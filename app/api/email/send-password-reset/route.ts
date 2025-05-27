@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { sendEmail, logEmailSent } from "@/lib/email-service"
-import { renderPasswordResetEmail } from "@/lib/email-templates"
+import { generatePasswordResetEmail } from "@/lib/email-templates"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
 
 export async function POST(request: Request) {
@@ -38,16 +38,13 @@ export async function POST(request: Request) {
     const resetUrl = data.properties.action_link
     const name = userData?.first_name || email.split("@")[0]
 
-    // Render the email HTML
-    const html = renderPasswordResetEmail({
-      name,
-      resetUrl,
-    })
+    // Generate the email template
+    const { subject, html } = generatePasswordResetEmail({ name, resetUrl })
 
     // Send the email
     await sendEmail({
       to: email,
-      subject: "Reset Your Password - TOTL Agency",
+      subject,
       html,
     })
 

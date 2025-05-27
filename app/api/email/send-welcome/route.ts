@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { sendEmail, logEmailSent } from "@/lib/email-service"
-import { renderWelcomeEmail } from "@/lib/email-templates"
+import { generateWelcomeEmail } from "@/lib/email-templates"
 
 export async function POST(request: Request) {
   try {
@@ -13,16 +13,13 @@ export async function POST(request: Request) {
     const name = firstName || email.split("@")[0]
     const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/login`
 
-    // Render the email HTML
-    const html = renderWelcomeEmail({
-      name,
-      loginUrl,
-    })
+    // Generate the email template
+    const { subject, html } = generateWelcomeEmail({ name, loginUrl })
 
     // Send the email
     await sendEmail({
       to: email,
-      subject: "Welcome to TOTL Agency",
+      subject,
       html,
     })
 

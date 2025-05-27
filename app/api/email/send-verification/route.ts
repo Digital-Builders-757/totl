@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { sendEmail, logEmailSent } from "@/lib/email-service"
-import { renderVerificationEmail } from "@/lib/email-templates"
+import { generateVerificationEmail } from "@/lib/email-templates"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
 
 export async function POST(request: Request) {
@@ -31,16 +31,13 @@ export async function POST(request: Request) {
     const verificationUrl = data.properties.action_link
     const name = firstName || email.split("@")[0]
 
-    // Render the email HTML
-    const html = renderVerificationEmail({
-      name,
-      verificationUrl,
-    })
+    // Generate the email template
+    const { subject, html } = generateVerificationEmail({ name, verificationUrl })
 
     // Send the email
     await sendEmail({
       to: email,
-      subject: "Verify Your Email Address - TOTL Agency",
+      subject,
       html,
     })
 
