@@ -1,0 +1,49 @@
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import ClientLayout from "./client-layout"
+
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata: Metadata = {
+  title: "TOTL Agency - Premium Modeling Agency",
+  description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+  openGraph: {
+    title: "TOTL Agency - Premium Modeling Agency",
+    description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+    url: "https://totlagency.com",
+    siteName: "TOTL Agency",
+    images: [
+      {
+        url: "/images/totl-logo-new.png",
+        width: 1200,
+        height: 630,
+        alt: "TOTL Agency",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TOTL Agency - Premium Modeling Agency",
+    description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+    images: ["/images/totl-logo-new.png"],
+  },
+    generator: 'v0.dev'
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        <ClientLayout>{children}</ClientLayout>
+      </body>
+    </html>
+  )
+}
+
+
+import './globals.css'
