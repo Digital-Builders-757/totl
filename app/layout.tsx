@@ -6,6 +6,7 @@ import ClientLayout from "./client-layout"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thetotlagency.com'),
   title: "TOTL Agency - Premium Modeling Agency",
   description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
   openGraph: {
