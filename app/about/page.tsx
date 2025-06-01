@@ -121,50 +121,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Team Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Meet Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                name: "Alexandra Reynolds",
-                role: "Founder & CEO",
-                image: "/professional-woman-portrait.png",
-              },
-              {
-                name: "Marcus Chen",
-                role: "Talent Director",
-                image: "/professional-asian-man-portrait.png",
-              },
-              {
-                name: "Sophia Williams",
-                role: "Client Relations",
-                image: "/professional-black-woman-portrait.png",
-              },
-              {
-                name: "James Rodriguez",
-                role: "Marketing Director",
-                image: "/placeholder.svg?key=x265d",
-              },
-            ].map((member, index) => (
-              <div key={index} className="text-center">
-                <div className="relative h-[350px] w-full mb-4 overflow-hidden">
-                  <Image
-                    src={member.image || "/placeholder.svg"}
-                    alt={member.name}
-                    fill
-                    className="object-cover transition-transform duration-300 hover:scale-105"
-                  />
-                </div>
-                <h3 className="text-xl font-bold">{member.name}</h3>
-                <p className="text-gray-600">{member.role}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Services Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">

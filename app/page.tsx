@@ -1,9 +1,15 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Star, MapPin, Calendar, Users, Briefcase, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useAuth } from "@/components/auth-provider"
+import { useRouter } from "next/navigation"
+import { useCallback } from "react"
+import { PostAGigFooterLink } from "@/components/PostAGigFooterLink"
 
 export default function HomePage() {
   return (
@@ -337,7 +343,7 @@ export default function HomePage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-600"
+                  className="w-full sm:w-auto border-blue-100 text-blue-100 hover:bg-white hover:text-blue-600"
                 >
                   Learn More
                 </Button>
@@ -365,9 +371,7 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">For Brands</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/gigs" className="hover:text-white transition-colors">
-                    Post a Gig
-                  </Link>
+                  <PostAGigFooterLink />
                 </li>
                 <li>
                   <Link href="/talent" className="hover:text-white transition-colors">

@@ -98,26 +98,40 @@ export function generateWelcomeEmail(data: EmailTemplateData): EmailTemplate {
 
 export function generateVerificationEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
-    <h1>Verify Your Email Address</h1>
-    <p>Hello ${escapeHtml(data.name)},</p>
-    <p>Thank you for registering with TOTL Agency. To complete your registration and secure your account, please verify your email address by clicking the button below:</p>
-    <div style="text-align: center;">
-      <a href="${escapeHtml(data.verificationUrl || "")}" class="button">Verify Email Address</a>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://thetotlagency.com/logo.png" alt="TOTL Agency" style="max-width: 150px; height: auto;" />
+      </div>
+      
+      <h1 style="color: #111827; font-size: 24px; font-weight: 600; margin-bottom: 20px; text-align: center;">Verify Your Email Address</h1>
+      
+      <p style="color: #374151; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Hello ${escapeHtml(data.name)},</p>
+      
+      <p style="color: #374151; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">Thank you for registering with TOTL Agency. To complete your registration and secure your account, please verify your email address by clicking the button below:</p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${escapeHtml(data.verificationUrl || "")}" style="background-color: #000000; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 500; display: inline-block;">Verify Email Address</a>
+      </div>
+      
+      <div style="background-color: #F3F4F6; border-radius: 8px; padding: 20px; margin: 30px 0;">
+        <p style="color: #111827; font-weight: 600; margin-bottom: 15px;">Important Information:</p>
+        <ul style="color: #374151; font-size: 14px; line-height: 1.6; margin: 0; padding-left: 20px;">
+          <li style="margin-bottom: 8px;">This verification link will expire in 24 hours</li>
+          <li style="margin-bottom: 8px;">You must verify your email to access all platform features</li>
+          <li style="margin-bottom: 8px;">If you didn't create this account, please ignore this email</li>
+        </ul>
+      </div>
+      
+      <p style="color: #6B7280; font-size: 14px; margin: 30px 0;">If the button above doesn't work, you can copy and paste this link into your browser:</p>
+      <p style="color: #6B7280; font-size: 14px; word-break: break-all; background-color: #F9FAFB; padding: 12px; border-radius: 6px; margin-bottom: 30px;">${escapeHtml(data.verificationUrl || "")}</p>
+      
+      <div style="border-top: 1px solid #E5E7EB; padding-top: 20px; margin-top: 30px;">
+        <p style="color: #374151; font-size: 14px; margin: 0;">
+          Best regards,<br>
+          <strong>The TOTL Agency Team</strong>
+        </p>
+      </div>
     </div>
-    <div class="highlight">
-      <p><strong>Important:</strong></p>
-      <ul>
-        <li>This verification link will expire in 24 hours</li>
-        <li>You must verify your email to access all platform features</li>
-        <li>If you didn't create this account, please ignore this email</li>
-      </ul>
-    </div>
-    <p>If the button above doesn't work, you can copy and paste this link into your browser:</p>
-    <p style="word-break: break-all; color: #666; font-size: 14px;">${escapeHtml(data.verificationUrl || "")}</p>
-    <p>
-      Best regards,<br>
-      <strong>The TOTL Agency Team</strong>
-    </p>
   `
   return {
     subject: "Verify Your Email Address - TOTL Agency",

@@ -40,37 +40,27 @@ export default function VerificationPendingPage() {
     setIsSending(true)
 
     try {
-      console.log("Resending verification email to:", email)
-
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      // Use the custom verification email endpoint
+      const response = await fetch("/api/email/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       })
 
-      if (error) {
-        console.error("Error resending email:", error)
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        })
-        setEmailStatus("error")
-      } else {
-        setJustSent(true)
-        setEmailStatus("sent")
-        toast({
-          title: "Email sent",
-          description: "Verification email has been sent to your inbox",
-        })
-
-        // Reset the "just sent" state after 30 seconds
-        setTimeout(() => {
-          setJustSent(false)
-        }, 30000)
+      if (!response.ok) {
+        throw new Error("Failed to send verification email")
       }
+
+      setJustSent(true)
+      setEmailStatus("sent")
+      toast({
+        title: "Email sent",
+        description: "Verification email has been sent to your inbox",
+      })
+
+      setTimeout(() => {
+        setJustSent(false)
+      }, 30000)
     } catch (error) {
       console.error("Error sending verification email:", error)
       toast({

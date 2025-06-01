@@ -5,7 +5,7 @@ const resendApiKey = process.env.RESEND_API_KEY
 const resend = new Resend(resendApiKey)
 
 // Email sender configuration
-const FROM_EMAIL = "noreply@thetotlagency.com"
+const FROM_EMAIL = "noreply@mail.thetotlagency.com"
 const FROM_NAME = "TOTL Agency"
 
 // Email templates

@@ -6,6 +6,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import type { SupabaseClient, User, Session } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
+import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
 
 type UserRole = "talent" | "client" | "admin" | null
 
@@ -110,8 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string, role: UserRole) => {
     try {
-      console.log("Starting signup process...")
-
+      // 1. Create user in Supabase Auth with email confirmation disabled
       const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
@@ -126,9 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: signUpError }
       }
 
-      console.log("User created successfully:", data.user?.id)
-
-      // Create profile record with role
+      // 2. Create profile record
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: data.user?.id,
@@ -139,9 +137,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (profileError) {
         console.error("Profile creation error:", profileError)
+        return { error: profileError }
       }
 
-      return { error: profileError }
+      // 3. Generate verification link using Supabase admin
+      const supabaseAdmin = createSupabaseAdminClient()
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: "signup",
+        email,
+        password,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (linkError || !linkData.properties?.action_link) {
+        console.error("Error generating verification link:", linkError)
+        return { error: linkError }
+      }
+
+      // 4. Send custom verification email via Resend
+      const response = await fetch("/api/email/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          userId: data.user?.id,
+          verificationUrl: linkData.properties.action_link,
+        }),
+      })
+
+      if (!response.ok) {
+        console.error("Error sending verification email")
+        // Continue anyway since the account was created
+      }
+
+      return { error: null }
     } catch (error) {
       console.error("Unexpected error during signup:", error)
       return { error }
@@ -158,15 +189,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: new Error("No user email found") }
     }
 
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email: user.email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      // 1. Generate new verification link
+      const supabaseAdmin = createSupabaseAdminClient()
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: "signup",
+        email: user.email,
+        password: "",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
 
-    return { error }
+      if (linkError || !linkData.properties?.action_link) {
+        return { error: linkError }
+      }
+
+      // 2. Send custom verification email
+      const response = await fetch("/api/email/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          userId: user.id,
+          verificationUrl: linkData.properties.action_link,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to send verification email")
+      }
+
+      return { error: null }
+    } catch (error) {
+      console.error("Error sending verification email:", error)
+      return { error }
+    }
   }
 
   const resetPassword = async (email: string) => {
