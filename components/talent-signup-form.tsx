@@ -62,6 +62,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
     handleSubmit,
     formState: { errors },
     setError,
+    watch,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -73,6 +74,9 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       agreeTerms: false,
     },
   })
+
+  // Watch the agreeTerms value to handle checkbox state
+  const agreeTerms = watch("agreeTerms")
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true)
@@ -273,7 +277,22 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       </div>
 
       <div className="flex items-start space-x-2">
-        <Checkbox id="agreeTerms" {...register("agreeTerms")} className={errors.agreeTerms ? "border-red-500" : ""} />
+        <Checkbox
+          id="agreeTerms"
+          checked={agreeTerms}
+          onCheckedChange={(checked) => {
+            // Update the form value when checkbox changes
+            const event = {
+              target: {
+                name: "agreeTerms",
+                value: checked,
+              },
+            } as any
+            register("agreeTerms").onChange(event)
+          }}
+          className={errors.agreeTerms ? "border-red-500" : ""}
+          disabled={isSubmitting}
+        />
         <div className="grid gap-1.5 leading-none">
           <label
             htmlFor="agreeTerms"
@@ -281,9 +300,31 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
               errors.agreeTerms ? "text-red-500" : ""
             }`}
           >
-            I agree to the Terms of Service and Privacy Policy *
+            I agree to the{" "}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              Privacy Policy
+            </a>{" "}
+            *
           </label>
-          {errors.agreeTerms && <p className="text-sm text-red-500">{errors.agreeTerms.message}</p>}
+          {errors.agreeTerms && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors.agreeTerms.message || "You must agree to the terms and conditions"}
+            </p>
+          )}
         </div>
       </div>
 

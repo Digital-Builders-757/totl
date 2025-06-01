@@ -12,6 +12,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import type { Database } from "@/types/supabase"
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
@@ -20,11 +22,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const router = useRouter()
-  const { signIn, userRole } = useAuth()
+  const { signIn } = useAuth()
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const returnUrl = searchParams.get("returnUrl")
   const verified = searchParams.get("verified") === "true"
+  const supabase = createClientComponentClient<Database>()
 
   useEffect(() => {
     if (verified) {
@@ -65,11 +68,13 @@ export default function Login() {
     }
 
     setIsLoading(true)
+    setFormErrors({}) // Clear any existing errors
 
     try {
       const { error } = await signIn(email, password)
 
       if (error) {
+        console.error("Login error:", error)
         if (error.message.includes("Invalid login credentials")) {
           setFormErrors({
             auth: "Invalid email or password. Please try again.",
@@ -85,17 +90,24 @@ export default function Login() {
         return
       }
 
-      // Redirect to returnUrl if provided, otherwise based on user role
+      // Get the user role after successful sign in
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", (await supabase.auth.getUser()).data.user?.id)
+        .single()
+
+      // Redirect based on role and returnUrl
       if (returnUrl) {
         router.push(decodeURIComponent(returnUrl))
-      } else if (userRole === "talent") {
+      } else if (profile?.role === "talent") {
         router.push("/admin/talentdashboard")
-      } else if (userRole === "client") {
+      } else if (profile?.role === "client") {
         router.push("/admin/dashboard")
-      } else if (userRole === "admin") {
+      } else if (profile?.role === "admin") {
         router.push("/admin/dashboard")
       } else {
-        // Default redirect if role not determined yet
+        // Default redirect if role not determined
         router.push("/admin/dashboard")
       }
     } catch (error) {

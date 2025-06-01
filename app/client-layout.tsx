@@ -2,7 +2,6 @@
 
 import type React from "react"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import Navbar from "@/components/navbar"
 import { usePathname } from "next/navigation"
 import { AuthProvider } from "@/components/auth-provider"
@@ -19,10 +18,8 @@ export default function ClientLayout({
 
   return (
     <AuthProvider>
-      <ThemeProvider attribute="class" defaultTheme="light">
-        {showNavbar && <Navbar />}
-        {children}
-      </ThemeProvider>
+      {showNavbar && <Navbar />}
+      {children}
     </AuthProvider>
   )
 }
