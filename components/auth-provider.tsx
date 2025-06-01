@@ -7,6 +7,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import type { SupabaseClient, User, Session } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
+import { useRouter } from "next/navigation"
 
 type UserRole = "talent" | "client" | "admin" | null
 
@@ -33,6 +34,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isEmailVerified, setIsEmailVerified] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    let mounted = true
+
+    async function checkSession() {
+      setIsLoading(true)
+      const { data, error } = await supabase.auth.getSession()
+
+      if (error) {
+        // Network or server error, try again after a short delay
+        setTimeout(checkSession, 2000)
+        return
+      }
+
+      if (!data.session) {
+        // No session, try to refresh
+        const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession()
+        if (refreshed?.session) {
+          setUser(refreshed.session.user)
+        } else {
+          // Still no session, redirect to login
+          router.replace("/login")
+        }
+      } else {
+        setUser(data.session.user)
+      }
+      setIsLoading(false)
+    }
+
+    checkSession()
+
+    // Optionally, listen for auth state changes
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+        setUser(null)
+        router.replace("/login")
+      } else if (session) {
+        setUser(session.user)
+      }
+    })
+
+    return () => {
+      mounted = false
+      listener?.subscription.unsubscribe()
+    }
+  }, [supabase, router])
 
   useEffect(() => {
     const getSession = async () => {
@@ -282,4 +330,15 @@ export function useSupabaseStatus() {
   }
 
   return { isConnected, isChecking, checkConnection }
+}
+
+async function fetchWithAuth(url, supabase) {
+  let { data, error } = await supabase.from(url).select("*")
+  if (error && error.status === 401) {
+    // Try to refresh session
+    await supabase.auth.refreshSession()
+    // Retry the request
+    return await supabase.from(url).select("*")
+  }
+  return { data, error }
 }
