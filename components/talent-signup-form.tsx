@@ -97,51 +97,51 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
 
       if (error) {
         console.error("Signup error:", error)
-
         if (error.message.includes("email")) {
           setError("email", { message: error.message })
         } else {
           setServerError(error.message)
         }
-
         setIsSubmitting(false)
         return
       }
 
-      console.log("Auth signup successful, user ID:", authData.user?.id)
+      if (!authData.user) {
+        throw new Error("No user data returned from signup")
+      }
 
-      if (authData.user) {
-        // Create profile record
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: authData.user.id,
-            first_name: data.firstName,
-            last_name: data.lastName,
-            display_name: `${data.firstName} ${data.lastName}`,
-            role: "talent",
-            email_verified: false,
-            updated_at: new Date().toISOString(),
-          },
-        ])
+      console.log("Auth signup successful, user ID:", authData.user.id)
 
-        if (profileError) {
-          console.error("Error creating profile:", profileError)
-          // Continue anyway since the auth account was created
-        }
+      // Create profile record
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: authData.user.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          display_name: `${data.firstName} ${data.lastName}`,
+          role: "talent",
+          email_verified: false,
+          updated_at: new Date().toISOString(),
+        },
+      ])
 
-        // Create empty talent profile
-        const { error: talentProfileError } = await supabase.from("talent_profiles").insert([
-          {
-            user_id: authData.user.id,
-            first_name: data.firstName,
-            last_name: data.lastName,
-          },
-        ])
+      if (profileError) {
+        console.error("Error creating profile:", profileError)
+        throw profileError
+      }
 
-        if (talentProfileError) {
-          console.error("Error creating talent profile:", talentProfileError)
-          // Continue anyway since the auth account was created
-        }
+      // Create empty talent profile
+      const { error: talentProfileError } = await supabase.from("talent_profiles").insert([
+        {
+          user_id: authData.user.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+        },
+      ])
+
+      if (talentProfileError) {
+        console.error("Error creating talent profile:", talentProfileError)
+        throw talentProfileError
       }
 
       // Success - show toast and redirect
@@ -159,7 +159,8 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
       console.error("Unexpected error during signup:", error)
-      setServerError("An unexpected error occurred. Please try again.")
+      setServerError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.")
+    } finally {
       setIsSubmitting(false)
     }
   }
