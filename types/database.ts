@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'client' | 'talent'
-export type GigStatus = 'draft' | 'published' | 'closed' | 'completed'
-export type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
+export type GigStatus = 'draft' | 'active' | 'closed' | 'featured' | 'urgent'
+export type ApplicationStatus = 'new' | 'under_review' | 'shortlisted' | 'rejected' | 'accepted'
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
 
 export interface User {
@@ -14,25 +14,30 @@ export interface User {
 
 export interface Profile {
   id: string
-  user_id: string
-  bio?: string
-  location?: string
-  phone?: string
-  instagram_handle?: string
-  website?: string
+  role: UserRole
   created_at: string
   updated_at: string
+  display_name?: string
+  avatar_url?: string
+  email_verified?: boolean
 }
 
 export interface TalentProfile {
   id: string
   user_id: string
-  height?: number
-  weight?: number
-  measurements?: string
-  experience_years?: number
-  specialties?: string[]
+  first_name: string
+  last_name: string
+  phone?: string
+  age?: number
+  location?: string
+  experience?: string
   portfolio_url?: string
+  height?: string
+  measurements?: string
+  hair_color?: string
+  eye_color?: string
+  shoe_size?: string
+  languages?: string[]
   created_at: string
   updated_at: string
 }
@@ -40,8 +45,12 @@ export interface TalentProfile {
 export interface ClientProfile {
   id: string
   user_id: string
-  company_name?: string
+  company_name: string
   industry?: string
+  website?: string
+  contact_name?: string
+  contact_email?: string
+  contact_phone?: string
   company_size?: string
   created_at: string
   updated_at: string
@@ -52,15 +61,24 @@ export interface Gig {
   client_id: string
   title: string
   description: string
-  requirements: string[]
+  category: string
   location: string
-  start_date: string
-  end_date: string
-  compensation_min?: number
-  compensation_max?: number
+  compensation: string
+  duration: string
+  date: string
+  application_deadline?: string
   status: GigStatus
+  image_url?: string
+  search_vector?: any
   created_at: string
   updated_at: string
+}
+
+export interface GigRequirement {
+  id: string
+  gig_id: string
+  requirement: string
+  created_at?: string
 }
 
 export interface Application {
@@ -69,6 +87,23 @@ export interface Application {
   talent_id: string
   status: ApplicationStatus
   message?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ClientApplication {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  phone?: string
+  company_name: string
+  industry?: string
+  website?: string
+  business_description: string
+  needs_description: string
+  status: string
+  admin_notes?: string
   created_at: string
   updated_at: string
 }
@@ -123,10 +158,20 @@ export interface Database {
         Insert: Omit<Gig, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Gig, 'id'>>
       }
+      gig_requirements: {
+        Row: GigRequirement
+        Insert: Omit<GigRequirement, 'id' | 'created_at'>
+        Update: Partial<Omit<GigRequirement, 'id'>>
+      }
       applications: {
         Row: Application
         Insert: Omit<Application, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<Application, 'id'>>
+      }
+      client_applications: {
+        Row: ClientApplication
+        Insert: Omit<ClientApplication, 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Omit<ClientApplication, 'id'>>
       }
       bookings: {
         Row: Booking
