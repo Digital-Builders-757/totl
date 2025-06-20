@@ -1,121 +1,77 @@
-# Authentication Setup Documentation
+# 🔐 Authentication Setup Guide
 
-This document outlines the authentication system implemented for the TOTL Agency platform, focusing on the talent user authentication flow.
+This document outlines the authentication system for the Totl Agency platform, leveraging Supabase Auth.
 
-## Overview
+---
 
-The authentication system uses Supabase Auth for user management, with custom UI components and logic to handle the following processes:
+## 🚀 Overview
 
-- User registration (sign-up)
-- User authentication (sign-in)
+The system handles the full user lifecycle:
+- User registration (signup)
+- User authentication (signin)
 - Password reset
 - Email verification
-- Session management
-- Role-based access control
+- Session management (via `@supabase/auth-helpers-nextjs`)
+- Role-based access control (RBAC) via middleware
 
-## Database Structure
+---
 
-The authentication system relies on the following database tables:
+## 🗃️ Database & Auth Integration
 
-1. **auth.users** (managed by Supabase)
-   - Stores user credentials and authentication data
+The authentication system is tightly integrated with our public tables, which extend the `auth.users` table.
 
-2. **profiles**
-   - Stores user profile information and role
-   - Connected to auth.users via the id field
+1.  **`auth.users`**: The primary table managed by Supabase for credentials.
+2.  **`public.users`**: Our custom table that mirrors `auth.users` and adds a `role` (`talent` or `client`). The `id` is a foreign key to `auth.users.id`.
+3.  **`public.talent_profiles` / `public.client_profiles`**: Role-specific tables linked by `user_id`.
 
-3. **talent_profiles**
-   - Stores talent-specific information
-   - Connected to profiles via the user_id field
+---
 
-## Authentication Flow
+## 🌊 Authentication Flows
 
-### Talent Registration Flow
+### User Registration (Onboarding)
 
-1. User clicks "Join as Talent" on the choose-role page
-2. User completes the talent application form with personal details
-3. Form validation occurs on the client side
-4. On submission, the following happens:
-   - User account is created in Supabase Auth
-   - Profile record is created with role="talent"
-   - Talent profile record is created with user details
-   - Verification email is sent to the user
-   - User is redirected to the talent dashboard with a verification reminder
+Our registration process is a two-stage flow designed to reduce initial friction.
 
-### Email Verification
+1.  **Initial Signup**:
+    - A user provides minimal details (name, email, password) in a modal form.
+    - An account is created in `auth.users` and a corresponding profile in `public.users` with the appropriate `role`.
+    - A verification email is dispatched.
+    - The user is redirected to a `/verification-pending` page.
 
-1. User receives verification email with a link
-2. User clicks the link and is redirected to the auth/callback page
-3. The callback page processes the verification and redirects to the login page
-4. A verification reminder is shown on the talent dashboard until the email is verified
+2.  **Profile Completion**:
+    - After verifying their email, the user is redirected to their role-specific dashboard (`/talent/dashboard` or `/client/dashboard`).
+    - They are prompted to complete their profile, filling in the remaining details in their `talent_profiles` or `client_profiles` table.
 
-### Password Reset Flow
+For a detailed breakdown of this flow, see **`docs/ONBOARDING.md`**.
 
-1. User clicks "Forgot password?" on the login page
-2. User enters their email address
-3. Reset password email is sent
-4. User clicks the link in the email
-5. User is redirected to the update-password page
-6. User sets a new password
-7. User is redirected to the login page
+### Password Reset
 
-## Security Considerations
+1.  User clicks "Forgot password?" on the login page.
+2.  User enters their email, and a reset email is sent via Supabase Auth.
+3.  The link in the email directs them to the `/update-password` page.
+4.  After setting a new password, the user is redirected to the login page.
 
-1. **Password Requirements**
-   - Minimum 8 characters
-   - Client-side validation with clear error messages
+---
 
-2. **Email Verification**
-   - Required for all new accounts
-   - Reminder shown until verification is complete
+## 🛡️ Security & Configuration
 
-3. **Session Management**
-   - Sessions are managed by Supabase Auth
-   - Session expiration is set to 1 week
+- **Password Requirements**: Enforced on the client-side (e.g., min 8 characters).
+- **Email Verification**: Mandatory for all new accounts. A reminder is shown until the email is verified.
+- **Session Management**: Handled by `@supabase/auth-helpers-nextjs`, which securely manages JWTs in cookies.
+- **Supabase Auth Settings**:
+    - "Confirm email" is enabled.
+    - Custom email templates are configured for verification and password reset.
+    - Redirect URLs are set in the Supabase dashboard (e.g., `/auth/callback`, `/update-password`).
+- **Error Handling**: The system provides user-friendly error messages (e.g., "Invalid credentials") while logging detailed errors for debugging.
 
-4. **Error Handling**
-   - Detailed error messages for users
-   - Error logging for debugging
-   - Generic error messages for security-sensitive operations
+---
 
-## Supabase Configuration
+## ✅ Testing the Auth Flow
 
-### Auth Settings
-
-1. **Email Auth**
-   - Enabled with "Confirm email" option
-   - Custom email templates for verification and password reset
-
-2. **Redirect URLs**
-   - Site URL: https://totl-agency.com (production)
-   - Redirect URLs:
-     - /auth/callback
-     - /update-password
-
-3. **JWT Settings**
-   - Default expiry: 3600 (1 hour)
-   - Default refresh expiry: 604800 (1 week)
-
-## Testing the Authentication Flow
-
-1. **Registration Testing**
-   - Test with valid and invalid email formats
-   - Test password requirements
-   - Test duplicate email handling
-
-2. **Login Testing**
-   - Test with correct and incorrect credentials
-   - Test with unverified email accounts
-
-3. **Password Reset Testing**
-   - Test with existing and non-existing email addresses
-   - Test password reset link expiration
-   - Test new password requirements
-
-4. **Email Verification Testing**
-   - Test verification link functionality
-   - Test resending verification emails
-   - Test accessing restricted features before verification
+- **Registration**: Test with valid, invalid, and duplicate email addresses.
+- **Login**: Test with correct, incorrect, and unverified credentials.
+- **Password Reset**: Test with existing and non-existing email addresses and expired links.
+- **Email Verification**: Test the verification link and attempts to access protected content before verification.
 
 ## Troubleshooting
 

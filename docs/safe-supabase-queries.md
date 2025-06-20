@@ -1,131 +1,86 @@
-# Safe Supabase Queries Guide
+# 📖 Safe Supabase Queries Guide
 
-This guide outlines best practices for writing Supabase queries that are compatible with Row-Level Security (RLS) and avoid issues with aggregate functions.
+This guide outlines best practices for writing Supabase queries that are secure, performant, and compatible with our Row-Level Security (RLS) policies.
 
-## Common Issues
+---
 
-1. **Aggregate Function Errors**: Using functions like `count()`, `array_agg()`, or `sum()` in queries can cause errors with RLS.
-2. **Implicit Joins**: Relying on implicit joins with `select("*")` can lead to permission issues.
-3. **Missing Filters**: Not using explicit equality filters for user-based filtering.
+## The Core Problem: RLS and `select *`
 
-## Best Practices
+Most issues arise from using `select("*")` or aggregate functions (`count()`, `sum()`, etc.) on tables with RLS enabled. Supabase can't always apply the correct RLS policies on nested or aggregated data, which can lead to permission errors or data leaks.
 
-### 1. Use Explicit Column Selection
+Refer to the `docs/DATABASE_GUIDE.md` to understand which RLS policies apply to each table.
 
-❌ **Avoid**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("*")
-\`\`\`
+---
 
-✅ **Use Instead**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("id, first_name, last_name, email")
-\`\`\`
+## ✅ Best Practices
 
-### 2. Avoid Aggregate Functions
+### 1. Always Select Specific Columns
+Never use `select("*")`. Always specify the exact columns you need. This is the most important rule.
 
-❌ **Avoid**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("*, count(*)")
-\`\`\`
+- **❌ Bad**: `supabase.from("profiles").select("*")`
+- **✅ Good**: `supabase.from("profiles").select("id, full_name, location")`
 
-✅ **Use Instead**:
-\`\`\`typescript
-// Fetch the raw data first
-const { data } = await supabase
-  .from("profiles")
-  .select("id, first_name, last_name")
+### 2. Avoid Server-Side Aggregates
+Do not use `.count()` or other aggregate functions directly in your main queries, as they often conflict with RLS. Fetch the data first, then perform the calculation on the client or server-side.
 
-// Then count client-side
-const count = data ? data.length : 0
-\`\`\`
+- **❌ Bad**:
+  ```typescript
+  const { count } = await supabase
+    .from("gigs")
+    .select("*", { count: 'exact', head: true });
+  ```
+- **✅ Good**:
+  ```typescript
+  const { data } = await supabase
+    .from("gigs")
+    .select("id"); // Select a small, indexed column
+  
+  const count = data?.length ?? 0;
+  ```
 
-### 3. Use Explicit Filters
+### 3. Use Explicit `.eq()` Filters for RLS
+While RLS protects the data on the backend, always include an explicit `.eq('user_id', userId)` filter in your queries where applicable. This makes the query's intent clear and can improve performance.
 
-❌ **Avoid**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("*")
-\`\`\`
+- **❌ Okay, but less clear**: `supabase.from("profiles").select("id, full_name")` (Relies entirely on RLS)
+- **✅ Better**: `supabase.from("profiles").select("id, full_name").eq('user_id', userId)`
 
-✅ **Use Instead**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("id, first_name, last_name")
-  .eq("user_id", user.id)
-\`\`\`
+### 4. Use `.single()` or `.maybeSingle()` for Unique Rows
+When you expect only one row, use `.single()` to get the object directly instead of an array. This will also throw an error if more than one row is returned, which is a useful sanity check.
 
-### 4. Use Single/MaybeSingle for Expected Single Results
+- `.single()`: Throws an error if zero or more than one row is found.
+- `.maybeSingle()`: Returns `null` if no row is found; throws an error if more than one is found.
 
-❌ **Avoid**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("*")
-  .eq("id", userId)
-\`\`\`
+- **❌ Bad**: `const { data } = await supabase.from("users").select().eq('id', id)`
+- **✅ Good**: `const { data } = await supabase.from("users").select().eq('id', id).single()`
 
-✅ **Use Instead**:
-\`\`\`typescript
-const { data } = await supabase
-  .from("profiles")
-  .select("id, first_name, last_name")
-  .eq("id", userId)
-  .single() // Throws error if not found
-  // OR
-  .maybeSingle() // Returns null if not found
-\`\`\`
+### 5. Use RPC Functions for Complex Queries
+For complex queries that require joins or aggregations, the safest approach is to create a `SECURITY DEFINER` function in a SQL migration. This allows the function to bypass RLS (temporarily and safely within the function's scope) to perform its calculations.
 
-### 5. Avoid RPC Calls with Aggregates
+**Example SQL Migration:**
+```sql
+CREATE OR REPLACE FUNCTION get_user_gig_count(p_user_id UUID)
+RETURNS INT AS $$
+DECLARE
+  gig_count INT;
+BEGIN
+  SELECT COUNT(*)
+  INTO gig_count
+  FROM gigs
+  WHERE client_id = p_user_id;
+  
+  RETURN gig_count;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+**Example Usage:**
+```typescript
+const { data, error } = await supabase.rpc('get_user_gig_count', { p_user_id: userId });
+```
 
-❌ **Avoid**:
-\`\`\`typescript
-const { data } = await supabase.rpc('get_profile_with_counts', { user_id: userId })
-\`\`\`
+---
 
-✅ **Use Instead**:
-\`\`\`typescript
-// Fetch profile data
-const { data: profile } = await supabase
-  .from("profiles")
-  .select("id, first_name, last_name")
-  .eq("id", userId)
-  .single()
+## 📦 The `safeQuery` Wrapper
 
-// Separately fetch related data if needed
-const { data: relatedItems } = await supabase
-  .from("related_items")
-  .select("id")
-  .eq("user_id", userId)
+To simplify these practices, we use a `safeQuery` wrapper (`lib/safe-query.ts`). This utility encapsulates many of our standard data-fetching operations, ensuring they are always performed safely.
 
-// Calculate counts client-side
-const itemCount = relatedItems ? relatedItems.length : 0
-\`\`\`
-
-## Using the Safe Query Utility
-
-We've created a `safeQuery` utility that implements these best practices:
-
-\`\`\`typescript
-import { safeQuery } from '@/lib/safe-query'
-
-// In your component
-const { data, error } = await safeQuery.getProfileByUserId(supabase, userId)
-\`\`\`
-
-## Troubleshooting
-
-If you encounter "Use of aggregate functions is not allowed" errors:
-
-1. Check for any `count()`, `sum()`, `array_agg()` functions in your queries
-2. Look for any RPC calls that might use aggregates internally
-3. Ensure you're using explicit column selection
-4. Verify that you're using proper equality filters
+**Prefer using the `safeQuery` wrapper over writing raw queries wherever possible.**

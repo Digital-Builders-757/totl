@@ -1,52 +1,61 @@
-# Supabase Email Confirmation Setup Guide
+# ⚙️ Supabase Email Setup Guide
 
-This guide will help you properly configure email confirmation in your Supabase project for the TOTL Agency application.
+This guide details how to configure the email service within your Supabase project, which is critical for user verification and password resets.
 
-## 1. Configure SMTP Settings in Supabase
+---
 
-1. Log in to your Supabase dashboard
-2. Navigate to Authentication > Email Templates
-3. Click on "Enable SMTP" if you haven't already
-4. Enter your SMTP credentials:
-   - Host: (e.g., smtp.gmail.com, smtp.sendgrid.net)
-   - Port: (typically 587 for TLS or 465 for SSL)
-   - Username: Your SMTP username
-   - Password: Your SMTP password
-   - Sender Name: TOTL Agency
-   - Sender Email: The email address you want to send from
+## 1. Enable and Configure a Custom SMTP Provider
 
-## 2. Configure Email Templates
+For reliable email delivery in production, you must configure a custom SMTP provider. Supabase's built-in email service is not designed for production workloads.
 
-1. Still in the Email Templates section, customize the following templates:
-   - Confirmation Email
-   - Invite Email
-   - Magic Link Email
-   - Reset Password Email
+1.  Navigate to your Supabase Project: **Project Settings > Auth > SMTP Provider**.
+2.  Enter the SMTP credentials for your chosen provider (e.g., SendGrid, Resend, Postmark). You will need:
+    - **Host & Port**
+    - **Username & Password**
+    - **Sender Email**: The "from" address (e.g., `noreply@totl.agency`).
+3.  Save the settings. Supabase will now route all authentication emails through this service.
 
-2. For the Confirmation Email template:
-   - Subject: Confirm your TOTL Agency account
-   - Make sure the template includes the confirmation link: {{ .ConfirmationURL }}
-   - Customize the design to match your brand
+---
 
-## 3. Configure Site URL
+## 2. Configure Auth Notification Templates
 
-1. Go to Authentication > URL Configuration
-2. Set the Site URL to your production URL (e.g., https://your-app-domain.com)
-3. Add any additional redirect URLs if needed
+You can customize the content of the emails Supabase sends.
 
-## 4. Configure Auth Settings
+1.  Navigate to **Auth > Email Templates**.
+2.  Customize the following core templates:
+    - **Confirmation Signup**: For verifying a new user's email.
+    - **Reset Password**: For the "forgot password" flow.
+    - **Magic Link**: If you choose to enable passwordless sign-in.
+3.  Ensure each template includes the necessary template variable (e.g., `{{ .ConfirmationURL }}`).
 
-1. Go to Authentication > Settings
-2. Under "Email Auth":
-   - Enable "Enable Email Signup"
-   - Enable "Confirm Email"
-   - Set "Confirm Email Template" to your confirmation template
+---
 
-## 5. Test the Email Flow
+## 3. Configure Site & Redirect URLs
 
-1. Create a test account using your application
-2. Check if the confirmation email is received
-3. Click the confirmation link and verify it works correctly
+This step is crucial for ensuring the links in your emails work correctly.
+
+1.  Navigate to **Auth > URL Configuration**.
+2.  Set the **Site URL** to your application's production domain (e.g., `https://www.totl.agency`).
+3.  Under **Redirect URLs**, ensure you have added the necessary callback paths for your application. By default, this is typically:
+    - `http://localhost:3000/auth/callback` (for local development)
+
+---
+
+## 4. Enable "Confirm Email" in Supabase Auth
+
+1.  Navigate to **Auth > Providers > Email**.
+2.  Ensure the **"Confirm email"** toggle is enabled. This makes email verification mandatory for all new signups.
+
+---
+
+## 📦 Application Integration
+
+This Supabase setup is consumed by services within our application, primarily for sending custom, non-auth emails (like welcome messages or notifications).
+
+- See `lib/email-service.ts` for how we use the Resend service to send custom emails.
+- See `lib/email-templates.tsx` for the React-based templates used for these custom emails.
+
+This separation allows Supabase to handle secure auth emails, while we maintain control over transactional and marketing emails.
 
 ## Troubleshooting
 
@@ -62,6 +71,5 @@ If confirmation links are not working:
 1. Ensure the Site URL is correctly set
 2. Check that the redirect URL in your application matches what's configured in Supabase
 3. Verify the auth.exchangeCodeForSession method is being called correctly in your callback page
-\`\`\`
 
 ## 4. Let's update the verification pending page to be more informative:
