@@ -1,0 +1,138 @@
+# Totl Agency LLM Coding Rules
+# Version: 1.0
+# This file provides a comprehensive set of rules for the LLM to follow when
+# generating code for the Totl Agency platform. Adhering to these rules ensures
+# consistency, maintainability, and alignment with the project's architecture.
+
+project_overview:
+  name: "Totl Agency Platform"
+  description: "A full-stack application connecting modeling talent with clients for gigs. Built with Next.js and Supabase."
+  principles:
+    - "TypeScript first: Use TypeScript for all code."
+    - "Server Components by default: Leverage Next.js App Router and RSC for data fetching."
+    - "Mobile-first and accessible: Design for mobile and ensure ARIA compliance."
+    - "Security-conscious: Assume Row-Level Security (RLS) is always active."
+
+architecture:
+  framework: "Next.js 14+ (App Router)"
+  database: "Supabase (PostgreSQL)"
+  styling: "TailwindCSS with shadcn/ui"
+  authentication: "Supabase Auth with @supabase/auth-helpers-nextjs"
+  form_handling: "React Hook Form + Zod for validation"
+  state_management:
+    - "Use React's built-in state (useState, useReducer) for local component state."
+    - "Use React Context for sharing state across a few components."
+    - "Consider Zustand for complex global state if necessary."
+
+directory_structure:
+  - path: "/app"
+    description: "Next.js App Router routes, layouts, and pages (Server Components)."
+    subdirectories:
+      - path: "/app/(auth)"
+        description: "Authentication-related routes (login, signup)."
+      - path: "/app/talent"
+        description: "Routes for the talent dashboard."
+      - path: "/app/client"
+        description: "Routes for the client dashboard."
+      - path: "/app/admin"
+        description: "Routes for the admin dashboard."
+      - path: "/app/api"
+        description: "API route handlers."
+  - path: "/components"
+    description: "Reusable, presentational-only UI components."
+    subdirectories:
+      - path: "/components/ui"
+        description: "Core UI components from shadcn/ui."
+  - path: "/lib"
+    description: "Shared utilities, Supabase clients, and helper functions."
+    subdirectories:
+      - path: "/lib/actions"
+        description: "Server Actions for form submissions and mutations."
+  - path: "/supabase"
+    description: "Supabase-related files."
+    subdirectories:
+      - path: "/supabase/migrations"
+        description: "Timestamped SQL files for database schema changes. NEVER edit existing migration files."
+  - path: "/hooks"
+    description: "Custom React hooks."
+  - path: "/types"
+    description: "Global TypeScript type definitions. Use database.types.ts for Supabase types."
+
+frameworks_and_libraries:
+  next_js:
+    - "Use the App Router for all new routes."
+    - "Fetch data in Server Components (`page.tsx`, `layout.tsx`) by default."
+    - "Use Server Actions for form submissions and data mutations."
+    - "Use `next/image` via the `<SafeImage />` wrapper for all images."
+  react:
+    - "Use functional components with hooks."
+    - "Components in `/components` must be presentational (no data fetching)."
+  supabase:
+    - "Use the pre-configured client from `/lib/supabase-client.ts`."
+    - "For admin-level tasks, use the client from `/lib/supabase-admin-client.ts` in secure server environments only."
+    - "Always use the `safeQuery` wrapper from `/lib/safe-query.ts` for RLS-protected queries."
+    - "Never use `select('*')`. Always select specific columns."
+    - "Use `{ returning: 'minimal' }` for inserts unless you need the returned data."
+  tailwind_css:
+    - "Use utility classes directly in JSX."
+    - "Avoid using `@apply` or custom CSS files."
+    - "Use theme variables from `tailwind.config.ts` (e.g., `bg-background`, `text-primary`)."
+    - "Use responsive prefixes (`md:`, `lg:`) for mobile-first design."
+
+coding_style:
+  naming_conventions:
+    - "File names: `kebab-case.ts` (e.g., `supabase-client.ts`)."
+    - "Component names: `PascalCase` (e.g., `TalentCard`)."
+    - "Variable/Function names: `camelCase` (e.g., `getUserProfile`)."
+    - "TypeScript Interfaces/Types: `PascalCase` (e.g., `interface TalentProfileProps`)."
+  formatting:
+    - "Indentation: 2 spaces."
+    - "Use Prettier for code formatting (configured in the project)."
+  comments:
+    - "Use JSDoc for documenting complex functions, components, and props."
+    - "Add inline comments only for non-obvious logic."
+
+component_standards:
+  props:
+    - "Define a TypeScript `interface` for props for every component, named `ComponentNameProps`."
+  exports:
+    - "Use named exports for components: `export function MyComponent() {}`."
+  styling:
+    - "Use the `cn()` utility from `/lib/utils.ts` for dynamic or conditional class names."
+  custom_components:
+    - "Use `<SafeImage />` for all images to handle fallbacks and optimization."
+    - "Use `<SubmitButton />` in forms for automatic loading states."
+
+data_management:
+  fetching:
+    - "Prioritize data fetching in Server Components."
+    - "For client-side fetching, use `useEffect` or a library like SWR/TanStack Query if needed, but prefer Server Actions."
+  validation:
+    - "Use `zod` to define schemas for all form and API validation."
+    - "Use `react-hook-form` to manage form state and integrate with Zod schemas."
+
+database:
+  migrations:
+    - "To change the database schema, ALWAYS create a new migration file."
+    - "Use the command: `supabase migration new <description_in_snake_case>`."
+    - "Write the SQL changes in the newly generated file in `/supabase/migrations`."
+    - "NEVER modify a migration file that has already been applied."
+  naming:
+    - "Table names: `snake_case`, plural (e.g., `talent_profiles`)."
+    - "Column names: `snake_case` (e.g., `full_name`)."
+    - "Foreign keys: `[table_name_singular]_id` (e.g., `user_id`)."
+  querying:
+    - "All queries must respect Row-Level Security."
+    - "When querying data for the logged-in user, use `auth.uid()` in the where clause."
+
+authentication_and_security:
+  route_protection:
+    - "Use `middleware.ts` to protect routes."
+    - "Redirect unauthenticated users to `/login`."
+    - "After login, redirect users to their respective dashboards (`/talent/dashboard` or `/client/dashboard`) based on their role from the `profiles` table."
+  rls:
+    - "Assume RLS is enabled on all tables."
+    - "Users can only access their own data unless a policy explicitly allows wider access (e.g., public gigs)."
+  secrets:
+    - "Never hardcode API keys, JWT secrets, or service role keys."
+    - "Access all secrets from environment variables (`process.env`)." 

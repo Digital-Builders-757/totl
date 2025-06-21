@@ -85,7 +85,6 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
     try {
       console.log("Starting signup process for:", data.email)
 
-      // Try direct signup with Supabase
       const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -101,8 +100,10 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
 
       if (error) {
         console.error("Signup error:", error)
-        if (error.message.includes("email")) {
-          setError("email", { message: error.message })
+        if (error.message.includes("User already exists")) {
+          setServerError(
+            "A user with this email already exists. Please check your inbox for a verification email or try logging in."
+          )
         } else {
           setServerError(error.message)
         }
@@ -110,57 +111,20 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         return
       }
 
-      if (!authData.user) {
-        throw new Error("No user data returned from signup")
+      if (authData.user) {
+        toast({
+          title: "Account creation successful!",
+          description: "Please check your email to verify your account before logging in.",
+        })
+
+        if (onComplete) {
+          onComplete()
+        }
+
+        router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
+      } else {
+        throw new Error("Signup completed without errors, but no user data was returned.")
       }
-
-      console.log("Auth signup successful, user ID:", authData.user.id)
-
-      // Create profile record
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: authData.user.id,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          display_name: `${data.firstName} ${data.lastName}`,
-          role: "talent",
-          email_verified: false,
-          updated_at: new Date().toISOString(),
-        },
-      ])
-
-      if (profileError) {
-        console.error("Error creating profile:", profileError)
-        throw profileError
-      }
-
-      // Create empty talent profile
-      const { error: talentProfileError } = await supabase.from("talent_profiles").insert([
-        {
-          user_id: authData.user.id,
-          first_name: data.firstName,
-          last_name: data.lastName,
-        },
-      ])
-
-      if (talentProfileError) {
-        console.error("Error creating talent profile:", talentProfileError)
-        throw talentProfileError
-      }
-
-      // Success - show toast and redirect
-      toast({
-        title: "Account created!",
-        description: "Please check your email to verify your account.",
-      })
-
-      // Call the onComplete callback if provided (for modal)
-      if (onComplete) {
-        onComplete()
-      }
-
-      // Redirect to verification pending page
-      router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
       console.error("Unexpected error during signup:", error)
       setServerError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.")
