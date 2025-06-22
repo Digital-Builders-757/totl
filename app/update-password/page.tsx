@@ -24,31 +24,19 @@ export default function UpdatePassword() {
   const router = useRouter()
   const supabase = createClientComponentClient()
 
-  const [hasActiveSession, setHasActiveSession] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  // Listen for the PASSWORD_RECOVERY event to ensure the user has a valid session
+  // This effect will run when the component mounts.
+  // It listens for the `PASSWORD_RECOVERY` event, which is triggered when the user
+  // is redirected from the password reset email. The event provides a session.
   useEffect(() => {
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY") {
-        setHasActiveSession(true)
-      } else if (event === "SIGNED_IN") {
-        // Also handle if the user is already signed in
-        setHasActiveSession(true)
+        setIsAuthenticated(true)
       }
     })
-
-    // Check for session on initial load
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session) {
-        setHasActiveSession(true)
-      }
-    }
-    checkSession()
 
     return () => {
       subscription.unsubscribe()
@@ -137,7 +125,7 @@ export default function UpdatePassword() {
               </p>
             </div>
 
-            {hasActiveSession ? (
+            {isAuthenticated ? (
               !isSuccess ? (
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="space-y-2">
@@ -198,7 +186,7 @@ export default function UpdatePassword() {
             ) : (
               <div className="text-center">
                 <p className="text-gray-600 mb-4">
-                  Waiting for a valid password reset session. Please click the link in your email.
+                  Please click the link in your email to activate this page.
                 </p>
                 <div className="w-8 h-8 border-2 border-t-black rounded-full animate-spin mx-auto"></div>
               </div>
