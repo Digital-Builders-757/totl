@@ -39,13 +39,14 @@ export default function AuthCallbackPage() {
           return
         }
 
-        // The session is now active. Update the user's profile to mark email as verified.
-        // This is a crucial step for your app's logic.
-        if (session?.user) {
-          await supabase.from("profiles").update({ email_verified: true }).eq("id", session.user.id)
-        }
-
+        // Verification was successful. Show success message immediately.
         setVerificationStatus("success")
+
+        // In the background, update the user's profile. Don't make the user wait for this.
+        if (session?.user) {
+          // We don't need to await this. Let it run in the background.
+          supabase.from("profiles").update({ email_verified: true }).eq("id", session.user.id)
+        }
 
         // Redirect after a short delay to show the success message
         setTimeout(() => {
