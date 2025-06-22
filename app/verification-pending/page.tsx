@@ -40,15 +40,17 @@ export default function VerificationPendingPage() {
     setIsSending(true)
 
     try {
-      // Use the custom verification email endpoint
-      const response = await fetch("/api/email/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to send verification email")
+      if (error) {
+        console.error("Error resending verification email:", error)
+        throw new Error(error.message)
       }
 
       setJustSent(true)
