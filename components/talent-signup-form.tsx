@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useAuth } from "./auth-provider"
 
