@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Eye, EyeOff } from "lucide-react"
@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import Image from "next/image"
+import { useAuth } from "@/components/auth-provider"
 
 export default function UpdatePassword() {
   const [password, setPassword] = useState("")
@@ -23,25 +24,7 @@ export default function UpdatePassword() {
   const { toast } = useToast()
   const router = useRouter()
   const supabase = createClientComponentClient()
-
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-  // This effect will run when the component mounts.
-  // It listens for the `PASSWORD_RECOVERY` event, which is triggered when the user
-  // is redirected from the password reset email. The event provides a session.
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setIsAuthenticated(true)
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [supabase.auth])
+  const { session } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,7 +108,7 @@ export default function UpdatePassword() {
               </p>
             </div>
 
-            {isAuthenticated ? (
+            {session ? (
               !isSuccess ? (
                 <form className="space-y-6" onSubmit={handleSubmit}>
                   <div className="space-y-2">
