@@ -19,7 +19,7 @@ type AuthContextType = {
   isLoading: boolean
   isEmailVerified: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
-  signUp: (email: string, password: string, options: { data: any; emailRedirectTo: string }) => Promise<{ error: any }>
+  signUp: (email: string, password: string, options?: { data?: any; emailRedirectTo?: string }) => Promise<{ error: any }>
   signOut: () => Promise<{ error: any }>
   sendVerificationEmail: () => Promise<{ error: any }>
   resetPassword: (email: string) => Promise<{ error: any }>
@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const signUp = async (email: string, password: string, options: { data: any; emailRedirectTo: string }) => {
+  const signUp = async (email: string, password: string, options?: { data?: any; emailRedirectTo?: string }) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
