@@ -79,6 +79,10 @@ export default function Login() {
           setFormErrors({
             auth: "Invalid email or password. Please try again.",
           })
+        } else if (error.message.includes("Email not confirmed")) {
+          setFormErrors({
+            auth: "Please verify your email address before signing in.",
+          })
         } else {
           toast({
             title: "Error signing in",
@@ -90,26 +94,15 @@ export default function Login() {
         return
       }
 
-      // Get the user role after successful sign in
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", (await supabase.auth.getUser()).data.user?.id)
-        .single()
+      // The AuthProvider will handle the redirect after it processes the new session.
+      // We can optionally push a default route here if needed, but it's better to let the provider handle it.
+      // For now, we just wait for the provider to do its work.
+      toast({
+        title: "Signed in successfully!",
+        description: "Redirecting to your dashboard...",
+      })
 
-      // Redirect based on role and returnUrl
-      if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl))
-      } else if (profile?.role === "talent") {
-        router.push("/admin/talentdashboard")
-      } else if (profile?.role === "client") {
-        router.push("/admin/dashboard")
-      } else if (profile?.role === "admin") {
-        router.push("/admin/dashboard")
-      } else {
-        // Default redirect if role not determined
-        router.push("/admin/dashboard")
-      }
+      // The redirect is now handled by the AuthProvider's onAuthStateChange listener
     } catch (error) {
       console.error("Login error:", error)
       toast({
