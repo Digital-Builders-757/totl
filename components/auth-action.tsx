@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "./auth-provider"
 
 interface AuthActionProps extends ButtonProps {
-  actionText: string
+  actionText?: string
   unauthenticatedText?: string
   onAction: () => Promise<void> | void
   loadingText?: string
@@ -24,6 +24,7 @@ export function AuthAction({
   unauthenticatedText = "Sign in to continue",
   onAction,
   loadingText = "Processing...",
+  children,
   ...buttonProps
 }: AuthActionProps) {
   const [isLoading, setIsLoading] = useState(false)
@@ -50,7 +51,7 @@ export function AuthAction({
   if (authLoading) {
     return (
       <Button disabled {...buttonProps}>
-        {actionText}
+        {children || actionText}
       </Button>
     )
   }
@@ -64,7 +65,7 @@ export function AuthAction({
       }
     >
       <Button onClick={handleAction} disabled={isLoading} {...buttonProps}>
-        {isLoading ? loadingText : actionText}
+        {isLoading ? loadingText : children || actionText}
       </Button>
     </RequireAuth>
   )

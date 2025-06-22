@@ -15,62 +15,59 @@ export default function AuthCallbackPage() {
   const [errorMessage, setErrorMessage] = useState<string>("")
 
   useEffect(() => {
-    const handleEmailVerification = async () => {
-      try {
-        // Get the auth code from the URL
-        const code = searchParams.get("code")
-        const type = searchParams.get("type")
+    const handleAuthCallback = async () => {
+      const type = searchParams.get("type")
+      const code = searchParams.get("code")
+      const next = searchParams.get("next") ?? "/"
 
-        console.log("Auth callback received:", { code, type })
+      if (type === "recovery") {
+        // This is a password reset flow. The user will be redirected to the update-password page
+        // where the new session from the recovery link will be active.
+        router.push(next)
+        return
+      }
 
-        if (!code) {
-          setVerificationStatus("error")
-          setErrorMessage("Verification code is missing")
-          return
-        }
+      if (code) {
+        try {
+          // This is an email verification flow
+          const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-        // Exchange the code for a session
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-        if (error) {
-          console.error("Verification error:", error)
-          setVerificationStatus("error")
-          setErrorMessage(error.message)
-          return
-        }
-
-        // Update the user's email_verified status in the profiles table
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-
-        if (session?.user) {
-          console.log("User authenticated:", session.user.id)
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ email_verified: true })
-            .eq("id", session.user.id)
-
-          if (updateError) {
-            console.error("Error updating profile:", updateError)
+          if (error) {
+            console.error("Verification error:", error)
+            setVerificationStatus("error")
+            setErrorMessage(error.message)
+            return
           }
+
+          setVerificationStatus("success")
+          setTimeout(() => {
+            router.push("/login?verified=true")
+          }, 3000)
+        } catch (error) {
+          console.error("Error during verification:", error)
+          setVerificationStatus("error")
+          setErrorMessage("An unexpected error occurred during verification.")
         }
-
-        setVerificationStatus("success")
-
-        // Redirect after a short delay to show the success message
-        setTimeout(() => {
-          router.push("/login?verified=true")
-        }, 3000)
-      } catch (error) {
-        console.error("Error during verification:", error)
+      } else {
         setVerificationStatus("error")
-        setErrorMessage("An unexpected error occurred")
+        setErrorMessage("No verification code found in URL.")
       }
     }
 
-    handleEmailVerification()
+    handleAuthCallback()
   }, [searchParams, router, supabase])
+
+  // Don't render the verification UI for recovery
+  if (searchParams.get("type") === "recovery") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="flex flex-col items-center">
+          <div className="w-12 h-12 border-4 border-t-black border-r-gray-200 border-b-gray-200 border-l-gray-200 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-600">Redirecting to password reset...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">

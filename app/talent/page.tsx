@@ -55,19 +55,11 @@ export default function TalentPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                     <AuthAction
-                      asChild
-                      className="w-full bg-white text-black hover:bg-white/90"
-                      actionText={
-                        <>
-                          View Profile <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      }
+                      className="w-full bg-white text-black hover:bg-white/90 flex items-center justify-center"
                       unauthenticatedText="Sign in to View Profile"
-                      onAction={() => router.push(`/talent/${index}`)}
+                      onAction={() => router.push(`/talent/${person.id}`)}
                     >
-                      <Link href={`/talent/${index}`}>
-                        View Profile <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
+                      View Profile <ArrowRight className="ml-2 h-4 w-4" />
                     </AuthAction>
                   </div>
                 </div>
@@ -108,35 +100,41 @@ const talent = [
     specialty: "Editorial & Runway",
     tags: ["Editorial", "High Fashion", "Runway"],
     image: "/images/model-1.png",
+    id: "1",
   },
   {
     name: "Marcus Williams",
     specialty: "Commercial & Print",
     tags: ["Commercial", "Print", "Lifestyle"],
     image: "/images/model-2.png",
+    id: "2",
   },
   {
     name: "Ava Rodriguez",
     specialty: "High Fashion & Campaigns",
     tags: ["Campaigns", "Editorial", "Luxury"],
     image: "/images/model-3.png",
+    id: "3",
   },
   {
     name: "James Thompson",
     specialty: "Fitness & Commercial",
     tags: ["Fitness", "Sports", "Commercial"],
     image: "/athletic-woman-stretching.png",
+    id: "4",
   },
   {
     name: "Zoe Parker",
     specialty: "Beauty & Cosmetics",
     tags: ["Beauty", "Cosmetics", "Close-up"],
     image: "/radiant-portrait.png",
+    id: "5",
   },
   {
     name: "Elijah Washington",
     specialty: "Urban & Streetwear",
     tags: ["Urban", "Streetwear", "Casual"],
     image: "", // This will use the fallback
+    id: "6",
   },
 ]
