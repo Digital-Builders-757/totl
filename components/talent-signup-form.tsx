@@ -13,6 +13,7 @@ import { Eye, EyeOff, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Checkbox } from "@/components/ui/checkbox"
+import { useAuth } from "./auth-provider"
 
 // Define the form schema with validation rules
 const signupSchema = z
@@ -55,7 +56,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
   const [serverError, setServerError] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
-  const supabase = createClientComponentClient()
+  const { signUp } = useAuth()
 
   const {
     register,
@@ -85,17 +86,13 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
     try {
       console.log("Starting signup process for:", data.email)
 
-      const { data: authData, error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            role: "talent",
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+      const { error } = await signUp(data.email, data.password, {
+        data: {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          role: "talent",
         },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       })
 
       if (error) {
@@ -111,20 +108,16 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         return
       }
 
-      if (authData.user) {
-        toast({
-          title: "Account creation successful!",
-          description: "Please check your email to verify your account before logging in.",
-        })
+      toast({
+        title: "Account creation successful!",
+        description: "Please check your email to verify your account before logging in.",
+      })
 
-        if (onComplete) {
-          onComplete()
-        }
-
-        router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
-      } else {
-        throw new Error("Signup completed without errors, but no user data was returned.")
+      if (onComplete) {
+        onComplete()
       }
+
+      router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
       console.error("Unexpected error during signup:", error)
       setServerError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.")
