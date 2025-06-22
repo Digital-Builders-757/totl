@@ -19,7 +19,7 @@ type AuthContextType = {
   isLoading: boolean
   isEmailVerified: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
-  signUp: (email: string, password: string, role: UserRole) => Promise<{ error: any }>
+  signUp: (email: string, password: string, options: { data: any; emailRedirectTo: string }) => Promise<{ error: any }>
   signOut: () => Promise<{ error: any }>
   sendVerificationEmail: () => Promise<{ error: any }>
   resetPassword: (email: string) => Promise<{ error: any }>
@@ -110,74 +110,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const signUp = async (email: string, password: string, role: UserRole) => {
-    try {
-      // 1. Create user in Supabase Auth with email confirmation disabled
-      const { error: signUpError, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { role },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (signUpError) {
-        console.error("Signup error:", signUpError)
-        return { error: signUpError }
-      }
-
-      // 2. Create profile record
-      const { error: profileError } = await supabase.from("profiles").insert([
-        {
-          id: data.user?.id,
-          role,
-          email_verified: false,
-        },
-      ])
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError)
-        return { error: profileError }
-      }
-
-      // 3. Generate verification link using Supabase admin
-      const supabaseAdmin = createSupabaseAdminClient()
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: "signup",
-        email,
-        password,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (linkError || !linkData.properties?.action_link) {
-        console.error("Error generating verification link:", linkError)
-        return { error: linkError }
-      }
-
-      // 4. Send custom verification email via Resend
-      const response = await fetch("/api/email/send-verification", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          userId: data.user?.id,
-          verificationUrl: linkData.properties.action_link,
-        }),
-      })
-
-      if (!response.ok) {
-        console.error("Error sending verification email")
-        // Continue anyway since the account was created
-      }
-
-      return { error: null }
-    } catch (error) {
-      console.error("Unexpected error during signup:", error)
-      return { error }
-    }
+  const signUp = async (email: string, password: string, options: { data: any; emailRedirectTo: string }) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options,
+    })
+    return { error }
   }
 
   const signOut = async () => {
