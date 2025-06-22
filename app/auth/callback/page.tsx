@@ -27,13 +27,22 @@ export default function AuthCallbackPage() {
         }
 
         // Exchange the code for a session
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.exchangeCodeForSession(code)
 
         if (error) {
           console.error("Verification error:", error)
           setVerificationStatus("error")
           setErrorMessage(error.message)
           return
+        }
+
+        // The session is now active. Update the user's profile to mark email as verified.
+        // This is a crucial step for your app's logic.
+        if (session?.user) {
+          await supabase.from("profiles").update({ email_verified: true }).eq("id", session.user.id)
         }
 
         setVerificationStatus("success")
