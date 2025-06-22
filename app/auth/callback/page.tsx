@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import Link from "next/link"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,50 +14,46 @@ export default function AuthCallbackPage() {
   const searchParams = useSearchParams()
   const [verificationStatus, setVerificationStatus] = useState<"loading" | "success" | "error">("loading")
   const [errorMessage, setErrorMessage] = useState<string>("")
+  const effectRan = useRef(false)
 
   useEffect(() => {
+    // This function is defined once and called inside the effect.
     const handleEmailVerification = async () => {
-      try {
-        // Get the auth code from the URL
-        const code = searchParams.get("code")
-
-        if (!code) {
-          setVerificationStatus("error")
-          setErrorMessage("Verification code is missing")
-          return
-        }
-
-        // Exchange the code for a session
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.exchangeCodeForSession(code)
-
-        if (error) {
-          console.error("Verification error:", error)
-          setVerificationStatus("error")
-          setErrorMessage(error.message)
-          return
-        }
-
-        // Verification was successful. Show success message immediately.
-        setVerificationStatus("success")
-
-        // In the background, update the user's profile. Don't make the user wait for this.
-        if (session?.user) {
-          // We don't need to await this. Let it run in the background.
-          supabase.from("profiles").update({ email_verified: true }).eq("id", session.user.id)
-        }
-
-        // Redirect after a short delay to show the success message
-        setTimeout(() => {
-          router.push("/login?verified=true")
-        }, 3000)
-      } catch (error) {
-        console.error("Error during verification:", error)
-        setVerificationStatus("error")
-        setErrorMessage("An unexpected error occurred")
+      // In development, React's Strict Mode runs useEffects twice to check for side-effects.
+      // This ref prevents our code from running twice.
+      if (effectRan.current) {
+        return
       }
+      effectRan.current = true
+
+      const code = searchParams.get("code")
+      if (!code) {
+        setVerificationStatus("error")
+        setErrorMessage("Verification code is missing from the link.")
+        return
+      }
+
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+      if (error) {
+        console.error("Verification error:", error)
+        setVerificationStatus("error")
+        setErrorMessage(error.message)
+        return
+      }
+
+      // Success!
+      setVerificationStatus("success")
+
+      // Update profile in the background without blocking the UI
+      if (data.session?.user) {
+        supabase.from("profiles").update({ email_verified: true }).eq("id", data.session.user.id).then()
+      }
+
+      // Redirect the user to the login page after a short delay.
+      setTimeout(() => {
+        router.push("/login?verified=true")
+      }, 2000)
     }
 
     handleEmailVerification()
