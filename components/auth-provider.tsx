@@ -8,6 +8,7 @@ import type { SupabaseClient, User, Session } from "@supabase/supabase-js"
 import type { Database } from "@/types/supabase"
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
 import { useRouter } from "next/navigation"
+import { toast } from "@/components/ui/use-toast"
 
 type UserRole = "talent" | "client" | "admin" | null
 
@@ -74,21 +75,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null)
 
       if (event === "SIGNED_IN" && session) {
-        const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
+        try {
+          const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
 
-        const role = profile?.role as UserRole
-        setUserRole(role)
-        setIsEmailVerified(session.user.email_confirmed_at !== null)
+          if (error) {
+            // This is the most likely source of the 404 error.
+            // Throw the error to be caught by the outer catch block.
+            throw error
+          }
 
-        // Redirect based on role
-        if (role === "talent") {
-          router.push("/admin/talentdashboard")
-        } else if (role === "client") {
-          router.push("/admin/dashboard")
-        } else if (role === "admin") {
-          router.push("/admin/dashboard")
-        } else {
-          router.push("/admin/dashboard") // Fallback
+          const role = profile?.role as UserRole
+          setUserRole(role)
+          setIsEmailVerified(session.user.email_confirmed_at !== null)
+
+          // Redirect based on role
+          if (role === "talent") {
+            router.push("/admin/talentdashboard")
+          } else if (role === "client") {
+            router.push("/admin/dashboard")
+          } else if (role === "admin") {
+            router.push("/admin/dashboard")
+          } else {
+            // If role is null or not found, it's a configuration issue.
+            // Let's redirect to a safe page and log an error.
+            console.error("User signed in but has no role. Redirecting to dashboard.")
+            router.push("/admin/dashboard") // Fallback
+          }
+        } catch (error: any) {
+          console.error("Error fetching user profile after sign-in:", error)
+          toast({
+            title: "Failed to fetch user profile",
+            description: `There was an error getting your role from the database. Message: ${error.message}`,
+            variant: "destructive",
+          })
+          // Sign the user out to prevent a loop
+          await supabase.auth.signOut()
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null)

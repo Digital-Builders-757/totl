@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -38,47 +36,153 @@ import { Avatar } from "@/components/ui/avatar"
 import { RequireAuth } from "@/components/require-auth"
 import { EmailVerificationReminder } from "@/components/email-verification-reminder"
 import { useAuth } from "@/components/auth-provider"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
+import type { Database, TalentProfile } from "@/types/database"
+import { TalentDashboardClient } from "./talent-dashboard-client"
 
-export default function TalentDashboard() {
-  const [activeTab, setActiveTab] = useState("active")
-  const { supabase, user } = useAuth()
-  const [profileData, setProfileData] = useState<any>(null)
-  const [isProfileComplete, setIsProfileComplete] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+export default async function TalentDashboard() {
+  const supabase = createServerComponentClient<Database>({ cookies })
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!user) return
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-      try {
-        setIsLoading(true)
+  let profileData: TalentProfile | null = null
+  let isProfileComplete = false
+  let applications = [] // This should be fetched properly later
 
-        // FIXED: Using explicit column selection and eq filter
-        const { data, error } = await supabase
-          .from("talent_profiles")
-          .select("id, user_id, first_name, last_name, phone, age, location, experience")
-          .eq("user_id", user.id)
-          .single()
+  if (user) {
+    const { data, error } = await supabase
+      .from("talent_profiles")
+      .select("*")
+      .eq("user_id", user.id)
+      .single()
 
-        if (error) throw error
-
-        setProfileData(data)
-
-        // Check if required fields are filled - now done client-side
-        const requiredFields = ["phone", "age", "location", "experience"]
-        const complete = requiredFields.every((field) => !!data[field])
-        setIsProfileComplete(complete)
-      } catch (err) {
-        console.error("Error fetching profile data:", err)
-      } finally {
-        setIsLoading(false)
-      }
+    if (error) {
+      console.error("Error fetching profile data:", error)
+    } else if (data) {
+      profileData = data
+      const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"]
+      isProfileComplete = requiredFields.every((field) => !!profileData?.[field])
     }
 
-    if (user) {
-      fetchProfileData()
-    }
-  }, [user, supabase])
+    // You can also fetch applications data here
+    // const { data: appData, error: appError } = await supabase.from('applications')...
+    // applications = appData;
+  }
+
+  // Mock data for gigs - replace with real data fetching as needed
+  const gigs = {
+    active: [
+      {
+        id: 1,
+        gigId: 0,
+        title: "Luxury Fashion Editorial",
+        company: "Vogue Magazine",
+        location: "New York, NY",
+        appliedDate: "June 23, 2023",
+        status: "Shortlisted",
+        image: "/gig-editorial.png",
+      },
+      {
+        id: 2,
+        gigId: 1,
+        title: "Summer Collection Lookbook",
+        company: "Luxury Brand",
+        location: "Paris, France",
+        appliedDate: "June 20, 2023",
+        status: "Under Review",
+        image: "/similar-gig-1.png",
+      },
+      {
+        id: 3,
+        gigId: 6,
+        title: "Luxury Jewelry Campaign",
+        company: "Eternal Diamonds",
+        location: "London, UK",
+        appliedDate: "June 18, 2023",
+        status: "Interview Scheduled",
+        image: "/gig-jewelry.png",
+      },
+      {
+        id: 4,
+        gigId: 2,
+        title: "Runway Models for Fashion Week",
+        company: "Luxury Design House",
+        location: "Milan, Italy",
+        appliedDate: "June 15, 2023",
+        status: "Under Review",
+        image: "/gig-runway.png",
+      },
+      {
+        id: 5,
+        gigId: 3,
+        title: "Beauty Campaign for Skincare Line",
+        company: "Luminous Beauty",
+        location: "Miami, FL",
+        appliedDate: "June 10, 2023",
+        status: "Under Review",
+        image: "/gig-beauty.png",
+      },
+    ],
+    accepted: [],
+    rejected: [],
+  }
+
+  // Mock data for upcoming bookings
+  const upcomingBookings = [
+    {
+      id: 1,
+      title: "Luxury Jewelry Campaign",
+      company: "Eternal Diamonds",
+      date: "July 15, 2023",
+      time: "9:00 AM - 5:00 PM",
+      location: "London Studio, UK",
+      compensation: "$3,000",
+      image: "/gig-jewelry.png",
+    },
+    {
+      id: 2,
+      title: "Summer Fashion Editorial",
+      company: "Vogue Magazine",
+      date: "July 22, 2023",
+      time: "10:00 AM - 4:00 PM",
+      location: "New York Studio, NY",
+      compensation: "$2,000",
+      image: "/gig-editorial.png",
+    },
+    {
+      id: 3,
+      title: "Paris Fashion Week Runway",
+      company: "Luxury Design House",
+      date: "September 28, 2023",
+      time: "All Day",
+      location: "Paris, France",
+      compensation: "$5,000",
+      image: "/gig-runway.png",
+    },
+  ]
+
+  // Mock data for portfolio highlights
+  const portfolioHighlights = [
+    {
+      image: "/ethereal-bloom.png",
+      caption: "Vogue Editorial",
+    },
+    {
+      image: "/fashion-forward-strut.png",
+      caption: "NYFW Runway",
+    },
+    {
+      image: "/urban-threads.png",
+      caption: "Summer Campaign",
+    },
+    {
+      image: "/radiant-portrait.png",
+      caption: "Beauty Editorial",
+    },
+  ]
 
   return (
     <RequireAuth>
@@ -153,7 +257,7 @@ export default function TalentDashboard() {
           <EmailVerificationReminder />
 
           {/* Profile Completion Alert */}
-          {!isProfileComplete && !isLoading && (
+          {!isProfileComplete && (
             <Alert className="mb-6 bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800 flex items-center justify-between">
@@ -225,7 +329,7 @@ export default function TalentDashboard() {
                         <Link href="/admin/talentdashboard/profile">Edit Profile</Link>
                       </Button>
                       <Button asChild className="bg-black text-white hover:bg-black/90">
-                        <Link href="/talent/0">
+                        <Link href={`/talent/${profileData?.id || 0}`}>
                           <Eye className="mr-2 h-4 w-4" /> View Public Profile
                         </Link>
                       </Button>
@@ -322,171 +426,10 @@ export default function TalentDashboard() {
             </div>
           </div>
 
-          {/* My Applications */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex flex-col md:flex-row md:items-center justify-between">
-                <h2 className="text-xl font-bold">My Applications</h2>
-                <div className="mt-4 md:mt-0 flex items-center space-x-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <Input placeholder="Search applications" className="pl-9 w-full md:w-60" />
-                  </div>
-                  <Button variant="outline" size="icon">
-                    <Filter size={16} />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <Tabs defaultValue="active" className="w-full" onValueChange={setActiveTab}>
-              <div className="px-6 border-b border-gray-100">
-                <TabsList className="h-12">
-                  <TabsTrigger
-                    value="active"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none"
-                  >
-                    Active (5)
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="accepted"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none"
-                  >
-                    Accepted (3)
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="rejected"
-                    className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none"
-                  >
-                    Rejected (4)
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value="active" className="p-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Gig
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Company
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {activeApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-50">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 flex-shrink-0 rounded bg-gray-200 mr-3">
-                                <SafeImage
-                                  src={application.image}
-                                  alt={application.title}
-                                  width={40}
-                                  height={40}
-                                  placeholderQuery="fashion photoshoot"
-                                  className="rounded object-cover h-10 w-10"
-                                />
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">{application.title}</div>
-                                <div className="text-gray-500 text-sm">{application.location}</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-500">{application.company}</td>
-                          <td className="py-4 px-6 text-gray-500">{application.appliedDate}</td>
-                          <td className="py-4 px-6">
-                            <Badge
-                              className={`${
-                                application.status === "Under Review"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : application.status === "Shortlisted"
-                                    ? "bg-green-100 text-green-800"
-                                    : application.status === "Rejected"
-                                      ? "bg-red-100 text-red-800"
-                                      : "bg-amber-100 text-amber-800"
-                              }`}
-                            >
-                              {application.status}
-                            </Badge>
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem asChild>
-                                  <Link href={`/gigs/${application.gigId}`}>
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    <span>View Gig</span>
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link href={`/admin/talentdashboard/applications/${application.id}`}>
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    <span>View Application</span>
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                  <MessageSquare className="mr-2 h-4 w-4" />
-                                  <span>Contact Client</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="text-red-600">
-                                  <XCircle className="mr-2 h-4 w-4" />
-                                  <span>Withdraw Application</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="accepted" className="p-6">
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                    <CheckCircle className="h-8 w-8 text-green-500" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">Accepted Applications</h3>
-                  <p className="text-gray-500 mb-4">You have 3 accepted applications</p>
-                  <Button asChild variant="outline">
-                    <Link href="/admin/talentdashboard/applications?status=accepted">View Accepted Applications</Link>
-                  </Button>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="rejected" className="p-6">
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-red-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                    <XCircle className="h-8 w-8 text-red-500" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">Rejected Applications</h3>
-                  <p className="text-gray-500 mb-4">You have 4 rejected applications</p>
-                  <Button asChild variant="outline">
-                    <Link href="/admin/talentdashboard/applications?status=rejected">View Rejected Applications</Link>
-                  </Button>
-                </div>
-              </TabsContent>
-            </Tabs>
+          {/* Application Overview */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Application Overview</h3>
+            <TalentDashboardClient profileData={profileData} gigs={gigs} />
           </div>
 
           {/* Upcoming Bookings */}
@@ -577,7 +520,7 @@ export default function TalentDashboard() {
             <div className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {portfolioHighlights.map((item, index) => (
-                  <div key={index} className="aspect-[3/4] relative rounded-md overflow-hidden group">
+                  <div key={index} className="group relative rounded-xl overflow-hidden">
                     <SafeImage
                       src={item.image}
                       alt={item.caption}
@@ -641,111 +584,3 @@ export default function TalentDashboard() {
     </RequireAuth>
   )
 }
-
-// Mock data for active applications
-const activeApplications = [
-  {
-    id: 1,
-    gigId: 0,
-    title: "Luxury Fashion Editorial",
-    company: "Vogue Magazine",
-    location: "New York, NY",
-    appliedDate: "June 23, 2023",
-    status: "Shortlisted",
-    image: "/gig-editorial.png",
-  },
-  {
-    id: 2,
-    gigId: 1,
-    title: "Summer Collection Lookbook",
-    company: "Luxury Brand",
-    location: "Paris, France",
-    appliedDate: "June 20, 2023",
-    status: "Under Review",
-    image: "/similar-gig-1.png",
-  },
-  {
-    id: 3,
-    gigId: 6,
-    title: "Luxury Jewelry Campaign",
-    company: "Eternal Diamonds",
-    location: "London, UK",
-    appliedDate: "June 18, 2023",
-    status: "Interview Scheduled",
-    image: "/gig-jewelry.png",
-  },
-  {
-    id: 4,
-    gigId: 2,
-    title: "Runway Models for Fashion Week",
-    company: "Luxury Design House",
-    location: "Milan, Italy",
-    appliedDate: "June 15, 2023",
-    status: "Under Review",
-    image: "/gig-runway.png",
-  },
-  {
-    id: 5,
-    gigId: 3,
-    title: "Beauty Campaign for Skincare Line",
-    company: "Luminous Beauty",
-    location: "Miami, FL",
-    appliedDate: "June 10, 2023",
-    status: "Under Review",
-    image: "/gig-beauty.png",
-  },
-]
-
-// Mock data for upcoming bookings
-const upcomingBookings = [
-  {
-    id: 1,
-    title: "Luxury Jewelry Campaign",
-    company: "Eternal Diamonds",
-    date: "July 15, 2023",
-    time: "9:00 AM - 5:00 PM",
-    location: "London Studio, UK",
-    compensation: "$3,000",
-    image: "/gig-jewelry.png",
-  },
-  {
-    id: 2,
-    title: "Summer Fashion Editorial",
-    company: "Vogue Magazine",
-    date: "July 22, 2023",
-    time: "10:00 AM - 4:00 PM",
-    location: "New York Studio, NY",
-    compensation: "$2,000",
-    image: "/gig-editorial.png",
-  },
-  {
-    id: 3,
-    title: "Paris Fashion Week Runway",
-    company: "Luxury Design House",
-    date: "September 28, 2023",
-    time: "All Day",
-    location: "Paris, France",
-    compensation: "$5,000",
-    image: "/gig-runway.png",
-  },
-]
-
-// Mock data for portfolio highlights
-const portfolioHighlights = [
-  {
-    image: "/ethereal-bloom.png",
-    caption: "Vogue Editorial",
-  },
-  {
-    image: "/fashion-forward-strut.png",
-    caption: "NYFW Runway",
-  },
-  {
-    image: "/urban-threads.png",
-    caption: "Summer Campaign",
-  },
-  {
-    image: "/radiant-portrait.png",
-    caption: "Beauty Editorial",
-  },
-]

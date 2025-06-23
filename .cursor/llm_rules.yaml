@@ -56,7 +56,7 @@ directory_structure:
   - path: "/hooks"
     description: "Custom React hooks."
   - path: "/types"
-    description: "Global TypeScript type definitions. Use database.types.ts for Supabase types."
+    description: "Global TypeScript type definitions. The `types/database.ts` file contains manually-defined interfaces for database tables (e.g., `TalentProfile`). It does NOT use auto-generated types."
 
 frameworks_and_libraries:
   next_js:
@@ -64,6 +64,11 @@ frameworks_and_libraries:
     - "Fetch data in Server Components (`page.tsx`, `layout.tsx`) by default."
     - "Use Server Actions for form submissions and data mutations."
     - "Use `next/image` via the `<SafeImage />` wrapper for all images."
+    - "Use the pre-configured client from `/lib/supabase-client.ts`."
+    - "For admin-level tasks, use the client from `/lib/supabase-admin-client.ts` in secure server environments only."
+    - "Always use the `safeQuery` wrapper from `/lib/safe-query.ts` for RLS-protected queries."
+    - "Prefer `select('*')` when fetching data for a component that uses a pre-defined TypeScript interface (e.g., `TalentProfile`) to ensure the fetched data matches the type definition and avoids linter errors. Only select specific columns if the data is used for a one-off task and not passed to a typed component."
+    - "Use `{ returning: 'minimal' }` for inserts unless you need the returned data."
   react:
     - "Use functional components with hooks."
     - "Components in `/components` must be presentational (no data fetching)."
@@ -135,4 +140,15 @@ authentication_and_security:
     - "Users can only access their own data unless a policy explicitly allows wider access (e.g., public gigs)."
   secrets:
     - "Never hardcode API keys, JWT secrets, or service role keys."
-    - "Access all secrets from environment variables (`process.env`)." 
+    - "Access all secrets from environment variables (`process.env`)."
+
+anti_patterns:
+  - name: "Client-side data fetching in UI page components"
+    description: "Do not fetch data on the client side within page components using `useEffect` and `useState`. This was refactored in the Talent Dashboard."
+    correct_approach: "Fetch data in Server Components (at the page level) and pass it as props to client components. This is more performant and aligns with Next.js best practices."
+  - name: "Incomplete data fetching for typed components"
+    description: "Do not use `select('col1, col2')` if the component you are passing the data to expects a full TypeScript interface (e.g. `TalentProfile`). This will cause a type mismatch."
+    correct_approach: "Use `select('*')` to fetch the complete data model, ensuring it fully satisfies the TypeScript interface."
+  - name: "Mixing Server and Client Component logic"
+    description: "Do not use React hooks that depend on the browser (like `useState`, `useEffect`, `onClick`) inside a component that is not explicitly marked with the `'use client'` directive at the top of the file."
+    correct_approach: "Keep data-fetching and server-side logic in Server Components. If a component requires interactivity or state, extract it into a separate Client Component and import it into the Server Component." 
