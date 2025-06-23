@@ -37,39 +37,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    let mounted = true
+    // This immediately handles the initial session check, and the listener will take over from there.
+    const initialSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
 
-    async function checkSession() {
-      setIsLoading(true)
-      const { data, error } = await supabase.auth.getSession()
-
-      if (error) {
-        // Network or server error, try again after a short delay
-        setTimeout(checkSession, 2000)
+      // If there is no session on initial load, we can stop loading.
+      // The listener will handle the case where the user signs in.
+      if (!session) {
+        setIsLoading(false)
+        router.push("/login")
         return
       }
 
-      if (!data.session) {
-        // No session, try to refresh
-        const { data: refreshed, error: refreshError } = await supabase.auth.refreshSession()
-        if (refreshed?.session) {
-          setUser(refreshed.session.user)
-        } else {
-          // Still no session, redirect to login
-          router.replace("/login")
-        }
-      } else {
-        setUser(data.session.user)
-      }
-      setIsLoading(false)
+      // If there is a session, proceed to set user and fetch profile
+      setUser(session.user)
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
+      const role = profile?.role as UserRole
+      setUserRole(role)
+      setIsLoading(false) // Stop loading after initial fetch
     }
 
-    checkSession()
+    initialSession()
 
-    // Optionally, listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setIsLoading(true) // Start loading on any auth change
       setSession(session)
       setUser(session?.user ?? null)
 
@@ -88,7 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (role === "admin") {
           router.push("/admin/dashboard")
         } else {
-          router.push("/admin/dashboard") // Fallback
+          // If no role, perhaps go to a role selection or onboarding page
+          router.push("/choose-role")
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null)
@@ -97,10 +93,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsEmailVerified(false)
         router.push("/login")
       }
+      setIsLoading(false) // Stop loading after handling the auth event
     })
 
     return () => {
-      mounted = false
       subscription.unsubscribe()
     }
   }, [supabase, router])
