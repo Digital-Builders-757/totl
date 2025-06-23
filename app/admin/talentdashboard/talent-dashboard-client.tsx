@@ -56,7 +56,12 @@ export function TalentDashboardClient({ profileData, gigs }: TalentDashboardClie
       case "interview scheduled":
         return "bg-purple-100 text-purple-800"
       case "under review":
+      case "new":
         return "bg-yellow-100 text-yellow-800"
+      case "accepted":
+        return "bg-green-100 text-green-800"
+      case "rejected":
+        return "bg-red-100 text-red-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -98,46 +103,54 @@ export function TalentDashboardClient({ profileData, gigs }: TalentDashboardClie
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {activeApplications.map((application: Gig) => (
-                      <tr key={application.id} className="hover:bg-gray-50">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center">
-                            <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
-                              <SafeImage
-                                src={application.image}
-                                alt={application.title}
-                                width={64}
-                                height={64}
-                                placeholderQuery="gig photo"
-                                className="object-cover w-full h-full"
-                              />
+                    {activeApplications.length > 0 ? (
+                      activeApplications.map((application: Gig) => (
+                        <tr key={application.id} className="hover:bg-gray-50">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center">
+                              <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+                                <SafeImage
+                                  src={application.image}
+                                  alt={application.title}
+                                  width={64}
+                                  height={64}
+                                  placeholderQuery="gig photo"
+                                  className="object-cover w-full h-full"
+                                />
+                              </div>
+                              <div>
+                                <Link
+                                  href={`/gigs/${application.gigId}`}
+                                  className="font-semibold text-black hover:underline"
+                                >
+                                  {application.title}
+                                </Link>
+                                <p className="text-gray-600">
+                                  {application.company} - {application.location}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <Link
-                                href={`/gigs/${application.gigId}`}
-                                className="font-semibold text-black hover:underline"
-                              >
-                                {application.title}
-                              </Link>
-                              <p className="text-gray-600">
-                                {application.company} - {application.location}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 text-gray-600">{application.appliedDate}</td>
-                        <td className="py-4 px-6">
-                          <Badge className={`capitalize ${getStatusBadge(application.status)}`}>
-                            {application.status}
-                          </Badge>
-                        </td>
-                        <td className="py-4 px-6 text-right">
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical size={18} />
-                          </Button>
+                          </td>
+                          <td className="py-4 px-6 text-gray-600">{application.appliedDate}</td>
+                          <td className="py-4 px-6">
+                            <Badge className={`capitalize ${getStatusBadge(application.status)}`}>
+                              {application.status.replace("_", " ")}
+                            </Badge>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical size={18} />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="text-center py-12 text-gray-500">
+                          You have no {activeTab} applications yet.
                         </td>
                       </tr>
-                    ))}
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -1,41 +1,28 @@
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
-  Search,
   MoreVertical,
   Eye,
-  Clock,
   CheckCircle,
-  XCircle,
-  Filter,
-  Camera,
-  BarChart,
   Settings,
   LogOut,
   Bell,
   UserIcon,
   Calendar,
-  DollarSign,
   Star,
-  ImageIcon,
-  FileText,
-  MessageSquare,
   Briefcase,
-  MapPin,
   AlertCircle,
   Edit,
+  FileText,
+  DollarSign,
 } from "lucide-react"
 import { SafeImage } from "@/components/ui/safe-image"
 import { Avatar } from "@/components/ui/avatar"
 import { RequireAuth } from "@/components/require-auth"
 import { EmailVerificationReminder } from "@/components/email-verification-reminder"
-import { useAuth } from "@/components/auth-provider"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 import type { Database, TalentProfile } from "@/types/database"
@@ -50,144 +37,142 @@ export default async function TalentDashboard() {
 
   let profileData: TalentProfile | null = null
   let isProfileComplete = false
-  let applications = [] // This should be fetched properly later
+  let applicationsData: any[] = []
+  let bookingsData: any[] = []
+  let portfolioData: any[] = []
+  let mainProfileData: { avatar_url: string | null } | null = null
 
   if (user) {
-    const { data, error } = await supabase
-      .from("talent_profiles")
-      .select("*")
-      .eq("user_id", user.id)
-      .single()
+    const [
+      profileResult,
+      applicationsResult,
+      bookingsResult,
+      portfolioResult,
+      mainProfileResult,
+    ] = await Promise.all([
+      supabase.from("talent_profiles").select("*").eq("user_id", user.id).single(),
+      supabase
+        .from("applications")
+        .select(
+          `
+          id,
+          status,
+          created_at,
+          gigs (
+            id,
+            title,
+            location,
+            clients (
+              company_name
+            )
+          )
+        `
+        )
+        .eq("talent_id", user.id),
+      supabase
+        .from("bookings")
+        .select(
+          `
+          id,
+          date,
+          compensation,
+          gigs (
+            id,
+            title,
+            location,
+            clients (
+              company_name
+            )
+          )
+        `
+        )
+        .eq("talent_id", user.id)
+        .eq("status", "confirmed"),
+      supabase.from("portfolio_items").select("image_url, caption").eq("talent_id", user.id).limit(4),
+      supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
+    ])
 
-    if (error) {
-      console.error("Error fetching profile data:", error)
-    } else if (data) {
-      profileData = data
+    if (profileResult.error) console.error("Error fetching talent profile:", profileResult.error)
+    if (applicationsResult.error) console.error("Error fetching applications:", applicationsResult.error)
+    if (bookingsResult.error) console.error("Error fetching bookings:", bookingsResult.error)
+    if (portfolioResult.error) console.error("Error fetching portfolio:", portfolioResult.error)
+    if (mainProfileResult.error) console.error("Error fetching main profile:", mainProfileResult.error)
+
+    if (profileResult.data) {
+      profileData = profileResult.data
       const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"]
       isProfileComplete = requiredFields.every((field) => !!profileData?.[field])
     }
 
-    // You can also fetch applications data here
-    // const { data: appData, error: appError } = await supabase.from('applications')...
-    // applications = appData;
+    applicationsData = applicationsResult.data || []
+    bookingsData = bookingsResult.data || []
+    portfolioData = portfolioResult.data || []
+    mainProfileData = mainProfileResult.data || null
   }
 
-  // Mock data for gigs - replace with real data fetching as needed
   const gigs = {
-    active: [
-      {
-        id: 1,
-        gigId: 0,
-        title: "Luxury Fashion Editorial",
-        company: "Vogue Magazine",
-        location: "New York, NY",
-        appliedDate: "June 23, 2023",
-        status: "Shortlisted",
-        image: "/gig-editorial.png",
-      },
-      {
-        id: 2,
-        gigId: 1,
-        title: "Summer Collection Lookbook",
-        company: "Luxury Brand",
-        location: "Paris, France",
-        appliedDate: "June 20, 2023",
-        status: "Under Review",
-        image: "/similar-gig-1.png",
-      },
-      {
-        id: 3,
-        gigId: 6,
-        title: "Luxury Jewelry Campaign",
-        company: "Eternal Diamonds",
-        location: "London, UK",
-        appliedDate: "June 18, 2023",
-        status: "Interview Scheduled",
-        image: "/gig-jewelry.png",
-      },
-      {
-        id: 4,
-        gigId: 2,
-        title: "Runway Models for Fashion Week",
-        company: "Luxury Design House",
-        location: "Milan, Italy",
-        appliedDate: "June 15, 2023",
-        status: "Under Review",
-        image: "/gig-runway.png",
-      },
-      {
-        id: 5,
-        gigId: 3,
-        title: "Beauty Campaign for Skincare Line",
-        company: "Luminous Beauty",
-        location: "Miami, FL",
-        appliedDate: "June 10, 2023",
-        status: "Under Review",
-        image: "/gig-beauty.png",
-      },
-    ],
-    accepted: [],
-    rejected: [],
+    active:
+      applicationsData
+        ?.filter((app) => ["new", "under_review", "shortlisted"].includes(app.status))
+        .map((app) => ({
+          id: app.id,
+          gigId: app.gigs.id,
+          title: app.gigs.title,
+          company: app.gigs.clients?.company_name || "Private Client",
+          location: app.gigs.location,
+          appliedDate: new Date(app.created_at).toLocaleDateString(),
+          status: app.status,
+          image: "/gig-editorial.png",
+        })) || [],
+    accepted:
+      applicationsData
+        ?.filter((app) => app.status === "accepted")
+        .map((app) => ({
+          id: app.id,
+          gigId: app.gigs.id,
+          title: app.gigs.title,
+          company: app.gigs.clients?.company_name || "Private Client",
+          location: app.gigs.location,
+          appliedDate: new Date(app.created_at).toLocaleDateString(),
+          status: app.status,
+          image: "/gig-editorial.png",
+        })) || [],
+    rejected:
+      applicationsData
+        ?.filter((app) => app.status === "rejected")
+        .map((app) => ({
+          id: app.id,
+          gigId: app.gigs.id,
+          title: app.gigs.title,
+          company: app.gigs.clients?.company_name || "Private Client",
+          location: app.gigs.location,
+          appliedDate: new Date(app.created_at).toLocaleDateString(),
+          status: app.status,
+          image: "/gig-editorial.png",
+        })) || [],
   }
 
-  // Mock data for upcoming bookings
-  const upcomingBookings = [
-    {
-      id: 1,
-      title: "Luxury Jewelry Campaign",
-      company: "Eternal Diamonds",
-      date: "July 15, 2023",
-      time: "9:00 AM - 5:00 PM",
-      location: "London Studio, UK",
-      compensation: "$3,000",
+  const upcomingBookings =
+    bookingsData?.map((booking) => ({
+      id: booking.id,
+      title: booking.gigs.title,
+      company: booking.gigs.clients?.company_name || "Private Client",
+      date: new Date(booking.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+      time: new Date(booking.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+      location: booking.gigs.location,
+      compensation: `$${booking.compensation}`,
       image: "/gig-jewelry.png",
-    },
-    {
-      id: 2,
-      title: "Summer Fashion Editorial",
-      company: "Vogue Magazine",
-      date: "July 22, 2023",
-      time: "10:00 AM - 4:00 PM",
-      location: "New York Studio, NY",
-      compensation: "$2,000",
-      image: "/gig-editorial.png",
-    },
-    {
-      id: 3,
-      title: "Paris Fashion Week Runway",
-      company: "Luxury Design House",
-      date: "September 28, 2023",
-      time: "All Day",
-      location: "Paris, France",
-      compensation: "$5,000",
-      image: "/gig-runway.png",
-    },
-  ]
+    })) || []
 
-  // Mock data for portfolio highlights
-  const portfolioHighlights = [
-    {
-      image: "/ethereal-bloom.png",
-      caption: "Vogue Editorial",
-    },
-    {
-      image: "/fashion-forward-strut.png",
-      caption: "NYFW Runway",
-    },
-    {
-      image: "/urban-threads.png",
-      caption: "Summer Campaign",
-    },
-    {
-      image: "/radiant-portrait.png",
-      caption: "Beauty Editorial",
-    },
-  ]
+  const portfolioHighlights =
+    portfolioData?.map((item) => ({
+      image: item.image_url,
+      caption: item.caption,
+    })) || []
 
   return (
     <RequireAuth>
       <div className="bg-gray-50">
-        {/* Admin Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
@@ -221,14 +206,21 @@ export default async function TalentDashboard() {
                 <button className="text-gray-600 hover:text-black relative">
                   <Bell size={20} />
                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                    5
+                    {gigs.active.length}
                   </span>
                 </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center text-sm font-medium text-gray-700 hover:text-black">
-                      <Avatar src="/images/model-1.png" alt="Sophia Chen" size="sm" className="mr-2" />
-                      <span className="hidden md:inline">Sophia Chen</span>
+                      <Avatar
+                        src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                        alt={profileData?.first_name || "User"}
+                        size="sm"
+                        className="mr-2"
+                      />
+                      <span className="hidden md:inline">
+                        {profileData ? `${profileData.first_name} ${profileData.last_name}` : "Talent"}
+                      </span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -256,14 +248,11 @@ export default async function TalentDashboard() {
         <div className="container mx-auto px-4 py-8">
           <EmailVerificationReminder />
 
-          {/* Profile Completion Alert */}
-          {!isProfileComplete && (
+          {!isProfileComplete && profileData && (
             <Alert className="mb-6 bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800 flex items-center justify-between">
-                <span>
-                  Your profile is incomplete. Complete your profile to increase your chances of being discovered.
-                </span>
+                <span>Your profile is incomplete. Complete your profile to increase your chances of being discovered.</span>
                 <Button asChild variant="outline" size="sm" className="ml-4">
                   <Link href="/admin/talentdashboard/profile">
                     <Edit className="mr-2 h-4 w-4" /> Complete Profile
@@ -273,7 +262,6 @@ export default async function TalentDashboard() {
             </Alert>
           )}
 
-          {/* Dashboard Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-bold mb-1">Talent Dashboard</h1>
@@ -288,7 +276,6 @@ export default async function TalentDashboard() {
             </div>
           </div>
 
-          {/* Profile Summary */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
             <div className="relative h-40 md:h-48 bg-gradient-to-r from-gray-900 to-gray-700">
               <div className="absolute inset-0 opacity-30 mix-blend-overlay">
@@ -306,8 +293,8 @@ export default async function TalentDashboard() {
                 <div className="relative -mt-16 md:-mt-20 mb-4 md:mb-0 md:mr-8">
                   <div className="w-32 h-32 rounded-xl overflow-hidden border-4 border-white shadow-md">
                     <SafeImage
-                      src="/images/model-1.png"
-                      alt="Sophia Chen"
+                      src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                      alt={profileData?.first_name || "User"}
                       width={128}
                       height={128}
                       placeholderQuery="model portrait"
@@ -359,228 +346,107 @@ export default async function TalentDashboard() {
             </div>
           </div>
 
-          {/* Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm">Applications</p>
-                  <h3 className="text-3xl font-bold mt-1">12</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-blue-500" />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-sm p-6 flex items-center">
+              <div className="p-3 bg-blue-100 rounded-full mr-4">
+                <Briefcase className="h-6 w-6 text-blue-600" />
               </div>
-              <div className="mt-4 text-sm text-green-600 flex items-center">
-                <span className="font-medium">+3</span>
-                <span className="ml-1">from last month</span>
+              <div>
+                <p className="text-gray-500 text-sm">Active Applications</p>
+                <p className="text-2xl font-bold">{gigs.active.length}</p>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm">Upcoming Bookings</p>
-                  <h3 className="text-3xl font-bold mt-1">3</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-purple-500" />
-                </div>
+            <div className="bg-white rounded-xl shadow-sm p-6 flex items-center">
+              <div className="p-3 bg-green-100 rounded-full mr-4">
+                <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
-              <div className="mt-4 text-sm text-green-600 flex items-center">
-                <span className="font-medium">+1</span>
-                <span className="ml-1">from last month</span>
+              <div>
+                <p className="text-gray-500 text-sm">Gigs Completed</p>
+                <p className="text-2xl font-bold">12</p>
               </div>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm">Earnings</p>
-                  <h3 className="text-3xl font-bold mt-1">$4,800</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-green-500" />
-                </div>
+            <div className="bg-white rounded-xl shadow-sm p-6 flex items-center">
+              <div className="p-3 bg-amber-100 rounded-full mr-4">
+                <DollarSign className="h-6 w-6 text-amber-600" />
               </div>
-              <div className="mt-4 text-sm text-green-600 flex items-center">
-                <span className="font-medium">+$1,200</span>
-                <span className="ml-1">from last month</span>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm">Portfolio Views</p>
-                  <h3 className="text-3xl font-bold mt-1">324</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center">
-                  <Eye className="h-5 w-5 text-amber-500" />
-                </div>
-              </div>
-              <div className="mt-4 text-sm text-green-600 flex items-center">
-                <span className="font-medium">+86</span>
-                <span className="ml-1">from last month</span>
+              <div>
+                <p className="text-gray-500 text-sm">Total Earnings</p>
+                <p className="text-2xl font-bold">$15,200</p>
               </div>
             </div>
           </div>
 
-          {/* Application Overview */}
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Application Overview</h3>
             <TalentDashboardClient profileData={profileData} gigs={gigs} />
           </div>
 
-          {/* Upcoming Bookings */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">Upcoming Bookings</h2>
-                <Link href="/admin/talentdashboard/bookings" className="text-sm font-medium text-black hover:underline">
-                  View All
-                </Link>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="space-y-6">
-                {upcomingBookings.map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex flex-col md:flex-row gap-6 border-b border-gray-100 pb-6 last:border-0 last:pb-0"
-                  >
-                    <div className="md:w-1/4">
-                      <div className="aspect-video relative rounded-lg overflow-hidden">
-                        <SafeImage
-                          src={booking.image}
-                          alt={booking.title}
-                          fill
-                          placeholderQuery="fashion photoshoot"
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div className="md:w-3/4">
-                      <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                        <h3 className="text-lg font-bold">{booking.title}</h3>
-                        <Badge className="w-fit mt-1 md:mt-0 bg-green-100 text-green-800">Confirmed</Badge>
-                      </div>
-                      <p className="text-gray-600 mb-2">{booking.company}</p>
-                      <div className="flex flex-wrap gap-4 mb-4 text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Calendar className="mr-1 h-4 w-4" />
-                          {booking.date}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <Clock className="mr-1 h-4 w-4" />
-                          {booking.time}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <MapPin className="mr-1 h-4 w-4" />
-                          {booking.location}
-                        </div>
-                        <div className="flex items-center text-gray-600">
-                          <DollarSign className="mr-1 h-4 w-4" />
-                          {booking.compensation}
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/admin/talentdashboard/bookings/${booking.id}`}>View Details</Link>
-                        </Button>
-                        <Button asChild size="sm" variant="outline">
-                          <Link href={`/admin/talentdashboard/bookings/${booking.id}/calendar`}>Add to Calendar</Link>
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          Contact Client
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Portfolio Preview */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="p-6 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold">Portfolio Highlights</h2>
-                <Link
-                  href="/admin/talentdashboard/portfolio"
-                  className="text-sm font-medium text-black hover:underline"
-                >
-                  Manage Portfolio
-                </Link>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {portfolioHighlights.map((item, index) => (
-                  <div key={index} className="group relative rounded-xl overflow-hidden">
+          <div className="mb-8">
+            <h3 className="text-xl font-bold mb-4">Upcoming Bookings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingBookings.map((booking) => (
+                <div key={booking.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="h-40 bg-gray-200">
                     <SafeImage
-                      src={item.image}
-                      alt={item.caption}
-                      fill
-                      placeholderQuery="fashion model"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      src={booking.image}
+                      alt={booking.title}
+                      width={400}
+                      height={160}
+                      placeholderQuery="booking image"
+                      className="object-cover w-full h-full"
                     />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <p className="text-white font-medium text-center px-2">{item.caption}</p>
+                  </div>
+                  <div className="p-4">
+                    <p className="text-xs text-gray-500">{booking.date}</p>
+                    <h4 className="font-bold my-1">{booking.title}</h4>
+                    <p className="text-sm text-gray-600 mb-2">{booking.company}</p>
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Calendar className="mr-1.5 h-3 w-3" />
+                      <span>{booking.date} at {booking.time}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 flex justify-center">
-                <Button asChild variant="outline">
-                  <Link href="/admin/talentdashboard/portfolio/upload">
-                    <ImageIcon className="mr-2 h-4 w-4" /> Upload New Photos
-                  </Link>
-                </Button>
-              </div>
+                </div>
+              ))}
+              {upcomingBookings.length === 0 && (
+                <div className="text-center py-8 col-span-full">
+                  <p className="text-gray-500">You have no upcoming bookings.</p>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-                <Briefcase className="h-6 w-6 text-blue-500" />
-              </div>
-              <h3 className="text-lg font-bold mb-2">Find New Gigs</h3>
-              <p className="text-gray-600 mb-4">Browse available casting calls and job opportunities.</p>
-              <Button asChild className="w-full bg-black text-white hover:bg-black/90">
-                <Link href="/gigs">Browse Gigs</Link>
-              </Button>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center mb-4">
-                <Camera className="h-6 w-6 text-purple-500" />
-              </div>
-              <h3 className="text-lg font-bold mb-2">Update Portfolio</h3>
-              <p className="text-gray-600 mb-4">Add new photos and update your portfolio to showcase your best work.</p>
-              <Button asChild variant="outline" className="w-full">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Portfolio Highlights</h3>
+              <Button asChild variant="outline">
                 <Link href="/admin/talentdashboard/portfolio">Manage Portfolio</Link>
               </Button>
             </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-4">
-                <BarChart className="h-6 w-6 text-amber-500" />
-              </div>
-              <h3 className="text-lg font-bold mb-2">View Analytics</h3>
-              <p className="text-gray-600 mb-4">Track your profile views, application success rate, and earnings.</p>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/admin/talentdashboard/analytics">View Analytics</Link>
-              </Button>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {portfolioHighlights.map((item, index) => (
+                <div key={index} className="group relative rounded-xl overflow-hidden">
+                  <SafeImage
+                    src={item.image}
+                    alt={item.caption}
+                    width={300}
+                    height={400}
+                    placeholderQuery="portfolio image"
+                    className="object-cover w-full h-full aspect-[3/4] transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <p className="text-white font-medium text-sm">{item.caption}</p>
+                  </div>
+                </div>
+              ))}
+              {portfolioHighlights.length === 0 && (
+                <div className="text-center py-8 col-span-full">
+                  <p className="text-gray-500">Your portfolio is empty. Add some highlights!</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
     </RequireAuth>
   )
-}
+} 
