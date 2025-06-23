@@ -121,6 +121,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
+    // After signing out, we should manually clear the state and redirect
+    // to ensure a clean slate, preventing issues with stale sessions.
+    setUser(null)
+    setSession(null)
+    setUserRole(null)
+    setIsEmailVerified(false)
+    router.push("/login")
     return { error }
   }
 
