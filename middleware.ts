@@ -1,48 +1,61 @@
 import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import type { Database } from "@/types/database"
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+  const supabase = createMiddlewareClient<Database>({ req, res })
 
-  // Get the session
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  // Check if the user is authenticated
-  const isAuthenticated = !!session
-
-  // Get the URL path
   const path = req.nextUrl.pathname
 
-  // Define protected routes that require authentication
-  const protectedRoutes = ["/admin", "/talent/dashboard", "/client/dashboard"]
-  const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route))
+  // Public routes that do not require any specific handling
+  const publicRoutes = ["/"]
+  if (publicRoutes.includes(path)) {
+    return res
+  }
 
-  // Define auth routes (login, signup, etc.)
-  const authRoutes = ["/login", "/talent/signup", "/client/signup", "/choose-role"]
-  const isAuthRoute = authRoutes.some((route) => path === route)
+  // Auth routes that should redirect if the user is already logged in
+  const authRoutes = ["/login", "/talent/signup", "/client/signup"]
+  const isAuthRoute = authRoutes.includes(path)
 
-  // Redirect logic
-  if (isProtectedRoute && !isAuthenticated) {
-    // Redirect to login if trying to access protected route without authentication
+  if (isAuthRoute && session) {
+    // If the user is logged in and tries to access an auth page, redirect to their dashboard.
+    // The role-based redirect will be handled by the next block.
+    return NextResponse.redirect(new URL("/admin/talentdashboard", req.url))
+  }
+
+  // If there's no session, and the route is not public or auth-related, redirect to login
+  const isProtectedRoute = !isAuthRoute && !publicRoutes.includes(path) && path !== "/choose-role"
+
+  if (!session && isProtectedRoute) {
     const redirectUrl = new URL("/login", req.url)
-    redirectUrl.searchParams.set("returnUrl", encodeURIComponent(req.nextUrl.pathname))
+    redirectUrl.searchParams.set("returnUrl", encodeURIComponent(path))
     return NextResponse.redirect(redirectUrl)
   }
 
-  if (isAuthRoute && isAuthenticated) {
-    // Redirect to appropriate dashboard if already authenticated
+  // If we have a session, we can proceed with role checks
+  if (session) {
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
 
-    if (profile?.role === "talent") {
-      return NextResponse.redirect(new URL("/admin/talentdashboard", req.url))
-    } else if (profile?.role === "client") {
-      return NextResponse.redirect(new URL("/admin/dashboard", req.url))
-    } else if (profile?.role === "admin") {
-      return NextResponse.redirect(new URL("/admin/applications", req.url))
+    // If the user has a profile but no role, and is not already on the choose-role page, redirect them there.
+    if (!profile?.role && path !== "/choose-role") {
+      return NextResponse.redirect(new URL("/choose-role", req.url))
+    }
+
+    // If the user has a role, redirect them from the choose-role page to their dashboard.
+    if (profile?.role && path === "/choose-role") {
+      if (profile.role === "talent") {
+        return NextResponse.redirect(new URL("/admin/talentdashboard", req.url))
+      }
+      if (profile.role === "client") {
+        // Assuming there is a client dashboard route
+        return NextResponse.redirect(new URL("/client/dashboard", req.url))
+      }
     }
   }
 
@@ -51,12 +64,13 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/talent/dashboard/:path*",
-    "/client/dashboard/:path*",
-    "/login",
-    "/talent/signup",
-    "/client/signup",
-    "/choose-role",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - api/ (API routes)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|api).*)",
   ],
 }
