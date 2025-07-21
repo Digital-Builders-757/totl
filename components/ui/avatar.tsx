@@ -53,6 +53,7 @@ export interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageEleme
   asChild?: boolean;
 }
 
+// eslint-disable-next-line @next/next/no-img-element
 export function AvatarImage({ className, alt, ...props }: AvatarImageProps) {
   return (
     <img
