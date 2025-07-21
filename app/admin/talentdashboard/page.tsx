@@ -19,7 +19,7 @@ import { TalentDashboardClient } from "./talent-dashboard-client";
 import { EmailVerificationReminder } from "@/components/email-verification-reminder";
 import { RequireAuth } from "@/components/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,28 +35,28 @@ interface ApplicationWithGigAndClient {
   id: string;
   status: ApplicationStatus;
   created_at: string;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface BookingWithGigAndClient {
   id: string;
   date: string;
   compensation: number | null;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface PortfolioItemWithCaption {
@@ -156,11 +156,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => ["new", "under_review", "shortlisted"].includes(app.status))
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -169,11 +169,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "accepted")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -182,11 +182,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "rejected")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -196,8 +196,8 @@ export default async function TalentDashboard() {
   const upcomingBookings =
     bookingsData?.map((booking) => ({
       id: booking.id,
-      title: booking.gigs.title,
-      company: booking.gigs.clients?.company_name || "Private Client",
+      title: booking.gigs?.[0]?.title || "Unknown Gig",
+      company: booking.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
       date: new Date(booking.date).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -207,7 +207,7 @@ export default async function TalentDashboard() {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      location: booking.gigs.location,
+      location: booking.gigs?.[0]?.location || "Unknown Location",
       compensation: `$${booking.compensation}`,
       image: "/gig-jewelry.png",
     })) || [];
@@ -269,12 +269,13 @@ export default async function TalentDashboard() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center text-sm font-medium text-gray-700 hover:text-black">
-                      <Avatar
-                        src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                        alt={profileData?.first_name || "User"}
-                        size="sm"
-                        className="mr-2"
-                      />
+                      <Avatar className="mr-2 h-8 w-8">
+                        <AvatarImage
+                          src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                          alt={profileData?.first_name || "User"}
+                        />
+                        <AvatarFallback>{profileData?.first_name?.charAt(0) || "U"}</AvatarFallback>
+                      </Avatar>
                       <span className="hidden md:inline">
                         {profileData
                           ? `${profileData.first_name} ${profileData.last_name}`
@@ -442,7 +443,7 @@ export default async function TalentDashboard() {
 
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Application Overview</h3>
-            <TalentDashboardClient profileData={profileData} gigs={gigs} />
+            <TalentDashboardClient gigs={gigs} />
           </div>
 
           <div className="mb-8">
@@ -493,7 +494,7 @@ export default async function TalentDashboard() {
                 <div key={index} className="group relative rounded-xl overflow-hidden">
                   <SafeImage
                     src={item.image}
-                    alt={item.caption}
+                    alt={item.caption || "Portfolio image"}
                     width={300}
                     height={400}
                     placeholderQuery="portfolio image"

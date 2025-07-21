@@ -3,15 +3,7 @@ export type GigStatus = "draft" | "active" | "closed" | "featured" | "urgent";
 export type ApplicationStatus = "new" | "under_review" | "shortlisted" | "rejected" | "accepted";
 export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
 
-export interface User {
-  id: string;
-  email: string;
-  full_name: string;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
-}
-
+// Core user profile table linked to Supabase Auth
 export interface Profile {
   id: string;
   role: UserRole;
@@ -22,6 +14,7 @@ export interface Profile {
   email_verified?: boolean;
 }
 
+// Extended profile information for talent users
 export interface TalentProfile {
   id: string;
   user_id: string;
@@ -42,6 +35,7 @@ export interface TalentProfile {
   updated_at: string;
 }
 
+// Extended profile information for client users
 export interface ClientProfile {
   id: string;
   user_id: string;
@@ -56,6 +50,7 @@ export interface ClientProfile {
   updated_at: string;
 }
 
+// Job opportunities posted by clients
 export interface Gig {
   id: string;
   client_id: string;
@@ -65,15 +60,16 @@ export interface Gig {
   location: string;
   compensation: string;
   duration: string;
-  date: string;
+  date: string; // This is actually a date in DB, but we'll keep as string for API compatibility
   application_deadline?: string;
   status: GigStatus;
   image_url?: string;
-  search_vector?: any;
+  search_vector?: unknown; // tsvector in DB, but unknown for TypeScript compatibility
   created_at: string;
   updated_at: string;
 }
 
+// Specific requirements for each gig
 export interface GigRequirement {
   id: string;
   gig_id: string;
@@ -81,6 +77,7 @@ export interface GigRequirement {
   created_at?: string;
 }
 
+// Applications submitted by talent for gigs
 export interface Application {
   id: string;
   gig_id: string;
@@ -91,6 +88,7 @@ export interface Application {
   updated_at: string;
 }
 
+// Applications from potential clients to join the platform
 export interface ClientApplication {
   id: string;
   first_name: string;
@@ -102,42 +100,16 @@ export interface ClientApplication {
   website?: string;
   business_description: string;
   needs_description: string;
-  status: string;
+  status: string; // Defaults to 'pending' in DB
   admin_notes?: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface Booking {
-  id: string;
-  gig_id: string;
-  talent_id: string;
-  status: BookingStatus;
-  compensation?: number;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PortfolioItem {
-  id: string;
-  talent_id: string;
-  title: string;
-  description?: string;
-  image_url: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// Database schema type
+// Database schema type - ONLY includes tables that actually exist in the database
 export interface Database {
   public: {
     Tables: {
-      users: {
-        Row: User;
-        Insert: Omit<User, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<User, "id">>;
-      };
       profiles: {
         Row: Profile;
         Insert: Omit<Profile, "id" | "created_at" | "updated_at">;
@@ -173,16 +145,38 @@ export interface Database {
         Insert: Omit<ClientApplication, "id" | "created_at" | "updated_at">;
         Update: Partial<Omit<ClientApplication, "id">>;
       };
-      bookings: {
-        Row: Booking;
-        Insert: Omit<Booking, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<Booking, "id">>;
-      };
-      portfolio_items: {
-        Row: PortfolioItem;
-        Insert: Omit<PortfolioItem, "id" | "created_at" | "updated_at">;
-        Update: Partial<Omit<PortfolioItem, "id">>;
-      };
     };
   };
+}
+
+// Legacy interfaces for backward compatibility (deprecated)
+// These tables don't exist in the actual database schema
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Booking {
+  id: string;
+  gig_id: string;
+  talent_id: string;
+  status: BookingStatus;
+  compensation?: number;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PortfolioItem {
+  id: string;
+  talent_id: string;
+  title: string;
+  description?: string;
+  image_url: string;
+  created_at: string;
+  updated_at: string;
 }

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Database } from "@/lib/database.types";
+import type { Database } from "@/types/database";
 
 // FIXED: Using explicit column selection and avoiding aggregates
 
