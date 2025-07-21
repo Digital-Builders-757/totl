@@ -170,10 +170,10 @@ export default async function TalentDashboard() {
         ?.filter((app) => app.status === "accepted")
         .map((app) => ({
           id: parseInt(app.id) || 0,
-          gigId: parseInt(app.gigs.id) || 0,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -183,10 +183,10 @@ export default async function TalentDashboard() {
         ?.filter((app) => app.status === "rejected")
         .map((app) => ({
           id: parseInt(app.id) || 0,
-          gigId: parseInt(app.gigs.id) || 0,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -196,8 +196,8 @@ export default async function TalentDashboard() {
   const upcomingBookings =
     bookingsData?.map((booking) => ({
       id: booking.id,
-      title: booking.gigs.title,
-      company: booking.gigs.clients?.company_name || "Private Client",
+      title: booking.gigs?.[0]?.title || "Unknown Gig",
+      company: booking.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
       date: new Date(booking.date).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -207,7 +207,7 @@ export default async function TalentDashboard() {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      location: booking.gigs.location,
+      location: booking.gigs?.[0]?.location || "Unknown Location",
       compensation: `$${booking.compensation}`,
       image: "/gig-jewelry.png",
     })) || [];
@@ -443,7 +443,7 @@ export default async function TalentDashboard() {
 
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Application Overview</h3>
-            <TalentDashboardClient profileData={profileData} gigs={gigs} />
+            <TalentDashboardClient gigs={gigs} />
           </div>
 
           <div className="mb-8">
