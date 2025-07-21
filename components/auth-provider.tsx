@@ -36,14 +36,38 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClientComponentClient<Database>();
+// Fallback auth provider when Supabase is not configured
+function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthContext.Provider
+      value={{
+        supabase: null as unknown as SupabaseClient<Database>,
+        user: null,
+        session: null,
+        userRole: null,
+        isLoading: false,
+        isEmailVerified: false,
+        signIn: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signUp: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signOut: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        sendVerificationEmail: async () => ({ error: new Error("Supabase not configured") }),
+        resetPassword: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Main auth provider with Supabase functionality
+function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
+  const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
     // This immediately handles the initial session check, and the listener will take over from there.
@@ -213,6 +237,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// Main AuthProvider that chooses between Supabase and fallback
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Check if Supabase environment variables are available
+  const hasSupabaseConfig =
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!hasSupabaseConfig) {
+    console.warn("Supabase environment variables not found - using fallback auth provider");
+    return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
+  }
+
+  return <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
+}
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -240,5 +278,3 @@ export function useSupabaseStatus() {
 
   return { isSupabaseConnected, checkConnection };
 }
-
-

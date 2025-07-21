@@ -1,5 +1,8 @@
 "use client";
 
+// Force dynamic rendering to prevent build-time Supabase access
+export const dynamic = "force-dynamic";
+
 import { Star, MapPin, Calendar, Users, Briefcase, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
