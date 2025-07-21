@@ -63,7 +63,7 @@ export async function GET() {
         exists: false,
         tables: [],
         hasUsersTable: false,
-        error: "Server error: " + error.message,
+        error: "Server error: " + (error instanceof Error ? error.message : "Unknown error"),
       },
       { status: 500 }
     );

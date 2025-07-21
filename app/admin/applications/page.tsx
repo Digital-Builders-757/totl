@@ -89,7 +89,8 @@ export default function AdminApplicationsPage() {
             website, 
             status, 
             admin_notes, 
-            created_at
+            created_at,
+            updated_at
           `
           )
           .order("created_at", { ascending: false });

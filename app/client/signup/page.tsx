@@ -55,7 +55,13 @@ export default function ClientSignup() {
 
     try {
       // Register the user with Supabase Auth
-      const { error } = await signUp(formData.email, formData.password, "client");
+      const { error } = await signUp(formData.email, formData.password, {
+        data: {
+          role: "client",
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+        },
+      });
 
       if (error) {
         toast({

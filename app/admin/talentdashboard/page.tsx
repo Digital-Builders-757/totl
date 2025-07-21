@@ -19,7 +19,7 @@ import { TalentDashboardClient } from "./talent-dashboard-client";
 import { EmailVerificationReminder } from "@/components/email-verification-reminder";
 import { RequireAuth } from "@/components/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -269,12 +269,13 @@ export default async function TalentDashboard() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center text-sm font-medium text-gray-700 hover:text-black">
-                      <Avatar
-                        src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                        alt={profileData?.first_name || "User"}
-                        size="sm"
-                        className="mr-2"
-                      />
+                      <Avatar className="mr-2 h-8 w-8">
+                        <AvatarImage
+                          src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                          alt={profileData?.first_name || "User"}
+                        />
+                        <AvatarFallback>{profileData?.first_name?.charAt(0) || "U"}</AvatarFallback>
+                      </Avatar>
                       <span className="hidden md:inline">
                         {profileData
                           ? `${profileData.first_name} ${profileData.last_name}`
@@ -493,7 +494,7 @@ export default async function TalentDashboard() {
                 <div key={index} className="group relative rounded-xl overflow-hidden">
                   <SafeImage
                     src={item.image}
-                    alt={item.caption}
+                    alt={item.caption || "Portfolio image"}
                     width={300}
                     height={400}
                     placeholderQuery="portfolio image"
