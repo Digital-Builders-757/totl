@@ -36,23 +36,25 @@ interface ProfessionalInfoFormData {
 
 // Helper function to convert TalentProfile to PersonalInfoFormData
 const mapTalentProfileToPersonalInfo = (profile: TalentProfile): Partial<PersonalInfoFormData> => ({
-  phone: profile.phone || "",
-  age: profile.age?.toString() || "",
-  location: profile.location || "",
-  height: profile.height || "",
+  phone: "", // Not in TalentProfile anymore
+  age: "", // Not in TalentProfile anymore
+  location: "", // Not in TalentProfile anymore
+  height: profile.height?.toString() || "",
   measurements: profile.measurements || "",
-  hairColor: profile.hair_color || "",
-  eyeColor: profile.eye_color || "",
-  shoeSize: profile.shoe_size || "",
-  languages: profile.languages || ["English"],
+  hairColor: "", // Not in TalentProfile anymore
+  eyeColor: "", // Not in TalentProfile anymore
+  shoeSize: "", // Not in TalentProfile anymore
+  languages: ["English"], // Not in TalentProfile anymore
   instagram: "", // Not in TalentProfile, will be empty
 });
 
 // Helper function to convert TalentProfile to ProfessionalInfoFormData
-const mapTalentProfileToProfessionalInfo = (profile: TalentProfile): Partial<ProfessionalInfoFormData> => ({
-  experience: profile.experience || "",
+const mapTalentProfileToProfessionalInfo = (
+  profile: TalentProfile
+): Partial<ProfessionalInfoFormData> => ({
+  experience: profile.experience_years?.toString() || "",
   portfolio: profile.portfolio_url || "",
-  specialties: "", // Not in TalentProfile, will be empty
+  specialties: profile.specialties?.join(", ") || "",
   achievements: "", // Not in TalentProfile, will be empty
   availability: "", // Not in TalentProfile, will be empty
 });
@@ -114,8 +116,8 @@ export default function TalentProfilePage() {
   const isProfileComplete = () => {
     if (!profileData) return false;
 
-    const requiredPersonalFields: (keyof TalentProfile)[] = ["phone", "age", "location"];
-    const requiredProfessionalFields: (keyof TalentProfile)[] = ["experience"];
+    const requiredPersonalFields: (keyof TalentProfile)[] = ["height", "weight"];
+    const requiredProfessionalFields: (keyof TalentProfile)[] = ["experience_years"];
 
     const hasRequiredPersonal = requiredPersonalFields.every((field) => !!profileData[field]);
     const hasRequiredProfessional = requiredProfessionalFields.every(
@@ -164,7 +166,9 @@ export default function TalentProfilePage() {
                   </div>
                 ) : (
                   <TalentPersonalInfoForm
-                    initialData={profileData ? mapTalentProfileToPersonalInfo(profileData) : undefined}
+                    initialData={
+                      profileData ? mapTalentProfileToPersonalInfo(profileData) : undefined
+                    }
                     onSaved={handleProfileUpdate}
                   />
                 )}
@@ -179,7 +183,9 @@ export default function TalentProfilePage() {
                   </div>
                 ) : (
                   <TalentProfessionalInfoForm
-                    initialData={profileData ? mapTalentProfileToProfessionalInfo(profileData) : undefined}
+                    initialData={
+                      profileData ? mapTalentProfileToProfessionalInfo(profileData) : undefined
+                    }
                     onSaved={handleProfileUpdate}
                   />
                 )}

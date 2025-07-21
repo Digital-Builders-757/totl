@@ -24,16 +24,16 @@ fi
 
 echo "✅ types/database.ts exists"
 
-# Check for any 'any' types in database-related files
-echo "🔍 Checking for 'any' types in database code..."
-ANY_COUNT=$(grep -r "any" types/database.ts lib/ app/ --include="*.ts" --include="*.tsx" | wc -l)
+# Check for TypeScript 'any' types in database-related files
+echo "🔍 Checking for TypeScript 'any' types in database code..."
+ANY_COUNT=$(grep -r ": any" types/database.ts lib/ app/ --include="*.ts" --include="*.tsx" | wc -l)
 
 if [ $ANY_COUNT -gt 0 ]; then
-    echo "⚠️  WARNING: Found $ANY_COUNT instances of 'any' type in database code"
+    echo "⚠️  WARNING: Found $ANY_COUNT instances of TypeScript 'any' type in database code"
     echo "   Consider replacing with proper types from database_schema_audit.md"
-    grep -r "any" types/database.ts lib/ app/ --include="*.ts" --include="*.tsx"
+    grep -r ": any" types/database.ts lib/ app/ --include="*.ts" --include="*.tsx"
 else
-    echo "✅ No 'any' types found in database code"
+    echo "✅ No TypeScript 'any' types found in database code"
 fi
 
 # Check TypeScript compilation

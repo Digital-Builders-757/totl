@@ -67,9 +67,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
+
   const supabase = createClientComponentClient<Database>();
 
   useEffect(() => {
+    // Prevent initialization during static generation
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
+
     // This immediately handles the initial session check, and the listener will take over from there.
     const initialSession = async () => {
       const {
@@ -86,12 +93,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       // If there is a session, proceed to set user and fetch profile
       setUser(session.user);
-      const { data: profile } = await supabase
-        .from("profiles")
+      const { data: userData } = await supabase
+        .from("users")
         .select("role")
         .eq("id", session.user.id)
         .single();
-      const role = profile?.role as UserRole;
+      const role = userData?.role as UserRole;
       setUserRole(role);
       setIsLoading(false); // Stop loading after initial fetch
     };
@@ -106,13 +113,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (event === "SIGNED_IN" && session) {
-        const { data: profile } = await supabase
-          .from("profiles")
+        const { data: userData } = await supabase
+          .from("users")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
-        const role = profile?.role as UserRole;
+        const role = userData?.role as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
 
@@ -239,12 +246,18 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
 // Main AuthProvider that chooses between Supabase and fallback
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Check if Supabase environment variables are available
+  // Check if we're in a browser environment and if Supabase environment variables are available
+  const isBrowser = typeof window !== "undefined";
   const hasSupabaseConfig =
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!hasSupabaseConfig) {
-    console.warn("Supabase environment variables not found - using fallback auth provider");
+  // During static generation or if no config, use fallback
+  if (!isBrowser || !hasSupabaseConfig) {
+    if (!isBrowser) {
+      console.warn("AuthProvider: Static generation detected - using fallback auth provider");
+    } else if (!hasSupabaseConfig) {
+      console.warn("Supabase environment variables not found - using fallback auth provider");
+    }
     return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
   }
 
@@ -265,7 +278,7 @@ export function useSupabaseStatus() {
   const checkConnection = async () => {
     try {
       const supabaseAdmin = createSupabaseAdminClient();
-      const { error } = await supabaseAdmin.from("profiles").select("id").limit(1);
+      const { error } = await supabaseAdmin.from("users").select("id").limit(1);
 
       if (error) {
         throw error;
