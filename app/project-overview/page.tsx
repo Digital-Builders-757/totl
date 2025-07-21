@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function ProjectOverview() {
   return (
@@ -10,7 +10,8 @@ export default function ProjectOverview() {
           <div className="mb-12 text-center">
             <h1 className="text-4xl font-bold mb-4">TOTL Agency Project Overview</h1>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              Use this page to navigate between different parts of the application during your presentation.
+              Use this page to navigate between different parts of the application during your
+              presentation.
             </p>
           </div>
 
@@ -18,7 +19,9 @@ export default function ProjectOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Client Dashboard</CardTitle>
-                <CardDescription>View the client dashboard with gigs and applications</CardDescription>
+                <CardDescription>
+                  View the client dashboard with gigs and applications
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full bg-black text-white hover:bg-black/90">
@@ -30,7 +33,9 @@ export default function ProjectOverview() {
             <Card>
               <CardHeader>
                 <CardTitle>Talent Dashboard</CardTitle>
-                <CardDescription>View the talent dashboard with portfolio and bookings</CardDescription>
+                <CardDescription>
+                  View the talent dashboard with portfolio and bookings
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full bg-black text-white hover:bg-black/90">
@@ -128,5 +133,5 @@ export default function ProjectOverview() {
         </div>
       </div>
     </div>
-  )
+  );
 }

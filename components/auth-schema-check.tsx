@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from "lucide-react"
+import { CheckCircle, XCircle, AlertTriangle, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AuthSchemaCheck() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   const [authSchemaStatus, setAuthSchemaStatus] = useState<{
-    exists: boolean
-    tables: string[]
-    hasUsersTable: boolean
-    error?: string
+    exists: boolean;
+    tables: string[];
+    hasUsersTable: boolean;
+    error?: string;
   }>({
     exists: false,
     tables: [],
     hasUsersTable: false,
-  })
+  });
 
   const checkAuthSchema = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // Use server action to check auth schema with service role key
@@ -29,35 +29,35 @@ export default function AuthSchemaCheck() {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Error checking auth schema: ${response.statusText}`)
+        throw new Error(`Error checking auth schema: ${response.statusText}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
       setAuthSchemaStatus({
         exists: data.exists,
         tables: data.tables || [],
         hasUsersTable: data.hasUsersTable,
         error: data.error,
-      })
+      });
     } catch (e) {
-      console.error("Error checking auth schema:", e)
+      console.error("Error checking auth schema:", e);
       setAuthSchemaStatus({
         exists: false,
         tables: [],
         hasUsersTable: false,
         error: e.message,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    checkAuthSchema()
-  }, [])
+    checkAuthSchema();
+  }, []);
 
   return (
     <Card className="w-full">
@@ -74,7 +74,9 @@ export default function AuthSchemaCheck() {
             <XCircle className="h-5 w-5 text-red-500" />
           )}
         </CardTitle>
-        <CardDescription>Checking the status of your Supabase auth schema using service role key</CardDescription>
+        <CardDescription>
+          Checking the status of your Supabase auth schema using service role key
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -148,15 +150,18 @@ export default function AuthSchemaCheck() {
                 <p className="text-sm mt-1">
                   {!authSchemaStatus.exists ? (
                     <span className="text-red-600">
-                      The auth schema is missing. Contact Supabase support to reset your auth schema.
+                      The auth schema is missing. Contact Supabase support to reset your auth
+                      schema.
                     </span>
                   ) : !authSchemaStatus.hasUsersTable ? (
                     <span className="text-red-600">
-                      The users table is missing from the auth schema. Contact Supabase support to reset your auth
-                      schema.
+                      The users table is missing from the auth schema. Contact Supabase support to
+                      reset your auth schema.
                     </span>
                   ) : (
-                    <span className="text-green-600">Auth schema appears to be properly configured.</span>
+                    <span className="text-green-600">
+                      Auth schema appears to be properly configured.
+                    </span>
                   )}
                 </p>
               </div>
@@ -169,5 +174,5 @@ export default function AuthSchemaCheck() {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

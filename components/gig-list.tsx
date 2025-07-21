@@ -1,41 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Gig } from "@/types/database"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Calendar, MapPin, DollarSign } from "lucide-react"
-import { format } from "date-fns"
+import { format } from "date-fns";
+import { Calendar, MapPin, DollarSign } from "lucide-react";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Gig } from "@/types/database";
 
 interface GigListProps {
-  gigs: Gig[]
-  onGigClick?: (gig: Gig) => void
-  showApplyButton?: boolean
+  gigs: Gig[];
+  onGigClick?: (gig: Gig) => void;
+  showApplyButton?: boolean;
 }
 
 export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListProps) {
-  const [selectedGig, setSelectedGig] = useState<Gig | null>(null)
+  const [selectedGig, setSelectedGig] = useState<Gig | null>(null);
 
   const handleGigClick = (gig: Gig) => {
-    setSelectedGig(gig)
-    onGigClick?.(gig)
-  }
+    setSelectedGig(gig);
+    onGigClick?.(gig);
+  };
 
   const getStatusColor = (status: Gig["status"]) => {
     switch (status) {
       case "published":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "draft":
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
       case "closed":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       case "completed":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -71,8 +71,8 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
                   {gig.compensation_min && gig.compensation_max
                     ? `$${gig.compensation_min} - $${gig.compensation_max}`
                     : gig.compensation_min
-                    ? `From $${gig.compensation_min}`
-                    : `Up to $${gig.compensation_max}`}
+                      ? `From $${gig.compensation_min}`
+                      : `Up to $${gig.compensation_max}`}
                 </div>
               )}
             </div>
@@ -96,5 +96,5 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
         </Card>
       ))}
     </div>
-  )
-} 
+  );
+}

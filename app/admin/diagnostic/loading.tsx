@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react";
 
 export default function Loading() {
   return (
@@ -8,5 +8,5 @@ export default function Loading() {
         <p className="mt-4 text-lg text-gray-600">Loading diagnostic tools...</p>
       </div>
     </div>
-  )
+  );
 }

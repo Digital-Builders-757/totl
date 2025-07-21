@@ -1,33 +1,29 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react"
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useAuth } from "@/components/auth-provider"
-import { useToast } from "@/components/ui/use-toast"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import type { Database } from "@/types/supabase"
+import { ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const router = useRouter()
-  const { signIn } = useAuth()
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const returnUrl = searchParams.get("returnUrl")
-  const verified = searchParams.get("verified") === "true"
-  const supabase = createClientComponentClient<Database>()
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const { signIn } = useAuth();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
+  const verified = searchParams.get("verified") === "true";
 
   useEffect(() => {
     if (verified) {
@@ -35,63 +31,63 @@ export default function Login() {
         title: "Email verified successfully!",
         description: "You can now log in to your account.",
         variant: "default",
-      })
+      });
     }
-  }, [verified, toast])
+  }, [verified, toast]);
 
   const validateForm = () => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      errors.email = "Email is required"
+      errors.email = "Email is required";
     } else if (!emailRegex.test(email)) {
-      errors.email = "Please enter a valid email address"
+      errors.email = "Please enter a valid email address";
     }
 
     // Validate password
     if (!password) {
-      errors.password = "Password is required"
+      errors.password = "Password is required";
     }
 
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     // Validate form before submission
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsLoading(true)
-    setFormErrors({}) // Clear any existing errors
+    setIsLoading(true);
+    setFormErrors({}); // Clear any existing errors
 
     try {
-      const { error } = await signIn(email, password)
+      const { error } = await signIn(email, password);
 
       if (error) {
-        console.error("Login error:", error)
+        console.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
           setFormErrors({
             auth: "Invalid email or password. Please try again.",
-          })
+          });
         } else if (error.message.includes("Email not confirmed")) {
           setFormErrors({
             auth: "Please verify your email address before signing in.",
-          })
+          });
         } else {
           toast({
             title: "Error signing in",
             description: error.message,
             variant: "destructive",
-          })
+          });
         }
-        setIsLoading(false)
-        return
+        setIsLoading(false);
+        return;
       }
 
       // The AuthProvider will handle the redirect after it processes the new session.
@@ -100,19 +96,19 @@ export default function Login() {
       toast({
         title: "Signed in successfully!",
         description: "Redirecting to your dashboard...",
-      })
+      });
 
       // The redirect is now handled by the AuthProvider's onAuthStateChange listener
     } catch (error) {
-      console.error("Login error:", error)
+      console.error("Login error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
-      setIsLoading(false)
+      });
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -140,7 +136,9 @@ export default function Login() {
               <Alert className="bg-green-50 border-green-200 mb-6">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle className="text-green-800">Email verified successfully!</AlertTitle>
-                <AlertDescription className="text-green-700">You can now log in to your account.</AlertDescription>
+                <AlertDescription className="text-green-700">
+                  You can now log in to your account.
+                </AlertDescription>
               </Alert>
             )}
 
@@ -161,20 +159,28 @@ export default function Login() {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => {
-                    setEmail(e.target.value)
+                    setEmail(e.target.value);
                     if (formErrors.email) {
-                      const { email, ...rest } = formErrors
-                      setFormErrors(rest)
+                      setFormErrors((prev) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { email: _, ...rest } = prev;
+                        return rest;
+                      });
                     }
                     if (formErrors.auth) {
-                      const { auth, ...rest } = formErrors
-                      setFormErrors(rest)
+                      setFormErrors((prev) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        const { auth: _, ...rest } = prev;
+                        return rest;
+                      });
                     }
                   }}
                   required
                   className={formErrors.email ? "border-red-500" : ""}
                 />
-                {formErrors.email && <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>}
+                {formErrors.email && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -193,14 +199,20 @@ export default function Login() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => {
-                      setPassword(e.target.value)
+                      setPassword(e.target.value);
                       if (formErrors.password) {
-                        const { password, ...rest } = formErrors
-                        setFormErrors(rest)
+                        setFormErrors((prev) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                          const { password: _, ...rest } = prev;
+                          return rest;
+                        });
                       }
                       if (formErrors.auth) {
-                        const { auth, ...rest } = formErrors
-                        setFormErrors(rest)
+                        setFormErrors((prev) => {
+                          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                          const { auth: _, ...rest } = prev;
+                          return rest;
+                        });
                       }
                     }}
                     required
@@ -214,10 +226,16 @@ export default function Login() {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {formErrors.password && <p className="text-sm text-red-500 mt-1">{formErrors.password}</p>}
+                {formErrors.password && (
+                  <p className="text-sm text-red-500 mt-1">{formErrors.password}</p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-black text-white hover:bg-black/90"
+                disabled={isLoading}
+              >
                 {isLoading ? "Signing in..." : "Sign In"}
               </Button>
             </form>
@@ -251,5 +269,5 @@ export default function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }

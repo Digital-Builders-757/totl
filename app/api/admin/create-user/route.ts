@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server"
-import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
+import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, firstName, lastName, role } = await request.json()
+    const { email, password, firstName, lastName, role } = await request.json();
 
     if (!email || !password || !firstName || !lastName || !role) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdminClient()
+    const supabase = createSupabaseAdminClient();
 
     // Step 1: Create auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
@@ -21,11 +21,11 @@ export async function POST(request: Request) {
         last_name: lastName,
         role,
       },
-    })
+    });
 
     if (authError) {
-      console.error("Auth user creation failed:", authError)
-      return NextResponse.json({ error: authError.message }, { status: 500 })
+      console.error("Auth user creation failed:", authError);
+      return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
     // Step 2: Create profile record
@@ -39,10 +39,10 @@ export async function POST(request: Request) {
         email_verified: true,
         updated_at: new Date().toISOString(),
       },
-    ])
+    ]);
 
     if (profileError) {
-      console.error("Profile creation failed:", profileError)
+      console.error("Profile creation failed:", profileError);
       // Continue anyway since the auth user was created
     }
 
@@ -54,16 +54,16 @@ export async function POST(request: Request) {
           first_name: firstName,
           last_name: lastName,
         },
-      ])
+      ]);
 
       if (talentError) {
-        console.error("Talent profile creation failed:", talentError)
+        console.error("Talent profile creation failed:", talentError);
       }
     }
 
-    return NextResponse.json({ success: true, user: authData.user }, { status: 200 })
+    return NextResponse.json({ success: true, user: authData.user }, { status: 200 });
   } catch (error) {
-    console.error("Error creating user:", error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error("Error creating user:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

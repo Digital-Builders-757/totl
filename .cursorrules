@@ -1,0 +1,103 @@
+# TOTL Agency - Cursor AI Assistant Rules
+
+## 🎯 MANDATORY CONTEXT REFERENCE
+
+**BEFORE WRITING ANY CODE, YOU MUST:**
+
+1. **READ** `TOTL_PROJECT_CONTEXT_PROMPT.md` completely
+2. **CHECK** `supabase/migrations/` for current database schema
+3. **VERIFY** RLS policies in the context file
+4. **USE** generated types from `types/database.ts` (NO `any` types)
+5. **FOLLOW** established project structure and naming conventions
+
+## 📋 PROJECT OVERVIEW
+
+**TOTL Agency** - Talent booking platform connecting models/actors with casting directors/brands
+
+**Tech Stack:**
+- Next.js 15.2.4 + App Router + TypeScript 5
+- Supabase (PostgreSQL + Auth + Storage + Real-time)
+- TailwindCSS + shadcn/ui components
+- Resend API for custom emails
+
+**Database:** PostgreSQL with RLS policies on all tables
+**Auth:** Supabase Auth with role-based access (talent/client/admin)
+**Key Tables:** profiles, talent_profiles, client_profiles, gigs, applications, bookings, portfolio_items
+
+## 📋 PROJECT CONTEXT SUMMARY
+
+**Tech Stack:** Next.js 15.2.4 + Supabase + TypeScript + shadcn/ui
+**Database:** PostgreSQL with RLS policies on all tables
+**Auth:** Supabase Auth with role-based access (talent/client/admin)
+**Key Tables:** profiles, talent_profiles, client_profiles, gigs, applications, bookings, portfolio_items
+**Security:** Row-level security enforced, no service keys in client code
+**Architecture:** Server components for data fetching, presentational components only
+
+## ✅ COMPLIANCE CHECKLIST
+
+Before generating any code, ensure:
+- [ ] Referenced `TOTL_PROJECT_CONTEXT_PROMPT.md` for complete context
+- [ ] Used proper TypeScript types (no `any`)
+- [ ] Followed RLS-compatible query patterns
+- [ ] Separated database logic from React components
+- [ ] Used centralized Supabase clients (`lib/supabase-client.ts`)
+- [ ] Implemented proper error handling
+- [ ] Followed project naming conventions
+
+## 🏗️ ARCHITECTURE RULES
+
+### Database Access
+- Use `lib/supabase-client.ts` for client-side queries
+- Use `lib/supabase-admin-client.ts` for server-side admin operations
+- Always assume RLS is active - never bypass security policies
+- Use generated types from `types/database.ts`
+
+### Component Structure
+- React components should be presentational only
+- No direct database calls in components
+- Use server components for data fetching
+- Pass data as props to client components
+
+### Authentication & Authorization
+- Use `@supabase/auth-helpers-nextjs` for session management
+- Check user roles before allowing actions
+- Use middleware for route protection
+- Implement proper error handling for auth failures
+
+### Security Best Practices
+- Never expose service keys in client code
+- Always validate user permissions before data access
+- Use parameterized queries (Supabase handles this)
+- Follow least privilege principle
+
+## 🚫 FORBIDDEN PATTERNS
+
+- Using `any` types in TypeScript
+- Direct database calls in React components
+- Bypassing RLS policies
+- Exposing service keys to client
+- Mixing database logic with UI logic
+- Using raw SQL instead of Supabase query builder
+
+## 📁 CRITICAL FILES TO REFERENCE
+
+- `TOTL_PROJECT_CONTEXT_PROMPT.md` - Complete project context
+- `types/database.ts` - Generated Supabase types
+- `supabase/migrations/` - Database schema history
+- `lib/supabase-client.ts` - Client configuration
+- `middleware.ts` - Route protection logic
+- `components/auth-provider.tsx` - Authentication context
+
+## 🔄 WHEN TO APPLY
+
+This rule applies to:
+- All code generation for this project
+- Database schema changes or migrations
+- New feature development
+- Bug fixes or refactoring
+- API route creation or modification
+- Component creation or updates
+
+---
+
+**Remember: Always reference the full context file before writing any code. This ensures consistency, security, and proper architecture compliance.** 

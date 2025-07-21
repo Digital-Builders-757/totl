@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GigSuccessLoading() {
   return (
@@ -48,5 +48,5 @@ export default function GigSuccessLoading() {
         <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     </div>
-  )
+  );
 }

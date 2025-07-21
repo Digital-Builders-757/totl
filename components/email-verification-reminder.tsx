@@ -1,66 +1,71 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "@/components/auth-provider"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 export function EmailVerificationReminder() {
-  const { user, isEmailVerified, sendVerificationEmail } = useAuth()
-  const [isSending, setIsSending] = useState(false)
-  const [justSent, setJustSent] = useState(false)
-  const { toast } = useToast()
+  const { user, isEmailVerified, sendVerificationEmail } = useAuth();
+  const [isSending, setIsSending] = useState(false);
+  const [justSent, setJustSent] = useState(false);
+  const { toast } = useToast();
 
   if (!user || isEmailVerified) {
-    return null
+    return null;
   }
 
   const handleResend = async () => {
-    setIsSending(true)
+    setIsSending(true);
 
     try {
-      const { error } = await sendVerificationEmail()
+      const { error } = await sendVerificationEmail();
 
       if (error) {
         toast({
           title: "Error",
           description: error.message,
           variant: "destructive",
-        })
+        });
       } else {
-        setJustSent(true)
+        setJustSent(true);
         toast({
           title: "Email sent",
           description: "Verification email has been sent to your inbox",
-        })
+        });
 
         // Reset the "just sent" state after 30 seconds
         setTimeout(() => {
-          setJustSent(false)
-        }, 30000)
+          setJustSent(false);
+        }, 30000);
       }
     } catch (error) {
-      console.error("Error sending verification email:", error)
+      console.error("Error sending verification email:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   return (
-    <Alert className={justSent ? "bg-green-50 border-green-200 mb-6" : "bg-amber-50 border-amber-200 mb-6"}>
+    <Alert
+      className={
+        justSent ? "bg-green-50 border-green-200 mb-6" : "bg-amber-50 border-amber-200 mb-6"
+      }
+    >
       {justSent ? (
         <>
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           <AlertTitle className="text-green-800">Email sent!</AlertTitle>
           <AlertDescription className="text-green-700">
-            We've sent a verification email to {user.email}. Please check your inbox and click the verification link.
+            We&apos;ve sent a verification email to {user.email}. Please check your inbox and click the
+            verification link.
           </AlertDescription>
         </>
       ) : (
@@ -82,5 +87,5 @@ export function EmailVerificationReminder() {
         </>
       )}
     </Alert>
-  )
+  );
 }

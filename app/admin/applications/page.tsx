@@ -1,15 +1,6 @@
-"use client"
+"use client";
 
-import { Label } from "@/components/ui/label"
-
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Search,
   MoreVertical,
@@ -22,12 +13,13 @@ import {
   LogOut,
   Bell,
   UserIcon,
-} from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
-import { useAuth } from "@/components/auth-provider"
-import { useRouter } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
-import { approveClientApplication, rejectClientApplication } from "@/lib/actions/client-actions"
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -35,42 +27,56 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import type { Database } from "@/types/supabase"
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"]
+import { SafeImage } from "@/components/ui/safe-image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { approveClientApplication, rejectClientApplication } from "@/lib/actions/client-actions";
+import type { Database } from "@/types/supabase";
+
+type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"];
 
 export default function AdminApplicationsPage() {
-  const [activeTab, setActiveTab] = useState("pending")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [applications, setApplications] = useState<ClientApplication[]>([])
-  const [filteredApplications, setFilteredApplications] = useState<ClientApplication[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedApplication, setSelectedApplication] = useState<ClientApplication | null>(null)
-  const [adminNotes, setAdminNotes] = useState("")
-  const [showApproveDialog, setShowApproveDialog] = useState(false)
-  const [showRejectDialog, setShowRejectDialog] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [activeTab, setActiveTab] = useState("pending");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [applications, setApplications] = useState<ClientApplication[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<ClientApplication[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedApplication, setSelectedApplication] = useState<ClientApplication | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [showApproveDialog, setShowApproveDialog] = useState(false);
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const { user, userRole } = useAuth()
-  const router = useRouter()
-  const { toast } = useToast()
-  const supabase = createClientComponentClient<Database>()
+  const { user, userRole } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const supabase = createClientComponentClient<Database>();
 
   // Fetch applications on component mount
   useEffect(() => {
     const fetchApplications = async () => {
       if (!user || userRole !== "admin") {
-        router.push("/login")
-        return
+        router.push("/login");
+        return;
       }
 
       try {
         // FIXED: Explicit column selection, no aggregates
         const { data, error } = await supabase
           .from("client_applications")
-          .select(`
+          .select(
+            `
             id, 
             first_name, 
             last_name, 
@@ -84,149 +90,154 @@ export default function AdminApplicationsPage() {
             status, 
             admin_notes, 
             created_at
-          `)
-          .order("created_at", { ascending: false })
+          `
+          )
+          .order("created_at", { ascending: false });
 
         if (error) {
-          throw error
+          throw error;
         }
 
-        setApplications(data || [])
-        setIsLoading(false)
+        setApplications(data || []);
+        setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching applications:", error)
+        console.error("Error fetching applications:", error);
         toast({
           title: "Error",
           description: "Failed to load applications. Please try again.",
           variant: "destructive",
-        })
-        setIsLoading(false)
+        });
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchApplications()
-  }, [user, userRole, router, toast, supabase])
+    fetchApplications();
+  }, [user, userRole, router, toast, supabase]);
 
   // Filter applications based on search query and active tab
   useEffect(() => {
     if (!applications.length) {
-      setFilteredApplications([])
-      return
+      setFilteredApplications([]);
+      return;
     }
 
-    let filtered = applications
+    let filtered = applications;
 
     // Filter by status based on active tab
     filtered = filtered.filter((app) => {
-      if (activeTab === "pending") return app.status === "pending"
-      if (activeTab === "approved") return app.status === "approved"
-      if (activeTab === "rejected") return app.status === "rejected"
-      return true
-    })
+      if (activeTab === "pending") return app.status === "pending";
+      if (activeTab === "approved") return app.status === "approved";
+      if (activeTab === "rejected") return app.status === "rejected";
+      return true;
+    });
 
     // Filter by search query
     if (searchQuery) {
-      const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (app) =>
           app.first_name.toLowerCase().includes(query) ||
           app.last_name.toLowerCase().includes(query) ||
           app.company_name.toLowerCase().includes(query) ||
-          app.email.toLowerCase().includes(query),
-      )
+          app.email.toLowerCase().includes(query)
+      );
     }
 
-    setFilteredApplications(filtered)
-  }, [applications, searchQuery, activeTab])
+    setFilteredApplications(filtered);
+  }, [applications, searchQuery, activeTab]);
 
   const handleApprove = async () => {
-    if (!selectedApplication) return
+    if (!selectedApplication) return;
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
-      const result = await approveClientApplication(selectedApplication.id, adminNotes)
+      const result = await approveClientApplication(selectedApplication.id, adminNotes);
 
       if (result.error) {
         toast({
           title: "Error",
           description: result.error,
           variant: "destructive",
-        })
+        });
       } else {
         // Update the local state
         setApplications((prev) =>
           prev.map((app) =>
-            app.id === selectedApplication.id ? { ...app, status: "approved", admin_notes: adminNotes } : app,
-          ),
-        )
+            app.id === selectedApplication.id
+              ? { ...app, status: "approved", admin_notes: adminNotes }
+              : app
+          )
+        );
 
         toast({
           title: "Application Approved",
           description: "The client application has been approved successfully.",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error approving application:", error)
+      console.error("Error approving application:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsProcessing(false)
-      setShowApproveDialog(false)
-      setSelectedApplication(null)
-      setAdminNotes("")
+      setIsProcessing(false);
+      setShowApproveDialog(false);
+      setSelectedApplication(null);
+      setAdminNotes("");
     }
-  }
+  };
 
   const handleReject = async () => {
-    if (!selectedApplication) return
+    if (!selectedApplication) return;
 
-    setIsProcessing(true)
+    setIsProcessing(true);
     try {
-      const result = await rejectClientApplication(selectedApplication.id, adminNotes)
+      const result = await rejectClientApplication(selectedApplication.id, adminNotes);
 
       if (result.error) {
         toast({
           title: "Error",
           description: result.error,
           variant: "destructive",
-        })
+        });
       } else {
         // Update the local state
         setApplications((prev) =>
           prev.map((app) =>
-            app.id === selectedApplication.id ? { ...app, status: "rejected", admin_notes: adminNotes } : app,
-          ),
-        )
+            app.id === selectedApplication.id
+              ? { ...app, status: "rejected", admin_notes: adminNotes }
+              : app
+          )
+        );
 
         toast({
           title: "Application Rejected",
           description: "The client application has been rejected.",
-        })
+        });
       }
     } catch (error) {
-      console.error("Error rejecting application:", error)
+      console.error("Error rejecting application:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsProcessing(false)
-      setShowRejectDialog(false)
-      setSelectedApplication(null)
-      setAdminNotes("")
+      setIsProcessing(false);
+      setShowRejectDialog(false);
+      setSelectedApplication(null);
+      setAdminNotes("");
     }
-  }
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -315,7 +326,10 @@ export default function AdminApplicationsPage() {
               <h2 className="text-xl font-bold">Applications</h2>
               <div className="mt-4 md:mt-0 flex items-center space-x-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                   <Input
                     placeholder="Search applications"
                     className="pl-9 w-full md:w-60"
@@ -361,7 +375,9 @@ export default function AdminApplicationsPage() {
                     <Clock className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Pending Applications</h3>
-                  <p className="text-gray-500">There are currently no pending client applications to review.</p>
+                  <p className="text-gray-500">
+                    There are currently no pending client applications to review.
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -397,7 +413,9 @@ export default function AdminApplicationsPage() {
                                 <Building className="h-5 w-5 text-gray-500" />
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900">{application.company_name}</div>
+                                <div className="font-medium text-gray-900">
+                                  {application.company_name}
+                                </div>
                                 <div className="text-gray-500 text-sm">
                                   {application.website ? (
                                     <a
@@ -439,7 +457,8 @@ export default function AdminApplicationsPage() {
                                     : "bg-red-100 text-red-800"
                               }`}
                             >
-                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                              {application.status.charAt(0).toUpperCase() +
+                                application.status.slice(1)}
                             </Badge>
                           </td>
                           <td className="py-4 px-6">
@@ -452,8 +471,8 @@ export default function AdminApplicationsPage() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    setSelectedApplication(application)
-                                    setShowApproveDialog(true)
+                                    setSelectedApplication(application);
+                                    setShowApproveDialog(true);
                                   }}
                                 >
                                   <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
@@ -461,8 +480,8 @@ export default function AdminApplicationsPage() {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    setSelectedApplication(application)
-                                    setShowRejectDialog(true)
+                                    setSelectedApplication(application);
+                                    setShowRejectDialog(true);
                                   }}
                                 >
                                   <XCircle className="mr-2 h-4 w-4 text-red-500" />
@@ -471,7 +490,7 @@ export default function AdminApplicationsPage() {
                                 <DropdownMenuItem
                                   onClick={() => {
                                     // View application details
-                                    setSelectedApplication(application)
+                                    setSelectedApplication(application);
                                     // In a real app, you might navigate to a details page or show a modal
                                   }}
                                 >
@@ -496,7 +515,9 @@ export default function AdminApplicationsPage() {
                     <CheckCircle className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Approved Applications</h3>
-                  <p className="text-gray-500">There are currently no approved client applications.</p>
+                  <p className="text-gray-500">
+                    There are currently no approved client applications.
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -532,7 +553,9 @@ export default function AdminApplicationsPage() {
                                 <Building className="h-5 w-5 text-gray-500" />
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900">{application.company_name}</div>
+                                <div className="font-medium text-gray-900">
+                                  {application.company_name}
+                                </div>
                                 <div className="text-gray-500 text-sm">
                                   {application.website ? (
                                     <a
@@ -587,7 +610,9 @@ export default function AdminApplicationsPage() {
                     <XCircle className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Rejected Applications</h3>
-                  <p className="text-gray-500">There are currently no rejected client applications.</p>
+                  <p className="text-gray-500">
+                    There are currently no rejected client applications.
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -623,7 +648,9 @@ export default function AdminApplicationsPage() {
                                 <Building className="h-5 w-5 text-gray-500" />
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900">{application.company_name}</div>
+                                <div className="font-medium text-gray-900">
+                                  {application.company_name}
+                                </div>
                                 <div className="text-gray-500 text-sm">
                                   {application.website ? (
                                     <a
@@ -680,8 +707,8 @@ export default function AdminApplicationsPage() {
           <DialogHeader>
             <DialogTitle>Approve Client Application</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this client application? This will send an email to the client with
-              instructions to set up their account.
+              Are you sure you want to approve this client application? This will send an email to
+              the client with instructions to set up their account.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -697,10 +724,18 @@ export default function AdminApplicationsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowApproveDialog(false)} disabled={isProcessing}>
+            <Button
+              variant="outline"
+              onClick={() => setShowApproveDialog(false)}
+              disabled={isProcessing}
+            >
               Cancel
             </Button>
-            <Button onClick={handleApprove} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+            <Button
+              onClick={handleApprove}
+              disabled={isProcessing}
+              className="bg-green-600 hover:bg-green-700"
+            >
               {isProcessing ? "Processing..." : "Approve Application"}
             </Button>
           </DialogFooter>
@@ -713,8 +748,8 @@ export default function AdminApplicationsPage() {
           <DialogHeader>
             <DialogTitle>Reject Client Application</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject this client application? This will send an email to the client notifying
-              them of the rejection.
+              Are you sure you want to reject this client application? This will send an email to
+              the client notifying them of the rejection.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -731,15 +766,23 @@ export default function AdminApplicationsPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRejectDialog(false)} disabled={isProcessing}>
+            <Button
+              variant="outline"
+              onClick={() => setShowRejectDialog(false)}
+              disabled={isProcessing}
+            >
               Cancel
             </Button>
-            <Button onClick={handleReject} disabled={isProcessing} className="bg-red-600 hover:bg-red-700">
+            <Button
+              onClick={handleReject}
+              disabled={isProcessing}
+              className="bg-red-600 hover:bg-red-700"
+            >
               {isProcessing ? "Processing..." : "Reject Application"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

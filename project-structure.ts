@@ -109,4 +109,4 @@ const projectStructure = {
   docs: {
     "best-practices.md": "Best practices guide for the codebase",
   },
-}
+};

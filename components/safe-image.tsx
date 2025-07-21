@@ -1,12 +1,12 @@
-import Image, { type ImageProps } from "next/image"
-import { cn } from "@/lib/utils"
+import Image, { type ImageProps } from "next/image";
+import { cn } from "@/lib/utils";
 
 type SafeImageProps = Omit<ImageProps, "src"> & {
-  src?: string | null
-  fallbackSrc?: string
-  fallbackType?: "placeholder" | "static"
-  placeholderQuery?: string
-}
+  src?: string | null;
+  fallbackSrc?: string;
+  fallbackType?: "placeholder" | "static";
+  placeholderQuery?: string;
+};
 
 /**
  * SafeImage component that handles empty or null image sources gracefully
@@ -31,21 +31,21 @@ export function SafeImage({
   ...props
 }: SafeImageProps) {
   // Check if src is valid (not undefined, null, or empty string)
-  const isValidSrc = src && src.trim() !== ""
+  const isValidSrc = src && src.trim() !== "";
 
   // Determine the image source based on fallback type
-  let imageSrc: string
+  let imageSrc: string;
 
   if (isValidSrc) {
-    imageSrc = src as string
+    imageSrc = src as string;
   } else if (fallbackType === "placeholder") {
     // Create a dynamic placeholder with appropriate dimensions
-    const w = width || 400
-    const h = height || 400
-    imageSrc = `/placeholder.svg?height=${h}&width=${w}&query=${placeholderQuery}`
+    const w = width || 400;
+    const h = height || 400;
+    imageSrc = `/placeholder.svg?height=${h}&width=${w}&query=${placeholderQuery}`;
   } else {
     // Use the provided static fallback
-    imageSrc = fallbackSrc
+    imageSrc = fallbackSrc;
   }
 
   return (
@@ -60,5 +60,5 @@ export function SafeImage({
         {...props}
       />
     </div>
-  )
+  );
 }

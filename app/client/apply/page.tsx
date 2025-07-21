@@ -1,18 +1,24 @@
-"use client"
+"use client";
 
-import type React from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft } from "lucide-react"
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
-import { submitClientApplication } from "@/lib/actions/client-actions"
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { submitClientApplication } from "@/lib/actions/client-actions";
 
 export default function ClientApplicationPage() {
   const [formData, setFormData] = useState({
@@ -25,25 +31,25 @@ export default function ClientApplicationPage() {
     businessDescription: "",
     needsDescription: "",
     website: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const returnUrl = searchParams.get("returnUrl")
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
-  }
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
 
   const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, industry: value }))
-  }
+    setFormData((prev) => ({ ...prev, industry: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const result = await submitClientApplication({
@@ -56,30 +62,30 @@ export default function ClientApplicationPage() {
         businessDescription: formData.businessDescription,
         needsDescription: formData.needsDescription,
         website: formData.website || null,
-      })
+      });
 
       if (result.error) {
         toast({
           title: "Error submitting application",
           description: result.error,
           variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       // Success - redirect to success page
-      router.push("/client/apply/success")
+      router.push("/client/apply/success");
     } catch (error) {
-      console.error("Application submission error:", error)
+      console.error("Application submission error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
-      setIsSubmitting(false)
+      });
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -116,8 +122,8 @@ export default function ClientApplicationPage() {
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-2">Client Application</h1>
                 <p className="text-gray-600">
-                  Complete the form below to apply as a client with TOTL Agency. Our team will review your application
-                  and contact you within 2-3 business days.
+                  Complete the form below to apply as a client with TOTL Agency. Our team will
+                  review your application and contact you within 2-3 business days.
                 </p>
               </div>
 
@@ -256,5 +262,5 @@ export default function ClientApplicationPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

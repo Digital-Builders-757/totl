@@ -1,13 +1,13 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Profile = {
-  id: string
-  role: string
-  email: string
-  display_name: string | null
-  created_at: string
-}
+  id: string;
+  role: string;
+  email: string;
+  display_name: string | null;
+  created_at: string;
+};
 
 export function ProfileData({ profile }: { profile: Profile | null }) {
   if (!profile) {
@@ -21,7 +21,7 @@ export function ProfileData({ profile }: { profile: Profile | null }) {
           <p className="text-gray-500">Profile data not available</p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -66,5 +66,5 @@ export function ProfileData({ profile }: { profile: Profile | null }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,16 +1,13 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 export const POST = async (request: Request) => {
   const { userId } = await request.json();
 
   if (!userId) {
-    return NextResponse.json(
-      { error: 'User ID is required.' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "User ID is required." }, { status: 400 });
   }
 
   const supabase = createRouteHandlerClient({ cookies });
@@ -23,7 +20,7 @@ export const POST = async (request: Request) => {
   } = await supabase.auth.getSession();
 
   if (!session) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
   // Now, create a privileged Supabase client using the service role key
@@ -40,6 +37,6 @@ export const POST = async (request: Request) => {
   }
 
   return NextResponse.json({
-    message: 'User deleted successfully.',
+    message: "User deleted successfully.",
   });
-}; 
+};

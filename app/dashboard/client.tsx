@@ -1,38 +1,45 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-type UserRole = "talent" | "client" | "admin" | null
+type UserRole = "talent" | "client" | "admin" | null;
 
-export function DashboardClient({ userId, userRole }: { userId: string; userRole: UserRole }) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+export function DashboardClient({ userRole }: { userRole: UserRole }) {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClientComponentClient();
 
   const handleSignOut = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-      router.push("/")
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push("/");
     } catch (err) {
-      console.error("Error signing out:", err)
-      setError("Failed to sign out. Please try again.")
+      console.error("Error signing out:", err);
+      setError("Failed to sign out. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const refreshData = () => {
-    router.refresh()
-  }
+    router.refresh();
+  };
 
   return (
     <Card className="mt-8">
@@ -64,5 +71,5 @@ export function DashboardClient({ userId, userRole }: { userId: string; userRole
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

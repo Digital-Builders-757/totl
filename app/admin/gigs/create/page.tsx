@@ -1,38 +1,47 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { ArrowLeft, Upload, Plus, Minus, Calendar, DollarSign, Clock, MapPin } from "lucide-react"
-import { useState } from "react"
+import { ArrowLeft, Upload, Plus, Minus, Calendar, DollarSign, Clock, MapPin } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function CreateGigPage() {
-  const [requirements, setRequirements] = useState<string[]>([""])
+  const [requirements, setRequirements] = useState<string[]>([""]);
 
   const addRequirement = () => {
-    setRequirements([...requirements, ""])
-  }
+    setRequirements([...requirements, ""]);
+  };
 
   const removeRequirement = (index: number) => {
-    const newRequirements = [...requirements]
-    newRequirements.splice(index, 1)
-    setRequirements(newRequirements)
-  }
+    const newRequirements = [...requirements];
+    newRequirements.splice(index, 1);
+    setRequirements(newRequirements);
+  };
 
   const updateRequirement = (index: number, value: string) => {
-    const newRequirements = [...requirements]
-    newRequirements[index] = value
-    setRequirements(newRequirements)
-  }
+    const newRequirements = [...requirements];
+    newRequirements[index] = value;
+    setRequirements(newRequirements);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-12">
-        <Link href="/admin/dashboard" className="inline-flex items-center text-gray-600 hover:text-black mb-8">
+        <Link
+          href="/admin/dashboard"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to dashboard
         </Link>
@@ -42,8 +51,8 @@ export default function CreateGigPage() {
             <div className="mb-8">
               <h1 className="text-2xl font-bold mb-2">Create a New Gig</h1>
               <p className="text-gray-600">
-                Fill out the form below to create a new casting call or gig. Be as detailed as possible to attract the
-                right talent.
+                Fill out the form below to create a new casting call or gig. Be as detailed as
+                possible to attract the right talent.
               </p>
             </div>
 
@@ -55,7 +64,11 @@ export default function CreateGigPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="company">Company/Brand Name</Label>
-                <Input id="company" placeholder="Your company or brand name" defaultValue="Eternal Diamonds" />
+                <Input
+                  id="company"
+                  placeholder="Your company or brand name"
+                  defaultValue="Eternal Diamonds"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -80,7 +93,10 @@ export default function CreateGigPage() {
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <MapPin
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
                     <Input id="location" placeholder="e.g., New York, NY" className="pl-9" />
                   </div>
                 </div>
@@ -90,15 +106,29 @@ export default function CreateGigPage() {
                 <div className="space-y-2">
                   <Label htmlFor="duration">Duration</Label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <Input id="duration" placeholder="e.g., 1 Day Shoot, 3 Days, etc." className="pl-9" />
+                    <Clock
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      id="duration"
+                      placeholder="e.g., 1 Day Shoot, 3 Days, etc."
+                      className="pl-9"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="compensation">Compensation</Label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <Input id="compensation" placeholder="e.g., $1,200, $500-$800, etc." className="pl-9" />
+                    <DollarSign
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
+                    <Input
+                      id="compensation"
+                      placeholder="e.g., $1,200, $500-$800, etc."
+                      className="pl-9"
+                    />
                   </div>
                 </div>
               </div>
@@ -107,14 +137,20 @@ export default function CreateGigPage() {
                 <div className="space-y-2">
                   <Label htmlFor="date">Shoot Date</Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <Calendar
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
                     <Input id="date" type="date" className="pl-9" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="applicationDeadline">Application Deadline</Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <Calendar
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      size={16}
+                    />
                     <Input id="applicationDeadline" type="date" className="pl-9" />
                   </div>
                 </div>
@@ -197,5 +233,5 @@ export default function CreateGigPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

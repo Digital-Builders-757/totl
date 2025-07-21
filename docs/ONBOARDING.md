@@ -81,4 +81,71 @@ The client onboarding flow mirrors the talent flow, but is tailored to their nee
 
 - **RLS Policies**: All profile tables (`profiles`, `talent_profiles`, `client_profiles`) have RLS policies ensuring users can only edit their own data.
 - **Protected Routes**: The `/talent/*` and `/client/*` routes are protected by middleware, redirecting unauthenticated users to `/login`.
-- **Component-Based**: The signup forms are reusable React components that can be placed in modals or on dedicated pages. 
+- **Component-Based**: The signup forms are reusable React components that can be placed in modals or on dedicated pages.
+
+---
+
+## 🛠 Plan
+
+1. **Review your current talent signup form/component** (likely `components/talent-signup-form.tsx` or `app/talent/signup/page.tsx`).
+2. **Update the `signUp` call** to ensure it always passes the required metadata: `role`, `first_name`, and `last_name`.
+3. **Add or improve error handling** and optionally add frontend validation to block signups without a role.
+4. **Provide a summary of the changes** and instructions for testing.
+
+---
+
+## Step 1: Review the Signup Form
+
+From previous code search, your `TalentSignupForm` already calls `signUp` with a `data` object:
+```ts
+<code_block_to_apply_changes_from>
+```
+**However:**  
+- If the `signUp` function in your `auth-provider` or wherever it’s defined does not forward this `data` to Supabase as `options.data`, the metadata will not reach the backend trigger.
+
+---
+
+## Step 2: Fix the `signUp` Implementation
+
+Let’s ensure your `signUp` function in `auth-provider.tsx` (or wherever it’s defined) looks like this:
+```ts
+const signUp = async (
+  email: string,
+  password: string,
+  options?: { data?: any; emailRedirectTo?: string }
+) => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options, // <-- This must include the data object!
+  });
+  return { error };
+};
+```
+**If you see something like this, you’re good. If not, I’ll update it.**
+
+---
+
+## Step 3: Add/Improve Validation (Optional)
+
+- Ensure the form requires first name, last name, and role before allowing submission.
+- Add error messages if any are missing.
+
+---
+
+## Step 4: Test and Document
+
+- After the fix, sign up as a talent.
+- Check Supabase:  
+  - `profiles` should have `role = talent`
+  - `talent_profiles` should have the user’s name
+
+---
+
+## Would you like me to:
+
+- **Review and fix your existing signup form file?**
+- **Generate a new, standalone `sign-up.ts` module with the correct logic?**
+- **Or both?**
+
+Let me know your preference, and I’ll implement the fix right away!

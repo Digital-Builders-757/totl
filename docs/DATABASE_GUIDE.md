@@ -94,6 +94,7 @@ erDiagram
 ## 📜 Tables & Schemas
 
 ### `users`
+
 Extends the `auth.users` table from Supabase to store core user information and assign a role.
 
 - **`id` (UUID, Primary Key)**: Foreign key to `auth.users.id`.
@@ -102,6 +103,7 @@ Extends the `auth.users` table from Supabase to store core user information and 
 - **`role` (user_role)**: Enum type (`admin`, `client`, `talent`). Determines user permissions.
 
 ### `profiles`
+
 Stores general profile information applicable to all user roles.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the profile.
@@ -113,6 +115,7 @@ Stores general profile information applicable to all user roles.
 - **`website` (text)**: Link to a personal or company website.
 
 ### `talent_profiles`
+
 Stores specific information for users with the `talent` role.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the talent profile.
@@ -125,6 +128,7 @@ Stores specific information for users with the `talent` role.
 - **`portfolio_url` (text)**: Link to an external portfolio.
 
 ### `client_profiles`
+
 Stores specific information for users with the `client` role.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the client profile.
@@ -134,6 +138,7 @@ Stores specific information for users with the `client` role.
 - **`company_size` (text)**: Size of the company.
 
 ### `gigs`
+
 Contains information about modeling jobs posted by clients.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the gig.
@@ -147,6 +152,7 @@ Contains information about modeling jobs posted by clients.
 - **`status` (gig_status)**: Enum (`draft`, `published`, `closed`, `completed`).
 
 ### `applications`
+
 Tracks applications submitted by talent for gigs.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the application.
@@ -156,6 +162,7 @@ Tracks applications submitted by talent for gigs.
 - **`message` (text)**: A message from the talent to the client.
 
 ### `bookings`
+
 Represents a confirmed booking of a talent for a gig.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the booking.
@@ -166,6 +173,7 @@ Represents a confirmed booking of a talent for a gig.
 - **`notes` (text)**: Any additional notes about the booking.
 
 ### `portfolio_items`
+
 Stores individual items for a talent's portfolio, such as images or videos.
 
 - **`id` (UUID, Primary Key)**: Unique identifier for the portfolio item.

@@ -1,7 +1,7 @@
-import Image from "next/image"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Instagram, Mail, MapPin, Phone } from "lucide-react"
+import { Instagram, Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function AboutPage() {
   return (
@@ -9,13 +9,19 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative bg-black text-white">
         <div className="absolute inset-0 z-0 opacity-50">
-          <Image src="/images/agency-team.png" alt="TOTL Agency Team" fill className="object-cover" priority />
+          <Image
+            src="/images/agency-team.png"
+            alt="TOTL Agency Team"
+            fill
+            className="object-cover"
+            priority
+          />
         </div>
         <div className="relative z-10 container mx-auto px-4 py-32 md:py-40">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">About TOTL Agency</h1>
           <p className="text-xl md:text-2xl max-w-2xl">
-            Representing exceptional modeling talent worldwide. We rise above the rest to connect the right talent with
-            the right opportunities.
+            Representing exceptional modeling talent worldwide. We rise above the rest to connect
+            the right talent with the right opportunities.
           </p>
         </div>
       </section>
@@ -27,22 +33,29 @@ export default function AboutPage() {
             <div className="md:w-1/2">
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
               <p className="text-gray-700 mb-4">
-                Founded in 2020, TOTL Agency emerged from a vision to transform the modeling industry. We recognized a
-                gap between exceptional talent and quality opportunities, and set out to bridge that divide with
-                integrity and innovation.
+                Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
+                industry. We recognized a gap between exceptional talent and quality opportunities,
+                and set out to bridge that divide with integrity and innovation.
               </p>
               <p className="text-gray-700 mb-4">
-                Our name, TOTL (Top Of The Line), represents our commitment to excellence in every aspect of our
-                business. We believe in fostering genuine relationships with both our talent and clients, creating a
-                supportive community rather than just a transactional agency.
+                Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
+                aspect of our business. We believe in fostering genuine relationships with both our
+                talent and clients, creating a supportive community rather than just a transactional
+                agency.
               </p>
               <p className="text-gray-700">
-                Today, we're proud to represent diverse talent across various modeling specialties, connecting them with
-                brands that value authenticity and creativity as much as we do.
+                Today, we&rsquo;re proud to represent diverse talent across various modeling
+                specialties, connecting them with brands that value authenticity and creativity as
+                much as we do.
               </p>
             </div>
             <div className="md:w-1/2 relative h-[400px] md:h-[500px] w-full">
-              <Image src="/images/model-2.png" alt="TOTL Agency Journey" fill className="object-cover rounded-lg" />
+              <Image
+                src="/images/model-2.png"
+                alt="TOTL Agency Journey"
+                fill
+                className="object-cover rounded-lg"
+              />
             </div>
           </div>
         </div>
@@ -62,13 +75,18 @@ export default function AboutPage() {
                   stroke="currentColor"
                   className="w-8 h-8"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
               <h3 className="text-xl font-bold mb-4">Empower Talent</h3>
               <p className="text-gray-700">
-                We empower models to take control of their careers through education, mentorship, and transparent
-                business practices.
+                We empower models to take control of their careers through education, mentorship,
+                and transparent business practices.
               </p>
             </div>
             <div className="bg-white p-8 rounded-lg shadow-sm">
@@ -90,8 +108,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold mb-4">Foster Diversity</h3>
               <p className="text-gray-700">
-                We celebrate diversity in all forms, actively working to create inclusive opportunities in the modeling
-                industry.
+                We celebrate diversity in all forms, actively working to create inclusive
+                opportunities in the modeling industry.
               </p>
             </div>
             <div className="bg-white p-8 rounded-lg shadow-sm">
@@ -113,8 +131,8 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold mb-4">Elevate Standards</h3>
               <p className="text-gray-700">
-                We're committed to raising industry standards through ethical practices, fair compensation, and
-                professional development.
+                We&rsquo;re committed to raising industry standards through ethical practices, fair
+                compensation, and professional development.
               </p>
             </div>
           </div>
@@ -148,8 +166,8 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-xl font-bold mb-2">Talent Representation</h3>
                 <p className="text-gray-700">
-                  We provide comprehensive representation for models, including portfolio development, career guidance,
-                  and booking management.
+                  We provide comprehensive representation for models, including portfolio
+                  development, career guidance, and booking management.
                 </p>
               </div>
             </div>
@@ -175,7 +193,8 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-xl font-bold mb-2">Client Casting</h3>
                 <p className="text-gray-700">
-                  We help brands find the perfect talent for their campaigns, events, and promotional activities.
+                  We help brands find the perfect talent for their campaigns, events, and
+                  promotional activities.
                 </p>
               </div>
             </div>
@@ -207,8 +226,8 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-xl font-bold mb-2">Portfolio Development</h3>
                 <p className="text-gray-700">
-                  We offer professional photoshoot coordination and portfolio curation to showcase our talent's unique
-                  qualities.
+                  We offer professional photoshoot coordination and portfolio curation to showcase
+                  our talent&rsquo;s unique qualities.
                 </p>
               </div>
             </div>
@@ -234,8 +253,8 @@ export default function AboutPage() {
               <div>
                 <h3 className="text-xl font-bold mb-2">Event Management</h3>
                 <p className="text-gray-700">
-                  We coordinate fashion shows, promotional events, and brand activations with our roster of professional
-                  models.
+                  We coordinate fashion shows, promotional events, and brand activations with our
+                  roster of professional models.
                 </p>
               </div>
             </div>
@@ -357,7 +376,8 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work With Us?</h2>
           <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Whether you're a model looking for representation or a brand seeking talent, we're here to help you succeed.
+            Whether you&rsquo;re a model looking for representation or a brand seeking talent,
+            we&rsquo;re here to help you succeed.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/talent/signup">
@@ -372,5 +392,5 @@ export default function AboutPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }

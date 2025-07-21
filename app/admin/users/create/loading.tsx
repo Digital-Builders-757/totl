@@ -1,5 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CreateUserLoading() {
   return (
@@ -40,5 +40,5 @@ export default function CreateUserLoading() {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

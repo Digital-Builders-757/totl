@@ -1,5 +1,15 @@
-import type { SupabaseClient } from "@supabase/supabase-js"
-import type { Database } from "@/types/supabase"
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { GigStatus } from "@/types/database";
+import type { Database } from "@/types/supabase";
+
+// Type definition for gig filters
+interface GigFilters {
+  category?: string;
+  location?: string;
+  status?: GigStatus;
+  client_id?: string;
+  [key: string]: string | undefined;
+}
 
 /**
  * A utility to create safe Supabase queries that avoid aggregate functions
@@ -14,7 +24,7 @@ export const safeQuery = {
       .from("profiles")
       .select("id, first_name, last_name, email, role, created_at")
       .eq("id", userId)
-      .single()
+      .single();
   },
 
   /**
@@ -23,7 +33,8 @@ export const safeQuery = {
   getTalentProfileByUserId: async (supabase: SupabaseClient<Database>, userId: string) => {
     return await supabase
       .from("talent_profiles")
-      .select(`
+      .select(
+        `
         id, 
         user_id, 
         first_name, 
@@ -34,9 +45,10 @@ export const safeQuery = {
         experience,
         specialty,
         bio
-      `)
+      `
+      )
       .eq("user_id", userId)
-      .single()
+      .single();
   },
 
   /**
@@ -45,7 +57,8 @@ export const safeQuery = {
   getClientProfileByUserId: async (supabase: SupabaseClient<Database>, userId: string) => {
     return await supabase
       .from("client_profiles")
-      .select(`
+      .select(
+        `
         id, 
         user_id, 
         company_name, 
@@ -53,15 +66,21 @@ export const safeQuery = {
         email, 
         phone, 
         industry
-      `)
+      `
+      )
       .eq("user_id", userId)
-      .single()
+      .single();
   },
 
   /**
    * Safely get gigs with pagination
    */
-  getGigs: async (supabase: SupabaseClient<Database>, page = 1, pageSize = 10, filters: Record<string, any> = {}) => {
+  getGigs: async (
+    supabase: SupabaseClient<Database>,
+    page = 1,
+    pageSize = 10,
+    filters: GigFilters = {}
+  ) => {
     let query = supabase.from("gigs").select(`
         id, 
         title, 
@@ -74,26 +93,31 @@ export const safeQuery = {
         client_id,
         created_at,
         status
-      `)
+      `);
 
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") {
-        query = query.eq(key, value)
+        query = query.eq(key, value);
       }
-    })
+    });
 
     // Apply pagination
-    const from = (page - 1) * pageSize
-    const to = from + pageSize - 1
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-    return await query.order("created_at", { ascending: false }).range(from, to)
+    return await query.order("created_at", { ascending: false }).range(from, to);
   },
 
   /**
    * Safely get applications with pagination
    */
-  getApplications: async (supabase: SupabaseClient<Database>, page = 1, pageSize = 10, status?: string) => {
+  getApplications: async (
+    supabase: SupabaseClient<Database>,
+    page = 1,
+    pageSize = 10,
+    status?: string
+  ) => {
     let query = supabase.from("applications").select(`
         id, 
         user_id, 
@@ -101,16 +125,16 @@ export const safeQuery = {
         status, 
         created_at, 
         updated_at
-      `)
+      `);
 
     if (status) {
-      query = query.eq("status", status)
+      query = query.eq("status", status);
     }
 
     // Apply pagination
-    const from = (page - 1) * pageSize
-    const to = from + pageSize - 1
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
 
-    return await query.order("created_at", { ascending: false }).range(from, to)
+    return await query.order("created_at", { ascending: false }).range(from, to);
   },
-}
+};

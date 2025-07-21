@@ -29,4 +29,4 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Build App
-        run: npm run build 
+        run: npm run build

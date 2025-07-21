@@ -1,19 +1,25 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import type React from "react";
 
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft } from "lucide-react"
-import { useState } from "react"
-import { useAuth } from "@/components/auth-provider"
-import { useRouter, useSearchParams } from "next/navigation"
-import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ClientSignup() {
   const [formData, setFormData] = useState({
@@ -26,43 +32,43 @@ export default function ClientSignup() {
     industry: "",
     projectDescription: "",
     website: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { signUp, supabase } = useAuth() // Moved useAuth here to prevent conditional hook call
-  const router = useRouter()
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const returnUrl = searchParams.get("returnUrl")
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signUp, supabase } = useAuth(); // Moved useAuth here to prevent conditional hook call
+  const router = useRouter();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
-  }
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
+  };
 
   const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, industry: value }))
-  }
+    setFormData((prev) => ({ ...prev, industry: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       // Register the user with Supabase Auth
-      const { error } = await signUp(formData.email, formData.password, "client")
+      const { error } = await signUp(formData.email, formData.password, "client");
 
       if (error) {
         toast({
           title: "Error creating account",
           description: error.message,
           variant: "destructive",
-        })
-        setIsSubmitting(false)
-        return
+        });
+        setIsSubmitting(false);
+        return;
       }
 
       // Create client profile
-      const user = (await supabase.auth.getUser()).data.user
+      const user = (await supabase.auth.getUser()).data.user;
 
       if (user) {
         const { error: profileError } = await supabase.from("client_profiles").insert([
@@ -76,15 +82,16 @@ export default function ClientSignup() {
             contact_phone: formData.phone || null,
             company_size: null,
           },
-        ])
+        ]);
 
         if (profileError) {
-          console.error("Error creating client profile:", profileError)
+          console.error("Error creating client profile:", profileError);
           toast({
             title: "Profile creation issue",
-            description: "Your account was created but we had trouble setting up your profile. Please contact support.",
+            description:
+              "Your account was created but we had trouble setting up your profile. Please contact support.",
             variant: "destructive",
-          })
+          });
         }
       }
 
@@ -96,33 +103,33 @@ export default function ClientSignup() {
           last_name: formData.lastName,
           updated_at: new Date().toISOString(),
         })
-        .eq("id", user?.id)
+        .eq("id", user?.id);
 
       if (updateError) {
-        console.error("Error updating profile:", updateError)
+        console.error("Error updating profile:", updateError);
       }
 
       // Success - redirect to returnUrl, success page or dashboard
       toast({
         title: "Account created!",
         description: "Your client account has been created successfully.",
-      })
+      });
 
       if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl))
+        router.push(decodeURIComponent(returnUrl));
       } else {
-        router.push("/admin/dashboard")
+        router.push("/admin/dashboard");
       }
     } catch (error) {
-      console.error("Signup error:", error)
+      console.error("Signup error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
-      setIsSubmitting(false)
+      });
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -148,7 +155,9 @@ export default function ClientSignup() {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 text-white">
                   <h2 className="text-2xl font-bold mb-2">Register as a Client</h2>
-                  <p className="text-white/80">Access our premium talent pool and build your dream campaigns</p>
+                  <p className="text-white/80">
+                    Access our premium talent pool and build your dream campaigns
+                  </p>
                 </div>
               </div>
             </div>
@@ -157,8 +166,8 @@ export default function ClientSignup() {
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-2">Client Registration</h1>
                 <p className="text-gray-600">
-                  Complete the form below to register as a client with TOTL Agency. Our team will review your
-                  information and set up your account within 1-2 business days.
+                  Complete the form below to register as a client with TOTL Agency. Our team will
+                  review your information and set up your account within 1-2 business days.
                 </p>
               </div>
 
@@ -298,5 +307,5 @@ export default function ClientSignup() {
         </div>
       </div>
     </div>
-  )
+  );
 }

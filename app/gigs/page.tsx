@@ -1,24 +1,25 @@
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import type { Database } from "@/lib/database.types"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
+import { cookies } from "next/headers";
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import type { Database } from "@/lib/database.types";
 
 // FIXED: Using explicit column selection and avoiding aggregates
 
 export async function getGigs() {
-  const supabase = createServerComponentClient<Database>({ cookies })
+  const supabase = createServerComponentClient<Database>({ cookies });
 
   // FIXED: Explicit column selection, no aggregates
   const { data, error } = await supabase
     .from("gigs")
-    .select(`
+    .select(
+      `
       id, 
       title, 
       description, 
@@ -28,20 +29,21 @@ export async function getGigs() {
       category,
       image,
       client_id
-    `)
+    `
+    )
     .eq("status", "active")
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching gigs:", error)
-    return []
+    console.error("Error fetching gigs:", error);
+    return [];
   }
 
-  return data || []
+  return data || [];
 }
 
 export default async function GigsPage() {
-  const gigs = await getGigs()
+  const gigs = await getGigs();
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -50,8 +52,8 @@ export default async function GigsPage() {
           <div className="mb-12">
             <h1 className="text-4xl font-bold mb-4">Find Gigs</h1>
             <p className="text-gray-600 max-w-3xl">
-              Browse through available casting opportunities and gigs. Filter by category, location, and more to find
-              the perfect match for your talents.
+              Browse through available casting opportunities and gigs. Filter by category, location,
+              and more to find the perfect match for your talents.
             </p>
           </div>
 
@@ -59,8 +61,14 @@ export default async function GigsPage() {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <Input placeholder="Search for gigs, roles, or keywords" className="pl-10 bg-gray-50 border-gray-200" />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
+                <Input
+                  placeholder="Search for gigs, roles, or keywords"
+                  className="pl-10 bg-gray-50 border-gray-200"
+                />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex items-center gap-2">
@@ -183,7 +191,7 @@ export default async function GigsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Comprehensive mock gig data

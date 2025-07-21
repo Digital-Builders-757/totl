@@ -1,12 +1,5 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
   Search,
   Plus,
@@ -25,20 +18,31 @@ import {
   LogOut,
   Bell,
   UserIcon,
-} from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { SafeImage } from "@/components/ui/safe-image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("active")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter gigs based on search query
   const filteredGigs = activeGigs.filter(
     (gig) =>
       gig.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       gig.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      gig.category.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      gig.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -208,7 +212,10 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-bold">My Gigs</h2>
               <div className="mt-4 md:mt-0 flex items-center space-x-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
                   <Input
                     placeholder="Search gigs"
                     className="pl-9 w-full md:w-60"
@@ -223,7 +230,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <Tabs defaultValue="active" className="w-full" onValueChange={setActiveTab}>
+          <Tabs defaultValue="active" className="w-full">
             <div className="px-6 border-b border-gray-100">
               <TabsList className="h-12">
                 <TabsTrigger
@@ -302,7 +309,9 @@ export default function AdminDashboard() {
                           <div className="flex items-center">
                             <span className="font-medium">{gig.applications}</span>
                             {gig.newApplications > 0 && (
-                              <Badge className="ml-2 bg-green-500 text-white text-xs">+{gig.newApplications} new</Badge>
+                              <Badge className="ml-2 bg-green-500 text-white text-xs">
+                                +{gig.newApplications} new
+                              </Badge>
                             )}
                           </div>
                         </td>
@@ -440,7 +449,9 @@ export default function AdminDashboard() {
                           />
                         </div>
                         <div>
-                          <div className="font-medium text-gray-900">{application.applicantName}</div>
+                          <div className="font-medium text-gray-900">
+                            {application.applicantName}
+                          </div>
                           <div className="text-gray-500 text-sm">{application.applicantType}</div>
                         </div>
                       </div>
@@ -482,7 +493,9 @@ export default function AdminDashboard() {
                 <Briefcase className="h-6 w-6 text-blue-500" />
               </div>
               <h3 className="text-lg font-bold mb-2">Post a New Gig</h3>
-              <p className="text-gray-600 mb-4">Create a new casting call or job opportunity for talent.</p>
+              <p className="text-gray-600 mb-4">
+                Create a new casting call or job opportunity for talent.
+              </p>
               <Button className="w-full bg-black text-white hover:bg-black/90">Create Gig</Button>
             </div>
           </Link>
@@ -493,7 +506,9 @@ export default function AdminDashboard() {
                 <Users className="h-6 w-6 text-purple-500" />
               </div>
               <h3 className="text-lg font-bold mb-2">Browse Talent</h3>
-              <p className="text-gray-600 mb-4">Discover and connect with professional models and talent.</p>
+              <p className="text-gray-600 mb-4">
+                Discover and connect with professional models and talent.
+              </p>
               <Button variant="outline" className="w-full">
                 Browse Talent
               </Button>
@@ -506,7 +521,9 @@ export default function AdminDashboard() {
                 <BarChart className="h-6 w-6 text-amber-500" />
               </div>
               <h3 className="text-lg font-bold mb-2">Talent Dashboard</h3>
-              <p className="text-gray-600 mb-4">View the talent perspective of the TOTL Agency platform.</p>
+              <p className="text-gray-600 mb-4">
+                View the talent perspective of the TOTL Agency platform.
+              </p>
               <Button variant="outline" className="w-full">
                 View Talent Dashboard
               </Button>
@@ -515,7 +532,7 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Mock data for active gigs
@@ -575,7 +592,7 @@ const activeGigs = [
     postedDate: "June 5, 2023",
     image: "/gig-fitness.png",
   },
-]
+];
 
 // Mock data for recent applications
 const recentApplications = [
@@ -609,4 +626,4 @@ const recentApplications = [
     status: "Shortlisted",
     applicantId: 2,
   },
-]
+];

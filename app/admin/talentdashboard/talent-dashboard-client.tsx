@@ -1,73 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Search,
-  MoreVertical,
-  Eye,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Filter,
-} from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
-import type { TalentProfile } from "@/types/database"
+import { Search, MoreVertical, Filter } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SafeImage } from "@/components/ui/safe-image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Gig {
-  id: number
-  gigId: number
-  title: string
-  company: string
-  location: string
-  appliedDate: string
-  status: string
-  image: string
+  id: number;
+  gigId: number;
+  title: string;
+  company: string;
+  location: string;
+  appliedDate: string;
+  status: string;
+  image: string;
 }
 
 interface GigCategory {
-  active: Gig[]
-  accepted: Gig[]
-  rejected: Gig[]
+  active: Gig[];
+  accepted: Gig[];
+  rejected: Gig[];
 }
 
 interface TalentDashboardClientProps {
-  profileData: TalentProfile | null
-  gigs: GigCategory
+  gigs: GigCategory;
 }
 
-export function TalentDashboardClient({ profileData, gigs }: TalentDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<keyof GigCategory>("active")
+export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
+  const [activeTab, setActiveTab] = useState<keyof GigCategory>("active");
 
   const handleTabChange = (value: string) => {
     if (value === "active" || value === "accepted" || value === "rejected") {
-      setActiveTab(value)
+      setActiveTab(value);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status.toLowerCase()) {
       case "shortlisted":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "interview scheduled":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "under review":
       case "new":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "accepted":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "rejected":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
-  const activeApplications: Gig[] = gigs[activeTab] || []
+  const activeApplications: Gig[] = gigs[activeTab] || [];
 
   return (
     <div>
@@ -159,5 +149,5 @@ export function TalentDashboardClient({ profileData, gigs }: TalentDashboardClie
         </TabsContent>
       </Tabs>
     </div>
-  )
-} 
+  );
+}
