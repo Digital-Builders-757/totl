@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
 import { EmailVerificationReminder } from "@/components/email-verification-reminder";
 import { RequireAuth } from "@/components/require-auth";
@@ -69,6 +70,12 @@ interface MainProfileData {
 }
 
 export default async function TalentDashboard() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - redirecting to login");
+    redirect("/login?returnUrl=/admin/talentdashboard");
+  }
+
   const supabase = createServerComponentClient<Database>({ cookies });
 
   const {
