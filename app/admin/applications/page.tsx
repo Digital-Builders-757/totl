@@ -31,23 +31,16 @@ export default async function AdminApplicationsPage() {
     redirect("/login?returnUrl=/admin/applications");
   }
 
-  // Fetch applications
+  // Fetch applications - simplified query without complex joins
   const { data: applications, error: applicationsError } = await supabase
-    .from("client_applications")
+    .from("applications")
     .select(
       `
-      id, 
-      first_name, 
-      last_name, 
-      company_name, 
-      email, 
-      phone, 
-      industry, 
-      business_description, 
-      needs_description, 
-      website, 
-      status, 
-      admin_notes, 
+      id,
+      gig_id,
+      talent_id,
+      status,
+      message,
       created_at,
       updated_at
     `
@@ -60,5 +53,12 @@ export default async function AdminApplicationsPage() {
     return <AdminApplicationsClient applications={[]} user={user} />;
   }
 
-  return <AdminApplicationsClient applications={applications || []} user={user} />;
+  // Transform the data to match the expected structure
+  const transformedApplications = (applications || []).map((app) => ({
+    ...app,
+    gigs: null, // We'll fetch gig data separately if needed
+    talent: null, // We'll fetch talent data separately if needed
+  }));
+
+  return <AdminApplicationsClient applications={transformedApplications} user={user} />;
 }

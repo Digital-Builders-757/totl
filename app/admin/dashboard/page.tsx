@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
     .limit(5);
 
   const { data: applications, error: applicationsError } = await supabase
-    .from("client_applications")
+    .from("applications")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(5);

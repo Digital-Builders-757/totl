@@ -36,12 +36,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/database";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
-type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"];
+type Application = Database["public"]["Tables"]["applications"]["Row"];
 
 interface AdminDashboardClientProps {
   user: User;
   gigs: Gig[];
-  applications: ClientApplication[];
+  applications: Application[];
 }
 
 export function AdminDashboardClient({ user, gigs, applications }: AdminDashboardClientProps) {
@@ -52,7 +52,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
     (gig) =>
       gig.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       gig.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      gig.category.toLowerCase().includes(searchQuery.toLowerCase())
+      gig.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -172,7 +172,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Approved Applications</p>
                 <p className="text-2xl font-bold">
-                  {applications.filter((a) => a.status === "approved").length}
+                  {applications.filter((a) => a.status === "accepted").length}
                 </p>
               </div>
             </div>
@@ -238,9 +238,6 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                     Gig
                   </th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                    Category
-                  </th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
                     Location
                   </th>
                   <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
@@ -261,11 +258,6 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                           {new Date(gig.created_at).toLocaleDateString()}
                         </div>
                       </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <Badge variant="outline" className="capitalize">
-                        {gig.category}
-                      </Badge>
                     </td>
                     <td className="py-4 px-6 text-gray-500">{gig.location}</td>
                     <td className="py-4 px-6">

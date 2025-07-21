@@ -40,13 +40,16 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { approveClientApplication, rejectClientApplication } from "@/lib/actions/client-actions";
 import type { Database } from "@/types/database";
 
-type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"];
+// Type for the joined application data
+type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {
+  gigs: null;
+  talent: null;
+};
 
 interface AdminApplicationsClientProps {
-  applications: ClientApplication[];
+  applications: ApplicationWithDetails[];
   user: User;
 }
 
@@ -56,9 +59,11 @@ export function AdminApplicationsClient({
 }: AdminApplicationsClientProps) {
   const [activeTab, setActiveTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
-  const [applications, setApplications] = useState<ClientApplication[]>(initialApplications);
-  const [filteredApplications, setFilteredApplications] = useState<ClientApplication[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<ClientApplication | null>(null);
+  const [applications, setApplications] = useState<ApplicationWithDetails[]>(initialApplications);
+  const [filteredApplications, setFilteredApplications] = useState<ApplicationWithDetails[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(
+    null
+  );
   const [adminNotes, setAdminNotes] = useState("");
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -80,7 +85,7 @@ export function AdminApplicationsClient({
     // Filter by status based on active tab
     filtered = filtered.filter((app) => {
       if (activeTab === "pending") return app.status === "pending";
-      if (activeTab === "approved") return app.status === "approved";
+      if (activeTab === "approved") return app.status === "accepted";
       if (activeTab === "rejected") return app.status === "rejected";
       return true;
     });
@@ -90,10 +95,9 @@ export function AdminApplicationsClient({
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (app) =>
-          app.first_name.toLowerCase().includes(query) ||
-          app.last_name.toLowerCase().includes(query) ||
-          app.company_name.toLowerCase().includes(query) ||
-          app.email.toLowerCase().includes(query)
+          app.gig_id.toLowerCase().includes(query) ||
+          app.talent_id.toLowerCase().includes(query) ||
+          app.status.toLowerCase().includes(query)
       );
     }
 
@@ -105,27 +109,29 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
-      const result = await approveClientApplication(selectedApplication.id, adminNotes);
+      // Update application status to accepted
+      const { error } = await supabase
+        .from("applications")
+        .update({ status: "accepted" })
+        .eq("id", selectedApplication.id);
 
-      if (result.error) {
+      if (error) {
         toast({
           title: "Error",
-          description: result.error,
+          description: error.message,
           variant: "destructive",
         });
       } else {
         // Update the local state
         setApplications((prev) =>
           prev.map((app) =>
-            app.id === selectedApplication.id
-              ? { ...app, status: "approved", admin_notes: adminNotes }
-              : app
+            app.id === selectedApplication.id ? { ...app, status: "accepted" } : app
           )
         );
 
         toast({
           title: "Application Approved",
-          description: "The client application has been approved successfully.",
+          description: "The talent application has been approved successfully.",
         });
       }
     } catch (error) {
@@ -148,27 +154,29 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
-      const result = await rejectClientApplication(selectedApplication.id, adminNotes);
+      // Update application status to rejected
+      const { error } = await supabase
+        .from("applications")
+        .update({ status: "rejected" })
+        .eq("id", selectedApplication.id);
 
-      if (result.error) {
+      if (error) {
         toast({
           title: "Error",
-          description: result.error,
+          description: error.message,
           variant: "destructive",
         });
       } else {
         // Update the local state
         setApplications((prev) =>
           prev.map((app) =>
-            app.id === selectedApplication.id
-              ? { ...app, status: "rejected", admin_notes: adminNotes }
-              : app
+            app.id === selectedApplication.id ? { ...app, status: "rejected" } : app
           )
         );
 
         toast({
           title: "Application Rejected",
-          description: "The client application has been rejected.",
+          description: "The talent application has been rejected.",
         });
       }
     } catch (error) {
@@ -260,8 +268,8 @@ export function AdminApplicationsClient({
         {/* Dashboard Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold mb-1">Client Applications</h1>
-            <p className="text-gray-600">Review and manage client applications</p>
+            <h1 className="text-2xl font-bold mb-1">Talent Applications</h1>
+            <p className="text-gray-600">Review and manage talent applications for gigs</p>
           </div>
         </div>
 
@@ -322,7 +330,7 @@ export function AdminApplicationsClient({
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Pending Applications</h3>
                   <p className="text-gray-500">
-                    There are currently no pending client applications to review.
+                    There are currently no pending talent applications to review.
                   </p>
                 </div>
               ) : (
@@ -331,13 +339,13 @@ export function AdminApplicationsClient({
                     <thead>
                       <tr className="bg-gray-50">
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Company
+                          Application ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Contact
+                          Gig ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Industry
+                          Talent ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
                           Applied Date
@@ -354,41 +362,13 @@ export function AdminApplicationsClient({
                       {filteredApplications.map((application) => (
                         <tr key={application.id} className="hover:bg-gray-50">
                           <td className="py-4 px-6">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 flex-shrink-0 rounded bg-gray-200 mr-3 flex items-center justify-center">
-                                <Building className="h-5 w-5 text-gray-500" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {application.company_name}
-                                </div>
-                                <div className="text-gray-500 text-sm">
-                                  {application.website ? (
-                                    <a
-                                      href={application.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="hover:underline"
-                                    >
-                                      Website
-                                    </a>
-                                  ) : (
-                                    "No website"
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                            <div className="font-medium text-gray-900">{application.id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <div className="font-medium">
-                              {application.first_name} {application.last_name}
-                            </div>
-                            <div className="text-gray-500 text-sm">{application.email}</div>
+                            <div className="font-medium text-gray-900">{application.gig_id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge variant="outline" className="capitalize">
-                              {application.industry || "Not specified"}
-                            </Badge>
+                            <div className="font-medium text-gray-900">{application.talent_id}</div>
                           </td>
                           <td className="py-4 px-6 text-gray-500">
                             {new Date(application.created_at).toLocaleDateString()}
@@ -398,7 +378,7 @@ export function AdminApplicationsClient({
                               className={`${
                                 application.status === "pending"
                                   ? "bg-amber-100 text-amber-800"
-                                  : application.status === "approved"
+                                  : application.status === "accepted"
                                     ? "bg-green-100 text-green-800"
                                     : "bg-red-100 text-red-800"
                               }`}
@@ -462,7 +442,7 @@ export function AdminApplicationsClient({
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Approved Applications</h3>
                   <p className="text-gray-500">
-                    There are currently no approved client applications.
+                    There are currently no approved talent applications.
                   </p>
                 </div>
               ) : (
@@ -471,13 +451,13 @@ export function AdminApplicationsClient({
                     <thead>
                       <tr className="bg-gray-50">
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Company
+                          Application ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Contact
+                          Gig ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Industry
+                          Talent ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
                           Applied Date
@@ -494,41 +474,13 @@ export function AdminApplicationsClient({
                       {filteredApplications.map((application) => (
                         <tr key={application.id} className="hover:bg-gray-50">
                           <td className="py-4 px-6">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 flex-shrink-0 rounded bg-gray-200 mr-3 flex items-center justify-center">
-                                <Building className="h-5 w-5 text-gray-500" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {application.company_name}
-                                </div>
-                                <div className="text-gray-500 text-sm">
-                                  {application.website ? (
-                                    <a
-                                      href={application.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="hover:underline"
-                                    >
-                                      Website
-                                    </a>
-                                  ) : (
-                                    "No website"
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                            <div className="font-medium text-gray-900">{application.id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <div className="font-medium">
-                              {application.first_name} {application.last_name}
-                            </div>
-                            <div className="text-gray-500 text-sm">{application.email}</div>
+                            <div className="font-medium text-gray-900">{application.gig_id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge variant="outline" className="capitalize">
-                              {application.industry || "Not specified"}
-                            </Badge>
+                            <div className="font-medium text-gray-900">{application.talent_id}</div>
                           </td>
                           <td className="py-4 px-6 text-gray-500">
                             {new Date(application.created_at).toLocaleDateString()}
@@ -557,7 +509,7 @@ export function AdminApplicationsClient({
                   </div>
                   <h3 className="text-lg font-medium mb-2">No Rejected Applications</h3>
                   <p className="text-gray-500">
-                    There are currently no rejected client applications.
+                    There are currently no rejected talent applications.
                   </p>
                 </div>
               ) : (
@@ -566,13 +518,13 @@ export function AdminApplicationsClient({
                     <thead>
                       <tr className="bg-gray-50">
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Company
+                          Application ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Contact
+                          Gig ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Industry
+                          Talent ID
                         </th>
                         <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
                           Applied Date
@@ -589,41 +541,13 @@ export function AdminApplicationsClient({
                       {filteredApplications.map((application) => (
                         <tr key={application.id} className="hover:bg-gray-50">
                           <td className="py-4 px-6">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 flex-shrink-0 rounded bg-gray-200 mr-3 flex items-center justify-center">
-                                <Building className="h-5 w-5 text-gray-500" />
-                              </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {application.company_name}
-                                </div>
-                                <div className="text-gray-500 text-sm">
-                                  {application.website ? (
-                                    <a
-                                      href={application.website}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="hover:underline"
-                                    >
-                                      Website
-                                    </a>
-                                  ) : (
-                                    "No website"
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                            <div className="font-medium text-gray-900">{application.id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <div className="font-medium">
-                              {application.first_name} {application.last_name}
-                            </div>
-                            <div className="text-gray-500 text-sm">{application.email}</div>
+                            <div className="font-medium text-gray-900">{application.gig_id}</div>
                           </td>
                           <td className="py-4 px-6">
-                            <Badge variant="outline" className="capitalize">
-                              {application.industry || "Not specified"}
-                            </Badge>
+                            <div className="font-medium text-gray-900">{application.talent_id}</div>
                           </td>
                           <td className="py-4 px-6 text-gray-500">
                             {new Date(application.created_at).toLocaleDateString()}
@@ -651,10 +575,10 @@ export function AdminApplicationsClient({
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Approve Client Application</DialogTitle>
+            <DialogTitle>Approve Talent Application</DialogTitle>
             <DialogDescription>
-              Are you sure you want to approve this client application? This will send an email to
-              the client with instructions to set up their account.
+              Are you sure you want to approve this talent application? This will notify the talent
+              and client.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -692,10 +616,9 @@ export function AdminApplicationsClient({
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Client Application</DialogTitle>
+            <DialogTitle>Reject Talent Application</DialogTitle>
             <DialogDescription>
-              Are you sure you want to reject this client application? This will send an email to
-              the client notifying them of the rejection.
+              Are you sure you want to reject this talent application? This will notify the talent.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
