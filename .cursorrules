@@ -37,6 +37,7 @@
 
 Before generating any code, ensure:
 - [ ] Referenced `TOTL_PROJECT_CONTEXT_PROMPT.md` for complete context
+- [ ] **🚨 CRITICAL: database_schema_audit.md is the SINGLE SOURCE OF TRUTH**
 - [ ] Used proper TypeScript types (no `any`)
 - [ ] Followed RLS-compatible query patterns
 - [ ] Separated database logic from React components
@@ -73,6 +74,8 @@ Before generating any code, ensure:
 ## 🚫 FORBIDDEN PATTERNS
 
 - Using `any` types in TypeScript
+- **🚨 Making database changes without updating `database_schema_audit.md`**
+- **🚨 Updating `types/database.ts` without referencing the audit file**
 - Direct database calls in React components
 - Bypassing RLS policies
 - Exposing service keys to client
@@ -82,6 +85,7 @@ Before generating any code, ensure:
 ## 📁 CRITICAL FILES TO REFERENCE
 
 - `TOTL_PROJECT_CONTEXT_PROMPT.md` - Complete project context
+- **🚨 `database_schema_audit.md` - SINGLE SOURCE OF TRUTH for database schema**
 - `types/database.ts` - Generated Supabase types
 - `supabase/migrations/` - Database schema history
 - `lib/supabase-client.ts` - Client configuration

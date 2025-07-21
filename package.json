@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "verify-schema": "bash scripts/verify-schema-truth.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "latest",
