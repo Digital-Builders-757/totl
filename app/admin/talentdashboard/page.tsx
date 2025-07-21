@@ -35,28 +35,28 @@ interface ApplicationWithGigAndClient {
   id: string;
   status: ApplicationStatus;
   created_at: string;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface BookingWithGigAndClient {
   id: string;
   date: string;
   compensation: number | null;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface PortfolioItemWithCaption {
@@ -156,11 +156,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => ["new", "under_review", "shortlisted"].includes(app.status))
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -169,8 +169,8 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "accepted")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs.id) || 0,
           title: app.gigs.title,
           company: app.gigs.clients?.company_name || "Private Client",
           location: app.gigs.location,
@@ -182,8 +182,8 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "rejected")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs.id) || 0,
           title: app.gigs.title,
           company: app.gigs.clients?.company_name || "Private Client",
           location: app.gigs.location,
