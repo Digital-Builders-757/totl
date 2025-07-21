@@ -1,24 +1,24 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useSearchParams } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
-import { ApplyAsTalentButton } from "@/components/apply-as-talent-button"
-import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
+import { Button } from "@/components/ui/button";
 
 export default function ChooseRolePage() {
-  const [mounted, setMounted] = useState(false)
-  const searchParams = useSearchParams()
-  const returnUrl = searchParams.get("returnUrl")
+  const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
-    return null
+    return null;
   }
 
   return (
@@ -33,7 +33,8 @@ export default function ChooseRolePage() {
           <div className="text-center mb-12">
             <h1 className="text-3xl font-bold mb-4">Choose Your Role</h1>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Select whether you're joining as talent looking for opportunities or a client looking to hire talent.
+              Select whether you&apos;re joining as talent looking for opportunities or a client looking
+              to hire talent.
             </p>
           </div>
 
@@ -49,8 +50,8 @@ export default function ChooseRolePage() {
               </div>
               <div className="p-6">
                 <p className="text-gray-600 mb-6">
-                  Create a profile, showcase your portfolio, and get discovered by top clients looking for talent like
-                  you.
+                  Create a profile, showcase your portfolio, and get discovered by top clients
+                  looking for talent like you.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
@@ -81,8 +82,8 @@ export default function ChooseRolePage() {
               </div>
               <div className="p-6">
                 <p className="text-gray-600 mb-6">
-                  Post gigs, browse our talent roster, and find the perfect models for your projects, campaigns, and
-                  events.
+                  Post gigs, browse our talent roster, and find the perfect models for your
+                  projects, campaigns, and events.
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
@@ -109,5 +110,5 @@ export default function ChooseRolePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

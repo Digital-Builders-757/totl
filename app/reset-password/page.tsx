@@ -1,61 +1,63 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { ArrowLeft } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import Image from "next/image"
-import { useAuth } from "@/components/auth-provider"
+import { useState } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ResetPassword() {
-  const [email, setEmail] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const { toast } = useToast()
-  const { resetPassword } = useAuth()
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { toast } = useToast();
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
-      const { error } = await resetPassword(email)
+      const { error } = await resetPassword(email);
 
       if (error) {
         toast({
           title: "Error",
           description: error.message,
           variant: "destructive",
-        })
+        });
       } else {
-        setIsSubmitted(true)
+        setIsSubmitted(true);
         toast({
           title: "Email sent",
           description: "Check your email for the password reset link",
-        })
+        });
       }
     } catch (error) {
-      console.error("Password reset error:", error)
+      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       <div className="container mx-auto px-4 py-12">
-        <Link href="/login" className="inline-flex items-center text-gray-600 hover:text-black mb-8">
+        <Link
+          href="/login"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to login
         </Link>
@@ -92,14 +94,19 @@ export default function ResetPassword() {
                   />
                 </div>
 
-                <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={isSubmitting}>
+                <Button
+                  type="submit"
+                  className="w-full bg-black text-white hover:bg-black/90"
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>
             ) : (
               <div className="text-center">
                 <p className="mb-6 text-gray-600">
-                  If an account exists with the email you entered, you will receive a password reset link shortly.
+                  If an account exists with the email you entered, you will receive a password reset
+                  link shortly.
                 </p>
                 <Button asChild variant="outline" className="w-full">
                   <Link href="/login">Return to Login</Link>
@@ -110,5 +117,5 @@ export default function ResetPassword() {
         </div>
       </div>
     </div>
-  )
+  );
 }

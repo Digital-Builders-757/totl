@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, ArrowRight, Clock, Users, Briefcase } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import { SafeImage } from "@/components/ui/safe-image"
+import { CheckCircle, ArrowRight, Clock, Users, Briefcase } from "lucide-react";
+import Link from "next/link";
+import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/ui/safe-image";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function GigSuccessPage() {
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   // Show toast notification when the page loads
   useEffect(() => {
@@ -17,8 +17,8 @@ export default function GigSuccessPage() {
       title: "Gig submitted!",
       description: "We'll review it shortly.",
       variant: "default",
-    })
-  }, [toast])
+    });
+  }, [toast]);
 
   // Mock data for the submitted gig
   const submittedGig = {
@@ -40,7 +40,7 @@ export default function GigSuccessPage() {
       "Refined facial features",
       "Previous luxury brand experience preferred",
     ],
-  }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -87,8 +87,8 @@ export default function GigSuccessPage() {
             </div>
             <h2 className="text-2xl font-semibold">Your gig has been submitted!</h2>
             <p className="text-gray-600 mt-2 max-w-md mx-auto">
-              Our team is reviewing your casting call. Once approved, it will appear on the talent dashboard for
-              submissions.
+              Our team is reviewing your casting call. Once approved, it will appear on the talent
+              dashboard for submissions.
             </p>
           </div>
 
@@ -163,28 +163,49 @@ export default function GigSuccessPage() {
                     Start browsing talent and bookmark profiles that fit your casting
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    Get a head start by exploring our diverse talent pool. Save profiles that match your requirements so
-                    you're ready when your gig is approved.
+                    Get a head start by exploring our diverse talent pool. Save profiles that match
+                    your requirements so you&apos;re ready when your gig is approved.
                   </p>
                   <Button asChild className="bg-black text-white hover:bg-black/90">
                     <Link href="/talent">
-                      <Users className="mr-2 h-4 w-4" /> Explore Talent <ArrowRight className="ml-2 h-4 w-4" />
+                      <Users className="mr-2 h-4 w-4" /> Explore Talent{" "}
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
                 <div className="md:w-1/3">
                   <div className="grid grid-cols-2 gap-2">
                     <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage src="/images/model-1.png" alt="Talent" fill className="object-cover" />
+                      <SafeImage
+                        src="/images/model-1.png"
+                        alt="Talent"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage src="/images/model-2.png" alt="Talent" fill className="object-cover" />
+                      <SafeImage
+                        src="/images/model-2.png"
+                        alt="Talent"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage src="/images/model-3.png" alt="Talent" fill className="object-cover" />
+                      <SafeImage
+                        src="/images/model-3.png"
+                        alt="Talent"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage src="/athletic-woman-stretching.png" alt="Talent" fill className="object-cover" />
+                      <SafeImage
+                        src="/athletic-woman-stretching.png"
+                        alt="Talent"
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                   </div>
                 </div>
@@ -194,5 +215,5 @@ export default function GigSuccessPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

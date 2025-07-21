@@ -1,31 +1,38 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useToast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function VerificationPendingPage() {
-  const searchParams = useSearchParams()
-  const email = searchParams.get("email") || ""
-  const [isSending, setIsSending] = useState(false)
-  const [justSent, setJustSent] = useState(false)
-  const [emailStatus, setEmailStatus] = useState<"unknown" | "sent" | "error">("unknown")
-  const { toast } = useToast()
-  const supabase = createClientComponentClient()
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+  const [isSending, setIsSending] = useState(false);
+  const [justSent, setJustSent] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<"unknown" | "sent" | "error">("unknown");
+  const { toast } = useToast();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     // Check if we just created the account
-    const justCreated = searchParams.get("new") === "true"
+    const justCreated = searchParams.get("new") === "true";
     if (justCreated) {
-      setEmailStatus("sent")
+      setEmailStatus("sent");
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleResendEmail = async () => {
     if (!email) {
@@ -33,11 +40,11 @@ export default function VerificationPendingPage() {
         title: "Error",
         description: "Email address is missing",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSending(true)
+    setIsSending(true);
 
     try {
       const { error } = await supabase.auth.resend({
@@ -46,35 +53,35 @@ export default function VerificationPendingPage() {
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
-      })
+      });
 
       if (error) {
-        console.error("Error resending verification email:", error)
-        throw new Error(error.message)
+        console.error("Error resending verification email:", error);
+        throw new Error(error.message);
       }
 
-      setJustSent(true)
-      setEmailStatus("sent")
+      setJustSent(true);
+      setEmailStatus("sent");
       toast({
         title: "Email sent",
         description: "Verification email has been sent to your inbox",
-      })
+      });
 
       setTimeout(() => {
-        setJustSent(false)
-      }, 30000)
+        setJustSent(false);
+      }, 30000);
     } catch (error) {
-      console.error("Error sending verification email:", error)
+      console.error("Error sending verification email:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
-      setEmailStatus("error")
+      });
+      setEmailStatus("error");
     } finally {
-      setIsSending(false)
+      setIsSending(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -92,12 +99,13 @@ export default function VerificationPendingPage() {
               </div>
               <CardTitle className="text-center">Verify your email</CardTitle>
               <CardDescription className="text-center">
-                We've sent a verification email to <strong>{email}</strong>
+                We&apos;ve sent a verification email to <strong>{email}</strong>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-center text-gray-600">
-                Please check your inbox and click the verification link to complete your registration.
+                Please check your inbox and click the verification link to complete your
+                registration.
               </p>
 
               {emailStatus === "sent" && (
@@ -115,23 +123,29 @@ export default function VerificationPendingPage() {
                 <Alert className="bg-amber-50 border-amber-200">
                   <AlertTriangle className="h-4 w-4 text-amber-600" />
                   <AlertDescription className="text-amber-700">
-                    There was an issue sending the verification email. Please try again or contact support.
+                    There was an issue sending the verification email. Please try again or contact
+                    support.
                   </AlertDescription>
                 </Alert>
               )}
 
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Didn't receive the email?</h4>
+                <h4 className="font-medium mb-2">Didn&apos;t receive the email?</h4>
                 <ul className="text-sm text-gray-600 space-y-2">
                   <li>• Check your spam or junk folder</li>
                   <li>• Make sure you entered the correct email address</li>
                   <li>• Wait a few minutes for the email to arrive</li>
-                  <li>• If you still don't see it, try clicking the resend button below</li>
+                  <li>• If you still don&apos;t see it, try clicking the resend button below</li>
                 </ul>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button onClick={handleResendEmail} disabled={isSending || justSent} className="w-full" variant="outline">
+              <Button
+                onClick={handleResendEmail}
+                disabled={isSending || justSent}
+                className="w-full"
+                variant="outline"
+              >
                 {isSending ? "Sending..." : justSent ? "Email sent" : "Resend verification email"}
               </Button>
               <div className="text-center text-sm text-gray-500">
@@ -145,5 +159,5 @@ export default function VerificationPendingPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

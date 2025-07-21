@@ -19,7 +19,7 @@ This is the canonical guide for writing clear, reusable, and performant code for
 
 - `/app` - Page routes, layouts, and data fetching (Server Components).
 - `/components` - Reusable, **presentational-only** UI components.
-    - `/components/ui` - Core `shadcn/ui` components.
+  - `/components/ui` - Core `shadcn/ui` components.
 - `/lib` - Supabase client, shared utilities, API helpers, and type definitions.
 - `/supabase/migrations` - Database schema changes (SQL files).
 - `/hooks` - Custom React hooks (e.g., `useEmailService`).
@@ -42,9 +42,9 @@ This is the canonical guide for writing clear, reusable, and performant code for
 - **Server Components**: Fetch data in Server Components (`page.tsx`, `layout.tsx`) wherever possible. This is the default in the App Router.
 - **`safeQuery` Wrapper**: Use the `lib/safe-query.ts` wrapper for all Supabase queries to ensure they are RLS-safe. See `docs/safe-supabase-queries.md` for more info.
 - **Client-Side State**:
-    - Use React's built-in state (`useState`, `useReducer`) for simple, local state.
-    - Use React Context for state that needs to be shared across a few components.
-    - For complex global state, consider a lightweight library like Zustand.
+  - Use React's built-in state (`useState`, `useReducer`) for simple, local state.
+  - Use React Context for state that needs to be shared across a few components.
+  - For complex global state, consider a lightweight library like Zustand.
 - **API Functions**: Keep reusable server-side functions (e.g., calls to Supabase) in `/lib/actions/` or `/lib/api/`.
 
 ---
@@ -79,4 +79,4 @@ This is the canonical guide for writing clear, reusable, and performant code for
 - **READMEs**: Add a `README.md` for new, complex features.
 - **Update These Docs**: This guide is a living document. If you establish a new best practice, update it here.
 
-By following these standards, we keep Totl Agency fast, clear, and beautiful — built to scale. ✨ 
+By following these standards, we keep Totl Agency fast, clear, and beautiful — built to scale. ✨

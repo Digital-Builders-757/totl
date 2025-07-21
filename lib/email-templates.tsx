@@ -3,21 +3,21 @@
 
 // Pure TypeScript approach - no React dependencies
 export interface EmailTemplateData {
-  name: string
-  loginUrl?: string
-  verificationUrl?: string
-  resetUrl?: string
-  gigTitle?: string
+  name: string;
+  loginUrl?: string;
+  verificationUrl?: string;
+  resetUrl?: string;
+  gigTitle?: string;
 }
 
 export interface EmailTemplate {
-  subject: string
-  html: string
+  subject: string;
+  html: string;
 }
 
 // Base template function
 function createBaseTemplate(title: string, content: string, previewText = ""): string {
-  const currentYear = new Date().getFullYear()
+  const currentYear = new Date().getFullYear();
 
   return `
 <!DOCTYPE html>
@@ -51,7 +51,7 @@ function createBaseTemplate(title: string, content: string, previewText = ""): s
     </div>
   </div>
 </body>
-</html>`
+</html>`;
 }
 
 // HTML escaping utility for security
@@ -62,8 +62,8 @@ function escapeHtml(text: string): string {
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#039;",
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
 export function generateWelcomeEmail(data: EmailTemplateData): EmailTemplate {
@@ -89,11 +89,15 @@ export function generateWelcomeEmail(data: EmailTemplateData): EmailTemplate {
       Best regards,<br>
       <strong>The TOTL Agency Team</strong>
     </p>
-  `
+  `;
   return {
     subject: "Welcome to TOTL Agency - Your Journey Begins Now",
-    html: createBaseTemplate("Welcome to TOTL Agency", content, "Your journey with TOTL Agency begins now"),
-  }
+    html: createBaseTemplate(
+      "Welcome to TOTL Agency",
+      content,
+      "Your journey with TOTL Agency begins now"
+    ),
+  };
 }
 
 export function generateVerificationEmail(data: EmailTemplateData): EmailTemplate {
@@ -132,15 +136,15 @@ export function generateVerificationEmail(data: EmailTemplateData): EmailTemplat
         </p>
       </div>
     </div>
-  `
+  `;
   return {
     subject: "Verify Your Email Address - TOTL Agency",
     html: createBaseTemplate(
       "Verify Your Email Address",
       content,
-      "Please verify your email address to complete your TOTL Agency registration",
+      "Please verify your email address to complete your TOTL Agency registration"
     ),
-  }
+  };
 }
 
 export function generatePasswordResetEmail(data: EmailTemplateData): EmailTemplate {
@@ -167,11 +171,15 @@ export function generatePasswordResetEmail(data: EmailTemplateData): EmailTempla
       Best regards,<br>
       <strong>The TOTL Agency Team</strong>
     </p>
-  `
+  `;
   return {
     subject: "Reset Your Password - TOTL Agency",
-    html: createBaseTemplate("Reset Your Password", content, "Instructions to reset your TOTL Agency password"),
-  }
+    html: createBaseTemplate(
+      "Reset Your Password",
+      content,
+      "Instructions to reset your TOTL Agency password"
+    ),
+  };
 }
 
 export function generateApplicationReceivedEmail(data: EmailTemplateData): EmailTemplate {
@@ -197,31 +205,35 @@ export function generateApplicationReceivedEmail(data: EmailTemplateData): Email
       Best regards,<br>
       <strong>The TOTL Agency Team</strong>
     </p>
-  `
+  `;
   return {
     subject: `Application Received - ${data.gigTitle || "TOTL Agency"}`,
-    html: createBaseTemplate("Application Received", content, "Your application has been received by TOTL Agency"),
-  }
+    html: createBaseTemplate(
+      "Application Received",
+      content,
+      "Your application has been received by TOTL Agency"
+    ),
+  };
 }
 
 export function generateEmailBatch(
   templates: Array<{
-    type: "welcome" | "verification" | "passwordReset" | "applicationReceived"
-    data: EmailTemplateData
-  }>,
+    type: "welcome" | "verification" | "passwordReset" | "applicationReceived";
+    data: EmailTemplateData;
+  }>
 ): EmailTemplate[] {
   return templates.map(({ type, data }) => {
     switch (type) {
       case "welcome":
-        return generateWelcomeEmail(data)
+        return generateWelcomeEmail(data);
       case "verification":
-        return generateVerificationEmail(data)
+        return generateVerificationEmail(data);
       case "passwordReset":
-        return generatePasswordResetEmail(data)
+        return generatePasswordResetEmail(data);
       case "applicationReceived":
-        return generateApplicationReceivedEmail(data)
+        return generateApplicationReceivedEmail(data);
       default:
-        throw new Error(`Unknown email template type: ${type}`)
+        throw new Error(`Unknown email template type: ${type}`);
     }
-  })
+  });
 }

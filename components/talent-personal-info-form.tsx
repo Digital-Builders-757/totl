@@ -1,37 +1,46 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { Info, Loader2 } from "lucide-react";
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Info, Loader2 } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
-import { useAuth } from "@/components/auth-provider"
+import { useState } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/components/ui/use-toast";
 
 interface PersonalInfoFormData {
-  phone: string
-  age: string
-  location: string
-  height: string
-  measurements: string
-  hairColor: string
-  eyeColor: string
-  shoeSize: string
-  languages: string[]
-  instagram: string
+  phone: string;
+  age: string;
+  location: string;
+  height: string;
+  measurements: string;
+  hairColor: string;
+  eyeColor: string;
+  shoeSize: string;
+  languages: string[];
+  instagram: string;
 }
 
 interface PersonalInfoFormProps {
-  initialData?: Partial<PersonalInfoFormData>
-  onSaved?: () => void
+  initialData?: Partial<PersonalInfoFormData>;
+  onSaved?: () => void;
 }
 
-export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: PersonalInfoFormProps) {
+export default function TalentPersonalInfoForm({
+  initialData = {},
+  onSaved,
+}: PersonalInfoFormProps) {
   const [formData, setFormData] = useState<PersonalInfoFormData>({
     phone: initialData.phone || "",
     age: initialData.age || "",
@@ -43,16 +52,16 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
     shoeSize: initialData.shoeSize || "",
     languages: initialData.languages || ["English"],
     instagram: initialData.instagram || "",
-  })
+  });
 
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
-  const { supabase, user } = useAuth()
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const { supabase, user } = useAuth();
 
   // Available options for select fields
-  const hairColorOptions = ["Black", "Brown", "Blonde", "Red", "Gray", "White", "Other"]
-  const eyeColorOptions = ["Brown", "Blue", "Green", "Hazel", "Gray", "Amber", "Other"]
+  const hairColorOptions = ["Black", "Brown", "Blonde", "Red", "Gray", "White", "Other"];
+  const eyeColorOptions = ["Brown", "Blue", "Green", "Hazel", "Gray", "Amber", "Other"];
   const languageOptions = [
     "English",
     "Spanish",
@@ -65,107 +74,107 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
     "Japanese",
     "Korean",
     "Italian",
-  ]
+  ];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    setFormData((prev) => ({ ...prev, [id]: value }))
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
 
     // Clear error when field is edited
     if (formErrors[id]) {
       setFormErrors((prev) => {
-        const updated = { ...prev }
-        delete updated[id]
-        return updated
-      })
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
     }
-  }
+  };
 
   const handleSelectChange = (id: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [id]: value }))
+    setFormData((prev) => ({ ...prev, [id]: value }));
 
     // Clear error when field is edited
     if (formErrors[id]) {
       setFormErrors((prev) => {
-        const updated = { ...prev }
-        delete updated[id]
-        return updated
-      })
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
     }
-  }
+  };
 
   const handleLanguageToggle = (language: string) => {
     setFormData((prev) => {
-      const currentLanguages = [...prev.languages]
+      const currentLanguages = [...prev.languages];
 
       if (currentLanguages.includes(language)) {
-        return { ...prev, languages: currentLanguages.filter((lang) => lang !== language) }
+        return { ...prev, languages: currentLanguages.filter((lang) => lang !== language) };
       } else {
-        return { ...prev, languages: [...currentLanguages, language] }
+        return { ...prev, languages: [...currentLanguages, language] };
       }
-    })
-  }
+    });
+  };
 
   const validateForm = () => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     // Validate phone (required and format)
     if (!formData.phone) {
-      errors.phone = "Phone number is required"
+      errors.phone = "Phone number is required";
     } else {
-      const phoneRegex = /^\+?[0-9\s\-()]+$/
+      const phoneRegex = /^\+?[0-9\s\-()]+$/;
       if (!phoneRegex.test(formData.phone)) {
-        errors.phone = "Please enter a valid phone number"
+        errors.phone = "Please enter a valid phone number";
       }
     }
 
     // Validate age
     if (!formData.age) {
-      errors.age = "Age is required"
+      errors.age = "Age is required";
     } else {
-      const ageNum = Number.parseInt(formData.age)
+      const ageNum = Number.parseInt(formData.age);
       if (isNaN(ageNum) || ageNum < 16 || ageNum > 100) {
-        errors.age = "Please enter a valid age between 16 and 100"
+        errors.age = "Please enter a valid age between 16 and 100";
       }
     }
 
     // Validate location
-    if (!formData.location.trim()) errors.location = "Location is required"
+    if (!formData.location.trim()) errors.location = "Location is required";
 
     // Validate height format if provided
     if (formData.height) {
-      const heightRegex = /^(\d+'\d+"|\d+\.\d+|\d+)$/
+      const heightRegex = /^(\d+'\d+"|\d+\.\d+|\d+)$/;
       if (!heightRegex.test(formData.height)) {
-        errors.height = "Please enter a valid height (e.g., 5'10\" or 178)"
+        errors.height = "Please enter a valid height (e.g., 5'10\" or 178)";
       }
     }
 
     // Validate Instagram handle format if provided
     if (formData.instagram) {
       if (formData.instagram.startsWith("@")) {
-        formData.instagram = formData.instagram.substring(1)
+        formData.instagram = formData.instagram.substring(1);
       }
 
-      const instagramRegex = /^[a-zA-Z0-9._]+$/
+      const instagramRegex = /^[a-zA-Z0-9._]+$/;
       if (!instagramRegex.test(formData.instagram)) {
-        errors.instagram = "Please enter a valid Instagram handle without the @ symbol"
+        errors.instagram = "Please enter a valid Instagram handle without the @ symbol";
       }
     }
 
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateForm()) {
       toast({
         title: "Form validation failed",
         description: "Please check the form for errors and try again.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (!user) {
@@ -173,11 +182,11 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
         title: "Authentication error",
         description: "You must be logged in to update your profile.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const { error } = await supabase
@@ -195,31 +204,31 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
           instagram: formData.instagram || null,
           updated_at: new Date().toISOString(),
         })
-        .eq("user_id", user.id)
+        .eq("user_id", user.id);
 
       if (error) {
-        throw error
+        throw error;
       }
 
       toast({
         title: "Profile updated",
         description: "Your personal information has been saved successfully.",
-      })
+      });
 
       if (onSaved) {
-        onSaved()
+        onSaved();
       }
     } catch (error) {
-      console.error("Error updating profile:", error)
+      console.error("Error updating profile:", error);
       toast({
         title: "Update failed",
         description: "There was a problem updating your profile. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -266,7 +275,9 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
             required
             className={formErrors.location ? "border-red-500" : ""}
           />
-          {formErrors.location && <p className="text-sm text-red-500 mt-1">{formErrors.location}</p>}
+          {formErrors.location && (
+            <p className="text-sm text-red-500 mt-1">{formErrors.location}</p>
+          )}
         </div>
       </div>
 
@@ -281,7 +292,7 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="w-[200px] text-xs">
-                    Enter your height in feet and inches (e.g., 5'10") or centimeters (e.g., 178)
+                    Enter your height in feet and inches (e.g., 5&apos;10&quot;) or centimeters (e.g., 178)
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -312,14 +323,22 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
               </Tooltip>
             </TooltipProvider>
           </Label>
-          <Input id="measurements" placeholder="e.g., 34-28-36" value={formData.measurements} onChange={handleChange} />
+          <Input
+            id="measurements"
+            placeholder="e.g., 34-28-36"
+            value={formData.measurements}
+            onChange={handleChange}
+          />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <Label htmlFor="hairColor">Hair Color</Label>
-          <Select value={formData.hairColor} onValueChange={(value) => handleSelectChange("hairColor", value)}>
+          <Select
+            value={formData.hairColor}
+            onValueChange={(value) => handleSelectChange("hairColor", value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select hair color" />
             </SelectTrigger>
@@ -334,7 +353,10 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
         </div>
         <div className="space-y-2">
           <Label htmlFor="eyeColor">Eye Color</Label>
-          <Select value={formData.eyeColor} onValueChange={(value) => handleSelectChange("eyeColor", value)}>
+          <Select
+            value={formData.eyeColor}
+            onValueChange={(value) => handleSelectChange("eyeColor", value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select eye color" />
             </SelectTrigger>
@@ -349,7 +371,12 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
         </div>
         <div className="space-y-2">
           <Label htmlFor="shoeSize">Shoe Size</Label>
-          <Input id="shoeSize" placeholder="e.g., 9 or 42" value={formData.shoeSize} onChange={handleChange} />
+          <Input
+            id="shoeSize"
+            placeholder="e.g., 9 or 42"
+            value={formData.shoeSize}
+            onChange={handleChange}
+          />
         </div>
       </div>
 
@@ -383,7 +410,9 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
                 <Info className="h-3.5 w-3.5 ml-1 inline text-gray-400" />
               </TooltipTrigger>
               <TooltipContent>
-                <p className="w-[200px] text-xs">Enter your Instagram username without the @ symbol</p>
+                <p className="w-[200px] text-xs">
+                  Enter your Instagram username without the @ symbol
+                </p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -398,11 +427,17 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
             className={`pl-8 ${formErrors.instagram ? "border-red-500" : ""}`}
           />
         </div>
-        {formErrors.instagram && <p className="text-sm text-red-500 mt-1">{formErrors.instagram}</p>}
+        {formErrors.instagram && (
+          <p className="text-sm text-red-500 mt-1">{formErrors.instagram}</p>
+        )}
       </div>
 
       <div className="pt-4 flex justify-end">
-        <Button type="submit" className="bg-black text-white hover:bg-black/90" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          className="bg-black text-white hover:bg-black/90"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
@@ -413,5 +448,5 @@ export default function TalentPersonalInfoForm({ initialData = {}, onSaved }: Pe
         </Button>
       </div>
     </form>
-  )
+  );
 }

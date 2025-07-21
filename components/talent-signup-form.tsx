@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
-import { Eye, EyeOff, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useAuth } from "./auth-provider"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { useAuth } from "./auth-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 // Define the form schema with validation rules
 const signupSchema = z
@@ -40,28 +40,27 @@ const signupSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
-  })
+  });
 
-type SignupFormValues = z.infer<typeof signupSchema>
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 interface TalentSignupFormProps {
-  onComplete?: () => void
+  onComplete?: () => void;
 }
 
 export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [serverError, setServerError] = useState<string | null>(null)
-  const router = useRouter()
-  const { toast } = useToast()
-  const { signUp } = useAuth()
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const router = useRouter();
+  const { toast } = useToast();
+  const { signUp } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    setError,
     watch,
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -73,17 +72,17 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       confirmPassword: "",
       agreeTerms: false,
     },
-  })
+  });
 
   // Watch the agreeTerms value to handle checkbox state
-  const agreeTerms = watch("agreeTerms")
+  const agreeTerms = watch("agreeTerms");
 
   const onSubmit = async (data: SignupFormValues) => {
-    setIsSubmitting(true)
-    setServerError(null)
+    setIsSubmitting(true);
+    setServerError(null);
 
     try {
-      console.log("Starting signup process for:", data.email)
+      console.log("Starting signup process for:", data.email);
 
       const { error } = await signUp(data.email, data.password, {
         data: {
@@ -92,38 +91,40 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
           role: "talent",
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-      })
+      });
 
       if (error) {
-        console.error("Signup error:", error)
+        console.error("Signup error:", error);
         if (error.message.includes("User already exists")) {
           setServerError(
             "A user with this email already exists. Please check your inbox for a verification email or try logging in."
-          )
+          );
         } else {
-          setServerError(error.message)
+          setServerError(error.message);
         }
-        setIsSubmitting(false)
-        return
+        setIsSubmitting(false);
+        return;
       }
 
       toast({
         title: "Account creation successful!",
         description: "Please check your email to verify your account before logging in.",
-      })
+      });
 
       if (onComplete) {
-        onComplete()
+        onComplete();
       }
 
-      router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`)
+      router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
-      console.error("Unexpected error during signup:", error)
-      setServerError(error instanceof Error ? error.message : "An unexpected error occurred. Please try again.")
+      console.error("Unexpected error during signup:", error);
+      setServerError(
+        error instanceof Error ? error.message : "An unexpected error occurred. Please try again."
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -146,7 +147,9 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
             className={errors.firstName ? "border-red-500" : ""}
             disabled={isSubmitting}
           />
-          {errors.firstName && <p className="text-sm text-red-500 mt-1">{errors.firstName.message}</p>}
+          {errors.firstName && (
+            <p className="text-sm text-red-500 mt-1">{errors.firstName.message}</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="lastName" className={errors.lastName ? "text-red-500" : ""}>
@@ -159,7 +162,9 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
             className={errors.lastName ? "border-red-500" : ""}
             disabled={isSubmitting}
           />
-          {errors.lastName && <p className="text-sm text-red-500 mt-1">{errors.lastName.message}</p>}
+          {errors.lastName && (
+            <p className="text-sm text-red-500 mt-1">{errors.lastName.message}</p>
+          )}
         </div>
       </div>
 
@@ -229,7 +234,9 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
             {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
-        {errors.confirmPassword && <p className="text-sm text-red-500 mt-1">{errors.confirmPassword.message}</p>}
+        {errors.confirmPassword && (
+          <p className="text-sm text-red-500 mt-1">{errors.confirmPassword.message}</p>
+        )}
       </div>
 
       <div className="flex items-start space-x-2">
@@ -243,8 +250,8 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
                 name: "agreeTerms",
                 value: checked,
               },
-            } as any
-            register("agreeTerms").onChange(event)
+            } as React.ChangeEvent<HTMLInputElement>;
+            register("agreeTerms").onChange(event);
           }}
           className={errors.agreeTerms ? "border-red-500" : ""}
           disabled={isSubmitting}
@@ -287,15 +294,20 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       <Alert className="bg-blue-50 border-blue-200">
         <AlertCircle className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          After signing up, you'll need to verify your email address and complete your profile in your dashboard.
+          After signing up, you&apos;ll need to verify your email address and complete your profile in
+          your dashboard.
         </AlertDescription>
       </Alert>
 
       <div className="pt-4 flex justify-end">
-        <Button type="submit" className="bg-black text-white hover:bg-black/90" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          className="bg-black text-white hover:bg-black/90"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Creating Account..." : "Create Free Account"}
         </Button>
       </div>
     </form>
-  )
+  );
 }

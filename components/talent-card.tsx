@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { User, Profile, TalentProfile } from "@/types/database"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, Instagram, Globe } from "lucide-react"
+import { MapPin, Instagram, Globe } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Profile, TalentProfile } from "@/types/database";
 
 interface TalentCardProps {
-  user: User
-  profile: Profile
-  talentProfile: TalentProfile
-  onViewProfile?: () => void
+  user: User;
+  profile: Profile;
+  talentProfile: TalentProfile;
+  onViewProfile?: () => void;
 }
 
 export function TalentCard({ user, profile, talentProfile, onViewProfile }: TalentCardProps) {
@@ -19,7 +19,7 @@ export function TalentCard({ user, profile, talentProfile, onViewProfile }: Tale
     .split(" ")
     .map((n) => n[0])
     .join("")
-    .toUpperCase()
+    .toUpperCase();
 
   return (
     <Card className="w-full max-w-sm">
@@ -83,5 +83,5 @@ export function TalentCard({ user, profile, talentProfile, onViewProfile }: Tale
         )}
       </CardFooter>
     </Card>
-  )
-} 
+  );
+}

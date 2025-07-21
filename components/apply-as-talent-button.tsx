@@ -1,16 +1,22 @@
-"use client"
+"use client";
 
-import { Button, type ButtonProps } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { UserPlus } from "lucide-react"
-import { useState } from "react"
-import TalentSignupForm from "@/components/talent-signup-form"
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
+import TalentSignupForm from "@/components/talent-signup-form";
+import { Button, type ButtonProps } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ApplyAsTalentButtonProps extends ButtonProps {
-  showIcon?: boolean
-  variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive"
-  size?: "default" | "sm" | "lg" | "icon"
+  showIcon?: boolean;
+  variant?: "default" | "outline" | "secondary" | "ghost" | "link" | "destructive";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export function ApplyAsTalentButton({
@@ -20,11 +26,17 @@ export function ApplyAsTalentButton({
   className,
   ...props
 }: ApplyAsTalentButtonProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} variant={variant} size={size} className={`${className || ""}`} {...props}>
+      <Button
+        onClick={() => setIsOpen(true)}
+        variant={variant}
+        size={size}
+        className={`${className || ""}`}
+        {...props}
+      >
         {showIcon && <UserPlus className="mr-2 h-4 w-4" />}
         Apply as Talent
       </Button>
@@ -36,7 +48,7 @@ export function ApplyAsTalentButton({
               <DialogHeader className="mb-4">
                 <DialogTitle>Create Your Talent Account</DialogTitle>
                 <DialogDescription>
-                  Apply to join our talent roster. It's completely free to create an account.
+                  Apply to join our talent roster. It&apos;s completely free to create an account.
                 </DialogDescription>
               </DialogHeader>
 
@@ -46,5 +58,5 @@ export function ApplyAsTalentButton({
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

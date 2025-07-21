@@ -1,10 +1,5 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
-  MoreVertical,
   Eye,
   CheckCircle,
   Settings,
@@ -16,45 +11,85 @@ import {
   Briefcase,
   AlertCircle,
   Edit,
-  FileText,
   DollarSign,
-} from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
-import { Avatar } from "@/components/ui/avatar"
-import { RequireAuth } from "@/components/require-auth"
-import { EmailVerificationReminder } from "@/components/email-verification-reminder"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import type { Database, TalentProfile } from "@/types/database"
-import { TalentDashboardClient } from "./talent-dashboard-client"
+} from "lucide-react";
+import { cookies } from "next/headers";
+import Link from "next/link";
+import { TalentDashboardClient } from "./talent-dashboard-client";
+import { EmailVerificationReminder } from "@/components/email-verification-reminder";
+import { RequireAuth } from "@/components/require-auth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { SafeImage } from "@/components/ui/safe-image";
+import type { Database, TalentProfile, ApplicationStatus } from "@/types/database";
+
+// Type definitions for joined data
+interface ApplicationWithGigAndClient {
+  id: string;
+  status: ApplicationStatus;
+  created_at: string;
+  gigs: {
+    id: string;
+    title: string;
+    location: string;
+    clients: {
+      company_name: string;
+    } | null;
+  };
+}
+
+interface BookingWithGigAndClient {
+  id: string;
+  date: string;
+  compensation: number | null;
+  gigs: {
+    id: string;
+    title: string;
+    location: string;
+    clients: {
+      company_name: string;
+    } | null;
+  };
+}
+
+interface PortfolioItemWithCaption {
+  image_url: string;
+  caption: string | null;
+}
+
+interface MainProfileData {
+  avatar_url: string | null;
+}
 
 export default async function TalentDashboard() {
-  const supabase = createServerComponentClient<Database>({ cookies })
+  const supabase = createServerComponentClient<Database>({ cookies });
 
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
-  let profileData: TalentProfile | null = null
-  let isProfileComplete = false
-  let applicationsData: any[] = []
-  let bookingsData: any[] = []
-  let portfolioData: any[] = []
-  let mainProfileData: { avatar_url: string | null } | null = null
+  let profileData: TalentProfile | null = null;
+  let isProfileComplete = false;
+  let applicationsData: ApplicationWithGigAndClient[] = [];
+  let bookingsData: BookingWithGigAndClient[] = [];
+  let portfolioData: PortfolioItemWithCaption[] = [];
+  let mainProfileData: MainProfileData | null = null;
 
   if (user) {
-    const [
-      profileResult,
-      applicationsResult,
-      bookingsResult,
-      portfolioResult,
-      mainProfileResult,
-    ] = await Promise.all([
-      supabase.from("talent_profiles").select("*").eq("user_id", user.id).single(),
-      supabase
-        .from("applications")
-        .select(
-          `
+    const [profileResult, applicationsResult, bookingsResult, portfolioResult, mainProfileResult] =
+      await Promise.all([
+        supabase.from("talent_profiles").select("*").eq("user_id", user.id).single(),
+        supabase
+          .from("applications")
+          .select(
+            `
           id,
           status,
           created_at,
@@ -67,12 +102,12 @@ export default async function TalentDashboard() {
             )
           )
         `
-        )
-        .eq("talent_id", user.id),
-      supabase
-        .from("bookings")
-        .select(
-          `
+          )
+          .eq("talent_id", user.id),
+        supabase
+          .from("bookings")
+          .select(
+            `
           id,
           date,
           compensation,
@@ -85,29 +120,35 @@ export default async function TalentDashboard() {
             )
           )
         `
-        )
-        .eq("talent_id", user.id)
-        .eq("status", "confirmed"),
-      supabase.from("portfolio_items").select("image_url, caption").eq("talent_id", user.id).limit(4),
-      supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
-    ])
+          )
+          .eq("talent_id", user.id)
+          .eq("status", "confirmed"),
+        supabase
+          .from("portfolio_items")
+          .select("image_url, caption")
+          .eq("talent_id", user.id)
+          .limit(4),
+        supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
+      ]);
 
-    if (profileResult.error) console.error("Error fetching talent profile:", profileResult.error)
-    if (applicationsResult.error) console.error("Error fetching applications:", applicationsResult.error)
-    if (bookingsResult.error) console.error("Error fetching bookings:", bookingsResult.error)
-    if (portfolioResult.error) console.error("Error fetching portfolio:", portfolioResult.error)
-    if (mainProfileResult.error) console.error("Error fetching main profile:", mainProfileResult.error)
+    if (profileResult.error) console.error("Error fetching talent profile:", profileResult.error);
+    if (applicationsResult.error)
+      console.error("Error fetching applications:", applicationsResult.error);
+    if (bookingsResult.error) console.error("Error fetching bookings:", bookingsResult.error);
+    if (portfolioResult.error) console.error("Error fetching portfolio:", portfolioResult.error);
+    if (mainProfileResult.error)
+      console.error("Error fetching main profile:", mainProfileResult.error);
 
     if (profileResult.data) {
-      profileData = profileResult.data
-      const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"]
-      isProfileComplete = requiredFields.every((field) => !!profileData?.[field])
+      profileData = profileResult.data;
+      const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"];
+      isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
     }
 
-    applicationsData = applicationsResult.data || []
-    bookingsData = bookingsResult.data || []
-    portfolioData = portfolioResult.data || []
-    mainProfileData = mainProfileResult.data || null
+    applicationsData = applicationsResult.data || [];
+    bookingsData = bookingsResult.data || [];
+    portfolioData = portfolioResult.data || [];
+    mainProfileData = mainProfileResult.data || null;
   }
 
   const gigs = {
@@ -150,25 +191,32 @@ export default async function TalentDashboard() {
           status: app.status,
           image: "/gig-editorial.png",
         })) || [],
-  }
+  };
 
   const upcomingBookings =
     bookingsData?.map((booking) => ({
       id: booking.id,
       title: booking.gigs.title,
       company: booking.gigs.clients?.company_name || "Private Client",
-      date: new Date(booking.date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-      time: new Date(booking.date).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+      date: new Date(booking.date).toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+      time: new Date(booking.date).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
       location: booking.gigs.location,
       compensation: `$${booking.compensation}`,
       image: "/gig-jewelry.png",
-    })) || []
+    })) || [];
 
   const portfolioHighlights =
     portfolioData?.map((item) => ({
       image: item.image_url,
       caption: item.caption,
-    })) || []
+    })) || [];
 
   return (
     <RequireAuth>
@@ -191,13 +239,22 @@ export default async function TalentDashboard() {
                   <Link href="/admin/talentdashboard" className="text-black font-medium">
                     Dashboard
                   </Link>
-                  <Link href="/admin/talentdashboard/profile" className="text-gray-600 hover:text-black">
+                  <Link
+                    href="/admin/talentdashboard/profile"
+                    className="text-gray-600 hover:text-black"
+                  >
                     Profile
                   </Link>
-                  <Link href="/admin/talentdashboard/portfolio" className="text-gray-600 hover:text-black">
+                  <Link
+                    href="/admin/talentdashboard/portfolio"
+                    className="text-gray-600 hover:text-black"
+                  >
                     Portfolio
                   </Link>
-                  <Link href="/admin/talentdashboard/applications" className="text-gray-600 hover:text-black">
+                  <Link
+                    href="/admin/talentdashboard/applications"
+                    className="text-gray-600 hover:text-black"
+                  >
                     Applications
                   </Link>
                 </nav>
@@ -219,7 +276,9 @@ export default async function TalentDashboard() {
                         className="mr-2"
                       />
                       <span className="hidden md:inline">
-                        {profileData ? `${profileData.first_name} ${profileData.last_name}` : "Talent"}
+                        {profileData
+                          ? `${profileData.first_name} ${profileData.last_name}`
+                          : "Talent"}
                       </span>
                     </button>
                   </DropdownMenuTrigger>
@@ -252,7 +311,10 @@ export default async function TalentDashboard() {
             <Alert className="mb-6 bg-amber-50 border-amber-200">
               <AlertCircle className="h-4 w-4 text-amber-600" />
               <AlertDescription className="text-amber-800 flex items-center justify-between">
-                <span>Your profile is incomplete. Complete your profile to increase your chances of being discovered.</span>
+                <span>
+                  Your profile is incomplete. Complete your profile to increase your chances of
+                  being discovered.
+                </span>
                 <Button asChild variant="outline" size="sm" className="ml-4">
                   <Link href="/admin/talentdashboard/profile">
                     <Edit className="mr-2 h-4 w-4" /> Complete Profile
@@ -307,7 +369,9 @@ export default async function TalentDashboard() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
                       <h2 className="text-2xl font-bold mb-1">
-                        {profileData ? `${profileData.first_name} ${profileData.last_name}` : "Your Name"}
+                        {profileData
+                          ? `${profileData.first_name} ${profileData.last_name}`
+                          : "Your Name"}
                       </h2>
                       <p className="text-gray-600">Editorial & Runway Model</p>
                     </div>
@@ -402,7 +466,9 @@ export default async function TalentDashboard() {
                     <p className="text-sm text-gray-600 mb-2">{booking.company}</p>
                     <div className="flex items-center text-xs text-gray-500">
                       <Calendar className="mr-1.5 h-3 w-3" />
-                      <span>{booking.date} at {booking.time}</span>
+                      <span>
+                        {booking.date} at {booking.time}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -448,5 +514,5 @@ export default async function TalentDashboard() {
         </div>
       </div>
     </RequireAuth>
-  )
-} 
+  );
+}

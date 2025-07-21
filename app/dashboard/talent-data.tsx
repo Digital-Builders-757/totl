@@ -1,32 +1,32 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 type TalentProfile = {
-  id: string
-  bio: string | null
-  skills: string[] | null
-  experience_years: number | null
-  portfolio_url: string | null
-}
+  id: string;
+  bio: string | null;
+  skills: string[] | null;
+  experience_years: number | null;
+  portfolio_url: string | null;
+};
 
 type Application = {
-  id: string
-  status: string
-  created_at: string
+  id: string;
+  status: string;
+  created_at: string;
   gigs: {
-    id: string
-    title: string
-    company_name: string
-  }
-}
+    id: string;
+    title: string;
+    company_name: string;
+  };
+};
 
 export function TalentData({
   talentProfile,
   applications,
 }: {
-  talentProfile: TalentProfile | null
-  applications: Application[] | null
+  talentProfile: TalentProfile | null;
+  applications: Application[] | null;
 }) {
   return (
     <div className="space-y-6">
@@ -38,7 +38,7 @@ export function TalentData({
         <CardContent>
           {!talentProfile ? (
             <div className="space-y-4">
-              <p className="text-gray-500">You haven't created a talent profile yet.</p>
+              <p className="text-gray-500">You haven&apos;t created a talent profile yet.</p>
               <Link
                 href="/talent/create-profile"
                 className="inline-block px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
@@ -72,7 +72,9 @@ export function TalentData({
                 <div>
                   <h3 className="font-medium mb-1">Experience</h3>
                   <p className="text-gray-600">
-                    {talentProfile.experience_years ? `${talentProfile.experience_years} years` : "Not specified"}
+                    {talentProfile.experience_years
+                      ? `${talentProfile.experience_years} years`
+                      : "Not specified"}
                   </p>
                 </div>
 
@@ -100,16 +102,19 @@ export function TalentData({
       <Card>
         <CardHeader>
           <CardTitle>Your Applications</CardTitle>
-          <CardDescription>Gigs you've applied to</CardDescription>
+          <CardDescription>Gigs you&apos;ve applied to</CardDescription>
         </CardHeader>
         <CardContent>
           {!applications || applications.length === 0 ? (
-            <p className="text-gray-500">You haven't applied to any gigs yet.</p>
+            <p className="text-gray-500">You haven&apos;t applied to any gigs yet.</p>
           ) : (
             <ul className="space-y-4">
               {applications.map((application) => (
                 <li key={application.id} className="border-b pb-4 last:border-b-0 last:pb-0">
-                  <Link href={`/gigs/${application.gigs.id}`} className="font-medium hover:underline">
+                  <Link
+                    href={`/gigs/${application.gigs.id}`}
+                    className="font-medium hover:underline"
+                  >
                     {application.gigs.title}
                   </Link>
                   <p className="text-sm text-gray-600 mt-1">{application.gigs.company_name}</p>
@@ -117,7 +122,7 @@ export function TalentData({
                     <Badge
                       variant={
                         application.status === "accepted"
-                          ? "success"
+                          ? "default"
                           : application.status === "rejected"
                             ? "destructive"
                             : "default"
@@ -136,5 +141,5 @@ export function TalentData({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

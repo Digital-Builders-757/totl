@@ -1,41 +1,41 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type React from "react";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import Image from "next/image"
-import { useAuth } from "@/components/auth-provider"
+import { useState } from "react";
+import { useAuth } from "@/components/auth-provider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function UpdatePassword() {
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSuccess, setIsSuccess] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
-  const supabase = createClientComponentClient()
-  const { session } = useAuth()
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+  const supabase = createClientComponentClient();
+  const { session } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (password !== confirmPassword) {
       toast({
         title: "Passwords don't match",
         description: "Please make sure your passwords match.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (password.length < 8) {
@@ -43,49 +43,52 @@ export default function UpdatePassword() {
         title: "Password too short",
         description: "Password must be at least 8 characters long.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({ password })
+      const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
         toast({
           title: "Error",
           description: error.message,
           variant: "destructive",
-        })
+        });
       } else {
-        setIsSuccess(true)
+        setIsSuccess(true);
         toast({
           title: "Password updated",
           description: "Your password has been successfully updated.",
-        })
+        });
 
         // Redirect to login after a short delay
         setTimeout(() => {
-          router.push("/login")
-        }, 3000)
+          router.push("/login");
+        }, 3000);
       }
     } catch (error) {
-      console.error("Password update error:", error)
+      console.error("Password update error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       <div className="container mx-auto px-4 py-12">
-        <Link href="/login" className="inline-flex items-center text-gray-600 hover:text-black mb-8">
+        <Link
+          href="/login"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to login
         </Link>
@@ -131,7 +134,9 @@ export default function UpdatePassword() {
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
+                    <p className="text-xs text-gray-500">
+                      Password must be at least 8 characters long
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -155,7 +160,11 @@ export default function UpdatePassword() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full bg-black text-white hover:bg-black/90" disabled={isSubmitting}>
+                  <Button
+                    type="submit"
+                    className="w-full bg-black text-white hover:bg-black/90"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? "Updating..." : "Update Password"}
                   </Button>
                 </form>
@@ -178,5 +187,5 @@ export default function UpdatePassword() {
         </div>
       </div>
     </div>
-  )
+  );
 }

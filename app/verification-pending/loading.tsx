@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function VerificationPendingLoading() {
   return (
@@ -29,5 +29,5 @@ export default function VerificationPendingLoading() {
         </div>
       </div>
     </div>
-  )
+  );
 }

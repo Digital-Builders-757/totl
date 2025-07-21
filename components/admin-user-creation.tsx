@@ -1,38 +1,51 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { AlertCircle } from "lucide-react";
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AdminUserCreation() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [role, setRole] = useState<"talent" | "client" | "admin">("talent")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const { toast } = useToast()
-  const supabase = createClientComponentClient()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [role, setRole] = useState<"talent" | "client" | "admin">("talent");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const { toast } = useToast();
+  const supabase = createClientComponentClient();
 
   const handleCreateUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-    setSuccess(null)
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
 
     try {
-      console.log("Creating user with email:", email)
+      console.log("Creating user with email:", email);
 
       // Try to create user with direct API call
       const { data, error } = await supabase.functions.invoke("create-user", {
@@ -43,39 +56,39 @@ export default function AdminUserCreation() {
           lastName,
           role,
         },
-      })
+      });
 
       if (error) {
-        console.error("Error creating user:", error)
-        setError(error.message || "Failed to create user")
-        return
+        console.error("Error creating user:", error);
+        setError(error.message || "Failed to create user");
+        return;
       }
 
-      console.log("User creation response:", data)
+      console.log("User creation response:", data);
 
       if (data?.error) {
-        setError(data.error)
-        return
+        setError(data.error);
+        return;
       }
 
-      setSuccess(`User ${email} created successfully!`)
+      setSuccess(`User ${email} created successfully!`);
       toast({
         title: "User created",
         description: `User ${email} has been created successfully.`,
-      })
+      });
 
       // Reset form
-      setEmail("")
-      setPassword("")
-      setFirstName("")
-      setLastName("")
+      setEmail("");
+      setPassword("");
+      setFirstName("");
+      setLastName("");
     } catch (err) {
-      console.error("Unexpected error:", err)
-      setError(err instanceof Error ? err.message : "An unexpected error occurred")
+      console.error("Unexpected error:", err);
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -142,7 +155,10 @@ export default function AdminUserCreation() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as "talent" | "client" | "admin")}>
+            <Select
+              value={role}
+              onValueChange={(value) => setRole(value as "talent" | "client" | "admin")}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
@@ -159,8 +175,10 @@ export default function AdminUserCreation() {
         </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <p className="text-sm text-gray-500">This will create a new user account without email verification.</p>
+        <p className="text-sm text-gray-500">
+          This will create a new user account without email verification.
+        </p>
       </CardFooter>
     </Card>
-  )
+  );
 }

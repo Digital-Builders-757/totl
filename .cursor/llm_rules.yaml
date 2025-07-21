@@ -92,10 +92,12 @@ coding_style:
     - "TypeScript Interfaces/Types: `PascalCase` (e.g., `interface TalentProfileProps`)."
   formatting:
     - "Indentation: 2 spaces."
-    - "Use Prettier for code formatting (configured in the project)."
+    - "Use Prettier for code formatting (configured in the project). Run 'npm run format' before pushing."
   comments:
     - "Use JSDoc for documenting complex functions, components, and props."
     - "Add inline comments only for non-obvious logic."
+  linting:
+    - "Run ESLint (npm run lint) and Prettier (npm run format) before every commit, PR, and merge. All code must pass lint and formatting checks."
 
 component_standards:
   props:
@@ -151,4 +153,7 @@ anti_patterns:
     correct_approach: "Use `select('*')` to fetch the complete data model, ensuring it fully satisfies the TypeScript interface."
   - name: "Mixing Server and Client Component logic"
     description: "Do not use React hooks that depend on the browser (like `useState`, `useEffect`, `onClick`) inside a component that is not explicitly marked with the `'use client'` directive at the top of the file."
-    correct_approach: "Keep data-fetching and server-side logic in Server Components. If a component requires interactivity or state, extract it into a separate Client Component and import it into the Server Component." 
+    correct_approach: "Keep data-fetching and server-side logic in Server Components. If a component requires interactivity or state, extract it into a separate Client Component and import it into the Server Component."
+
+testing_and_ci:
+  - "All PRs and merges must pass the GitHub Actions lint and format checks. These are enforced via workflows in .github/workflows/."

@@ -1,13 +1,13 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import ClientLayout from "./client-layout"
-import { ThemeProvider } from "@/components/theme-provider"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import type React from "react";
+import ClientLayout from "./client-layout";
+import { ThemeProvider } from "@/components/theme-provider";
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://www.thetotlagency.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com"),
   title: "TOTL Agency - Premium Modeling Agency",
   description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
   openGraph: {
@@ -30,14 +30,10 @@ export const metadata: Metadata = {
     description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
     images: ["/images/totl-logo-new.png"],
   },
-  generator: 'v0.dev'
-}
+  generator: "v0.dev",
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -51,8 +47,7 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
 
-
-import './globals.css'
+import "./globals.css";

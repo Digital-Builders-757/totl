@@ -1,28 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Gig } from "@/types/database"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import { Gig } from "@/types/database";
 
 interface ApplicationFormProps {
-  gig: Gig
-  onSuccess?: () => void
-  onCancel?: () => void
+  gig: Gig;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
 export function ApplicationForm({ gig, onSuccess, onCancel }: ApplicationFormProps) {
-  const [message, setMessage] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const router = useRouter()
-  const { toast } = useToast()
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const response = await fetch("/api/applications", {
@@ -34,30 +34,30 @@ export function ApplicationForm({ gig, onSuccess, onCancel }: ApplicationFormPro
           gig_id: gig.id,
           message,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to submit application")
+        throw new Error("Failed to submit application");
       }
 
       toast({
         title: "Application submitted",
         description: "Your application has been submitted successfully.",
-      })
+      });
 
-      onSuccess?.()
-      router.refresh()
+      onSuccess?.();
+      router.refresh();
     } catch (error) {
-      console.error("Error submitting application:", error)
+      console.error("Error submitting application:", error);
       toast({
         title: "Error",
         description: "Failed to submit application. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -94,5 +94,5 @@ export function ApplicationForm({ gig, onSuccess, onCancel }: ApplicationFormPro
         </CardFooter>
       </form>
     </Card>
-  )
-} 
+  );
+}

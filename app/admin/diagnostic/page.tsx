@@ -1,7 +1,7 @@
-import { Suspense } from "react"
-import AuthSchemaCheck from "@/components/auth-schema-check"
-import DirectUserCreation from "@/components/direct-user-creation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Suspense } from "react";
+import AuthSchemaCheck from "@/components/auth-schema-check";
+import DirectUserCreation from "@/components/direct-user-creation";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DiagnosticPage() {
   return (
@@ -19,7 +19,9 @@ export default function DiagnosticPage() {
         <Card>
           <CardHeader>
             <CardTitle>Environment Variables</CardTitle>
-            <CardDescription>Check if your Supabase environment variables are properly set</CardDescription>
+            <CardDescription>
+              Check if your Supabase environment variables are properly set
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
@@ -50,5 +52,5 @@ export default function DiagnosticPage() {
         </Suspense>
       </div>
     </div>
-  )
+  );
 }

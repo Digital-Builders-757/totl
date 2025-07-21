@@ -7,6 +7,7 @@ This document outlines the authentication system for the Totl Agency platform, l
 ## 🚀 Overview
 
 The system handles the full user lifecycle:
+
 - User registration (signup)
 - User authentication (signin)
 - Password reset
@@ -59,9 +60,9 @@ For a detailed breakdown of this flow, see **`docs/ONBOARDING.md`**.
 - **Email Verification**: Mandatory for all new accounts. A reminder is shown until the email is verified.
 - **Session Management**: Handled by `@supabase/auth-helpers-nextjs`, which securely manages JWTs in cookies.
 - **Supabase Auth Settings**:
-    - "Confirm email" is enabled.
-    - Custom email templates are configured for verification and password reset.
-    - Redirect URLs are set in the Supabase dashboard (e.g., `/auth/callback`, `/update-password`).
+  - "Confirm email" is enabled.
+  - Custom email templates are configured for verification and password reset.
+  - Redirect URLs are set in the Supabase dashboard (e.g., `/auth/callback`, `/update-password`).
 - **Error Handling**: The system provides user-friendly error messages (e.g., "Invalid credentials") while logging detailed errors for debugging.
 
 ---

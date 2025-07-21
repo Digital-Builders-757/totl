@@ -11,17 +11,23 @@
  */
 export function getSafeImageUrl(
   url?: string | null,
-  { fallback = "/placeholder.jpg", type = "placeholder", query = "image", width = 400, height = 400 } = {},
+  {
+    fallback = "/placeholder.jpg",
+    type = "placeholder",
+    query = "image",
+    width = 400,
+    height = 400,
+  } = {}
 ): string {
   // Check if URL is valid
   if (url && url.trim() !== "") {
-    return url
+    return url;
   }
 
   // Return appropriate fallback
   if (type === "placeholder") {
-    return `/placeholder.svg?height=${height}&width=${width}&query=${query}`
+    return `/placeholder.svg?height=${height}&width=${width}&query=${query}`;
   }
 
-  return fallback
+  return fallback;
 }

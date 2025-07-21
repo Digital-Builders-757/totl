@@ -1,28 +1,28 @@
-"use server"
+"use server";
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function createProfile(formData: {
-  full_name: string
-  bio?: string
-  role: "talent" | "client"
-  location?: string
-  website?: string
+  full_name: string;
+  bio?: string;
+  role: "talent" | "client";
+  location?: string;
+  website?: string;
 }) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createServerActionClient({ cookies });
 
   // Get the current user
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect("/login")
+    redirect("/login");
   }
 
-  const userId = session.user.id
+  const userId = session.user.id;
 
   // Create the profile
   const { error } = await supabase.from("profiles").insert({
@@ -32,22 +32,22 @@ export async function createProfile(formData: {
     role: formData.role,
     location: formData.location || null,
     website: formData.website || null,
-  })
+  });
 
   if (error) {
-    console.error("Error creating profile:", error)
-    throw new Error("Failed to create profile. Please try again.")
+    console.error("Error creating profile:", error);
+    throw new Error("Failed to create profile. Please try again.");
   }
 
   // If role is talent, create a talent profile
   if (formData.role === "talent") {
     const { error: talentError } = await supabase.from("talent_profiles").insert({
       user_id: userId,
-    })
+    });
 
     if (talentError) {
-      console.error("Error creating talent profile:", talentError)
-      throw new Error("Failed to create talent profile. Please try again.")
+      console.error("Error creating talent profile:", talentError);
+      throw new Error("Failed to create talent profile. Please try again.");
     }
   }
 
@@ -55,13 +55,13 @@ export async function createProfile(formData: {
   if (formData.role === "client") {
     const { error: clientError } = await supabase.from("client_profiles").insert({
       user_id: userId,
-    })
+    });
 
     if (clientError) {
-      console.error("Error creating client profile:", clientError)
-      throw new Error("Failed to create client profile. Please try again.")
+      console.error("Error creating client profile:", clientError);
+      throw new Error("Failed to create client profile. Please try again.");
     }
   }
 
-  return { success: true }
+  return { success: true };
 }

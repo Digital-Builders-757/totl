@@ -1,15 +1,37 @@
-"use client"
+"use client";
 
-import type React from "react"
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { UserRole } from "@/types/database";
+
+// Type definitions for user creation
+interface CreatedUser {
+  id: string;
+  email: string;
+  full_name: string;
+  role: UserRole;
+  created_at: string;
+}
+
+interface UserCreationResult {
+  success: boolean;
+  message: string;
+  details?: CreatedUser | Error;
+}
 
 export default function DirectUserCreation() {
   const [formData, setFormData] = useState({
@@ -17,42 +39,38 @@ export default function DirectUserCreation() {
     password: "",
     firstName: "",
     lastName: "",
-    role: "talent",
-  })
-  const [isLoading, setIsLoading] = useState(false)
-  const [result, setResult] = useState<{
-    success: boolean
-    message: string
-    details?: any
-  } | null>(null)
-  const [logs, setLogs] = useState<string[]>([])
+    role: "talent" as UserRole,
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState<UserCreationResult | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
-    setLogs((prev) => [...prev, `[${new Date().toISOString()}] ${message}`])
-  }
+    setLogs((prev) => [...prev, `[${new Date().toISOString()}] ${message}`]);
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
-    })
-  }
+    });
+  };
 
   const handleRoleChange = (value: string) => {
     setFormData({
       ...formData,
-      role: value,
-    })
-  }
+      role: value as UserRole,
+    });
+  };
 
   const createUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setResult(null)
-    setLogs([])
+    e.preventDefault();
+    setIsLoading(true);
+    setResult(null);
+    setLogs([]);
 
     try {
-      addLog(`Starting user creation for ${formData.email}`)
+      addLog(`Starting user creation for ${formData.email}`);
 
       // Use server endpoint with service role key
       const response = await fetch("/api/admin/create-user", {
@@ -61,56 +79,78 @@ export default function DirectUserCreation() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        addLog(`User creation failed: ${data.error || response.statusText}`)
-        throw new Error(data.error || "Failed to create user")
+        addLog(`User creation failed: ${data.error || response.statusText}`);
+        throw new Error(data.error || "Failed to create user");
       }
 
-      addLog(`User created successfully with ID: ${data.user.id}`)
+      addLog(`User created successfully with ID: ${data.user.id}`);
 
       setResult({
         success: true,
         message: `User ${formData.email} created successfully`,
-        details: data.user,
-      })
+        details: data.user as CreatedUser,
+      });
     } catch (error) {
-      console.error("User creation error:", error)
+      console.error("User creation error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setResult({
         success: false,
-        message: error.message || "Unknown error occurred",
-        details: error,
-      })
+        message: errorMessage,
+        details: error instanceof Error ? error : new Error(errorMessage),
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>Direct User Creation (Using Service Role Key)</CardTitle>
-        <CardDescription>Create a user directly using the Supabase admin API with service role key</CardDescription>
+        <CardDescription>
+          Create a user directly using the Supabase admin API with service role key
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={createUser} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required />
+              <Input
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                required
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required />
+              <Input
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                required
+              />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="space-y-2">
@@ -169,7 +209,7 @@ export default function DirectUserCreation() {
             </AlertTitle>
             <AlertDescription>
               {result.message}
-              {result.success && (
+              {result.success && result.details && 'id' in result.details && (
                 <div className="mt-2 text-xs">
                   <p>User ID: {result.details.id}</p>
                   <p>Email: {result.details.email}</p>
@@ -193,5 +233,5 @@ export default function DirectUserCreation() {
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

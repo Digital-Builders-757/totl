@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
-import { createSupabaseAdminClient } from "@/lib/supabase-admin-client"
+import { NextResponse } from "next/server";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 export async function GET() {
   try {
-    const supabase = createSupabaseAdminClient()
+    const supabase = createSupabaseAdminClient();
 
     // FIXED: Removed RPC call that might use aggregates
     // Instead, directly query information_schema tables
@@ -13,7 +13,7 @@ export async function GET() {
       .from("information_schema.schemata")
       .select("schema_name")
       .eq("schema_name", "auth")
-      .maybeSingle()
+      .maybeSingle();
 
     if (namespaceError || !namespaceData) {
       return NextResponse.json(
@@ -23,15 +23,15 @@ export async function GET() {
           hasUsersTable: false,
           error: "Auth schema not found or insufficient permissions",
         },
-        { status: 200 },
-      )
+        { status: 200 }
+      );
     }
 
     // Then get tables in auth schema
     const { data: tablesData, error: tablesError } = await supabase
       .from("information_schema.tables")
       .select("table_name")
-      .eq("table_schema", "auth")
+      .eq("table_schema", "auth");
 
     if (tablesError) {
       return NextResponse.json(
@@ -41,12 +41,12 @@ export async function GET() {
           hasUsersTable: false,
           error: "Could not query auth schema tables",
         },
-        { status: 200 },
-      )
+        { status: 200 }
+      );
     }
 
-    const tables = tablesData.map((t) => t.table_name)
-    const hasUsersTable = tables.includes("users")
+    const tables = tablesData.map((t) => t.table_name);
+    const hasUsersTable = tables.includes("users");
 
     return NextResponse.json(
       {
@@ -54,10 +54,10 @@ export async function GET() {
         tables,
         hasUsersTable,
       },
-      { status: 200 },
-    )
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error in check-auth-schema route:", error)
+    console.error("Error in check-auth-schema route:", error);
     return NextResponse.json(
       {
         exists: false,
@@ -65,7 +65,7 @@ export async function GET() {
         hasUsersTable: false,
         error: "Server error: " + error.message,
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }

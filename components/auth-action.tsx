@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { RequireAuth } from "./require-auth"
-import { Button } from "@/components/ui/button"
-import type { ButtonProps } from "@/components/ui/button"
-import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
-import { useAuth } from "./auth-provider"
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "./auth-provider";
+import { RequireAuth } from "./require-auth";
+import { Button } from "@/components/ui/button";
+import type { ButtonProps } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AuthActionProps extends ButtonProps {
-  actionText?: string
-  unauthenticatedText?: string
-  onAction: () => Promise<void> | void
-  loadingText?: string
+  actionText?: string;
+  unauthenticatedText?: string;
+  onAction: () => Promise<void> | void;
+  loadingText?: string;
 }
 
 /**
@@ -27,33 +27,33 @@ export function AuthAction({
   children,
   ...buttonProps
 }: AuthActionProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
-  const { isLoading: authLoading } = useAuth()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+  const { isLoading: authLoading } = useAuth();
 
   const handleAction = async () => {
     try {
-      setIsLoading(true)
-      await onAction()
+      setIsLoading(true);
+      await onAction();
     } catch (error) {
-      console.error("Action error:", error)
+      console.error("Action error:", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (authLoading) {
     return (
       <Button disabled {...buttonProps}>
         {children || actionText}
       </Button>
-    )
+    );
   }
 
   return (
@@ -68,5 +68,5 @@ export function AuthAction({
         {isLoading ? loadingText : children || actionText}
       </Button>
     </RequireAuth>
-  )
+  );
 }

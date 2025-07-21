@@ -1,15 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Star, MapPin, Calendar, Users, Briefcase, ArrowRight } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { useAuth } from "@/components/auth-provider"
-import { useRouter } from "next/navigation"
-import { useCallback } from "react"
-import { PostAGigFooterLink } from "@/components/PostAGigFooterLink"
+import { Star, MapPin, Calendar, Users, Briefcase, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { PostAGigFooterLink } from "@/components/PostAGigFooterLink";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function HomePage() {
   return (
@@ -66,8 +63,8 @@ export default function HomePage() {
                   Instantly
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
-                  TOTL Agency is the fastest way to discover, book, and work with exceptional talent. From models to
-                  influencers, find the perfect match for your next project.
+                  TOTL Agency is the fastest way to discover, book, and work with exceptional
+                  talent. From models to influencers, find the perfect match for your next project.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -146,7 +143,10 @@ export default function HomePage() {
                 price: "$350/day",
               },
             ].map((talent, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <Card
+                key={index}
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+              >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
                     <Image
@@ -194,7 +194,9 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">Latest Opportunities</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Fresh gigs posted by top brands and agencies</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Fresh gigs posted by top brands and agencies
+            </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -227,7 +229,10 @@ export default function HomePage() {
                 category: "Beauty",
               },
             ].map((gig, index) => (
-              <Card key={index} className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <Card
+                key={index}
+                className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+              >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
                     <Image
@@ -329,7 +334,9 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-3xl lg:text-4xl font-bold text-white">Ready to Find Your Perfect Match?</h2>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white">
+              Ready to Find Your Perfect Match?
+            </h2>
             <p className="text-xl text-blue-100">
               Join thousands of brands and talent who trust TOTL Agency for their projects
             </p>
@@ -365,7 +372,9 @@ export default function HomePage() {
                 height={40}
                 className="h-8 w-auto brightness-0 invert"
               />
-              <p className="text-gray-400">The premier platform for connecting brands with exceptional talent.</p>
+              <p className="text-gray-400">
+                The premier platform for connecting brands with exceptional talent.
+              </p>
             </div>
             <div>
               <h4 className="font-semibold mb-4">For Brands</h4>
@@ -437,5 +446,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

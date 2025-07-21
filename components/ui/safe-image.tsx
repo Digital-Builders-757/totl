@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import Image, { type ImageProps } from "next/image"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
+import Image, { type ImageProps } from "next/image";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 type SafeImageProps = Omit<ImageProps, "src"> & {
-  src?: string | null
-  fallbackSrc?: string
-  fallbackType?: "placeholder" | "static"
-  placeholderQuery?: string
-}
+  src?: string | null;
+  fallbackSrc?: string;
+  fallbackType?: "placeholder" | "static";
+  placeholderQuery?: string;
+};
 
 /**
  * SafeImage component that handles empty or null image sources gracefully
@@ -33,41 +33,41 @@ export function SafeImage({
   className,
   ...props
 }: SafeImageProps) {
-  const [imageError, setImageError] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if src is valid (not undefined, null, or empty string)
-  const isValidSrc = src && src.trim() !== "" && !imageError
+  const isValidSrc = src && src.trim() !== "" && !imageError;
 
   // Determine the image source based on fallback type
-  let imageSrc: string
+  let imageSrc: string;
 
   if (isValidSrc) {
-    imageSrc = src as string
+    imageSrc = src as string;
   } else if (fallbackType === "placeholder") {
     // Create a dynamic placeholder with appropriate dimensions
-    const w = width || 400
-    const h = height || 400
-    imageSrc = `/placeholder.svg?height=${h}&width=${w}&query=${encodeURIComponent(placeholderQuery)}`
+    const w = width || 400;
+    const h = height || 400;
+    imageSrc = `/placeholder.svg?height=${h}&width=${w}&query=${encodeURIComponent(placeholderQuery)}`;
   } else {
     // Use the provided static fallback or default
-    imageSrc =
-      fallbackSrc ||
-      "/placeholder.jpg"
+    imageSrc = fallbackSrc || "/placeholder.jpg";
   }
 
   const handleError = () => {
-    setImageError(true)
-    setIsLoading(false)
-    console.warn("SafeImage: Failed to load image", { src, fallbackType, fallbackSrc })
-  }
+    setImageError(true);
+    setIsLoading(false);
+    console.warn("SafeImage: Failed to load image", { src, fallbackType, fallbackSrc });
+  };
 
   const handleLoad = () => {
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   return (
-    <div className={cn("overflow-hidden bg-gray-100 relative", fill ? "w-full h-full" : "", className)}>
+    <div
+      className={cn("overflow-hidden bg-gray-100 relative", fill ? "w-full h-full" : "", className)}
+    >
       <Image
         src={imageSrc}
         alt={alt}
@@ -77,7 +77,7 @@ export function SafeImage({
         className={cn(
           "object-cover transition-opacity duration-200",
           isLoading ? "opacity-0" : "opacity-100",
-          className,
+          className
         )}
         onError={handleError}
         onLoad={handleLoad}
@@ -89,5 +89,5 @@ export function SafeImage({
         </div>
       )}
     </div>
-  )
+  );
 }

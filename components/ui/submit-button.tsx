@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { cn } from "@/lib/utils"
-import type { ButtonHTMLAttributes } from "react"
+import type { ButtonHTMLAttributes } from "react";
+import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { cn } from "@/lib/utils";
 
 type SubmitButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  isLoading?: boolean
-  loadingText?: string
-  className?: string
-  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
-}
+  isLoading?: boolean;
+  loadingText?: string;
+  className?: string;
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+};
 
 export function SubmitButton({
   children,
@@ -20,7 +20,13 @@ export function SubmitButton({
   ...props
 }: SubmitButtonProps) {
   return (
-    <Button type="submit" disabled={isLoading || disabled} className={cn(className)} variant={variant} {...props}>
+    <Button
+      type="submit"
+      disabled={isLoading || disabled}
+      className={cn(className)}
+      variant={variant}
+      {...props}
+    >
       {isLoading ? (
         <>
           <LoadingSpinner size="sm" className="mr-2" />
@@ -30,5 +36,5 @@ export function SubmitButton({
         children
       )}
     </Button>
-  )
+  );
 }

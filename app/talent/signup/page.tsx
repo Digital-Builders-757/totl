@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
-import TalentSignupForm from "@/components/talent-signup-form"
-import { useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import TalentSignupForm from "@/components/talent-signup-form";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function TalentSignupPage() {
-  const searchParams = useSearchParams()
-  const returnUrl = searchParams.get("returnUrl")
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -25,7 +25,7 @@ export default function TalentSignupPage() {
           <CardHeader>
             <CardTitle>Create Your Talent Account</CardTitle>
             <CardDescription>
-              Apply to join our talent roster. It's completely free to create an account.
+              Apply to join our talent roster. It&apos;s completely free to create an account.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -34,5 +34,5 @@ export default function TalentSignupPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

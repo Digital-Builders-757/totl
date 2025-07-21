@@ -1,27 +1,31 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import OnboardingForm from "./onboarding-form"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { OnboardingForm } from "./onboarding-form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Onboarding() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = createServerComponentClient({ cookies });
 
   // Verify authentication
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect("/login?returnUrl=/onboarding")
+    redirect("/login?returnUrl=/onboarding");
   }
 
   // Check if profile already exists
-  const { data: existingProfile } = await supabase.from("profiles").select("id").eq("id", session.user.id).maybeSingle()
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("id", session.user.id)
+    .maybeSingle();
 
   // If profile exists, redirect to dashboard
   if (existingProfile) {
-    redirect("/dashboard")
+    redirect("/dashboard");
   }
 
   return (
@@ -32,9 +36,9 @@ export default async function Onboarding() {
           <CardDescription>Please provide some basic information to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          <OnboardingForm userId={session.user.id} userEmail={session.user.email} />
+          <OnboardingForm />
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,15 +1,24 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, MapPin, Clock, DollarSign, Calendar, Building, CheckCircle, Star } from "lucide-react"
-import { RequireAuth } from "@/components/require-auth"
+"use client";
+import {
+  ArrowLeft,
+  MapPin,
+  Clock,
+  DollarSign,
+  Calendar,
+  Building,
+  CheckCircle,
+  Star,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { RequireAuth } from "@/components/require-auth";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function GigDetailPage({ params }: { params: { id: string } }) {
   // Get the gig data based on the ID
-  const gigId = Number.parseInt(params.id)
-  const gig = gigs[gigId] || gigs[0] // Fallback to first gig if ID not found
+  const gigId = Number.parseInt(params.id);
+  const gig = gigs[gigId] || gigs[0]; // Fallback to first gig if ID not found
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -38,11 +47,7 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
                     <Badge className="bg-black text-white">Featured</Badge>
                   </div>
                 )}
-                {gig.urgent && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-red-500 text-white">Urgent</Badge>
-                  </div>
-                )}
+
               </div>
 
               <div className="p-6">
@@ -112,7 +117,10 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
                     <div className="relative h-40 bg-gray-200">
                       {/* Fixed: Added fallback for similar gig image */}
                       <Image
-                        src={similarGig.image || "/placeholder.svg?height=200&width=400&query=photoshoot"}
+                        src={
+                          similarGig.image ||
+                          "/placeholder.svg?height=200&width=400&query=photoshoot"
+                        }
                         alt={similarGig.title}
                         fill
                         className="object-cover"
@@ -138,19 +146,25 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold mb-4">Apply Now</h2>
               <p className="text-gray-600 mb-6">
-                Interested in this opportunity? Submit your application now to be considered for this role.
+                Interested in this opportunity? Submit your application now to be considered for
+                this role.
               </p>
               <RequireAuth
                 fallback={
-                  <Button className="w-full bg-black text-white hover:bg-black/90 mb-3">Sign in to Apply</Button>
+                  <Button className="w-full bg-black text-white hover:bg-black/90 mb-3">
+                    Sign in to Apply
+                  </Button>
                 }
               >
-                <Button className="w-full bg-black text-white hover:bg-black/90 mb-3">Apply for this Gig</Button>
+                <Button className="w-full bg-black text-white hover:bg-black/90 mb-3">
+                  Apply for this Gig
+                </Button>
               </RequireAuth>
               <RequireAuth
                 fallback={
                   <p className="text-sm text-center text-gray-500 mt-2">
-                    Don't have an account? You'll be able to create one after clicking the button above.
+                    Don&apos;t have an account? You&apos;ll be able to create one after clicking the button
+                    above.
                   </p>
                 }
               >
@@ -171,7 +185,10 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
                   <div className="flex items-center">
                     <p className="font-medium">{gig.clientInfo.name}</p>
                     {gig.clientInfo.verified && (
-                      <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
+                      <Badge
+                        variant="outline"
+                        className="ml-2 bg-blue-50 text-blue-700 border-blue-200"
+                      >
                         <CheckCircle className="h-3 w-3 mr-1" /> Verified
                       </Badge>
                     )}
@@ -225,7 +242,7 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Comprehensive mock gig data
@@ -259,7 +276,7 @@ const gigs = [
     },
   },
   // Other gig data entries...
-]
+];
 
 // Similar gigs for the detail page
 const similarGigs = [
@@ -291,4 +308,4 @@ const similarGigs = [
     location: "Milan, Italy",
     image: "/similar-gig-4.png",
   },
-]
+];

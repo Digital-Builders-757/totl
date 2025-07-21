@@ -1,15 +1,14 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Search, Filter, ArrowRight } from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
-import { AuthAction } from "@/components/auth-action"
+import { Search, Filter, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AuthAction } from "@/components/auth-action";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { SafeImage } from "@/components/ui/safe-image";
 
 export default function TalentPage() {
-  const router = useRouter()
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       <div className="container mx-auto px-4 py-12">
@@ -17,8 +16,8 @@ export default function TalentPage() {
           <div className="mb-12">
             <h1 className="text-4xl font-bold mb-4">Browse Talent</h1>
             <p className="text-gray-600 max-w-3xl">
-              Discover our diverse roster of professional models and talent. Filter by specialty, look, and experience
-              to find the perfect match for your project.
+              Discover our diverse roster of professional models and talent. Filter by specialty,
+              look, and experience to find the perfect match for your project.
             </p>
           </div>
 
@@ -26,8 +25,14 @@ export default function TalentPage() {
           <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                <Input placeholder="Search by name, specialty, or look" className="pl-10 bg-gray-50 border-gray-200" />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={20}
+                />
+                <Input
+                  placeholder="Search by name, specialty, or look"
+                  className="pl-10 bg-gray-50 border-gray-200"
+                />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" className="flex items-center gap-2">
@@ -90,7 +95,7 @@ export default function TalentPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Sample talent data
@@ -137,4 +142,4 @@ const talent = [
     image: "", // This will use the fallback
     id: "6",
   },
-]
+];

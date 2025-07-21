@@ -1,9 +1,5 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   ArrowLeft,
   Instagram,
@@ -16,18 +12,25 @@ import {
   Heart,
   Share2,
   MessageSquare,
-} from "lucide-react"
-import { SafeImage } from "@/components/ui/safe-image"
+} from "lucide-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/ui/safe-image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function TalentProfilePage({ params }: { params: { id: string } }) {
   // Get the talent data based on the ID
-  const talentId = Number.parseInt(params.id)
-  const talent = talentData[talentId] || talentData[0] // Fallback to first talent if ID not found
+  const talentId = Number.parseInt(params.id);
+  const talent = talentData[talentId] || talentData[0]; // Fallback to first talent if ID not found
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
       <div className="container mx-auto px-4 py-12">
-        <Link href="/talent" className="inline-flex items-center text-gray-600 hover:text-black mb-8">
+        <Link
+          href="/talent"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to talent
         </Link>
@@ -96,9 +99,9 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                   </div>
                   <div className="flex items-center">
                     <Instagram className="mr-2 h-4 w-4 text-gray-500" />
-                    <a href="#" className="hover:underline">
+                    <span className="hover:underline">
                       @{talent.instagram}
-                    </a>
+                    </span>
                   </div>
                   <div className="flex items-center">
                     <Star className="mr-2 h-4 w-4 text-gray-500" />
@@ -152,7 +155,10 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
               <h2 className="text-xl font-bold mb-4">Experience</h2>
               <div className="space-y-4">
                 {talent.experience.map((exp, index) => (
-                  <div key={index} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                  <div
+                    key={index}
+                    className="border-b border-gray-100 last:border-0 pb-4 last:pb-0"
+                  >
                     <div className="flex items-start">
                       <Briefcase className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
                       <div>
@@ -179,7 +185,10 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                 <div>
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Upcoming Schedule</h3>
                   {talent.availabilityDetails.schedule.map((item, index) => (
-                    <div key={index} className="flex items-center py-2 border-b border-gray-100 last:border-0">
+                    <div
+                      key={index}
+                      className="flex items-center py-2 border-b border-gray-100 last:border-0"
+                    >
                       <div className="w-12 h-12 bg-gray-100 rounded-md flex items-center justify-center mr-3">
                         <span className="font-medium">{item.date}</span>
                       </div>
@@ -211,7 +220,10 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                 <TabsContent value="portfolio">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {talent.portfolio.map((item, index) => (
-                      <div key={index} className="aspect-[3/4] relative rounded-md overflow-hidden group">
+                      <div
+                        key={index}
+                        className="aspect-[3/4] relative rounded-md overflow-hidden group"
+                      >
                         {/* Using SafeImage for portfolio images */}
                         <SafeImage
                           src={item.image}
@@ -246,7 +258,10 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                 <TabsContent value="videos">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {talent.videos.map((video, index) => (
-                      <div key={index} className="aspect-video relative rounded-md overflow-hidden bg-gray-100">
+                      <div
+                        key={index}
+                        className="aspect-video relative rounded-md overflow-hidden bg-gray-100"
+                      >
                         {/* Using SafeImage for video thumbnails with conditional rendering */}
                         {video.thumbnail && (
                           <SafeImage
@@ -277,7 +292,9 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                     <Calendar className="h-5 w-5 text-gray-500 mr-2" />
                     <h3 className="font-medium">Standard Booking</h3>
                   </div>
-                  <p className="text-gray-600 text-sm mb-4">Perfect for editorial, commercial, and print work</p>
+                  <p className="text-gray-600 text-sm mb-4">
+                    Perfect for editorial, commercial, and print work
+                  </p>
                   <p className="font-bold text-xl mb-1">${talent.bookingRates.standard}/day</p>
                   <p className="text-gray-500 text-sm">Standard rate for 8-hour day</p>
                 </div>
@@ -293,7 +310,9 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
                   <p className="text-gray-500 text-sm">Premium rate with extended usage rights</p>
                 </div>
               </div>
-              <Button className="w-full bg-black text-white hover:bg-black/90">Request Booking</Button>
+              <Button className="w-full bg-black text-white hover:bg-black/90">
+                Request Booking
+              </Button>
               <p className="text-center text-gray-500 text-sm mt-4">
                 Or contact directly at{" "}
                 <a href={`mailto:${talent.email}`} className="text-black font-medium">
@@ -305,7 +324,7 @@ export default function TalentProfilePage({ params }: { params: { id: string } }
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Comprehensive mock data for talent profiles
@@ -398,7 +417,12 @@ const talentData = [
         caption: "Magazine Cover",
       },
     ],
-    polaroids: ["/sophia-polaroid-1.png", "/sophia-polaroid-2.png", "/sophia-polaroid-3.png", "/sophia-polaroid-4.png"],
+    polaroids: [
+      "/sophia-polaroid-1.png",
+      "/sophia-polaroid-2.png",
+      "/sophia-polaroid-3.png",
+      "/sophia-polaroid-4.png",
+    ],
     videos: [
       { url: "#", thumbnail: "/sophia-video-1.png" },
       { url: "#", thumbnail: "/sophia-video-2.png" },
@@ -409,4 +433,4 @@ const talentData = [
     },
   },
   // Other talent data entries...
-]
+];

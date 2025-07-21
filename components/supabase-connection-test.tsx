@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, XCircle, RefreshCw } from "lucide-react"
+import { CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function SupabaseConnectionTest() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<{
-    connected: boolean
-    error?: string
-    publicVars: boolean
-    serviceVars: boolean
+    connected: boolean;
+    error?: string;
+    publicVars: boolean;
+    serviceVars: boolean;
   }>({
     connected: false,
     publicVars: false,
     serviceVars: false,
-  })
+  });
 
   const testConnection = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       const response = await fetch("/api/admin/test-connection", {
@@ -28,35 +28,35 @@ export default function SupabaseConnectionTest() {
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Error testing connection: ${response.statusText}`)
+        throw new Error(`Error testing connection: ${response.statusText}`);
       }
 
-      const data = await response.json()
+      const data = await response.json();
       setConnectionStatus({
         connected: data.connected,
         error: data.error,
         publicVars: data.publicVars,
         serviceVars: data.serviceVars,
-      })
+      });
     } catch (e) {
-      console.error("Error testing connection:", e)
+      console.error("Error testing connection:", e);
       setConnectionStatus({
         connected: false,
         error: e.message,
         publicVars: false,
         serviceVars: false,
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    testConnection()
-  }, [])
+    testConnection();
+  }, []);
 
   return (
     <Card className="w-full">
@@ -71,7 +71,9 @@ export default function SupabaseConnectionTest() {
             <XCircle className="h-5 w-5 text-red-500" />
           )}
         </CardTitle>
-        <CardDescription>Testing connection to Supabase with both anon and service role keys</CardDescription>
+        <CardDescription>
+          Testing connection to Supabase with both anon and service role keys
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -135,5 +137,5 @@ export default function SupabaseConnectionTest() {
         </Button>
       </CardContent>
     </Card>
-  )
+  );
 }

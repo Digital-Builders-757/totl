@@ -1,4 +1,4 @@
-import AdminUserCreation from "@/components/admin-user-creation"
+import AdminUserCreation from "@/components/admin-user-creation";
 
 export default function CreateUserPage() {
   return (
@@ -6,5 +6,5 @@ export default function CreateUserPage() {
       <h1 className="text-2xl font-bold mb-6">Create New User</h1>
       <AdminUserCreation />
     </div>
-  )
+  );
 }
