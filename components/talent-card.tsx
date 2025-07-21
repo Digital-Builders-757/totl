@@ -28,17 +28,26 @@ export function TalentCard({ user, talentProfile, onViewProfile }: TalentCardPro
         </Avatar>
         <div className="flex flex-col">
           <CardTitle className="text-xl">{user.full_name}</CardTitle>
-          {talentProfile.location && (
+          {talentProfile.experience_years && (
             <div className="flex items-center text-sm text-muted-foreground">
               <MapPin className="mr-1 h-4 w-4" />
-              {talentProfile.location}
+              {talentProfile.experience_years} years experience
             </div>
           )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {talentProfile.experience && (
-          <p className="text-sm text-muted-foreground">{talentProfile.experience}</p>
+        {talentProfile.specialties && talentProfile.specialties.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Specialties:</p>
+            <div className="flex flex-wrap gap-1">
+              {talentProfile.specialties.map((specialty, index) => (
+                <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                  {specialty}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
       </CardContent>
       <CardFooter className="flex justify-end">

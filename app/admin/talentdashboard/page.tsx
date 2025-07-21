@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
 import { EmailVerificationReminder } from "@/components/email-verification-reminder";
 import { RequireAuth } from "@/components/require-auth";
@@ -69,6 +70,12 @@ interface MainProfileData {
 }
 
 export default async function TalentDashboard() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - redirecting to login");
+    redirect("/login?returnUrl=/admin/talentdashboard");
+  }
+
   const supabase = createServerComponentClient<Database>({ cookies });
 
   const {
@@ -141,7 +148,7 @@ export default async function TalentDashboard() {
 
     if (profileResult.data) {
       profileData = profileResult.data;
-      const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"];
+      const requiredFields: (keyof TalentProfile)[] = ["height", "weight", "experience_years"];
       isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
     }
 
@@ -272,15 +279,13 @@ export default async function TalentDashboard() {
                       <Avatar className="mr-2 h-8 w-8">
                         <AvatarImage
                           src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                          alt={profileData?.first_name || "User"}
+                          alt={user?.email || "User"}
                         />
-                        <AvatarFallback>{profileData?.first_name?.charAt(0) || "U"}</AvatarFallback>
+                        <AvatarFallback>
+                          {user?.email?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="hidden md:inline">
-                        {profileData
-                          ? `${profileData.first_name} ${profileData.last_name}`
-                          : "Talent"}
-                      </span>
+                      <span className="hidden md:inline">{user?.email || "Talent"}</span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -357,7 +362,7 @@ export default async function TalentDashboard() {
                   <div className="w-32 h-32 rounded-xl overflow-hidden border-4 border-white shadow-md">
                     <SafeImage
                       src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                      alt={profileData?.first_name || "User"}
+                      alt={user?.email || "User"}
                       width={128}
                       height={128}
                       placeholderQuery="model portrait"
@@ -369,11 +374,7 @@ export default async function TalentDashboard() {
                 <div className="flex-1 pt-0 md:pt-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
-                      <h2 className="text-2xl font-bold mb-1">
-                        {profileData
-                          ? `${profileData.first_name} ${profileData.last_name}`
-                          : "Your Name"}
-                      </h2>
+                      <h2 className="text-2xl font-bold mb-1">{user?.email || "Your Name"}</h2>
                       <p className="text-gray-600">Editorial & Runway Model</p>
                     </div>
                     <div className="flex space-x-2 mt-4 md:mt-0">

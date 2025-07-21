@@ -4,7 +4,16 @@ import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+// Force dynamic rendering to prevent build-time Supabase access
+export const dynamic = "force-dynamic";
+
 export default async function Onboarding() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - redirecting to login");
+    redirect("/login?returnUrl=/onboarding");
+  }
+
   const supabase = createServerComponentClient({ cookies });
 
   // Verify authentication

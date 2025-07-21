@@ -36,8 +36,31 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClientComponentClient<Database>();
+// Fallback auth provider when Supabase is not configured
+function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthContext.Provider
+      value={{
+        supabase: null as unknown as SupabaseClient<Database>,
+        user: null,
+        session: null,
+        userRole: null,
+        isLoading: false,
+        isEmailVerified: false,
+        signIn: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signUp: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signOut: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        sendVerificationEmail: async () => ({ error: new Error("Supabase not configured") }),
+        resetPassword: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Main auth provider with Supabase functionality
+function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
@@ -45,7 +68,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
 
+  const supabase = createClientComponentClient<Database>();
+
   useEffect(() => {
+    // Prevent initialization during static generation
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
+
     // This immediately handles the initial session check, and the listener will take over from there.
     const initialSession = async () => {
       const {
@@ -62,12 +93,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // If there is a session, proceed to set user and fetch profile
       setUser(session.user);
-      const { data: profile } = await supabase
-        .from("profiles")
+      const { data: userData } = await supabase
+        .from("users")
         .select("role")
         .eq("id", session.user.id)
         .single();
-      const role = profile?.role as UserRole;
+      const role = userData?.role as UserRole;
       setUserRole(role);
       setIsLoading(false); // Stop loading after initial fetch
     };
@@ -82,13 +113,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (event === "SIGNED_IN" && session) {
-        const { data: profile } = await supabase
-          .from("profiles")
+        const { data: userData } = await supabase
+          .from("users")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
-        const role = profile?.role as UserRole;
+        const role = userData?.role as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
 
@@ -213,6 +244,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// Main AuthProvider that chooses between Supabase and fallback
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Check if we're in a browser environment and if Supabase environment variables are available
+  const isBrowser = typeof window !== "undefined";
+  const hasSupabaseConfig =
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // During static generation or if no config, use fallback
+  if (!isBrowser || !hasSupabaseConfig) {
+    if (!isBrowser) {
+      console.warn("AuthProvider: Static generation detected - using fallback auth provider");
+    } else if (!hasSupabaseConfig) {
+      console.warn("Supabase environment variables not found - using fallback auth provider");
+    }
+    return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
+  }
+
+  return <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
+}
+
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -227,7 +278,7 @@ export function useSupabaseStatus() {
   const checkConnection = async () => {
     try {
       const supabaseAdmin = createSupabaseAdminClient();
-      const { error } = await supabaseAdmin.from("profiles").select("id").limit(1);
+      const { error } = await supabaseAdmin.from("users").select("id").limit(1);
 
       if (error) {
         throw error;
@@ -240,5 +291,3 @@ export function useSupabaseStatus() {
 
   return { isSupabaseConnected, checkConnection };
 }
-
-

@@ -13,6 +13,12 @@ import type { Database } from "@/types/database";
 // FIXED: Using explicit column selection and avoiding aggregates
 
 export async function getGigs() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - returning empty gigs list");
+    return [];
+  }
+
   const supabase = createServerComponentClient<Database>({ cookies });
 
   // FIXED: Explicit column selection, no aggregates

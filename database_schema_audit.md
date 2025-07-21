@@ -10,11 +10,11 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 6
-- **Total Columns:** 67
+- **Total Tables:** 8
+- **Total Columns:** 75
 - **Custom Types (Enums):** 4
-- **Foreign Key Relationships:** 6
-- **Indexes:** 15 (including primary keys)
+- **Foreign Key Relationships:** 8
+- **Indexes:** 16 (including primary keys)
 
 ## 📊 Custom Types (Enums)
 
@@ -25,17 +25,14 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ### 2. `gig_status`
 - `draft`
-- `active`
+- `published`
 - `closed`
-- `featured`
-- `urgent`
+- `completed`
 
 ### 3. `application_status`
-- `new`
-- `under_review`
-- `shortlisted`
-- `rejected`
+- `pending`
 - `accepted`
+- `rejected`
 
 ### 4. `booking_status`
 - `pending`
@@ -45,118 +42,127 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗃️ Table Details
 
-### 1. `profiles` - Core User Profiles
-**Purpose:** Central user profile table linked to Supabase Auth
+### 1. `users` - Core User Table
+**Purpose:** Main user table linked to Supabase Auth
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | - | Primary key, links to auth.users |
-| `role` | `user_role` | NO | - | User role (talent/client/admin) |
+| `email` | `text` | NO | - | User's email address |
+| `full_name` | `text` | NO | - | User's full name |
+| `role` | `user_role` | NO | `'talent'` | User role (talent/client/admin) |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
-| `display_name` | `text` | YES | - | User's display name |
-| `avatar_url` | `text` | YES | - | Profile avatar URL |
-| `email_verified` | `boolean` | YES | `false` | Email verification status |
 
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `id` → `auth.users.id`
+- Unique: `email`
+
+**Indexes:**
+- `users_pkey` (Primary Key)
+- `users_email_key` (Unique constraint)
+
+---
+
+### 2. `profiles` - Additional User Information
+**Purpose:** Extended profile information for users
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | NO | - | Foreign key to users |
+| `bio` | `text` | YES | - | User biography |
+| `location` | `text` | YES | - | Geographic location |
+| `phone` | `text` | YES | - | Contact phone number |
+| `instagram_handle` | `text` | YES | - | Instagram username |
+| `website` | `text` | YES | - | Personal website URL |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `user_id` → `users.id`
 
 **Indexes:**
 - `profiles_pkey` (Primary Key)
 
 ---
 
-### 2. `talent_profiles` - Talent-Specific Information
+### 3. `talent_profiles` - Talent-Specific Information
 **Purpose:** Extended profile information for talent users
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `user_id` | `uuid` | NO | - | Foreign key to profiles |
-| `first_name` | `text` | NO | - | Talent's first name |
-| `last_name` | `text` | NO | - | Talent's last name |
-| `phone` | `text` | YES | - | Contact phone number |
-| `age` | `integer` | YES | - | Talent's age |
-| `location` | `text` | YES | - | Geographic location |
-| `experience` | `text` | YES | - | Experience description |
-| `portfolio_url` | `text` | YES | - | Portfolio website URL |
-| `height` | `text` | YES | - | Height measurement |
+| `user_id` | `uuid` | NO | - | Foreign key to users |
+| `height` | `numeric` | YES | - | Height measurement |
+| `weight` | `numeric` | YES | - | Weight measurement |
 | `measurements` | `text` | YES | - | Body measurements |
-| `hair_color` | `text` | YES | - | Hair color |
-| `eye_color` | `text` | YES | - | Eye color |
-| `shoe_size` | `text` | YES | - | Shoe size |
-| `languages` | `text[]` | YES | - | Array of spoken languages |
+| `experience_years` | `integer` | YES | - | Years of experience |
+| `specialties` | `text[]` | YES | - | Array of specialties |
+| `portfolio_url` | `text` | YES | - | Portfolio website URL |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `profiles.id`
+- Foreign Key: `user_id` → `users.id`
 
 **Indexes:**
 - `talent_profiles_pkey` (Primary Key)
-- `talent_profiles_user_id_idx` (Foreign Key)
 
 ---
 
-### 3. `client_profiles` - Client-Specific Information
+### 4. `client_profiles` - Client-Specific Information
 **Purpose:** Extended profile information for client users
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `user_id` | `uuid` | NO | - | Foreign key to profiles |
-| `company_name` | `text` | NO | - | Company name |
+| `user_id` | `uuid` | NO | - | Foreign key to users |
+| `company_name` | `text` | YES | - | Company name |
 | `industry` | `text` | YES | - | Industry sector |
-| `website` | `text` | YES | - | Company website |
-| `contact_name` | `text` | YES | - | Primary contact name |
-| `contact_email` | `text` | YES | - | Contact email |
-| `contact_phone` | `text` | YES | - | Contact phone |
 | `company_size` | `text` | YES | - | Company size category |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `profiles.id`
+- Foreign Key: `user_id` → `users.id`
 
 **Indexes:**
 - `client_profiles_pkey` (Primary Key)
-- `client_profiles_user_id_idx` (Foreign Key)
 
 ---
 
-### 4. `gigs` - Job/Gig Listings
+### 5. `gigs` - Job/Gig Listings
 **Purpose:** Job opportunities posted by clients
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `client_id` | `uuid` | NO | - | Foreign key to profiles (client) |
+| `client_id` | `uuid` | NO | - | Foreign key to users (client) |
 | `title` | `text` | NO | - | Gig title |
 | `description` | `text` | NO | - | Detailed description |
-| `category` | `text` | NO | - | Gig category |
+| `requirements` | `text[]` | YES | - | Array of requirements |
 | `location` | `text` | NO | - | Job location |
-| `compensation` | `text` | NO | - | Compensation details |
-| `duration` | `text` | NO | - | Job duration |
-| `date` | `date` | NO | - | Gig date |
-| `application_deadline` | `timestamp with time zone` | YES | - | Application deadline |
-| `status` | `gig_status` | NO | - | Current status |
-| `image_url` | `text` | YES | - | Associated image URL |
-| `search_vector` | `tsvector` | YES | - | Full-text search vector |
+| `start_date` | `timestamp with time zone` | NO | - | Gig start date |
+| `end_date` | `timestamp with time zone` | NO | - | Gig end date |
+| `compensation_min` | `numeric` | YES | - | Minimum compensation |
+| `compensation_max` | `numeric` | YES | - | Maximum compensation |
+| `status` | `gig_status` | NO | `'draft'` | Current status |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `client_id` → `profiles.id`
+- Foreign Key: `client_id` → `users.id`
+- Check: `end_date > start_date`
+- Check: `compensation_max >= compensation_min` (if both set)
 
 **Indexes:**
 - `gigs_pkey` (Primary Key)
-- `gigs_client_id_idx` (Foreign Key)
-- `gigs_status_idx` (Status filtering)
-- `gigs_search_idx` (Full-text search)
 
 ---
 
@@ -187,8 +193,8 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
 | `gig_id` | `uuid` | NO | - | Foreign key to gigs |
-| `talent_id` | `uuid` | NO | - | Foreign key to profiles (talent) |
-| `status` | `application_status` | NO | - | Application status |
+| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
+| `status` | `application_status` | NO | `'pending'` | Application status |
 | `message` | `text` | YES | - | Application message |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
@@ -196,45 +202,62 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `gig_id` → `gigs.id`
-- Foreign Key: `talent_id` → `profiles.id`
+- Foreign Key: `talent_id` → `users.id`
 - Unique: `(gig_id, talent_id)` - Prevents duplicate applications
 
 **Indexes:**
 - `applications_pkey` (Primary Key)
-- `applications_gig_id_idx` (Foreign Key)
-- `applications_talent_id_idx` (Foreign Key)
-- `applications_status_idx` (Status filtering)
 - `applications_gig_id_talent_id_key` (Unique constraint)
 
 ---
 
-### 7. `client_applications` - Client Registration Applications
-**Purpose:** Applications from potential clients to join the platform
+### 7. `bookings` - Confirmed Bookings
+**Purpose:** Confirmed bookings between clients and talent
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `first_name` | `text` | NO | - | Applicant's first name |
-| `last_name` | `text` | NO | - | Applicant's last name |
-| `email` | `text` | NO | - | Contact email |
-| `phone` | `text` | YES | - | Contact phone |
-| `company_name` | `text` | NO | - | Company name |
-| `industry` | `text` | YES | - | Industry sector |
-| `website` | `text` | YES | - | Company website |
-| `business_description` | `text` | NO | - | Business description |
-| `needs_description` | `text` | NO | - | Needs description |
-| `status` | `text` | NO | `'pending'` | Application status |
-| `admin_notes` | `text` | YES | - | Admin notes |
+| `gig_id` | `uuid` | NO | - | Foreign key to gigs |
+| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
+| `status` | `booking_status` | NO | `'pending'` | Booking status |
+| `compensation` | `numeric` | YES | - | Agreed compensation |
+| `notes` | `text` | YES | - | Booking notes |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Unique: `email` - Prevents duplicate email applications
+- Foreign Key: `gig_id` → `gigs.id`
+- Foreign Key: `talent_id` → `users.id`
 
 **Indexes:**
-- `client_applications_pkey` (Primary Key)
-- `client_applications_email_key` (Unique constraint)
+- `bookings_pkey` (Primary Key)
+
+---
+
+### 8. `portfolio_items` - Talent Portfolio Items
+**Purpose:** Portfolio items for talent to showcase their work
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
+| `title` | `text` | NO | - | Portfolio item title |
+| `description` | `text` | YES | - | Portfolio item description |
+| `image_url` | `text` | NO | - | Portfolio image URL |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `talent_id` → `users.id`
+
+**Indexes:**
+- `portfolio_items_pkey` (Primary Key)
+
+---
+
+
 
 ---
 
@@ -242,18 +265,21 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ### Foreign Key Relationships
 
-1. **profiles.id** → `auth.users.id` (Auth integration)
-2. **talent_profiles.user_id** → `profiles.id` (Talent profile link)
-3. **client_profiles.user_id** → `profiles.id` (Client profile link)
-4. **gigs.client_id** → `profiles.id` (Gig creator)
-5. **gig_requirements.gig_id** → `gigs.id` (Gig requirements)
+1. **users.id** → `auth.users.id` (Auth integration)
+2. **profiles.user_id** → `users.id` (Profile link)
+3. **talent_profiles.user_id** → `users.id` (Talent profile link)
+4. **client_profiles.user_id** → `users.id` (Client profile link)
+5. **gigs.client_id** → `users.id` (Gig creator)
 6. **applications.gig_id** → `gigs.id` (Application for gig)
-7. **applications.talent_id** → `profiles.id` (Application by talent)
+7. **applications.talent_id** → `users.id` (Application by talent)
+8. **bookings.gig_id** → `gigs.id` (Booking for gig)
+9. **bookings.talent_id** → `users.id` (Booking by talent)
+10. **portfolio_items.talent_id** → `users.id` (Portfolio by talent)
 
 ### Unique Constraints
 
-1. **applications**: `(gig_id, talent_id)` - One application per talent per gig
-2. **client_applications**: `email` - One application per email address
+1. **users**: `email` - One user per email address
+2. **applications**: `(gig_id, talent_id)` - One application per talent per gig
 
 ## 📈 Performance Optimizations
 
@@ -314,15 +340,15 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 📊 Statistics Summary
 
-- **Total Tables**: 7
-- **Total Columns**: 67
-- **Primary Keys**: 7
-- **Foreign Keys**: 7
-- **Unique Constraints**: 3
-- **Indexes**: 15
+- **Total Tables**: 8
+- **Total Columns**: 75
+- **Primary Keys**: 8
+- **Foreign Keys**: 10
+- **Unique Constraints**: 2
+- **Indexes**: 16
 - **Custom Types**: 4
-- **Nullable Columns**: 35 (52%)
-- **Required Columns**: 32 (48%)
+- **Nullable Columns**: 40 (53%)
+- **Required Columns**: 35 (47%)
 
 ---
 
