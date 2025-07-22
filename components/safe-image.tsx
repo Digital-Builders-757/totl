@@ -1,64 +1,88 @@
-import Image, { type ImageProps } from "next/image";
-import { cn } from "@/lib/utils";
+"use client";
 
-type SafeImageProps = Omit<ImageProps, "src"> & {
+import Image from "next/image";
+import { useState } from "react";
+
+interface SafeImageProps {
   src?: string | null;
+  alt: string;
+  width?: number;
+  height?: number;
+  fill?: boolean;
+  className?: string;
   fallbackSrc?: string;
   fallbackType?: "placeholder" | "static";
   placeholderQuery?: string;
-};
+}
 
 /**
- * SafeImage component that handles empty or null image sources gracefully
- *
- * @param src - The image source URL (can be undefined, null, or empty string)
- * @param alt - Alt text for the image
- * @param fallbackSrc - Optional custom fallback image
+ * Safe image component that handles loading errors gracefully
+ * @param src - Image source URL
+ * @param alt - Alt text for accessibility
+ * @param width - Image width (required if fill is false)
+ * @param height - Image height (required if fill is false)
+ * @param fill - Whether to use fill mode (requires parent with relative positioning)
+ * @param className - CSS classes
+ * @param fallbackSrc - Fallback image source
  * @param fallbackType - "placeholder" uses dynamic placeholder, "static" uses fallbackSrc
  * @param placeholderQuery - Query string for placeholder image (e.g. "person", "landscape")
- * @param ...props - All other Image props (width, height, className, etc.)
  */
 export function SafeImage({
   src,
   alt,
-  fallbackSrc = "/placeholder.jpg",
-  fallbackType = "placeholder",
-  placeholderQuery = "image",
   width,
   height,
-  fill,
-  className,
-  ...props
+  fill = false,
+  className = "",
+  fallbackSrc = "/images/totl-logo-transparent.png",
+  fallbackType = "static",
+  placeholderQuery = "image",
 }: SafeImageProps) {
-  // Check if src is valid (not undefined, null, or empty string)
-  const isValidSrc = src && src.trim() !== "";
+  const [imageSrc, setImageSrc] = useState<string | null>(src || null);
+  const [hasError, setHasError] = useState(false);
 
-  // Determine the image source based on fallback type
-  let imageSrc: string;
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      if (fallbackType === "static") {
+        setImageSrc(fallbackSrc);
+      } else {
+        // For placeholder type, use a simple fallback
+        setImageSrc(fallbackSrc);
+      }
+    }
+  };
 
-  if (isValidSrc) {
-    imageSrc = src as string;
-  } else if (fallbackType === "placeholder") {
-    // Create a dynamic placeholder with appropriate dimensions
-    const w = width || 400;
-    const h = height || 400;
-    imageSrc = `/placeholder.svg?height=${h}&width=${w}&query=${placeholderQuery}`;
-  } else {
-    // Use the provided static fallback
-    imageSrc = fallbackSrc;
+  // Validate props
+  if (!fill && (!width || !height)) {
+    console.warn("SafeImage: width and height are required when fill is false");
+    return null;
   }
 
-  return (
-    <div className={cn("overflow-hidden", fill ? "relative w-full h-full" : "", className)}>
+  // If no src provided, use fallback immediately
+  if (!src) {
+    return (
       <Image
-        src={imageSrc || "/placeholder.svg"}
+        src={fallbackSrc}
         alt={alt}
         width={width}
         height={height}
         fill={fill}
-        className={cn("object-cover", className)}
-        {...props}
+        className={className}
+        onError={handleError}
       />
-    </div>
+    );
+  }
+
+  return (
+    <Image
+      src={imageSrc || fallbackSrc}
+      alt={alt}
+      width={width}
+      height={height}
+      fill={fill}
+      className={className}
+      onError={handleError}
+    />
   );
 }

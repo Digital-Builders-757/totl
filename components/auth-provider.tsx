@@ -87,19 +87,20 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       // The listener will handle the case where the user signs in.
       if (!session) {
         setIsLoading(false);
-        router.push("/login");
         return;
       }
 
       // If there is a session, proceed to set user and fetch profile
       setUser(session.user);
-      const { data: userData } = await supabase
-        .from("users")
+      const { data: profileData } = await supabase
+        .from("profiles")
         .select("role")
         .eq("id", session.user.id)
         .single();
-      const role = userData?.role as UserRole;
+
+      const role = profileData?.role as UserRole;
       setUserRole(role);
+      setIsEmailVerified(session.user.email_confirmed_at !== null);
       setIsLoading(false); // Stop loading after initial fetch
     };
 
@@ -113,21 +114,21 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (event === "SIGNED_IN" && session) {
-        const { data: userData } = await supabase
-          .from("users")
+        const { data: profileData } = await supabase
+          .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
-        const role = userData?.role as UserRole;
+        const role = profileData?.role as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
 
-        // Redirect based on role
+        // Redirect based on role - FIXED PATHS
         if (role === "talent") {
-          router.push("/admin/talentdashboard");
+          router.push("/talent/dashboard");
         } else if (role === "client") {
-          router.push("/admin/dashboard");
+          router.push("/client/dashboard");
         } else if (role === "admin") {
           router.push("/admin/dashboard");
         } else {
@@ -198,66 +199,70 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         return { error: linkError ?? new Error("No action link returned") };
       }
 
-      // 2. Send custom verification email
+      // 2. Send the verification email using Resend
       const response = await fetch("/api/email/send-verification", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           email: user.email,
-          userId: user.id,
-          verificationUrl: linkData.properties.action_link,
+          verificationLink: linkData.properties.action_link,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send verification email");
+        const errorData = await response.json();
+        return { error: new Error(errorData.error || "Failed to send verification email") };
       }
 
       return { error: null };
-    } catch (err) {
-      console.error("Error sending verification email:", err);
-      return { error: err instanceof Error ? err : new Error("Unknown error") };
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      return { error: error instanceof Error ? error : new Error("Unknown error") };
     }
   };
 
   const resetPassword = async (email: string): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      return { error };
+    } catch (error) {
+      console.error("Password reset error:", error);
+      return { error: { message: "Failed to send password reset email" } as AuthError };
+    }
   };
 
-  const value = {
-    supabase,
-    user,
-    session,
-    userRole,
-    isLoading,
-    isEmailVerified,
-    signIn,
-    signUp,
-    signOut,
-    sendVerificationEmail,
-    resetPassword,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        supabase,
+        user,
+        session,
+        userRole,
+        isLoading,
+        isEmailVerified,
+        signIn,
+        signUp,
+        signOut,
+        sendVerificationEmail,
+        resetPassword,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-// Main AuthProvider that chooses between Supabase and fallback
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  // Check if we're in a browser environment and if Supabase environment variables are available
-  const isBrowser = typeof window !== "undefined";
-  const hasSupabaseConfig =
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Check if Supabase is configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // During static generation or if no config, use fallback
-  if (!isBrowser || !hasSupabaseConfig) {
-    if (!isBrowser) {
-      console.warn("AuthProvider: Static generation detected - using fallback auth provider");
-    } else if (!hasSupabaseConfig) {
-      console.warn("Supabase environment variables not found - using fallback auth provider");
-    }
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("Supabase not configured, using fallback auth provider");
     return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
   }
 
@@ -273,21 +278,14 @@ export function useAuth() {
 }
 
 export function useSupabaseStatus() {
-  const [isSupabaseConnected, setIsSupabaseConnected] = useState(true);
-
   const checkConnection = async () => {
     try {
-      const supabaseAdmin = createSupabaseAdminClient();
-      const { error } = await supabaseAdmin.from("users").select("id").limit(1);
-
-      if (error) {
-        throw error;
-      }
-      setIsSupabaseConnected(true);
+      const response = await fetch("/api/admin/test-connection");
+      return response.ok;
     } catch {
-      setIsSupabaseConnected(false);
+      return false;
     }
   };
 
-  return { isSupabaseConnected, checkConnection };
+  return { checkConnection };
 }
