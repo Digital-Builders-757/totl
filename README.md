@@ -15,22 +15,41 @@ cp .env.example .env.local
 npm run dev
 ```
 
-## 📚 Documentation
+## 📚 Project Documentation & Developer Onboarding
 
-### **🔐 Authentication & User Management**
-- **[Auth Strategy](./docs/AUTH_STRATEGY.md)** - Complete authentication flow, database triggers, and profile creation
-- **[Developer Quick Reference](./docs/DEVELOPER_QUICK_REFERENCE.md)** - Critical requirements and troubleshooting
-- **[Database Schema Audit](./database_schema_audit.md)** - Complete database structure with NOT NULL constraints
+Welcome to the TOTL Agency codebase! Start here to get productive in minutes.
 
-### **🏗️ Development Guides**
-- **[Coding Standards](./docs/CODING_STANDARDS.md)** - Project conventions and best practices
-- **[Database Guide](./docs/DATABASE_GUIDE.md)** - Database setup and management
-- **[Onboarding Guide](./docs/ONBOARDING.md)** - New developer setup process
+### 🚦 Quick Start
 
-### **🔧 Technical Documentation**
-- **[Email Service Setup](./docs/email-service.md)** - Email configuration and templates
-- **[Supabase Email Setup](./docs/supabase-email-setup.md)** - Supabase email configuration
-- **[Safe Supabase Queries](./docs/safe-supabase-queries.md)** - Secure database query patterns
+- **Auth System Quick Reference:**  
+  [docs/DEVELOPER_QUICK_REFERENCE.md](docs/DEVELOPER_QUICK_REFERENCE.md)
+
+- **Full Auth Architecture & Triggers:**  
+  [docs/AUTH_STRATEGY.md](docs/AUTH_STRATEGY.md)
+
+- **Database Schema & Constraints:**  
+  [database_schema_audit.md](database_schema_audit.md)
+
+- **Testing the Signup Flow:**  
+  [scripts/test-signup-flow.ts](scripts/test-signup-flow.ts)
+
+### 🧰 Debugging & Troubleshooting
+
+- See the "Common Errors & Fixes" section in the Quick Reference.
+- Run included debug queries for live data validation.
+- Use the health checks and validation queries for monitoring.
+
+### 💡 Developer Best Practices
+
+- Use snake_case for all user metadata keys (e.g., `first_name`, not `firstName`)
+- All database triggers use graceful fallbacks—no more signup failures
+- See commit history for migrations, rollbacks, and docs updates
+
+> **Tip:** New to the project? Read the Quick Reference first, then dive into `AUTH_STRATEGY.md` for full architecture understanding!
+
+---
+
+**This project is fully self-service. You are never more than one click away from answers. Happy building! 🚀**
 
 ## 🎯 Key Features
 
