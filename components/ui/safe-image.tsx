@@ -6,8 +6,9 @@ import { useState } from "react";
 interface SafeImageProps {
   src?: string | null;
   alt: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+  fill?: boolean;
   className?: string;
   fallbackSrc?: string;
   fallbackType?: "placeholder" | "static";
@@ -18,8 +19,9 @@ interface SafeImageProps {
  * Safe image component that handles loading errors gracefully
  * @param src - Image source URL
  * @param alt - Alt text for accessibility
- * @param width - Image width
- * @param height - Image height
+ * @param width - Image width (required if fill is false)
+ * @param height - Image height (required if fill is false)
+ * @param fill - Whether to use fill mode (requires parent with relative positioning)
  * @param className - CSS classes
  * @param fallbackSrc - Fallback image source
  * @param fallbackType - "placeholder" uses dynamic placeholder, "static" uses fallbackSrc
@@ -30,6 +32,7 @@ export function SafeImage({
   alt,
   width,
   height,
+  fill = false,
   className = "",
   fallbackSrc = "/images/totl-logo-transparent.png",
   fallbackType = "static",
@@ -50,6 +53,12 @@ export function SafeImage({
     }
   };
 
+  // Validate props
+  if (!fill && (!width || !height)) {
+    console.warn("SafeImage: width and height are required when fill is false");
+    return null;
+  }
+
   // If no src provided, use fallback immediately
   if (!src) {
     return (
@@ -58,6 +67,7 @@ export function SafeImage({
         alt={alt}
         width={width}
         height={height}
+        fill={fill}
         className={className}
         onError={handleError}
       />
@@ -70,6 +80,7 @@ export function SafeImage({
       alt={alt}
       width={width}
       height={height}
+      fill={fill}
       className={className}
       onError={handleError}
     />

@@ -15,12 +15,13 @@ export const dynamic = "force-dynamic";
 export default async function UpdatePasswordPage({
   searchParams,
 }: {
-  searchParams: { token_hash?: string; type?: string; access_token?: string };
+  searchParams: Promise<{ token_hash?: string; type?: string; access_token?: string }>;
 }) {
   const supabase = createServerComponentClient({ cookies });
-  const tokenHash = searchParams.token_hash;
-  const type = searchParams.type;
-  const accessToken = searchParams.access_token;
+  const params = await searchParams;
+  const tokenHash = params.token_hash;
+  const type = params.type;
+  const accessToken = params.access_token;
 
   // Handle password reset token verification
   if (tokenHash && type === "recovery") {

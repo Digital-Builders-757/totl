@@ -18,12 +18,13 @@ export const dynamic = "force-dynamic";
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: { code?: string; error?: string; error_description?: string };
+  searchParams: Promise<{ code?: string; error?: string; error_description?: string }>;
 }) {
   const supabase = createServerComponentClient({ cookies });
-  const code = searchParams.code;
-  const error = searchParams.error;
-  const errorDescription = searchParams.error_description;
+  const params = await searchParams;
+  const code = params.code;
+  const error = params.error;
+  const errorDescription = params.error_description;
 
   // Handle OAuth errors
   if (error) {
