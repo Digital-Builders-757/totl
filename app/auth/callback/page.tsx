@@ -95,16 +95,70 @@ export default async function AuthCallbackPage({
         );
       }
 
-      // Success! Update profile in the background
+      // Success! Check if profile exists and update email verification status
       if (data.session?.user) {
-        // Update email verification status
-        await supabase
+        // Check if profile exists
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .update({ email_verified: true })
-          .eq("id", data.session.user.id);
+          .select("role, email_verified")
+          .eq("id", data.session.user.id)
+          .single();
+
+        if (profileError && profileError.code === "PGRST116") {
+          // Profile doesn't exist - this shouldn't happen with our trigger, but handle it
+          console.error("Profile not found for user:", data.session.user.id);
+          return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+              <Card className="w-full max-w-md">
+                <CardHeader>
+                  <CardTitle className="text-center">Profile Not Found</CardTitle>
+                  <CardDescription className="text-center">
+                    Your account was created but profile setup failed
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                      <XCircle className="h-8 w-8 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-medium text-red-800 mb-2">Setup Error</h3>
+                    <p className="text-gray-600 text-center mb-4">
+                      Please contact support to complete your account setup.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-center">
+                  <Button asChild>
+                    <a href="/login">Return to Login</a>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          );
+        }
+
+        // Update email verification status if not already verified
+        if (profile && !profile.email_verified) {
+          await supabase
+            .from("profiles")
+            .update({ email_verified: true })
+            .eq("id", data.session.user.id);
+        }
+
+        // Redirect based on role
+        if (profile?.role === "talent") {
+          redirect("/talent/dashboard");
+        } else if (profile?.role === "client") {
+          redirect("/client/dashboard");
+        } else if (profile?.role === "admin") {
+          redirect("/admin/dashboard");
+        } else {
+          // No role assigned, go to role selection
+          redirect("/choose-role");
+        }
       }
 
-      // Redirect to dashboard or login
+      // Fallback redirect
       redirect("/dashboard");
     } catch (error) {
       console.error("Unexpected error:", error);

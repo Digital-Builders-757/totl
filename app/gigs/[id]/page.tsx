@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { RequireAuth } from "@/components/require-auth";
+import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -33,109 +34,63 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
           <div className="lg:col-span-2 space-y-8">
             {/* Gig Header */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="relative h-64 md:h-80 bg-gray-200">
-                {/* Fixed: Added fallback for gig image */}
-                <Image
-                  src={gig.image || "/placeholder.svg?height=400&width=1200&query=photoshoot"}
-                  alt={gig.title}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                {gig.featured && (
-                  <div className="absolute top-4 left-4">
-                    <Badge className="bg-black text-white">Featured</Badge>
-                  </div>
-                )}
+              <SafeImage
+                src={gig.image}
+                alt={gig.title}
+                width={1200}
+                height={400}
+                className="w-full h-64 md:h-96 object-cover rounded-lg"
+                fallbackSrc="/images/totl-logo-transparent.png"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+              {gig.featured && (
+                <div className="absolute top-4 left-4">
+                  <Badge className="bg-black text-white">Featured</Badge>
+                </div>
+              )}
+            </div>
 
+            <div className="p-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold mb-1">{gig.title}</h1>
+                  <p className="text-gray-600 text-lg">{gig.company}</p>
+                </div>
+                <Badge className="mt-2 md:mt-0 w-fit bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
+                  {gig.category}
+                </Badge>
               </div>
 
-              <div className="p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                  <div>
-                    <h1 className="text-3xl font-bold mb-1">{gig.title}</h1>
-                    <p className="text-gray-600 text-lg">{gig.company}</p>
-                  </div>
-                  <Badge className="mt-2 md:mt-0 w-fit bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-                    {gig.category}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {gig.tags.map((tag, index) => (
+                  <Badge key={index} variant="outline" className="bg-gray-50">
+                    {tag}
                   </Badge>
-                </div>
+                ))}
+              </div>
 
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {gig.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline" className="bg-gray-50">
-                      {tag}
-                    </Badge>
-                  ))}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6">
+                <div className="flex items-center">
+                  <MapPin className="mr-2 h-4 w-4 text-gray-500" />
+                  <span>{gig.location}</span>
                 </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6">
-                  <div className="flex items-center">
-                    <MapPin className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>{gig.location}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Clock className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>{gig.duration}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <DollarSign className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>{gig.compensation}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="mr-2 h-4 w-4 text-gray-500" />
-                    <span>{gig.date}</span>
-                  </div>
+                <div className="flex items-center">
+                  <Clock className="mr-2 h-4 w-4 text-gray-500" />
+                  <span>{gig.duration}</span>
                 </div>
-
-                <div className="border-t border-gray-100 pt-6">
-                  <h2 className="text-xl font-bold mb-4">Description</h2>
-                  <p className="text-gray-700 whitespace-pre-line">{gig.description}</p>
+                <div className="flex items-center">
+                  <DollarSign className="mr-2 h-4 w-4 text-gray-500" />
+                  <span>{gig.compensation}</span>
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4 text-gray-500" />
+                  <span>{gig.date}</span>
                 </div>
               </div>
-            </div>
 
-            {/* Requirements */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-4">Requirements</h2>
-              <ul className="space-y-3">
-                {gig.requirements.map((requirement, index) => (
-                  <li key={index} className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-gray-400 mt-0.5 mr-3" />
-                    <span>{requirement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Similar Gigs */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-bold mb-6">Similar Opportunities</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {similarGigs.map((similarGig, index) => (
-                  <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="relative h-40 bg-gray-200">
-                      {/* Fixed: Added fallback for similar gig image */}
-                      <Image
-                        src={
-                          similarGig.image ||
-                          "/placeholder.svg?height=200&width=400&query=photoshoot"
-                        }
-                        alt={similarGig.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold mb-1">{similarGig.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{similarGig.company}</p>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">{similarGig.location}</span>
-                        <Badge variant="outline">{similarGig.category}</Badge>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="border-t border-gray-100 pt-6">
+                <h2 className="text-xl font-bold mb-4">Description</h2>
+                <p className="text-gray-700 whitespace-pre-line">{gig.description}</p>
               </div>
             </div>
           </div>
@@ -163,8 +118,8 @@ export default function GigDetailPage({ params }: { params: { id: string } }) {
               <RequireAuth
                 fallback={
                   <p className="text-sm text-center text-gray-500 mt-2">
-                    Don&apos;t have an account? You&apos;ll be able to create one after clicking the button
-                    above.
+                    Don&apos;t have an account? You&apos;ll be able to create one after clicking the
+                    button above.
                   </p>
                 }
               >

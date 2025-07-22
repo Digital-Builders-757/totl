@@ -5,6 +5,7 @@ import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
+import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,11 +118,13 @@ export default async function GigsPage() {
               <div key={gig.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div className="grid md:grid-cols-4">
                   <div className="md:col-span-1 relative h-48 md:h-auto">
-                    <Image
-                      src={gig.image || "/placeholder.svg?height=300&width=300&query=casting"}
+                    <SafeImage
+                      src={gig.image}
                       alt={gig.title}
-                      fill
-                      className="object-cover"
+                      width={300}
+                      height={300}
+                      className="w-full h-48 object-cover rounded-t-lg"
+                      fallbackSrc="/images/totl-logo-transparent.png"
                     />
                     {/* {gig.featured && (
                       <div className="absolute top-3 left-3">
