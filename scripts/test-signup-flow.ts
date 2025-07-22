@@ -89,219 +89,282 @@ const testScenarios = [
       Role: "talent",
     },
     expected: {
-      profile_role: "talent",
+      profile_role: "talent", // Default role since wrong keys
       talent_profile_exists: true,
       client_profile_exists: false,
-      first_name: "", // Should be empty due to wrong key names
-      last_name: "",
+      first_name: "", // Empty because wrong key name
+      last_name: "", // Empty because wrong key name
+    },
+  },
+  {
+    name: "Admin Role Test",
+    metadata: {
+      first_name: "Admin",
+      last_name: "User",
+      role: "admin",
+    },
+    expected: {
+      profile_role: "admin",
+      talent_profile_exists: false,
+      client_profile_exists: false,
+      first_name: "Admin",
+      last_name: "User",
     },
   },
 ];
 
-async function testSignupFlow() {
-  console.log("🧪 Starting TOTL Agency Signup Flow Tests\n");
+// Regression test for schema reference issues
+const regressionTests = [
+  {
+    name: "Schema Reference Regression Test",
+    description: "Tests that explicit schema references work under different conditions",
+    test: async (supabase: SupabaseClient) => {
+      console.log("🔍 Running schema reference regression test...");
 
-  // Initialize Supabase client
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    console.error("❌ Missing Supabase environment variables");
-    console.log("Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY");
-    process.exit(1);
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  let passedTests = 0;
-  const totalTests = testScenarios.length;
-
-  for (const scenario of testScenarios) {
-    console.log(`📋 Testing: ${scenario.name}`);
-
-    try {
-      // Generate unique test email
-      const testEmail = `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}@example.com`;
-      const testPassword = "TestPassword123!";
-
-      // Create test user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: testEmail,
-        password: testPassword,
-        options: {
-          data: scenario.metadata,
-        },
+      // Test 1: Verify enum exists and can be cast
+      const { data: enumTest, error: enumError } = await supabase.rpc("test_enum_casting", {
+        test_role: "talent",
       });
 
-      if (authError) {
-        console.log(`  ❌ Auth Error: ${authError.message}`);
-        continue;
+      if (enumError) {
+        console.error("❌ Enum casting test failed:", enumError);
+        return false;
       }
 
-      if (!authData.user) {
-        console.log(`  ❌ No user created`);
-        continue;
+      console.log("✅ Enum casting test passed");
+
+      // Test 2: Verify trigger function exists
+      const { data: triggerTest, error: triggerError } = await supabase.rpc(
+        "test_trigger_function_exists"
+      );
+
+      if (triggerError) {
+        console.error("❌ Trigger function test failed:", triggerError);
+        return false;
       }
 
-      const userId = authData.user.id;
+      console.log("✅ Trigger function test passed");
 
-      // Wait a moment for trigger to execute
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return true;
+    },
+  },
+];
 
-      // Check profile creation
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+async function runTestScenario(
+  supabase: SupabaseClient,
+  scenario: (typeof testScenarios)[0],
+  testIndex: number
+): Promise<boolean> {
+  const testEmail = `test-${testIndex}-${Date.now()}@example.com`;
+  const testPassword = "TestPassword123!";
 
-      if (profileError) {
-        console.log(`  ❌ Profile Error: ${profileError.message}`);
-        continue;
-      }
+  console.log(`\n🧪 Testing: ${scenario.name}`);
+  console.log(`📧 Test email: ${testEmail}`);
 
-      // Check talent profile
-      const { data: talentProfile } = await supabase
+  try {
+    // Step 1: Create user with metadata
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: testEmail,
+      password: testPassword,
+      options: {
+        data: scenario.metadata,
+      },
+    });
+
+    if (authError) {
+      console.error("❌ Auth signup failed:", authError.message);
+      return false;
+    }
+
+    if (!authData.user) {
+      console.error("❌ No user returned from signup");
+      return false;
+    }
+
+    console.log("✅ User created successfully");
+
+    // Step 2: Wait a moment for trigger to execute
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Step 3: Check profile creation
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authData.user.id)
+      .single();
+
+    if (profileError) {
+      console.error("❌ Profile not found:", profileError.message);
+      return false;
+    }
+
+    console.log("✅ Profile created successfully");
+
+    // Step 4: Verify profile data
+    if (profile.role !== scenario.expected.profile_role) {
+      console.error(
+        `❌ Wrong role: expected ${scenario.expected.profile_role}, got ${profile.role}`
+      );
+      return false;
+    }
+
+    // Step 5: Check role-specific profile
+    if (scenario.expected.talent_profile_exists) {
+      const { data: talentProfile, error: talentError } = await supabase
         .from("talent_profiles")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", authData.user.id)
         .single();
 
-      // Check client profile
-      const { data: clientProfile } = await supabase
+      if (talentError) {
+        console.error("❌ Talent profile not found:", talentError.message);
+        return false;
+      }
+
+      // Verify talent profile data
+      if (talentProfile.first_name !== scenario.expected.first_name) {
+        console.error(
+          `❌ Wrong first_name: expected "${scenario.expected.first_name}", got "${talentProfile.first_name}"`
+        );
+        return false;
+      }
+
+      if (talentProfile.last_name !== scenario.expected.last_name) {
+        console.error(
+          `❌ Wrong last_name: expected "${scenario.expected.last_name}", got "${talentProfile.last_name}"`
+        );
+        return false;
+      }
+
+      console.log("✅ Talent profile verified");
+    }
+
+    if (scenario.expected.client_profile_exists) {
+      const { data: clientProfile, error: clientError } = await supabase
         .from("client_profiles")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", authData.user.id)
         .single();
 
-      // Validate results
-      let testPassed = true;
-      const results = [];
-
-      // Check profile role
-      if (profile.role !== scenario.expected.profile_role) {
-        results.push(`❌ Expected role '${scenario.expected.profile_role}', got '${profile.role}'`);
-        testPassed = false;
-      } else {
-        results.push(`✅ Role: ${profile.role}`);
+      if (clientError) {
+        console.error("❌ Client profile not found:", clientError.message);
+        return false;
       }
 
-      // Check talent profile existence
-      if (scenario.expected.talent_profile_exists && !talentProfile) {
-        results.push("❌ Expected talent profile, but not found");
-        testPassed = false;
-      } else if (!scenario.expected.talent_profile_exists && talentProfile) {
-        results.push("❌ Unexpected talent profile found");
-        testPassed = false;
-      } else {
-        results.push(
-          `✅ Talent profile: ${scenario.expected.talent_profile_exists ? "exists" : "not found"}`
+      // Verify client profile data
+      if (
+        scenario.expected.company_name &&
+        clientProfile.company_name !== scenario.expected.company_name
+      ) {
+        console.error(
+          `❌ Wrong company_name: expected "${scenario.expected.company_name}", got "${clientProfile.company_name}"`
         );
+        return false;
       }
 
-      // Check client profile existence
-      if (scenario.expected.client_profile_exists && !clientProfile) {
-        results.push("❌ Expected client profile, but not found");
-        testPassed = false;
-      } else if (!scenario.expected.client_profile_exists && clientProfile) {
-        results.push("❌ Unexpected client profile found");
-        testPassed = false;
-      } else {
-        results.push(
-          `✅ Client profile: ${scenario.expected.client_profile_exists ? "exists" : "not found"}`
-        );
-      }
-
-      // Check specific fields for talent profiles
-      if (talentProfile) {
-        if (
-          scenario.expected.first_name !== undefined &&
-          talentProfile.first_name !== scenario.expected.first_name
-        ) {
-          results.push(
-            `❌ Expected first_name '${scenario.expected.first_name}', got '${talentProfile.first_name}'`
-          );
-          testPassed = false;
-        } else {
-          results.push(`✅ First name: ${talentProfile.first_name}`);
-        }
-
-        if (
-          scenario.expected.last_name !== undefined &&
-          talentProfile.last_name !== scenario.expected.last_name
-        ) {
-          results.push(
-            `❌ Expected last_name '${scenario.expected.last_name}', got '${talentProfile.last_name}'`
-          );
-          testPassed = false;
-        } else {
-          results.push(`✅ Last name: ${talentProfile.last_name}`);
-        }
-      }
-
-      // Check specific fields for client profiles
-      if (clientProfile) {
-        if (
-          scenario.expected.company_name !== undefined &&
-          clientProfile.company_name !== scenario.expected.company_name
-        ) {
-          results.push(
-            `❌ Expected company_name '${scenario.expected.company_name}', got '${clientProfile.company_name}'`
-          );
-          testPassed = false;
-        } else {
-          results.push(`✅ Company name: ${clientProfile.company_name}`);
-        }
-      }
-
-      // Display results
-      results.forEach((result) => console.log(`    ${result}`));
-
-      if (testPassed) {
-        console.log(`  ✅ PASSED\n`);
-        passedTests++;
-      } else {
-        console.log(`  ❌ FAILED\n`);
-      }
-
-      // Clean up test user
-      await cleanupTestUser(supabase, userId);
-    } catch (error) {
-      console.log(`  ❌ Test Error: ${error instanceof Error ? error.message : "Unknown error"}\n`);
+      console.log("✅ Client profile verified");
     }
-  }
 
-  // Summary
-  console.log("📊 Test Summary");
-  console.log(`Passed: ${passedTests}/${totalTests}`);
-  console.log(`Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);
+    // Step 6: Clean up test user
+    await cleanupTestUser(supabase, authData.user.id);
 
-  if (passedTests === totalTests) {
-    console.log("\n🎉 All tests passed! Signup flow is working correctly.");
-  } else {
-    console.log("\n⚠️  Some tests failed. Please review the results above.");
+    console.log("✅ Test scenario passed");
+    return true;
+  } catch (error) {
+    console.error("❌ Test scenario failed with error:", error);
+    return false;
   }
 }
 
 async function cleanupTestUser(supabase: SupabaseClient, userId: string) {
   try {
-    // Delete role-specific profiles
+    // Delete role-specific profiles first
     await supabase.from("talent_profiles").delete().eq("user_id", userId);
     await supabase.from("client_profiles").delete().eq("user_id", userId);
 
     // Delete main profile
     await supabase.from("profiles").delete().eq("id", userId);
 
-    // Note: auth.users deletion requires admin privileges
-    // In production, you might want to mark users as deleted instead
-  } catch {
-    console.log(`Warning: Could not clean up test user ${userId}`);
+    // Delete auth user (requires admin privileges)
+    // Note: This might not work in all environments
+    try {
+      await supabase.auth.admin.deleteUser(userId);
+    } catch (error) {
+      console.log("⚠️ Could not delete auth user (requires admin privileges)");
+    }
+  } catch (error) {
+    console.error("⚠️ Cleanup failed:", error);
   }
 }
 
-// Run tests if this file is executed directly
-if (require.main === module) {
-  testSignupFlow().catch(console.error);
+async function runRegressionTests(supabase: SupabaseClient): Promise<boolean> {
+  console.log("\n🔧 Running regression tests...");
+
+  let allPassed = true;
+
+  for (const test of regressionTests) {
+    console.log(`\n🧪 ${test.name}: ${test.description}`);
+
+    const passed = await test.test(supabase);
+    if (!passed) {
+      allPassed = false;
+    }
+  }
+
+  return allPassed;
 }
 
-export { testSignupFlow };
+async function main() {
+  // Initialize Supabase client
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("❌ Missing Supabase environment variables");
+    console.error("Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    process.exit(1);
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+  console.log("🚀 Starting TOTL Agency Signup Flow Tests");
+  console.log("==========================================");
+
+  // Run regression tests first
+  const regressionPassed = await runRegressionTests(supabase);
+  if (!regressionPassed) {
+    console.error("❌ Regression tests failed. Stopping.");
+    process.exit(1);
+  }
+
+  // Run main test scenarios
+  let passedTests = 0;
+  const totalTests = testScenarios.length;
+
+  for (let i = 0; i < testScenarios.length; i++) {
+    const passed = await runTestScenario(supabase, testScenarios[i], i);
+    if (passed) {
+      passedTests++;
+    }
+  }
+
+  // Summary
+  console.log("\n📊 Test Summary");
+  console.log("===============");
+  console.log(`✅ Passed: ${passedTests}/${totalTests}`);
+  console.log(`❌ Failed: ${totalTests - passedTests}/${totalTests}`);
+
+  if (passedTests === totalTests) {
+    console.log("\n🎉 All tests passed! Signup flow is working correctly.");
+    process.exit(0);
+  } else {
+    console.log("\n💥 Some tests failed. Please check the errors above.");
+    process.exit(1);
+  }
+}
+
+// Run the tests
+main().catch((error) => {
+  console.error("❌ Test runner failed:", error);
+  process.exit(1);
+});

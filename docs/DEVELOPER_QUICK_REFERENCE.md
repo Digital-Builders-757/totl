@@ -12,86 +12,62 @@
 
 ## 🚨 Critical Requirements
 
-### **Metadata Key Naming Convention**
-**⚠️ ALWAYS use lowercase with underscores:**
+### **Metadata Key Naming**
+- **MUST use snake_case** for all user metadata keys
+- **Correct:** `first_name`, `last_name`, `role`, `company_name`
+- **Wrong:** `firstName`, `lastName`, `Role`, `companyName`
 
-```typescript
-// ✅ CORRECT
-{
-  first_name: "John",      // lowercase with underscore
-  last_name: "Doe",        // lowercase with underscore
-  role: "talent",          // lowercase
-  company_name: "Acme Co"  // lowercase with underscore
-}
+### **Database Triggers**
+- Profile creation is automatic via `handle_new_user()` trigger
+- Trigger handles NULL values gracefully with COALESCE
+- Uses explicit schema references: `user_role::public.user_role`
 
-// ❌ WRONG - Will cause NULL constraint violations
-{
-  firstName: "John",       // camelCase
-  lastName: "Doe",         // camelCase
-  Role: "talent",          // PascalCase
-  companyName: "Acme Co"   // camelCase
-}
-```
-
-### **Required Metadata Keys**
-```typescript
-// Talent Signup
-{
-  first_name: string,    // Required
-  last_name: string,     // Required
-  role: "talent"         // Required
-}
-
-// Client Signup
-{
-  first_name: string,     // Required
-  last_name: string,      // Required
-  role: "client",         // Required
-  company_name: string    // Optional (defaults to display_name)
-}
-```
+### **Role Assignment**
+- Default role: `talent`
+- Valid roles: `talent`, `client`, `admin`
+- Role determines which profile table is created
 
 ## 🔄 Signup Flow
 
-### **1. Frontend Signup**
-```typescript
-const { error } = await signUp(email, password, {
-  data: {
-    first_name: firstName,    // ✅ lowercase with underscore
-    last_name: lastName,      // ✅ lowercase with underscore
-    role: "talent",           // ✅ lowercase
-  },
-  emailRedirectTo: `${window.location.origin}/auth/callback`,
-});
-```
-
-### **2. Database Trigger**
-- Fires automatically on `auth.users` INSERT
-- Creates `profiles` record with role
-- Creates `talent_profiles` or `client_profiles` record
-- Handles NULL metadata gracefully
-
-### **3. Email Verification**
-- User clicks verification link
-- Goes to `/auth/callback`
-- Updates `email_verified = true`
-- Redirects to role-based dashboard
+1. **User submits signup form** with metadata
+2. **Supabase creates auth.users record**
+3. **Trigger fires** `on_auth_user_created`
+4. **Profile created** in `profiles` table
+5. **Role-specific profile** created in `talent_profiles` or `client_profiles`
+6. **Email verification** required before login
+7. **Role-based redirect** to appropriate dashboard
 
 ## 🛠️ Troubleshooting
 
-### **Common Errors**
+### **Common Errors & Fixes**
 
-#### **"null value violates not-null constraint"**
-**Cause:** Wrong metadata key naming (camelCase instead of snake_case)  
-**Fix:** Use lowercase with underscores
+#### **"type user_role does not exist" Error**
+```sql
+-- Check if enum exists
+SELECT n.nspname as "Schema", t.typname as "Name"
+FROM pg_type t
+LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+WHERE t.typtype = 'e' AND t.typname = 'user_role';
 
-#### **Profile not created**
-**Cause:** Trigger not firing  
-**Fix:** Check if `on_auth_user_created` trigger exists
+-- If missing, recreate:
+CREATE TYPE user_role AS ENUM ('talent', 'client', 'admin');
+```
 
-#### **Wrong role assigned**
-**Cause:** Missing or incorrect role in metadata  
-**Fix:** Ensure `role` is set to `"talent"` or `"client"`
+#### **NULL Value Constraint Violations**
+- Trigger function uses COALESCE for safe defaults
+- Empty strings used instead of NULL for required fields
+- Check metadata key naming (must be snake_case)
+
+#### **Profile Creation Failures**
+```sql
+-- Check trigger exists
+SELECT trigger_name FROM information_schema.triggers 
+WHERE trigger_name = 'on_auth_user_created';
+
+-- Check function exists
+SELECT routine_name FROM information_schema.routines 
+WHERE routine_name = 'handle_new_user';
+```
 
 ## 🔍 Debug Queries
 
@@ -150,23 +126,43 @@ FROM information_schema.routines
 WHERE routine_name = 'handle_new_user';
 ```
 
+### **Enum Type Verification**
+```sql
+-- Check if user_role enum exists and has correct values
+SELECT n.nspname as "Schema", t.typname as "Name"
+FROM pg_type t
+LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+WHERE t.typtype = 'e' AND t.typname = 'user_role';
+
+-- Test enum casting
+SELECT 'talent'::user_role as test_cast;
+
+-- Check profiles table role column type
+SELECT column_name, data_type, udt_name 
+FROM information_schema.columns 
+WHERE table_name = 'profiles' AND column_name = 'role';
+```
+
 ## 📋 Testing Checklist
 
-### **Before Deploying**
-- [ ] Test talent signup with complete metadata
-- [ ] Test talent signup with missing names
-- [ ] Test client signup with complete metadata
-- [ ] Test client signup with missing company name
-- [ ] Test OAuth signup (minimal metadata)
-- [ ] Verify email verification flow
-- [ ] Verify role-based redirects
+### **Pre-Signup**
+- [ ] Database migrations applied
+- [ ] `user_role` enum exists
+- [ ] Trigger function exists
+- [ ] Trigger attached to `auth.users`
 
-### **Edge Cases to Test**
-- [ ] Empty metadata object `{}`
-- [ ] NULL metadata
-- [ ] Missing role in metadata
-- [ ] Wrong metadata key names (camelCase)
-- [ ] Special characters in names
+### **Signup Testing**
+- [ ] Complete talent signup with all fields
+- [ ] Complete client signup with company name
+- [ ] Signup with missing optional fields
+- [ ] Signup with wrong metadata keys (should fail gracefully)
+- [ ] Email verification flow
+
+### **Post-Signup Verification**
+- [ ] Profile created in `profiles` table
+- [ ] Role-specific profile created
+- [ ] Email verification status correct
+- [ ] Role-based redirect works
 
 ### **Production Health Checks**
 ```sql
@@ -194,11 +190,12 @@ LEFT JOIN client_profiles cp ON p.id = cp.user_id
 GROUP BY p.role;
 ```
 
-## 🔗 Related Documentation
-- [Full Auth Strategy](./AUTH_STRATEGY.md)
-- [Database Schema Audit](./database_schema_audit.md)
-- [Coding Standards](./CODING_STANDARDS.md)
+## 📚 Related Documentation
+
+- **[Auth Strategy](./AUTH_STRATEGY.md)** - Complete authentication architecture
+- **[Database Schema Audit](../database_schema_audit.md)** - Full schema with constraints
+- **[Testing Script](../scripts/test-signup-flow.ts)** - Automated signup testing
 
 ---
 
-**Remember:** Always use lowercase with underscores for metadata keys! 🎯 
+**Need help?** Check the troubleshooting section above, then consult the full Auth Strategy document. 
