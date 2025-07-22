@@ -16,6 +16,46 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 - **Foreign Key Relationships:** 8
 - **Indexes:** 16 (including primary keys)
 
+## 🔒 NOT NULL Constraints & Protection
+
+### **Critical NOT NULL Columns Protected by Trigger Logic**
+
+The following NOT NULL columns are protected by the `handle_new_user()` trigger function to prevent constraint violations during user signup:
+
+| Column | Table | Protection Method | Default Value |
+|--------|-------|-------------------|---------------|
+| `role` | profiles | `COALESCE(new.raw_user_meta_data->>'role', 'talent')` | `'talent'` |
+| `first_name` | talent_profiles | `COALESCE(new.raw_user_meta_data->>'first_name', '')` | `''` (empty string) |
+| `last_name` | talent_profiles | `COALESCE(new.raw_user_meta_data->>'last_name', '')` | `''` (empty string) |
+| `company_name` | client_profiles | `COALESCE(new.raw_user_meta_data->>'company_name', display_name)` | `display_name` |
+
+### **Metadata Key Requirements**
+
+**⚠️ CRITICAL:** All metadata keys must use **lowercase with underscores** to work with the trigger:
+
+```typescript
+// ✅ CORRECT - Will work with trigger
+{
+  first_name: "John",      // lowercase with underscore
+  last_name: "Doe",        // lowercase with underscore
+  role: "talent",          // lowercase
+  company_name: "Acme Co"  // lowercase with underscore
+}
+
+// ❌ WRONG - Will cause NULL values in database
+{
+  firstName: "John",       // camelCase - trigger won't find this
+  lastName: "Doe",         // camelCase - trigger won't find this
+  Role: "talent",          // PascalCase - trigger won't find this
+  companyName: "Acme Co"   // camelCase - trigger won't find this
+}
+```
+
+### **Trigger Function Location**
+- **Function:** `handle_new_user()`
+- **Migration:** `supabase/migrations/20250722015600_fix_handle_new_user_trigger_null_handling.sql`
+- **Trigger:** `on_auth_user_created` on `auth.users` table
+
 ## 📊 Custom Types (Enums)
 
 ### 1. `user_role`
@@ -95,19 +135,31 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `user_id` | `uuid` | NO | - | Foreign key to users |
-| `height` | `numeric` | YES | - | Height measurement |
-| `weight` | `numeric` | YES | - | Weight measurement |
-| `measurements` | `text` | YES | - | Body measurements |
-| `experience_years` | `integer` | YES | - | Years of experience |
-| `specialties` | `text[]` | YES | - | Array of specialties |
+| `user_id` | `uuid` | NO | - | Foreign key to profiles |
+| `first_name` | `text` | NO | - | First name (protected by trigger) |
+| `last_name` | `text` | NO | - | Last name (protected by trigger) |
+| `phone` | `text` | YES | - | Contact phone number |
+| `age` | `integer` | YES | - | Age in years |
+| `location` | `text` | YES | - | Geographic location |
+| `experience` | `text` | YES | - | Experience description |
 | `portfolio_url` | `text` | YES | - | Portfolio website URL |
+| `height` | `text` | YES | - | Height measurement |
+| `measurements` | `text` | YES | - | Body measurements |
+| `hair_color` | `text` | YES | - | Hair color |
+| `eye_color` | `text` | YES | - | Eye color |
+| `shoe_size` | `text` | YES | - | Shoe size |
+| `languages` | `text[]` | YES | - | Array of spoken languages |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
+**NOT NULL Protection:**
+- `first_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'first_name', '')`
+- `last_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'last_name', '')`
+- Both default to empty string if metadata is missing
+
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `users.id`
+- Foreign Key: `user_id` → `profiles.id`
 
 **Indexes:**
 - `talent_profiles_pkey` (Primary Key)
@@ -120,16 +172,24 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `user_id` | `uuid` | NO | - | Foreign key to users |
-| `company_name` | `text` | YES | - | Company name |
+| `user_id` | `uuid` | NO | - | Foreign key to profiles |
+| `company_name` | `text` | NO | - | Company name (protected by trigger) |
 | `industry` | `text` | YES | - | Industry sector |
+| `website` | `text` | YES | - | Company website |
+| `contact_name` | `text` | YES | - | Primary contact name |
+| `contact_email` | `text` | YES | - | Primary contact email |
+| `contact_phone` | `text` | YES | - | Primary contact phone |
 | `company_size` | `text` | YES | - | Company size category |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
+**NOT NULL Protection:**
+- `company_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'company_name', display_name)`
+- Defaults to display_name if metadata is missing
+
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `users.id`
+- Foreign Key: `user_id` → `profiles.id`
 
 **Indexes:**
 - `client_profiles_pkey` (Primary Key)
