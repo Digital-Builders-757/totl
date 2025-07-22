@@ -4,6 +4,18 @@
 **Version:** 1.0  
 **Status:** Production Ready
 
+## Table of Contents
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Database Schema](#database-schema)
+- [User Signup Flow](#user-signup-flow)
+- [Critical Requirements](#critical-requirements)
+- [Testing Scenarios](#testing-scenarios)
+- [Troubleshooting](#troubleshooting)
+- [Migration History](#migration-history)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
+
 ## 🎯 Overview
 
 This document outlines the complete authentication and profile creation strategy for TOTL Agency. It serves as the single source of truth for understanding how user signup, profile creation, and role-based access control work.
@@ -220,6 +232,25 @@ FROM profiles p
 LEFT JOIN talent_profiles tp ON p.id = tp.user_id
 LEFT JOIN client_profiles cp ON p.id = cp.user_id
 WHERE p.id = 'user-uuid';
+
+-- Get new users without profiles (should be empty)
+SELECT * FROM auth.users u
+LEFT JOIN profiles p ON u.id = p.id
+WHERE p.id IS NULL;
+
+-- Verify role and email verification status
+SELECT id, role, email_verified, display_name FROM profiles;
+
+-- Check for users with missing role-specific profiles
+SELECT p.id, p.role, p.display_name,
+       CASE 
+         WHEN p.role = 'talent' AND tp.user_id IS NULL THEN 'Missing talent profile'
+         WHEN p.role = 'client' AND cp.user_id IS NULL THEN 'Missing client profile'
+         ELSE 'Profile complete'
+       END as status
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id;
 ```
 
 ## 📋 Migration History
@@ -259,6 +290,7 @@ supabase db push
 
 ## 🔗 Related Documentation
 - [Database Schema Audit](./database_schema_audit.md)
+- [Developer Quick Reference](./DEVELOPER_QUICK_REFERENCE.md)
 - [Coding Standards](./CODING_STANDARDS.md)
 - [Supabase Setup Guide](./supabase-email-setup.md)
 

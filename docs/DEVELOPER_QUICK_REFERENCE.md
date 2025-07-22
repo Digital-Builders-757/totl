@@ -2,6 +2,14 @@
 
 **Last Updated:** July 22, 2025
 
+## Table of Contents
+- [Critical Requirements](#critical-requirements)
+- [Signup Flow](#signup-flow)
+- [Troubleshooting](#troubleshooting)
+- [Debug Queries](#debug-queries)
+- [Testing Checklist](#testing-checklist)
+- [Related Documentation](#related-documentation)
+
 ## 🚨 Critical Requirements
 
 ### **Metadata Key Naming Convention**
@@ -85,7 +93,9 @@ const { error } = await signUp(email, password, {
 **Cause:** Missing or incorrect role in metadata  
 **Fix:** Ensure `role` is set to `"talent"` or `"client"`
 
-### **Debug Queries**
+## 🔍 Debug Queries
+
+### **Basic Debugging**
 ```sql
 -- Check user metadata
 SELECT id, email, raw_user_meta_data FROM auth.users WHERE email = 'user@example.com';
@@ -99,6 +109,45 @@ WHERE p.id = 'user-uuid';
 
 -- Check trigger exists
 SELECT trigger_name FROM information_schema.triggers WHERE trigger_name = 'on_auth_user_created';
+```
+
+### **Advanced Debugging**
+```sql
+-- Get new users without profiles (should be empty)
+SELECT * FROM auth.users u
+LEFT JOIN profiles p ON u.id = p.id
+WHERE p.id IS NULL;
+
+-- Verify role and email verification status
+SELECT id, role, email_verified, display_name FROM profiles;
+
+-- Check for users with missing role-specific profiles
+SELECT p.id, p.role, p.display_name,
+       CASE 
+         WHEN p.role = 'talent' AND tp.user_id IS NULL THEN 'Missing talent profile'
+         WHEN p.role = 'client' AND cp.user_id IS NULL THEN 'Missing client profile'
+         ELSE 'Profile complete'
+       END as status
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id;
+
+-- Find users with NULL metadata (potential issues)
+SELECT id, email, raw_user_meta_data 
+FROM auth.users 
+WHERE raw_user_meta_data IS NULL OR raw_user_meta_data = '{}';
+
+-- Check for metadata with wrong key names
+SELECT id, email, raw_user_meta_data 
+FROM auth.users 
+WHERE raw_user_meta_data::text LIKE '%firstName%' 
+   OR raw_user_meta_data::text LIKE '%lastName%'
+   OR raw_user_meta_data::text LIKE '%companyName%';
+
+-- Verify trigger function exists and is correct
+SELECT routine_definition 
+FROM information_schema.routines 
+WHERE routine_name = 'handle_new_user';
 ```
 
 ## 📋 Testing Checklist
@@ -118,6 +167,32 @@ SELECT trigger_name FROM information_schema.triggers WHERE trigger_name = 'on_au
 - [ ] Missing role in metadata
 - [ ] Wrong metadata key names (camelCase)
 - [ ] Special characters in names
+
+### **Production Health Checks**
+```sql
+-- Run these queries to verify system health
+-- 1. No orphaned users
+SELECT COUNT(*) as orphaned_users FROM auth.users u
+LEFT JOIN profiles p ON u.id = p.id
+WHERE p.id IS NULL;
+
+-- 2. All profiles have correct roles
+SELECT role, COUNT(*) FROM profiles GROUP BY role;
+
+-- 3. Email verification status
+SELECT email_verified, COUNT(*) FROM profiles GROUP BY email_verified;
+
+-- 4. Profile completion status
+SELECT 
+  p.role,
+  COUNT(*) as total_profiles,
+  COUNT(tp.user_id) as talent_profiles,
+  COUNT(cp.user_id) as client_profiles
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id
+GROUP BY p.role;
+```
 
 ## 🔗 Related Documentation
 - [Full Auth Strategy](./AUTH_STRATEGY.md)
