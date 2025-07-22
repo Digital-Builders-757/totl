@@ -1,19 +1,40 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { AlertCircle, Save, User, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertCircle, Save, User, Phone, MapPin, Globe, FileText } from "lucide-react";
+
+// Define the talent profile interface based on database schema
+interface TalentProfile {
+  id?: string;
+  user_id?: string;
+  first_name: string;
+  last_name: string;
+  phone?: string | null;
+  age?: number | null;
+  location?: string | null;
+  experience?: string | null;
+  portfolio_url?: string | null;
+  height?: string | null;
+  measurements?: string | null;
+  hair_color?: string | null;
+  eye_color?: string | null;
+  shoe_size?: string | null;
+  languages?: string[] | null;
+  created_at?: string;
+  updated_at?: string;
+}
 
 // Define the form schema
 const profileSchema = z.object({
@@ -28,7 +49,7 @@ const profileSchema = z.object({
   phone: z
     .string()
     .optional()
-    .refine((val) => !val || /^[\+]?[1-9][\d]{0,15}$/.test(val), {
+    .refine((val) => !val || /^[+]?[1-9][\d]{0,15}$/.test(val), {
       message: "Please enter a valid phone number",
     }),
   location: z.string().max(100, { message: "Location cannot exceed 100 characters" }).optional(),
@@ -38,14 +59,20 @@ const profileSchema = z.object({
     .refine((val) => !val || (parseInt(val) >= 18 && parseInt(val) <= 100), {
       message: "Age must be between 18 and 100",
     }),
-  experience: z.string().max(500, { message: "Experience cannot exceed 500 characters" }).optional(),
+  experience: z
+    .string()
+    .max(500, { message: "Experience cannot exceed 500 characters" })
+    .optional(),
   portfolio_url: z
     .string()
     .url({ message: "Please enter a valid URL" })
     .optional()
     .or(z.literal("")),
   height: z.string().max(20, { message: "Height cannot exceed 20 characters" }).optional(),
-  measurements: z.string().max(100, { message: "Measurements cannot exceed 100 characters" }).optional(),
+  measurements: z
+    .string()
+    .max(100, { message: "Measurements cannot exceed 100 characters" })
+    .optional(),
   hair_color: z.string().max(30, { message: "Hair color cannot exceed 30 characters" }).optional(),
   eye_color: z.string().max(30, { message: "Eye color cannot exceed 30 characters" }).optional(),
   shoe_size: z.string().max(10, { message: "Shoe size cannot exceed 10 characters" }).optional(),
@@ -55,7 +82,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface TalentProfileFormProps {
-  initialData?: any;
+  initialData?: TalentProfile | null;
 }
 
 export default function TalentProfileForm({ initialData }: TalentProfileFormProps) {
@@ -143,7 +170,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
 
       // Reset form dirty state
       reset(data);
-      
+
       // Redirect to dashboard
       router.push("/talent/dashboard");
     } catch (error) {
@@ -172,9 +199,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <User className="h-5 w-5" />
             Basic Information
           </CardTitle>
-          <CardDescription>
-            Your name and contact information
-          </CardDescription>
+          <CardDescription>Your name and contact information</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -222,9 +247,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 className={errors.phone ? "border-red-500" : ""}
                 disabled={isSubmitting}
               />
-              {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone.message}</p>
-              )}
+              {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="location" className={errors.location ? "text-red-500" : ""}>
@@ -237,9 +260,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 className={errors.location ? "border-red-500" : ""}
                 disabled={isSubmitting}
               />
-              {errors.location && (
-                <p className="text-sm text-red-500">{errors.location.message}</p>
-              )}
+              {errors.location && <p className="text-sm text-red-500">{errors.location.message}</p>}
             </div>
           </div>
 
@@ -269,9 +290,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <User className="h-5 w-5" />
             Physical Characteristics
           </CardTitle>
-          <CardDescription>
-            Your physical measurements and characteristics
-          </CardDescription>
+          <CardDescription>Your physical measurements and characteristics</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -287,9 +306,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 className={errors.age ? "border-red-500" : ""}
                 disabled={isSubmitting}
               />
-              {errors.age && (
-                <p className="text-sm text-red-500">{errors.age.message}</p>
-              )}
+              {errors.age && <p className="text-sm text-red-500">{errors.age.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="height" className={errors.height ? "text-red-500" : ""}>
@@ -297,14 +314,12 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               </Label>
               <Input
                 id="height"
-                placeholder="5'8""
+                placeholder="5'8&quot;"
                 {...register("height")}
                 className={errors.height ? "border-red-500" : ""}
                 disabled={isSubmitting}
               />
-              {errors.height && (
-                <p className="text-sm text-red-500">{errors.height.message}</p>
-              )}
+              {errors.height && <p className="text-sm text-red-500">{errors.height.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="shoe_size" className={errors.shoe_size ? "text-red-500" : ""}>
@@ -381,9 +396,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <FileText className="h-5 w-5" />
             Additional Information
           </CardTitle>
-          <CardDescription>
-            Your experience and languages
-          </CardDescription>
+          <CardDescription>Your experience and languages</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -414,9 +427,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               className={errors.languages ? "border-red-500" : ""}
               disabled={isSubmitting}
             />
-            {errors.languages && (
-              <p className="text-sm text-red-500">{errors.languages.message}</p>
-            )}
+            {errors.languages && <p className="text-sm text-red-500">{errors.languages.message}</p>}
           </div>
         </CardContent>
       </Card>
@@ -451,4 +462,4 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       </div>
     </form>
   );
-} 
+}
