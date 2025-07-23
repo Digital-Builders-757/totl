@@ -38,6 +38,9 @@ import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = "force-dynamic";
+
 interface TalentProfile {
   id?: string;
   user_id?: string;
@@ -89,7 +92,14 @@ export default function TalentDashboard() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClientComponentClient();
+  const [supabaseError, setSupabaseError] = useState<string | null>(null);
+  
+  // Check if Supabase is configured
+  const isSupabaseConfigured = typeof window !== 'undefined' && 
+    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
   // Mock data for enhanced UI (these would be replaced with real data)
   const profileStats = {
@@ -199,12 +209,19 @@ export default function TalentDashboard() {
   ];
 
   useEffect(() => {
-    if (user) {
+    if (user && supabase) {
       fetchDashboardData();
+    } else if (!isSupabaseConfigured) {
+      setSupabaseError("Supabase is not configured. Please check your environment variables.");
+      setLoading(false);
+    } else {
+      setLoading(false);
     }
-  }, [user]);
+  }, [user, supabase, isSupabaseConfigured]);
 
   const fetchDashboardData = async () => {
+    if (!supabase || !user) return;
+    
     try {
       // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
@@ -248,6 +265,7 @@ export default function TalentDashboard() {
       setGigs(gigsData || []);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+      setSupabaseError("Failed to load dashboard data. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -290,12 +308,44 @@ export default function TalentDashboard() {
 
   const needsProfileCompletion = !talentProfile?.first_name || !talentProfile?.last_name;
 
+  // Show error state if Supabase is not configured
+  if (supabaseError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
+          <p className="text-gray-600 mb-4">{supabaseError}</p>
+          <Button asChild>
+            <Link href="/login">Go to Login</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if no user
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Please Log In</h2>
+          <p className="text-gray-600 mb-4">You need to be logged in to access your talent dashboard.</p>
+          <Button asChild>
+            <Link href="/login">Log In</Link>
+          </Button>
         </div>
       </div>
     );
@@ -311,8 +361,7 @@ export default function TalentDashboard() {
               <Avatar className="h-12 w-12">
                 <AvatarImage src="/images/totl-logo-transparent.png" alt="Profile" />
                 <AvatarFallback>
-                  {talentProfile?.first_name?.[0]}
-                  {talentProfile?.last_name?.[0] || "T"}
+                  {talentProfile?.first_name?.[0]}{talentProfile?.last_name?.[0] || "T"}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -486,7 +535,9 @@ export default function TalentDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Profile Completion</span>
-                      <span className="font-medium">{needsProfileCompletion ? "60%" : "85%"}</span>
+                      <span className="font-medium">
+                        {needsProfileCompletion ? "60%" : "85%"}
+                      </span>
                     </div>
                     <Progress value={needsProfileCompletion ? 60 : 85} className="h-2" />
                   </div>
@@ -496,13 +547,9 @@ export default function TalentDashboard() {
                         <User className="h-4 w-4" />
                         Basic Information
                       </span>
-                      <Badge
-                        variant="outline"
-                        className={
-                          needsProfileCompletion
-                            ? "bg-red-50 text-red-700"
-                            : "bg-green-50 text-green-700"
-                        }
+                      <Badge 
+                        variant="outline" 
+                        className={needsProfileCompletion ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}
                       >
                         {needsProfileCompletion ? "Incomplete" : "Complete"}
                       </Badge>
@@ -587,11 +634,7 @@ export default function TalentDashboard() {
                             </div>
                           </div>
                           <div className="flex md:flex-col gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 md:flex-none bg-transparent"
-                            >
+                            <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
                               View Details
                             </Button>
                             <Button variant="ghost" size="sm">
@@ -605,9 +648,7 @@ export default function TalentDashboard() {
                     <div className="text-center py-8">
                       <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                       <p className="text-gray-500 mb-4">You don't have any upcoming gigs.</p>
-                      <Button onClick={() => setActiveTab("discover")}>
-                        Browse Available Gigs
-                      </Button>
+                      <Button onClick={() => setActiveTab("discover")}>Browse Available Gigs</Button>
                     </div>
                   )}
                 </CardContent>
@@ -660,9 +701,7 @@ export default function TalentDashboard() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <CardTitle>My Applications</CardTitle>
-                    <CardDescription>
-                      Track all your gig applications and their status
-                    </CardDescription>
+                    <CardDescription>Track all your gig applications and their status</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
@@ -709,11 +748,7 @@ export default function TalentDashboard() {
                         </div>
                       </div>
                       <div className="flex md:flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 md:flex-none bg-transparent"
-                        >
+                        <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
                           View Details
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -775,11 +810,7 @@ export default function TalentDashboard() {
                         </div>
                       </div>
                       <div className="flex md:flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 md:flex-none bg-transparent"
-                        >
+                        <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
                           View Details
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -799,9 +830,7 @@ export default function TalentDashboard() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <CardTitle>Available Gigs</CardTitle>
-                    <CardDescription>
-                      Discover new opportunities that match your profile
-                    </CardDescription>
+                    <CardDescription>Discover new opportunities that match your profile</CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
@@ -818,10 +847,7 @@ export default function TalentDashboard() {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {availableGigs.map((gig) => (
-                    <Card
-                      key={gig.id}
-                      className="overflow-hidden hover:shadow-lg transition-shadow group"
-                    >
+                    <Card key={gig.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
                       <div className="h-48 relative">
                         <SafeImage
                           src={gig.image}
@@ -830,11 +856,7 @@ export default function TalentDashboard() {
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                           placeholderQuery={gig.category.toLowerCase()}
                         />
-                        {gig.urgent && (
-                          <Badge className="absolute top-3 left-3 bg-red-500 text-white">
-                            Urgent
-                          </Badge>
-                        )}
+                        {gig.urgent && <Badge className="absolute top-3 left-3 bg-red-500 text-white">Urgent</Badge>}
                         <div className="absolute top-3 right-3 flex gap-1">
                           <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white">
                             <Heart className="h-4 w-4" />
@@ -843,9 +865,7 @@ export default function TalentDashboard() {
                       </div>
                       <CardContent className="p-4 space-y-3">
                         <div>
-                          <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
-                            {gig.title}
-                          </h4>
+                          <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">{gig.title}</h4>
                           <p className="text-gray-600 text-sm">{gig.company}</p>
                         </div>
                         <div className="space-y-2">
