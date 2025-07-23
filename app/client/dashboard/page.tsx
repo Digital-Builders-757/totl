@@ -133,7 +133,7 @@ export default function ClientDashboard() {
       status: "Active",
       applications_count: 8,
       created_at: "2025-07-20",
-      image: "/gig-editorial.png",
+      image_url: "/gig-editorial.png",
     },
     {
       id: "2",
@@ -144,7 +144,7 @@ export default function ClientDashboard() {
       status: "Active",
       applications_count: 12,
       created_at: "2025-07-18",
-      image: "/gig-sportswear.png",
+      image_url: "/gig-sportswear.png",
     },
     {
       id: "3",
@@ -155,7 +155,7 @@ export default function ClientDashboard() {
       status: "Completed",
       applications_count: 15,
       created_at: "2025-07-15",
-      image: "/gig-beauty.png",
+      image_url: "/gig-beauty.png",
     },
   ];
 
