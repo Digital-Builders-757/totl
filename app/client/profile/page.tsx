@@ -6,6 +6,12 @@ import ClientProfileForm from "@/components/client-profile-form";
 export const dynamic = "force-dynamic";
 
 export default async function ClientProfilePage() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - redirecting to login");
+    redirect("/login?returnUrl=/client/profile");
+  }
+
   const supabase = createServerComponentClient({ cookies });
   const {
     data: { user },

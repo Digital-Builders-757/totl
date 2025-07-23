@@ -21,13 +21,23 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = "force-dynamic";
+
 export default function PostGigPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+
+  // Check if Supabase is configured
+  const isSupabaseConfigured =
+    typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
   const [formData, setFormData] = useState({
     title: "",
@@ -56,6 +66,12 @@ export default function PostGigPage() {
 
     if (!user) {
       setError("You must be logged in to post a gig");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!supabase) {
+      setError("Supabase is not configured. Please check your environment variables.");
       setIsSubmitting(false);
       return;
     }
@@ -98,6 +114,26 @@ export default function PostGigPage() {
       setIsSubmitting(false);
     }
   };
+
+  // Show error state if Supabase is not configured
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-24">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-md mx-auto text-center">
+            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
+            <p className="text-gray-600 mb-4">
+              Supabase is not configured. Please check your environment variables.
+            </p>
+            <Button asChild>
+              <Link href="/login">Go to Login</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
