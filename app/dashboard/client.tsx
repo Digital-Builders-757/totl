@@ -54,14 +54,19 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
             Refresh Data
           </Button>
           {userRole === "talent" && (
-            <Button onClick={() => router.push("/talent/edit-profile")} variant="outline">
-              Edit Talent Profile
+            <Button onClick={() => router.push("/talent/dashboard")} variant="outline">
+              Go to Talent Dashboard
             </Button>
           )}
           {userRole === "client" && (
-            <Button onClick={() => router.push("/client/post-gig")} variant="outline">
-              Post New Gig
-            </Button>
+            <>
+              <Button onClick={() => router.push("/client/dashboard")} variant="outline">
+                Go to Client Dashboard
+              </Button>
+              <Button onClick={() => router.push("/post-gig")} variant="outline">
+                Post New Gig
+              </Button>
+            </>
           )}
         </div>
       </CardContent>
