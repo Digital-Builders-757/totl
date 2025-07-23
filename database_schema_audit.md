@@ -1,232 +1,275 @@
 # TOTL Agency Database Schema Audit
 
-**Audit Date:** December 2024  
+**Audit Date:** July 23, 2025  
 **Database:** Supabase PostgreSQL  
 **Schema:** public  
+**Status:** Production Ready
+
+## Table of Contents
+- [Executive Summary](#-executive-summary)
+- [Database Overview](#-database-overview)
+- [Custom Types (Enums)](#-custom-types-enums)
+- [Table Details](#-table-details)
+- [Relationships & Constraints](#-relationships--constraints)
+- [Row-Level Security (RLS)](#-row-level-security-rls)
+- [Indexes & Performance](#-indexes--performance)
+- [Triggers & Functions](#-triggers--functions)
+- [Production Data Status](#-production-data-status)
+- [Migration History](#-migration-history)
 
 ## 📋 Executive Summary
 
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
+**Key Highlights:**
+- ✅ **8 tables** with proper relationships
+- ✅ **RLS enabled** on all tables for security
+- ✅ **Custom enums** for status management
+- ✅ **Automatic triggers** for profile creation
+- ✅ **Production ready** with clean data
+
 ## 🗂️ Database Overview
 
 - **Total Tables:** 8
-- **Total Columns:** 75
+- **Total Columns:** 75+
 - **Custom Types (Enums):** 4
 - **Foreign Key Relationships:** 8
 - **Indexes:** 16 (including primary keys)
+- **RLS Policies:** 15+ active policies
 
-## 🔒 NOT NULL Constraints & Protection
-
-### **Critical NOT NULL Columns Protected by Trigger Logic**
-
-The following NOT NULL columns are protected by the `handle_new_user()` trigger function to prevent constraint violations during user signup:
-
-| Column | Table | Protection Method | Default Value |
-|--------|-------|-------------------|---------------|
-| `role` | profiles | `COALESCE(new.raw_user_meta_data->>'role', 'talent')` | `'talent'` |
-| `first_name` | talent_profiles | `COALESCE(new.raw_user_meta_data->>'first_name', '')` | `''` (empty string) |
-| `last_name` | talent_profiles | `COALESCE(new.raw_user_meta_data->>'last_name', '')` | `''` (empty string) |
-| `company_name` | client_profiles | `COALESCE(new.raw_user_meta_data->>'company_name', display_name)` | `display_name` |
-
-### **Metadata Key Requirements**
-
-**⚠️ CRITICAL:** All metadata keys must use **lowercase with underscores** to work with the trigger:
-
-```typescript
-// ✅ CORRECT - Will work with trigger
-{
-  first_name: "John",      // lowercase with underscore
-  last_name: "Doe",        // lowercase with underscore
-  role: "talent",          // lowercase
-  company_name: "Acme Co"  // lowercase with underscore
-}
-
-// ❌ WRONG - Will cause NULL values in database
-{
-  firstName: "John",       // camelCase - trigger won't find this
-  lastName: "Doe",         // camelCase - trigger won't find this
-  Role: "talent",          // PascalCase - trigger won't find this
-  companyName: "Acme Co"   // camelCase - trigger won't find this
-}
-```
-
-### **Trigger Function Location**
-- **Function:** `handle_new_user()`
-- **Migration:** `supabase/migrations/20250722015600_fix_handle_new_user_trigger_null_handling.sql`
-- **Trigger:** `on_auth_user_created` on `auth.users` table
-
-## 📊 Custom Types (Enums)
+## 🔒 Custom Types (Enums)
 
 ### 1. `user_role`
-- `talent`
-- `client` 
-- `admin`
+```sql
+CREATE TYPE public.user_role AS ENUM ('talent', 'client', 'admin');
+```
+- **Purpose:** Defines user account types
+- **Default:** `'talent'`
+- **Usage:** `profiles.role` column
 
 ### 2. `gig_status`
-- `draft`
-- `published`
-- `closed`
-- `completed`
+```sql
+CREATE TYPE public.gig_status AS ENUM ('draft', 'active', 'closed', 'completed');
+```
+- **Purpose:** Tracks gig lifecycle
+- **Default:** `'draft'`
+- **Usage:** `gigs.status` column
 
 ### 3. `application_status`
-- `pending`
-- `accepted`
-- `rejected`
+```sql
+CREATE TYPE public.application_status AS ENUM ('new', 'under_review', 'shortlisted', 'rejected', 'accepted');
+```
+- **Purpose:** Tracks application progress
+- **Default:** `'new'`
+- **Usage:** `applications.status` column
 
 ### 4. `booking_status`
-- `pending`
-- `confirmed`
-- `completed`
-- `cancelled`
+```sql
+CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 'cancelled');
+```
+- **Purpose:** Tracks booking lifecycle
+- **Default:** `'pending'`
+- **Usage:** `bookings.status` column
 
 ## 🗃️ Table Details
 
-### 1. `users` - Core User Table
+### 1. `profiles` - Core User Accounts
 **Purpose:** Main user table linked to Supabase Auth
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | - | Primary key, links to auth.users |
-| `email` | `text` | NO | - | User's email address |
-| `full_name` | `text` | NO | - | User's full name |
 | `role` | `user_role` | NO | `'talent'` | User role (talent/client/admin) |
+| `display_name` | `text` | YES | - | User's display name |
+| `avatar_url` | `text` | YES | - | Profile picture URL |
+| `email_verified` | `boolean` | NO | `false` | Email verification status |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `id` → `auth.users.id`
-- Unique: `email`
-
-**Indexes:**
-- `users_pkey` (Primary Key)
-- `users_email_key` (Unique constraint)
-
----
-
-### 2. `profiles` - Additional User Information
-**Purpose:** Extended profile information for users
-
-| Column | Data Type | Nullable | Default | Description |
-|--------|-----------|----------|---------|-------------|
-| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `user_id` | `uuid` | NO | - | Foreign key to users |
-| `bio` | `text` | YES | - | User biography |
-| `location` | `text` | YES | - | Geographic location |
-| `phone` | `text` | YES | - | Contact phone number |
-| `instagram_handle` | `text` | YES | - | Instagram username |
-| `website` | `text` | YES | - | Personal website URL |
-| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
-| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
-
-**Constraints:**
-- Primary Key: `id`
-- Foreign Key: `user_id` → `users.id`
+- Check: `role IN ('talent', 'client', 'admin')`
 
 **Indexes:**
 - `profiles_pkey` (Primary Key)
+- `profiles_role_idx` (Role for filtering)
 
 ---
 
-### 3. `talent_profiles` - Talent-Specific Information
-**Purpose:** Extended profile information for talent users
+### 2. `talent_profiles` - Talent-Specific Data
+**Purpose:** Extended information for talent users
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
 | `user_id` | `uuid` | NO | - | Foreign key to profiles |
-| `first_name` | `text` | NO | - | First name (protected by trigger) |
-| `last_name` | `text` | NO | - | Last name (protected by trigger) |
-| `phone` | `text` | YES | - | Contact phone number |
-| `age` | `integer` | YES | - | Age in years |
-| `location` | `text` | YES | - | Geographic location |
+| `first_name` | `text` | NO | `''` | First name |
+| `last_name` | `text` | NO | `''` | Last name |
+| `phone` | `text` | YES | - | Phone number |
+| `age` | `integer` | YES | - | Age |
+| `location` | `text` | YES | - | Location |
 | `experience` | `text` | YES | - | Experience description |
-| `portfolio_url` | `text` | YES | - | Portfolio website URL |
-| `height` | `text` | YES | - | Height measurement |
+| `portfolio_url` | `text` | YES | - | Portfolio website |
+| `height` | `text` | YES | - | Height |
 | `measurements` | `text` | YES | - | Body measurements |
 | `hair_color` | `text` | YES | - | Hair color |
 | `eye_color` | `text` | YES | - | Eye color |
 | `shoe_size` | `text` | YES | - | Shoe size |
-| `languages` | `text[]` | YES | - | Array of spoken languages |
+| `languages` | `text[]` | YES | - | Languages spoken |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
-
-**NOT NULL Protection:**
-- `first_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'first_name', '')`
-- `last_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'last_name', '')`
-- Both default to empty string if metadata is missing
 
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `user_id` → `profiles.id`
+- NOT NULL: `first_name`, `last_name` (protected by trigger)
 
 **Indexes:**
 - `talent_profiles_pkey` (Primary Key)
+- `talent_profiles_user_id_idx` (Foreign Key)
 
 ---
 
-### 4. `client_profiles` - Client-Specific Information
-**Purpose:** Extended profile information for client users
+### 3. `client_profiles` - Client-Specific Data
+**Purpose:** Extended information for client users
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
 | `user_id` | `uuid` | NO | - | Foreign key to profiles |
-| `company_name` | `text` | NO | - | Company name (protected by trigger) |
-| `industry` | `text` | YES | - | Industry sector |
+| `company_name` | `text` | NO | `''` | Company name |
+| `industry` | `text` | YES | - | Industry |
 | `website` | `text` | YES | - | Company website |
-| `contact_name` | `text` | YES | - | Primary contact name |
-| `contact_email` | `text` | YES | - | Primary contact email |
-| `contact_phone` | `text` | YES | - | Primary contact phone |
-| `company_size` | `text` | YES | - | Company size category |
+| `contact_name` | `text` | YES | - | Contact person name |
+| `contact_email` | `text` | YES | - | Contact email |
+| `contact_phone` | `text` | YES | - | Contact phone |
+| `company_size` | `text` | YES | - | Company size |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
-
-**NOT NULL Protection:**
-- `company_name` is protected by trigger function using `COALESCE(new.raw_user_meta_data->>'company_name', display_name)`
-- Defaults to display_name if metadata is missing
 
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `user_id` → `profiles.id`
+- NOT NULL: `company_name` (protected by trigger)
 
 **Indexes:**
 - `client_profiles_pkey` (Primary Key)
+- `client_profiles_user_id_idx` (Foreign Key)
 
 ---
 
-### 5. `gigs` - Job/Gig Listings
-**Purpose:** Job opportunities posted by clients
+### 4. `gigs` - Job Postings
+**Purpose:** Gig/job postings by clients
 
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `client_id` | `uuid` | NO | - | Foreign key to users (client) |
+| `client_id` | `uuid` | NO | - | Foreign key to profiles (client) |
 | `title` | `text` | NO | - | Gig title |
 | `description` | `text` | NO | - | Detailed description |
-| `requirements` | `text[]` | YES | - | Array of requirements |
+| `category` | `text` | NO | - | Gig category |
 | `location` | `text` | NO | - | Job location |
-| `start_date` | `timestamp with time zone` | NO | - | Gig start date |
-| `end_date` | `timestamp with time zone` | NO | - | Gig end date |
-| `compensation_min` | `numeric` | YES | - | Minimum compensation |
-| `compensation_max` | `numeric` | YES | - | Maximum compensation |
-| `status` | `gig_status` | NO | `'draft'` | Current status |
+| `compensation` | `text` | NO | - | Payment amount |
+| `duration` | `text` | NO | - | Job duration |
+| `date` | `text` | NO | - | Job date |
+| `application_deadline` | `timestamp with time zone` | YES | - | Application deadline |
+| `requirements` | `text[]` | YES | - | Array of requirements |
+| `status` | `text` | NO | `'draft'` | Current status |
+| `image_url` | `text` | YES | - | Gig image URL |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `client_id` → `users.id`
-- Check: `end_date > start_date`
-- Check: `compensation_max >= compensation_min` (if both set)
+- Foreign Key: `client_id` → `profiles.id`
+- Check: `status IN ('draft', 'active', 'closed', 'featured', 'urgent')`
 
 **Indexes:**
 - `gigs_pkey` (Primary Key)
+- `gigs_client_id_idx` (Foreign Key)
+- `gigs_status_idx` (Status for filtering)
 
 ---
 
-### 5. `gig_requirements` - Gig Requirements
+### 5. `applications` - Talent Applications
+**Purpose:** Applications submitted by talent for gigs
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `gig_id` | `uuid` | NO | - | Foreign key to gigs |
+| `talent_id` | `uuid` | NO | - | Foreign key to profiles (talent) |
+| `status` | `text` | NO | `'new'` | Application status |
+| `message` | `text` | YES | - | Application message |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `gig_id` → `gigs.id`
+- Foreign Key: `talent_id` → `profiles.id`
+- Unique: `(gig_id, talent_id)` (one application per talent per gig)
+- Check: `status IN ('new', 'under_review', 'shortlisted', 'rejected', 'accepted')`
+
+**Indexes:**
+- `applications_pkey` (Primary Key)
+- `applications_gig_id_idx` (Foreign Key)
+- `applications_talent_id_idx` (Foreign Key)
+- `applications_gig_talent_unique` (Unique constraint)
+
+---
+
+### 6. `bookings` - Confirmed Engagements
+**Purpose:** Confirmed bookings between talent and clients
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `gig_id` | `uuid` | NO | - | Foreign key to gigs |
+| `talent_id` | `uuid` | NO | - | Foreign key to profiles (talent) |
+| `status` | `booking_status` | NO | `'pending'` | Booking status |
+| `compensation` | `numeric` | YES | - | Agreed compensation |
+| `notes` | `text` | YES | - | Booking notes |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `gig_id` → `gigs.id`
+- Foreign Key: `talent_id` → `profiles.id`
+
+**Indexes:**
+- `bookings_pkey` (Primary Key)
+- `bookings_gig_id_idx` (Foreign Key)
+- `bookings_talent_id_idx` (Foreign Key)
+
+---
+
+### 7. `portfolio_items` - Talent Portfolio
+**Purpose:** Portfolio items for talent
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `talent_id` | `uuid` | NO | - | Foreign key to profiles (talent) |
+| `title` | `text` | NO | - | Item title |
+| `description` | `text` | YES | - | Item description |
+| `image_url` | `text` | YES | - | Image URL |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `talent_id` → `profiles.id`
+
+**Indexes:**
+- `portfolio_items_pkey` (Primary Key)
+- `portfolio_items_talent_id_idx` (Foreign Key)
+
+---
+
+### 8. `gig_requirements` - Gig Requirements
 **Purpose:** Specific requirements for each gig
 
 | Column | Data Type | Nullable | Default | Description |
@@ -244,172 +287,212 @@ The following NOT NULL columns are protected by the `handle_new_user()` trigger 
 - `gig_requirements_pkey` (Primary Key)
 - `gig_requirements_gig_id_idx` (Foreign Key)
 
----
+## 🔗 Relationships & Constraints
 
-### 6. `applications` - Talent Applications
-**Purpose:** Applications submitted by talent for gigs
+### **Entity Relationship Diagram**
+```
+auth.users (1) ←→ (1) profiles (1) ←→ (1) talent_profiles
+                                    (1) ←→ (1) client_profiles
+                                    (1) ←→ (many) gigs
+                                    (1) ←→ (many) applications
+                                    (1) ←→ (many) bookings
+                                    (1) ←→ (many) portfolio_items
 
-| Column | Data Type | Nullable | Default | Description |
-|--------|-----------|----------|---------|-------------|
-| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `gig_id` | `uuid` | NO | - | Foreign key to gigs |
-| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
-| `status` | `application_status` | NO | `'pending'` | Application status |
-| `message` | `text` | YES | - | Application message |
-| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
-| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+gigs (1) ←→ (many) applications
+gigs (1) ←→ (many) bookings
+gigs (1) ←→ (many) gig_requirements
+```
 
-**Constraints:**
-- Primary Key: `id`
-- Foreign Key: `gig_id` → `gigs.id`
-- Foreign Key: `talent_id` → `users.id`
-- Unique: `(gig_id, talent_id)` - Prevents duplicate applications
+### **Foreign Key Relationships**
+1. `profiles.id` → `auth.users.id` (CASCADE DELETE)
+2. `talent_profiles.user_id` → `profiles.id` (CASCADE DELETE)
+3. `client_profiles.user_id` → `profiles.id` (CASCADE DELETE)
+4. `gigs.client_id` → `profiles.id` (CASCADE DELETE)
+5. `applications.gig_id` → `gigs.id` (CASCADE DELETE)
+6. `applications.talent_id` → `profiles.id` (CASCADE DELETE)
+7. `bookings.gig_id` → `gigs.id` (CASCADE DELETE)
+8. `bookings.talent_id` → `profiles.id` (CASCADE DELETE)
+9. `portfolio_items.talent_id` → `profiles.id` (CASCADE DELETE)
+10. `gig_requirements.gig_id` → `gigs.id` (CASCADE DELETE)
 
-**Indexes:**
-- `applications_pkey` (Primary Key)
-- `applications_gig_id_talent_id_key` (Unique constraint)
+## 🔒 Row-Level Security (RLS)
 
----
+### **Active RLS Policies**
 
-### 7. `bookings` - Confirmed Bookings
-**Purpose:** Confirmed bookings between clients and talent
+#### **profiles Table**
+```sql
+-- Public can view profiles
+CREATE POLICY "Profiles view policy" ON profiles FOR SELECT TO public USING (true);
 
-| Column | Data Type | Nullable | Default | Description |
-|--------|-----------|----------|---------|-------------|
-| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `gig_id` | `uuid` | NO | - | Foreign key to gigs |
-| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
-| `status` | `booking_status` | NO | `'pending'` | Booking status |
-| `compensation` | `numeric` | YES | - | Agreed compensation |
-| `notes` | `text` | YES | - | Booking notes |
-| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
-| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+-- Users can update their own profile
+CREATE POLICY "Update own profile" ON profiles FOR UPDATE TO authenticated 
+USING (id = auth.uid());
 
-**Constraints:**
-- Primary Key: `id`
-- Foreign Key: `gig_id` → `gigs.id`
-- Foreign Key: `talent_id` → `users.id`
+-- Users can insert their own profile
+CREATE POLICY "Insert profile by user or service" ON profiles FOR INSERT TO public 
+WITH CHECK (id = auth.uid());
+```
 
-**Indexes:**
-- `bookings_pkey` (Primary Key)
+#### **talent_profiles Table**
+```sql
+-- Public can view talent profiles
+CREATE POLICY "Talent profiles view policy" ON talent_profiles FOR SELECT TO public USING (true);
 
----
+-- Talent can update their own profile
+CREATE POLICY "Update own talent profile" ON talent_profiles FOR UPDATE TO authenticated 
+USING (user_id = auth.uid());
 
-### 8. `portfolio_items` - Talent Portfolio Items
-**Purpose:** Portfolio items for talent to showcase their work
+-- Talent can insert their own profile
+CREATE POLICY "Insert own talent profile" ON talent_profiles FOR INSERT TO authenticated 
+WITH CHECK (user_id = auth.uid());
+```
 
-| Column | Data Type | Nullable | Default | Description |
-|--------|-----------|----------|---------|-------------|
-| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
-| `talent_id` | `uuid` | NO | - | Foreign key to users (talent) |
-| `title` | `text` | NO | - | Portfolio item title |
-| `description` | `text` | YES | - | Portfolio item description |
-| `image_url` | `text` | NO | - | Portfolio image URL |
-| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
-| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+#### **client_profiles Table**
+```sql
+-- Public can view client profiles
+CREATE POLICY "Client profiles view policy" ON client_profiles FOR SELECT TO public USING (true);
 
-**Constraints:**
-- Primary Key: `id`
-- Foreign Key: `talent_id` → `users.id`
+-- Clients can update their own profile
+CREATE POLICY "Update own client profile" ON client_profiles FOR UPDATE TO authenticated 
+USING (user_id = auth.uid());
 
-**Indexes:**
-- `portfolio_items_pkey` (Primary Key)
+-- Clients can insert their own profile
+CREATE POLICY "Client profile insert policy" ON client_profiles FOR INSERT TO authenticated 
+WITH CHECK (user_id = auth.uid());
+```
 
----
+#### **gigs Table**
+```sql
+-- Public can view active gigs only
+CREATE POLICY "Public can view active gigs only" ON gigs FOR SELECT TO authenticated, anon 
+USING (status = 'active');
 
+-- Clients can create gigs
+CREATE POLICY "Clients can create gigs" ON gigs FOR INSERT TO authenticated 
+WITH CHECK (client_id = auth.uid());
 
+-- Clients can update their gigs
+CREATE POLICY "Clients can update their gigs" ON gigs FOR UPDATE TO authenticated 
+USING (client_id = auth.uid());
 
----
+-- Clients can delete their gigs
+CREATE POLICY "Clients can delete their gigs" ON gigs FOR DELETE TO authenticated 
+USING (client_id = auth.uid());
+```
 
-## 🔗 Relationships Overview
+#### **applications Table**
+```sql
+-- Talent can see their applications, clients can see for their gigs
+CREATE POLICY "Applications access policy" ON applications FOR SELECT TO authenticated 
+USING (
+  talent_id = auth.uid() OR 
+  EXISTS (
+    SELECT 1 FROM gigs 
+    WHERE gigs.id = applications.gig_id 
+    AND gigs.client_id = auth.uid()
+  )
+);
 
-### Foreign Key Relationships
+-- Talent can apply to gigs
+CREATE POLICY "Talent can apply to gigs" ON applications FOR INSERT TO authenticated 
+WITH CHECK (talent_id = auth.uid());
 
-1. **users.id** → `auth.users.id` (Auth integration)
-2. **profiles.user_id** → `users.id` (Profile link)
-3. **talent_profiles.user_id** → `users.id` (Talent profile link)
-4. **client_profiles.user_id** → `users.id` (Client profile link)
-5. **gigs.client_id** → `users.id` (Gig creator)
-6. **applications.gig_id** → `gigs.id` (Application for gig)
-7. **applications.talent_id** → `users.id` (Application by talent)
-8. **bookings.gig_id** → `gigs.id` (Booking for gig)
-9. **bookings.talent_id** → `users.id` (Booking by talent)
-10. **portfolio_items.talent_id** → `users.id` (Portfolio by talent)
+-- Update application status
+CREATE POLICY "Update application status" ON applications FOR UPDATE TO authenticated 
+USING (
+  talent_id = auth.uid() OR 
+  EXISTS (
+    SELECT 1 FROM gigs 
+    WHERE gigs.id = applications.gig_id 
+    AND gigs.client_id = auth.uid()
+  )
+);
+```
 
-### Unique Constraints
+## 📊 Indexes & Performance
 
-1. **users**: `email` - One user per email address
-2. **applications**: `(gig_id, talent_id)` - One application per talent per gig
+### **Primary Key Indexes**
+- All tables have primary key indexes automatically created
 
-## 📈 Performance Optimizations
-
-### Indexes by Purpose
-
-**Primary Keys (7):**
-- All tables have UUID primary keys with B-tree indexes
-
-**Foreign Key Indexes (6):**
+### **Foreign Key Indexes**
 - `talent_profiles_user_id_idx`
 - `client_profiles_user_id_idx`
 - `gigs_client_id_idx`
-- `gig_requirements_gig_id_idx`
 - `applications_gig_id_idx`
 - `applications_talent_id_idx`
+- `bookings_gig_id_idx`
+- `bookings_talent_id_idx`
+- `portfolio_items_talent_id_idx`
+- `gig_requirements_gig_id_idx`
 
-**Filtering Indexes (2):**
-- `applications_status_idx` - For application status queries
-- `gigs_status_idx` - For gig status filtering
+### **Performance Indexes**
+- `profiles_role_idx` (for role-based filtering)
+- `gigs_status_idx` (for status filtering)
 
-**Search Indexes (1):**
-- `gigs_search_idx` - GIN index on `search_vector` for full-text search
+## ⚡ Triggers & Functions
 
-**Unique Indexes (3):**
-- `applications_gig_id_talent_id_key` - Prevents duplicate applications
-- `client_applications_email_key` - Prevents duplicate email applications
+### **handle_new_user() Function**
+**Purpose:** Automatically creates profiles when users sign up
 
-## 🔒 Security Considerations
+**Location:** `supabase/migrations/20250722015600_fix_handle_new_user_trigger_null_handling.sql`
 
-### Row Level Security (RLS)
-- All tables should have RLS policies enabled
-- Policies should be based on user roles and ownership
-- Foreign key relationships ensure data integrity
+**Key Features:**
+- Creates `profiles` record
+- Creates role-specific profile (`talent_profiles` or `client_profiles`)
+- Handles NULL values with `COALESCE`
+- Sets proper defaults for required fields
 
-### Data Types
-- UUIDs used for all primary keys (security through obscurity)
-- Proper enum types prevent invalid status values
-- Timestamps with timezone for audit trails
+**Critical Metadata Requirements:**
+```typescript
+// ✅ CORRECT - Will work with trigger
+{
+  first_name: "John",      // lowercase with underscore
+  last_name: "Doe",        // lowercase with underscore
+  role: "talent",          // lowercase
+  company_name: "Acme Co"  // lowercase with underscore
+}
+```
 
-## 📝 Recommendations
+### **on_auth_user_created Trigger**
+**Purpose:** Fires when new user is created in `auth.users`
 
-### Immediate Actions
-1. **Verify RLS Policies**: Ensure all tables have appropriate RLS policies
-2. **Add Missing Indexes**: Consider indexes on frequently queried columns
-3. **Audit Data Types**: Review if `compensation` should be numeric instead of text
+**Function:** `handle_new_user()`
 
-### Future Enhancements
-1. **Add Soft Deletes**: Consider adding `deleted_at` columns for data retention
-2. **Audit Trail**: Consider adding `created_by` and `updated_by` columns
-3. **Performance Monitoring**: Monitor query performance and add indexes as needed
-4. **Data Validation**: Add CHECK constraints for data validation
+## 📈 Production Data Status
 
-### Schema Improvements
-1. **Normalize Compensation**: Consider separate `compensation_min` and `compensation_max` columns
-2. **Add Categories Table**: Consider normalizing gig categories
-3. **Add Locations Table**: Consider normalizing location data
-4. **Add Portfolio Items**: Consider adding a `portfolio_items` table for talent portfolios
+### **Current Database State**
+| Table | Records | Status |
+|-------|---------|--------|
+| `profiles` | 2 | ✅ Clean (test client + real user) |
+| `client_profiles` | 1 | ✅ Clean (test client) |
+| `talent_profiles` | 1 | ✅ Clean (real talent) |
+| `gigs` | 0 | ✅ Clean (ready for real gigs) |
+| `applications` | 0 | ✅ Clean (ready for real applications) |
+| `bookings` | 0 | ✅ Clean (ready for real bookings) |
+| `portfolio_items` | 0 | ✅ Clean (ready for real portfolios) |
+| `gig_requirements` | 0 | ✅ Clean (ready for real requirements) |
 
-## 📊 Statistics Summary
+### **Test Account**
+- **Email:** `testclient@example.com`
+- **Password:** `TestPassword123!`
+- **Purpose:** Demo client functionality
 
-- **Total Tables**: 8
-- **Total Columns**: 75
-- **Primary Keys**: 8
-- **Foreign Keys**: 10
-- **Unique Constraints**: 2
-- **Indexes**: 16
-- **Custom Types**: 4
-- **Nullable Columns**: 40 (53%)
-- **Required Columns**: 35 (47%)
+## 📜 Migration History
+
+### **Key Migrations**
+1. **`20240320000000_create_entities.sql`** - Initial schema creation
+2. **`20250623034037_create_user_profile_on_signup.sql`** - Profile creation trigger
+3. **`20250722013500_add_user_profile_creation_trigger.sql`** - Enhanced trigger
+4. **`20250722015600_fix_handle_new_user_trigger_null_handling.sql`** - NULL handling fixes
+5. **`20250722015600_fix_user_role_enum_reference_in_trigger.sql`** - Enum reference fixes
+6. **`add_missing_rls_policies_for_production.sql`** - Production RLS policies
+
+### **Recent Updates**
+- ✅ **Production cleanup** - Removed all mock data
+- ✅ **RLS enhancement** - Added secure policies
+- ✅ **Trigger optimization** - Fixed NULL handling
+- ✅ **Enum fixes** - Resolved type reference issues
 
 ---
 
-*This audit provides a comprehensive view of the TOTL Agency database schema. Regular audits should be conducted to ensure the schema continues to meet business requirements and performance expectations.* 
+**This document serves as the single source of truth for the TOTL Agency database schema.** 

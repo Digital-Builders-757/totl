@@ -8,32 +8,23 @@ import {
   MapPin,
   MoreVertical,
   Users,
-  TrendingUp,
-  Star,
-  Eye,
-  Heart,
-  Camera,
-  Award,
-  Target,
-  Activity,
-  Bell,
-  Settings,
-  LogOut,
-  Plus,
-  Filter,
-  Search,
-  User,
-  Phone,
-  Globe,
-  AlertCircle,
-  Building,
   FileText,
   CheckCircle,
-  XCircle,
   Clock as ClockIcon,
   UserCheck,
   Briefcase,
   BarChart3,
+  AlertCircle,
+  Plus,
+  User,
+  Bell,
+  Settings,
+  LogOut,
+  Activity,
+  Eye,
+  Filter,
+  Search,
+  Phone,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -42,7 +33,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { EmptyState } from "@/components/ui/empty-state";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -73,12 +64,20 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
+  message?: string;
   created_at: string;
-  talent?: {
+  updated_at: string;
+  gigs?: {
+    title: string;
+    category?: string;
+    location: string;
+    compensation: string;
+  };
+  talent_profiles?: {
     first_name: string;
     last_name: string;
-    email: string;
     location?: string;
+    experience?: string;
   };
 }
 
@@ -93,12 +92,12 @@ interface Gig {
   image_url?: string;
   created_at: string;
   applications_count?: number;
+  application_deadline?: string;
 }
 
 export default function ClientDashboard() {
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
@@ -113,108 +112,35 @@ export default function ClientDashboard() {
 
   const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
-  // Mock data for demonstration
+  // Calculate dashboard stats from real data
   const dashboardStats = {
-    totalGigs: 8,
-    activeGigs: 5,
-    totalApplications: 47,
-    pendingApplications: 12,
-    completedGigs: 3,
-    totalSpent: 8500,
+    totalGigs: gigs.length,
+    activeGigs: gigs.filter((gig) => gig.status === "active").length,
+    totalApplications: applications.length,
+    pendingApplications: applications.filter(
+      (app) => app.status === "new" || app.status === "under_review"
+    ).length,
+    completedGigs: gigs.filter((gig) => gig.status === "completed").length,
+    totalSpent: 0, // This would need to be calculated from bookings/payments
   };
 
-  const recentGigs = [
-    {
-      id: "1",
-      title: "Summer Fashion Editorial",
-      category: "Editorial",
-      location: "New York",
-      compensation: "$800",
-      status: "Active",
-      applications_count: 8,
-      created_at: "2025-07-20",
-      image_url: "/gig-editorial.png",
-    },
-    {
-      id: "2",
-      title: "Sportswear Campaign",
-      category: "Commercial",
-      location: "Los Angeles",
-      compensation: "$1,200",
-      status: "Active",
-      applications_count: 12,
-      created_at: "2025-07-18",
-      image_url: "/gig-sportswear.png",
-    },
-    {
-      id: "3",
-      title: "Beauty Product Launch",
-      category: "Beauty",
-      location: "Miami",
-      compensation: "$1,500",
-      status: "Completed",
-      applications_count: 15,
-      created_at: "2025-07-15",
-      image_url: "/gig-beauty.png",
-    },
-  ];
+  // Get recent gigs (last 3)
+  const recentGigs = gigs.slice(0, 3);
 
-  const recentApplications = [
-    {
-      id: "1",
-      gigTitle: "Summer Fashion Editorial",
-      talentName: "Sarah Johnson",
-      appliedDate: "2025-07-22",
-      status: "Under Review",
-      location: "New York",
-      experience: "5 years",
-      image: "/images/model-1.png",
-    },
-    {
-      id: "2",
-      gigTitle: "Sportswear Campaign",
-      talentName: "Michael Chen",
-      appliedDate: "2025-07-21",
-      status: "Interview Scheduled",
-      location: "Los Angeles",
-      experience: "3 years",
-      image: "/images/model-2.png",
-    },
-    {
-      id: "3",
-      gigTitle: "Beauty Product Launch",
-      talentName: "Emma Rodriguez",
-      appliedDate: "2025-07-20",
-      status: "Hired",
-      location: "Miami",
-      experience: "7 years",
-      image: "/images/model-3.png",
-    },
-  ];
+  // Get recent applications (last 3)
+  const recentApplications = applications.slice(0, 3);
 
-  const upcomingDeadlines = [
-    {
-      id: "1",
-      title: "Summer Fashion Editorial",
-      deadline: "2025-07-25",
-      applications: 8,
-      status: "Urgent",
-    },
-    {
-      id: "2",
-      title: "Sportswear Campaign",
-      deadline: "2025-07-28",
-      applications: 12,
-      status: "Active",
-    },
-    {
-      id: "3",
-      title: "Beauty Product Launch",
-      deadline: "2025-08-01",
-      applications: 15,
-      status: "Active",
-    },
-  ];
+  // Get upcoming deadlines (gigs with deadlines in the next 30 days)
+  const upcomingDeadlines = gigs
+    .filter((gig) => gig.status === "active" && gig.application_deadline)
+    .filter((gig) => {
+      if (!gig.application_deadline) return false;
+      const deadline = new Date(gig.application_deadline);
+      const now = new Date();
+      const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      return deadline <= thirtyDaysFromNow;
+    })
+    .slice(0, 3);
 
   useEffect(() => {
     if (user && supabase) {
@@ -225,7 +151,7 @@ export default function ClientDashboard() {
     } else {
       setLoading(false);
     }
-  }, [user, supabase, isSupabaseConfigured]);
+  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
 
   const fetchDashboardData = async () => {
     if (!supabase || !user) return;
@@ -243,7 +169,7 @@ export default function ClientDashboard() {
         return;
       }
 
-      setProfile(profileData);
+      // setProfile(profileData); // This line was removed as per the edit hint
 
       // Fetch client profile
       const { data: clientProfileData, error: clientProfileError } = await supabase
@@ -297,30 +223,22 @@ export default function ClientDashboard() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status: string | undefined) => {
+    switch (status?.toLowerCase()) {
       case "active":
         return "bg-green-100 text-green-800 border-green-200";
       case "completed":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "draft":
         return "bg-gray-100 text-gray-800 border-gray-200";
-      case "under review":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "interview scheduled":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "hired":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "rejected":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "urgent":
+      case "expired":
         return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: string | undefined) => {
     switch (category?.toLowerCase()) {
       case "editorial":
         return "bg-purple-50 text-purple-700 border-purple-200";
@@ -332,6 +250,8 @@ export default function ClientDashboard() {
         return "bg-rose-50 text-rose-700 border-rose-200";
       case "fitness":
         return "bg-green-50 text-green-700 border-green-200";
+      case "e-commerce":
+        return "bg-orange-50 text-orange-700 border-orange-200";
       default:
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
@@ -570,36 +490,48 @@ export default function ClientDashboard() {
                   <CardDescription>Your latest gig postings and their status</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentGigs.map((gig) => (
-                    <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
-                      <SafeImage
-                        src={gig.image_url}
-                        alt={gig.title}
-                        width={48}
-                        height={48}
-                        className="rounded-md object-cover"
-                        fallbackSrc="/images/totl-logo-transparent.png"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 truncate">{gig.title}</h4>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                            {gig.category}
-                          </Badge>
-                          <Badge variant="outline" className={getStatusColor(gig.status)}>
-                            {gig.status}
-                          </Badge>
+                  {recentGigs.length > 0 ? (
+                    recentGigs.map((gig) => (
+                      <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
+                        <SafeImage
+                          src={gig.image_url}
+                          alt={gig.title}
+                          width={48}
+                          height={48}
+                          className="rounded-md object-cover"
+                          fallbackSrc="/images/totl-logo-transparent.png"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900 truncate">{gig.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className={getCategoryColor(gig.category)}>
+                              {gig.category}
+                            </Badge>
+                            <Badge variant="outline" className={getStatusColor(gig.status)}>
+                              {gig.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-1">
+                            {gig.applications_count || 0} applications • {gig.location}
+                          </p>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {gig.applications_count} applications • {gig.location}
-                        </p>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">{gig.compensation}</p>
+                          <p className="text-sm text-gray-600">{gig.created_at}</p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{gig.compensation}</p>
-                        <p className="text-sm text-gray-600">{gig.created_at}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={FileText}
+                      title="No gigs posted yet"
+                      description="Start by creating your first gig to attract talent"
+                      action={{
+                        label: "Post Your First Gig",
+                        href: "/post-gig",
+                      }}
+                    />
+                  )}
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/client/gigs">View All Gigs</Link>
                   </Button>
@@ -616,36 +548,56 @@ export default function ClientDashboard() {
                   <CardDescription>Latest talent applications to review</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentApplications.map((application) => (
-                    <div
-                      key={application.id}
-                      className="flex items-center gap-4 p-3 rounded-lg border"
-                    >
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={application.image} alt={application.talentName} />
-                        <AvatarFallback>
-                          {application.talentName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900">{application.talentName}</h4>
-                        <p className="text-sm text-gray-600 truncate">{application.gigTitle}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className={getStatusColor(application.status)}>
-                            {application.status}
-                          </Badge>
-                          <span className="text-sm text-gray-600">{application.location}</span>
+                  {recentApplications.length > 0 ? (
+                    recentApplications.map((application) => (
+                      <div
+                        key={application.id}
+                        className="flex items-center gap-4 p-3 rounded-lg border"
+                      >
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src="/images/totl-logo-transparent.png"
+                            alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
+                          />
+                          <AvatarFallback>
+                            {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
+                            {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-gray-900">
+                            {application.talent_profiles?.first_name}{" "}
+                            {application.talent_profiles?.last_name}
+                          </h4>
+                          <p className="text-sm text-gray-600 truncate">
+                            {application.gigs?.title}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className={getStatusColor(application.status)}>
+                              {application.status}
+                            </Badge>
+                            <span className="text-sm text-gray-600">
+                              {application.talent_profiles?.location}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">
+                            {new Date(application.created_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {application.talent_profiles?.experience}
+                          </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">{application.appliedDate}</p>
-                        <p className="text-xs text-gray-500">{application.experience}</p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={Users}
+                      title="No applications yet"
+                      description="Applications will appear here once talent starts applying to your gigs"
+                    />
+                  )}
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/client/applications">View All Applications</Link>
                   </Button>
@@ -664,27 +616,37 @@ export default function ClientDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {upcomingDeadlines.map((deadline) => (
-                    <div
-                      key={deadline.id}
-                      className="flex items-center justify-between p-4 rounded-lg border"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">{deadline.title}</h4>
-                          <p className="text-sm text-gray-600">
-                            {deadline.applications} applications received
+                  {upcomingDeadlines.length > 0 ? (
+                    upcomingDeadlines.map((deadline) => (
+                      <div
+                        key={deadline.id}
+                        className="flex items-center justify-between p-4 rounded-lg border"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{deadline.title}</h4>
+                            <p className="text-sm text-gray-600">
+                              {deadline.applications_count || 0} applications received
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-gray-900">
+                            Due {deadline.application_deadline}
                           </p>
+                          <Badge variant="outline" className={getStatusColor(deadline.status)}>
+                            {deadline.status}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">Due {deadline.deadline}</p>
-                        <Badge variant="outline" className={getStatusColor(deadline.status)}>
-                          {deadline.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={Calendar}
+                      title="No upcoming deadlines"
+                      description="Deadlines will appear here for gigs with application deadlines"
+                    />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -807,20 +769,21 @@ export default function ClientDashboard() {
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="text-lg font-semibold text-gray-900">
-                              {application.talentName}
+                              {application.talent_profiles?.first_name}{" "}
+                              {application.talent_profiles?.last_name}
                             </h3>
-                            <p className="text-gray-600">{application.gigTitle}</p>
+                            <p className="text-gray-600">{application.gigs?.title}</p>
                             <div className="flex items-center gap-4 mt-2">
                               <span className="text-sm text-gray-600">
                                 <MapPin className="h-4 w-4 inline mr-1" />
-                                {application.location}
+                                {application.talent_profiles?.location}
                               </span>
                               <span className="text-sm text-gray-600">
                                 <Clock className="h-4 w-4 inline mr-1" />
-                                {application.experience}
+                                {application.talent_profiles?.experience}
                               </span>
                               <span className="text-sm text-gray-600">
-                                Applied {application.appliedDate}
+                                Applied {new Date(application.created_at).toLocaleDateString()}
                               </span>
                             </div>
                           </div>

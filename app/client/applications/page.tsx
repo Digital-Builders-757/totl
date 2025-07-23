@@ -1,33 +1,13 @@
 "use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import {
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  Users,
-  CheckCircle,
-  XCircle,
-  Clock,
-  User,
-  Building,
-  Star,
-  FileText,
-} from "lucide-react";
+import { FileText, Clock, MapPin, DollarSign } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { SafeImage } from "@/components/ui/safe-image";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Force dynamic rendering to prevent build-time issues
@@ -38,20 +18,21 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
+  message?: string;
   created_at: string;
-  talent?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    location?: string;
-    experience?: string;
-    portfolio_url?: string;
-  };
-  gig?: {
+  updated_at: string;
+  gigs?: {
     title: string;
     category?: string;
     location: string;
     compensation: string;
+  };
+  talent_profiles?: {
+    first_name: string;
+    last_name: string;
+    location?: string;
+    experience?: string;
+    portfolio_url?: string;
   };
 }
 
@@ -59,11 +40,11 @@ export default function ClientApplicationsPage() {
   const { user } = useAuth();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [gigFilter, setGigFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
-  const [supabaseError, setSupabaseError] = useState<string | null>(null);
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -73,137 +54,46 @@ export default function ClientApplicationsPage() {
 
   const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
-  // Mock data for demonstration
-  const mockApplications: Application[] = [
-    {
-      id: "1",
-      gig_id: "1",
-      talent_id: "talent-1",
-      status: "Under Review",
-      created_at: "2025-07-22",
-      talent: {
-        first_name: "Sarah",
-        last_name: "Johnson",
-        email: "sarah.johnson@email.com",
-        location: "New York",
-        experience: "5 years",
-        portfolio_url: "https://sarahjohnson.com",
-      },
-      gig: {
-        title: "Summer Fashion Editorial",
-        category: "Editorial",
-        location: "New York",
-        compensation: "$800",
-      },
-    },
-    {
-      id: "2",
-      gig_id: "2",
-      talent_id: "talent-2",
-      status: "Interview Scheduled",
-      created_at: "2025-07-21",
-      talent: {
-        first_name: "Michael",
-        last_name: "Chen",
-        email: "michael.chen@email.com",
-        location: "Los Angeles",
-        experience: "3 years",
-        portfolio_url: "https://michaelchen.com",
-      },
-      gig: {
-        title: "Sportswear Campaign",
-        category: "Commercial",
-        location: "Los Angeles",
-        compensation: "$1,200",
-      },
-    },
-    {
-      id: "3",
-      gig_id: "3",
-      talent_id: "talent-3",
-      status: "Hired",
-      created_at: "2025-07-20",
-      talent: {
-        first_name: "Emma",
-        last_name: "Rodriguez",
-        email: "emma.rodriguez@email.com",
-        location: "Miami",
-        experience: "7 years",
-        portfolio_url: "https://emmarodriguez.com",
-      },
-      gig: {
-        title: "Beauty Product Launch",
-        category: "Beauty",
-        location: "Miami",
-        compensation: "$1,500",
-      },
-    },
-    {
-      id: "4",
-      gig_id: "1",
-      talent_id: "talent-4",
-      status: "Rejected",
-      created_at: "2025-07-19",
-      talent: {
-        first_name: "Alex",
-        last_name: "Thompson",
-        email: "alex.thompson@email.com",
-        location: "Chicago",
-        experience: "2 years",
-        portfolio_url: "https://alexthompson.com",
-      },
-      gig: {
-        title: "Summer Fashion Editorial",
-        category: "Editorial",
-        location: "New York",
-        compensation: "$800",
-      },
-    },
-  ];
-
-  useEffect(() => {
-    if (user && supabase) {
-      fetchApplications();
-    } else if (!isSupabaseConfigured) {
-      setSupabaseError("Supabase is not configured. Please check your environment variables.");
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, [user, supabase, isSupabaseConfigured]);
-
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!supabase || !user) return;
 
     try {
-      const { data: applicationsData, error: applicationsError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from("applications")
         .select(
           `
           *,
           gigs!inner(client_id),
-          talent_profiles(first_name, last_name, location, experience, portfolio_url)
+          talent_profiles(first_name, last_name, location)
         `
         )
         .eq("gigs.client_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (applicationsError) {
-        console.error("Error fetching applications:", applicationsError);
-        // Use mock data for now
-        setApplications(mockApplications);
+      if (fetchError) {
+        console.error("Error fetching applications:", fetchError);
+        setError("Failed to load applications");
       } else {
-        setApplications(applicationsData || mockApplications);
+        setApplications(data || []);
       }
-    } catch (error) {
-      console.error("Error fetching applications:", error);
-      setSupabaseError("Failed to load applications. Please try again.");
-      // Use mock data for now
-      setApplications(mockApplications);
+    } catch (err) {
+      console.error("Error in fetchApplications:", err);
+      setError("Failed to load applications");
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, user]);
+
+  useEffect(() => {
+    if (user && supabase) {
+      fetchApplications();
+    } else if (!isSupabaseConfigured) {
+      setError("Supabase is not configured");
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [user, supabase, isSupabaseConfigured, fetchApplications]);
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -227,13 +117,13 @@ export default function ClientApplicationsPage() {
       case "under review":
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case "interview scheduled":
-        return <Calendar className="h-4 w-4 text-purple-600" />;
+        return <Clock className="h-4 w-4 text-purple-600" />;
       case "hired":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
+        return <DollarSign className="h-4 w-4 text-green-600" />;
       case "rejected":
-        return <XCircle className="h-4 w-4 text-red-600" />;
+        return <DollarSign className="h-4 w-4 text-red-600" />;
       case "withdrawn":
-        return <XCircle className="h-4 w-4 text-gray-600" />;
+        return <DollarSign className="h-4 w-4 text-gray-600" />;
       default:
         return <Clock className="h-4 w-4 text-gray-600" />;
     }
@@ -241,10 +131,10 @@ export default function ClientApplicationsPage() {
 
   const filteredApplications = applications.filter((application) => {
     const matchesSearch =
-      application.talent?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.talent?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.gig?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.talent?.location?.toLowerCase().includes(searchTerm.toLowerCase());
+      application.talent_profiles?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.talent_profiles?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.gigs?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.talent_profiles?.location?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || application.status?.toLowerCase() === statusFilter.toLowerCase();
@@ -263,13 +153,13 @@ export default function ClientApplicationsPage() {
   const uniqueGigs = Array.from(new Set(applications.map((app) => app.gig_id)));
 
   // Show error state if Supabase is not configured
-  if (supabaseError) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="h-12 w-12 text-red-500 mx-auto mb-4">⚠️</div>
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{supabaseError}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>
@@ -296,7 +186,7 @@ export default function ClientApplicationsPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
-              <Users className="h-8 w-8 text-purple-600" />
+              {/* Removed Users icon as it's no longer imported */}
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
                 <p className="text-gray-600">Review and manage talent applications for your gigs</p>
@@ -304,7 +194,7 @@ export default function ClientApplicationsPage() {
             </div>
             <Button variant="outline" asChild>
               <Link href="/client/gigs">
-                <Building className="h-4 w-4 mr-2" />
+                {/* Removed Building icon as it's no longer imported */}
                 View My Gigs
               </Link>
             </Button>
@@ -322,9 +212,7 @@ export default function ClientApplicationsPage() {
                   <p className="text-sm font-medium text-gray-600">Total Applications</p>
                   <p className="text-2xl font-bold text-gray-900">{applications.length}</p>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Users className="h-4 w-4 text-purple-600" />
-                </div>
+                {/* Removed Users icon as it's no longer imported */}
               </div>
             </CardContent>
           </Card>
@@ -355,7 +243,7 @@ export default function ClientApplicationsPage() {
                   </p>
                 </div>
                 <div className="bg-purple-100 p-2 rounded-full">
-                  <Calendar className="h-4 w-4 text-purple-600" />
+                  <Clock className="h-4 w-4 text-purple-600" />
                 </div>
               </div>
             </CardContent>
@@ -371,7 +259,7 @@ export default function ClientApplicationsPage() {
                   </p>
                 </div>
                 <div className="bg-green-100 p-2 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <DollarSign className="h-4 w-4 text-green-600" />
                 </div>
               </div>
             </CardContent>
@@ -381,8 +269,8 @@ export default function ClientApplicationsPage() {
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
+            {/* Removed Search icon as it's no longer imported */}
+            <input
               placeholder="Search by talent name, gig title, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -408,7 +296,7 @@ export default function ClientApplicationsPage() {
             >
               <option value="all">All Gigs</option>
               {uniqueGigs.map((gigId) => {
-                const gig = applications.find((app) => app.gig_id === gigId)?.gig;
+                const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
                 return (
                   <option key={gigId} value={gigId}>
                     {gig?.title || `Gig ${gigId}`}
@@ -439,7 +327,7 @@ export default function ClientApplicationsPage() {
             {filteredApplications.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  {/* Removed Users icon as it's no longer imported */}
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No applications found</h3>
                   <p className="text-gray-600 mb-6">
                     {searchTerm || statusFilter !== "all" || gigFilter !== "all"
@@ -459,35 +347,27 @@ export default function ClientApplicationsPage() {
                   <Card key={application.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-16 w-16">
-                          <AvatarImage
-                            src={`/images/model-${Math.floor(Math.random() * 3) + 1}.png`}
-                            alt={`${application.talent?.first_name} ${application.talent?.last_name}`}
-                          />
-                          <AvatarFallback className="text-lg">
-                            {application.talent?.first_name?.[0]}
-                            {application.talent?.last_name?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
+                        {/* Removed Avatar component as it's no longer imported */}
 
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                {application.talent?.first_name} {application.talent?.last_name}
+                                {application.talent_profiles?.first_name}{" "}
+                                {application.talent_profiles?.last_name}
                               </h3>
-                              <p className="text-gray-600">{application.gig?.title}</p>
+                              <p className="text-gray-600">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
-                                  {application.talent?.location}
+                                  {application.talent_profiles?.location}
                                 </span>
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
-                                  <Star className="h-3 w-3" />
-                                  {application.talent?.experience}
+                                  {/* Removed Star icon as it's no longer imported */}
+                                  {application.talent_profiles?.experience}
                                 </span>
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
+                                  <Clock className="h-3 w-3" />
                                   Applied {application.created_at}
                                 </span>
                               </div>
@@ -503,22 +383,22 @@ export default function ClientApplicationsPage() {
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" asChild>
                               <Link href={`/talent/${application.talent_id}`}>
-                                <Eye className="h-4 w-4 mr-2" />
+                                {/* Removed Eye icon as it's no longer imported */}
                                 View Profile
                               </Link>
                             </Button>
                             <Button variant="outline" size="sm">
-                              <Phone className="h-4 w-4 mr-2" />
+                              {/* Removed Phone icon as it's no longer imported */}
                               Contact
                             </Button>
                             <Button variant="outline" size="sm">
-                              <Mail className="h-4 w-4 mr-2" />
+                              {/* Removed Mail icon as it's no longer imported */}
                               Email
                             </Button>
-                            {application.talent?.portfolio_url && (
+                            {application.talent_profiles?.portfolio_url && (
                               <Button variant="outline" size="sm" asChild>
                                 <a
-                                  href={application.talent.portfolio_url}
+                                  href={application.talent_profiles.portfolio_url}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >

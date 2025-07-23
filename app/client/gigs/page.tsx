@@ -3,29 +3,26 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Eye,
-  Edit,
-  Trash2,
-  Calendar,
   MapPin,
-  DollarSign,
-  Users,
   Clock,
+  DollarSign,
   CheckCircle,
   XCircle,
   AlertCircle,
   Building,
+  Users,
+  Eye,
+  Edit,
+  Trash2,
+  Search,
+  MoreVertical,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -43,18 +40,14 @@ interface Gig {
   status?: string;
   image_url?: string;
   created_at: string;
-  applications_count?: number;
-  deadline?: string;
+  application_deadline?: string;
 }
 
 export default function ClientGigsPage() {
   const { user } = useAuth();
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [activeTab, setActiveTab] = useState("all");
-  const [supabaseError, setSupabaseError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -64,99 +57,40 @@ export default function ClientGigsPage() {
 
   const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
-  // Mock data for demonstration
-  const mockGigs: Gig[] = [
-    {
-      id: "1",
-      title: "Summer Fashion Editorial",
-      description: "Looking for experienced fashion models for summer editorial shoot",
-      category: "Editorial",
-      location: "New York",
-      compensation: "$800",
-      status: "Active",
-      applications_count: 8,
-      created_at: "2025-07-20",
-      deadline: "2025-07-25",
-      image_url: "/gig-editorial.png",
-    },
-    {
-      id: "2",
-      title: "Sportswear Campaign",
-      description: "Athletic models needed for sportswear brand campaign",
-      category: "Commercial",
-      location: "Los Angeles",
-      compensation: "$1,200",
-      status: "Active",
-      applications_count: 12,
-      created_at: "2025-07-18",
-      deadline: "2025-07-28",
-      image_url: "/gig-sportswear.png",
-    },
-    {
-      id: "3",
-      title: "Beauty Product Launch",
-      description: "Beauty models for new product launch campaign",
-      category: "Beauty",
-      location: "Miami",
-      compensation: "$1,500",
-      status: "Completed",
-      applications_count: 15,
-      created_at: "2025-07-15",
-      deadline: "2025-08-01",
-      image_url: "/gig-beauty.png",
-    },
-    {
-      id: "4",
-      title: "E-commerce Photoshoot",
-      description: "Models for online clothing store product photos",
-      category: "E-commerce",
-      location: "Chicago",
-      compensation: "$600",
-      status: "Draft",
-      applications_count: 0,
-      created_at: "2025-07-22",
-      deadline: "2025-08-05",
-      image_url: "/gig-ecommerce.png",
-    },
-  ];
-
-  useEffect(() => {
-    if (user && supabase) {
-      fetchGigs();
-    } else if (!isSupabaseConfigured) {
-      setSupabaseError("Supabase is not configured. Please check your environment variables.");
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, [user, supabase, isSupabaseConfigured]);
-
-  const fetchGigs = async () => {
+  const fetchGigs = useCallback(async () => {
     if (!supabase || !user) return;
 
     try {
-      const { data: gigsData, error: gigsError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from("gigs")
         .select("*")
         .eq("client_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (gigsError) {
-        console.error("Error fetching gigs:", gigsError);
-        // Use mock data for now
-        setGigs(mockGigs);
+      if (fetchError) {
+        console.error("Error fetching gigs:", fetchError);
+        setError("Failed to load gigs");
       } else {
-        setGigs(gigsData || mockGigs);
+        setGigs(data || []);
       }
-    } catch (error) {
-      console.error("Error fetching gigs:", error);
-      setSupabaseError("Failed to load gigs. Please try again.");
-      // Use mock data for now
-      setGigs(mockGigs);
+    } catch (err) {
+      console.error("Error in fetchGigs:", err);
+      setError("Failed to load gigs");
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, user]);
+
+  useEffect(() => {
+    if (user && supabase) {
+      fetchGigs();
+    } else if (!isSupabaseConfigured) {
+      setError("Supabase is not configured");
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [user, supabase, isSupabaseConfigured, fetchGigs]);
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -226,13 +160,13 @@ export default function ClientGigsPage() {
   };
 
   // Show error state if Supabase is not configured
-  if (supabaseError) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{supabaseError}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>

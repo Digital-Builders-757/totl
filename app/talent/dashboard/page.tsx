@@ -2,38 +2,45 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
-  Calendar,
+  FileText,
   Clock,
-  DollarSign,
   MapPin,
-  MoreVertical,
+  DollarSign,
   Users,
-  TrendingUp,
   Star,
-  Eye,
-  Heart,
-  Camera,
-  Award,
-  Target,
-  Activity,
+  Briefcase,
+  BarChart3,
+  AlertCircle,
+  Plus,
+  User,
   Bell,
   Settings,
   LogOut,
-  Plus,
+  Activity,
+  Eye,
   Filter,
   Search,
-  User,
   Phone,
+  CheckCircle,
+  XCircle,
+  Clock as ClockIcon,
+  UserCheck,
+  Calendar,
+  TrendingUp,
+  Target,
+  Award,
   Globe,
-  AlertCircle,
+  MoreVertical,
+  Heart,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -71,7 +78,19 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
+  message?: string;
   created_at: string;
+  updated_at: string;
+  gigs?: {
+    title: string;
+    category?: string;
+    location: string;
+    compensation: string;
+    image_url?: string;
+    client_profiles?: {
+      company_name: string;
+    };
+  };
 }
 
 interface Gig {
@@ -79,209 +98,129 @@ interface Gig {
   title: string;
   description: string;
   location: string;
-  pay_rate: string;
-  image?: string;
+  compensation: string;
+  category?: string;
+  status?: string;
+  image_url?: string;
   created_at: string;
+  application_deadline?: string;
 }
 
 export default function TalentDashboard() {
   const { user, signOut } = useAuth();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [profile, setProfile] = useState<Profile | null>(null);
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
-  const [supabaseError, setSupabaseError] = useState<string | null>(null);
-  
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+
   // Check if Supabase is configured
-  const isSupabaseConfigured = typeof window !== 'undefined' && 
-    process.env.NEXT_PUBLIC_SUPABASE_URL && 
+  const isSupabaseConfigured =
+    typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
 
-  // Mock data for enhanced UI (these would be replaced with real data)
-  const profileStats = {
-    profileViews: 1247,
-    applications: 12,
-    interviews: 5,
-    bookings: 3,
-    earnings: 2450,
-    rating: 4.8,
-    completionRate: 95,
+  // Calculate dashboard stats from real data
+  const dashboardStats = {
+    totalApplications: applications.length,
+    pendingApplications: applications.filter(
+      (app) => app.status === "new" || app.status === "under_review"
+    ).length,
+    acceptedApplications: applications.filter((app) => app.status === "accepted").length,
+    completedGigs: applications.filter((app) => app.status === "completed").length,
+    activeGigs: gigs.filter((gig) => gig.status === "active").length,
+    totalGigs: gigs.length,
   };
 
-  const upcomingGigs = [
-    {
-      id: 1,
-      title: "Summer Fashion Editorial",
-      company: "Vogue Magazine",
-      date: "July 15, 2023",
-      time: "9:00 AM - 5:00 PM",
-      location: "New York Studio",
-      status: "Confirmed",
-      pay: "$800",
-      image: "/images/totl-logo-transparent.png",
-      category: "Editorial",
-    },
-    {
-      id: 2,
-      title: "Sportswear Campaign",
-      company: "Nike",
-      date: "July 22, 2023",
-      time: "10:00 AM - 4:00 PM",
-      location: "Los Angeles",
-      status: "Pending",
-      pay: "$1,200",
-      image: "/images/totl-logo-transparent.png",
-      category: "Commercial",
-    },
-  ];
+  const needsProfileCompletion =
+    !talentProfile?.first_name || !talentProfile?.last_name || !talentProfile?.location;
 
-  const recentApplications = [
-    {
-      id: 1,
-      gigTitle: "Luxury Jewelry Campaign",
-      company: "Tiffany & Co",
-      appliedDate: "June 28, 2023",
-      status: "Under Review",
-      image: "/images/totl-logo-transparent.png",
-      category: "Commercial",
-      pay: "$1,500",
-    },
-    {
-      id: 2,
-      gigTitle: "Summer Collection Lookbook",
-      company: "Zara",
-      appliedDate: "June 25, 2023",
-      status: "Interview Scheduled",
-      image: "/images/totl-logo-transparent.png",
-      category: "Editorial",
-      pay: "$900",
-    },
-    {
-      id: 3,
-      gigTitle: "Fitness Apparel Shoot",
-      company: "Lululemon",
-      appliedDate: "June 20, 2023",
-      status: "Rejected",
-      image: "/images/totl-logo-transparent.png",
-      category: "Fitness",
-      pay: "$700",
-    },
-  ];
+  const fetchDashboardData = useCallback(async () => {
+    if (!supabase || !user) return;
 
-  const availableGigs = [
-    {
-      id: 1,
-      title: "Runway Show - Fall Collection",
-      company: "Fashion Week NYC",
-      deadline: "July 10, 2023",
-      location: "New York",
-      pay: "$1,500",
-      image: "/images/totl-logo-transparent.png",
-      category: "Runway",
-      urgent: true,
-    },
-    {
-      id: 2,
-      title: "Beauty Campaign",
-      company: "Sephora",
-      deadline: "July 15, 2023",
-      location: "Los Angeles",
-      pay: "$2,000",
-      image: "/images/totl-logo-transparent.png",
-      category: "Beauty",
-      urgent: false,
-    },
-    {
-      id: 3,
-      title: "E-commerce Photoshoot",
-      company: "ASOS",
-      deadline: "July 20, 2023",
-      location: "Miami",
-      pay: "$800",
-      image: "/images/totl-logo-transparent.png",
-      category: "E-commerce",
-      urgent: false,
-    },
-  ];
+    try {
+      // Fetch talent profile
+      const { data: talentProfileData, error: talentProfileError } = await supabase
+        .from("talent_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (talentProfileError) {
+        console.error("Error fetching talent profile:", talentProfileError);
+      } else {
+        setTalentProfile(talentProfileData);
+      }
+
+      // Fetch talent's applications
+      const { data: applicationsData, error: applicationsError } = await supabase
+        .from("applications")
+        .select(
+          `
+          *,
+          gigs(
+            title,
+            category,
+            location,
+            compensation,
+            image_url,
+            client_profiles(company_name)
+          )
+        `
+        )
+        .eq("talent_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (applicationsError) {
+        console.error("Error fetching applications:", applicationsError);
+      } else {
+        setApplications(applicationsData || []);
+      }
+
+      // Fetch active gigs for discovery
+      const { data: gigsData, error: gigsError } = await supabase
+        .from("gigs")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (gigsError) {
+        console.error("Error fetching gigs:", gigsError);
+      } else {
+        setGigs(gigsData || []);
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
+      setError("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, user]);
 
   useEffect(() => {
     if (user && supabase) {
       fetchDashboardData();
     } else if (!isSupabaseConfigured) {
-      setSupabaseError("Supabase is not configured. Please check your environment variables.");
+      setError("Supabase is not configured");
       setLoading(false);
     } else {
       setLoading(false);
     }
-  }, [user, supabase, isSupabaseConfigured]);
-
-  const fetchDashboardData = async () => {
-    if (!supabase || !user) return;
-    
-    try {
-      // Fetch profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user?.id)
-        .single();
-
-      if (profileError) throw profileError;
-      setProfile(profileData);
-
-      // Fetch talent profile
-      const { data: talentData, error: talentError } = await supabase
-        .from("talent_profiles")
-        .select("*")
-        .eq("user_id", user?.id)
-        .single();
-
-      if (talentError && talentError.code !== "PGRST116") throw talentError;
-      setTalentProfile(talentData);
-
-      // Fetch applications
-      const { data: applicationsData, error: applicationsError } = await supabase
-        .from("applications")
-        .select("*")
-        .eq("talent_id", user?.id)
-        .order("created_at", { ascending: false })
-        .limit(5);
-
-      if (applicationsError) throw applicationsError;
-      setApplications(applicationsData || []);
-
-      // Fetch available gigs
-      const { data: gigsData, error: gigsError } = await supabase
-        .from("gigs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(6);
-
-      if (gigsError) throw gigsError;
-      setGigs(gigsData || []);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      setSupabaseError("Failed to load dashboard data. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "confirmed":
       case "accepted":
+      case "completed":
         return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "under review":
+      case "new":
+      case "under_review":
+      case "interview_scheduled":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "interview scheduled":
-        return "bg-purple-100 text-purple-800 border-purple-200";
       case "rejected":
         return "bg-red-100 text-red-800 border-red-200";
       default:
@@ -306,16 +245,14 @@ export default function TalentDashboard() {
     }
   };
 
-  const needsProfileCompletion = !talentProfile?.first_name || !talentProfile?.last_name;
-
   // Show error state if Supabase is not configured
-  if (supabaseError) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{supabaseError}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>
@@ -342,7 +279,9 @@ export default function TalentDashboard() {
         <div className="text-center max-w-md mx-auto p-6">
           <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Please Log In</h2>
-          <p className="text-gray-600 mb-4">You need to be logged in to access your talent dashboard.</p>
+          <p className="text-gray-600 mb-4">
+            You need to be logged in to access your talent dashboard.
+          </p>
           <Button asChild>
             <Link href="/login">Log In</Link>
           </Button>
@@ -361,12 +300,13 @@ export default function TalentDashboard() {
               <Avatar className="h-12 w-12">
                 <AvatarImage src="/images/totl-logo-transparent.png" alt="Profile" />
                 <AvatarFallback>
-                  {talentProfile?.first_name?.[0]}{talentProfile?.last_name?.[0] || "T"}
+                  {talentProfile?.first_name?.[0]}
+                  {talentProfile?.last_name?.[0] || "T"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Welcome back, {profile?.display_name || "Talent"}!
+                  Welcome back, {talentProfile?.first_name || "Talent"}!
                 </h1>
                 <p className="text-gray-600">Ready to discover your next opportunity?</p>
               </div>
@@ -419,7 +359,7 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Profile Views</p>
-                  <p className="text-2xl font-bold text-gray-900">{profileStats.profileViews}</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                 </div>
                 <div className="bg-blue-100 p-2 rounded-full">
                   <Eye className="h-4 w-4 text-blue-600" />
@@ -433,7 +373,9 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">{applications.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {dashboardStats.totalApplications}
+                  </p>
                 </div>
                 <div className="bg-green-100 p-2 rounded-full">
                   <Users className="h-4 w-4 text-green-600" />
@@ -447,7 +389,7 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Bookings</p>
-                  <p className="text-2xl font-bold text-gray-900">{profileStats.bookings}</p>
+                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.completedGigs}</p>
                 </div>
                 <div className="bg-purple-100 p-2 rounded-full">
                   <Calendar className="h-4 w-4 text-purple-600" />
@@ -461,7 +403,7 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Earnings</p>
-                  <p className="text-2xl font-bold text-gray-900">${profileStats.earnings}</p>
+                  <p className="text-2xl font-bold text-gray-900">${0}</p>
                 </div>
                 <div className="bg-yellow-100 p-2 rounded-full">
                   <DollarSign className="h-4 w-4 text-yellow-600" />
@@ -475,7 +417,7 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Rating</p>
-                  <p className="text-2xl font-bold text-gray-900">{profileStats.rating}</p>
+                  <p className="text-2xl font-bold text-gray-900">0</p>
                 </div>
                 <div className="bg-orange-100 p-2 rounded-full">
                   <Star className="h-4 w-4 text-orange-600" />
@@ -489,7 +431,7 @@ export default function TalentDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                  <p className="text-2xl font-bold text-gray-900">{profileStats.completionRate}%</p>
+                  <p className="text-2xl font-bold text-gray-900">0%</p>
                 </div>
                 <div className="bg-teal-100 p-2 rounded-full">
                   <TrendingUp className="h-4 w-4 text-teal-600" />
@@ -535,9 +477,7 @@ export default function TalentDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Profile Completion</span>
-                      <span className="font-medium">
-                        {needsProfileCompletion ? "60%" : "85%"}
-                      </span>
+                      <span className="font-medium">{needsProfileCompletion ? "60%" : "85%"}</span>
                     </div>
                     <Progress value={needsProfileCompletion ? 60 : 85} className="h-2" />
                   </div>
@@ -547,9 +487,13 @@ export default function TalentDashboard() {
                         <User className="h-4 w-4" />
                         Basic Information
                       </span>
-                      <Badge 
-                        variant="outline" 
-                        className={needsProfileCompletion ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"}
+                      <Badge
+                        variant="outline"
+                        className={
+                          needsProfileCompletion
+                            ? "bg-red-50 text-red-700"
+                            : "bg-green-50 text-green-700"
+                        }
                       >
                         {needsProfileCompletion ? "Incomplete" : "Complete"}
                       </Badge>
@@ -592,63 +536,75 @@ export default function TalentDashboard() {
                   <CardDescription>Your confirmed and pending bookings</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {upcomingGigs.length > 0 ? (
+                  {applications.filter((app) => app.status === "accepted").length > 0 ? (
                     <div className="space-y-4">
-                      {upcomingGigs.map((gig) => (
-                        <div
-                          key={gig.id}
-                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                        >
-                          <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                            <SafeImage
-                              src={gig.image}
-                              alt={gig.title}
-                              fill
-                              className="object-cover"
-                              placeholderQuery={gig.category.toLowerCase()}
-                            />
-                          </div>
-                          <div className="flex-grow space-y-2">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <h4 className="font-semibold text-lg text-gray-900">{gig.title}</h4>
-                              <Badge className={getStatusColor(gig.status)}>{gig.status}</Badge>
+                      {applications
+                        .filter((app) => app.status === "accepted")
+                        .map((app) => (
+                          <div
+                            key={app.id}
+                            className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
+                              <SafeImage
+                                src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                                alt={app.gigs?.title || "Unknown Gig"}
+                                fill
+                                className="object-cover"
+                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                              />
                             </div>
-                            <p className="text-gray-600 font-medium">{gig.company}</p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-4 w-4" />
-                                {gig.date}
+                            <div className="flex-grow space-y-2">
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                                <h4 className="font-semibold text-lg text-gray-900">
+                                  {app.gigs?.title}
+                                </h4>
+                                <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {gig.time}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {gig.location}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="h-4 w-4" />
-                                {gig.pay}
+                              <p className="text-gray-600 font-medium">
+                                {app.gigs?.client_profiles?.company_name || "Private Client"}
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {new Date(app.created_at).toLocaleDateString()}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  {app.gigs?.location}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </div>
                               </div>
                             </div>
+                            <div className="flex md:flex-col gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 md:flex-none bg-transparent"
+                              >
+                                View Details
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex md:flex-col gap-2">
-                            <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
-                              View Details
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   ) : (
                     <div className="text-center py-8">
                       <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-4">You don't have any upcoming gigs.</p>
-                      <Button onClick={() => setActiveTab("discover")}>Browse Available Gigs</Button>
+                      <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
+                      <Button onClick={() => setActiveTab("discover")}>
+                        Browse Available Gigs
+                      </Button>
                     </div>
                   )}
                 </CardContent>
@@ -666,27 +622,31 @@ export default function TalentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentApplications.slice(0, 3).map((app) => (
+                  {applications.slice(0, 3).map((app) => (
                     <div
                       key={app.id}
                       className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <div className="w-12 h-12 relative rounded-lg overflow-hidden flex-shrink-0">
                         <SafeImage
-                          src={app.image}
-                          alt={app.gigTitle}
+                          src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                          alt={app.gigs?.title || "Unknown Gig"}
                           fill
                           className="object-cover"
-                          placeholderQuery={app.category.toLowerCase()}
+                          placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
                         />
                       </div>
                       <div className="flex-grow">
-                        <h5 className="font-medium text-gray-900">{app.gigTitle}</h5>
-                        <p className="text-sm text-gray-600">{app.company}</p>
+                        <h5 className="font-medium text-gray-900">{app.gigs?.title}</h5>
+                        <p className="text-sm text-gray-600">
+                          {app.gigs?.client_profiles?.company_name || "Private Client"}
+                        </p>
                       </div>
                       <div className="text-right">
                         <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
-                        <p className="text-xs text-gray-500 mt-1">{app.appliedDate}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(app.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -701,7 +661,9 @@ export default function TalentDashboard() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <CardTitle>My Applications</CardTitle>
-                    <CardDescription>Track all your gig applications and their status</CardDescription>
+                    <CardDescription>
+                      Track all your gig applications and their status
+                    </CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
@@ -716,39 +678,48 @@ export default function TalentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentApplications.map((app) => (
+                  {applications.map((app) => (
                     <div
                       key={app.id}
                       className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                     >
                       <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                         <SafeImage
-                          src={app.image}
-                          alt={app.gigTitle}
+                          src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                          alt={app.gigs?.title || "Unknown Gig"}
                           fill
                           className="object-cover"
-                          placeholderQuery={app.category.toLowerCase()}
+                          placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
                         />
                       </div>
                       <div className="flex-grow space-y-2">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <h4 className="font-semibold text-lg text-gray-900">{app.gigTitle}</h4>
+                          <h4 className="font-semibold text-lg text-gray-900">{app.gigs?.title}</h4>
                           <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                         </div>
-                        <p className="text-gray-600 font-medium">{app.company}</p>
+                        <p className="text-gray-600 font-medium">
+                          {app.gigs?.client_profiles?.company_name || "Private Client"}
+                        </p>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <Badge variant="outline" className={getCategoryColor(app.category)}>
-                            {app.category}
+                          <Badge
+                            variant="outline"
+                            className={getCategoryColor(app.gigs?.category || "General")}
+                          >
+                            {app.gigs?.category || "General"}
                           </Badge>
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-4 w-4" />
-                            {app.pay}
+                            {app.gigs?.compensation || "TBD"}
                           </span>
-                          <span>Applied: {app.appliedDate}</span>
+                          <span>Applied: {new Date(app.created_at).toLocaleDateString()}</span>
                         </div>
                       </div>
                       <div className="flex md:flex-col gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 md:flex-none bg-transparent"
+                        >
                           View Details
                         </Button>
                         <Button variant="ghost" size="sm">
@@ -770,55 +741,65 @@ export default function TalentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {upcomingGigs.map((gig) => (
-                    <div
-                      key={gig.id}
-                      className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                    >
-                      <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
-                        <SafeImage
-                          src={gig.image}
-                          alt={gig.title}
-                          fill
-                          className="object-cover"
-                          placeholderQuery={gig.category.toLowerCase()}
-                        />
-                      </div>
-                      <div className="flex-grow space-y-2">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <h4 className="font-semibold text-lg text-gray-900">{gig.title}</h4>
-                          <Badge className={getStatusColor(gig.status)}>{gig.status}</Badge>
+                  {applications
+                    .filter((app) => app.status === "accepted")
+                    .map((app) => (
+                      <div
+                        key={app.id}
+                        className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                      >
+                        <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
+                          <SafeImage
+                            src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                            alt={app.gigs?.title || "Unknown Gig"}
+                            fill
+                            className="object-cover"
+                            placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                          />
                         </div>
-                        <p className="text-gray-600 font-medium">{gig.company}</p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {gig.date}
+                        <div className="flex-grow space-y-2">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <h4 className="font-semibold text-lg text-gray-900">
+                              {app.gigs?.title}
+                            </h4>
+                            <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {gig.time}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {gig.location}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
-                            {gig.pay}
+                          <p className="text-gray-600 font-medium">
+                            {app.gigs?.client_profiles?.company_name || "Private Client"}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(app.created_at).toLocaleDateString()}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              {app.gigs?.compensation || "TBD"}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="h-4 w-4" />
+                              {app.gigs?.location}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="h-4 w-4" />
+                              {app.gigs?.compensation || "TBD"}
+                            </div>
                           </div>
                         </div>
+                        <div className="flex md:flex-col gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 md:flex-none bg-transparent"
+                          >
+                            View Details
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex md:flex-col gap-2">
-                        <Button variant="outline" size="sm" className="flex-1 md:flex-none bg-transparent">
-                          View Details
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -830,7 +811,9 @@ export default function TalentDashboard() {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
                     <CardTitle>Available Gigs</CardTitle>
-                    <CardDescription>Discover new opportunities that match your profile</CardDescription>
+                    <CardDescription>
+                      Discover new opportunities that match your profile
+                    </CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
@@ -846,17 +829,26 @@ export default function TalentDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {availableGigs.map((gig) => (
-                    <Card key={gig.id} className="overflow-hidden hover:shadow-lg transition-shadow group">
+                  {gigs.map((gig) => (
+                    <Card
+                      key={gig.id}
+                      className="overflow-hidden hover:shadow-lg transition-shadow group"
+                    >
                       <div className="h-48 relative">
                         <SafeImage
-                          src={gig.image}
+                          src={gig.image_url || "/images/totl-logo-transparent.png"}
                           alt={gig.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          placeholderQuery={gig.category.toLowerCase()}
+                          placeholderQuery={gig.category?.toLowerCase() || "general"}
                         />
-                        {gig.urgent && <Badge className="absolute top-3 left-3 bg-red-500 text-white">Urgent</Badge>}
+                        {gig.application_deadline &&
+                          new Date(gig.application_deadline) <
+                            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
+                            <Badge className="absolute top-3 left-3 bg-red-500 text-white">
+                              Urgent
+                            </Badge>
+                          )}
                         <div className="absolute top-3 right-3 flex gap-1">
                           <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white">
                             <Heart className="h-4 w-4" />
@@ -865,12 +857,17 @@ export default function TalentDashboard() {
                       </div>
                       <CardContent className="p-4 space-y-3">
                         <div>
-                          <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">{gig.title}</h4>
-                          <p className="text-gray-600 text-sm">{gig.company}</p>
+                          <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                            {gig.title}
+                          </h4>
+                          <p className="text-gray-600 text-sm">{gig.description}</p>
                         </div>
                         <div className="space-y-2">
-                          <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                            {gig.category}
+                          <Badge
+                            variant="outline"
+                            className={getCategoryColor(gig.category || "General")}
+                          >
+                            {gig.category || "General"}
                           </Badge>
                           <div className="flex items-center text-sm text-gray-500">
                             <MapPin className="h-4 w-4 mr-1" />
@@ -878,11 +875,14 @@ export default function TalentDashboard() {
                           </div>
                           <div className="flex items-center text-sm text-gray-500">
                             <Calendar className="h-4 w-4 mr-1" />
-                            Deadline: {gig.deadline}
+                            Deadline:{" "}
+                            {gig.application_deadline
+                              ? new Date(gig.application_deadline).toLocaleDateString()
+                              : "No deadline"}
                           </div>
                           <div className="flex items-center text-sm font-medium text-gray-900">
                             <DollarSign className="h-4 w-4 mr-1" />
-                            {gig.pay}
+                            {gig.compensation}
                           </div>
                         </div>
                         <div className="flex gap-2 pt-2">
