@@ -79,6 +79,11 @@ interface Application {
     location?: string;
     experience?: string;
   };
+  profiles?: {
+    display_name: string;
+    email_verified: boolean;
+    role: string;
+  };
 }
 
 interface Gig {
@@ -188,7 +193,8 @@ export default function ClientDashboard() {
           `
           *,
           gigs!inner(id, title, client_id),
-          talent_profiles(first_name, last_name, location, experience)
+          talent_profiles(first_name, last_name, location, experience),
+          profiles!talent_id(display_name, email_verified, role)
         `
         )
         .eq("gigs.client_id", user.id)
@@ -764,11 +770,17 @@ export default function ClientDashboard() {
                         <Avatar className="h-16 w-16">
                           <AvatarImage
                             src="/images/totl-logo-transparent.png"
-                            alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
+                            alt={
+                              application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                                ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                : application.profiles?.display_name || "Talent"
+                            }
                           />
                           <AvatarFallback className="text-lg">
-                            {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
-                            {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
+                            {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                              ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
+                              : application.profiles?.display_name?.charAt(0) || "T"
+                            }
                           </AvatarFallback>
                         </Avatar>
 
@@ -776,22 +788,30 @@ export default function ClientDashboard() {
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                {application.talent_profiles?.first_name}{" "}
-                                {application.talent_profiles?.last_name}
+                                {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                                  ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                  : application.profiles?.display_name || "Talent User"
+                                }
                               </h3>
                               <p className="text-gray-600">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
                                 <span className="text-sm text-gray-600">
                                   <MapPin className="h-4 w-4 inline mr-1" />
-                                  {application.talent_profiles?.location}
+                                  {application.talent_profiles?.location || "Location not specified"}
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   <Clock className="h-4 w-4 inline mr-1" />
-                                  {application.talent_profiles?.experience}
+                                  {application.talent_profiles?.experience || "Experience not specified"}
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   Applied {new Date(application.created_at).toLocaleDateString()}
                                 </span>
+                                {application.profiles?.email_verified && (
+                                  <span className="text-sm text-green-600">
+                                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                                    Verified
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <Badge variant="outline" className={getStatusColor(application.status)}>
