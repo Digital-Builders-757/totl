@@ -41,6 +41,7 @@ interface Gig {
   image_url?: string;
   created_at: string;
   application_deadline?: string;
+  applications_count?: number;
 }
 
 export default function ClientGigsPage() {
@@ -48,6 +49,9 @@ export default function ClientGigsPage() {
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -63,7 +67,12 @@ export default function ClientGigsPage() {
     try {
       const { data, error: fetchError } = await supabase
         .from("gigs")
-        .select("*")
+        .select(
+          `
+          *,
+          applications_count:applications(count)
+        `
+        )
         .eq("client_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -71,7 +80,13 @@ export default function ClientGigsPage() {
         console.error("Error fetching gigs:", fetchError);
         setError("Failed to load gigs");
       } else {
-        setGigs(data || []);
+        // Transform the data to flatten the applications_count
+        const transformedData =
+          data?.map((gig) => ({
+            ...gig,
+            applications_count: gig.applications_count?.[0]?.count || 0,
+          })) || [];
+        setGigs(transformedData);
       }
     } catch (err) {
       console.error("Error in fetchGigs:", err);
@@ -392,10 +407,10 @@ export default function ClientGigsPage() {
                           <span className="text-gray-600">Posted:</span>
                           <span className="font-medium">{gig.created_at}</span>
                         </div>
-                        {gig.deadline && (
+                        {gig.application_deadline && (
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Deadline:</span>
-                            <span className="font-medium">{gig.deadline}</span>
+                            <span className="font-medium">{gig.application_deadline}</span>
                           </div>
                         )}
                       </div>

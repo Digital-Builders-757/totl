@@ -27,7 +27,7 @@ import {
   Phone,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -124,11 +124,7 @@ export default function ClientDashboard() {
     totalSpent: 0, // This would need to be calculated from bookings/payments
   };
 
-  // Get recent gigs (last 3)
-  const recentGigs = gigs.slice(0, 3);
-
-  // Get recent applications (last 3)
-  const recentApplications = applications.slice(0, 3);
+  const needsProfileCompletion = !clientProfile?.company_name || !clientProfile?.contact_name;
 
   // Get upcoming deadlines (gigs with deadlines in the next 30 days)
   const upcomingDeadlines = gigs
@@ -136,24 +132,13 @@ export default function ClientDashboard() {
     .filter((gig) => {
       if (!gig.application_deadline) return false;
       const deadline = new Date(gig.application_deadline);
-      const now = new Date();
-      const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
       return deadline <= thirtyDaysFromNow;
     })
-    .slice(0, 3);
+    .slice(0, 5);
 
-  useEffect(() => {
-    if (user && supabase) {
-      fetchDashboardData();
-    } else if (!isSupabaseConfigured) {
-      setSupabaseError("Supabase is not configured. Please check your environment variables.");
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (!supabase || !user) return;
 
     try {
@@ -168,8 +153,6 @@ export default function ClientDashboard() {
         console.error("Error fetching profile:", profileError);
         return;
       }
-
-      // setProfile(profileData); // This line was removed as per the edit hint
 
       // Fetch client profile
       const { data: clientProfileData, error: clientProfileError } = await supabase
@@ -221,7 +204,18 @@ export default function ClientDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, user]);
+
+  useEffect(() => {
+    if (user && supabase) {
+      fetchDashboardData();
+    } else if (!isSupabaseConfigured) {
+      setSupabaseError("Supabase is not configured. Please check your environment variables.");
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
 
   const getStatusColor = (status: string | undefined) => {
     switch (status?.toLowerCase()) {
@@ -256,8 +250,6 @@ export default function ClientDashboard() {
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
-
-  const needsProfileCompletion = !clientProfile?.company_name || !clientProfile?.contact_name;
 
   // Show error state if Supabase is not configured
   if (supabaseError) {
@@ -490,8 +482,8 @@ export default function ClientDashboard() {
                   <CardDescription>Your latest gig postings and their status</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentGigs.length > 0 ? (
-                    recentGigs.map((gig) => (
+                  {gigs.length > 0 ? (
+                    gigs.slice(0, 3).map((gig) => (
                       <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
                         <SafeImage
                           src={gig.image_url}
@@ -548,8 +540,8 @@ export default function ClientDashboard() {
                   <CardDescription>Latest talent applications to review</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {recentApplications.length > 0 ? (
-                    recentApplications.map((application) => (
+                  {applications.length > 0 ? (
+                    applications.slice(0, 3).map((application) => (
                       <div
                         key={application.id}
                         className="flex items-center gap-4 p-3 rounded-lg border"
@@ -668,7 +660,7 @@ export default function ClientDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {recentGigs.map((gig) => (
+              {gigs.map((gig) => (
                 <Card key={gig.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -751,17 +743,18 @@ export default function ClientDashboard() {
             </div>
 
             <div className="space-y-4">
-              {recentApplications.map((application) => (
+              {applications.map((application) => (
                 <Card key={application.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-16 w-16">
-                        <AvatarImage src={application.image} alt={application.talentName} />
+                        <AvatarImage
+                          src="/images/totl-logo-transparent.png"
+                          alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
+                        />
                         <AvatarFallback className="text-lg">
-                          {application.talentName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
+                          {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
 
