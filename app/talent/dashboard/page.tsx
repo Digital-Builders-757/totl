@@ -169,12 +169,15 @@ export default function TalentDashboard() {
       }
 
       // Fetch active gigs for discovery
+      console.log("Starting gigs fetch..."); // Debug log
       const { data: gigsData, error: gigsError } = await supabase
         .from("gigs")
         .select("*")
         .eq("status", "active")
         .order("created_at", { ascending: false })
         .limit(10);
+
+      console.log("Gigs fetch result:", { gigsData, gigsError }); // Debug log
 
       if (gigsError) {
         console.error("Error fetching gigs:", gigsError);
@@ -829,7 +832,18 @@ export default function TalentDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {error ? (
+                {/* Debug info */}
+                <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
+                  Debug: {gigs.length} gigs loaded, Error: {error || "none"}, Loading:{" "}
+                  {loading ? "yes" : "no"}
+                </div>
+
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Loading available gigs...</p>
+                  </div>
+                ) : error ? (
                   <EmptyState
                     icon={AlertCircle}
                     title="Error Loading Gigs"
