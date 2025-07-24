@@ -189,14 +189,11 @@ export default function ClientDashboard() {
       console.log("🔍 Fetching applications for client:", user.id); // Debug log
       const { data: applicationsData, error: applicationsError } = await supabase
         .from("applications")
-        .select(
-          `
+        .select(`
           *,
           gigs!inner(id, title, client_id),
-          talent_profiles(first_name, last_name, location, experience),
           profiles!talent_id(display_name, email_verified, role)
-        `
-        )
+        `)
         .eq("gigs.client_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -205,7 +202,27 @@ export default function ClientDashboard() {
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);
       } else {
-        setApplications(applicationsData || []);
+        // Fetch talent profiles separately if needed
+        if (applicationsData && applicationsData.length > 0) {
+          const talentIds = applicationsData.map(app => app.talent_id);
+          const { data: talentProfilesData, error: talentProfilesError } = await supabase
+            .from("talent_profiles")
+            .select("user_id, first_name, last_name, location, experience")
+            .in("user_id", talentIds);
+
+          if (!talentProfilesError && talentProfilesData) {
+            // Merge talent profiles with applications
+            const applicationsWithProfiles = applicationsData.map(app => ({
+              ...app,
+              talent_profiles: talentProfilesData.find(tp => tp.user_id === app.talent_id) || null
+            }));
+            setApplications(applicationsWithProfiles);
+          } else {
+            setApplications(applicationsData || []);
+          }
+        } else {
+          setApplications(applicationsData || []);
+        }
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -313,7 +330,7 @@ export default function ClientDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/images/agency-team.png" alt="Company" />
+                <AvatarImage src="/placeholder.jpg" alt="Company" />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
