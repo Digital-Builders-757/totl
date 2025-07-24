@@ -922,9 +922,13 @@ export default function TalentDashboard() {
                             </div>
                           </div>
                           <div className="flex gap-2 pt-2">
-                            <Button className="flex-1">Apply Now</Button>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
+                            <Button className="flex-1" asChild>
+                              <Link href={`/gigs/${gig.id}`}>Apply Now</Link>
+                            </Button>
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/gigs/${gig.id}`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
                             </Button>
                           </div>
                         </CardContent>

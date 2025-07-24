@@ -1,30 +1,42 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { ArrowLeft, MapPin, DollarSign, Calendar, Clock, User, Building } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Clock, User, Building, ArrowLeft, Send } from "lucide-react";
 import { cookies } from "next/headers";
-import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { SafeImage } from "@/components/safe-image";
+import { notFound, redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/database";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SafeImage } from "@/components/ui/safe-image";
+import type { Database } from "@/types/supabase";
 
-// Force dynamic rendering to prevent static pre-rendering
+// Force dynamic rendering
 export const dynamic = "force-dynamic";
 
-export default async function GigDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const supabase = createServerComponentClient<Database>({ cookies });
+interface GigDetailsPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  // Fetch the specific gig
+export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
+  const { id } = await params;
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+
+  // Get current user session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  // Fetch gig by ID with client details
   const { data: gig, error } = await supabase
     .from("gigs")
     .select(
       `
       *,
-      client_profiles!inner (
+      client_profiles (
         company_name,
-        industry
+        contact_name,
+        email,
+        phone
       )
     `
     )
@@ -33,171 +45,220 @@ export default async function GigDetailPage({ params }: { params: Promise<{ id: 
     .single();
 
   if (error || !gig) {
+    console.error("Gig not found:", error);
     notFound();
   }
 
-  // Fetch similar gigs (excluding current gig)
-  const { data: similarGigs } = await supabase
-    .from("gigs")
-    .select("id, title, description, location, compensation, date, category, image")
-    .eq("status", "active")
-    .neq("id", id)
-    .eq("category", gig.category)
-    .limit(3);
+  // Check if user has already applied
+  let hasApplied = false;
+  if (session?.user) {
+    const { data: existingApplication } = await supabase
+      .from("applications")
+      .select("id")
+      .eq("gig_id", id)
+      .eq("talent_id", session.user.id)
+      .single();
+
+    hasApplied = !!existingApplication;
+  }
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      "e-commerce": "bg-blue-100 text-blue-800",
+      commercial: "bg-green-100 text-green-800",
+      editorial: "bg-purple-100 text-purple-800",
+      runway: "bg-pink-100 text-pink-800",
+      sportswear: "bg-orange-100 text-orange-800",
+      beauty: "bg-yellow-100 text-yellow-800",
+    };
+    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Back Button */}
-          <Link
-            href="/gigs"
-            className="inline-flex items-center text-gray-600 hover:text-black mb-8"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Gigs
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Back Button */}
+      <div className="mb-6">
+        <Button variant="ghost" asChild>
+          <Link href="/gigs" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to All Gigs
           </Link>
+        </Button>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
           {/* Gig Header */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="relative h-64 md:h-96 bg-gray-100">
-              <SafeImage
-                src={gig.image}
-                alt={gig.title}
-                fill
-                className="object-cover"
-                fallbackSrc="/images/totl-logo-transparent.png"
-              />
-              <div className="absolute top-4 left-4">
-                <Badge className="bg-black/80 text-white border-0">
-                  {gig.category || "Casting"}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <CardTitle className="text-3xl font-bold">{gig.title}</CardTitle>
+                  <CardDescription className="text-lg mt-2">{gig.description}</CardDescription>
+                </div>
+                <Badge className={getCategoryColor(gig.category || "general")}>
+                  {gig.category || "General"}
                 </Badge>
               </div>
-            </div>
+            </CardHeader>
+          </Card>
 
-            <div className="p-8">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">{gig.title}</h1>
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <Building className="mr-2 h-4 w-4" />
-                    <span>{gig.client_profiles?.company_name || "Client"}</span>
+          {/* Gig Image */}
+          {gig.image_url && (
+            <Card>
+              <CardContent className="p-0">
+                <div className="h-64 md:h-96 relative">
+                  <SafeImage
+                    src={gig.image_url}
+                    alt={gig.title}
+                    fill
+                    className="object-cover rounded-t-lg"
+                    placeholderQuery={gig.category?.toLowerCase() || "general"}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Gig Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Gig Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Location</p>
+                    <p className="text-gray-600">{gig.location}</p>
                   </div>
                 </div>
-                <div className="md:text-right">
-                  <div className="text-2xl font-bold text-green-600 mb-1">{gig.compensation}</div>
-                  <div className="text-sm text-gray-500">Compensation</div>
+
+                <div className="flex items-center gap-3">
+                  <DollarSign className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Compensation</p>
+                    <p className="text-gray-600">${gig.compensation}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Date</p>
+                    <p className="text-gray-600">
+                      {gig.date ? new Date(gig.date).toLocaleDateString() : "TBD"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Clock className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">Posted</p>
+                    <p className="text-gray-600">{new Date(gig.created_at).toLocaleDateString()}</p>
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              {/* Gig Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="flex items-center">
-                  <MapPin className="mr-3 h-5 w-5 text-gray-400" />
+          {/* Client Information */}
+          {gig.client_profiles && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Client Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
                   <div>
-                    <div className="font-medium">Location</div>
-                    <div className="text-gray-600">{gig.location}</div>
+                    <p className="font-medium">Company</p>
+                    <p className="text-gray-600">{gig.client_profiles.company_name}</p>
                   </div>
+                  {gig.client_profiles.contact_name && (
+                    <div>
+                      <p className="font-medium">Contact</p>
+                      <p className="text-gray-600">{gig.client_profiles.contact_name}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center">
-                  <Calendar className="mr-3 h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-medium">Date</div>
-                    <div className="text-gray-600">{new Date(gig.date).toLocaleDateString()}</div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="mr-3 h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-medium">Duration</div>
-                    <div className="text-gray-600">1 Day</div>
-                  </div>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-              {/* Description */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">Description</h2>
-                <p className="text-gray-700 leading-relaxed">{gig.description}</p>
-              </div>
-
-              {/* Requirements */}
-              {gig.requirements && gig.requirements.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold mb-4">Requirements</h2>
-                  <ul className="space-y-2">
-                    {gig.requirements.map((requirement: string, index: number) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                        <span className="text-gray-700">{requirement}</span>
-                      </li>
-                    ))}
-                  </ul>
+        {/* Sidebar - Application */}
+        <div className="space-y-6">
+          <Card className="sticky top-6">
+            <CardHeader>
+              <CardTitle>Apply for this Gig</CardTitle>
+              <CardDescription>
+                Submit your application to be considered for this opportunity
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!session ? (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    You need to be logged in to apply for gigs.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href="/login">Sign In to Apply</Link>
+                  </Button>
+                </div>
+              ) : hasApplied ? (
+                <div className="text-center space-y-3">
+                  <Badge variant="secondary" className="w-full">
+                    Application Submitted
+                  </Badge>
+                  <p className="text-sm text-gray-600">
+                    You've already applied for this gig. Check your dashboard for updates.
+                  </p>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/talent/dashboard">View Dashboard</Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Ready to apply? Click below to submit your application.
+                  </p>
+                  <Button asChild className="w-full">
+                    <Link href={`/apply?gig_id=${id}`} className="flex items-center gap-2">
+                      <Send className="h-4 w-4" />
+                      Apply Now
+                    </Link>
+                  </Button>
                 </div>
               )}
+            </CardContent>
+          </Card>
 
-              {/* Apply Button */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="bg-black text-white hover:bg-black/90 flex-1">
-                  Apply for this Gig
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  Save for Later
-                </Button>
+          {/* Quick Stats */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Info</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Category</span>
+                <span className="font-medium">{gig.category || "General"}</span>
               </div>
-            </div>
-          </div>
-
-          {/* Similar Gigs */}
-          {similarGigs && similarGigs.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Similar Gigs</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {similarGigs.map((similarGig) => (
-                  <Link key={similarGig.id} href={`/gigs/${similarGig.id}`}>
-                    <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
-                      <div className="relative h-48 bg-gray-100">
-                        <SafeImage
-                          src={similarGig.image}
-                          alt={similarGig.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          fallbackSrc="/images/totl-logo-transparent.png"
-                        />
-                        <div className="absolute top-3 left-3">
-                          <Badge className="bg-black/80 text-white border-0">
-                            {similarGig.category || "Casting"}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="p-6">
-                        <h3 className="font-semibold text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                          {similarGig.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {similarGig.description}
-                        </p>
-                        <div className="flex items-center justify-between text-sm text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <MapPin size={14} />
-                            <span>{similarGig.location}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <DollarSign size={14} />
-                            <span>{similarGig.compensation}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
-                          <Calendar size={14} />
-                          <span>{new Date(similarGig.date).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Compensation</span>
+                <span className="font-medium">${gig.compensation}</span>
               </div>
-            </div>
-          )}
+              <div className="flex justify-between">
+                <span className="text-gray-600">Location</span>
+                <span className="font-medium">{gig.location}</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
