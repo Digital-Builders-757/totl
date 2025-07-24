@@ -190,7 +190,9 @@ export default function TalentDashboard() {
 
       if (gigsError) {
         console.error("Error fetching gigs:", gigsError);
+        setError("Failed to load gigs");
       } else {
+        console.log("Fetched gigs:", gigsData); // Debug logging
         setGigs(gigsData || []);
       }
     } catch (err) {
@@ -828,73 +830,95 @@ export default function TalentDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {gigs.map((gig) => (
-                    <Card
-                      key={gig.id}
-                      className="overflow-hidden hover:shadow-lg transition-shadow group"
-                    >
-                      <div className="h-48 relative">
-                        <SafeImage
-                          src={gig.image_url || "/images/totl-logo-transparent.png"}
-                          alt={gig.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          placeholderQuery={gig.category?.toLowerCase() || "general"}
-                        />
-                        {gig.application_deadline &&
-                          new Date(gig.application_deadline) <
-                            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
-                            <Badge className="absolute top-3 left-3 bg-red-500 text-white">
-                              Urgent
+                {error ? (
+                  <EmptyState
+                    icon={AlertCircle}
+                    title="Error Loading Gigs"
+                    description={error}
+                    action={{
+                      label: "Try Again",
+                      onClick: fetchDashboardData,
+                    }}
+                  />
+                ) : gigs.length === 0 ? (
+                  <EmptyState
+                    icon={Briefcase}
+                    title="No Gigs Available"
+                    description="There are currently no active gigs available. Check back soon for new opportunities!"
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {gigs.map((gig) => (
+                      <Card
+                        key={gig.id}
+                        className="overflow-hidden hover:shadow-lg transition-shadow group"
+                      >
+                        <div className="h-48 relative">
+                          <SafeImage
+                            src={gig.image_url || "/images/totl-logo-transparent.png"}
+                            alt={gig.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            placeholderQuery={gig.category?.toLowerCase() || "general"}
+                          />
+                          {gig.application_deadline &&
+                            new Date(gig.application_deadline) <
+                              new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
+                              <Badge className="absolute top-3 left-3 bg-red-500 text-white">
+                                Urgent
+                              </Badge>
+                            )}
+                          <div className="absolute top-3 right-3 flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="bg-white/80 hover:bg-white"
+                            >
+                              <Heart className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <CardContent className="p-4 space-y-3">
+                          <div>
+                            <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                              {gig.title}
+                            </h4>
+                            <p className="text-gray-600 text-sm">{gig.description}</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Badge
+                              variant="outline"
+                              className={getCategoryColor(gig.category || "General")}
+                            >
+                              {gig.category || "General"}
                             </Badge>
-                          )}
-                        <div className="absolute top-3 right-3 flex gap-1">
-                          <Button variant="ghost" size="sm" className="bg-white/80 hover:bg-white">
-                            <Heart className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <CardContent className="p-4 space-y-3">
-                        <div>
-                          <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
-                            {gig.title}
-                          </h4>
-                          <p className="text-gray-600 text-sm">{gig.description}</p>
-                        </div>
-                        <div className="space-y-2">
-                          <Badge
-                            variant="outline"
-                            className={getCategoryColor(gig.category || "General")}
-                          >
-                            {gig.category || "General"}
-                          </Badge>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <MapPin className="h-4 w-4 mr-1" />
-                            {gig.location}
+                            <div className="flex items-center text-sm text-gray-500">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              {gig.location}
+                            </div>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              Deadline:{" "}
+                              {gig.application_deadline
+                                ? new Date(gig.application_deadline).toLocaleDateString()
+                                : "No deadline"}
+                            </div>
+                            <div className="flex items-center text-sm font-medium text-gray-900">
+                              <DollarSign className="h-4 w-4 mr-1" />
+                              {gig.compensation}
+                            </div>
                           </div>
-                          <div className="flex items-center text-sm text-gray-500">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            Deadline:{" "}
-                            {gig.application_deadline
-                              ? new Date(gig.application_deadline).toLocaleDateString()
-                              : "No deadline"}
+                          <div className="flex gap-2 pt-2">
+                            <Button className="flex-1">Apply Now</Button>
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <div className="flex items-center text-sm font-medium text-gray-900">
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            {gig.compensation}
-                          </div>
-                        </div>
-                        <div className="flex gap-2 pt-2">
-                          <Button className="flex-1">Apply Now</Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
