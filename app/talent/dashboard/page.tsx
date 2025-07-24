@@ -158,19 +158,7 @@ export default function TalentDashboard() {
       // Fetch talent's applications
       const { data: applicationsData, error: applicationsError } = await supabase
         .from("applications")
-        .select(
-          `
-          *,
-          gigs(
-            title,
-            category,
-            location,
-            compensation,
-            image_url,
-            client_profiles(company_name)
-          )
-        `
-        )
+        .select("*, gigs(title, category, location, compensation, image_url)")
         .eq("talent_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -528,131 +516,136 @@ export default function TalentDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Upcoming Gigs */}
-              <Card className="lg:col-span-2">
+              {/* Browse Available Gigs */}
+              <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-purple-600" />
-                    Upcoming Gigs
+                    <Briefcase className="h-5 w-5 text-green-600" />
+                    Available Gigs
                   </CardTitle>
-                  <CardDescription>Your confirmed and pending bookings</CardDescription>
+                  <CardDescription>Discover new opportunities</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  {applications.filter((app) => app.status === "accepted").length > 0 ? (
-                    <div className="space-y-4">
-                      {applications
-                        .filter((app) => app.status === "accepted")
-                        .map((app) => (
-                          <div
-                            key={app.id}
-                            className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                          >
-                            <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                              <SafeImage
-                                src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
-                                alt={app.gigs?.title || "Unknown Gig"}
-                                fill
-                                className="object-cover"
-                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
-                              />
-                            </div>
-                            <div className="flex-grow space-y-2">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                                <h4 className="font-semibold text-lg text-gray-900">
-                                  {app.gigs?.title}
-                                </h4>
-                                <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
-                              </div>
-                              <p className="text-gray-600 font-medium">
-                                {app.gigs?.client_profiles?.company_name || "Private Client"}
-                              </p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {new Date(app.created_at).toLocaleDateString()}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  {app.gigs?.compensation || "TBD"}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-4 w-4" />
-                                  {app.gigs?.location}
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <DollarSign className="h-4 w-4" />
-                                  {app.gigs?.compensation || "TBD"}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex md:flex-col gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 md:flex-none bg-transparent"
-                              >
-                                View Details
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 mb-2">{gigs.length}</div>
+                    <p className="text-sm text-gray-600">Active gigs available</p>
+                  </div>
+                  <Button className="w-full" asChild>
+                    <Link href="/gigs" className="flex items-center gap-2">
+                      <Eye className="h-4 w-4" />
+                      Browse All Gigs
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Quick Stats */}
+              <Card className="lg:col-span-1">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    Quick Stats
+                  </CardTitle>
+                  <CardDescription>Your activity summary</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {dashboardStats.totalApplications}
+                      </div>
+                      <p className="text-xs text-gray-600">Applications</p>
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
-                      <Button onClick={() => setActiveTab("discover")}>
-                        Browse Available Gigs
-                      </Button>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-600">
+                        {dashboardStats.acceptedApplications}
+                      </div>
+                      <p className="text-xs text-gray-600">Accepted</p>
                     </div>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Recent Activity */}
-            <Card>
+            {/* Upcoming Gigs */}
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-green-600" />
-                  Recent Activity
+                  <Clock className="h-5 w-5 text-purple-600" />
+                  Upcoming Gigs
                 </CardTitle>
-                <CardDescription>Your latest applications and their status</CardDescription>
+                <CardDescription>Your confirmed and pending bookings</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {applications.slice(0, 3).map((app) => (
-                    <div
-                      key={app.id}
-                      className="flex items-center gap-4 p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="w-12 h-12 relative rounded-lg overflow-hidden flex-shrink-0">
-                        <SafeImage
-                          src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
-                          alt={app.gigs?.title || "Unknown Gig"}
-                          fill
-                          className="object-cover"
-                          placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
-                        />
-                      </div>
-                      <div className="flex-grow">
-                        <h5 className="font-medium text-gray-900">{app.gigs?.title}</h5>
-                        <p className="text-sm text-gray-600">
-                          {app.gigs?.client_profiles?.company_name || "Private Client"}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {new Date(app.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {applications.filter((app) => app.status === "accepted").length > 0 ? (
+                  <div className="space-y-4">
+                    {applications
+                      .filter((app) => app.status === "accepted")
+                      .map((app) => (
+                        <div
+                          key={app.id}
+                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
+                            <SafeImage
+                              src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                              alt={app.gigs?.title || "Unknown Gig"}
+                              fill
+                              className="object-cover"
+                              placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                            />
+                          </div>
+                          <div className="flex-grow space-y-2">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                              <h4 className="font-semibold text-lg text-gray-900">
+                                {app.gigs?.title}
+                              </h4>
+                              <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
+                            </div>
+                            <p className="text-gray-600 font-medium">
+                              {app.gigs?.client_profiles?.company_name || "Private Client"}
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                {new Date(app.created_at).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {app.gigs?.compensation || "TBD"}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                {app.gigs?.location}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-4 w-4" />
+                                {app.gigs?.compensation || "TBD"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex md:flex-col gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 md:flex-none bg-transparent"
+                            >
+                              View Details
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
+                    <Button onClick={() => setActiveTab("discover")}>Browse Available Gigs</Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -825,6 +818,12 @@ export default function TalentDashboard() {
                     <Button variant="outline" size="sm">
                       <Search className="h-4 w-4 mr-2" />
                       Search
+                    </Button>
+                    <Button asChild size="sm">
+                      <Link href="/gigs">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View All Gigs
+                      </Link>
                     </Button>
                   </div>
                 </div>
