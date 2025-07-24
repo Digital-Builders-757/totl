@@ -103,7 +103,7 @@ export default function ClientApplicationPage() {
             <div className="md:col-span-2 relative hidden md:block">
               <div className="absolute inset-0 bg-black">
                 <Image
-                  src="/images/agency-team.png"
+                  src="/placeholder.jpg"
                   alt="Client application"
                   fill
                   className="object-cover opacity-80"

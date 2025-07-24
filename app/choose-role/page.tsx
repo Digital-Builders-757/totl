@@ -42,7 +42,7 @@ export default function ChooseRolePage() {
             {/* Talent Card */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="relative h-48">
-                <Image src="/images/model-1.png" alt="Talent" fill className="object-cover" />
+                <Image src="/placeholder.jpg" alt="Talent" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                   <h2 className="text-white text-xl font-bold">Join as Talent</h2>
@@ -74,7 +74,7 @@ export default function ChooseRolePage() {
             {/* Client Card */}
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="relative h-48">
-                <Image src="/images/agency-team.png" alt="Client" fill className="object-cover" />
+                <Image src="/placeholder.jpg" alt="Client" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                   <h2 className="text-white text-xl font-bold">Join as Client</h2>

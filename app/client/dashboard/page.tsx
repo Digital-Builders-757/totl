@@ -36,6 +36,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
+import { logEmptyState, logFallbackUsage } from "@/lib/error-logger";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -78,6 +80,11 @@ interface Application {
     last_name: string;
     location?: string;
     experience?: string;
+  };
+  profiles?: {
+    display_name: string;
+    email_verified: boolean;
+    role: string;
   };
 }
 
@@ -181,22 +188,43 @@ export default function ClientDashboard() {
       }
 
       // Fetch applications for client's gigs
+      console.log("🔍 Fetching applications for client:", user.id); // Debug log
       const { data: applicationsData, error: applicationsError } = await supabase
         .from("applications")
-        .select(
-          `
+        .select(`
           *,
-          gigs!inner(client_id),
-          talent_profiles(first_name, last_name, location)
-        `
-        )
+          gigs!inner(id, title, client_id),
+          profiles!talent_id(display_name, email_verified, role)
+        `)
         .eq("gigs.client_id", user.id)
         .order("created_at", { ascending: false });
+
+      console.log("📊 Applications fetch result:", { applicationsData, applicationsError }); // Debug log
 
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);
       } else {
-        setApplications(applicationsData || []);
+        // Fetch talent profiles separately if needed
+        if (applicationsData && applicationsData.length > 0) {
+          const talentIds = applicationsData.map(app => app.talent_id);
+          const { data: talentProfilesData, error: talentProfilesError } = await supabase
+            .from("talent_profiles")
+            .select("user_id, first_name, last_name, location, experience")
+            .in("user_id", talentIds);
+
+          if (!talentProfilesError && talentProfilesData) {
+            // Merge talent profiles with applications
+            const applicationsWithProfiles = applicationsData.map(app => ({
+              ...app,
+              talent_profiles: talentProfilesData.find(tp => tp.user_id === app.talent_id) || null
+            }));
+            setApplications(applicationsWithProfiles);
+          } else {
+            setApplications(applicationsData || []);
+          }
+        } else {
+          setApplications(applicationsData || []);
+        }
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -216,6 +244,41 @@ export default function ClientDashboard() {
       setLoading(false);
     }
   }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
+
+  // Check for incomplete profile
+  const missingFields = [];
+  if (!clientProfile?.company_name) missingFields.push("Company Name");
+  if (!clientProfile?.contact_name) missingFields.push("Contact Name");
+  if (!clientProfile?.contact_email) missingFields.push("Contact Email");
+
+  // Log empty states for analytics
+  useEffect(() => {
+    if (!loading && user) {
+      if (applications.length === 0) {
+        logEmptyState("client_applications", user.id, "client");
+      }
+      if (gigs.length === 0) {
+        logEmptyState("client_gigs", user.id, "client");
+      }
+    }
+  }, [applications.length, gigs.length, loading, user]);
+
+  // Log fallback usage
+  useEffect(() => {
+    if (applications.length > 0 && user) {
+      applications.forEach(app => {
+        if (!app.talent_profiles?.first_name && app.profiles?.display_name) {
+          logFallbackUsage("display_name", "talent_name", user.id);
+        }
+        if (!app.talent_profiles?.location) {
+          logFallbackUsage("location", "talent_location", user.id);
+        }
+        if (!app.talent_profiles?.experience) {
+          logFallbackUsage("experience", "talent_experience", user.id);
+        }
+      });
+    }
+  }, [applications, user]);
 
   const getStatusColor = (status: string | undefined) => {
     switch (status?.toLowerCase()) {
@@ -304,7 +367,7 @@ export default function ClientDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/images/agency-team.png" alt="Company" />
+                <AvatarImage src="/placeholder.jpg" alt="Company" />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
@@ -334,26 +397,15 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Profile Completion Alert */}
-        {needsProfileCompletion && (
-          <Card className="mb-6 border-orange-200 bg-orange-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-orange-600" />
-                <div className="flex-1">
-                  <h3 className="font-medium text-orange-900">Complete Your Profile</h3>
-                  <p className="text-sm text-orange-700">
-                    Add your company information to get the most out of the platform.
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" asChild>
-                  <Link href="/client/profile">Complete Profile</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Profile Completion Banner */}
+        <ProfileCompletionBanner
+          userRole="client"
+          missingFields={missingFields}
+          profileUrl="/client/profile"
+        />
+
+        {/* Welcome Section */}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
@@ -486,7 +538,7 @@ export default function ClientDashboard() {
                     gigs.slice(0, 3).map((gig) => (
                       <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
                         <SafeImage
-                          src={gig.image_url}
+                          src={gig.image_url || "/placeholder.jpg"}
                           alt={gig.title}
                           width={48}
                           height={48}
@@ -675,7 +727,7 @@ export default function ClientDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <SafeImage
-                      src={gig.image_url}
+                      src={gig.image_url || "/placeholder.jpg"}
                       alt={gig.title}
                       width={300}
                       height={200}
@@ -743,63 +795,89 @@ export default function ClientDashboard() {
             </div>
 
             <div className="space-y-4">
-              {applications.map((application) => (
-                <Card key={application.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-16 w-16">
-                        <AvatarImage
-                          src="/images/totl-logo-transparent.png"
-                          alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
-                        />
-                        <AvatarFallback className="text-lg">
-                          {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
-                          {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
+              {applications.length === 0 ? (
+                <EmptyState
+                  icon={FileText}
+                  title="No applications yet"
+                  description="Applications will appear here once talent starts applying to your gigs. Make sure your gigs are active and visible to talent."
+                  action={{
+                    label: "Create a Gig",
+                    onClick: () => setActiveTab("create"),
+                  }}
+                />
+              ) : (
+                applications.map((application) => (
+                  <Card key={application.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage
+                            src="/images/totl-logo-transparent.png"
+                            alt={
+                              application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                                ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                : application.profiles?.display_name || "Talent"
+                            }
+                          />
+                          <AvatarFallback className="text-lg">
+                            {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                              ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
+                              : application.profiles?.display_name?.charAt(0) || "T"
+                            }
+                          </AvatarFallback>
+                        </Avatar>
 
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              {application.talent_profiles?.first_name}{" "}
-                              {application.talent_profiles?.last_name}
-                            </h3>
-                            <p className="text-gray-600">{application.gigs?.title}</p>
-                            <div className="flex items-center gap-4 mt-2">
-                              <span className="text-sm text-gray-600">
-                                <MapPin className="h-4 w-4 inline mr-1" />
-                                {application.talent_profiles?.location}
-                              </span>
-                              <span className="text-sm text-gray-600">
-                                <Clock className="h-4 w-4 inline mr-1" />
-                                {application.talent_profiles?.experience}
-                              </span>
-                              <span className="text-sm text-gray-600">
-                                Applied {new Date(application.created_at).toLocaleDateString()}
-                              </span>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                                  ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                  : application.profiles?.display_name || "Talent User"
+                                }
+                              </h3>
+                              <p className="text-gray-600">{application.gigs?.title}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <span className="text-sm text-gray-600">
+                                  <MapPin className="h-4 w-4 inline mr-1" />
+                                  {application.talent_profiles?.location || "Location not specified"}
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  <Clock className="h-4 w-4 inline mr-1" />
+                                  {application.talent_profiles?.experience || "Experience not specified"}
+                                </span>
+                                <span className="text-sm text-gray-600">
+                                  Applied {new Date(application.created_at).toLocaleDateString()}
+                                </span>
+                                {application.profiles?.email_verified && (
+                                  <span className="text-sm text-green-600">
+                                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                                    Verified
+                                  </span>
+                                )}
+                              </div>
                             </div>
+                            <Badge variant="outline" className={getStatusColor(application.status)}>
+                              {application.status}
+                            </Badge>
                           </div>
-                          <Badge variant="outline" className={getStatusColor(application.status)}>
-                            {application.status}
-                          </Badge>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Review
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            <Phone className="h-4 w-4 mr-2" />
+                            Contact
+                          </Button>
                         </div>
                       </div>
-
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <UserCheck className="h-4 w-4 mr-2" />
-                          Review
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Phone className="h-4 w-4 mr-2" />
-                          Contact
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 

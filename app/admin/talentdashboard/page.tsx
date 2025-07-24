@@ -278,7 +278,7 @@ export default async function TalentDashboard() {
                     <button className="flex items-center text-sm font-medium text-gray-700 hover:text-black">
                       <Avatar className="mr-2 h-8 w-8">
                         <AvatarImage
-                          src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                          src={mainProfileData?.avatar_url || "/placeholder.jpg"}
                           alt={user?.email || "User"}
                         />
                         <AvatarFallback>
@@ -361,7 +361,7 @@ export default async function TalentDashboard() {
                 <div className="relative -mt-16 md:-mt-20 mb-4 md:mb-0 md:mr-8">
                   <div className="w-32 h-32 rounded-xl overflow-hidden border-4 border-white shadow-md">
                     <SafeImage
-                      src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                      src={mainProfileData?.avatar_url || "/placeholder.jpg"}
                       alt={user?.email || "User"}
                       width={128}
                       height={128}

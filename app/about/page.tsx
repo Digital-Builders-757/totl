@@ -10,7 +10,7 @@ export default function AboutPage() {
       <section className="relative bg-black text-white">
         <div className="absolute inset-0 z-0 opacity-50">
           <Image
-            src="/images/agency-team.png"
+            src="/placeholder.jpg"
             alt="TOTL Agency Team"
             fill
             className="object-cover"
@@ -51,7 +51,7 @@ export default function AboutPage() {
             </div>
             <div className="md:w-1/2 relative h-[400px] md:h-[500px] w-full">
               <Image
-                src="/images/model-2.png"
+                src="/placeholder.jpg"
                 alt="TOTL Agency Journey"
                 fill
                 className="object-cover rounded-lg"

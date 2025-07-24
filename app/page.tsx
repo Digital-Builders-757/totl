@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -95,12 +96,11 @@ export default function HomePage() {
             </div>
             <div className="relative">
               <div className="relative z-10">
-                <SafeImage
-                  src="/images/hero-model.png"
-                  alt="Featured Model"
-                  width={600}
-                  height={700}
-                  className="w-full h-auto rounded-2xl shadow-2xl"
+                <Image
+                  src="/placeholder.jpg"
+                  alt="Professional model showcasing talent"
+                  fill
+                  className="object-cover rounded-lg"
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-purple-600/20 rounded-2xl"></div>
@@ -126,7 +126,7 @@ export default function HomePage() {
                 category: "Fashion Model",
                 location: "New York, NY",
                 rating: 4.9,
-                image: "/images/model-1.png",
+                image: "/placeholder.jpg",
                 price: "$500/day",
               },
               {
@@ -134,7 +134,7 @@ export default function HomePage() {
                 category: "Fitness Model",
                 location: "Los Angeles, CA",
                 rating: 4.8,
-                image: "/images/model-2.png",
+                image: "/placeholder.jpg",
                 price: "$400/day",
               },
               {
@@ -142,7 +142,7 @@ export default function HomePage() {
                 category: "Commercial Model",
                 location: "Miami, FL",
                 rating: 5.0,
-                image: "/images/model-3.png",
+                image: "/placeholder.jpg",
                 price: "$350/day",
               },
             ].map((talent, index) => (
