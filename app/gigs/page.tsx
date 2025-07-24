@@ -12,30 +12,8 @@ import { Input } from "@/components/ui/input";
 import type { Database } from "@/types/database";
 
 export default async function GigsPage() {
-  // Check if Supabase environment variables are available
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.warn("Supabase environment variables not found - returning empty gigs list");
-    return (
-      <div className="min-h-screen bg-gray-50 pt-24">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="mb-12">
-              <h1 className="text-4xl font-bold mb-4">Find Gigs</h1>
-              <p className="text-gray-600 max-w-3xl">
-                Browse through available casting opportunities and gigs. Filter by category,
-                location, and more to find the perfect match for your talents.
-              </p>
-            </div>
-            <div className="text-center py-12">
-              <p className="text-gray-500">Unable to load gigs at this time.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = cookies(); // ✅ Fixed: cookies() is synchronous
+  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // FIXED: Explicit column selection, no aggregates
   const { data: gigs, error } = await supabase

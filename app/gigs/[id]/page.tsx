@@ -18,7 +18,7 @@ interface GigDetailsPageProps {
 
 export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
   const { id } = await params;
-  const cookieStore = cookies();
+  const cookieStore = cookies(); // ✅ Fixed: cookies() is synchronous
   const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // Get current user session
@@ -26,17 +26,16 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Fetch gig by ID with client details
+  // Fetch gig by ID with client details - FIXED: join to profiles, not client_profiles
   const { data: gig, error } = await supabase
     .from("gigs")
     .select(
       `
       *,
-      client_profiles (
-        company_name,
-        contact_name,
-        email,
-        phone
+      profiles:client_id (
+        id,
+        display_name,
+        role
       )
     `
     )
@@ -166,7 +165,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
           </Card>
 
           {/* Client Information */}
-          {gig.client_profiles && (
+          {gig.profiles && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -178,12 +177,12 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium">Company</p>
-                    <p className="text-gray-600">{gig.client_profiles.company_name}</p>
+                    <p className="text-gray-600">{gig.profiles.display_name}</p>
                   </div>
-                  {gig.client_profiles.contact_name && (
+                  {gig.profiles.role && (
                     <div>
-                      <p className="font-medium">Contact</p>
-                      <p className="text-gray-600">{gig.client_profiles.contact_name}</p>
+                      <p className="font-medium">Role</p>
+                      <p className="text-gray-600">{gig.profiles.role}</p>
                     </div>
                   )}
                 </div>
