@@ -70,6 +70,45 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClientComponentClient<Database>();
 
+  // Session caching utilities
+  const SESSION_CACHE_KEY = "totl_session_cache";
+  const SESSION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  const cacheSession = (session: Session | null) => {
+    if (typeof window !== "undefined" && session) {
+      localStorage.setItem(
+        SESSION_CACHE_KEY,
+        JSON.stringify({
+          session,
+          timestamp: Date.now(),
+        })
+      );
+    }
+  };
+
+  const getCachedSession = (): Session | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const cached = localStorage.getItem(SESSION_CACHE_KEY);
+      if (!cached) return null;
+
+      const { session, timestamp } = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is still valid (5 minutes)
+      if (now - timestamp < SESSION_CACHE_DURATION) {
+        return session;
+      }
+
+      // Clear expired cache
+      localStorage.removeItem(SESSION_CACHE_KEY);
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
   useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {
@@ -77,63 +116,86 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // This immediately handles the initial session check, and the listener will take over from there.
+    let mounted = true;
+
+    // Initial session check - only once on mount
     const initialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      // If there is no session on initial load, we can stop loading.
-      // The listener will handle the case where the user signs in.
-      if (!session) {
-        setIsLoading(false);
-        return;
-      }
+        if (!mounted) return;
 
-      // If there is a session, proceed to set user and fetch profile
-      setUser(session.user);
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
+        // If there is no session on initial load, we can stop loading.
+        if (!session) {
+          setIsLoading(false);
+          return;
+        }
 
-      const role = profileData?.role as UserRole;
-      setUserRole(role);
-      setIsEmailVerified(session.user.email_confirmed_at !== null);
-      setIsLoading(false); // Stop loading after initial fetch
-    };
+        // If there is a session, proceed to set user and fetch profile
+        setUser(session.user);
+        setSession(session);
 
-    initialSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setIsLoading(true); // Start loading on any auth change
-      setSession(session);
-      setUser(session?.user ?? null);
-
-      if (event === "SIGNED_IN" && session) {
         const { data: profileData } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
+        if (!mounted) return;
+
         const role = profileData?.role as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error in initial session check:", error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-        // Redirect based on role - FIXED PATHS
-        if (role === "talent") {
-          router.push("/talent/dashboard");
-        } else if (role === "client") {
-          router.push("/client/dashboard");
-        } else if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          // If no role, perhaps go to a role selection or onboarding page
-          router.push("/choose-role");
+    initialSession();
+
+    // Set up auth state change listener - this is the main way to handle auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
+      setIsLoading(true);
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (event === "SIGNED_IN" && session) {
+        try {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single();
+
+          if (!mounted) return;
+
+          const role = profileData?.role as UserRole;
+          setUserRole(role);
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+
+          // Redirect based on role - FIXED PATHS
+          if (role === "talent") {
+            router.push("/talent/dashboard");
+          } else if (role === "client") {
+            router.push("/client/dashboard");
+          } else if (role === "admin") {
+            router.push("/admin/dashboard");
+          } else {
+            // If no role, perhaps go to a role selection or onboarding page
+            router.push("/choose-role");
+          }
+        } catch (error) {
+          console.error("Error fetching profile on sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
@@ -141,11 +203,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUserRole(null);
         setIsEmailVerified(false);
         router.push("/login");
+      } else if (event === "TOKEN_REFRESHED") {
+        // Just update the session, no need to refetch profile
+        setSession(session);
+        if (session?.user) {
+          setUser(session.user);
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+        }
       }
-      setIsLoading(false); // Stop loading after handling the auth event
+
+      if (mounted) {
+        setIsLoading(false);
+      }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [supabase, router]);

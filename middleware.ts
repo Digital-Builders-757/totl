@@ -5,19 +5,31 @@ import type { Database } from "@/types/database";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
-  const supabase = createMiddlewareClient<Database>({ req, res });
-
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
   const path = req.nextUrl.pathname;
 
-  // Public routes that do not require any specific handling
+  // Skip middleware for static assets and API routes (except auth-related ones)
+  if (
+    path.startsWith("/_next") ||
+    path.startsWith("/favicon") ||
+    path.startsWith("/images") ||
+    (path.startsWith("/api/") && !path.startsWith("/api/auth")) ||
+    path.includes(".")
+  ) {
+    return res;
+  }
+
+  // Public routes that do not require any auth handling
   const publicRoutes = ["/", "/about", "/gigs", "/talent"];
   if (publicRoutes.includes(path)) {
     return res;
   }
+
+  const supabase = createMiddlewareClient<Database>({ req, res });
+
+  // Only check auth for routes that actually need it
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // Auth routes that should redirect if the user is already logged in
   const authRoutes = [
@@ -114,12 +126,10 @@ export async function middleware(req: NextRequest) {
       if (path.startsWith("/talent/") && profile.role !== "talent") {
         return NextResponse.redirect(new URL("/login", req.url));
       }
-
       // Client routes
       if (path.startsWith("/client/") && profile.role !== "client") {
         return NextResponse.redirect(new URL("/login", req.url));
       }
-
       // Admin routes
       if (path.startsWith("/admin/") && profile.role !== "admin") {
         return NextResponse.redirect(new URL("/login", req.url));
@@ -137,8 +147,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - api/ (API routes)
+     * - public folder
      */
-    "/((?!_next/static|_next/image|favicon.ico|api).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
