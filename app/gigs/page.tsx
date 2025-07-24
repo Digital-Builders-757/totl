@@ -49,7 +49,7 @@ export default async function GigsPage() {
       compensation, 
       date, 
       category,
-      image,
+      image_url,
       client_id
     `
     )
@@ -113,87 +113,69 @@ export default async function GigsPage() {
                 <Button className="bg-black text-white hover:bg-black/90">Search</Button>
               </div>
             </div>
-
-            {/* Quick Filters */}
-            <div className="flex flex-wrap gap-2 mt-4">
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                Editorial
-              </Badge>
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                Commercial
-              </Badge>
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                Runway
-              </Badge>
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                E-commerce
-              </Badge>
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                Beauty
-              </Badge>
-              <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">
-                Sportswear
-              </Badge>
-            </div>
           </div>
 
           {/* Gigs Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gigsList.map((gig) => (
-              <Link key={gig.id} href={`/gigs/${gig.id}`}>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
-                  <div className="relative h-48 bg-gray-100">
+          {gigsList.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <div className="text-gray-400 mb-4">
+                  <Search className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Gigs</h3>
+                <p className="text-gray-600 mb-4">
+                  There are currently no active gigs available. Check back later for new
+                  opportunities!
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gigsList.map((gig) => (
+                <div key={gig.id} className="bg-white rounded-xl shadow-sm overflow-hidden group">
+                  <div className="relative aspect-[4/3]">
                     <SafeImage
-                      src={gig.image}
+                      src={gig.image_url || ""}
                       alt={gig.title}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      fallbackSrc="/images/totl-logo-transparent.png"
+                      className="transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-black/80 text-white border-0">
-                        {gig.category || "Casting"}
-                      </Badge>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                      <Button className="w-full bg-white text-black hover:bg-white/90" asChild>
+                        <Link href={`/gigs/${gig.id}`}>
+                          View Details <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                   <div className="p-6">
-                    <h3 className="font-semibold text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                      {gig.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{gig.description}</p>
-                    <div className="flex items-center justify-between text-sm text-gray-500">
-                      <div className="flex items-center gap-1">
-                        <MapPin size={14} />
-                        <span>{gig.location}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign size={14} />
-                        <span>{gig.compensation}</span>
-                      </div>
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                        {gig.title}
+                      </h3>
+                      <Badge variant="secondary" className="text-xs">
+                        {gig.category}
+                      </Badge>
                     </div>
-                    <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
-                      <Calendar size={14} />
-                      <span>{new Date(gig.date).toLocaleDateString()}</span>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{gig.description}</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-gray-500">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {gig.location}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        {gig.compensation}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        {gig.date}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* Empty State */}
-          {gigsList.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                <Search className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">No Gigs Available</h3>
-              <p className="text-gray-500 mb-6">
-                There are currently no active gigs. Check back later for new opportunities.
-              </p>
-              <Button asChild>
-                <Link href="/post-gig">Post a Gig</Link>
-              </Button>
+              ))}
             </div>
           )}
         </div>

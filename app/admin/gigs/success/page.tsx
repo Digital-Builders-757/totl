@@ -1,46 +1,52 @@
 "use client";
 
-import { CheckCircle, ArrowRight, Clock, Users, Briefcase } from "lucide-react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { CheckCircle, Clock, MapPin, DollarSign, Calendar, Users } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/types/supabase";
 
 export default function GigSuccessPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  const supabase = createClientComponentClient<Database>();
 
-  // Show toast notification when the page loads
+  const gigId = searchParams.get("gigId");
+
   useEffect(() => {
+    // Show success toast
     toast({
-      title: "Gig submitted!",
-      description: "We'll review it shortly.",
-      variant: "default",
+      title: "Gig Submitted Successfully!",
+      description: "Your gig has been submitted and is pending review.",
     });
   }, [toast]);
 
-  // Mock data for the submitted gig
-  const submittedGig = {
-    id: 6,
-    title: "Luxury Jewelry Campaign",
-    category: "Commercial",
-    location: "London, UK",
-    compensation: "$3,000",
-    duration: "1 Day Shoot",
-    date: "July 15, 2023",
-    status: "Pending Review",
-    image: "/gig-jewelry.png",
-    description:
-      "Prestigious jewelry brand is seeking elegant female models for our upcoming fine jewelry campaign. The shoot will feature close-up hand shots as well as portrait work showcasing our exclusive diamond collection.",
-    requirements: [
-      "Female, ages 25-40",
-      "Elegant hands with long fingers",
-      "Well-maintained nails",
-      "Refined facial features",
-      "Previous luxury brand experience preferred",
-    ],
-  };
+  if (!gigId) {
+    return (
+      <div className="bg-gray-50 min-h-screen">
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="bg-white rounded-xl shadow-sm p-8">
+              <div className="w-16 h-16 bg-red-50 rounded-full mx-auto flex items-center justify-center mb-4">
+                <Clock className="h-8 w-8 text-red-500" />
+              </div>
+              <h2 className="text-2xl font-semibold">Invalid Gig ID</h2>
+              <p className="text-gray-600 mt-2">No gig ID provided. Please submit a gig first.</p>
+              <Button asChild className="mt-4">
+                <Link href="/post-gig">Create New Gig</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -104,113 +110,37 @@ export default function GigSuccessPage() {
             </div>
 
             <div className="p-6">
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="md:w-1/3">
-                  <div className="relative h-48 rounded-lg overflow-hidden">
-                    <SafeImage
-                      src={submittedGig.image}
-                      alt={submittedGig.title}
-                      fill
-                      placeholderQuery="jewelry photoshoot"
-                      className="object-cover"
-                    />
-                  </div>
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-blue-50 rounded-full mx-auto flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-blue-500" />
                 </div>
-                <div className="md:w-2/3">
-                  <h3 className="text-xl font-bold mb-2">{submittedGig.title}</h3>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline" className="bg-gray-50">
-                      {submittedGig.category}
-                    </Badge>
-                    <Badge variant="outline" className="bg-gray-50">
-                      {submittedGig.location}
-                    </Badge>
-                    <Badge variant="outline" className="bg-gray-50">
-                      {submittedGig.compensation}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-600 mb-4">{submittedGig.description}</p>
-                  <div className="flex items-center text-amber-600">
-                    <Clock className="mr-2 h-4 w-4" />
-                    <span className="text-sm">Estimated approval time: 24-48 hours</span>
-                  </div>
+                <h3 className="text-lg font-semibold mb-2">Gig ID: {gigId}</h3>
+                <p className="text-gray-600">
+                  Your gig has been successfully submitted and is now pending review.
+                </p>
+                <div className="mt-6 space-y-2">
+                  <p className="text-sm text-gray-500">
+                    • You'll receive an email notification once it's approved
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    • Approved gigs appear on the talent dashboard within 24 hours
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    • You can track applications in your dashboard
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <Button asChild className="bg-black text-white hover:bg-black/90 flex-1">
-              <Link href="/admin/gigs/create">
-                <Briefcase className="mr-2 h-4 w-4" /> Post Another Gig
-              </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild variant="outline">
+              <Link href="/admin/dashboard">Go to Dashboard</Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1">
-              <Link href="/admin/dashboard">View My Gigs</Link>
+            <Button asChild>
+              <Link href="/post-gig">Create Another Gig</Link>
             </Button>
-          </div>
-
-          {/* While You Wait Section */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-xl font-bold">While You Wait...</h2>
-            </div>
-            <div className="p-6">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="md:w-2/3">
-                  <h3 className="text-lg font-semibold mb-2">
-                    Start browsing talent and bookmark profiles that fit your casting
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Get a head start by exploring our diverse talent pool. Save profiles that match
-                    your requirements so you&apos;re ready when your gig is approved.
-                  </p>
-                  <Button asChild className="bg-black text-white hover:bg-black/90">
-                    <Link href="/talent">
-                      <Users className="mr-2 h-4 w-4" /> Explore Talent{" "}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-                <div className="md:w-1/3">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage
-                        src="/images/model-1.png"
-                        alt="Talent"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage
-                        src="/images/model-2.png"
-                        alt="Talent"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage
-                        src="/images/model-3.png"
-                        alt="Talent"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="aspect-square relative rounded-lg overflow-hidden">
-                      <SafeImage
-                        src="/athletic-woman-stretching.png"
-                        alt="Talent"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
