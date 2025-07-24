@@ -4,13 +4,13 @@
 export const dynamic = "force-dynamic";
 
 import { MapPin, DollarSign, Clock, Users, Star, ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { PostAGigFooterLink } from "@/components/PostAGigFooterLink";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
-import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -97,7 +97,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative z-10">
                 <Image
-                  src="/placeholder.jpg"
+                  src="/images/totl-logo.png"
                   alt="Professional model showcasing talent"
                   fill
                   className="object-cover rounded-lg"
@@ -126,7 +126,7 @@ export default function HomePage() {
                 category: "Fashion Model",
                 location: "New York, NY",
                 rating: 4.9,
-                image: "/placeholder.jpg",
+                image: "/images/totl-logo.png",
                 price: "$500/day",
               },
               {
@@ -134,7 +134,7 @@ export default function HomePage() {
                 category: "Fitness Model",
                 location: "Los Angeles, CA",
                 rating: 4.8,
-                image: "/placeholder.jpg",
+                image: "/images/totl-logo.png",
                 price: "$400/day",
               },
               {
@@ -142,7 +142,7 @@ export default function HomePage() {
                 category: "Commercial Model",
                 location: "Miami, FL",
                 rating: 5.0,
-                image: "/placeholder.jpg",
+                image: "/images/totl-logo.png",
                 price: "$350/day",
               },
             ].map((talent, index) => (

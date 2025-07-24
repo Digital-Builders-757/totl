@@ -372,7 +372,7 @@ export default function ClientGigsPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <SafeImage
-                        src={gig.image_url || "/placeholder.jpg"}
+                        src={gig.image_url || "/images/totl-logo.png"}
                         alt={gig.title}
                         width={300}
                         height={200}
