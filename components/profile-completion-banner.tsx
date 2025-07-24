@@ -23,7 +23,7 @@ export function ProfileCompletionBanner({
     return null;
   }
 
-  const roleIcon = userRole === "talent" ? User : Building2;
+  const RoleIcon = userRole === "talent" ? User : Building2;
   const roleName = userRole === "talent" ? "Talent" : "Client";
   const missingFieldsText = missingFields.join(", ");
 
@@ -32,7 +32,7 @@ export function ProfileCompletionBanner({
       <AlertCircle className="h-4 w-4 text-amber-600" />
       <AlertDescription className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <roleIcon className="h-4 w-4 text-amber-600" />
+          <RoleIcon className="h-4 w-4 text-amber-600" />
           <div>
             <span className="font-medium text-amber-800">
               Complete your {roleName} profile

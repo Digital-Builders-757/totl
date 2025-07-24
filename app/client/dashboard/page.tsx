@@ -538,7 +538,7 @@ export default function ClientDashboard() {
                     gigs.slice(0, 3).map((gig) => (
                       <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
                         <SafeImage
-                          src={gig.image_url}
+                          src={gig.image_url || "/placeholder.jpg"}
                           alt={gig.title}
                           width={48}
                           height={48}
@@ -727,7 +727,7 @@ export default function ClientDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <SafeImage
-                      src={gig.image_url}
+                      src={gig.image_url || "/placeholder.jpg"}
                       alt={gig.title}
                       width={300}
                       height={200}

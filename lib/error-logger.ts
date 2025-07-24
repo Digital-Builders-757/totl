@@ -117,3 +117,7 @@ export const logEmptyState = (context: string, userId?: string, userRole?: strin
 export const logFallbackUsage = (fallbackType: string, context: string, userId?: string) => {
   errorLogger.logFallbackUsage(fallbackType, context, userId);
 }; 
+
+export const logImageFallback = (imagePath: string, context: string) => {
+  errorLogger.logImageFallback(imagePath, context);
+}; 
