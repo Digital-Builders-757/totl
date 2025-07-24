@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import type { Database } from "@/types/supabase";
 
+// Force dynamic rendering to prevent static generation issues
+export const dynamic = "force-dynamic";
+
 interface TalentProfile {
   id: string;
   user_id: string;
@@ -38,13 +41,30 @@ export default function TalentPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClientComponentClient<Database>();
+  // Check if Supabase is configured
+  const isSupabaseConfigured =
+    typeof window !== "undefined" &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const supabase = isSupabaseConfigured ? createClientComponentClient<Database>() : null;
 
   useEffect(() => {
-    fetchTalent();
-  }, []);
+    if (isSupabaseConfigured) {
+      fetchTalent();
+    } else {
+      setError("Supabase is not configured. Please check your environment variables.");
+      setLoading(false);
+    }
+  }, [isSupabaseConfigured]);
 
   const fetchTalent = async () => {
+    if (!supabase) {
+      setError("Supabase client not available");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       const { data, error } = await supabase
