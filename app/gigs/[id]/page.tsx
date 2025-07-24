@@ -1,12 +1,20 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { MapPin, Calendar, DollarSign, Clock, User, Building, ArrowLeft, Send } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { SafeImage } from "@/components/ui/safe-image";
+import { 
+  MapPin, 
+  Calendar, 
+  DollarSign, 
+  Clock, 
+  Building,
+  ArrowLeft,
+  Send
+} from "lucide-react";
+import Link from "next/link";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering

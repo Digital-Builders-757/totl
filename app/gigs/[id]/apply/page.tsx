@@ -29,7 +29,6 @@ interface Gig {
 }
 
 export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
-  const [id, setId] = useState<string>("");
   const supabase = createClientComponentClient<Database>();
   const router = useRouter();
   
@@ -39,35 +38,45 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   const [coverLetter, setCoverLetter] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
 
   // Get params and fetch data
   useEffect(() => {
     async function initialize() {
-      const { id: gigId } = await params;
-      setId(gigId);
-      await fetchData(gigId);
+      try {
+        const { id: gigId } = await params;
+        await fetchData(gigId);
+      } catch (error) {
+        console.error("Error initializing:", error);
+        setError("Failed to load application form.");
+        setLoading(false);
+      }
     }
     initialize();
-  }, [params]);
+  }, [params]); // Remove fetchData from dependencies to prevent infinite loop
 
   async function fetchData(gigId: string) {
+    console.log("🔍 Starting fetchData for gig:", gigId); // Debug log
     setLoading(true);
     setError("");
 
     try {
       // Get current user first
+      console.log("🔍 Getting current user..."); // Debug log
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
       
       if (userError || !currentUser) {
+        console.log("❌ User error:", userError); // Debug log
         setError("You must be logged in to apply for gigs.");
         setLoading(false);
         return;
       }
 
+      console.log("✅ User found:", currentUser.id); // Debug log
       setUser(currentUser);
 
       // Check if user has talent role
+      console.log("🔍 Checking user role..."); // Debug log
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
@@ -75,12 +84,16 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
         .single();
 
       if (profileError || !profile || profile.role !== "talent") {
+        console.log("❌ Profile error:", profileError, "Role:", profile?.role); // Debug log
         setError("Only talent users can apply for gigs.");
         setLoading(false);
         return;
       }
 
+      console.log("✅ User is talent"); // Debug log
+
       // Fetch gig details
+      console.log("🔍 Fetching gig details..."); // Debug log
       const { data: gigData, error: gigError } = await supabase
         .from("gigs")
         .select("*")
@@ -89,14 +102,17 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
         .single();
 
       if (gigError || !gigData) {
+        console.log("❌ Gig error:", gigError); // Debug log
         setError("Gig not found or no longer available.");
         setLoading(false);
         return;
       }
 
+      console.log("✅ Gig found:", gigData.title); // Debug log
       setGig(gigData);
 
       // Check if user already applied
+      console.log("🔍 Checking if already applied..."); // Debug log
       const { data: existingApplication } = await supabase
         .from("applications")
         .select("id, status")
@@ -105,14 +121,18 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
         .single();
 
       if (existingApplication) {
+        console.log("✅ Already applied"); // Debug log
         setAlreadyApplied(true);
+      } else {
+        console.log("✅ Not applied yet"); // Debug log
       }
 
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error("❌ Error fetching data:", err);
       setError("An error occurred while loading the gig.");
     } finally {
-      setLoading(false);
+      console.log("🏁 Setting loading to false"); // Debug log
+      setLoading(false); // Always set loading to false
     }
   }
 
@@ -319,7 +339,7 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
                         id="coverLetter"
                         value={coverLetter}
                         onChange={(e) => setCoverLetter(e.target.value)}
-                        placeholder="Tell the client why you're perfect for this gig. Include any relevant experience, availability, or special skills..."
+                        placeholder="Tell the client why you&apos;re perfect for this gig. Include any relevant experience, availability, or special skills..."
                         className="min-h-[120px]"
                         maxLength={1000}
                       />
