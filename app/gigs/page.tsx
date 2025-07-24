@@ -56,6 +56,10 @@ export default async function GigsPage() {
     .eq("status", "active")
     .order("created_at", { ascending: false });
 
+  // Debug logging
+  console.log("Gigs page - fetched gigs:", gigs);
+  console.log("Gigs page - error:", error);
+
   if (error) {
     console.error("Error fetching gigs:", error);
     return (
