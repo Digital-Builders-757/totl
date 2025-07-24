@@ -3,19 +3,26 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Database } from "@/types/supabase";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time Supabase access
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies(); // ✅ Fixed: no await needed
   const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // Get user profile data directly - no need for getSession since middleware handles auth
   const { data: profile, error } = await supabase.from("profiles").select("*").single();
 
-  if (error || !profile) {
+  // ✅ Fixed: Proper type guards
+  if (error) {
+    console.error("Error fetching profile:", error);
+    redirect("/login");
+  }
+
+  if (!profile) {
+    console.error("No profile found");
     redirect("/login");
   }
 

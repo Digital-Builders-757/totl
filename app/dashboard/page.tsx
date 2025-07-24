@@ -7,19 +7,26 @@ import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies(); // ✅ Fixed: no await needed
   const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // Get user profile data directly - no need for getSession since middleware handles auth
   const { data: profile, error } = await supabase.from("profiles").select("*").single();
 
-  if (error || !profile) {
+  // ✅ Fixed: Proper type guards
+  if (error) {
+    console.error("Error fetching profile:", error);
     redirect("/login");
   }
 
-  // 6. Render the user's profile information
+  if (!profile) {
+    console.error("No profile found");
+    redirect("/login");
+  }
+
+  // Now safe to access profile.role
   return <DashboardClient userRole={profile.role} />;
 }
