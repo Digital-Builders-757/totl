@@ -1,151 +1,387 @@
-# 🚀 Totl Agency - User Onboarding Guide
+# TOTL Agency - Developer Onboarding
 
-This document outlines the complete user onboarding flow for both **Talent** and **Clients**. The process is designed to be streamlined, reducing initial friction while gathering necessary details post-registration.
+**Last Updated:** July 23, 2025  
+**Status:** Production Ready
 
----
+## Table of Contents
+- [Getting Started](#getting-started)
+- [Environment Setup](#environment-setup)
+- [Database Setup](#database-setup)
+- [Development Workflow](#development-workflow)
+- [Testing](#testing)
+- [Deployment](#deployment)
 
-## 📝 Core Philosophy
+## 🚀 Getting Started
 
-Our onboarding process follows a two-stage approach:
+### **Prerequisites**
+- Node.js 18+ 
+- npm or yarn
+- Git
+- Supabase account
+- Resend API key (for emails)
 
-1.  **Initial, Minimal Signup**: Collect only the essential information needed to create an account (name, email, password). This is typically done via a modal to keep the user in context.
-2.  **Progressive Profile Completion**: After email verification, the user is guided to complete their full profile inside their respective dashboard. This includes role-specific details (e.g., measurements for talent, company info for clients).
+### **Initial Setup**
+```bash
+# Clone the repository
+git clone <repository-url>
+cd totl
 
----
+# Install dependencies
+npm install
 
-## 🕺 Talent Onboarding Flow
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your credentials
 
-### Step 1: Initial Signup
-
-1.  **Trigger**: The user clicks an "Apply as Talent" or similar call-to-action button.
-2.  **Interface**: A modal dialog (`TalentSignupForm`) appears, containing a simple form.
-3.  **Fields Collected**:
-    - First & Last Name
-    - Email Address
-    - Password
-    - Agreement to Terms of Service
-4.  **Action**:
-    - A new user is created in `auth.users`.
-    - A corresponding record is created in our public `users` table with the `role` set to `'talent'`.
-    - A new, mostly empty `talent_profiles` record is created, linked to the user's ID.
-    - A verification email is sent via Supabase Auth.
-5.  **Redirect**: The user is sent to a `/verification-pending` page, which instructs them to check their email.
-
-### Step 2: Email Verification & Profile Completion
-
-1.  **Verification**: The user clicks the link in their email, which routes them through the `/auth/callback` endpoint. Supabase verifies the token and authenticates the user.
-2.  **Redirect to Dashboard**: Upon successful verification, the user is redirected to the `/talent/dashboard`.
-3.  **Profile Completion Prompt**:
-    - The dashboard detects that the user's `talent_profiles` record is incomplete.
-    - A prominent alert or banner prompts the user to complete their profile.
-4.  **Onboarding Form**: The user is directed to an onboarding or profile settings page where they fill in the remaining details:
-    - **Personal Information**: Phone, age, location, measurements, etc.
-    - **Professional Information**: Experience, specialties, portfolio links, etc.
-5.  **Action**: The `talent_profiles` table is updated with the new information. The user's profile is now considered complete.
-
----
-
-## 🏢 Client Onboarding Flow
-
-The client onboarding flow mirrors the talent flow, but is tailored to their needs.
-
-### Step 1: Initial Signup
-
-1.  **Trigger**: The user clicks a "Hire Talent" or "Join as Client" button.
-2.  **Interface**: A modal dialog appears for client signup.
-3.  **Fields Collected**:
-    - Full Name
-    - Company Name
-    - Email Address
-    - Password
-4.  **Action**:
-    - A new user is created in `auth.users`.
-    - A `users` record is created with the `role` set to `'client'`.
-    - A new, mostly empty `client_profiles` record is created.
-    - A verification email is sent.
-5.  **Redirect**: The user is sent to the `/verification-pending` page.
-
-### Step 2: Email Verification & Profile Completion
-
-1.  **Verification**: The user verifies their email via the link and the `/auth/callback` route.
-2.  **Redirect to Dashboard**: The user is redirected to the `/client/dashboard`.
-3.  **Profile Completion**: The user is prompted to complete their `client_profiles` record with details such as:
-    - Company Industry
-    - Company Size
-    - Website
-4.  **Action**: The `client_profiles` table is updated. The client can now post gigs.
-
----
-
-## 🛡️ Security & Technical Notes
-
-- **RLS Policies**: All profile tables (`profiles`, `talent_profiles`, `client_profiles`) have RLS policies ensuring users can only edit their own data.
-- **Protected Routes**: The `/talent/*` and `/client/*` routes are protected by middleware, redirecting unauthenticated users to `/login`.
-- **Component-Based**: The signup forms are reusable React components that can be placed in modals or on dedicated pages.
-
----
-
-## 🛠 Plan
-
-1. **Review your current talent signup form/component** (likely `components/talent-signup-form.tsx` or `app/talent/signup/page.tsx`).
-2. **Update the `signUp` call** to ensure it always passes the required metadata: `role`, `first_name`, and `last_name`.
-3. **Add or improve error handling** and optionally add frontend validation to block signups without a role.
-4. **Provide a summary of the changes** and instructions for testing.
-
----
-
-## Step 1: Review the Signup Form
-
-From previous code search, your `TalentSignupForm` already calls `signUp` with a `data` object:
-```ts
-<code_block_to_apply_changes_from>
+# Start development server
+npm run dev
 ```
-**However:**  
-- If the `signUp` function in your `auth-provider` or wherever it’s defined does not forward this `data` to Supabase as `options.data`, the metadata will not reach the backend trigger.
 
----
+## ⚙️ Environment Setup
 
-## Step 2: Fix the `signUp` Implementation
+### **Required Environment Variables**
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-Let’s ensure your `signUp` function in `auth-provider.tsx` (or wherever it’s defined) looks like this:
-```ts
-const signUp = async (
-  email: string,
-  password: string,
-  options?: { data?: any; emailRedirectTo?: string }
-) => {
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options, // <-- This must include the data object!
+# Email Service (Resend)
+RESEND_API_KEY=your_resend_api_key
+
+# Optional - Custom domain for emails
+RESEND_DOMAIN=your-domain.com
+```
+
+### **Getting Supabase Credentials**
+1. **Create Supabase project** at [supabase.com](https://supabase.com)
+2. **Go to Settings** → API
+3. **Copy Project URL** and anon key
+4. **Add to .env.local**
+
+### **Getting Resend API Key**
+1. **Sign up** at [resend.com](https://resend.com)
+2. **Go to API Keys** section
+3. **Create new API key**
+4. **Add to .env.local**
+
+## 🗄️ Database Setup
+
+### **Local Development**
+```bash
+# Install Supabase CLI
+npm install -g supabase
+
+# Start local Supabase
+supabase start
+
+# Apply migrations
+supabase db reset
+
+# Generate types
+npx supabase gen types typescript --local > types/database.ts
+```
+
+### **Production Database**
+```bash
+# Link to remote project
+supabase link --project-ref your-project-ref
+
+# Push migrations
+supabase db push
+
+# Generate types from remote
+npx supabase gen types typescript --project-id your-project-id > types/database.ts
+```
+
+### **Database Schema**
+The database schema is defined in `database_schema_audit.md` - this is the **single source of truth**.
+
+**Key Tables:**
+- `profiles` - Main user accounts
+- `talent_profiles` - Talent-specific data
+- `client_profiles` - Client-specific data
+- `gigs` - Job postings
+- `applications` - Talent applications
+- `bookings` - Confirmed engagements
+
+### **Critical Database Notes**
+- **RLS is enabled** on all tables
+- **Triggers automatically create** profiles on signup
+- **Metadata keys must use** lowercase with underscores
+- **Never use service keys** in client code
+
+## 💻 Development Workflow
+
+### **Code Standards**
+- **TypeScript only** - no `any` types
+- **Use generated types** from `types/database.ts`
+- **Server components** for data fetching
+- **Client components** for interactivity
+- **Zod validation** for forms
+
+### **Component Patterns**
+
+#### **Server Component (Data Fetching)**
+```typescript
+// app/gigs/page.tsx
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+
+export const dynamic = "force-dynamic";
+
+export default async function GigsPage() {
+  const supabase = createServerComponentClient({ cookies });
+  
+  // Check environment variables
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return <div>Configuration error</div>;
+  }
+  
+  const { data: gigs, error } = await supabase
+    .from('gigs')
+    .select('*')
+    .eq('status', 'active');
+  
+  if (error) {
+    console.error('Error fetching gigs:', error);
+    return <div>Error loading gigs</div>;
+  }
+  
+  return <GigsClient gigs={gigs || []} />;
+}
+```
+
+#### **Client Component (Presentational)**
+```typescript
+// components/gigs-client.tsx
+"use client";
+
+import { EmptyState } from "@/components/ui/empty-state";
+
+interface GigsClientProps {
+  gigs: Gig[];
+}
+
+export function GigsClient({ gigs }: GigsClientProps) {
+  if (gigs.length === 0) {
+    return (
+      <EmptyState
+        icon={FileText}
+        title="No gigs available"
+        description="Check back later for new opportunities"
+      />
+    );
+  }
+  
+  return (
+    <div className="grid gap-4">
+      {gigs.map(gig => <GigCard key={gig.id} gig={gig} />)}
+    </div>
+  );
+}
+```
+
+### **Authentication Patterns**
+```typescript
+// Check authentication
+const { user } = useAuth();
+
+if (!user) {
+  return <div>Please log in</div>;
+}
+
+// Check user role
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('role')
+  .eq('id', user.id)
+  .single();
+
+if (profile?.role !== 'client') {
+  redirect('/dashboard');
+}
+```
+
+### **Form Validation**
+```typescript
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+const gigSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  location: z.string().min(1, "Location is required"),
+  compensation: z.string().min(1, "Compensation is required"),
+});
+
+type GigFormValues = z.infer<typeof gigSchema>;
+
+export function GigForm() {
+  const form = useForm<GigFormValues>({
+    resolver: zodResolver(gigSchema),
   });
-  return { error };
-};
+  
+  // ... rest of component
+}
 ```
-**If you see something like this, you’re good. If not, I’ll update it.**
+
+## 🧪 Testing
+
+### **Manual Testing Checklist**
+
+#### **User Registration**
+- [ ] **Talent signup** - Creates talent profile
+- [ ] **Client signup** - Creates client profile
+- [ ] **Email verification** - Works correctly
+- [ ] **Role-based routing** - Goes to correct dashboard
+
+#### **Gig Management**
+- [ ] **Create gig** - Client can post gigs
+- [ ] **Edit gig** - Client can update gigs
+- [ ] **Delete gig** - Client can remove gigs
+- [ ] **Gig visibility** - Talent can see active gigs
+
+#### **Application Flow**
+- [ ] **Apply to gig** - Talent can apply
+- [ ] **Review applications** - Client can see applications
+- [ ] **Update status** - Client can change application status
+- [ ] **Application notifications** - Emails sent correctly
+
+#### **Security Testing**
+- [ ] **RLS policies** - Users can only access their data
+- [ ] **Unauthorized access** - Blocked appropriately
+- [ ] **Role restrictions** - Proper access control
+
+### **Test Accounts**
+```bash
+# Test Client Account
+Email: testclient@example.com
+Password: TestPassword123!
+Purpose: Demo client functionality
+
+# Create additional test accounts as needed
+```
+
+### **Automated Testing**
+```bash
+# Run type checking
+npm run type-check
+
+# Run linting
+npm run lint
+
+# Run build
+npm run build
+```
+
+## 🚀 Deployment
+
+### **Vercel Deployment**
+1. **Connect repository** to Vercel
+2. **Set environment variables** in Vercel dashboard
+3. **Deploy** - Vercel will auto-deploy on push to main
+
+### **Environment Variables in Production**
+```env
+# Required
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+RESEND_API_KEY=your_resend_key
+
+# Optional
+RESEND_DOMAIN=your-domain.com
+```
+
+### **Database Migration**
+```bash
+# Push migrations to production
+supabase db push
+
+# Generate types from production
+npx supabase gen types typescript --project-id your-project-id > types/database.ts
+```
+
+### **Post-Deployment Checklist**
+- [ ] **Environment variables** set correctly
+- [ ] **Database migrations** applied
+- [ ] **Email service** working
+- [ ] **Authentication** functioning
+- [ ] **RLS policies** active
+- [ ] **Performance** acceptable
+
+## 📚 Key Documentation
+
+### **Essential Files**
+- **[Project Context](TOTL_PROJECT_CONTEXT_PROMPT.md)** - Complete project overview
+- **[Database Schema](database_schema_audit.md)** - Single source of truth for database
+- **[Developer Quick Reference](DEVELOPER_QUICK_REFERENCE.md)** - Common patterns
+- **[Coding Standards](CODING_STANDARDS.md)** - Development guidelines
+
+### **Important Directories**
+```
+app/                    # Next.js pages and API routes
+components/            # React components
+lib/                   # Utility functions and services
+types/                 # TypeScript type definitions
+supabase/              # Database migrations and config
+docs/                  # Documentation
+```
+
+### **Critical Files**
+```
+TOTL_PROJECT_CONTEXT_PROMPT.md    # Main project context
+database_schema_audit.md          # Database schema
+types/database.ts                 # Generated Supabase types
+lib/supabase-client.ts           # Supabase client config
+components/auth-provider.tsx      # Authentication context
+middleware.ts                    # Route protection
+```
+
+## 🔧 Troubleshooting
+
+### **Common Issues**
+
+#### **Build Errors**
+```bash
+# Check TypeScript
+npm run type-check
+
+# Check linting
+npm run lint
+
+# Check build
+npm run build
+```
+
+#### **Database Connection Issues**
+```bash
+# Check environment variables
+echo $NEXT_PUBLIC_SUPABASE_URL
+echo $NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+# Test connection
+npx supabase status
+```
+
+#### **Authentication Issues**
+```sql
+-- Check user profiles
+SELECT p.id, p.role, p.display_name 
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id;
+
+-- Check RLS policies
+SELECT * FROM pg_policies WHERE schemaname = 'public';
+```
+
+### **Getting Help**
+1. **Check documentation** - Start with the files listed above
+2. **Review error logs** - Check browser console and server logs
+3. **Test with known good data** - Use test accounts
+4. **Ask for help** - Provide error details and context
 
 ---
 
-## Step 3: Add/Improve Validation (Optional)
-
-- Ensure the form requires first name, last name, and role before allowing submission.
-- Add error messages if any are missing.
-
----
-
-## Step 4: Test and Document
-
-- After the fix, sign up as a talent.
-- Check Supabase:  
-  - `profiles` should have `role = talent`
-  - `talent_profiles` should have the user’s name
-
----
-
-## Would you like me to:
-
-- **Review and fix your existing signup form file?**
-- **Generate a new, standalone `sign-up.ts` module with the correct logic?**
-- **Or both?**
-
-Let me know your preference, and I’ll implement the fix right away!
+**Welcome to the TOTL Agency development team! 🎉**

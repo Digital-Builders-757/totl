@@ -1,141 +1,275 @@
-... This file was left out for brevity. Assume it is correct and does not need any modifications. ...
-\`\`\`
+# TOTL Agency - Talent Booking Platform
 
-## Supabase Schema Migration
+**Status:** Production Ready  
+**Last Updated:** July 23, 2025
 
-Database Schema Overview
+A comprehensive talent booking platform connecting models, actors, and performers with casting directors, agencies, and brands. Built with Next.js 15, Supabase, and TypeScript.
 
-1. Users Table
-   Table Name: users
-   Description: Extends Supabase's auth.users table to store user information.
-   Columns:
-   id (UUID, Primary Key): References auth.users(id).
-   email (TEXT, Unique, Not Null): User's email address.
-   full_name (TEXT, Not Null): User's full name.
-   role (user_role, Not Null, Default: 'talent'): User's role (admin, client, talent).
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-2. Profiles Table
-   Table Name: profiles
-   Description: Stores additional user information.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   user_id (UUID, Foreign Key): References users(id).
-   bio (TEXT): User biography.
-   location (TEXT): User's location.
-   phone (TEXT): User's phone number.
-   instagram_handle (TEXT): User's Instagram handle.
-   website (TEXT): User's website.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-3. Talent Profiles Table
-   Table Name: talent_profiles
-   Description: Stores model-specific information for talent users.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   user_id (UUID, Foreign Key): References users(id).
-   height (NUMERIC): Talent's height.
-   weight (NUMERIC): Talent's weight.
-   measurements (TEXT): Talent's measurements.
-   experience_years (INTEGER): Years of experience.
-   specialties (TEXT[]): Talent's specialties.
-   portfolio_url (TEXT): URL to the talent's portfolio.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-4. Client Profiles Table
-   Table Name: client_profiles
-   Description: Stores client-specific information.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   user_id (UUID, Foreign Key): References users(id).
-   company_name (TEXT): Client's company name.
-   industry (TEXT): Industry of the client.
-   company_size (TEXT): Size of the company.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-5. Gigs Table
-   Table Name: gigs
-   Description: Stores information about gigs posted by clients.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   client_id (UUID, Foreign Key): References users(id).
-   title (TEXT, Not Null): Title of the gig.
-   description (TEXT, Not Null): Description of the gig.
-   requirements (TEXT[]): Requirements for the gig.
-   location (TEXT, Not Null): Location of the gig.
-   start_date (TIMESTAMPTZ, Not Null): Start date of the gig.
-   end_date (TIMESTAMPTZ, Not Null): End date of the gig.
-   compensation_min (NUMERIC): Minimum compensation for the gig.
-   compensation_max (NUMERIC): Maximum compensation for the gig.
-   status (gig_status, Not Null, Default: 'draft'): Status of the gig.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-6. Applications Table
-   Table Name: applications
-   Description: Stores applications made by talents for gigs.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   gig_id (UUID, Foreign Key): References gigs(id).
-   talent_id (UUID, Foreign Key): References users(id).
-   status (application_status, Not Null, Default: 'pending'): Status of the application.
-   message (TEXT): Message from the talent.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-   UNIQUE(gig_id, talent_id): Ensures a talent can apply to a gig only once.
-7. Bookings Table
-   Table Name: bookings
-   Description: Stores bookings made by talents for gigs.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   gig_id (UUID, Foreign Key): References gigs(id).
-   talent_id (UUID, Foreign Key): References users(id).
-   status (booking_status, Not Null, Default: 'pending'): Status of the booking.
-   compensation (NUMERIC): Compensation for the booking.
-   notes (TEXT): Additional notes for the booking.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-8. Portfolio Items Table
-   Table Name: portfolio_items
-   Description: Stores portfolio items for talents.
-   Columns:
-   id (UUID, Primary Key, Default: uuid_generate_v4()): Unique identifier.
-   talent_id (UUID, Foreign Key): References users(id).
-   title (TEXT, Not Null): Title of the portfolio item.
-   description (TEXT): Description of the portfolio item.
-   image_url (TEXT, Not Null): URL of the portfolio item image.
-   created_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of creation.
-   updated_at (TIMESTAMPTZ, Not Null, Default: NOW()): Timestamp of last update.
-   Relationships
-   Users Table:
-   Profiles: Each user can have one profile in the profiles table.
-   Talent Profiles: Each user can have one talent profile in the talent_profiles table.
-   Client Profiles: Each user can have one client profile in the client_profiles table.
-   Applications: Each user (talent) can submit multiple applications in the applications table for different gigs.
-   Bookings: Each user (talent) can have multiple bookings in the bookings table for different gigs.
-   Portfolio Items: Each user (talent) can have multiple portfolio items in the portfolio_items table.
-   Profiles Table:
-   User ID: Each profile is linked to a user in the users table via the user_id foreign key.
-   Talent Profiles Table:
-   User ID: Each talent profile is linked to a user in the users table via the user_id foreign key.
-   Client Profiles Table:
-   User ID: Each client profile is linked to a user in the users table via the user_id foreign key.
-   Gigs Table:
-   Client ID: Each gig is linked to a client in the users table via the client_id foreign key.
-   Applications: Each gig can have multiple applications from talents in the applications table.
-   Applications Table:
-   Gig ID: Each application is linked to a gig in the gigs table via the gig_id foreign key.
-   Talent ID: Each application is linked to a talent in the users table via the talent_id foreign key.
-   Bookings Table:
-   Gig ID: Each booking is linked to a gig in the gigs table via the gig_id foreign key.
-   Talent ID: Each booking is linked to a talent in the users table via the talent_id foreign key.
-   Portfolio Items Table:
-   Talent ID: Each portfolio item is linked to a talent in the users table via the talent_id foreign key.
-   Summary of Key Attributes
-   Primary Keys: Each table has a unique identifier (UUID) as the primary key.
-   Foreign Keys: Relationships between tables are established using foreign keys, ensuring referential integrity.
-   Timestamps: Each table includes created_at and updated_at columns to track record creation and modification times.
-   Enums: The use of enum types (e.g., user_role, gig_status, application_status, booking_status) helps maintain data integrity for specific fields.
-   Additional Notes
-   Row Level Security (RLS): RLS is enabled on all tables to control access based on user roles and permissions.
-   Indexes: Indexes are created on foreign key columns and other frequently queried fields to improve query performance.
-   This guide provides a comprehensive overview of your database schema, including relationships and key attributes, which can be useful for another LLM or any developer working with your database.
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Resend API key (for emails)
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd totl
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Supabase and Resend credentials
+
+# Start development server
+npm run dev
+```
+
+### Environment Variables
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+
+# Email Service
+RESEND_API_KEY=your_resend_key
+```
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js 15.2.4 with App Router, TypeScript 5, React Server Components
+- **Backend:** Supabase (PostgreSQL + Auth + Storage + Real-time)
+- **UI:** TailwindCSS + shadcn/ui components
+- **Email:** Resend API for custom transactional emails
+- **Deployment:** Vercel (frontend) + Supabase Cloud (backend)
+- **Database:** PostgreSQL with Row-Level Security (RLS)
+
+## 🏗️ Architecture
+
+### Database Schema
+The platform uses a well-structured PostgreSQL database with the following core tables:
+
+- **`profiles`** - Main user accounts with roles
+- **`talent_profiles`** - Extended talent information
+- **`client_profiles`** - Extended client information
+- **`gigs`** - Job postings by clients
+- **`applications`** - Talent applications to gigs
+- **`bookings`** - Confirmed engagements
+- **`portfolio_items`** - Talent portfolio media
+
+### Authentication Flow
+1. **User Signup** → Supabase Auth
+2. **Trigger** → Automatic profile creation
+3. **Email Verification** → Profile activation
+4. **Role-based Routing** → Appropriate dashboard
+
+### Security
+- **Row-Level Security (RLS)** enabled on all tables
+- **Role-based access control** (talent/client/admin)
+- **Secure authentication** with Supabase Auth
+- **Input validation** with Zod schemas
+
+## 📁 Project Structure
+
+```
+totl/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/            # Authentication pages
+│   ├── talent/            # Talent dashboard & features
+│   ├── client/            # Client dashboard & features
+│   ├── admin/             # Admin panel
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── ui/               # shadcn/ui components
+│   └── ...               # Custom components
+├── lib/                  # Utility functions
+├── types/                # TypeScript type definitions
+├── supabase/             # Database migrations & config
+├── docs/                 # Documentation
+└── scripts/              # Utility scripts
+```
+
+## 🔐 User Roles & Access
+
+### Talent Users
+- **Dashboard:** `/talent/dashboard`
+- **Features:** Browse gigs, apply, manage profile, portfolio
+- **Access:** View active gigs, submit applications
+
+### Client Users  
+- **Dashboard:** `/client/dashboard`
+- **Features:** Post gigs, review applications, manage bookings
+- **Access:** Create/edit gigs, view applications for their gigs
+
+### Admin Users
+- **Dashboard:** `/admin/dashboard`
+- **Features:** User management, platform oversight
+- **Access:** Full platform access
+
+## 🚀 Development
+
+### Common Commands
+```bash
+# Development
+npm run dev          # Start development server
+npm run build        # Production build
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript type checking
+
+# Database
+npx supabase gen types typescript --project-id "<ID>" > types/database.ts
+npx supabase db reset    # Reset local database
+npx supabase db push     # Push migrations to remote
+```
+
+### Code Patterns
+
+#### Supabase Client Usage
+```typescript
+// Client-side
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/types/database";
+
+const supabase = createClientComponentClient<Database>();
+
+// Server-side
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+
+const supabase = createServerComponentClient<Database>({ cookies });
+```
+
+#### Component Architecture
+```typescript
+// Server Component (data fetching)
+export default async function GigsPage() {
+  const supabase = createServerComponentClient<Database>({ cookies });
+  const { data: gigs } = await supabase
+    .from('gigs')
+    .select('*')
+    .eq('status', 'active');
+  
+  return <GigsClient gigs={gigs || []} />;
+}
+
+// Client Component (presentational)
+"use client";
+export function GigsClient({ gigs }: { gigs: Gig[] }) {
+  if (gigs.length === 0) {
+    return <EmptyState message="No gigs available" />;
+  }
+  
+  return (
+    <div className="grid gap-4">
+      {gigs.map(gig => <GigCard key={gig.id} gig={gig} />)}
+    </div>
+  );
+}
+```
+
+## 📊 Production Status
+
+### ✅ Production Ready Features
+- ✅ Clean database (no mock data)
+- ✅ Secure RLS policies
+- ✅ Proper empty states
+- ✅ Real data fetching
+- ✅ Email verification flow
+- ✅ Role-based routing
+- ✅ TypeScript compilation
+- ✅ Build process working
+
+### Current Database State
+| Table | Records | Status |
+|-------|---------|--------|
+| `profiles` | 2 | ✅ Clean |
+| `client_profiles` | 1 | ✅ Clean |
+| `talent_profiles` | 1 | ✅ Clean |
+| `gigs` | 0 | ✅ Ready for real data |
+| `applications` | 0 | ✅ Ready for real data |
+
+### Test Account
+- **Email:** `testclient@example.com`
+- **Password:** `TestPassword123!`
+- **Purpose:** Demo client functionality
+
+## 📚 Documentation
+
+### Core Documentation
+- **[Project Context](TOTL_PROJECT_CONTEXT_PROMPT.md)** - Complete project overview and AI assistant rules
+- **[Database Schema](database_schema_audit.md)** - Single source of truth for database structure
+- **[Authentication Strategy](docs/AUTH_STRATEGY.md)** - Detailed auth flow and security
+- **[Developer Quick Reference](docs/DEVELOPER_QUICK_REFERENCE.md)** - Common patterns and troubleshooting
+
+### Additional Resources
+- **[Coding Standards](docs/CODING_STANDARDS.md)** - Development guidelines
+- **[Database Guide](docs/DATABASE_GUIDE.md)** - Database usage patterns
+- **[Email Service](docs/email-service.md)** - Email integration details
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Build Errors
+```bash
+# TypeScript errors
+npm run type-check
+
+# Linting issues  
+npm run lint
+
+# Build issues
+npm run build
+```
+
+#### Database Issues
+```sql
+-- Check RLS policies
+SELECT * FROM pg_policies WHERE schemaname = 'public';
+
+-- Check user profiles
+SELECT p.id, p.role, p.display_name 
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id;
+```
+
+#### Authentication Issues
+- Verify environment variables are set correctly
+- Check Supabase project settings
+- Ensure email verification is configured
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+- Follow TypeScript best practices
+- Use proper error handling
+- Write meaningful commit messages
+- Test thoroughly before submitting PRs
+- Follow the established component patterns
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Check the [documentation](docs/)
+- Review the [troubleshooting guide](#-troubleshooting)
+- Open an issue on GitHub
+
+---
+
+**Built with ❤️ for the talent industry**

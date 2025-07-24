@@ -15,11 +15,12 @@ import {
 } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
 import { EmailVerificationReminder } from "@/components/email-verification-reminder";
 import { RequireAuth } from "@/components/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,28 +36,28 @@ interface ApplicationWithGigAndClient {
   id: string;
   status: ApplicationStatus;
   created_at: string;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface BookingWithGigAndClient {
   id: string;
   date: string;
   compensation: number | null;
-  gigs: {
+  gigs: Array<{
     id: string;
     title: string;
     location: string;
-    clients: {
+    clients: Array<{
       company_name: string;
-    } | null;
-  };
+    }> | null;
+  }>;
 }
 
 interface PortfolioItemWithCaption {
@@ -69,6 +70,12 @@ interface MainProfileData {
 }
 
 export default async function TalentDashboard() {
+  // Check if Supabase environment variables are available
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("Supabase environment variables not found - redirecting to login");
+    redirect("/login?returnUrl=/admin/talentdashboard");
+  }
+
   const supabase = createServerComponentClient<Database>({ cookies });
 
   const {
@@ -141,7 +148,7 @@ export default async function TalentDashboard() {
 
     if (profileResult.data) {
       profileData = profileResult.data;
-      const requiredFields: (keyof TalentProfile)[] = ["phone", "age", "location", "experience"];
+      const requiredFields: (keyof TalentProfile)[] = ["height", "weight", "experience_years"];
       isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
     }
 
@@ -156,11 +163,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => ["new", "under_review", "shortlisted"].includes(app.status))
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -169,11 +176,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "accepted")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -182,11 +189,11 @@ export default async function TalentDashboard() {
       applicationsData
         ?.filter((app) => app.status === "rejected")
         .map((app) => ({
-          id: app.id,
-          gigId: app.gigs.id,
-          title: app.gigs.title,
-          company: app.gigs.clients?.company_name || "Private Client",
-          location: app.gigs.location,
+          id: parseInt(app.id) || 0,
+          gigId: parseInt(app.gigs?.[0]?.id) || 0,
+          title: app.gigs?.[0]?.title || "Unknown Gig",
+          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
+          location: app.gigs?.[0]?.location || "Unknown Location",
           appliedDate: new Date(app.created_at).toLocaleDateString(),
           status: app.status,
           image: "/gig-editorial.png",
@@ -196,8 +203,8 @@ export default async function TalentDashboard() {
   const upcomingBookings =
     bookingsData?.map((booking) => ({
       id: booking.id,
-      title: booking.gigs.title,
-      company: booking.gigs.clients?.company_name || "Private Client",
+      title: booking.gigs?.[0]?.title || "Unknown Gig",
+      company: booking.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
       date: new Date(booking.date).toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -207,7 +214,7 @@ export default async function TalentDashboard() {
         hour: "2-digit",
         minute: "2-digit",
       }),
-      location: booking.gigs.location,
+      location: booking.gigs?.[0]?.location || "Unknown Location",
       compensation: `$${booking.compensation}`,
       image: "/gig-jewelry.png",
     })) || [];
@@ -269,17 +276,16 @@ export default async function TalentDashboard() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="flex items-center text-sm font-medium text-gray-700 hover:text-black">
-                      <Avatar
-                        src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                        alt={profileData?.first_name || "User"}
-                        size="sm"
-                        className="mr-2"
-                      />
-                      <span className="hidden md:inline">
-                        {profileData
-                          ? `${profileData.first_name} ${profileData.last_name}`
-                          : "Talent"}
-                      </span>
+                      <Avatar className="mr-2 h-8 w-8">
+                        <AvatarImage
+                          src={mainProfileData?.avatar_url || "/images/model-1.png"}
+                          alt={user?.email || "User"}
+                        />
+                        <AvatarFallback>
+                          {user?.email?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="hidden md:inline">{user?.email || "Talent"}</span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -356,7 +362,7 @@ export default async function TalentDashboard() {
                   <div className="w-32 h-32 rounded-xl overflow-hidden border-4 border-white shadow-md">
                     <SafeImage
                       src={mainProfileData?.avatar_url || "/images/model-1.png"}
-                      alt={profileData?.first_name || "User"}
+                      alt={user?.email || "User"}
                       width={128}
                       height={128}
                       placeholderQuery="model portrait"
@@ -368,11 +374,7 @@ export default async function TalentDashboard() {
                 <div className="flex-1 pt-0 md:pt-6">
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <div>
-                      <h2 className="text-2xl font-bold mb-1">
-                        {profileData
-                          ? `${profileData.first_name} ${profileData.last_name}`
-                          : "Your Name"}
-                      </h2>
+                      <h2 className="text-2xl font-bold mb-1">{user?.email || "Your Name"}</h2>
                       <p className="text-gray-600">Editorial & Runway Model</p>
                     </div>
                     <div className="flex space-x-2 mt-4 md:mt-0">
@@ -442,7 +444,7 @@ export default async function TalentDashboard() {
 
           <div className="mb-8">
             <h3 className="text-xl font-bold mb-4">Application Overview</h3>
-            <TalentDashboardClient profileData={profileData} gigs={gigs} />
+            <TalentDashboardClient gigs={gigs} />
           </div>
 
           <div className="mb-8">
@@ -493,7 +495,7 @@ export default async function TalentDashboard() {
                 <div key={index} className="group relative rounded-xl overflow-hidden">
                   <SafeImage
                     src={item.image}
-                    alt={item.caption}
+                    alt={item.caption || "Portfolio image"}
                     width={300}
                     height={400}
                     placeholderQuery="portfolio image"

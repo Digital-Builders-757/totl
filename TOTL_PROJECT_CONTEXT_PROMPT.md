@@ -1,27 +1,49 @@
 # TOTL Agency – Complete Project Context & AI Assistant Rules
 
+**Last Updated:** July 23, 2025  
+**Version:** 2.0  
+**Status:** Production Ready
+
+## Table of Contents
+- [Project Overview](#-project-overview)
+- [Tech Stack](#-tech-stack)
+- [Database Schema](#-database-schema)
+- [Authentication & Authorization](#-authentication--authorization)
+- [Development Guidelines](#-development-guidelines)
+- [Production Status](#-production-status)
+- [Quick Reference](#-quick-reference)
+- [Troubleshooting](#-troubleshooting)
+
 ## 🎯 Project Overview
 
 **TOTL Agency** is a comprehensive talent booking platform connecting models, actors, and performers with casting directors, agencies, and brands. The platform facilitates gig postings, applications, bookings, and portfolio management with role-based access control.
 
-**Tech Stack:**
+**Key Features:**
+- **Role-based access** (talent/client/admin)
+- **Gig posting and management**
+- **Application system**
+- **Portfolio management**
+- **Real-time notifications**
+- **Secure authentication**
+
+## 🛠️ Tech Stack
+
 - **Frontend:** Next.js 15.2.4 with App Router, TypeScript 5, React Server Components
 - **Backend:** Supabase (PostgreSQL + Auth + Storage + Real-time)
 - **UI:** TailwindCSS + shadcn/ui components
 - **Email:** Resend API for custom transactional emails
 - **Deployment:** Vercel (frontend) + Supabase Cloud (backend)
+- **Database:** PostgreSQL with Row-Level Security (RLS)
 
----
+## 🗃️ Database Schema
 
-## 🏗️ Architecture & Database Schema
+### **Core Tables**
 
-### Core Database Tables
-
-#### **Profiles (Core User Accounts)**
+#### **profiles** (Main User Accounts)
 ```sql
 CREATE TABLE public.profiles (
   id            UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE, 
-  role          TEXT NOT NULL CHECK (role IN ('talent', 'client', 'admin')), 
+  role          user_role NOT NULL DEFAULT 'talent', 
   display_name  TEXT, 
   avatar_url    TEXT, 
   email_verified BOOLEAN DEFAULT FALSE, 
@@ -30,13 +52,13 @@ CREATE TABLE public.profiles (
 );
 ```
 
-#### **Talent Profiles**
+#### **talent_profiles**
 ```sql
 CREATE TABLE public.talent_profiles (
   id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id      UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  first_name   TEXT NOT NULL,
-  last_name    TEXT NOT NULL,
+  first_name   TEXT NOT NULL DEFAULT '',
+  last_name    TEXT NOT NULL DEFAULT '',
   phone        TEXT,
   age          INTEGER,
   location     TEXT,
@@ -53,12 +75,12 @@ CREATE TABLE public.talent_profiles (
 );
 ```
 
-#### **Client Profiles**
+#### **client_profiles**
 ```sql
 CREATE TABLE public.client_profiles (
   id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id      UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  company_name TEXT NOT NULL,
+  company_name TEXT NOT NULL DEFAULT '',
   industry     TEXT,
   website      TEXT,
   contact_name TEXT,
@@ -70,7 +92,7 @@ CREATE TABLE public.client_profiles (
 );
 ```
 
-#### **Gigs (Job Postings)**
+#### **gigs** (Job Postings)
 ```sql
 CREATE TABLE public.gigs (
   id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -92,7 +114,7 @@ CREATE TABLE public.gigs (
 );
 ```
 
-#### **Applications**
+#### **applications**
 ```sql
 CREATE TABLE public.applications (
   id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -107,499 +129,296 @@ CREATE TABLE public.applications (
 );
 ```
 
-#### **Bookings**
+### **Custom Types (Enums)**
 ```sql
-CREATE TABLE public.bookings (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  gig_id        UUID NOT NULL REFERENCES public.gigs(id) ON DELETE CASCADE,
-  talent_id     UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  client_id     UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  status        TEXT NOT NULL CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
-  booking_date  TIMESTAMPTZ NOT NULL,
-  booking_time  TEXT NOT NULL,
-  location      TEXT NOT NULL,
-  compensation  TEXT NOT NULL,
-  notes         TEXT,
-  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+-- user_role
+CREATE TYPE public.user_role AS ENUM ('talent', 'client', 'admin');
+
+-- application_status  
+CREATE TYPE public.application_status AS ENUM ('new', 'under_review', 'shortlisted', 'rejected', 'accepted');
+
+-- booking_status
+CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 'cancelled');
+
+-- gig_status
+CREATE TYPE public.gig_status AS ENUM ('draft', 'active', 'closed', 'completed');
 ```
 
-#### **Portfolio Items**
-```sql
-CREATE TABLE public.portfolio_items (
-  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  talent_id   UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  image_url   TEXT NOT NULL,
-  title       TEXT,
-  description TEXT,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+### **Critical NOT NULL Constraints**
+The following columns are protected by the `handle_new_user()` trigger:
+
+| Column | Table | Protection | Default |
+|--------|-------|------------|---------|
+| `role` | profiles | `COALESCE(metadata->>'role', 'talent')` | `'talent'` |
+| `first_name` | talent_profiles | `COALESCE(metadata->>'first_name', '')` | `''` |
+| `last_name` | talent_profiles | `COALESCE(metadata->>'last_name', '')` | `''` |
+| `company_name` | client_profiles | `COALESCE(metadata->>'company_name', display_name)` | `display_name` |
+
+**⚠️ CRITICAL:** Metadata keys must use **lowercase with underscores**:
+```typescript
+// ✅ CORRECT
+{ first_name: "John", last_name: "Doe", role: "talent" }
+
+// ❌ WRONG  
+{ firstName: "John", lastName: "Doe", Role: "talent" }
 ```
 
-### Enum Values
-- **User Roles:** `'talent'`, `'client'`, `'admin'`
-- **Gig Status:** `'draft'`, `'active'`, `'closed'`, `'featured'`, `'urgent'`
-- **Application Status:** `'new'`, `'under_review'`, `'shortlisted'`, `'rejected'`, `'accepted'`
-- **Booking Status:** `'pending'`, `'confirmed'`, `'completed'`, `'cancelled'`
+## 🔐 Authentication & Authorization
 
----
+### **User Signup Flow**
 
-## 🔐 Row-Level Security (RLS) Policies
-
-### Profiles RLS
-```sql
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view their own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
-
-CREATE POLICY "Profiles are viewable by everyone"
-  ON public.profiles FOR SELECT
-  USING (TRUE);
+#### **1. Frontend Signup**
+```typescript
+// Talent signup
+const { error } = await signUp(data.email, data.password, {
+  data: {
+    first_name: data.firstName,    // lowercase with underscore
+    last_name: data.lastName,      // lowercase with underscore
+    role: "talent",                // lowercase
+  },
+  emailRedirectTo: `${window.location.origin}/auth/callback`,
+});
 ```
 
-### Talent Profiles RLS
+#### **2. Database Trigger**
+The `handle_new_user()` trigger automatically:
+- Creates `profiles` record
+- Creates role-specific profile (`talent_profiles` or `client_profiles`)
+- Handles NULL values with `COALESCE`
+- Sets proper defaults
+
+#### **3. Email Verification**
+- User receives verification email
+- Clicks link → `/auth/callback`
+- Profile `email_verified` updated to `true`
+- Redirected to role-specific dashboard
+
+### **Role-Based Routing**
+- **Talent:** `/talent/dashboard`
+- **Client:** `/client/dashboard`  
+- **Admin:** `/admin/dashboard`
+
+### **Row-Level Security (RLS)**
+All tables have RLS enabled with policies:
+
+#### **Gigs Table**
 ```sql
-ALTER TABLE public.talent_profiles ENABLE ROW LEVEL SECURITY;
+-- Public can view active gigs only
+CREATE POLICY "Public can view active gigs only"
+  ON public.gigs FOR SELECT
+  TO authenticated, anon
+  USING (status = 'active');
 
-CREATE POLICY "Talent can manage their own talent_profile"
-  ON public.talent_profiles FOR INSERT, UPDATE
-  WITH CHECK (auth.uid() = user_id AND (
-    SELECT role FROM public.profiles WHERE id = auth.uid()
-  ) = 'talent');
-
-CREATE POLICY "Talent profiles are viewable by anyone"
-  ON public.talent_profiles FOR SELECT
-  USING (TRUE);
-```
-
-### Client Profiles RLS
-```sql
-ALTER TABLE public.client_profiles ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Client can manage their own client_profile"
-  ON public.client_profiles FOR INSERT, UPDATE
-  WITH CHECK (auth.uid() = user_id AND (
-    SELECT role FROM public.profiles WHERE id = auth.uid()
-  ) = 'client');
-
-CREATE POLICY "Client profiles are viewable by anyone"
-  ON public.client_profiles FOR SELECT
-  USING (TRUE);
-```
-
-### Gigs RLS
-```sql
-ALTER TABLE public.gigs ENABLE ROW LEVEL SECURITY;
-
+-- Clients can manage their gigs
 CREATE POLICY "Clients can create gigs"
   ON public.gigs FOR INSERT
-  WITH CHECK (
-    auth.uid() = client_id 
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'client'
-  );
-
-CREATE POLICY "Clients can update their own gigs"
-  ON public.gigs FOR UPDATE
-  USING (auth.uid() = client_id);
-
-CREATE POLICY "Gigs are viewable by everyone"
-  ON public.gigs FOR SELECT
-  USING (TRUE);
+  TO authenticated
+  WITH CHECK (client_id = auth.uid());
 ```
 
-### Applications RLS
+#### **Applications Table**
 ```sql
-ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Talent can create applications"
-  ON public.applications FOR INSERT
-  WITH CHECK (
-    auth.uid() = talent_id 
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'talent'
-  );
-
-CREATE POLICY "Talent can view own applications"
+-- Talent can see their applications, clients can see for their gigs
+CREATE POLICY "Applications access policy"
   ON public.applications FOR SELECT
-  USING (auth.uid() = talent_id);
-
-CREATE POLICY "Clients can view applications for their gigs"
-  ON public.applications FOR SELECT
+  TO authenticated
   USING (
+    talent_id = auth.uid() OR 
     EXISTS (
-      SELECT 1 FROM public.gigs 
+      SELECT 1 FROM gigs 
       WHERE gigs.id = applications.gig_id 
-        AND gigs.client_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Clients can update applications for their gigs"
-  ON public.applications FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.gigs 
-      WHERE gigs.id = applications.gig_id 
-        AND gigs.client_id = auth.uid()
+      AND gigs.client_id = auth.uid()
     )
   );
 ```
 
-### Bookings RLS
-```sql
-ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+## 💻 Development Guidelines
 
-CREATE POLICY "Clients can create bookings"
-  ON public.bookings FOR INSERT
-  WITH CHECK (
-    auth.uid() = client_id 
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'client'
-  );
+### **Supabase Client Usage**
 
-CREATE POLICY "Clients can update own bookings"
-  ON public.bookings FOR UPDATE
-  USING (auth.uid() = client_id);
-
-CREATE POLICY "Participants can view bookings"
-  ON public.bookings FOR SELECT
-  USING (auth.uid() = client_id OR auth.uid() = talent_id);
-```
-
-### Portfolio Items RLS
-```sql
-ALTER TABLE public.portfolio_items ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Talent can add portfolio items"
-  ON public.portfolio_items FOR INSERT
-  WITH CHECK (
-    auth.uid() = talent_id
-    AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'talent'
-  );
-
-CREATE POLICY "Talent can update own portfolio items"
-  ON public.portfolio_items FOR UPDATE
-  USING (auth.uid() = talent_id);
-
-CREATE POLICY "Talent can delete own portfolio items"
-  ON public.portfolio_items FOR DELETE
-  USING (auth.uid() = talent_id);
-
-CREATE POLICY "Portfolio items are viewable by everyone"
-  ON public.portfolio_items FOR SELECT
-  USING (TRUE);
-```
-
----
-
-## 🔐 Authentication System
-
-### Signup Flow
-1. **User Registration:** Email, password, role selection (talent/client)
-2. **Supabase Auth Account:** Creates entry in `auth.users`
-3. **Profile Initialization:** Creates row in `profiles` with role
-4. **Role-Specific Profile:** Creates entry in `talent_profiles` or `client_profiles`
-5. **Email Verification:** Custom Resend email with verification link
-6. **Post-Verification:** Account fully active, redirect to appropriate dashboard
-
-### Login & Session Management
-- **Login:** `supabase.auth.signInWithPassword`
-- **Session Persistence:** Supabase JS client auto-refresh
-- **Role-Based Redirects:** Talent → `/admin/talentdashboard`, Client → `/admin/dashboard`
-- **Logout:** `supabase.auth.signOut()`
-
-### Middleware for Route Protection
+#### **Client-Side**
 ```typescript
-// middleware.ts - Role-based access control
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
-  const supabase = createMiddlewareClient({ req, res });
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/types/database";
 
-  const { data: { session } } = await supabase.auth.getSession();
+const supabase = createClientComponentClient<Database>();
 
-  if (!session) {
-    const protectedPaths = ['/dashboard', '/admin'];
-    const isAttemptingProtected = protectedPaths.some(path =>
-      req.nextUrl.pathname.startsWith(path)
-    );
-    if (isAttemptingProtected) {
-      const redirectUrl = new URL('/login', req.url);
-      redirectUrl.searchParams.set('redirect', req.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
-    }
-  }
-
-  if (session) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
-    const role = profile?.role;
-
-    // Role-based redirects
-    if (role === 'talent' && req.nextUrl.pathname.startsWith('/admin/dashboard')) {
-      return NextResponse.redirect(new URL('/admin/talentdashboard', req.url));
-    }
-    if (role === 'client' && req.nextUrl.pathname.startsWith('/admin/talentdashboard')) {
-      return NextResponse.redirect(new URL('/admin/dashboard', req.url));
-    }
-  }
-
-  return res;
-}
-```
-
----
-
-## 📁 Project Structure
-
-```
-totl/
-├── app/                          # Next.js App Router
-│   ├── (auth)/                   # Authentication routes
-│   ├── admin/                    # Admin dashboard routes
-│   ├── talent/                   # Talent-specific routes
-│   ├── client/                   # Client-specific routes
-│   └── api/                      # API routes
-├── components/
-│   ├── ui/                       # shadcn/ui components
-│   └── [custom components]       # Custom React components
-├── lib/
-│   ├── supabase-client.ts        # Supabase client initialization
-│   ├── supabase-admin-client.ts  # Admin client for server-side
-│   └── [utility functions]       # Helper functions
-├── types/
-│   └── database.ts               # Generated Supabase types
-├── supabase/
-│   ├── migrations/               # Database migrations
-│   └── functions/                # Edge functions
-└── middleware.ts                 # Route protection
-```
-
----
-
-## 🔧 Environment Configuration
-
-### Required Environment Variables
-```bash
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL="<YOUR_SUPABASE_PROJECT_URL>"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="<YOUR_SUPABASE_ANON_PUBLIC_KEY>"
-SUPABASE_SERVICE_ROLE_KEY="<YOUR_SUPABASE_SERVICE_ROLE_KEY>"
-
-# Email Service (Resend)
-RESEND_API_KEY="<YOUR_RESEND_API_KEY>"
-
-# Application
-NEXT_PUBLIC_SITE_URL="<YOUR_SITE_URL>"
-```
-
----
-
-## 🎨 UI/UX Guidelines
-
-### Design System
-- **Colors:** Black/white primary, gray scale for UI elements
-- **Typography:** Clean, professional fonts
-- **Components:** shadcn/ui library for consistency
-- **Layout:** Responsive design with mobile-first approach
-
-### User Flows
-- **Talent:** Browse gigs → Apply → Manage applications → Portfolio
-- **Client:** Post gigs → Review applications → Manage bookings → Browse talent
-- **Admin:** User management, platform oversight
-
----
-
-## 🚀 Development Workflow
-
-### Code Standards
-- **TypeScript:** Strict mode enabled, no `any` types
-- **ESLint:** Next.js core web vitals + TypeScript rules
-- **Prettier:** Consistent code formatting
-- **Components:** Presentational only, no direct data fetching
-
-### Database Access
-- **Client:** Use `lib/supabase-client.ts` for all queries
-- **Server:** Use `lib/supabase-admin-client.ts` when needed
-- **RLS:** Always assume RLS is active, never bypass on client
-- **Types:** Use generated `Database` types for all queries
-
-### Testing Strategy
-- **Unit Tests:** Utility functions and business logic
-- **Integration Tests:** API routes and database operations
-- **E2E Tests:** Critical user flows (signup, gig posting, applications)
-
----
-
-## 🔄 Deployment & CI/CD
-
-### Production Setup
-- **Frontend:** Vercel deployment with environment variables
-- **Backend:** Supabase Cloud with production database
-- **Email:** Resend production API key
-- **Monitoring:** Error tracking and performance monitoring
-
-### Migration Strategy
-- **Schema Changes:** Use Supabase migrations
-- **Type Generation:** Auto-generate types after schema changes
-- **Rollback Plan:** Database backups and migration rollbacks
-
----
-
-## 🛡️ Security Best Practices
-
-### Data Protection
-- **RLS Policies:** Enforce row-level security on all tables
-- **Input Validation:** Validate all user inputs
-- **Rate Limiting:** Prevent abuse of auth endpoints
-- **HTTPS:** All production traffic over HTTPS
-
-### Authentication Security
-- **Email Verification:** Required for all accounts
-- **Password Requirements:** Strong password policies
-- **Session Management:** Secure session handling
-- **Admin Access:** Restricted admin functionality
-
----
-
-## 📚 Resources & Documentation
-
-### Key Files
-- **Database Schema:** `supabase/migrations/`
-- **Type Definitions:** `types/database.ts`
-- **Auth Provider:** `components/auth-provider.tsx`
-- **Middleware:** `middleware.ts`
-- **API Routes:** `app/api/`
-
-### External Services
-- **Supabase Dashboard:** Database management and monitoring
-- **Vercel Dashboard:** Frontend deployment and analytics
-- **Resend Dashboard:** Email delivery and analytics
-
----
-
-## 🤖 AI Assistant Rules & Context Engineering
-
-### Before Writing Any Code
-1. **ALWAYS reference this context file first**
-2. **Check existing database schema** before modifying
-3. **Verify RLS policies** for any data access
-4. **Use generated types** from `types/database.ts`
-5. **Follow project structure** and naming conventions
-
-### Code Generation Guidelines
-- **No `any` types** - use proper TypeScript interfaces
-- **RLS-compatible queries** - assume security policies are active
-- **Component separation** - no database logic in React components
-- **Error handling** - always check for Supabase errors
-- **Type safety** - leverage generated database types
-
-### Architecture Compliance
-- **Database access** through centralized Supabase clients
-- **Server-side data fetching** in API routes or server components
-- **Client-side state management** through React context
-- **Route protection** via Next.js middleware
-- **Email handling** through Resend API
-
-### Security Requirements
-- **Never expose service keys** in client-side code
-- **Always validate user permissions** before data access
-- **Use parameterized queries** (Supabase handles this)
-- **Implement proper error handling** for all database operations
-- **Follow least privilege principle** in all data access
-
----
-
-## 📋 Current Project Status
-
-### ✅ Completed Features
-- User authentication and role-based access
-- Talent and client profile management
-- Gig posting and browsing
-- Application system
-- Portfolio management
-- Email verification system
-- Admin dashboard framework
-
-### 🚧 In Progress
-- Booking management system
-- Advanced search and filtering
-- Real-time notifications
-- Payment integration
-- Advanced admin features
-
-### 📋 Planned Features
-- Mobile app development
-- Advanced analytics
-- Multi-language support
-- API for third-party integrations
-- Advanced reporting tools
-
----
-
-## 🔗 Quick Reference
-
-### Common Database Queries
-```typescript
-// Get user profile with role
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('id', userId)
-  .single();
-
-// Get talent profile with details
-const { data: talentProfile } = await supabase
-  .from('talent_profiles')
-  .select('*')
-  .eq('user_id', userId)
-  .single();
-
-// Get gigs with client info
-const { data: gigs } = await supabase
+// Always use specific field selection
+const { data, error } = await supabase
   .from('gigs')
-  .select(`
-    *,
-    profiles!gigs_client_id_fkey (
-      company_name,
-      industry
-    )
-  `)
+  .select('id, title, description, location, compensation')
   .eq('status', 'active');
 ```
 
-### Common Component Patterns
+#### **Server-Side**
 ```typescript
-// Protected route component
-export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
-  
-  if (isLoading) return <LoadingSpinner />;
-  if (!user) return <Redirect to="/login" />;
-  
-  return <>{children}</>;
-}
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
 
-// Safe query wrapper
-export async function safeQuery<T>(
-  queryFn: () => Promise<{ data: T | null; error: any }>
-): Promise<{ data: T | null; error: string | null }> {
-  try {
-    const result = await queryFn();
-    return { data: result.data, error: result.error?.message || null };
-  } catch (error) {
-    return { data: null, error: 'Unexpected error occurred' };
-  }
+const supabase = createServerComponentClient<Database>({ cookies });
+
+// Force dynamic rendering for auth-dependent pages
+export const dynamic = "force-dynamic";
+```
+
+### **Component Architecture**
+
+#### **Server Components (Data Fetching)**
+```typescript
+// app/gigs/page.tsx
+export default async function GigsPage() {
+  const supabase = createServerComponentClient<Database>({ cookies });
+  const { data: gigs } = await supabase
+    .from('gigs')
+    .select('*')
+    .eq('status', 'active');
+  
+  return <GigsClient gigs={gigs || []} />;
 }
+```
+
+#### **Client Components (Presentational)**
+```typescript
+// components/gigs-client.tsx
+"use client";
+
+export function GigsClient({ gigs }: { gigs: Gig[] }) {
+  if (gigs.length === 0) {
+    return <EmptyState message="No gigs available" />;
+  }
+  
+  return (
+    <div className="grid gap-4">
+      {gigs.map(gig => <GigCard key={gig.id} gig={gig} />)}
+    </div>
+  );
+}
+```
+
+### **Error Handling**
+```typescript
+// Always wrap Supabase calls in try-catch
+try {
+  const { data, error } = await supabase.from('gigs').select('*');
+  if (error) throw error;
+  return data || [];
+} catch (error) {
+  console.error('Error fetching gigs:', error);
+  return [];
+}
+```
+
+### **Type Safety**
+- Use generated types from `types/database.ts`
+- Never use `any` types
+- Always type component props
+- Use Zod for form validation
+
+## 🚀 Production Status
+
+### **✅ Production Ready Features**
+- ✅ Clean database (no mock data)
+- ✅ Secure RLS policies
+- ✅ Proper empty states
+- ✅ Real data fetching
+- ✅ Email verification flow
+- ✅ Role-based routing
+- ✅ TypeScript compilation
+- ✅ Build process working
+
+### **Current Database State**
+| Table | Records | Status |
+|-------|---------|--------|
+| `profiles` | 2 | ✅ Clean |
+| `client_profiles` | 1 | ✅ Clean |
+| `talent_profiles` | 1 | ✅ Clean |
+| `gigs` | 0 | ✅ Ready for real data |
+| `applications` | 0 | ✅ Ready for real data |
+
+### **Test Account**
+- **Email:** `testclient@example.com`
+- **Password:** `TestPassword123!`
+- **Purpose:** Demo client functionality
+
+## 📋 Quick Reference
+
+### **Common Commands**
+```bash
+# Development
+npm run dev          # Start dev server
+npm run build        # Production build
+npm run lint         # Run ESLint
+
+# Database
+npx supabase gen types typescript --project-id "<ID>" > types/database.ts
+npx supabase db reset    # Reset local database
+npx supabase db push     # Push migrations to remote
+```
+
+### **Key File Locations**
+- **Database Schema:** `database_schema_audit.md` (single source of truth)
+- **Supabase Config:** `supabase/config.toml`
+- **Migrations:** `supabase/migrations/`
+- **Types:** `types/database.ts`
+- **Auth Provider:** `components/auth-provider.tsx`
+
+### **Environment Variables**
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+RESEND_API_KEY=your_resend_key
+```
+
+## 🔧 Troubleshooting
+
+### **Common Issues**
+
+#### **"type user_role does not exist"**
+```sql
+-- Recreate the enum if missing
+CREATE TYPE public.user_role AS ENUM ('talent', 'client', 'admin');
+```
+
+#### **Build Error: Supabase not configured**
+```typescript
+// Add environment variable check
+const isSupabaseConfigured = typeof window !== 'undefined' && 
+  process.env.NEXT_PUBLIC_SUPABASE_URL && 
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+```
+
+#### **RLS Policy Issues**
+```sql
+-- Check if RLS is enabled
+SELECT schemaname, tablename, rowsecurity 
+FROM pg_tables 
+WHERE schemaname = 'public';
+
+-- Check policies
+SELECT * FROM pg_policies WHERE schemaname = 'public';
+```
+
+### **Debug Queries**
+```sql
+-- Check user profiles
+SELECT p.id, p.role, p.display_name, 
+       CASE WHEN tp.id IS NOT NULL THEN 'talent' 
+            WHEN cp.id IS NOT NULL THEN 'client' 
+            ELSE 'no_profile' END as profile_type
+FROM profiles p
+LEFT JOIN talent_profiles tp ON p.id = tp.user_id
+LEFT JOIN client_profiles cp ON p.id = cp.user_id;
+
+-- Check gigs with applications
+SELECT g.title, g.status, COUNT(a.id) as application_count
+FROM gigs g
+LEFT JOIN applications a ON g.id = a.gig_id
+GROUP BY g.id, g.title, g.status;
 ```
 
 ---
 
-**This context file should be referenced before writing any code for the TOTL Agency project. It contains all necessary information about the database schema, authentication system, security policies, and development guidelines.** 
+**For complete database schema details, see `database_schema_audit.md`**  
+**For development setup, see `README.md`** 

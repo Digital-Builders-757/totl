@@ -1,33 +1,29 @@
 /**
- * Returns a safe URL for images, with fallback if the URL is invalid
- *
- * @param url - The image URL (can be undefined, null, or empty string)
- * @param fallback - Fallback URL to use if the provided URL is invalid
+ * Utility function to get a fallback image URL
+ * @param src - Original image source
+ * @param fallback - Fallback image URL
  * @param type - Type of fallback to use (static or placeholder)
  * @param query - Query string for placeholder image
  * @param width - Width for placeholder
  * @param height - Height for placeholder
- * @returns A valid image URL
+ * @returns Fallback image URL
  */
-export function getSafeImageUrl(
-  url?: string | null,
-  {
-    fallback = "/placeholder.jpg",
-    type = "placeholder",
-    query = "image",
-    width = 400,
-    height = 400,
-  } = {}
+export function getFallbackImage(
+  src: string | null | undefined,
+  fallback = "/images/totl-logo-transparent.png",
+  type = "static",
+  query = "image",
+  width = 300,
+  height = 300
 ): string {
-  // Check if URL is valid
-  if (url && url.trim() !== "") {
-    return url;
+  if (src) {
+    return src;
   }
 
-  // Return appropriate fallback
-  if (type === "placeholder") {
-    return `/placeholder.svg?height=${height}&width=${width}&query=${query}`;
+  if (type === "static") {
+    return fallback;
   }
 
+  // For placeholder type, return a simple fallback
   return fallback;
 }

@@ -1,12 +1,15 @@
 "use client";
 
-import { Star, MapPin, Calendar, Users, Briefcase, ArrowRight } from "lucide-react";
-import Image from "next/image";
+// Force dynamic rendering to prevent build-time Supabase access
+export const dynamic = "force-dynamic";
+
+import { MapPin, DollarSign, Clock, Users, Star, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { PostAGigFooterLink } from "@/components/PostAGigFooterLink";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SafeImage } from "@/components/ui/safe-image";
 
 export default function HomePage() {
   return (
@@ -16,7 +19,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Image
+              <SafeImage
                 src="/images/totl-logo-transparent.png"
                 alt="TOTL Agency"
                 width={120}
@@ -85,14 +88,14 @@ export default function HomePage() {
                   <span>500+ Verified Talent</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Briefcase className="h-4 w-4" />
+                  <DollarSign className="h-4 w-4" />
                   <span>1000+ Projects Completed</span>
                 </div>
               </div>
             </div>
             <div className="relative">
               <div className="relative z-10">
-                <Image
+                <SafeImage
                   src="/images/hero-model.png"
                   alt="Featured Model"
                   width={600}
@@ -149,7 +152,7 @@ export default function HomePage() {
               >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden rounded-t-lg">
-                    <Image
+                    <SafeImage
                       src={talent.image}
                       alt={talent.name}
                       width={400}
@@ -200,83 +203,10 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Summer Fashion Campaign",
-                company: "Urban Threads",
-                location: "New York, NY",
-                budget: "$2,000 - $5,000",
-                deadline: "Dec 15, 2024",
-                image: "/images/model-1.png",
-                category: "Fashion",
-              },
-              {
-                title: "Fitness Brand Ambassador",
-                company: "FitLife Athletics",
-                location: "Los Angeles, CA",
-                budget: "$1,500 - $3,000",
-                deadline: "Dec 20, 2024",
-                image: "/images/model-2.png",
-                category: "Fitness",
-              },
-              {
-                title: "Beauty Product Launch",
-                company: "Glow Cosmetics",
-                location: "Miami, FL",
-                budget: "$1,000 - $2,500",
-                deadline: "Dec 25, 2024",
-                image: "/images/model-3.png",
-                category: "Beauty",
-              },
-            ].map((gig, index) => (
-              <Card
-                key={index}
-                className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
-              >
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <Image
-                      src={gig.image}
-                      alt={gig.title}
-                      width={400}
-                      height={250}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="secondary">{gig.category}</Badge>
-                    </div>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div>
-                      <h3 className="font-semibold text-lg mb-1">{gig.title}</h3>
-                      <p className="text-gray-600">{gig.company}</p>
-                    </div>
-                    <div className="space-y-2 text-sm text-gray-500">
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        {gig.location}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Apply by {gig.deadline}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2">
-                      <span className="font-semibold text-green-600">{gig.budget}</span>
-                      <Button size="sm">Apply Now</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Link href="/gigs">
-              <Button variant="outline" size="lg">
-                View All Gigs <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            {/* This section will be populated with real gigs from the database */}
+            <div className="text-center py-12">
+              <p className="text-gray-500">Loading latest opportunities...</p>
+            </div>
           </div>
         </div>
       </section>
@@ -365,7 +295,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <Image
+              <SafeImage
                 src="/images/totl-logo-transparent.png"
                 alt="TOTL Agency"
                 width={120}

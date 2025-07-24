@@ -48,7 +48,7 @@ export default function AuthSchemaCheck() {
         exists: false,
         tables: [],
         hasUsersTable: false,
-        error: e.message,
+        error: e instanceof Error ? e.message : "Unknown error",
       });
     } finally {
       setIsLoading(false);

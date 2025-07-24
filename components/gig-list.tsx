@@ -62,8 +62,7 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
               </div>
               <div className="flex items-center text-sm">
                 <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                {format(new Date(gig.start_date), "MMM d, yyyy")} -{" "}
-                {format(new Date(gig.end_date), "MMM d, yyyy")}
+                {format(new Date(gig.start_date), "MMM d, yyyy")}
               </div>
               {(gig.compensation_min || gig.compensation_max) && (
                 <div className="flex items-center text-sm">
@@ -71,20 +70,11 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
                   {gig.compensation_min && gig.compensation_max
                     ? `$${gig.compensation_min} - $${gig.compensation_max}`
                     : gig.compensation_min
-                      ? `From $${gig.compensation_min}`
+                      ? `$${gig.compensation_min}+`
                       : `Up to $${gig.compensation_max}`}
                 </div>
               )}
             </div>
-            {gig.requirements && gig.requirements.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {gig.requirements.map((requirement) => (
-                  <Badge key={requirement} variant="secondary">
-                    {requirement}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </CardContent>
           {showApplyButton && (
             <CardFooter>

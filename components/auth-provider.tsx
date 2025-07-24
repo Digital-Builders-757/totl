@@ -36,8 +36,31 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClientComponentClient<Database>();
+// Fallback auth provider when Supabase is not configured
+function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthContext.Provider
+      value={{
+        supabase: null as unknown as SupabaseClient<Database>,
+        user: null,
+        session: null,
+        userRole: null,
+        isLoading: false,
+        isEmailVerified: false,
+        signIn: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signUp: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signOut: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        sendVerificationEmail: async () => ({ error: new Error("Supabase not configured") }),
+        resetPassword: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Main auth provider with Supabase functionality
+function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
@@ -45,63 +68,134 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    // This immediately handles the initial session check, and the listener will take over from there.
-    const initialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  const supabase = createClientComponentClient<Database>();
 
-      // If there is no session on initial load, we can stop loading.
-      // The listener will handle the case where the user signs in.
-      if (!session) {
-        setIsLoading(false);
-        router.push("/login");
-        return;
+  // Session caching utilities
+  const SESSION_CACHE_KEY = "totl_session_cache";
+  const SESSION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  const cacheSession = (session: Session | null) => {
+    if (typeof window !== "undefined" && session) {
+      localStorage.setItem(
+        SESSION_CACHE_KEY,
+        JSON.stringify({
+          session,
+          timestamp: Date.now(),
+        })
+      );
+    }
+  };
+
+  const getCachedSession = (): Session | null => {
+    if (typeof window === "undefined") return null;
+
+    try {
+      const cached = localStorage.getItem(SESSION_CACHE_KEY);
+      if (!cached) return null;
+
+      const { session, timestamp } = JSON.parse(cached);
+      const now = Date.now();
+
+      // Check if cache is still valid (5 minutes)
+      if (now - timestamp < SESSION_CACHE_DURATION) {
+        return session;
       }
 
-      // If there is a session, proceed to set user and fetch profile
-      setUser(session.user);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", session.user.id)
-        .single();
-      const role = profile?.role as UserRole;
-      setUserRole(role);
-      setIsLoading(false); // Stop loading after initial fetch
-    };
+      // Clear expired cache
+      localStorage.removeItem(SESSION_CACHE_KEY);
+      return null;
+    } catch {
+      return null;
+    }
+  };
 
-    initialSession();
+  useEffect(() => {
+    // Prevent initialization during static generation
+    if (typeof window === "undefined") {
+      setIsLoading(false);
+      return;
+    }
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setIsLoading(true); // Start loading on any auth change
-      setSession(session);
-      setUser(session?.user ?? null);
+    let mounted = true;
 
-      if (event === "SIGNED_IN" && session) {
-        const { data: profile } = await supabase
+    // Initial session check - only once on mount
+    const initialSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!mounted) return;
+
+        // If there is no session on initial load, we can stop loading.
+        if (!session) {
+          setIsLoading(false);
+          return;
+        }
+
+        // If there is a session, proceed to set user and fetch profile
+        setUser(session.user);
+        setSession(session);
+
+        const { data: profileData } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
           .single();
 
-        const role = profile?.role as UserRole;
+        if (!mounted) return;
+
+        const role = profileData?.role as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error in initial session check:", error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-        // Redirect based on role
-        if (role === "talent") {
-          router.push("/admin/talentdashboard");
-        } else if (role === "client") {
-          router.push("/admin/dashboard");
-        } else if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          // If no role, perhaps go to a role selection or onboarding page
-          router.push("/choose-role");
+    initialSession();
+
+    // Set up auth state change listener - this is the main way to handle auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return;
+
+      setIsLoading(true);
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (event === "SIGNED_IN" && session) {
+        try {
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", session.user.id)
+            .single();
+
+          if (!mounted) return;
+
+          const role = profileData?.role as UserRole;
+          setUserRole(role);
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+
+          // Redirect based on role - FIXED PATHS
+          if (role === "talent") {
+            router.push("/talent/dashboard");
+          } else if (role === "client") {
+            router.push("/client/dashboard");
+          } else if (role === "admin") {
+            router.push("/admin/dashboard");
+          } else {
+            // If no role, perhaps go to a role selection or onboarding page
+            router.push("/choose-role");
+          }
+        } catch (error) {
+          console.error("Error fetching profile on sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
         setUser(null);
@@ -109,11 +203,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserRole(null);
         setIsEmailVerified(false);
         router.push("/login");
+      } else if (event === "TOKEN_REFRESHED") {
+        // Just update the session, no need to refetch profile
+        setSession(session);
+        if (session?.user) {
+          setUser(session.user);
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+        }
       }
-      setIsLoading(false); // Stop loading after handling the auth event
+
+      if (mounted) {
+        setIsLoading(false);
+      }
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, [supabase, router]);
@@ -167,50 +272,74 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { error: linkError ?? new Error("No action link returned") };
       }
 
-      // 2. Send custom verification email
+      // 2. Send the verification email using Resend
       const response = await fetch("/api/email/send-verification", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           email: user.email,
-          userId: user.id,
-          verificationUrl: linkData.properties.action_link,
+          verificationLink: linkData.properties.action_link,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send verification email");
+        const errorData = await response.json();
+        return { error: new Error(errorData.error || "Failed to send verification email") };
       }
 
       return { error: null };
-    } catch (err) {
-      console.error("Error sending verification email:", err);
-      return { error: err instanceof Error ? err : new Error("Unknown error") };
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      return { error: error instanceof Error ? error : new Error("Unknown error") };
     }
   };
 
   const resetPassword = async (email: string): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/update-password`,
-    });
-    return { error };
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      });
+      return { error };
+    } catch (error) {
+      console.error("Password reset error:", error);
+      return { error: { message: "Failed to send password reset email" } as AuthError };
+    }
   };
 
-  const value = {
-    supabase,
-    user,
-    session,
-    userRole,
-    isLoading,
-    isEmailVerified,
-    signIn,
-    signUp,
-    signOut,
-    sendVerificationEmail,
-    resetPassword,
-  };
+  return (
+    <AuthContext.Provider
+      value={{
+        supabase,
+        user,
+        session,
+        userRole,
+        isLoading,
+        isEmailVerified,
+        signIn,
+        signUp,
+        signOut,
+        sendVerificationEmail,
+        resetPassword,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  // Check if Supabase is configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn("Supabase not configured, using fallback auth provider");
+    return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
+  }
+
+  return <SupabaseAuthProvider>{children}</SupabaseAuthProvider>;
 }
 
 export function useAuth() {
@@ -222,23 +351,14 @@ export function useAuth() {
 }
 
 export function useSupabaseStatus() {
-  const [isSupabaseConnected, setIsSupabaseConnected] = useState(true);
-
   const checkConnection = async () => {
     try {
-      const supabaseAdmin = createSupabaseAdminClient();
-      const { error } = await supabaseAdmin.from("profiles").select("id").limit(1);
-
-      if (error) {
-        throw error;
-      }
-      setIsSupabaseConnected(true);
+      const response = await fetch("/api/admin/test-connection");
+      return response.ok;
     } catch {
-      setIsSupabaseConnected(false);
+      return false;
     }
   };
 
-  return { isSupabaseConnected, checkConnection };
+  return { checkConnection };
 }
-
-

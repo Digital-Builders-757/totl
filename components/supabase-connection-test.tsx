@@ -45,7 +45,7 @@ export default function SupabaseConnectionTest() {
       console.error("Error testing connection:", e);
       setConnectionStatus({
         connected: false,
-        error: e.message,
+        error: e instanceof Error ? e.message : "Unknown error",
         publicVars: false,
         serviceVars: false,
       });
