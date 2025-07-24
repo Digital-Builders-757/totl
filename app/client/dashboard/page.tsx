@@ -36,6 +36,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
+import { logEmptyState, logFallbackUsage } from "@/lib/error-logger";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -243,6 +245,41 @@ export default function ClientDashboard() {
     }
   }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
 
+  // Check for incomplete profile
+  const missingFields = [];
+  if (!clientProfile?.company_name) missingFields.push("Company Name");
+  if (!clientProfile?.contact_name) missingFields.push("Contact Name");
+  if (!clientProfile?.contact_email) missingFields.push("Contact Email");
+
+  // Log empty states for analytics
+  useEffect(() => {
+    if (!loading && user) {
+      if (applications.length === 0) {
+        logEmptyState("client_applications", user.id, "client");
+      }
+      if (gigs.length === 0) {
+        logEmptyState("client_gigs", user.id, "client");
+      }
+    }
+  }, [applications.length, gigs.length, loading, user]);
+
+  // Log fallback usage
+  useEffect(() => {
+    if (applications.length > 0 && user) {
+      applications.forEach(app => {
+        if (!app.talent_profiles?.first_name && app.profiles?.display_name) {
+          logFallbackUsage("display_name", "talent_name", user.id);
+        }
+        if (!app.talent_profiles?.location) {
+          logFallbackUsage("location", "talent_location", user.id);
+        }
+        if (!app.talent_profiles?.experience) {
+          logFallbackUsage("experience", "talent_experience", user.id);
+        }
+      });
+    }
+  }, [applications, user]);
+
   const getStatusColor = (status: string | undefined) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -360,26 +397,15 @@ export default function ClientDashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Profile Completion Alert */}
-        {needsProfileCompletion && (
-          <Card className="mb-6 border-orange-200 bg-orange-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-orange-600" />
-                <div className="flex-1">
-                  <h3 className="font-medium text-orange-900">Complete Your Profile</h3>
-                  <p className="text-sm text-orange-700">
-                    Add your company information to get the most out of the platform.
-                  </p>
-                </div>
-                <Button size="sm" variant="outline" asChild>
-                  <Link href="/client/profile">Complete Profile</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Profile Completion Banner */}
+        <ProfileCompletionBanner
+          userRole="client"
+          missingFields={missingFields}
+          profileUrl="/client/profile"
+        />
+
+        {/* Welcome Section */}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
