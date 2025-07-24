@@ -832,12 +832,6 @@ export default function TalentDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Debug info */}
-                <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
-                  Debug: {gigs.length} gigs loaded, Error: {error || "none"}, Loading:{" "}
-                  {loading ? "yes" : "no"}
-                </div>
-
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
@@ -922,9 +916,13 @@ export default function TalentDashboard() {
                             </div>
                           </div>
                           <div className="flex gap-2 pt-2">
-                            <Button className="flex-1">Apply Now</Button>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
+                            <Button className="flex-1" asChild>
+                              <Link href={`/gigs/${gig.id}/apply`}>Apply Now</Link>
+                            </Button>
+                            <Button variant="outline" size="sm" asChild>
+                              <Link href={`/gigs/${gig.id}`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
                             </Button>
                           </div>
                         </CardContent>
