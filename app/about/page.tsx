@@ -10,7 +10,7 @@ export default function AboutPage() {
       <section className="relative bg-black text-white">
         <div className="absolute inset-0 z-0 opacity-50">
           <Image
-            src="/placeholder.jpg"
+            src="/images/totl-logo.png"
             alt="TOTL Agency Team"
             fill
             className="object-cover"

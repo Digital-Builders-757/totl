@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
 import { logEmptyState, logFallbackUsage } from "@/lib/error-logger";
 
 // Force dynamic rendering to prevent build-time issues
@@ -191,11 +191,13 @@ export default function ClientDashboard() {
       console.log("🔍 Fetching applications for client:", user.id); // Debug log
       const { data: applicationsData, error: applicationsError } = await supabase
         .from("applications")
-        .select(`
+        .select(
+          `
           *,
           gigs!inner(id, title, client_id),
           profiles!talent_id(display_name, email_verified, role)
-        `)
+        `
+        )
         .eq("gigs.client_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -206,7 +208,7 @@ export default function ClientDashboard() {
       } else {
         // Fetch talent profiles separately if needed
         if (applicationsData && applicationsData.length > 0) {
-          const talentIds = applicationsData.map(app => app.talent_id);
+          const talentIds = applicationsData.map((app) => app.talent_id);
           const { data: talentProfilesData, error: talentProfilesError } = await supabase
             .from("talent_profiles")
             .select("user_id, first_name, last_name, location, experience")
@@ -214,9 +216,10 @@ export default function ClientDashboard() {
 
           if (!talentProfilesError && talentProfilesData) {
             // Merge talent profiles with applications
-            const applicationsWithProfiles = applicationsData.map(app => ({
+            const applicationsWithProfiles = applicationsData.map((app) => ({
               ...app,
-              talent_profiles: talentProfilesData.find(tp => tp.user_id === app.talent_id) || null
+              talent_profiles:
+                talentProfilesData.find((tp) => tp.user_id === app.talent_id) || null,
             }));
             setApplications(applicationsWithProfiles);
           } else {
@@ -266,7 +269,7 @@ export default function ClientDashboard() {
   // Log fallback usage
   useEffect(() => {
     if (applications.length > 0 && user) {
-      applications.forEach(app => {
+      applications.forEach((app) => {
         if (!app.talent_profiles?.first_name && app.profiles?.display_name) {
           logFallbackUsage("display_name", "talent_name", user.id);
         }
@@ -367,7 +370,7 @@ export default function ClientDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/placeholder.jpg" alt="Company" />
+                <AvatarImage src="/images/totl-logo.png" alt="Company" />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
@@ -538,7 +541,7 @@ export default function ClientDashboard() {
                     gigs.slice(0, 3).map((gig) => (
                       <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
                         <SafeImage
-                          src={gig.image_url || "/placeholder.jpg"}
+                          src={gig.image_url || "/images/totl-logo.png"}
                           alt={gig.title}
                           width={48}
                           height={48}
@@ -727,7 +730,7 @@ export default function ClientDashboard() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <SafeImage
-                      src={gig.image_url || "/placeholder.jpg"}
+                      src={gig.image_url || "/images/totl-logo.png"}
                       alt={gig.title}
                       width={300}
                       height={200}
@@ -814,16 +817,17 @@ export default function ClientDashboard() {
                           <AvatarImage
                             src="/images/totl-logo-transparent.png"
                             alt={
-                              application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                              application.talent_profiles?.first_name &&
+                              application.talent_profiles?.last_name
                                 ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
                                 : application.profiles?.display_name || "Talent"
                             }
                           />
                           <AvatarFallback className="text-lg">
-                            {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                            {application.talent_profiles?.first_name &&
+                            application.talent_profiles?.last_name
                               ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
-                              : application.profiles?.display_name?.charAt(0) || "T"
-                            }
+                              : application.profiles?.display_name?.charAt(0) || "T"}
                           </AvatarFallback>
                         </Avatar>
 
@@ -831,20 +835,22 @@ export default function ClientDashboard() {
                           <div className="flex items-start justify-between">
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                {application.talent_profiles?.first_name && application.talent_profiles?.last_name
+                                {application.talent_profiles?.first_name &&
+                                application.talent_profiles?.last_name
                                   ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
-                                  : application.profiles?.display_name || "Talent User"
-                                }
+                                  : application.profiles?.display_name || "Talent User"}
                               </h3>
                               <p className="text-gray-600">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
                                 <span className="text-sm text-gray-600">
                                   <MapPin className="h-4 w-4 inline mr-1" />
-                                  {application.talent_profiles?.location || "Location not specified"}
+                                  {application.talent_profiles?.location ||
+                                    "Location not specified"}
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   <Clock className="h-4 w-4 inline mr-1" />
-                                  {application.talent_profiles?.experience || "Experience not specified"}
+                                  {application.talent_profiles?.experience ||
+                                    "Experience not specified"}
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   Applied {new Date(application.created_at).toLocaleDateString()}

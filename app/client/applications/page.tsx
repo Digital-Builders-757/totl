@@ -27,12 +27,10 @@ interface Application {
     location: string;
     compensation: string;
   };
-  talent_profiles?: {
-    first_name: string;
-    last_name: string;
-    location?: string;
-    experience?: string;
-    portfolio_url?: string;
+  profiles?: {
+    display_name: string;
+    email_verified: boolean;
+    role: string;
   };
 }
 
@@ -64,7 +62,7 @@ export default function ClientApplicationsPage() {
           `
           *,
           gigs!inner(client_id),
-          talent_profiles(first_name, last_name, location)
+          profiles!talent_id(display_name, email_verified, role)
         `
         )
         .eq("gigs.client_id", user.id)
@@ -131,10 +129,8 @@ export default function ClientApplicationsPage() {
 
   const filteredApplications = applications.filter((application) => {
     const matchesSearch =
-      application.talent_profiles?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.talent_profiles?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.gigs?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      application.talent_profiles?.location?.toLowerCase().includes(searchTerm.toLowerCase());
+      application.profiles?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      application.gigs?.title?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || application.status?.toLowerCase() === statusFilter.toLowerCase();
@@ -353,18 +349,17 @@ export default function ClientApplicationsPage() {
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h3 className="text-lg font-semibold text-gray-900">
-                                {application.talent_profiles?.first_name}{" "}
-                                {application.talent_profiles?.last_name}
+                                {application.profiles?.display_name}
                               </h3>
                               <p className="text-gray-600">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
-                                  {application.talent_profiles?.location}
+                                  {application.gigs?.location}
                                 </span>
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
                                   {/* Removed Star icon as it's no longer imported */}
-                                  {application.talent_profiles?.experience}
+                                  {application.profiles?.role}
                                 </span>
                                 <span className="text-sm text-gray-600 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
@@ -395,15 +390,15 @@ export default function ClientApplicationsPage() {
                               {/* Removed Mail icon as it's no longer imported */}
                               Email
                             </Button>
-                            {application.talent_profiles?.portfolio_url && (
+                            {application.profiles?.email_verified && (
                               <Button variant="outline" size="sm" asChild>
                                 <a
-                                  href={application.talent_profiles.portfolio_url}
+                                  href={`/talent/${application.talent_id}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
                                   <FileText className="h-4 w-4 mr-2" />
-                                  Portfolio
+                                  View Profile
                                 </a>
                               </Button>
                             )}

@@ -23,7 +23,7 @@ export function SafeImage({
   height = 300,
   fill = false,
   className = "",
-  fallbackSrc = "/placeholder.jpg",
+  fallbackSrc = "/images/totl-logo.png",
   context = "unknown",
   placeholderQuery, // Ignore for now, keep for compatibility
 }: SafeImageProps) {
