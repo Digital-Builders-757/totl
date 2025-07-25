@@ -3,7 +3,25 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SettingsForm } from "@/components/SettingsForm";
 
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = "force-dynamic";
+
 export default async function SettingsPage() {
+  // Check if Supabase is configured
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="h-12 w-12 text-red-500 mx-auto mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
+          <p className="text-gray-600 mb-4">
+            Supabase is not configured. Please check your environment variables.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const supabase = createServerComponentClient({ cookies });
 
   // Get current user
