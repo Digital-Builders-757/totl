@@ -486,12 +486,14 @@ USING (
 4. **`20250722015600_fix_handle_new_user_trigger_null_handling.sql`** - NULL handling fixes
 5. **`20250722015600_fix_user_role_enum_reference_in_trigger.sql`** - Enum reference fixes
 6. **`add_missing_rls_policies_for_production.sql`** - Production RLS policies
+7. **`20250725211607_fix_security_warnings.sql`** - Security hardening (search paths, OTP expiry, password protection)
 
 ### **Recent Updates**
 - ✅ **Production cleanup** - Removed all mock data
 - ✅ **RLS enhancement** - Added secure policies
 - ✅ **Trigger optimization** - Fixed NULL handling
 - ✅ **Enum fixes** - Resolved type reference issues
+- ✅ **Security hardening** - Fixed function search paths, reduced OTP expiry, enabled password protection
 
 ---
 

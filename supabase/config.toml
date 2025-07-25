@@ -117,7 +117,11 @@ enable_manual_linking = false
 minimum_password_length = 6
 # Passwords that do not meet the following requirements will be rejected as weak. Supported values
 # are: `letters_digits`, `lower_upper_letters_digits`, `lower_upper_letters_digits_symbols`
-password_requirements = ""
+password_requirements = "lower_upper_letters_digits_symbols"
+
+# Enable protection against known leaked passwords
+# Note: This feature may not be available in all Supabase CLI versions
+# enable_leaked_password_protection = true
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
@@ -133,8 +137,8 @@ secure_password_change = false
 max_frequency = "1s"
 # Number of characters used in the email OTP.
 otp_length = 6
-# Number of seconds before the email OTP expires (defaults to 1 hour).
-otp_expiry = 3600
+# Number of seconds before the email OTP expires (reduced from 1 hour to 15 minutes for security).
+otp_expiry = 900
 
 # Use a production-ready SMTP server
 # [auth.email.smtp]
