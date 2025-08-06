@@ -34,7 +34,7 @@ if (-not $SkipDbGeneration) {
     Write-Host "Ensuring local database reflects all migrations..." -ForegroundColor Cyan
     try {
         # Apply latest migrations to a local Supabase instance (Docker must be running)
-        $null = & supabase db reset --no-confirm
+        $null = & supabase db reset --yes
     } catch {
         Write-Warning "Supabase CLI failed to apply migrations locally: $($_.Exception.Message)"
     }

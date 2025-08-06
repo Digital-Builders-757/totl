@@ -134,7 +134,7 @@ npx supabase gen types typescript --project-id <PROJECT_ID> > types/database.ts
 ### **Database Reset**
 ```powershell
 # Reset local database and apply all migrations
-supabase db reset --no-confirm
+supabase db reset --yes
 ```
 
 ## 📊 Benefits
