@@ -11,15 +11,8 @@ BEGIN;
 -- 1. DROP EXISTING OBJECTS (if they exist)
 -- =====================================================
 
--- Drop triggers first
+-- Drop triggers first (only if tables exist)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
-DROP TRIGGER IF EXISTS update_talent_profiles_updated_at ON talent_profiles;
-DROP TRIGGER IF EXISTS update_client_profiles_updated_at ON client_profiles;
-DROP TRIGGER IF EXISTS update_gigs_updated_at ON gigs;
-DROP TRIGGER IF EXISTS update_applications_updated_at ON applications;
-DROP TRIGGER IF EXISTS update_gig_requirements_updated_at ON gig_requirements;
-DROP TRIGGER IF EXISTS update_client_applications_updated_at ON client_applications;
 
 -- Drop functions
 DROP FUNCTION IF EXISTS public.handle_new_user();
