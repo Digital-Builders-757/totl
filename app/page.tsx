@@ -3,13 +3,13 @@
 // Force dynamic rendering to prevent build-time Supabase access
 export const dynamic = "force-dynamic";
 
-import { MapPin, DollarSign, Clock, Users, Star, ArrowRight } from "lucide-react";
+import { DollarSign, Users, ArrowRight, Star, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PostAGigFooterLink } from "@/components/PostAGigFooterLink";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
 
 export default function HomePage() {

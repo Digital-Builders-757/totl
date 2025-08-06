@@ -9,14 +9,13 @@ import {
   XCircle,
   Clock,
   Filter,
-  Building,
   Settings,
   LogOut,
   Bell,
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,7 +54,6 @@ interface AdminApplicationsClientProps {
 
 export function AdminApplicationsClient({
   applications: initialApplications,
-  user,
 }: AdminApplicationsClientProps) {
   const [activeTab, setActiveTab] = useState("pending");
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,7 +67,6 @@ export function AdminApplicationsClient({
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const router = useRouter();
   const { toast } = useToast();
   const supabase = createClientComponentClient<Database>();
 

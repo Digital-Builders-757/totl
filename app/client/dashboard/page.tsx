@@ -54,13 +54,6 @@ interface ClientProfile {
   company_size?: string | null;
 }
 
-interface Profile {
-  id: string;
-  role: string;
-  display_name: string;
-  email_verified: boolean;
-}
-
 interface Application {
   id: string;
   gig_id: string;
@@ -131,8 +124,6 @@ export default function ClientDashboard() {
     totalSpent: 0, // This would need to be calculated from bookings/payments
   };
 
-  const needsProfileCompletion = !clientProfile?.company_name || !clientProfile?.contact_name;
-
   // Get upcoming deadlines (gigs with deadlines in the next 30 days)
   const upcomingDeadlines = gigs
     .filter((gig) => gig.status === "active" && gig.application_deadline)
@@ -150,7 +141,7 @@ export default function ClientDashboard() {
 
     try {
       // Fetch user profile
-      const { data: profileData, error: profileError } = await supabase
+      const { error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
@@ -188,7 +179,6 @@ export default function ClientDashboard() {
       }
 
       // Fetch applications for client's gigs
-      console.log("🔍 Fetching applications for client:", user.id); // Debug log
       const { data: applicationsData, error: applicationsError } = await supabase
         .from("applications")
         .select(
@@ -200,8 +190,6 @@ export default function ClientDashboard() {
         )
         .eq("gigs.client_id", user.id)
         .order("created_at", { ascending: false });
-
-      console.log("📊 Applications fetch result:", { applicationsData, applicationsError }); // Debug log
 
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);

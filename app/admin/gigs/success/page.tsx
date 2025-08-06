@@ -1,21 +1,17 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import { CheckCircle, Clock, MapPin, DollarSign, Calendar, Users } from "lucide-react";
+import { CheckCircle, Clock, Users } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { useToast } from "@/hooks/use-toast";
-import type { Database } from "@/types/supabase";
 
 export default function GigSuccessPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
-  const supabase = createClientComponentClient<Database>();
 
   const gigId = searchParams.get("gigId");
 
@@ -120,7 +116,7 @@ export default function GigSuccessPage() {
                 </p>
                 <div className="mt-6 space-y-2">
                   <p className="text-sm text-gray-500">
-                    • You'll receive an email notification once it's approved
+                    • You&apos;ll receive an email notification once it&apos;s approved
                   </p>
                   <p className="text-sm text-gray-500">
                     • Approved gigs appear on the talent dashboard within 24 hours

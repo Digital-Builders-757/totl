@@ -1,12 +1,8 @@
 export const dynamic = "force-dynamic";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { TriangleIcon as ExclamationTriangleIcon } from "lucide-react";
 import { cookies } from "next/headers";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import type { Database } from "@/types/supabase";
 
 export default async function DashboardPage() {

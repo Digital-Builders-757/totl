@@ -32,28 +32,35 @@ class ErrorLogger {
     return ErrorLogger.instance;
   }
 
-  logError(error: string, context: string, userId?: string, userRole?: string): void {
+  logError(error: string, context: string, userId?: string): void {
     const logData: ErrorLogData = {
       error,
       context,
       userId,
-      userRole,
+
       timestamp: new Date().toISOString(),
-      url: typeof window !== 'undefined' ? window.location.href : undefined,
-      userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+      userAgent: typeof window !== "undefined" ? window.navigator.userAgent : undefined,
     };
 
     this.logs.push(logData);
-    
+
     // In production, you'd send this to your logging service
-    if (process.env.NODE_ENV === 'development') {
-      console.error('🔴 Error Logged:', logData);
+    if (process.env.NODE_ENV === "development") {
+      console.error("🔴 Error Logged:", logData);
     }
-    
+
     // You could also send to Supabase, Sentry, or other services here
   }
 
-  logAnalytics(event: string, category: string, action: string, label?: string, value?: number, userId?: string): void {
+  logAnalytics(
+    event: string,
+    category: string,
+    action: string,
+    label?: string,
+    value?: number,
+    userId?: string
+  ): void {
     const analyticsData: AnalyticsEvent = {
       event,
       category,
@@ -65,24 +72,31 @@ class ErrorLogger {
     };
 
     this.analytics.push(analyticsData);
-    
+
     // In production, you'd send this to your analytics service
-    if (process.env.NODE_ENV === 'development') {
-      console.log('📊 Analytics Event:', analyticsData);
+    if (process.env.NODE_ENV === "development") {
+      console.log("📊 Analytics Event:", analyticsData);
     }
   }
 
-  logEmptyState(context: string, userId?: string, userRole?: string): void {
-    this.logAnalytics('empty_state', 'user_experience', 'displayed', context, 1, userId);
+  logEmptyState(context: string, userId?: string): void {
+    this.logAnalytics("empty_state", "user_experience", "displayed", context, 1, userId);
   }
 
   logFallbackUsage(fallbackType: string, context: string, userId?: string): void {
-    this.logAnalytics('fallback_used', 'user_experience', 'displayed', `${fallbackType}_in_${context}`, 1, userId);
+    this.logAnalytics(
+      "fallback_used",
+      "user_experience",
+      "displayed",
+      `${fallbackType}_in_${context}`,
+      1,
+      userId
+    );
   }
 
   logImageFallback(imagePath: string, context: string): void {
     this.logError(`Image not found: ${imagePath}`, context);
-    this.logAnalytics('image_fallback', 'assets', 'displayed', imagePath);
+    this.logAnalytics("image_fallback", "assets", "displayed", imagePath);
   }
 
   getLogs(): ErrorLogData[] {
@@ -102,22 +116,29 @@ class ErrorLogger {
 export const errorLogger = ErrorLogger.getInstance();
 
 // Convenience functions
-export const logError = (error: string, context: string, userId?: string, userRole?: string) => {
-  errorLogger.logError(error, context, userId, userRole);
+export const logError = (error: string, context: string, userId?: string) => {
+  errorLogger.logError(error, context, userId);
 };
 
-export const logAnalytics = (event: string, category: string, action: string, label?: string, value?: number, userId?: string) => {
+export const logAnalytics = (
+  event: string,
+  category: string,
+  action: string,
+  label?: string,
+  value?: number,
+  userId?: string
+) => {
   errorLogger.logAnalytics(event, category, action, label, value, userId);
 };
 
-export const logEmptyState = (context: string, userId?: string, userRole?: string) => {
-  errorLogger.logEmptyState(context, userId, userRole);
+export const logEmptyState = (context: string, userId?: string) => {
+  errorLogger.logEmptyState(context, userId);
 };
 
 export const logFallbackUsage = (fallbackType: string, context: string, userId?: string) => {
   errorLogger.logFallbackUsage(fallbackType, context, userId);
-}; 
+};
 
 export const logImageFallback = (imagePath: string, context: string) => {
   errorLogger.logImageFallback(imagePath, context);
-}; 
+};

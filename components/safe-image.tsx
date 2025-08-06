@@ -12,7 +12,6 @@ interface SafeImageProps {
   className?: string;
   fallbackSrc?: string;
   fallbackType?: "placeholder" | "static";
-  placeholderQuery?: string;
 }
 
 /**
@@ -36,7 +35,6 @@ export function SafeImage({
   className = "",
   fallbackSrc = "/images/totl-logo-transparent.png",
   fallbackType = "static",
-  placeholderQuery = "image",
 }: SafeImageProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(src || null);
   const [hasError, setHasError] = useState(false);

@@ -26,6 +26,67 @@
 - Add proper error handling
 - Include TypeScript types
 
+## 🖥️ Environment Standards
+
+### **PowerShell Environment (Windows)**
+- **OS:** Windows 10/11
+- **Shell:** PowerShell
+- **Commands:** Use PowerShell-compatible commands only
+  - `Get-ChildItem` instead of `ls`
+  - `Get-Content` instead of `cat`
+  - `Select-String` instead of `grep`
+  - `Where-Object` for filtering
+  - `ForEach-Object` for iteration
+  - `New-Item` for creating files/directories
+  - `Remove-Item` for deleting files/directories
+  - `Copy-Item` for copying files
+  - `Move-Item` for moving files
+  - `Test-Path` for checking file existence
+
+### **Common PowerShell Patterns**
+```powershell
+# File operations
+Get-ChildItem -Recurse -Filter "*.ts" | Where-Object { $_.Name -like "*component*" }
+Get-Content file.txt | Select-String "pattern"
+Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
+
+# File existence checks
+if (Test-Path "file.txt") { Write-Host "File exists" }
+
+# Creating/deleting files
+New-Item -ItemType File -Name "newfile.txt"
+Remove-Item "file.txt" -Force
+```
+
+## 📚 Documentation Standards
+
+### **Documentation-First Approach**
+**CRITICAL:** Always check relevant documentation before making any changes:
+1. Read project documentation overview files
+2. Check developer quick reference guides
+3. Review coding standards documentation
+4. Consult database schema documentation
+5. Reference project context files
+
+### **Documentation Maintenance**
+- Update documentation after significant changes
+- Remove outdated information
+- Ensure cross-references remain accurate
+- Test documentation instructions
+- Update timestamps in modified files
+
+### Code Documentation
+- Add JSDoc comments for complex functions
+- Document API endpoints
+- Include usage examples
+- Maintain README files
+
+### Project Documentation
+- Keep context files updated
+- Document architectural decisions
+- Maintain changelog
+- Include setup instructions
+
 ## 🏗️ Architecture Principles
 
 ### Separation of Concerns
@@ -46,28 +107,15 @@
 - Implement lazy loading
 - Monitor and optimize bundle size
 
-## 📚 Documentation Standards
-
-### Code Documentation
-- Add JSDoc comments for complex functions
-- Document API endpoints
-- Include usage examples
-- Maintain README files
-
-### Project Documentation
-- Keep context files updated
-- Document architectural decisions
-- Maintain changelog
-- Include setup instructions
-
 ## 🔄 Development Workflow
 
 ### Before Writing Code
 1. Understand the requirements
 2. Check existing codebase
 3. Reference project context
-4. Plan the implementation
-5. Consider edge cases
+4. **Check relevant documentation**
+5. Plan the implementation
+6. Consider edge cases
 
 ### Code Review Checklist
 - [ ] TypeScript types are correct
@@ -75,6 +123,7 @@
 - [ ] Security considerations addressed
 - [ ] Performance impact considered
 - [ ] Documentation updated
+- [ ] PowerShell commands used (if applicable)
 
 ### Testing Strategy
 - Write unit tests for utilities
@@ -92,6 +141,8 @@
 - Ignoring error handling
 - Hardcoding values
 - Mixing concerns
+- **Using Unix commands in PowerShell**
+- **Making changes without checking documentation**
 
 ### Security Anti-Patterns
 - Storing secrets in code
@@ -122,6 +173,19 @@
 - [ ] Bundle size reasonable
 - [ ] Loading states implemented
 - [ ] Caching strategy used
+
+### Documentation
+- [ ] Documentation checked before changes
+- [ ] Documentation updated after changes
+- [ ] Cross-references accurate
+- [ ] Instructions tested
+- [ ] Timestamps updated
+
+### Environment
+- [ ] PowerShell commands used (Windows)
+- [ ] Unix commands avoided (Windows)
+- [ ] Environment variables properly configured
+- [ ] Dependencies up to date
 
 ---
 

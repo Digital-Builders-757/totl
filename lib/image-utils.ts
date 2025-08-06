@@ -11,10 +11,7 @@
 export function getFallbackImage(
   src: string | null | undefined,
   fallback = "/images/totl-logo-transparent.png",
-  type = "static",
-  query = "image",
-  width = 300,
-  height = 300
+  type = "static"
 ): string {
   if (src) {
     return src;

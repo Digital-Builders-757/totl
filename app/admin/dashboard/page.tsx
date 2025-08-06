@@ -32,13 +32,13 @@ export default async function AdminDashboard() {
   }
 
   // Fetch dashboard data (gigs, applications, etc.)
-  const { data: gigs, error: gigsError } = await supabase
+  const { data: gigs } = await supabase
     .from("gigs")
     .select("*")
     .order("created_at", { ascending: false })
     .limit(5);
 
-  const { data: applications, error: applicationsError } = await supabase
+  const { data: applications } = await supabase
     .from("applications")
     .select("*")
     .order("created_at", { ascending: false })

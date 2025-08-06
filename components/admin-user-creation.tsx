@@ -45,8 +45,6 @@ export default function AdminUserCreation() {
     setSuccess(null);
 
     try {
-      console.log("Creating user with email:", email);
-
       // Try to create user with direct API call
       const { data, error } = await supabase.functions.invoke("create-user", {
         body: {
@@ -63,8 +61,6 @@ export default function AdminUserCreation() {
         setError(error.message || "Failed to create user");
         return;
       }
-
-      console.log("User creation response:", data);
 
       if (data?.error) {
         setError(data.error);

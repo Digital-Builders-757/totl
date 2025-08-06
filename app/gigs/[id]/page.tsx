@@ -1,20 +1,12 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "lucide-react";
 import { cookies } from "next/headers";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { SafeImage } from "@/components/ui/safe-image";
-import { 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  Clock, 
-  Building,
-  ArrowLeft,
-  Send
-} from "lucide-react";
-import Link from "next/link";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering
@@ -224,7 +216,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                     Application Submitted
                   </Badge>
                   <p className="text-sm text-gray-600">
-                    You've already applied for this gig. Check your dashboard for updates.
+                    You&apos;ve already applied for this gig. Check your dashboard for updates.
                   </p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/talent/dashboard">View Dashboard</Link>

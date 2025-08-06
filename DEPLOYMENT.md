@@ -1,5 +1,8 @@
 # 🚀 TOTL Agency Deployment Guide
 
+**Last Updated:** July 25, 2025  
+**Status:** Production Ready
+
 ## Environment Variables Required
 
 ### Supabase Configuration
@@ -51,6 +54,26 @@ npx tsc --noEmit
 
 Both commands should complete without errors.
 
+## Database Migration
+
+### Local Development
+```bash
+# Reset local database
+supabase db reset
+
+# Generate types
+npx supabase gen types typescript --local > types/database.ts
+```
+
+### Production
+```bash
+# Push migrations to production
+supabase db push
+
+# Generate types from production
+npx supabase gen types typescript --project-id your-project-id > types/database.ts
+```
+
 ## Troubleshooting
 
 ### "Supabase not configured" Error
@@ -61,4 +84,32 @@ Both commands should complete without errors.
 ### Build Fails on Vercel
 - Environment variables must be set in Vercel dashboard
 - Local `.env.local` is not used in production builds
-- Redeploy after adding environment variables 
+- Redeploy after adding environment variables
+
+### Database Connection Issues
+- Verify Supabase project is active
+- Check API keys are correct
+- Ensure RLS policies are properly configured
+
+## Post-Deployment Checklist
+
+- [ ] **Environment variables** set correctly
+- [ ] **Database migrations** applied
+- [ ] **Email service** working (if configured)
+- [ ] **Authentication** functioning
+- [ ] **RLS policies** active
+- [ ] **Performance** acceptable
+- [ ] **Error handling** working
+- [ ] **Empty states** displaying correctly
+
+## Security Considerations
+
+- ✅ **RLS policies** enabled on all tables
+- ✅ **No service keys** exposed to client
+- ✅ **Environment variables** properly configured
+- ✅ **HTTPS** enforced in production
+- ✅ **Authentication** required for protected routes
+
+---
+
+**For detailed security information, see [SECURITY_FIXES_SUMMARY.md](SECURITY_FIXES_SUMMARY.md)** 

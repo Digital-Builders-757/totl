@@ -1,6 +1,6 @@
 # TOTL Agency - Coding Standards
 
-**Last Updated:** July 23, 2025  
+**Last Updated:** July 25, 2025  
 **Status:** Production Ready
 
 ## Table of Contents
@@ -8,7 +8,6 @@
 - [React Patterns](#react-patterns)
 - [Database Patterns](#database-patterns)
 - [File Organization](#file-organization)
-- [Naming Conventions](#naming-conventions)
 - [Error Handling](#error-handling)
 
 ## 🔷 TypeScript Standards
@@ -132,12 +131,6 @@ export function GigsClient({ gigs }: GigsClientProps) {
 const [loading, setLoading] = useState(false);
 const [error, setError] = useState<string | null>(null);
 const [data, setData] = useState<Gig[]>([]);
-
-// ✅ Good - Use React Query for server state (if needed)
-const { data: gigs, isLoading, error } = useQuery({
-  queryKey: ['gigs'],
-  queryFn: fetchGigs,
-});
 ```
 
 ### **Event Handling**
@@ -334,63 +327,6 @@ export function GigCard({ gig, onApply }: GigCardProps) {
     </Card>
   );
 }
-```
-
-## 🏷️ Naming Conventions
-
-### **Variables and Functions**
-```typescript
-// ✅ Good - Descriptive names
-const fetchUserGigs = async (userId: string) => { /* ... */ };
-const handleGigApplication = async (gigId: string) => { /* ... */ };
-const isGigActive = (gig: Gig) => gig.status === 'active';
-
-// ❌ Bad - Unclear names
-const fetch = async (id: string) => { /* ... */ };
-const handle = async (id: string) => { /* ... */ };
-const check = (g: Gig) => g.status === 'active';
-```
-
-### **Database Fields**
-```typescript
-// ✅ Good - Consistent naming
-interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  compensation: string;
-  application_deadline: string; // snake_case for DB
-  created_at: string;
-  updated_at: string;
-}
-
-// ❌ Bad - Inconsistent naming
-interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  compensation: string;
-  applicationDeadline: string; // camelCase mixed with snake_case
-  createdAt: string;
-  updatedAt: string;
-}
-```
-
-### **CSS Classes**
-```typescript
-// ✅ Good - Tailwind classes
-<div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm">
-  <h2 className="text-lg font-semibold text-gray-900">Gig Title</h2>
-  <span className="text-sm text-gray-500">Location</span>
-</div>
-
-// ❌ Bad - Custom CSS classes
-<div className="gig-card">
-  <h2 className="gig-title">Gig Title</h2>
-  <span className="gig-location">Location</span>
-</div>
 ```
 
 ## ⚠️ Error Handling

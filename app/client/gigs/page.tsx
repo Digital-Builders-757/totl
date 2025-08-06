@@ -5,7 +5,6 @@ import {
   Plus,
   MapPin,
   Clock,
-  DollarSign,
   CheckCircle,
   XCircle,
   AlertCircle,

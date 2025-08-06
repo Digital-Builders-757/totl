@@ -1,24 +1,21 @@
 # TOTL Agency Authentication Strategy
 
-**Last Updated:** July 22, 2025  
-**Version:** 1.0  
+**Last Updated:** July 25, 2025  
+**Version:** 2.0  
 **Status:** Production Ready
 
 ## Table of Contents
 - [Overview](#overview)
 - [Architecture](#architecture)
-- [Database Schema](#database-schema)
 - [User Signup Flow](#user-signup-flow)
 - [Critical Requirements](#critical-requirements)
 - [Testing Scenarios](#testing-scenarios)
 - [Troubleshooting](#troubleshooting)
-- [Migration History](#migration-history)
-- [Best Practices](#best-practices)
-- [Related Documentation](#related-documentation)
+- [Security Features](#security-features)
 
 ## 🎯 Overview
 
-This document outlines the complete authentication and profile creation strategy for TOTL Agency. It serves as the single source of truth for understanding how user signup, profile creation, and role-based access control work.
+This document outlines the complete authentication and profile creation strategy for TOTL Agency. The system uses Supabase Auth with automatic profile creation via database triggers.
 
 ## 🏗️ Architecture
 
@@ -31,7 +28,7 @@ profiles (Main user profiles)
 talent_profiles OR client_profiles (Role-specific data)
 ```
 
-### **Key Tables & Constraints**
+### **Key Tables**
 
 #### **profiles Table**
 ```sql
@@ -253,11 +250,33 @@ LEFT JOIN talent_profiles tp ON p.id = tp.user_id
 LEFT JOIN client_profiles cp ON p.id = cp.user_id;
 ```
 
+## 🛡️ Security Features
+
+### **Recent Security Improvements (July 25, 2025)**
+- ✅ **Function search paths** secured against injection attacks
+- ✅ **OTP expiry** reduced to 15 minutes (900 seconds)
+- ✅ **Password requirements** enhanced to require symbols
+- ✅ **RLS policies** on all tables
+- ✅ **Role-based access control** enforced
+
+### **Authentication Hardening**
+- **Email verification** required for all accounts
+- **Secure session management** with proper expiry
+- **No service keys** exposed to client code
+- **Input validation** with Zod schemas
+
+### **Database Security**
+- **Row-Level Security (RLS)** enabled on all tables
+- **Proper function permissions** with minimal access
+- **Schema isolation** with explicit search paths
+- **Secure trigger functions** with proper error handling
+
 ## 📋 Migration History
 
 ### **Key Migrations**
 1. `20250722013500_add_user_profile_creation_trigger.sql` - Created initial trigger
 2. `20250722015600_fix_handle_new_user_trigger_null_handling.sql` - Fixed NULL handling
+3. `20250725211607_fix_security_warnings.sql` - Security hardening
 
 ### **Applying Migrations**
 ```bash
@@ -289,13 +308,13 @@ supabase db push
 4. Document any schema changes
 
 ## 🔗 Related Documentation
-- [Database Schema Audit](./database_schema_audit.md)
+- [Database Schema Audit](../database_schema_audit.md)
 - [Developer Quick Reference](./DEVELOPER_QUICK_REFERENCE.md)
 - [Coding Standards](./CODING_STANDARDS.md)
-- [Supabase Setup Guide](./supabase-email-setup.md)
+- [Security Fixes Summary](../SECURITY_FIXES_SUMMARY.md)
 
 ---
 
 **Maintainer:** TOTL Agency Development Team  
-**Last Review:** July 22, 2025  
-**Next Review:** August 22, 2025 
+**Last Review:** July 25, 2025  
+**Next Review:** August 25, 2025 
