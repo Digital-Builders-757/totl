@@ -246,10 +246,10 @@ export default function ClientDashboard() {
   useEffect(() => {
     if (!loading && user) {
       if (applications.length === 0) {
-        logEmptyState("client_applications", user.id, "client");
+        logEmptyState("client_applications", user.id);
       }
       if (gigs.length === 0) {
-        logEmptyState("client_gigs", user.id, "client");
+        logEmptyState("client_gigs", user.id);
       }
     }
   }, [applications.length, gigs.length, loading, user]);
