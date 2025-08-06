@@ -36,7 +36,7 @@ export default async function ClientProfilePage() {
     redirect("/dashboard");
   }
 
-  const { data: clientProfile, error: clientError } = await supabase
+  const { data: clientProfile } = await supabase
     .from("client_profiles")
     .select("*")
     .eq("user_id", user.id)

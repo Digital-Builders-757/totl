@@ -105,3 +105,34 @@ This rule applies to:
 ---
 
 **Remember: Always reference the full context file before writing any code. This ensures consistency, security, and proper architecture compliance.** 
+
+**Schema Management**  
+- **Single Source of Truth:** Always update the `database_schema_audit.md` **before** making any database schema changes. This audit file represents the ground truth of the database schema. Never apply a migration or change the database without first reflecting the change in this file.  
+- **Migrations Required:** All schema modifications must be done via version-controlled Supabase migration files (in `supabase/migrations`). Never edit the database schema manually without a migration. Update the audit file and then generate a new migration file using the Supabase CLI.  
+- **Generated Types Only:** After any schema change, **regenerate** the TypeScript types using the Supabase CLI (`supabase gen types typescript`). The file `types/database.ts` must always be generated from the live schema – do not manually edit this file.  
+- **No Drift:** The schema defined in `database_schema_audit.md`, the database itself, and `types/database.ts` should always be in sync. Use automated checks (scripts/CI) to verify that the audit file and the types file accurately reflect the actual database.  
+
+**Type Safety**  
+- **Use Generated Types:** The **only** source of TypeScript types for database entities is `types/database.ts`. Do not declare separate interfaces or types in components or elsewhere for tables like Profile, Gig, Application, etc. Instead, import and use the types from the generated file. This prevents duplicate definitions drifting from the truth.  
+- **No `any` for DB Data:** Do not use `any` types when handling database results or writing queries. All data must be strongly typed according to the generated types. If a query result is not properly typed, refine the query or the types rather than resorting to `any`.  
+- **Enum Consistency:** Whenever you update a database enum (for example, adding a new status), update the enum values in `database_schema_audit.md` and regenerate the types file. Ensure that any code using these enum values (strings or union types) is updated to match.  
+
+**Database Access Pattern**  
+- **Centralized Client:** All database calls must go through the single Supabase client instances provided (`lib/supabase-client.ts` for user-level access and `lib/supabase-admin-client.ts` for admin tasks). **Do not** instantiate new Supabase clients or use the Supabase JS library directly in components or API routes. This ensures that Row-Level Security (RLS) policies are consistently applied and that the types are correctly utilized.  
+- **Secure by Default:** RLS policies are in effect on all tables. Query the database in a role-appropriate way (e.g., using the anon/user client for user operations which will enforce RLS). Only use the admin client (service role) in server-side code that is trusted and needs to bypass RLS (such as internal tools or admin functionality).  
+- **No Logic in Components:** Keep database logic out of React components. React components (especially UI and pages) should call functions in the `lib/` layer (or Next.js Server Actions) which contain the actual database queries. This separation ensures easier maintenance and consistent enforcement of types and security.  
+
+**Verification**  
+- **Pre-commit Checks:** Always run the schema verification script (`scripts/verify-schema-sync.ps1`) before committing or opening a PR. This script will flag any type mismatches, outdated schema documentation, usage of `any`, or local interface duplications. Fix any issues it reports.  
+- **CI Enforcement:** The CI pipeline will block any pull request that introduces schema drift or type inconsistencies. If the CI fails due to the schema truth checks, regenerate the types, update the audit documentation, or remove any forbidden patterns as indicated, then commit the fixes.  
+
+**PowerShell Environment**
+- **Use PowerShell Commands:** Always use PowerShell-compatible commands in this Windows environment
+- **File Operations:** Use `Get-ChildItem` instead of `ls`, `Get-Content` instead of `cat`, `Select-String` instead of `grep`
+- **Scripts:** All verification and automation scripts should be PowerShell-compatible
+
+**Documentation-First Approach**
+- **Check Documentation:** Always read `docs/DOCUMENTATION_OVERVIEW.md` before making changes
+- **Update Documentation:** Always update relevant documentation after significant changes
+- **Reference Audit File:** Always reference `database_schema_audit.md` for database schema truth
+- **Maintain Consistency:** Ensure all documentation reflects the current state of the project 

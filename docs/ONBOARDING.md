@@ -1,6 +1,6 @@
 # TOTL Agency - Developer Onboarding
 
-**Last Updated:** July 23, 2025  
+**Last Updated:** July 25, 2025  
 **Status:** Production Ready
 
 ## Table of Contents
@@ -9,7 +9,6 @@
 - [Database Setup](#database-setup)
 - [Development Workflow](#development-workflow)
 - [Testing](#testing)
-- [Deployment](#deployment)
 
 ## 🚀 Getting Started
 
@@ -275,82 +274,19 @@ npm run lint
 npm run build
 ```
 
-## 🚀 Deployment
-
-### **Vercel Deployment**
-1. **Connect repository** to Vercel
-2. **Set environment variables** in Vercel dashboard
-3. **Deploy** - Vercel will auto-deploy on push to main
-
-### **Environment Variables in Production**
-```env
-# Required
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-RESEND_API_KEY=your_resend_key
-
-# Optional
-RESEND_DOMAIN=your-domain.com
-```
-
-### **Database Migration**
-```bash
-# Push migrations to production
-supabase db push
-
-# Generate types from production
-npx supabase gen types typescript --project-id your-project-id > types/database.ts
-```
-
-### **Post-Deployment Checklist**
-- [ ] **Environment variables** set correctly
-- [ ] **Database migrations** applied
-- [ ] **Email service** working
-- [ ] **Authentication** functioning
-- [ ] **RLS policies** active
-- [ ] **Performance** acceptable
-
-## 📚 Key Documentation
-
-### **Essential Files**
-- **[Project Context](TOTL_PROJECT_CONTEXT_PROMPT.md)** - Complete project overview
-- **[Database Schema](database_schema_audit.md)** - Single source of truth for database
-- **[Developer Quick Reference](DEVELOPER_QUICK_REFERENCE.md)** - Common patterns
-- **[Coding Standards](CODING_STANDARDS.md)** - Development guidelines
-
-### **Important Directories**
-```
-app/                    # Next.js pages and API routes
-components/            # React components
-lib/                   # Utility functions and services
-types/                 # TypeScript type definitions
-supabase/              # Database migrations and config
-docs/                  # Documentation
-```
-
-### **Critical Files**
-```
-TOTL_PROJECT_CONTEXT_PROMPT.md    # Main project context
-database_schema_audit.md          # Database schema
-types/database.ts                 # Generated Supabase types
-lib/supabase-client.ts           # Supabase client config
-components/auth-provider.tsx      # Authentication context
-middleware.ts                    # Route protection
-```
-
 ## 🔧 Troubleshooting
 
 ### **Common Issues**
 
 #### **Build Errors**
 ```bash
-# Check TypeScript
+# TypeScript errors
 npm run type-check
 
-# Check linting
+# Linting issues  
 npm run lint
 
-# Check build
+# Build issues
 npm run build
 ```
 
@@ -381,6 +317,34 @@ SELECT * FROM pg_policies WHERE schemaname = 'public';
 2. **Review error logs** - Check browser console and server logs
 3. **Test with known good data** - Use test accounts
 4. **Ask for help** - Provide error details and context
+
+## 📚 Key Documentation
+
+### **Essential Files**
+- **[Project Context](TOTL_PROJECT_CONTEXT_PROMPT.md)** - Complete project overview
+- **[Database Schema](database_schema_audit.md)** - Single source of truth for database
+- **[Developer Quick Reference](DEVELOPER_QUICK_REFERENCE.md)** - Common patterns
+- **[Coding Standards](CODING_STANDARDS.md)** - Development guidelines
+
+### **Important Directories**
+```
+app/                    # Next.js pages and API routes
+components/            # React components
+lib/                   # Utility functions and services
+types/                 # TypeScript type definitions
+supabase/              # Database migrations and config
+docs/                  # Documentation
+```
+
+### **Critical Files**
+```
+TOTL_PROJECT_CONTEXT_PROMPT.md    # Main project context
+database_schema_audit.md          # Database schema
+types/database.ts                 # Generated Supabase types
+lib/supabase-client.ts           # Supabase client config
+components/auth-provider.tsx      # Authentication context
+middleware.ts                    # Route protection
+```
 
 ---
 

@@ -2,7 +2,6 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
-  FileText,
   Clock,
   MapPin,
   DollarSign,
@@ -21,10 +20,6 @@ import {
   Filter,
   Search,
   Phone,
-  CheckCircle,
-  XCircle,
-  Clock as ClockIcon,
-  UserCheck,
   Calendar,
   TrendingUp,
   Target,
@@ -64,13 +59,6 @@ interface TalentProfile {
   eye_color?: string | null;
   shoe_size?: string | null;
   languages?: string[] | null;
-}
-
-interface Profile {
-  id: string;
-  role: string;
-  display_name: string;
-  email_verified: boolean;
 }
 
 interface Application {
@@ -169,7 +157,6 @@ export default function TalentDashboard() {
       }
 
       // Fetch active gigs for discovery
-      console.log("Starting gigs fetch..."); // Debug log
       const { data: gigsData, error: gigsError } = await supabase
         .from("gigs")
         .select("*")
@@ -177,13 +164,10 @@ export default function TalentDashboard() {
         .order("created_at", { ascending: false })
         .limit(10);
 
-      console.log("Gigs fetch result:", { gigsData, gigsError }); // Debug log
-
       if (gigsError) {
         console.error("Error fetching gigs:", gigsError);
         setError("Failed to load gigs");
       } else {
-        console.log("Fetched gigs:", gigsData); // Debug logging
         setGigs(gigsData || []);
       }
     } catch (err) {

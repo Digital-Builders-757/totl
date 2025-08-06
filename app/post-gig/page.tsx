@@ -77,7 +77,7 @@ export default function PostGigPage() {
     }
 
     try {
-      const { data, error: gigError } = await supabase
+      const { error: gigError } = await supabase
         .from("gigs")
         .insert([
           {

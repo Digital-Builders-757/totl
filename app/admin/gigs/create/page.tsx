@@ -31,5 +31,5 @@ export default async function CreateGigPage() {
     redirect("/login?returnUrl=/admin/gigs/create");
   }
 
-  return <CreateGigForm user={user} />;
+  return <CreateGigForm />;
 }

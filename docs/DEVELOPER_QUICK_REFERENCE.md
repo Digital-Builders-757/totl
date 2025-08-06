@@ -1,374 +1,263 @@
-# TOTL Agency - Developer Quick Reference
+# 📕 Developer Quick Reference (Database & Type Usage)
 
-**Last Updated:** July 23, 2025  
+**Last Updated:** July 25, 2025  
 **Status:** Production Ready
 
-## Table of Contents
-- [Quick Start](#-quick-start)
-- [Critical Requirements](#-critical-requirements)
-- [Common Patterns](#-common-patterns)
-- [Troubleshooting](#-troubleshooting)
-- [Testing Checklist](#-testing-checklist)
+This reference outlines how to interact with the database in our Next.js codebase, ensuring type safety and compliance with our security policies. It covers writing queries, using the generated types, creating migrations, and working with Row-Level Security (RLS).
 
-## 🚀 Quick Start
+## ⚡ Writing Database Queries (the Right Way)
 
-### Essential Commands
-```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Production build
-npm run lint         # Run ESLint
-npm run type-check   # TypeScript type checking
+- **Use the Supabase client provided:** Always import the initialized Supabase client from `lib/supabase-client.ts` (or `supabase-admin-client.ts` for privileged operations). Do not call `createClient` in your own code – the singleton clients ensure we use a consistent configuration (and user context for RLS) everywhere.  
+  ```ts
+  import { supabase } from "@/lib/supabase-client";
 
-# Database
-npx supabase gen types typescript --project-id "<ID>" > types/database.ts
-npx supabase db reset    # Reset local database
-npx supabase db push     # Push migrations to remote
-```
-
-### Environment Setup
-```env
-# Required
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-# Optional (for emails)
-RESEND_API_KEY=your_resend_key
-```
-
-## ⚠️ Critical Requirements
-
-### **1. Metadata Key Naming**
-**CRITICAL:** All user metadata keys must use **lowercase with underscores**:
-
-```typescript
-// ✅ CORRECT - Will work with trigger
-{
-  first_name: "John",      // lowercase with underscore
-  last_name: "Doe",        // lowercase with underscore
-  role: "talent",          // lowercase
-  company_name: "Acme Co"  // lowercase with underscore
-}
-
-// ❌ WRONG - Will cause NULL values in database
-{
-  firstName: "John",       // camelCase - trigger won't find this
-  lastName: "Doe",         // camelCase - trigger won't find this
-  Role: "talent",          // PascalCase - trigger won't find this
-  companyName: "Acme Co"   // camelCase - trigger won't find this
-}
-```
-
-### **2. Database Schema**
-- **Single Source of Truth:** `database_schema_audit.md`
-- **Generated Types:** `types/database.ts`
-- **Never use `any` types** - always use generated types
-
-### **3. RLS Policies**
-- All tables have RLS enabled
-- Policies are production-ready and secure
-- Test with real user accounts, not service keys
-
-## 💻 Common Patterns
-
-### **Supabase Client Usage**
-
-#### **Client-Side**
-```typescript
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { Database } from "@/types/database";
-
-const supabase = createClientComponentClient<Database>();
-
-// Always use specific field selection
-const { data, error } = await supabase
-  .from('gigs')
-  .select('id, title, description, location, compensation')
-  .eq('status', 'active');
-
-if (error) {
-  console.error('Error fetching gigs:', error);
-  return [];
-}
-
-return data || [];
-```
-
-#### **Server-Side**
-```typescript
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-
-const supabase = createServerComponentClient<Database>({ cookies });
-
-// Force dynamic rendering for auth-dependent pages
-export const dynamic = "force-dynamic";
-```
-
-### **Component Architecture**
-
-#### **Server Component (Data Fetching)**
-```typescript
-// app/gigs/page.tsx
-export default async function GigsPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  
-  // Check environment variables
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return <div>Configuration error</div>;
-  }
-  
   const { data: gigs, error } = await supabase
     .from('gigs')
     .select('*')
     .eq('status', 'active');
-  
+  ```
+
+In the above example, `gigs` will be strongly-typed (an array of Gig objects) because our Supabase client is configured with the generated `Database` types.
+
+* **Never use raw SQL strings or bypass Supabase:** All queries should be via the Supabase JS client methods (`select`, `insert`, `update`, etc.). This ensures that the returned data types align with our schema. If you find a query that the JS client cannot easily express, consider creating a Postgres function and calling it via `supabase.rpc()`.
+* **Handle errors and nulls:** The Supabase client returns an `{ data, error }` object. Always check for `error` and handle it (e.g., log it, throw it, or return a user-friendly message). If `error` is null, you can safely use `data` knowing it matches the expected type (or is `null` if no rows). Example:
+
+  ```ts
+  const { data: profile, error } = await supabase.from('profiles').select('*').single();
   if (error) {
-    console.error('Error fetching gigs:', error);
-    return <div>Error loading gigs</div>;
+    console.error("Failed to fetch profile", error);
+    return;
   }
-  
-  return <GigsClient gigs={gigs || []} />;
+  // profile is typed as Profile (or null if not found)
+  ```
+* **Use `.single()` or `.maybeSingle()` appropriately:** When you expect only one row (e.g., selecting a profile by user ID which is unique), use `single()` to get a typed single object instead of an array. Use `maybeSingle()` if a missing row isn't an error (returns `data = null` instead of throwing).
+
+## 🏷 Using Generated Types
+
+* **Import database types when needed:** Our types file `types/database.ts` exports a `Database` interface that has all schema types. You can use this to declare variables or annotate return types. For example:
+
+  ```ts
+  import { Database } from '@/types/database';
+  type Gig = Database['public']['Tables']['gigs']['Row'];
+  ```
+
+  Now `Gig` is a TypeScript type representing a row from the `gigs` table. You can do this for any table: replace `'gigs'` with the table name you need (`profiles`, `applications`, etc.).
+* **No custom interfaces for DB data:** Do **not** redefine an interface for a database entity (like `interface Gig { ... }`). This will likely become outdated. Instead, always derive from the generated `Database` type as shown. If you need to extend or pick only certain fields, use TypeScript's utility types on the generated type (e.g., `Partial<Gig>` for a subset, or pick specific fields).
+* **Enum types:** Enums in the database become union types in TypeScript. For example, a column `status` that uses the `application_status` enum will be typed as `"pending" | "accepted" | "rejected" | "withdrawn"`. You can refer to these as needed (you might define `type ApplicationStatus = Database['public']['Enums']['application_status']` for convenience). Always use these unions instead of string literals, so if an enum value changes, TypeScript will alert us in all the places it's used.
+* **Benefits of strict typing:** When you use the generated types, your IDE and the compiler will catch mistakes, such as using a wrong field name or wrong type. For instance, if you try `supabase.from('gigs').insert({ titlle: "Test" })`, TypeScript will error because `titlle` is not a known field (it's `title`). Leverage these errors to quickly correct typos or misuse.
+
+## 🗄 Creating and Running Migrations
+
+* **Creating a migration:** Use the Supabase CLI to generate migration files. Example:
+
+  ```bash
+  npx supabase migration new add_project_table
+  ```
+
+  This will create a SQL file in `supabase/migrations/` with a timestamp. Edit that file to add your SQL commands (CREATE TABLE, ALTER TABLE, etc.). Follow existing migration examples for formatting. Each migration should do one logical set of changes (e.g., create a new table and its related constraints).
+* **Applying migrations locally:** Ensure you have Docker running, then execute `supabase db reset` to reset and seed your local database (**warning:** this will wipe local data) or use `supabase db push` to apply new migrations without resetting data. This runs all migrations against a local Postgres instance. After running, check the database (via Supabase Studio or psql) to confirm the changes match what you expect.
+* **Generating types:** After running migrations, always refresh the types file:
+
+  ```bash
+  npx supabase gen types typescript --local > types/database.ts
+  ```
+
+  (If you connected the CLI to your project with `supabase link`, you can omit `--project-id` and use `--local` for local DB). Commit the updated `types/database.ts` along with the migration. Never manually edit `types/database.ts` – always regenerate it so it stays 100% faithful to the DB.
+* **Reviewing migrations:** When you open a PR with a migration, double-check that `database_schema_audit.md` is updated accordingly and that the diff of `types/database.ts` only contains the changes you intended (new fields, etc.). This helps catch any unintended side-effects of the SQL changes.
+
+## 🔐 Working with RLS (Row-Level Security)
+
+Our database tables are protected by RLS policies, meaning the database will restrict which rows a query can see or modify based on the user's role and other factors.
+
+* **Always use the correct client:**
+
+  * On the **frontend** and in most API routes, use the **anon** Supabase client (`supabase-client.ts`). This client uses the logged-in user's JWT token, so all queries automatically apply that user's permissions. For example, a talent user querying `applications` will only get their own applications, because the RLS policy on `applications` table filters by `talent_id = auth.uid()`.
+  * Only use the **admin service-role client** (`supabase-admin-client.ts`) in secure backend contexts (Next.js Server Actions, API routes with server-side checks, etc.) where you need to bypass RLS (e.g., an admin dashboard or a background job). Remember: the admin client will return **all** data, ignoring RLS, so never expose its results directly to an end-user without filtering in code.
+* **Design queries with RLS in mind:** If a certain data access isn't working, consider whether an RLS policy might be blocking it. For example, if a client tries to fetch all profiles, the `profiles` table might restrict visibility. In such cases, think "should the user be allowed to see this data?" If yes, perhaps the policy needs adjustment or the query should use a different approach (like calling a Cloud Function with elevated rights). If no, then the code should not attempt that query for that user.
+* **Avoid using the service key on the client side:** Never expose the service role key in client-side code or use it in front-end requests. All normal user interactions should go through the protected anon client to enforce security. The service key (admin client) is only for server-side usage where we trust the code path (and typically restrict by additional logic).
+* **Testing RLS behavior:** Use multiple accounts (or Supabase's "simulate logged in user" feature in the dashboard) to ensure that data is correctly isolated. For instance, a talent user should not be able to fetch another talent's profile or applications. Our RLS policies are defined in the database, but your application code should be written under the assumption that anything not permitted will come back as empty data (or `null`). Always handle these cases gracefully (e.g., if `apps` comes back empty because of RLS, maybe the user is not allowed to see those records).
+
+## 🚨 Type Safety Rules
+
+### **CRITICAL: Never Use These Patterns**
+```typescript
+// ❌ WRONG - Don't do this
+interface TalentProfile {
+  id: string;
+  first_name: string;
+  // ... other fields
 }
+
+// ❌ WRONG - Don't use any
+const data: any = await supabase.from('profiles').select('*');
+
+// ❌ WRONG - Don't create local interfaces for DB entities
+type GigStatus = 'draft' | 'published' | 'closed';
 ```
 
-#### **Client Component (Presentational)**
+### **CORRECT: Use Generated Types**
 ```typescript
-// components/gigs-client.tsx
-"use client";
+// ✅ CORRECT - Import from generated types
+import { Database } from '@/types/database';
+type TalentProfile = Database['public']['Tables']['talent_profiles']['Row'];
+type GigStatus = Database['public']['Enums']['gig_status'];
 
-import { EmptyState } from "@/components/ui/empty-state";
-
-interface GigsClientProps {
-  gigs: Gig[];
-}
-
-export function GigsClient({ gigs }: GigsClientProps) {
-  if (gigs.length === 0) {
-    return (
-      <EmptyState
-        icon={FileText}
-        title="No gigs available"
-        description="Check back later for new opportunities"
-      />
-    );
-  }
-  
-  return (
-    <div className="grid gap-4">
-      {gigs.map(gig => <GigCard key={gig.id} gig={gig} />)}
-    </div>
-  );
-}
+// ✅ CORRECT - Use proper typing
+const { data, error } = await supabase.from('profiles').select('*');
+// data is automatically typed as Profile[] | null
 ```
 
-### **Error Handling**
+## 🔧 Common Patterns
+
+### **Fetching Related Data**
 ```typescript
-// Always wrap Supabase calls in try-catch
-try {
-  const { data, error } = await supabase.from('gigs').select('*');
-  if (error) throw error;
-  return data || [];
-} catch (error) {
-  console.error('Error fetching gigs:', error);
-  return [];
-}
+// Fetch gig with client profile
+const { data: gigs } = await supabase
+  .from('gigs')
+  .select('*, client_profiles(company_name, industry)')
+  .eq('status', 'active');
+
+// Fetch application with gig and talent details
+const { data: applications } = await supabase
+  .from('applications')
+  .select(`
+    *,
+    gigs(title, location, compensation),
+    talent_profiles(first_name, last_name, location)
+  `)
+  .eq('talent_id', user.id);
 ```
 
-### **Authentication Patterns**
+### **Type-Safe Inserts**
 ```typescript
-// Check if user is authenticated
-const { user } = useAuth();
+// Insert with proper typing
+const { data, error } = await supabase
+  .from('gigs')
+  .insert({
+    client_id: user.id,
+    title: 'Photography Gig',
+    description: 'Professional photo shoot',
+    category: 'photography',
+    location: 'New York',
+    compensation: '$500',
+    date: '2025-08-15',
+    status: 'draft' // TypeScript will validate this enum value
+  })
+  .select()
+  .single();
+```
 
-if (!user) {
-  return <div>Please log in</div>;
-}
+### **Type-Safe Updates**
+```typescript
+// Update with proper typing
+const { data, error } = await supabase
+  .from('talent_profiles')
+  .update({
+    first_name: 'John',
+    last_name: 'Doe',
+    location: 'Los Angeles'
+  })
+  .eq('user_id', user.id)
+  .select()
+  .single();
+```
 
-// Check user role
+## ✅ Additional Tips
+
+* **Safe query wrappers:** We have a utility `safe-query.ts` which wraps Supabase queries to handle errors consistently. Consider using it for complex operations or when you want standardized logging of failures. It will return a `{ data, error }` object just like Supabase, but with error handling (and logging) baked in.
+* **No `any` – use exact types:** If you find yourself unsure of a type for a Supabase query result, refer to `types/database.ts` or use TypeScript's inference. In nearly all cases, you should **not need to cast to `any` or `unknown`**. If a type is too complex (for example, a join result), define a specific type for that response shape using the Database types as building blocks.
+* **Example – Fetching with Relationships:** Suppose you want to fetch a gig along with the client's profile. You can utilize Supabase's ability to select related data:
+
+  ```ts
+  const { data: gigs } = await supabase
+    .from('gigs')
+    .select('*, client_profiles(company_name, industry)')
+    .eq('status', 'active');
+  ```
+
+  In this query, `gigs` will be typed as an array of a combined type that includes a nested `client_profiles` object. Our generated types know about foreign keys and relationships if they are set up as such in Supabase. Use these features to your advantage to keep queries efficient (fetch related data in one round-trip) while still remaining type-safe.
+
+## 🔍 Verification Commands
+
+### **Pre-commit Checks**
+```powershell
+# Run schema verification before committing
+./scripts/verify-schema-sync.ps1
+
+# Generate types from local database
+npx supabase gen types typescript --local > types/database.ts
+
+# Reset local database
+supabase db reset --no-confirm
+```
+
+### **Type Checking**
+```powershell
+# Check for type errors
+npm run type-check
+
+# Build to catch type issues
+npm run build
+```
+
+## 📋 Quick Reference
+
+### **Common Type Imports**
+```typescript
+import { Database } from '@/types/database';
+
+// Table types
+type Profile = Database['public']['Tables']['profiles']['Row'];
+type TalentProfile = Database['public']['Tables']['talent_profiles']['Row'];
+type ClientProfile = Database['public']['Tables']['client_profiles']['Row'];
+type Gig = Database['public']['Tables']['gigs']['Row'];
+type Application = Database['public']['Tables']['applications']['Row'];
+
+// Enum types
+type UserRole = Database['public']['Enums']['user_role'];
+type GigStatus = Database['public']['Enums']['gig_status'];
+type ApplicationStatus = Database['public']['Enums']['application_status'];
+type BookingStatus = Database['public']['Enums']['booking_status'];
+
+// Insert types (for creating new records)
+type NewGig = Database['public']['Tables']['gigs']['Insert'];
+type NewApplication = Database['public']['Tables']['applications']['Insert'];
+
+// Update types (for partial updates)
+type GigUpdate = Database['public']['Tables']['gigs']['Update'];
+type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
+```
+
+### **Common Query Patterns**
+```typescript
+// Fetch single record
 const { data: profile } = await supabase
   .from('profiles')
-  .select('role')
+  .select('*')
   .eq('id', user.id)
   .single();
 
-if (profile?.role !== 'client') {
-  redirect('/dashboard');
-}
+// Fetch multiple records with filtering
+const { data: gigs } = await supabase
+  .from('gigs')
+  .select('*')
+  .eq('status', 'active')
+  .order('created_at', { ascending: false });
+
+// Insert with return
+const { data: newGig } = await supabase
+  .from('gigs')
+  .insert(gigData)
+  .select()
+  .single();
+
+// Update with return
+const { data: updatedProfile } = await supabase
+  .from('profiles')
+  .update(updateData)
+  .eq('id', user.id)
+  .select()
+  .single();
 ```
 
-### **Form Validation with Zod**
-```typescript
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-
-const gigSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  location: z.string().min(1, "Location is required"),
-  compensation: z.string().min(1, "Compensation is required"),
-});
-
-type GigFormValues = z.infer<typeof gigSchema>;
-
-export function GigForm() {
-  const form = useForm<GigFormValues>({
-    resolver: zodResolver(gigSchema),
-  });
-  
-  // ... rest of component
-}
-```
-
-## 🔧 Troubleshooting
-
-### **Common Issues & Solutions**
-
-#### **1. "type user_role does not exist"**
-```sql
--- Recreate the enum if missing
-CREATE TYPE public.user_role AS ENUM ('talent', 'client', 'admin');
-```
-
-#### **2. Build Error: Supabase not configured**
-```typescript
-// Add environment variable check
-const isSupabaseConfigured = typeof window !== 'undefined' && 
-  process.env.NEXT_PUBLIC_SUPABASE_URL && 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
-```
-
-#### **3. RLS Policy Issues**
-```sql
--- Check if RLS is enabled
-SELECT schemaname, tablename, rowsecurity 
-FROM pg_tables 
-WHERE schemaname = 'public';
-
--- Check policies
-SELECT * FROM pg_policies WHERE schemaname = 'public';
-```
-
-#### **4. NULL Value Constraint Violations**
-```sql
--- Check trigger function exists
-SELECT routine_name FROM information_schema.routines 
-WHERE routine_name = 'handle_new_user';
-
--- Test trigger function
-SELECT test_trigger_function_exists();
-```
-
-### **Debug Queries**
-
-#### **Check User Profiles**
-```sql
-SELECT p.id, p.role, p.display_name, 
-       CASE WHEN tp.id IS NOT NULL THEN 'talent' 
-            WHEN cp.id IS NOT NULL THEN 'client' 
-            ELSE 'no_profile' END as profile_type
-FROM profiles p
-LEFT JOIN talent_profiles tp ON p.id = tp.user_id
-LEFT JOIN client_profiles cp ON p.id = cp.user_id
-ORDER BY p.created_at;
-```
-
-#### **Check Gigs with Applications**
-```sql
-SELECT g.title, g.status, COUNT(a.id) as application_count
-FROM gigs g
-LEFT JOIN applications a ON g.id = a.gig_id
-GROUP BY g.id, g.title, g.status
-ORDER BY g.created_at DESC;
-```
-
-#### **Check RLS Policies**
-```sql
-SELECT 
-  schemaname,
-  tablename,
-  policyname,
-  permissive,
-  roles,
-  cmd,
-  qual
-FROM pg_policies 
-WHERE schemaname = 'public' 
-ORDER BY tablename, policyname;
-```
-
-### **Production Health Checks**
-
-#### **Database Health**
-```sql
--- Check table record counts
-SELECT 
-  'profiles' as table_name,
-  COUNT(*) as record_count
-FROM profiles
-UNION ALL
-SELECT 
-  'talent_profiles' as table_name,
-  COUNT(*) as record_count
-FROM talent_profiles
-UNION ALL
-SELECT 
-  'client_profiles' as table_name,
-  COUNT(*) as record_count
-FROM client_profiles
-UNION ALL
-SELECT 
-  'gigs' as table_name,
-  COUNT(*) as record_count
-FROM gigs
-UNION ALL
-SELECT 
-  'applications' as table_name,
-  COUNT(*) as record_count
-FROM applications
-ORDER BY table_name;
-```
-
-#### **RLS Policy Health**
-```sql
--- Check all tables have RLS enabled
-SELECT 
-  schemaname,
-  tablename,
-  rowsecurity
-FROM pg_tables 
-WHERE schemaname = 'public' 
-ORDER BY tablename;
-```
-
-## 🧪 Testing Checklist
-
-### **Pre-Launch Testing**
-- [ ] **User Registration** - Test talent and client signup
-- [ ] **Email Verification** - Verify email flow works
-- [ ] **Profile Creation** - Check profiles are created correctly
-- [ ] **Role-based Routing** - Test dashboard access
-- [ ] **Gig Creation** - Test client can post gigs
-- [ ] **Gig Visibility** - Test talent can see active gigs
-- [ ] **Application Flow** - Test talent can apply to gigs
-- [ ] **Application Review** - Test client can review applications
-- [ ] **RLS Security** - Test unauthorized access is blocked
-
-### **Production Testing**
-- [ ] **Environment Variables** - Verify all are set correctly
-- [ ] **Database Connection** - Test Supabase connectivity
-- [ ] **Build Process** - Verify production build works
-- [ ] **Performance** - Check page load times
-- [ ] **Error Handling** - Test error states
-- [ ] **Empty States** - Verify when no data exists
-
-### **Test Accounts**
-- **Test Client:** `testclient@example.com` / `TestPassword123!`
-- **Purpose:** Demo client functionality
-
----
-
-**For complete project context, see `TOTL_PROJECT_CONTEXT_PROMPT.md`**  
-**For database schema details, see `database_schema_audit.md`** 
+This quick reference should help in day-to-day coding. By following these guidelines – using the shared Supabase clients, relying on generated types, and respecting the migration workflow – you'll write code that is robust, secure, and easy to maintain. Happy coding! 🎉 

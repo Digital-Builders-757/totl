@@ -64,7 +64,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 // Create a mock action for profile creation if it doesn't exist
 async function createProfile(data: ProfileFormValues) {
   // This would typically call a server action or API endpoint
-  console.log("Creating profile:", data);
+
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 1000));
   return { success: true };

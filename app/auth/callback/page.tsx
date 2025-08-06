@@ -1,5 +1,5 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -71,7 +71,7 @@ export default async function AuthCallbackPage({
               <CardHeader>
                 <CardTitle className="text-center">Verification Failed</CardTitle>
                 <CardDescription className="text-center">
-                  We couldn't verify your email
+                  We couldn&apos;t verify your email
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center py-8">

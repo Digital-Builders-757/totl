@@ -82,8 +82,6 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
     setServerError(null);
 
     try {
-      console.log("Starting signup process for:", data.email);
-
       const { error } = await signUp(data.email, data.password, {
         data: {
           first_name: data.firstName,
@@ -294,8 +292,8 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       <Alert className="bg-blue-50 border-blue-200">
         <AlertCircle className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-800">
-          After signing up, you&apos;ll need to verify your email address and complete your profile in
-          your dashboard.
+          After signing up, you&apos;ll need to verify your email address and complete your profile
+          in your dashboard.
         </AlertDescription>
       </Alert>
 

@@ -1,7 +1,6 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
-import { ArrowLeft, Upload, Plus, Minus, Calendar, DollarSign, Clock, MapPin } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,11 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
-interface CreateGigFormProps {
-  user: User;
-}
-
-export function CreateGigForm({ user }: CreateGigFormProps) {
+export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
 
   const addRequirement = () => {

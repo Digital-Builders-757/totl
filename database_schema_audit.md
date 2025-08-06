@@ -420,14 +420,32 @@ USING (
 - `gigs_client_id_idx`
 - `applications_gig_id_idx`
 - `applications_talent_id_idx`
-- `bookings_gig_id_idx`
-- `bookings_talent_id_idx`
-- `portfolio_items_talent_id_idx`
 - `gig_requirements_gig_id_idx`
 
 ### **Performance Indexes**
 - `profiles_role_idx` (for role-based filtering)
 - `gigs_status_idx` (for status filtering)
+
+### **Performance Optimization Indexes (Added 2025-01-01)**
+- `gigs_status_created_at_idx` - Composite index for status filtering with date sorting
+- `applications_status_created_at_idx` - Composite index for application status filtering
+- `talent_profiles_location_age_idx` - Partial index for location-based talent searches
+- `client_profiles_company_name_idx` - Partial index for company name searches
+- `gigs_active_status_idx` - Partial index for active gigs only
+- `applications_new_status_idx` - Partial index for new applications only
+- `gigs_title_description_gin_idx` - GIN index for full-text search on gig content
+- `talent_profiles_experience_gin_idx` - GIN index for full-text search on experience
+- `gigs_listing_covering_idx` - Covering index for gig listings with included columns
+- `talent_profiles_listing_covering_idx` - Covering index for talent listings
+- `applications_gig_talent_status_idx` - Composite index for application queries
+- `profiles_role_created_at_idx` - Index for role-based user filtering
+
+### **Performance Functions**
+- `maintenance_cleanup()` - Automated maintenance function for statistics updates
+- `get_query_hints()` - Function providing performance optimization recommendations
+
+### **Performance Monitoring**
+- `performance_metrics` view - Database statistics monitoring view
 
 ## ⚡ Triggers & Functions
 
@@ -494,6 +512,7 @@ USING (
 - ✅ **Trigger optimization** - Fixed NULL handling
 - ✅ **Enum fixes** - Resolved type reference issues
 - ✅ **Security hardening** - Fixed function search paths, reduced OTP expiry, enabled password protection
+- ✅ **Performance optimization** - Fixed RLS auth function calls, consolidated duplicate policies, added strategic indexes
 
 ---
 

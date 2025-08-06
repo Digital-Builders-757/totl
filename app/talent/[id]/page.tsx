@@ -1,7 +1,7 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ArrowLeft, MapPin, Instagram, Globe, Star, Calendar, User } from "lucide-react";
 import { cookies } from "next/headers";
-import Image from "next/image";
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";

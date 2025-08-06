@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { AlertCircle, X, User, Building2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 interface ProfileCompletionBannerProps {
   userRole: "talent" | "client";
@@ -34,29 +34,19 @@ export function ProfileCompletionBanner({
         <div className="flex items-center gap-3">
           <RoleIcon className="h-4 w-4 text-amber-600" />
           <div>
-            <span className="font-medium text-amber-800">
-              Complete your {roleName} profile
-            </span>
-            <p className="text-sm text-amber-700">
-              Missing: {missingFieldsText}
-            </p>
+            <span className="font-medium text-amber-800">Complete your {roleName} profile</span>
+            <p className="text-sm text-amber-700">Missing: {missingFieldsText}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild size="sm" variant="outline">
-            <Link href={profileUrl}>
-              Complete Profile
-            </Link>
+            <Link href={profileUrl}>Complete Profile</Link>
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setIsVisible(false)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => setIsVisible(false)}>
             <X className="h-4 w-4" />
           </Button>
         </div>
       </AlertDescription>
     </Alert>
   );
-} 
+}

@@ -10,7 +10,6 @@ import {
   Eye,
   Clock,
   CheckCircle,
-  XCircle,
   Filter,
   Users,
   Briefcase,
@@ -32,7 +31,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/database";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];

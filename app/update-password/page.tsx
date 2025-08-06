@@ -1,13 +1,11 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UpdatePasswordForm } from "./update-password-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";

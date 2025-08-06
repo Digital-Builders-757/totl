@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
 import { cookies } from "next/headers";
-import Image from "next/image";
+
 import Link from "next/link";
 import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +33,6 @@ export default async function GigsPage() {
     )
     .eq("status", "active")
     .order("created_at", { ascending: false });
-
-  // Debug logging
-  console.log("Gigs page - fetched gigs:", gigs);
-  console.log("Gigs page - error:", error);
 
   if (error) {
     console.error("Error fetching gigs:", error);
