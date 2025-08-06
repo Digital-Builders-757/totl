@@ -188,7 +188,7 @@ const { data, error } = await supabase
 npx supabase gen types typescript --local > types/database.ts
 
 # Reset local database
-supabase db reset --no-confirm
+supabase db reset --yes
 ```
 
 ### **Type Checking**
