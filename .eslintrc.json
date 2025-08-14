@@ -22,6 +22,10 @@
           {
             "name": "@supabase/supabase-js",
             "message": "Use lib/supabase-client.ts or lib/supabase-admin-client.ts instead."
+          },
+          {
+            "name": "@/types/database",
+            "message": "Import Database from '@/types/supabase' instead."
           }
         ]
       }
