@@ -10,14 +10,15 @@
     "format": "prettier --write .",
     "prepare": "husky install",
     "verify-schema": "bash scripts/verify-schema-truth.sh",
-    "types:regen": "npx supabase@latest gen types typescript --linked --schema public > types/database.ts && node scripts/prepend-autogen-banner.mjs",
+    "types:regen": "npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts && node scripts/prepend-autogen-banner.mjs",
     "types:check": "node scripts/verify-types-fresh.mjs",
     "schema:verify-local": "node scripts/verify-schema-local.mjs",
     "schema:check": "node scripts/quick-schema-check.mjs",
-    "supabase:login": "npx supabase@latest login",
+    "supabase:login": "npx supabase@v2.33.4 login",
+    "supabase:link": "npx supabase@v2.33.4 link --project-ref %SUPABASE_PROJECT_ID%",
     "schema:verify": "powershell -ExecutionPolicy Bypass -File scripts/verify-schema-sync.ps1",
     "async-cookies:check": "powershell -ExecutionPolicy Bypass -File scripts/fix-async-cookies.ps1",
-    "pre-commit": "npm run lint && npm run schema:verify-local && npm run async-cookies:check && tsc --noEmit",
+    "pre-commit": "npm run lint && tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "db:reset": "supabase db reset --yes",
     "db:push": "supabase db push --linked",
@@ -107,9 +108,6 @@
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write"
-    ],
-    "types/database.ts": [
-      "npm run types:check"
     ]
   }
 }

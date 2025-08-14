@@ -1,7 +1,7 @@
 # Fix Async Cookies Issues - Next.js 15+ Compatibility
 # This script finds and fixes async cookies patterns that cause errors in Next.js 15+
 
-Write-Host "🔍 Scanning for async cookies issues..." -ForegroundColor Yellow
+Write-Host "Scanning for async cookies issues..." -ForegroundColor Yellow
 
 $issues = @()
 
@@ -62,25 +62,25 @@ foreach ($file in $files) {
 
 # Report findings
 if ($issues.Count -eq 0) {
-    Write-Host "✅ No async cookies issues found!" -ForegroundColor Green
+    Write-Host "No async cookies issues found!" -ForegroundColor Green
     exit 0
 }
 
-Write-Host "`n🚨 Found $($issues.Count) async cookies issues:" -ForegroundColor Red
+Write-Host "`nFound $($issues.Count) async cookies issues:" -ForegroundColor Red
 
 foreach ($issue in $issues) {
-    Write-Host "`n📁 $($issue.File)" -ForegroundColor Cyan
+    Write-Host "`nFile: $($issue.File)" -ForegroundColor Cyan
     Write-Host "   Issue: $($issue.Description)" -ForegroundColor Yellow
     Write-Host "   Lines: $($issue.LineNumbers -join ', ')" -ForegroundColor Yellow
     Write-Host "   Fix: $($issue.Fix)" -ForegroundColor Green
 }
 
-Write-Host "`n💡 To fix these issues:" -ForegroundColor Yellow
+Write-Host "`nTo fix these issues:" -ForegroundColor Yellow
 Write-Host "1. Replace direct Supabase client creation with centralized helpers" -ForegroundColor White
 Write-Host "2. Use createSupabaseServerClient() for server components" -ForegroundColor White
 Write-Host "3. Use createSupabaseActionClient() for server actions" -ForegroundColor White
 Write-Host "4. Import from lib/supabase-client instead of @supabase/auth-helpers-nextjs" -ForegroundColor White
 
-Write-Host "`n📚 See docs/CODING_STANDARDS.md for detailed patterns" -ForegroundColor Blue
+Write-Host "`nSee docs/CODING_STANDARDS.md for detailed patterns" -ForegroundColor Blue
 
 exit 1

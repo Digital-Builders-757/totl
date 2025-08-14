@@ -1,9 +1,3 @@
-/**
- * AUTO-GENERATED FILE – DO NOT EDIT.
- * Source of truth: Supabase schema.
- * Generated: 2025-08-14T23:31:56.707Z
- */
-
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
