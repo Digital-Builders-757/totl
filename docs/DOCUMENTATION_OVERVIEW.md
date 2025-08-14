@@ -59,6 +59,7 @@ This document provides an overview of all TOTL Agency documentation and how to n
 |------|---------|----------|----------|
 | [DEPLOYMENT.md](../DEPLOYMENT.md) | Deployment guide | DevOps/Deployers | ⭐⭐⭐⭐ |
 | [SECURITY_FIXES_SUMMARY.md](../SECURITY_FIXES_SUMMARY.md) | Security improvements | Security team | ⭐⭐⭐⭐ |
+| [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md) | CI/CD setup guide | DevOps/Developers | ⭐⭐⭐⭐ |
 
 ### **Cursor AI Context**
 
