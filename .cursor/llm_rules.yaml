@@ -1,8 +1,35 @@
 # Totl Agency LLM Coding Rules
-# Version: 2.1
+# Version: 2.2
 # This file provides a comprehensive set of rules for the LLM to follow when
 # generating code for the Totl Agency platform. Adhering to these rules ensures
 # consistency, maintainability, and alignment with the project's architecture.
+
+# 🎯 TASK PROMPT TEMPLATE (USE THIS FOR EVERY REQUEST)
+task_prompt_template: |
+  Before you change anything:
+  
+  1. Read this entire rules file and follow it strictly
+  2. Do not invent props or types - if a prop is missing, first update the component type and all call sites
+  3. Never import @supabase/supabase-js directly - use our clients in lib/
+  4. No DB calls in client components - mutations must be Server Actions
+  5. After changes, ensure this "Definition of Done" is met:
+     * npx tsc --noEmit passes
+     * eslint . --ext .ts,.tsx --max-warnings 0 passes
+     * No use of placeholderQuery prop on <SafeImage />
+     * No any types
+     * If schema changed → create migration + regenerate types/database.ts
+  
+  Output: a unified diff (git patch) and a short note of why the change satisfies the DoD.
+
+# 📌 CRITICAL FILES TO PIN IN CURSOR
+critical_files:
+  - "docs/DOCUMENTATION_OVERVIEW.md - Navigation guide for all documentation"
+  - "database_schema_audit.md - Database schema (single source of truth)"
+  - "types/supabase.ts - TypeScript type re-exports"
+  - "lib/supabase-client.ts - Centralized Supabase client"
+  - "components/ui/safe-image.tsx - SafeImage component (do not modify props)"
+  - "hooks/use-toast.ts - Toast system (single source of truth)"
+  - "TOTL_PROJECT_CONTEXT_PROMPT.md - Complete project context"
 
 # 🚨 CRITICAL: DOCUMENTATION-FIRST APPROACH
 documentation_requirements:
@@ -256,6 +283,56 @@ testing_and_ci:
   - "All PRs and merges must pass the GitHub Actions lint and format checks. These are enforced via workflows in .github/workflows/"
   - "Run schema verification before commits: `npm run types:check`"
   - "Ensure types/database.ts is in sync with live schema"
+
+# 🎯 DEFINITION OF DONE (MANDATORY)
+definition_of_done:
+  before_any_code_changes:
+    - "ALWAYS read this entire rules file before making changes"
+    - "Check component props/types before modifying - do not invent new props without updating all call sites"
+    - "If modifying SafeImage, do NOT add new props - placeholderQuery is deprecated and banned"
+    - "If touching data fetching/mutations, maintain server/client boundaries"
+    - "Check database_schema_audit.md for schema changes"
+    - "Reference types/supabase.ts for type imports (never from types/database.ts directly)"
+  
+  after_code_changes:
+    - "Run: npx tsc --noEmit (must pass with 0 errors)"
+    - "Run: npx eslint . --ext .ts,.tsx --max-warnings 0 (must pass with 0 warnings)"
+    - "No use of placeholderQuery prop on <SafeImage /> (deprecated)"
+    - "No any types in TypeScript"
+    - "If schema changed → create migration + regenerate types/database.ts"
+    - "All imports use centralized clients (lib/supabase-client.ts, lib/supabase-admin-client.ts)"
+    - "No direct @supabase/supabase-js imports in app code"
+  
+  validation_commands:
+    - "npx tsc --noEmit"
+    - "npx eslint . --ext .ts,.tsx --max-warnings 0"
+    - "npm run build (if applicable)"
+
+# 🚫 SPECIFIC PREVENTION RULES
+prevention_rules:
+  safeimage_component:
+    - "DO NOT add new props to SafeImage components"
+    - "placeholderQuery prop is deprecated and banned via ESLint"
+    - "If you need new functionality, create a new component or extend existing props carefully"
+    - "All SafeImage call sites must type-check without placeholderQuery"
+  
+  toast_system:
+    - "DO NOT rewrite hooks/use-toast.ts without following the established pattern"
+    - "This file is the single source of truth for toast actions/types"
+    - "If modifying, ensure ActionType and Action interfaces remain consistent"
+    - "Use React.createElement instead of JSX in this file to avoid TypeScript issues"
+  
+  database_access:
+    - "NEVER import @supabase/supabase-js directly in app code"
+    - "Use lib/supabase-client.ts for user-level access"
+    - "Use lib/supabase-admin-client.ts for admin operations (server-only)"
+    - "No database calls in client components - use Server Components or Server Actions"
+  
+  type_safety:
+    - "Import Database type from types/supabase.ts, never from types/database.ts"
+    - "No any types - use proper TypeScript types from generated schema"
+    - "If types are missing, regenerate types/database.ts first"
+    - "Use explicit column selection in queries, avoid select('*') in app code"
 
 # 📝 DOCUMENTATION UPDATE CHECKLIST
 documentation_checklist:

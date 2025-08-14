@@ -13,6 +13,8 @@ interface SafeImageProps {
   className?: string;
   fallbackSrc?: string;
   context?: string;
+  /** @deprecated Do not use. Ignored internally and blocked by ESLint. */
+  placeholderQuery?: string;
 }
 
 export function SafeImage({
@@ -24,6 +26,8 @@ export function SafeImage({
   className = "",
   fallbackSrc = "/images/totl-logo.png",
   context = "unknown",
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);

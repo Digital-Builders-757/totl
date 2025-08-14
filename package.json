@@ -22,7 +22,8 @@
     "db:status": "supabase db status --linked",
     "db:new": "supabase migration new",
     "db:setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-supabase.ps1",
-    "verify-all": "npm run lint && npm run types:check && npm run typecheck && npm run build"
+    "verify-all": "npm run lint && npm run types:check && npm run typecheck && npm run build",
+    "dod": "npx tsc --noEmit && npx eslint . --ext .ts,.tsx --max-warnings 0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

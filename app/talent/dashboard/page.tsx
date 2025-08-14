@@ -418,7 +418,7 @@ export default function TalentDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6" onValueChange={setActiveTab}>
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -629,7 +629,9 @@ export default function TalentDashboard() {
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
-                    <Button onClick={() => setActiveTab("discover")}>Browse Available Gigs</Button>
+                    <Button asChild>
+                      <Link href="/gigs">Browse Available Gigs</Link>
+                    </Button>
                   </div>
                 )}
               </CardContent>
