@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@supabase/supabase-js";
@@ -133,9 +133,9 @@ export function BasicInfoSection({ user, profile }: BasicInfoSectionProps) {
           <div className="flex items-center justify-between pt-4">
             <div className="text-sm text-gray-500">
               {profile.email_verified ? (
-                <span className="text-green-600">✓ Email verified</span>
+                <span className="text-green-600">✅ Email verified</span>
               ) : (
-                <span className="text-yellow-600">⚠ Email not verified</span>
+                <span className="text-yellow-600">⚠️ Email not verified</span>
               )}
             </div>
 

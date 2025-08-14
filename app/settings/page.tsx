@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
 import { createSupabaseServerClient } from "@/lib/supabase-client";
 import type { Database } from "@/types/supabase";

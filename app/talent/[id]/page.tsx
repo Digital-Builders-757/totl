@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
