@@ -99,20 +99,20 @@ export default function ClientSignup() {
             variant: "destructive",
           });
         }
-      }
 
-      // Update the user's profile with first and last name
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user?.id);
+        // Update the user's profile with first and last name
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", user.id);
 
-      if (updateError) {
-        console.error("Error updating profile:", updateError);
+        if (updateError) {
+          console.error("Error updating profile:", updateError);
+        }
       }
 
       // Success - redirect to returnUrl, success page or dashboard

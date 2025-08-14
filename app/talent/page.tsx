@@ -3,7 +3,7 @@
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Search, ArrowRight, AlertCircle, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AuthAction } from "@/components/auth-action";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -49,16 +49,7 @@ export default function TalentPage() {
 
   const supabase = isSupabaseConfigured ? createClientComponentClient<Database>() : null;
 
-  useEffect(() => {
-    if (isSupabaseConfigured) {
-      fetchTalent();
-    } else {
-      setError("Supabase is not configured. Please check your environment variables.");
-      setLoading(false);
-    }
-  }, [isSupabaseConfigured]);
-
-  const fetchTalent = async () => {
+  const fetchTalent = useCallback(async () => {
     if (!supabase) {
       setError("Supabase client not available");
       setLoading(false);
@@ -85,7 +76,16 @@ export default function TalentPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchTalent();
+    } else {
+      setError("Supabase is not configured. Please check your environment variables.");
+      setLoading(false);
+    }
+  }, [isSupabaseConfigured, fetchTalent]);
 
   const filteredTalent = talent.filter(
     (person) =>

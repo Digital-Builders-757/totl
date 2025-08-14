@@ -70,45 +70,6 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClientComponentClient<Database>();
 
-  // Session caching utilities
-  const SESSION_CACHE_KEY = "totl_session_cache";
-  const SESSION_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-  const cacheSession = (session: Session | null) => {
-    if (typeof window !== "undefined" && session) {
-      localStorage.setItem(
-        SESSION_CACHE_KEY,
-        JSON.stringify({
-          session,
-          timestamp: Date.now(),
-        })
-      );
-    }
-  };
-
-  const getCachedSession = (): Session | null => {
-    if (typeof window === "undefined") return null;
-
-    try {
-      const cached = localStorage.getItem(SESSION_CACHE_KEY);
-      if (!cached) return null;
-
-      const { session, timestamp } = JSON.parse(cached);
-      const now = Date.now();
-
-      // Check if cache is still valid (5 minutes)
-      if (now - timestamp < SESSION_CACHE_DURATION) {
-        return session;
-      }
-
-      // Clear expired cache
-      localStorage.removeItem(SESSION_CACHE_KEY);
-      return null;
-    } catch {
-      return null;
-    }
-  };
-
   useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {

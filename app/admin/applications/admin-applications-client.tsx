@@ -55,7 +55,7 @@ interface AdminApplicationsClientProps {
 export function AdminApplicationsClient({
   applications: initialApplications,
 }: AdminApplicationsClientProps) {
-  const [activeTab, setActiveTab] = useState("pending");
+  const [activeTab, setActiveTab] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
   const [applications, setApplications] = useState<ApplicationWithDetails[]>(initialApplications);
   const [filteredApplications, setFilteredApplications] = useState<ApplicationWithDetails[]>([]);
@@ -81,7 +81,7 @@ export function AdminApplicationsClient({
 
     // Filter by status based on active tab
     filtered = filtered.filter((app) => {
-      if (activeTab === "pending") return app.status === "pending";
+      if (activeTab === "new") return app.status === "new";
       if (activeTab === "approved") return app.status === "accepted";
       if (activeTab === "rejected") return app.status === "rejected";
       return true;
@@ -295,14 +295,14 @@ export function AdminApplicationsClient({
             </div>
           </div>
 
-          <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
+          <Tabs defaultValue="new" className="w-full" onValueChange={setActiveTab}>
             <div className="px-6 border-b border-gray-100">
               <TabsList className="h-12">
                 <TabsTrigger
-                  value="pending"
+                  value="new"
                   className="data-[state=active]:border-b-2 data-[state=active]:border-black rounded-none"
                 >
-                  Pending
+                  New
                 </TabsTrigger>
                 <TabsTrigger
                   value="approved"
@@ -319,15 +319,15 @@ export function AdminApplicationsClient({
               </TabsList>
             </div>
 
-            <TabsContent value="pending" className="p-0">
+            <TabsContent value="new" className="p-0">
               {filteredApplications.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
                     <Clock className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-medium mb-2">No Pending Applications</h3>
+                  <h3 className="text-lg font-medium mb-2">No New Applications</h3>
                   <p className="text-gray-500">
-                    There are currently no pending talent applications to review.
+                    There are currently no new talent applications to review.
                   </p>
                 </div>
               ) : (
@@ -373,7 +373,7 @@ export function AdminApplicationsClient({
                           <td className="py-4 px-6">
                             <Badge
                               className={`${
-                                application.status === "pending"
+                                application.status === "new"
                                   ? "bg-amber-100 text-amber-800"
                                   : application.status === "accepted"
                                     ? "bg-green-100 text-green-800"

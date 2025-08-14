@@ -110,3 +110,5 @@ const projectStructure = {
     "best-practices.md": "Best practices guide for the codebase",
   },
 };
+
+export default projectStructure;

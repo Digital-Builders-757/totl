@@ -12,7 +12,6 @@ interface SafeImageProps {
   className?: string;
   fallbackSrc?: string;
   fallbackType?: "placeholder" | "static";
-  placeholderQuery?: string; // Add support for placeholderQuery prop
 }
 
 /**
@@ -25,7 +24,7 @@ interface SafeImageProps {
  * @param className - CSS classes
  * @param fallbackSrc - Fallback image source
  * @param fallbackType - "placeholder" uses dynamic placeholder, "static" uses fallbackSrc
- * @param placeholderQuery - Query string for placeholder image (e.g. "person", "landscape")
+
  */
 export function SafeImage({
   src,
@@ -36,7 +35,6 @@ export function SafeImage({
   className = "",
   fallbackSrc = "/images/totl-logo-transparent.png",
   fallbackType = "static",
-  placeholderQuery, // Destructure but don't use for now
 }: SafeImageProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(src || null);
   const [hasError, setHasError] = useState(false);

@@ -1,6 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { XCircle } from "lucide-react";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -20,7 +19,7 @@ export default async function AuthCallbackPage({
 }: {
   searchParams: Promise<{ code?: string; error?: string; error_description?: string }>;
 }) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createSupabaseServerClient();
   const params = await searchParams;
   const code = params.code;
   const error = params.error;

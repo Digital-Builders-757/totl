@@ -1,14 +1,12 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "./admin-dashboard-client";
-import type { Database } from "@/types/database";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   // Check if user is authenticated and is admin
   const {
@@ -20,9 +18,9 @@ export default async function AdminDashboard() {
     redirect("/login?returnUrl=/admin/dashboard");
   }
 
-  // Get user role from users table
+  // Get user role from profiles table
   const { data: userData, error: userError } = await supabase
-    .from("users")
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();

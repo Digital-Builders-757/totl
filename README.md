@@ -13,6 +13,18 @@ A comprehensive talent booking platform connecting models, actors, and performer
 - Supabase account
 - Resend API key (for emails)
 
+### ⚠️ Important: Next.js 15+ Compatibility
+This project uses Next.js 15+ which requires specific patterns for async cookies. Always use our centralized Supabase client helpers:
+
+```typescript
+// ✅ Use these patterns
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+const supabase = await createSupabaseServerClient();
+
+// ❌ Avoid direct Supabase client creation
+const supabase = createServerComponentClient<Database>({ cookies });
+```
+
 ### Installation
 ```bash
 # Clone the repository

@@ -9,10 +9,23 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "prepare": "husky install",
-    "verify-schema": "bash scripts/verify-schema-truth.sh"
+    "verify-schema": "bash scripts/verify-schema-truth.sh",
+    "types:regen": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > types/database.ts && node scripts/prepend-autogen-banner.mjs",
+    "types:check": "node scripts/verify-types-fresh.mjs",
+    "schema:verify": "powershell -ExecutionPolicy Bypass -File scripts/verify-schema-sync.ps1",
+    "async-cookies:check": "powershell -ExecutionPolicy Bypass -File scripts/fix-async-cookies.ps1",
+    "pre-commit": "npm run lint && npm run types:check && npm run async-cookies:check && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "db:reset": "supabase db reset --yes",
+    "db:push": "supabase db push --linked",
+    "db:pull": "supabase db pull",
+    "db:status": "supabase db status --linked",
+    "db:new": "supabase migration new",
+    "db:setup": "powershell -ExecutionPolicy Bypass -File scripts/setup-supabase.ps1",
+    "verify-all": "npm run lint && npm run types:check && npm run typecheck && npm run build"
   },
   "dependencies": {
-    "@hookform/resolvers": "latest",
+    "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",
@@ -42,6 +55,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/auth-helpers-nextjs": "latest",
     "@supabase/mcp-server-supabase": "^0.4.4",
+    "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -55,7 +69,7 @@
     "next-themes": "^0.4.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-hook-form": "latest",
+    "react-hook-form": "^7.62.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
     "resend": "latest",
@@ -63,7 +77,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "zod": "latest"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22",

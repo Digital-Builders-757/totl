@@ -10,7 +10,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { TalentProfile } from "@/types/database";
+import type { Database } from "@/types/database";
+
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 // Type definitions for form data
 interface PersonalInfoFormData {

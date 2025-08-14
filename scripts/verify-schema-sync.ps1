@@ -5,6 +5,8 @@
 #   - No local duplicate interface/type definitions for database tables
 #   - No usage of 'any' in database-related code
 #   - Proper use of the centralized Supabase client (no direct supabase-js usage outside lib)
+#   - No select('*') usage in app code (except scripts/)
+#   - AUTO-GENERATED banner in types/database.ts
 
 param(
     [switch]$SkipDbGeneration  # Use this flag to skip the schema-to-types generation step (e.g., if already done in CI)
@@ -27,8 +29,22 @@ if (-not (Get-Command "supabase" -ErrorAction SilentlyContinue)) {
     }
 }
 
-# 2. Schema-to-types consistency check (optional if SkipDbGeneration is set)
+# 2. Ensure types/database.ts exists
 $typesFile = "types/database.ts"
+if (-not (Test-Path $typesFile)) {
+    Write-Error "types/database.ts missing. Run npm run types:regen"
+    $exitCode = 1
+    exit $exitCode
+}
+
+# 3. Check for AUTO-GENERATED banner
+$typesContent = Get-Content $typesFile -Raw
+if ($typesContent -notmatch "AUTO-GENERATED FILE") {
+    Write-Error "types/database.ts missing AUTO-GENERATED banner. Run npm run types:regen"
+    $exitCode = 1
+}
+
+# 4. Schema-to-types consistency check (optional if SkipDbGeneration is set)
 $genTypesFile = "types/database.gen.ts"
 if (-not $SkipDbGeneration) {
     Write-Host "Ensuring local database reflects all migrations..." -ForegroundColor Cyan
@@ -66,7 +82,7 @@ if (-not $SkipDbGeneration) {
     }
 }
 
-# 3. Verify that the audit file is up-to-date with the schema (timestamps and enums)
+# 5. Verify that the audit file is up-to-date with the schema (timestamps and enums)
 $auditFile = "database_schema_audit.md"
 if (-not (Test-Path $auditFile)) {
     Write-Error "WARNING: $auditFile not found. Skipping audit file checks."
@@ -127,7 +143,7 @@ if (-not (Test-Path $auditFile)) {
     }
 }
 
-# 4. Scan the codebase for forbidden patterns (duplicate types, usage of any, direct supabase imports)
+# 6. Scan the codebase for forbidden patterns (duplicate types, usage of any, direct supabase imports, select('*'))
 Write-Host "Scanning project files for forbidden patterns..." -ForegroundColor Cyan
 # Map of known table names to expected type names
 $tablesToTypes = @{
@@ -154,6 +170,7 @@ foreach ($file in $files) {
         $trimmed = $line.Trim()
         # Skip comment lines entirely
         if ($trimmed.StartsWith('//') -or $trimmed.StartsWith('/*') -or $trimmed.StartsWith('*')) { continue }
+        
         # Duplicate interface definitions for DB tables
         if ($line -match '^\s*interface\s+([A-Za-z0-9_]+)\b') {
             $ifaceName = $Matches[1]
@@ -174,11 +191,13 @@ foreach ($file in $files) {
                 }
             }
         }
+        
         # Usage of 'any' in code
         if ($line -match '\bany\b') {
             Write-Error ("ERROR: Usage of 'any' type in {0} (line {1}): {2}" -f $relativePath, $($i+1), $trimmed)
             $exitCode = 1
         }
+        
         # Direct supabase-js import (forbidden outside central client)
         if ($line -match "@supabase/supabase-js") {
             if ($relativePath -notmatch 'supabase-client.ts$' -and $relativePath -notmatch 'supabase-admin-client.ts$') {
@@ -186,10 +205,18 @@ foreach ($file in $files) {
                 $exitCode = 1
             }
         }
+        
+        # select('*') usage in app code (forbidden except in scripts/)
+        if ($line -match "select\('\\*'\)") {
+            if ($relativePath -notmatch '^scripts\\') {
+                Write-Error ("ERROR: select('*') usage in {0} (line {1}). Use explicit column selection in app code." -f $relativePath, $($i+1))
+                $exitCode = 1
+            }
+        }
     }
 }
 
-# 5. Final output and exit code
+# 7. Final output and exit code
 if ($exitCode -eq 0) {
     Write-Host "All checks passed. Database schema and types are in sync, and no violations were found." -ForegroundColor Green
 } else {

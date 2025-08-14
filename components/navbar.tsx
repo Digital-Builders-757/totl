@@ -131,7 +131,7 @@ export default function Navbar() {
                     </Link>
                   )}
                   <Link
-                    href="/profile"
+                    href="/settings"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Profile Settings
@@ -227,7 +227,7 @@ export default function Navbar() {
                       </Link>
                     )}
                     <Link
-                      href="/profile"
+                      href="/settings"
                       className="block py-2 text-gray-800 hover:text-gray-600 font-medium transition-colors"
                     >
                       Profile Settings

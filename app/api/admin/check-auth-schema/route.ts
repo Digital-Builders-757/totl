@@ -5,53 +5,32 @@ export async function GET() {
   try {
     const supabase = createSupabaseAdminClient();
 
-    // FIXED: Removed RPC call that might use aggregates
-    // Instead, directly query information_schema tables
+    // Use the RPC function to safely access information_schema
+    const { data, error } = await supabase.rpc("check_auth_schema");
 
-    // First check if auth schema exists
-    const { data: namespaceData, error: namespaceError } = await supabase
-      .from("information_schema.schemata")
-      .select("schema_name")
-      .eq("schema_name", "auth")
-      .maybeSingle();
-
-    if (namespaceError || !namespaceData) {
+    if (error) {
       return NextResponse.json(
         {
           exists: false,
           tables: [],
           hasUsersTable: false,
-          error: "Auth schema not found or insufficient permissions",
+          error: "Could not query auth schema: " + error.message,
         },
         { status: 200 }
       );
     }
 
-    // Then get tables in auth schema
-    const { data: tablesData, error: tablesError } = await supabase
-      .from("information_schema.tables")
-      .select("table_name")
-      .eq("table_schema", "auth");
-
-    if (tablesError) {
-      return NextResponse.json(
-        {
-          exists: true,
-          tables: [],
-          hasUsersTable: false,
-          error: "Could not query auth schema tables",
-        },
-        { status: 200 }
-      );
-    }
-
-    const tables = tablesData.map((t) => t.table_name);
-    const hasUsersTable = tables.includes("users");
+    // Type the RPC return value
+    const rpcData = data as { schemas: string[]; auth_tables: string[] } | null;
+    const schemas = rpcData?.schemas || [];
+    const authTables = rpcData?.auth_tables || [];
+    const hasAuthSchema = schemas.includes("auth");
+    const hasUsersTable = authTables.includes("users");
 
     return NextResponse.json(
       {
-        exists: true,
-        tables,
+        exists: hasAuthSchema,
+        tables: authTables,
         hasUsersTable,
       },
       { status: 200 }

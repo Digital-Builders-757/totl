@@ -1,0 +1,14 @@
+# Supabase Edge Functions (Deno)
+supabase/functions/**
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env*
+!.env.example

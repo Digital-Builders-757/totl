@@ -1,7 +1,6 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import ClientProfileForm from "@/components/client-profile-form";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +11,7 @@ export default async function ClientProfilePage() {
     redirect("/login?returnUrl=/client/profile");
   }
 
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
     error: authError,
@@ -51,7 +50,7 @@ export default async function ClientProfilePage() {
             Add your company information to make your gigs more attractive to talent
           </p>
         </div>
-        <ClientProfileForm initialData={clientProfile} />
+        <ClientProfileForm initialData={clientProfile || undefined} />
       </div>
     </div>
   );

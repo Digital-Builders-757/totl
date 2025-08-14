@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     // Get user info to personalize the email
     const { data: userData } = await supabase
       .from("profiles")
-      .select("first_name")
+      .select("display_name")
       .eq("email", email)
       .single();
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     }
 
     const resetUrl = data.properties.action_link;
-    const name = userData?.first_name || email.split("@")[0];
+    const name = userData?.display_name || email.split("@")[0];
 
     // Generate the email template
     const { subject, html } = generatePasswordResetEmail({ name, resetUrl });

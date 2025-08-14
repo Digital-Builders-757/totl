@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Gig } from "@/types/database";
+import type { Database } from "@/types/database";
+
+type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 
 interface ApplicationFormProps {
   gig: Gig;

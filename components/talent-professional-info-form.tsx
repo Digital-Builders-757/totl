@@ -94,7 +94,9 @@ export default function TalentProfessionalInfoForm({
         .update({
           experience: formData.experience,
           portfolio_url: formData.portfolio || null,
-          specialties: formData.specialties || null,
+          specialties: formData.specialties
+            ? formData.specialties.split(",").map((s) => s.trim())
+            : null,
           achievements: formData.achievements || null,
           availability: formData.availability || null,
           updated_at: new Date().toISOString(),

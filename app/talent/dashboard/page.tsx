@@ -101,7 +101,6 @@ export default function TalentDashboard() {
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("overview");
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -114,7 +113,7 @@ export default function TalentDashboard() {
   // Calculate dashboard stats from real data
   const dashboardStats = {
     totalApplications: applications.length,
-    pendingApplications: applications.filter(
+    newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
     acceptedApplications: applications.filter((app) => app.status === "accepted").length,

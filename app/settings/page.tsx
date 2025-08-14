@@ -1,10 +1,27 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { SettingsForm } from "@/components/SettingsForm";
+import { ProfileEditor } from "./profile-editor";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type Client = Database["public"]["Tables"]["client_profiles"]["Row"];
+
+// Type for the exact columns we select
+type ProfileData = Pick<
+  Profile,
+  | "id"
+  | "role"
+  | "display_name"
+  | "avatar_url"
+  | "avatar_path"
+  | "email_verified"
+  | "created_at"
+  | "updated_at"
+>;
 
 export default async function SettingsPage() {
   // Check if Supabase is configured
@@ -22,7 +39,7 @@ export default async function SettingsPage() {
     );
   }
 
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   // Get current user
   const {
@@ -34,33 +51,38 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
-  // Get user profile
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError) {
-    console.error("Error fetching profile:", profileError);
-  }
-
-  // Get role-specific profile
-  let roleProfile = null;
-  if (profile?.role === "talent") {
-    const { data: talentProfile } = await supabase
+  // Fetch profile data with explicit column selection
+  const [{ data: profile }, { data: talent }, { data: client }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "id, role, display_name, avatar_url, avatar_path, email_verified, created_at, updated_at"
+      )
+      .eq("id", user.id)
+      .single(),
+    supabase
       .from("talent_profiles")
-      .select("*")
+      .select(
+        "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, created_at, updated_at"
+      )
       .eq("user_id", user.id)
-      .single();
-    roleProfile = talentProfile;
-  } else if (profile?.role === "client") {
-    const { data: clientProfile } = await supabase
+      .maybeSingle(),
+    supabase
       .from("client_profiles")
-      .select("*")
+      .select(
+        "id, user_id, company_name, industry, website, contact_name, contact_email, contact_phone, company_size, created_at, updated_at"
+      )
       .eq("user_id", user.id)
-      .single();
-    roleProfile = clientProfile;
+      .maybeSingle(),
+  ]);
+
+  // Generate signed URL for avatar if path exists
+  let avatarSrc: string | null = null;
+  if (profile?.avatar_path) {
+    const { data: signed } = await supabase.storage
+      .from("avatars")
+      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7); // 7 days
+    avatarSrc = signed?.signedUrl ?? null;
   }
 
   return (
@@ -72,11 +94,12 @@ export default async function SettingsPage() {
             <p className="text-gray-600">Manage your account and profile information</p>
           </div>
 
-          <SettingsForm
+          <ProfileEditor
             user={user}
-            profile={profile}
-            roleProfile={roleProfile}
-            userRole={profile?.role}
+            profile={profile as ProfileData}
+            talent={talent as Talent | null}
+            client={client as Client | null}
+            avatarSrc={avatarSrc}
           />
         </div>
       </div>

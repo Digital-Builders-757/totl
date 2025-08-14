@@ -106,6 +106,27 @@ This rule applies to:
 
 **Remember: Always reference the full context file before writing any code. This ensures consistency, security, and proper architecture compliance.** 
 
+## Database Types & Codegen
+- `types/database.ts` is auto-generated from Supabase. Do not hand-edit.
+- After any SQL/migration changes, run:
+  `npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/database.ts`
+- Prepend an AUTO-GENERATED banner to discourage edits.
+
+## Supabase Client
+- Use a single typed client from `lib/supabase-client.ts`.
+- Do not import `@supabase/supabase-js` directly in pages/components.
+
+## Query Style
+- Default: explicit column selection. Avoid `select('*')` in app code.
+- Exception: internal admin scripts in `scripts/` may use `*`.
+
+## Security
+- No service role in client/browser code. Server-only (API routes, server actions).
+
+## Component Boundaries
+- Presentational components: no data fetching.
+- Server components/actions do all data I/O and pass typed props.
+
 **Schema Management**  
 - **Single Source of Truth:** Always update the `database_schema_audit.md` **before** making any database schema changes. This audit file represents the ground truth of the database schema. Never apply a migration or change the database without first reflecting the change in this file.  
 - **Migrations Required:** All schema modifications must be done via version-controlled Supabase migration files (in `supabase/migrations`). Never edit the database schema manually without a migration. Update the audit file and then generate a new migration file using the Supabase CLI.  

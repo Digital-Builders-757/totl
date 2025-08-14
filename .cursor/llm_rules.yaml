@@ -1,5 +1,5 @@
 # Totl Agency LLM Coding Rules
-# Version: 2.0
+# Version: 2.1
 # This file provides a comprehensive set of rules for the LLM to follow when
 # generating code for the Totl Agency platform. Adhering to these rules ensures
 # consistency, maintainability, and alignment with the project's architecture.
@@ -38,6 +38,8 @@ documentation_requirements:
 environment:
   terminal: "PowerShell (Windows)"
   commands:
+    - "When invoking env vars, use $env:NAME (no quotes), e.g., `--project-id $env:SUPABASE_PROJECT_ID`."
+    - "Prefer `supabase gen types --linked` to avoid quoting issues."
     - "Use PowerShell-compatible commands only"
     - "Use Get-ChildItem instead of ls"
     - "Use Get-Content instead of cat"
@@ -71,10 +73,10 @@ project_overview:
     - "Documentation-first: Always check and update documentation."
 
 architecture:
-  framework: "Next.js 14+ (App Router)"
+  framework: "Next.js 15 (App Router, React Server Components)"
   database: "Supabase (PostgreSQL)"
   styling: "TailwindCSS with shadcn/ui"
-  authentication: "Supabase Auth with @supabase/auth-helpers-nextjs"
+  authentication: "@supabase/ssr with createServerClient (SSR cookies)"
   form_handling: "React Hook Form + Zod for validation"
   state_management:
     - "Use React's built-in state (useState, useReducer) for local component state."
@@ -113,30 +115,28 @@ directory_structure:
   - path: "/hooks"
     description: "Custom React hooks."
   - path: "/types"
-    description: "Global TypeScript type definitions. The `types/database.ts` file contains manually-defined interfaces for database tables (e.g., `TalentProfile`). It does NOT use auto-generated types."
+    description: "Global TypeScript type definitions. The file `types/database.ts` is AUTO-GENERATED from the live Supabase schema. NEVER manually edit this file."
   - path: "/docs"
     description: "Project documentation. Always check these files before making changes."
 
 frameworks_and_libraries:
   next_js:
-    - "Use the App Router for all new routes."
-    - "Fetch data in Server Components (`page.tsx`, `layout.tsx`) by default."
-    - "Use Server Actions for form submissions and data mutations."
-    - "Use `next/image` via the `<SafeImage />` wrapper for all images."
-    - "Use the pre-configured client from `/lib/supabase-client.ts`."
-    - "For admin-level tasks, use the client from `/lib/supabase-admin-client.ts` in secure server environments only."
-    - "Always use the `safeQuery` wrapper from `/lib/safe-query.ts` for RLS-protected queries."
-    - "Prefer `select('*')` when fetching data for a component that uses a pre-defined TypeScript interface (e.g., `TalentProfile`) to ensure the fetched data matches the type definition and avoids linter errors. Only select specific columns if the data is used for a one-off task and not passed to a typed component."
-    - "Use `{ returning: 'minimal' }` for inserts unless you need the returned data."
+    - "Use the App Router for all routes."
+    - "Prefer Server Components for data fetching."
+    - "Use Server Actions for mutations only; never mutate in client components."
+    - "Use the SSR client from `/lib/supabase-client.ts` (built on @supabase/ssr)."
+    - "Use the admin client from `/lib/supabase-admin-client.ts` only in server-only contexts."
+    - "Always select explicit columns; never use `select('*')` in app code."
+    - "Use `<SafeImage />` (wraps next/image) for images."
   react:
     - "Use functional components with hooks."
     - "Components in `/components` must be presentational (no data fetching)."
   supabase:
-    - "Use the pre-configured client from `/lib/supabase-client.ts`."
-    - "For admin-level tasks, use the client from `/lib/supabase-admin-client.ts` in secure server environments only."
-    - "Always use the `safeQuery` wrapper from `/lib/safe-query.ts` for RLS-protected queries."
-    - "Never use `select('*')`. Always select specific columns."
-    - "Use `{ returning: 'minimal' }` for inserts unless you need the returned data."
+    - "Import the SSR client from lib/supabase-client.ts; do not import @supabase/supabase-js directly in app code."
+    - "Type data with `import type { Database } from '@/types/supabase'` (re-export); never import from types/database.ts."
+    - "Service role key only on the server (Server Actions, API routes)."
+    - "For complex joins, prefer database VIEWS or RPC."
+    - "Always select explicit columns. `{ returning: 'minimal' }` for inserts unless you need data back."
   tailwind_css:
     - "Use utility classes directly in JSX."
     - "Avoid using `@apply` or custom CSS files."
@@ -156,7 +156,8 @@ coding_style:
     - "Use JSDoc for documenting complex functions, components, and props."
     - "Add inline comments only for non-obvious logic."
   linting:
-    - "Run ESLint (npm run lint) and Prettier (npm run format) before every commit, PR, and merge. All code must pass lint and formatting checks."
+    - "Run ESLint & Prettier before commits."
+    - "Rules: no-explicit-any (error), consistent-type-imports (error), import/order (warn with auto-fix), @typescript-eslint/no-unused-vars with underscore ignore."
 
 component_standards:
   props:
@@ -179,18 +180,24 @@ data_management:
 
 database:
   migrations:
-    - "To change the database schema, ALWAYS create a new migration file."
-    - "Use the command: `supabase migration new <description_in_snake_case>`."
-    - "Write the SQL changes in the newly generated file in `/supabase/migrations`."
-    - "NEVER modify a migration file that has already been applied."
-    - "After database changes, update database_schema_audit.md to reflect the new schema."
+    - "Create new migrations for schema changes: `supabase migration new <desc>`."
+    - "Never modify an applied migration."
+    - "After schema changes, regenerate types via linked project (Windows-safe): `supabase link --project-ref <REF>` then `supabase gen types typescript --linked --schema public > types/database.ts`."
+    - "Keep `types/supabase.ts` as a re-export: `export type { Database } from './database'`."
   naming:
     - "Table names: `snake_case`, plural (e.g., `talent_profiles`)."
     - "Column names: `snake_case` (e.g., `full_name`)."
     - "Foreign keys: `[table_name_singular]_id` (e.g., `user_id`)."
   querying:
-    - "All queries must respect Row-Level Security."
-    - "When querying data for the logged-in user, use `auth.uid()` in the where clause."
+    - "All queries must respect Row-Level Security (RLS)."
+    - "In SQL (policies/views/RPC), use `(select auth.uid())` in predicates for performance."
+    - "In application code, use the authenticated user's `id` from the session; do **not** call `auth.uid()` in PostgREST filters."
+    - "Use explicit column selection; avoid `select('*')` in app code (allowed only in internal scripts)."
+
+views_and_rpc:
+  - "Name admin/reporting views with `admin_` prefix (e.g., `admin_talent_dashboard`)."
+  - "Grant SELECT only to `authenticated`; gate sensitive access by role inside the view or via policies."
+  - "RPC that touches system catalogs must be SECURITY DEFINER and role-gated inside the function."
 
 authentication_and_security:
   route_protection:
@@ -198,19 +205,37 @@ authentication_and_security:
     - "Redirect unauthenticated users to `/login`."
     - "After login, redirect users to their respective dashboards (`/talent/dashboard` or `/client/dashboard`) based on their role from the `profiles` table."
   rls:
-    - "Assume RLS is enabled on all tables."
-    - "Users can only access their own data unless a policy explicitly allows wider access (e.g., public gigs)."
+    - "Policies must avoid per-row re-evaluation of auth functions; wrap calls like `auth.uid()` with `(select auth.uid())`."
+    - "Use views or RPC for admin/reporting paths and gate them by role inside SQL when needed."
   secrets:
     - "Never hardcode API keys, JWT secrets, or service role keys."
     - "Access all secrets from environment variables (`process.env`)."
+    - "No service role in client/browser code. Server-only (API routes, server actions)."
+
+accessibility:
+  - "Interactive behavior belongs on native interactive elements (use <button>, not <div onClick>)."
+  - "Clickable non-native elements must have role, tabIndex, and keyboard handlers; prefer native elements instead."
+  - "All images require meaningful alt text; decorative images use empty alt."
 
 anti_patterns:
+  - name: "DB calls in client components"
+    description: "Do not call Supabase from client components."
+    correct_approach: "Fetch in Server Components or Server Actions; pass data/handlers to client components."
+  - name: "Deep nested selects for admin dashboards"
+    description: "Avoid brittle nested selects with multiple relationships."
+    correct_approach: "Use typed database VIEWS and select from them."
+  - name: "Calling auth.uid() in app filters"
+    description: "PostgREST filters in app code should not call auth.uid()."
+    correct_approach: "Use the session's `user.id`; reserve `(select auth.uid())` for SQL inside policies/views/RPC."
   - name: "Client-side data fetching in UI page components"
     description: "Do not fetch data on the client side within page components using `useEffect` and `useState`. This was refactored in the Talent Dashboard."
     correct_approach: "Fetch data in Server Components (at the page level) and pass it as props to client components. This is more performant and aligns with Next.js best practices."
-  - name: "Incomplete data fetching for typed components"
-    description: "Do not use `select('col1, col2')` if the component you are passing the data to expects a full TypeScript interface (e.g. `TalentProfile`). This will cause a type mismatch."
-    correct_approach: "Use `select('*')` to fetch the complete data model, ensuring it fully satisfies the TypeScript interface."
+  - name: "Using select('*') in app code"
+    description: "Do not use `select('*')` in application code. This can expose unnecessary data and impact performance."
+    correct_approach: "Use explicit column selection for better performance and security. Only use `select('*')` in internal admin scripts."
+  - name: "Direct Supabase client imports"
+    description: "Do not import `@supabase/supabase-js` directly in pages/components."
+    correct_approach: "Use the centralized client from `lib/supabase-client.ts` for consistent typing and security."
   - name: "Mixing Server and Client Component logic"
     description: "Do not use React hooks that depend on the browser (like `useState`, `useEffect`, `onClick`) inside a component that is not explicitly marked with the `'use client'` directive at the top of the file."
     correct_approach: "Keep data-fetching and server-side logic in Server Components. If a component requires interactivity or state, extract it into a separate Client Component and import it into the Server Component."
@@ -220,9 +245,17 @@ anti_patterns:
   - name: "Using Unix commands in PowerShell"
     description: "Do not use Unix/Linux commands like `ls`, `cat`, `grep` in PowerShell environment."
     correct_approach: "Use PowerShell-compatible commands like `Get-ChildItem`, `Get-Content`, `Select-String`."
+  - name: "Manual editing of types/database.ts"
+    description: "Do not manually edit `types/database.ts`. This file is auto-generated from the Supabase schema."
+    correct_approach: "Regenerate types using `npx supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" --schema public > types/database.ts` after schema changes."
 
 testing_and_ci:
+  - "CI must run: lint, typecheck, build, and (optionally) `supabase db push --linked --no-seed` on main."
+  - "Pre-commit runs lint-staged with eslint + prettier; builds must pass."
+  - "Run `npm run types:regen` after migrations and verify with `npm run types:check`."
   - "All PRs and merges must pass the GitHub Actions lint and format checks. These are enforced via workflows in .github/workflows/"
+  - "Run schema verification before commits: `npm run types:check`"
+  - "Ensure types/database.ts is in sync with live schema"
 
 # 📝 DOCUMENTATION UPDATE CHECKLIST
 documentation_checklist:

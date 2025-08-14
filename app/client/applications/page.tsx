@@ -139,7 +139,7 @@ export default function ClientApplicationsPage() {
 
     const matchesTab =
       activeTab === "all" ||
-      (activeTab === "pending" && application.status === "Under Review") ||
+      (activeTab === "new" && application.status === "new") ||
       (activeTab === "interview" && application.status === "Interview Scheduled") ||
       (activeTab === "hired" && application.status === "Hired");
 
@@ -307,8 +307,8 @@ export default function ClientApplicationsPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
-            <TabsTrigger value="pending">
-              Pending ({applications.filter((app) => app.status === "Under Review").length})
+            <TabsTrigger value="new">
+              New ({applications.filter((app) => app.status === "new").length})
             </TabsTrigger>
             <TabsTrigger value="interview">
               Interviews (

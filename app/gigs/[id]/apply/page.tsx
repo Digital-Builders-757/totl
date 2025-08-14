@@ -24,7 +24,7 @@ interface Gig {
   compensation: string;
   category?: string;
   date?: string;
-  image_url?: string;
+  image_url: string | null;
   client_id: string;
 }
 

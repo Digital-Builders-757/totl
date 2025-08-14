@@ -1,4 +1,3 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Eye,
   CheckCircle,
@@ -13,7 +12,6 @@ import {
   Edit,
   DollarSign,
 } from "lucide-react";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
@@ -29,39 +27,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database, TalentProfile, ApplicationStatus } from "@/types/database";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+import type { Database } from "@/types/database";
 
-// Type definitions for joined data
-interface ApplicationWithGigAndClient {
-  id: string;
-  status: ApplicationStatus;
-  created_at: string;
-  gigs: Array<{
-    id: string;
-    title: string;
-    location: string;
-    clients: Array<{
-      company_name: string;
-    }> | null;
-  }>;
-}
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
-interface BookingWithGigAndClient {
-  id: string;
-  date: string;
-  compensation: number | null;
-  gigs: Array<{
-    id: string;
-    title: string;
-    location: string;
-    clients: Array<{
-      company_name: string;
-    }> | null;
-  }>;
-}
+// Type definitions for joined data using views
+type ApplicationWithGigAndClient = Database["public"]["Views"]["admin_talent_dashboard"]["Row"];
+type BookingWithGigAndClient = Database["public"]["Views"]["admin_bookings_dashboard"]["Row"];
 
 interface PortfolioItemWithCaption {
-  image_url: string;
+  image_url: string | null;
   caption: string | null;
 }
 
@@ -76,7 +52,7 @@ export default async function TalentDashboard() {
     redirect("/login?returnUrl=/admin/talentdashboard");
   }
 
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   const {
     data: { user },
@@ -94,42 +70,17 @@ export default async function TalentDashboard() {
       await Promise.all([
         supabase.from("talent_profiles").select("*").eq("user_id", user.id).single(),
         supabase
-          .from("applications")
+          .from("admin_talent_dashboard")
           .select(
-            `
-          id,
-          status,
-          created_at,
-          gigs (
-            id,
-            title,
-            location,
-            clients (
-              company_name
-            )
-          )
-        `
+            "application_id,talent_id,application_status,application_created_at,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
           .eq("talent_id", user.id),
         supabase
-          .from("bookings")
+          .from("admin_bookings_dashboard")
           .select(
-            `
-          id,
-          date,
-          compensation,
-          gigs (
-            id,
-            title,
-            location,
-            clients (
-              company_name
-            )
+            "booking_id,booking_date,booking_compensation,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
-        `
-          )
-          .eq("talent_id", user.id)
-          .eq("status", "confirmed"),
+          .eq("talent_id", user.id),
         supabase
           .from("portfolio_items")
           .select("image_url, caption")
@@ -161,67 +112,81 @@ export default async function TalentDashboard() {
   const gigs = {
     active:
       applicationsData
-        ?.filter((app) => ["new", "under_review", "shortlisted"].includes(app.status))
+        ?.filter(
+          (app) =>
+            app.application_status &&
+            ["new", "under_review", "shortlisted"].includes(app.application_status)
+        )
         .map((app) => ({
-          id: parseInt(app.id) || 0,
-          gigId: parseInt(app.gigs?.[0]?.id) || 0,
-          title: app.gigs?.[0]?.title || "Unknown Gig",
-          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
-          location: app.gigs?.[0]?.location || "Unknown Location",
-          appliedDate: new Date(app.created_at).toLocaleDateString(),
-          status: app.status,
+          id: parseInt(app.application_id || "0") || 0,
+          gigId: parseInt(app.gig_id || "0") || 0,
+          title: app.gig_title || "Unknown Gig",
+          company: app.client_company_name || "Private Client",
+          location: app.gig_location || "Unknown Location",
+          appliedDate: app.application_created_at
+            ? new Date(app.application_created_at).toLocaleDateString()
+            : "Unknown Date",
+          status: app.application_status || "new",
           image: "/gig-editorial.png",
         })) || [],
     accepted:
       applicationsData
-        ?.filter((app) => app.status === "accepted")
+        ?.filter((app) => app.application_status === "accepted")
         .map((app) => ({
-          id: parseInt(app.id) || 0,
-          gigId: parseInt(app.gigs?.[0]?.id) || 0,
-          title: app.gigs?.[0]?.title || "Unknown Gig",
-          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
-          location: app.gigs?.[0]?.location || "Unknown Location",
-          appliedDate: new Date(app.created_at).toLocaleDateString(),
-          status: app.status,
+          id: parseInt(app.application_id || "0") || 0,
+          gigId: parseInt(app.gig_id || "0") || 0,
+          title: app.gig_title || "Unknown Gig",
+          company: app.client_company_name || "Private Client",
+          location: app.gig_location || "Unknown Location",
+          appliedDate: app.application_created_at
+            ? new Date(app.application_created_at).toLocaleDateString()
+            : "Unknown Date",
+          status: app.application_status || "accepted",
           image: "/gig-editorial.png",
         })) || [],
     rejected:
       applicationsData
-        ?.filter((app) => app.status === "rejected")
+        ?.filter((app) => app.application_status === "rejected")
         .map((app) => ({
-          id: parseInt(app.id) || 0,
-          gigId: parseInt(app.gigs?.[0]?.id) || 0,
-          title: app.gigs?.[0]?.title || "Unknown Gig",
-          company: app.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
-          location: app.gigs?.[0]?.location || "Unknown Location",
-          appliedDate: new Date(app.created_at).toLocaleDateString(),
-          status: app.status,
+          id: parseInt(app.application_id || "0") || 0,
+          gigId: parseInt(app.gig_id || "0") || 0,
+          title: app.gig_title || "Unknown Gig",
+          company: app.client_company_name || "Private Client",
+          location: app.gig_location || "Unknown Location",
+          appliedDate: app.application_created_at
+            ? new Date(app.application_created_at).toLocaleDateString()
+            : "Unknown Date",
+          status: app.application_status || "rejected",
           image: "/gig-editorial.png",
         })) || [],
   };
 
   const upcomingBookings =
     bookingsData?.map((booking) => ({
-      id: booking.id,
-      title: booking.gigs?.[0]?.title || "Unknown Gig",
-      company: booking.gigs?.[0]?.clients?.[0]?.company_name || "Private Client",
-      date: new Date(booking.date).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      }),
-      time: new Date(booking.date).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      location: booking.gigs?.[0]?.location || "Unknown Location",
-      compensation: `$${booking.compensation}`,
+      id: booking.booking_id || "0",
+      title: booking.gig_title || "Unknown Gig",
+      company: booking.client_company_name || "Private Client",
+      date: booking.booking_date
+        ? new Date(booking.booking_date).toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "Unknown Date",
+      time: booking.booking_date
+        ? new Date(booking.booking_date).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "Unknown Time",
+      location: booking.gig_location || "Unknown Location",
+      compensation: `$${booking.booking_compensation || 0}`,
       image: "/gig-jewelry.png",
     })) || [];
 
   const portfolioHighlights =
     portfolioData?.map((item) => ({
-      image: item.image_url,
+      image: item.image_url || "/placeholder.jpg",
       caption: item.caption,
     })) || [];
 

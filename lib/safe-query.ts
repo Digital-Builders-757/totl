@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { GigStatus } from "@/types/database";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
+
+type GigStatus = Database["public"]["Enums"]["gig_status"];
+type ApplicationStatus = Database["public"]["Enums"]["application_status"];
 
 // Type definition for gig filters
 interface GigFilters {
@@ -9,6 +11,66 @@ interface GigFilters {
   status?: GigStatus;
   client_id?: string;
   [key: string]: string | undefined;
+}
+
+/**
+ * Safe query wrapper for Supabase operations
+ * Provides consistent error handling and logging
+ */
+
+export async function safe<T>(promise: Promise<{ data: T; error: unknown }>): Promise<T> {
+  const { data, error } = await promise;
+  if (error) {
+    console.error("Supabase query error:", error);
+    throw error;
+  }
+  return data;
+}
+
+/**
+ * Safe query wrapper that returns null instead of throwing
+ * Useful for optional data fetching
+ */
+export async function safeOptional<T>(
+  promise: Promise<{ data: T; error: unknown }>
+): Promise<T | null> {
+  try {
+    return await safe(promise);
+  } catch (error) {
+    console.warn("Optional query failed:", error);
+    return null;
+  }
+}
+
+/**
+ * Safe insert wrapper with proper typing
+ */
+export async function safeInsert<T>(
+  promise: Promise<{ data: T | null; error: unknown }>
+): Promise<T> {
+  const { data, error } = await promise;
+  if (error) {
+    console.error("Supabase insert error:", error);
+    throw error;
+  }
+  if (!data) {
+    throw new Error("Insert returned no data");
+  }
+  return data;
+}
+
+/**
+ * Safe update wrapper
+ */
+export async function safeUpdate<T>(
+  promise: Promise<{ data: T | null; error: unknown }>
+): Promise<T | null> {
+  const { data, error } = await promise;
+  if (error) {
+    console.error("Supabase update error:", error);
+    throw error;
+  }
+  return data;
 }
 
 /**
@@ -116,7 +178,7 @@ export const safeQuery = {
     supabase: SupabaseClient<Database>,
     page = 1,
     pageSize = 10,
-    status?: string
+    status?: ApplicationStatus
   ) => {
     let query = supabase.from("applications").select(`
         id, 

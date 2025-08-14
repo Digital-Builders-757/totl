@@ -62,7 +62,7 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 // Create a mock action for profile creation if it doesn't exist
-async function createProfile(data: ProfileFormValues) {
+async function createProfile() {
   // This would typically call a server action or API endpoint
 
   // Simulate API call
@@ -80,12 +80,13 @@ export function OnboardingForm() {
     defaultValues,
   });
 
-  async function onSubmit(data: ProfileFormValues) {
+  async function onSubmit() {
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await createProfile(data);
+      const data = form.getValues();
+      await createProfile();
 
       // Redirect based on role
       if (data.role === "talent") {
