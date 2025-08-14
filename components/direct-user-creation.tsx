@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import type React from "react";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 

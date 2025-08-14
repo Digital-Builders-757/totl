@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CheckCircle, Clock, Users } from "lucide-react";
 import Link from "next/link";
@@ -116,13 +116,13 @@ export default function GigSuccessPage() {
                 </p>
                 <div className="mt-6 space-y-2">
                   <p className="text-sm text-gray-500">
-                    • You&apos;ll receive an email notification once it&apos;s approved
+                    â€¢ You&apos;ll receive an email notification once it&apos;s approved
                   </p>
                   <p className="text-sm text-gray-500">
-                    • Approved gigs appear on the talent dashboard within 24 hours
+                    â€¢ Approved gigs appear on the talent dashboard within 24 hours
                   </p>
                   <p className="text-sm text-gray-500">
-                    • You can track applications in your dashboard
+                    â€¢ You can track applications in your dashboard
                   </p>
                 </div>
               </div>

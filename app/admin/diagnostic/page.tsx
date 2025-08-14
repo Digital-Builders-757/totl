@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+﻿import { Suspense } from "react";
 import AuthSchemaCheck from "@/components/auth-schema-check";
 import DirectUserCreation from "@/components/direct-user-creation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,19 +27,19 @@ export default function DiagnosticPage() {
             <ul className="space-y-2">
               <li className="flex items-center">
                 <span className="font-medium mr-2">NEXT_PUBLIC_SUPABASE_URL:</span>
-                <span>{process.env.NEXT_PUBLIC_SUPABASE_URL ? "✅ Set" : "❌ Not set"}</span>
+                <span>{process.env.NEXT_PUBLIC_SUPABASE_URL ? "âœ… Set" : "âŒ Not set"}</span>
               </li>
               <li className="flex items-center">
                 <span className="font-medium mr-2">NEXT_PUBLIC_SUPABASE_ANON_KEY:</span>
-                <span>{process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "✅ Set" : "❌ Not set"}</span>
+                <span>{process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? "âœ… Set" : "âŒ Not set"}</span>
               </li>
               <li className="flex items-center">
                 <span className="font-medium mr-2">SUPABASE_URL:</span>
-                <span>{process.env.SUPABASE_URL ? "✅ Set" : "❌ Not set"}</span>
+                <span>{process.env.SUPABASE_URL ? "âœ… Set" : "âŒ Not set"}</span>
               </li>
               <li className="flex items-center">
                 <span className="font-medium mr-2">SUPABASE_SERVICE_ROLE_KEY:</span>
-                <span>{process.env.SUPABASE_SERVICE_ROLE_KEY ? "✅ Set" : "❌ Not set"}</span>
+                <span>{process.env.SUPABASE_SERVICE_ROLE_KEY ? "âœ… Set" : "âŒ Not set"}</span>
               </li>
             </ul>
           </CardContent>

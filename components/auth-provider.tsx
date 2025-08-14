@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { SupabaseClient, User, Session, AuthError } from "@supabase/supabase-js";

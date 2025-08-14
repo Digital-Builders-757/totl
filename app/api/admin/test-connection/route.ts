@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+﻿import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -90,7 +90,7 @@ export async function GET() {
     return NextResponse.json(
       {
         connected: false,
-        error: `Server error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Server error: ${error instanceof Error ? error.message : "Unknown error"}`,
         publicVars: false,
         serviceVars: false,
       },

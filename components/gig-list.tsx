@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { format } from "date-fns";
 import { Calendar, MapPin, DollarSign } from "lucide-react";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 

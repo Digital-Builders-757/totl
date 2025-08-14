@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/supabase-js";
@@ -39,7 +39,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Type for the joined application data
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {

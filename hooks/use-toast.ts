@@ -1,4 +1,4 @@
-// 🚫 Do not edit without updating .cursor/llm_rules.yaml
+﻿// ðŸš« Do not edit without updating .cursor/llm_rules.yaml
 // This file is the single source of truth for toast actions/types.
 // If modifying, ensure ActionType and Action interfaces remain consistent.
 import * as React from "react";

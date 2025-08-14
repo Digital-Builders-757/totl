@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
@@ -64,8 +64,8 @@ export function EmailVerificationReminder() {
           <CheckCircle2 className="h-4 w-4 text-green-600" />
           <AlertTitle className="text-green-800">Email sent!</AlertTitle>
           <AlertDescription className="text-green-700">
-            We&apos;ve sent a verification email to {user.email}. Please check your inbox and click the
-            verification link.
+            We&apos;ve sent a verification email to {user.email}. Please check your inbox and click
+            the verification link.
           </AlertDescription>
         </>
       ) : (

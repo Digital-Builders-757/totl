@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Canonical column selection helpers for Supabase queries
  * Use these to ensure consistent column selection across the app
  */

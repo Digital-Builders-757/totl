@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import ClientProfileForm from "@/components/client-profile-form";
 import { createSupabaseServerClient } from "@/lib/supabase-client";
 

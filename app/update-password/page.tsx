@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+﻿import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ArrowLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import Image from "next/image";

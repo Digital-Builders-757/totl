@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+﻿import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import TalentProfileForm from "@/components/talent-profile-form";
@@ -60,4 +60,4 @@ export default async function TalentProfilePage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type User = Database["public"]["Tables"]["profiles"]["Row"];
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];

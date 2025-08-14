@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
 import { createSupabaseServerClient } from "@/lib/supabase-client";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Application = Database["public"]["Tables"]["applications"]["Row"];
 

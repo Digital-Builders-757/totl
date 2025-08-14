@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { User } from "@supabase/supabase-js";
 import {
@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type Application = Database["public"]["Tables"]["applications"]["Row"];

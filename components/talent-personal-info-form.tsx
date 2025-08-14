@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Info, Loader2 } from "lucide-react";
 import type React from "react";
@@ -292,7 +292,8 @@ export default function TalentPersonalInfoForm({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="w-[200px] text-xs">
-                    Enter your height in feet and inches (e.g., 5&apos;10&quot;) or centimeters (e.g., 178)
+                    Enter your height in feet and inches (e.g., 5&apos;10&quot;) or centimeters
+                    (e.g., 178)
                   </p>
                 </TooltipContent>
               </Tooltip>

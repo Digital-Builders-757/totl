@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin } from "lucide-react";
 import Link from "next/link";

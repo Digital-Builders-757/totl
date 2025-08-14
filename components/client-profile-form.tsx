@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 
 // Import the generated type instead of defining our own
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 

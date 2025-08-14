@@ -1,4 +1,4 @@
-import {
+﻿import {
   Eye,
   CheckCircle,
   Settings,
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServerClient } from "@/lib/supabase-client";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 

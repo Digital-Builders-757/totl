@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+﻿import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
@@ -9,13 +9,13 @@ import type { Database } from "@/types/supabase";
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-  const cookieStore = cookies(); // ✅ Fixed: no await needed
+  const cookieStore = cookies(); // âœ… Fixed: no await needed
   const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // Get user profile data directly - no need for getSession since middleware handles auth
   const { data: profile, error } = await supabase.from("profiles").select("*").single();
 
-  // ✅ Fixed: Proper type guards
+  // âœ… Fixed: Proper type guards
   if (error) {
     console.error("Error fetching profile:", error);
     redirect("/login");

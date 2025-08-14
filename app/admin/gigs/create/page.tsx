@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { CreateGigForm } from "./create-gig-form";
 import { createSupabaseServerClient } from "@/lib/supabase-client";
 

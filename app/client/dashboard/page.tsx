@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
@@ -547,7 +547,7 @@ export default function ClientDashboard() {
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">
-                            {gig.applications_count || 0} applications • {gig.location}
+                            {gig.applications_count || 0} applications â€¢ {gig.location}
                           </p>
                         </div>
                         <div className="text-right">

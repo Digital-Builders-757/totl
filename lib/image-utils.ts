@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utility function to get a fallback image URL
  * @param src - Original image source
  * @param fallback - Fallback image URL

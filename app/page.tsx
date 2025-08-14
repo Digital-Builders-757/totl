@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 // Force dynamic rendering to prevent build-time Supabase access
 export const dynamic = "force-dynamic";
@@ -228,21 +228,21 @@ export default function HomePage() {
                 title: "Browse & Discover",
                 description:
                   "Search through our curated database of verified talent. Filter by category, location, budget, and availability.",
-                icon: "🔍",
+                icon: "ðŸ”",
               },
               {
                 step: "02",
                 title: "Connect & Book",
                 description:
                   "Review portfolios, check availability, and send booking requests directly through our platform.",
-                icon: "🤝",
+                icon: "ðŸ¤",
               },
               {
                 step: "03",
                 title: "Create & Deliver",
                 description:
                   "Collaborate seamlessly with your chosen talent and receive high-quality deliverables on time.",
-                icon: "✨",
+                icon: "âœ¨",
               },
             ].map((item, index) => (
               <div key={index} className="text-center space-y-4">
