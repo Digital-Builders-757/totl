@@ -1,4 +1,10 @@
-﻿export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+/**
+ * AUTO-GENERATED FILE – DO NOT EDIT.
+ * Source of truth: Supabase schema.
+ * Generated: 2025-08-14T23:25:13.999Z
+ */
+
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options

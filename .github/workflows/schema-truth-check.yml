@@ -23,7 +23,13 @@ jobs:
       - name: Install Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: v2.34.3
+
+      - name: Login to Supabase
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          echo $SUPABASE_ACCESS_TOKEN | supabase login
 
       - name: Generate types from remote schema
         env:
@@ -34,9 +40,17 @@ jobs:
 
       - name: Compare generated types with committed types
         run: |
-          if ! diff -q types/temp_schema_types.ts types/database.ts; then
-            echo "ERROR: types/database.ts is not up-to-date with remote schema. Please regenerate this file using:"
-            echo "npx supabase gen types typescript --project-id \$SUPABASE_PROJECT_ID --schema public > types/database.ts"
+          if ! diff -u types/temp_schema_types.ts types/database.ts; then
+            echo ""
+            echo "❌ ERROR: types/database.ts is out of sync with remote schema"
+            echo ""
+            echo "🔧 To fix this, run locally:"
+            echo "   npx supabase gen types typescript --project-id \$SUPABASE_PROJECT_ID --schema public > types/database.ts"
+            echo ""
+            echo "📋 Changes detected:"
+            echo "   - Lines starting with '-' are in your local file but not in remote"
+            echo "   - Lines starting with '+' are in remote but missing from your local file"
+            echo ""
             exit 1;
           fi
 
