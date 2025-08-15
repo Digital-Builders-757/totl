@@ -1,5 +1,5 @@
-# Supabase Edge Functions (Deno)
-supabase/functions/**
+# Generated files
+types/database.ts
 
 # Build outputs
 .next/
@@ -12,6 +12,3 @@ node_modules/
 # Environment files
 .env*
 !.env.example
-
-# Generated files
-types/database.ts
