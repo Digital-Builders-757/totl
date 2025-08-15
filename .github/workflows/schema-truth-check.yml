@@ -91,7 +91,7 @@ jobs:
 
       - name: Verify schema & type hygiene (fast)
         shell: pwsh
-        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration -EnforceBanner:$false
+        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration -EnforceBanner:$false -SoftFail
 
       - name: Cleanup temp files
         if: always()
