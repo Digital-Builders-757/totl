@@ -3,21 +3,13 @@ import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 
 /** Use in React Server Components (read-only cookies) */
-export async function createSupabaseServerClient(): Promise<ReturnType<
-  typeof createServerClient<Database>
-> | null> {
+export async function createSupabaseServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Don't throw at import time. Only fail when actually called.
+  // Only throw when the function is *called* (runtime), not at import.
   if (!url || !anon) {
-    // In production, fail explicitly so you see a 500 at runtime
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Missing Supabase environment variables");
-    }
-    // In dev, warn and return a no-op-ish client if you prefer
-    console.warn("Missing Supabase env; returning null client in dev");
-    return null;
+    throw new Error("Missing Supabase environment variables");
   }
 
   const cookieStore = await cookies();
@@ -38,21 +30,13 @@ export async function createSupabaseServerClient(): Promise<ReturnType<
 }
 
 /** Use in server actions / route handlers (can set/remove cookies) */
-export async function createSupabaseActionClient(): Promise<ReturnType<
-  typeof createServerClient<Database>
-> | null> {
+export async function createSupabaseActionClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Don't throw at import time. Only fail when actually called.
+  // Only throw when the function is *called* (runtime), not at import.
   if (!url || !anon) {
-    // In production, fail explicitly so you see a 500 at runtime
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Missing Supabase environment variables");
-    }
-    // In dev, warn and return a no-op-ish client if you prefer
-    console.warn("Missing Supabase env; returning null client in dev");
-    return null;
+    throw new Error("Missing Supabase environment variables");
   }
 
   const cookieStore = await cookies(); // <-- MUST await
@@ -72,21 +56,13 @@ export async function createSupabaseActionClient(): Promise<ReturnType<
 }
 
 /** Use in client components */
-export function createSupabaseBrowserClient(): ReturnType<
-  typeof createBrowserClient<Database>
-> | null {
+export function createSupabaseBrowserClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Don't throw at import time. Only fail when actually called.
+  // Only throw when the function is *called* (runtime), not at import.
   if (!url || !anon) {
-    // In production, fail explicitly so you see a 500 at runtime
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Missing Supabase environment variables");
-    }
-    // In dev, warn and return a no-op-ish client if you prefer
-    console.warn("Missing Supabase env; returning null client in dev");
-    return null;
+    throw new Error("Missing Supabase environment variables");
   }
 
   return createBrowserClient<Database>(url, anon);

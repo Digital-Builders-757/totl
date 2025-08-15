@@ -5,10 +5,6 @@ export async function GET() {
   try {
     const supabase = await createSupabaseServerClient();
 
-    if (!supabase) {
-      return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
-    }
-
     // Get current user
     const {
       data: { user },
