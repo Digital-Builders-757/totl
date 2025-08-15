@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "prepare": "husky install",
     "verify-schema": "bash scripts/verify-schema-truth.sh",
-    "types:regen": "powershell -NoProfile -Command \"& { $c = npx supabase@v2.33.4 gen types typescript --linked --schema public; [IO.File]::WriteAllText('types/database.ts', $c, [Text.UTF8Encoding]::new($false)) }\"",
+    "types:regen": "powershell -NoProfile -Command \"& { npx supabase@v2.33.4 gen types typescript --linked --schema public | Out-File -FilePath types/temp_types.ts -Encoding utf8; $content = Get-Content types/temp_types.ts -Raw; [System.IO.File]::WriteAllText('types/database.ts', $content, [System.Text.UTF8Encoding]::new($false)); Remove-Item types/temp_types.ts }\"",
     "types:check": "node scripts/verify-types-fresh.mjs",
     "schema:verify-local": "node scripts/verify-schema-local.mjs",
     "schema:check": "node scripts/quick-schema-check.mjs",
