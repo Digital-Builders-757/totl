@@ -39,31 +39,42 @@ jobs:
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
         run: npx -y supabase@v2.33.4 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
 
-      - name: Normalize committed types (strip BOM & CRLF)
+      - name: Normalize both files (strip BOM & normalize line endings)
         shell: bash
         run: |
-          python - <<'PY'
-          p="types/database.ts"
-          with open(p, "rb") as f: b=f.read()
-          if b.startswith(b"\xef\xbb\xbf"): b=b[3:]
-          b=b.replace(b"\r\n", b"\n")
-          open("types/database.normalized.ts", "wb").write(b)
+          set -euo pipefail
+          python3 - <<'PY'
+          import sys
+
+          def normalize(src, dst):
+            b = open(src, "rb").read()
+            # strip UTF-8 BOM
+            if b.startswith(b"\xef\xbb\xbf"):
+              b = b[3:]
+            # normalize ALL line ending variants to LF
+            b = b.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            open(dst, "wb").write(b)
+
+          normalize("types/temp_schema_types.ts", "types/_remote.normalized.ts")
+          normalize("types/database.ts",          "types/_local.normalized.ts")
           PY
 
       - name: Compare generated types with committed types
+        shell: bash
         run: |
-          if ! diff -u types/temp_schema_types.ts types/database.normalized.ts; then
+          set -euo pipefail
+          if ! diff -u types/_remote.normalized.ts types/_local.normalized.ts; then
             echo ""
             echo "❌ ERROR: types/database.ts is out of sync with remote schema"
             echo ""
-            echo "🔧 To fix this, run locally:"
+            echo "🔧 To fix locally:"
             echo "   npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts"
             echo ""
             echo "📋 Changes detected:"
             echo "   - Lines starting with '-' are in your local file but not in remote"
             echo "   - Lines starting with '+' are in remote but missing from your local file"
             echo ""
-            exit 1;
+            exit 1
           fi
 
       - name: Run schema truth verification script
@@ -72,4 +83,4 @@ jobs:
 
       - name: Cleanup temp files
         if: always()
-        run: rm -f types/temp_schema_types.ts types/database.normalized.ts 
+        run: rm -f types/_remote.normalized.ts types/_local.normalized.ts types/temp_schema_types.ts 
