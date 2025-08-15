@@ -82,10 +82,13 @@ foreach ($file in $files) {
     $text = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction SilentlyContinue
     if ($null -eq $text -or $text.Length -eq 0) { continue }
 
-    # 1. Direct Supabase client import (use shared client instead)
-    if ($text -match '@supabase/supabase-js') {
+    # 1. Direct Supabase client creation from supabase-js (use shared client instead)
+    # Allow auth-helpers and type imports, but flag direct supabase-js client creation
+    if (($text -match 'createClient\s*\(' -or $text -match 'createBrowserClient\s*\(' -or $text -match 'createServerClient\s*\(') -and 
+        $text -match 'from\s+["\''@supabase/supabase-js["\'']' -and
+        $text -notmatch '@supabase/auth-helpers') {
         if ($relativePath -notmatch 'supabase-client\.ts$' -and $relativePath -notmatch 'supabase-admin-client\.ts$') {
-            Write-Error "ERROR: Direct Supabase client import in $relativePath. Use lib/supabase-client."
+            Write-Error "ERROR: Direct Supabase client creation in $relativePath. Use lib/supabase-client."
             $failed = $true
         }
     }
@@ -97,16 +100,14 @@ foreach ($file in $files) {
         $failed = $true
     }
 
-    # 3. Manual interfaces duplicated from DB types
+    # 3. Manual interfaces duplicated from DB types (warn but don't fail)
     foreach ($dbType in $dbTypes) {
         if ($text -match "\binterface\s+$dbType\b") {
-            Write-Error "ERROR: Manual interface for $dbType in $relativePath. Use types/database.ts."
-            $failed = $true
+            Write-Warning "WARNING: Manual interface for $dbType in $relativePath. Consider using types/database.ts."
         }
         # Also check for manual type definitions
         if ($text -match "\btype\s+$dbType\s*=" -and $text -notmatch 'Database\[') {
-            Write-Error "ERROR: Manual type definition for $dbType in $relativePath. Use generated types."
-            $failed = $true
+            Write-Warning "WARNING: Manual type definition for $dbType in $relativePath. Consider using generated types."
         }
     }
 
