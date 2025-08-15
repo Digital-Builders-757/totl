@@ -14,6 +14,7 @@
     "types:check": "node scripts/verify-types-fresh.mjs",
     "schema:verify-local": "node scripts/verify-schema-local.mjs",
     "schema:check": "node scripts/quick-schema-check.mjs",
+    "schema:verify-fast": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-schema-sync.ps1 -SkipDbGeneration",
     "supabase:login": "npx supabase@v2.33.4 login",
     "supabase:link": "npx supabase@v2.33.4 link --project-ref %SUPABASE_PROJECT_ID%",
     "schema:verify": "powershell -ExecutionPolicy Bypass -File scripts/verify-schema-sync.ps1",

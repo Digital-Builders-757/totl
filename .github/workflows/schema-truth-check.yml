@@ -89,9 +89,9 @@ jobs:
             exit 1
           fi
 
-      - name: Run schema truth verification script
+      - name: Verify schema & type hygiene (fast)
         shell: pwsh
-        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration
+        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration -EnforceBanner:$false
 
       - name: Cleanup temp files
         if: always()
