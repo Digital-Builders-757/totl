@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ArrowLeft, AlertCircle } from "lucide-react";

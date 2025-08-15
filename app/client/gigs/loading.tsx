@@ -1,4 +1,4 @@
-export default function ClientGigsLoading() {
+﻿export default function ClientGigsLoading() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="bg-white border-b border-gray-200 sticky top-0 z-40">

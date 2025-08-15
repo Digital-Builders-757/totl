@@ -1,4 +1,4 @@
-import SupabaseConnectionTest from "@/components/supabase-connection-test";
+﻿import SupabaseConnectionTest from "@/components/supabase-connection-test";
 
 export default function DebugPage() {
   return (

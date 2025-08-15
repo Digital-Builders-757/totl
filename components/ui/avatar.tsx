@@ -1,6 +1,5 @@
-import { User } from "lucide-react";
+﻿import { User } from "lucide-react";
 import * as React from "react";
-import { SafeImage } from "./safe-image";
 import { cn } from "@/lib/utils";
 
 // Standard shadcn/ui Avatar component
@@ -22,9 +21,9 @@ export interface AvatarImageProps extends React.ImgHTMLAttributes<HTMLImageEleme
   asChild?: boolean;
 }
 
-// eslint-disable-next-line @next/next/no-img-element
 export function AvatarImage({ className, alt, ...props }: AvatarImageProps) {
   return (
+    /* eslint-disable-next-line @next/next/no-img-element */
     <img
       className={cn("aspect-square h-full w-full object-cover", className)}
       alt={alt}

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { generateWelcomeEmail } from "@/lib/email-templates";
 

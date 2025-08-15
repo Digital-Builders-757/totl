@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react";
@@ -132,10 +132,10 @@ export default function VerificationPendingPage() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-medium mb-2">Didn&apos;t receive the email?</h4>
                 <ul className="text-sm text-gray-600 space-y-2">
-                  <li>• Check your spam or junk folder</li>
-                  <li>• Make sure you entered the correct email address</li>
-                  <li>• Wait a few minutes for the email to arrive</li>
-                  <li>• If you still don&apos;t see it, try clicking the resend button below</li>
+                  <li>â€¢ Check your spam or junk folder</li>
+                  <li>â€¢ Make sure you entered the correct email address</li>
+                  <li>â€¢ Wait a few minutes for the email to arrive</li>
+                  <li>â€¢ If you still don&apos;t see it, try clicking the resend button below</li>
                 </ul>
               </div>
             </CardContent>

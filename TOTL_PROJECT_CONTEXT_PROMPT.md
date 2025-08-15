@@ -250,15 +250,34 @@ const { data, error } = await supabase
   .eq('status', 'active');
 ```
 
-#### **Server-Side**
+#### **Server-Side (Next.js 15+ Compatible)**
 ```typescript
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 
-const supabase = createServerComponentClient<Database>({ cookies });
+// ✅ CORRECT: Use function pattern for Next.js 15+
+const cookieStore = cookies();
+const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
 // Force dynamic rendering for auth-dependent pages
 export const dynamic = "force-dynamic";
+```
+
+#### **Server Actions (Next.js 15+ Compatible)**
+```typescript
+import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+
+export async function myServerAction() {
+  'use server';
+  
+  // ✅ CORRECT: Use function pattern for Next.js 15+
+  const cookieStore = cookies();
+  const supabase = createServerActionClient<Database>({ cookies: () => cookieStore });
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  // ... rest of action
+}
 ```
 
 ### **Component Architecture**
@@ -267,7 +286,9 @@ export const dynamic = "force-dynamic";
 ```typescript
 // app/gigs/page.tsx
 export default async function GigsPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  // ✅ CORRECT: Use function pattern for Next.js 15+
+  const cookieStore = cookies();
+  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
   const { data: gigs } = await supabase
     .from('gigs')
     .select('*')
@@ -313,6 +334,38 @@ try {
 - Never use `any` types
 - Always type component props
 - Use Zod for form validation
+
+### **Next.js 15+ Compatibility**
+
+#### **🚨 CRITICAL: Async Cookies Pattern**
+**ALWAYS** use the function pattern for cookies in Next.js 15+:
+
+```typescript
+// ✅ CORRECT - Use this pattern everywhere
+const cookieStore = cookies();
+const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+
+// ❌ WRONG - This will cause async cookies errors
+const supabase = createServerComponentClient<Database>({ cookies });
+```
+
+#### **Centralized Supabase Clients**
+Use our centralized client helpers from `lib/supabase-client.ts`:
+
+```typescript
+// ✅ Server Components
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+const supabase = await createSupabaseServerClient();
+
+// ✅ Server Actions  
+import { createSupabaseActionClient } from "@/lib/supabase-client";
+const supabase = await createSupabaseActionClient();
+```
+
+#### **Common Patterns to Avoid**
+- ❌ `{ cookies }` - Use `{ cookies: () => cookieStore }`
+- ❌ `await cookies()` - `cookies()` is synchronous
+- ❌ Direct `createServerComponentClient` calls - Use centralized helpers
 
 ## 🚀 Production Status
 
@@ -398,6 +451,23 @@ WHERE schemaname = 'public';
 
 -- Check policies
 SELECT * FROM pg_policies WHERE schemaname = 'public';
+```
+
+#### **Async Cookies Error (Next.js 15+)**
+```
+[Error: Route "/settings" used `cookies().get('sb-utvircuwknqzpnmvxidp-auth-token')`. 
+`cookies()` should be awaited before using its value.]
+```
+
+**Solution:**
+1. Replace `{ cookies }` with `{ cookies: () => cookieStore }`
+2. Use centralized client helpers from `lib/supabase-client.ts`
+3. Ensure all server components and actions use the correct pattern
+
+```typescript
+// ✅ Fix: Use function pattern
+const cookieStore = cookies();
+const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 ```
 
 ### **Debug Queries**

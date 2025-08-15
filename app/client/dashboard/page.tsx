@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
@@ -117,7 +117,7 @@ export default function ClientDashboard() {
     totalGigs: gigs.length,
     activeGigs: gigs.filter((gig) => gig.status === "active").length,
     totalApplications: applications.length,
-    pendingApplications: applications.filter(
+    newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
     completedGigs: gigs.filter((gig) => gig.status === "completed").length,
@@ -448,9 +448,9 @@ export default function ClientDashboard() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-sm font-medium text-gray-600">New</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {dashboardStats.pendingApplications}
+                    {dashboardStats.newApplications}
                   </p>
                 </div>
                 <div className="bg-yellow-100 p-2 rounded-full">
@@ -547,7 +547,7 @@ export default function ClientDashboard() {
                             </Badge>
                           </div>
                           <p className="text-sm text-gray-600 mt-1">
-                            {gig.applications_count || 0} applications • {gig.location}
+                            {gig.applications_count || 0} applications â€¢ {gig.location}
                           </p>
                         </div>
                         <div className="text-right">

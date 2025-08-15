@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { CheckCircle, XCircle, Loader2 } from "lucide-react";
 import type React from "react";
@@ -16,7 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { UserRole } from "@/types/database";
+import type { Database } from "@/types/supabase";
+
+type UserRole = Database["public"]["Enums"]["user_role"];
 
 // Type definitions for user creation
 interface CreatedUser {
@@ -209,7 +211,7 @@ export default function DirectUserCreation() {
             </AlertTitle>
             <AlertDescription>
               {result.message}
-              {result.success && result.details && 'id' in result.details && (
+              {result.success && result.details && "id" in result.details && (
                 <div className="mt-2 text-xs">
                   <p>User ID: {result.details.id}</p>
                   <p>Email: {result.details.email}</p>

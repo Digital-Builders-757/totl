@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { generateVerificationEmail } from "@/lib/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";

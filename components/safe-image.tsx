@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useState } from "react";
@@ -12,7 +12,8 @@ interface SafeImageProps {
   className?: string;
   fallbackSrc?: string;
   fallbackType?: "placeholder" | "static";
-  placeholderQuery?: string; // Add support for placeholderQuery prop
+  /** @deprecated Do not use. Ignored internally and blocked by ESLint. */
+  placeholderQuery?: string;
 }
 
 /**
@@ -25,7 +26,7 @@ interface SafeImageProps {
  * @param className - CSS classes
  * @param fallbackSrc - Fallback image source
  * @param fallbackType - "placeholder" uses dynamic placeholder, "static" uses fallbackSrc
- * @param placeholderQuery - Query string for placeholder image (e.g. "person", "landscape")
+
  */
 export function SafeImage({
   src,
@@ -36,7 +37,8 @@ export function SafeImage({
   className = "",
   fallbackSrc = "/images/totl-logo-transparent.png",
   fallbackType = "static",
-  placeholderQuery, // Destructure but don't use for now
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(src || null);
   const [hasError, setHasError] = useState(false);

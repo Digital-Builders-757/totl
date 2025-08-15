@@ -1,14 +1,12 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { CreateGigForm } from "./create-gig-form";
-import type { Database } from "@/types/database";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function CreateGigPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   // Check if user is authenticated and is admin
   const {
@@ -20,9 +18,9 @@ export default async function CreateGigPage() {
     redirect("/login?returnUrl=/admin/gigs/create");
   }
 
-  // Get user role from users table
+  // Get user role from profiles table
   const { data: userData, error: userError } = await supabase
-    .from("users")
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();

@@ -1,10 +1,9 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 export async function GET() {
   try {
-    const supabase = createServerComponentClient({ cookies });
+    const supabase = await createSupabaseServerClient();
 
     // Get current user
     const {

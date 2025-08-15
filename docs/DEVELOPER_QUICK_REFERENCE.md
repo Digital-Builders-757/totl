@@ -8,14 +8,31 @@ This reference outlines how to interact with the database in our Next.js codebas
 ## ⚡ Writing Database Queries (the Right Way)
 
 - **Use the Supabase client provided:** Always import the initialized Supabase client from `lib/supabase-client.ts` (or `supabase-admin-client.ts` for privileged operations). Do not call `createClient` in your own code – the singleton clients ensure we use a consistent configuration (and user context for RLS) everywhere.  
-  ```ts
-  import { supabase } from "@/lib/supabase-client";
 
-  const { data: gigs, error } = await supabase
-    .from('gigs')
-    .select('*')
-    .eq('status', 'active');
-  ```
+#### **Client-Side (Browser)**
+```ts
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/types/database";
+
+const supabase = createClientComponentClient<Database>();
+
+const { data: gigs, error } = await supabase
+  .from('gigs')
+  .select('id, title, description, location, compensation')
+  .eq('status', 'active');
+```
+
+#### **Server-Side (Next.js 15+)**
+```ts
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+
+const supabase = await createSupabaseServerClient();
+
+const { data: gigs, error } = await supabase
+  .from('gigs')
+  .select('id, title, description, location, compensation')
+  .eq('status', 'active');
+```
 
 In the above example, `gigs` will be strongly-typed (an array of Gig objects) because our Supabase client is configured with the generated `Database` types.
 
@@ -78,6 +95,23 @@ Our database tables are protected by RLS policies, meaning the database will res
 * **Testing RLS behavior:** Use multiple accounts (or Supabase's "simulate logged in user" feature in the dashboard) to ensure that data is correctly isolated. For instance, a talent user should not be able to fetch another talent's profile or applications. Our RLS policies are defined in the database, but your application code should be written under the assumption that anything not permitted will come back as empty data (or `null`). Always handle these cases gracefully (e.g., if `apps` comes back empty because of RLS, maybe the user is not allowed to see those records).
 
 ## 🚨 Type Safety Rules
+
+### **🚨 CRITICAL: Next.js 15+ Async Cookies**
+**ALWAYS** use the correct pattern to avoid async cookies errors:
+
+```typescript
+// ✅ CORRECT - Server Components
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+const supabase = await createSupabaseServerClient();
+
+// ✅ CORRECT - Server Actions
+import { createSupabaseActionClient } from "@/lib/supabase-client";
+const supabase = await createSupabaseActionClient();
+
+// ❌ WRONG - Causes async cookies errors
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+const supabase = createServerComponentClient<Database>({ cookies });
+```
 
 ### **CRITICAL: Never Use These Patterns**
 ```typescript

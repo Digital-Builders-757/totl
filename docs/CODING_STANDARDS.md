@@ -58,13 +58,46 @@ interface Gig {
 
 ## ⚛️ React Patterns
 
+### **Next.js 15+ Compatibility**
+
+#### **🚨 CRITICAL: Async Cookies Pattern**
+**ALWAYS** use the correct pattern for cookies in Next.js 15+:
+
+```typescript
+// ✅ CORRECT - Use centralized client helpers
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+
+export default async function MyPage() {
+  const supabase = await createSupabaseServerClient();
+  // ... rest of component
+}
+
+// ✅ CORRECT - Server actions
+import { createSupabaseActionClient } from "@/lib/supabase-client";
+
+export async function myServerAction() {
+  'use server';
+  const supabase = await createSupabaseActionClient();
+  // ... rest of action
+}
+
+// ❌ WRONG - This causes async cookies errors
+const supabase = createServerComponentClient<Database>({ cookies });
+```
+
+#### **Why This Matters**
+- Next.js 15+ made cookies async for streaming compatibility
+- The old `{ cookies }` pattern causes runtime errors
+- Centralized helpers ensure consistency across the app
+
 ### **Component Architecture**
 
 #### **Server Components (Data Fetching)**
 ```typescript
-// ✅ Good - Server component for data fetching
+// ✅ Good - Server component for data fetching (Next.js 15+)
 export default async function GigsPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  // Use centralized client helper for Next.js 15+ compatibility
+  const supabase = await createSupabaseServerClient();
   
   // Check environment variables
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -73,7 +106,7 @@ export default async function GigsPage() {
   
   const { data: gigs, error } = await supabase
     .from('gigs')
-    .select('*')
+    .select('id, title, description, location, compensation, status')
     .eq('status', 'active');
   
   if (error) {
@@ -186,13 +219,12 @@ const { data, error } = await supabase
   .select('*'); // Don't select all fields
 ```
 
-#### **Server-Side**
+#### **Server-Side (Next.js 15+)**
 ```typescript
-// ✅ Good - Server component setup
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
+// ✅ Good - Server component setup (Next.js 15+)
+import { createSupabaseServerClient } from "@/lib/supabase-client";
 
-const supabase = createServerComponentClient<Database>({ cookies });
+const supabase = await createSupabaseServerClient();
 
 // ✅ Good - Force dynamic rendering for auth-dependent pages
 export const dynamic = "force-dynamic";

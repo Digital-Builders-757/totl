@@ -1,14 +1,15 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
-import type { Database } from "@/types/database";
+import { createSupabaseServerClient } from "@/lib/supabase-client";
+import type { Database } from "@/types/supabase";
+
+type Application = Database["public"]["Tables"]["applications"]["Row"];
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function AdminApplicationsPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const supabase = await createSupabaseServerClient();
 
   // Check if user is authenticated and is admin
   const {
@@ -20,9 +21,9 @@ export default async function AdminApplicationsPage() {
     redirect("/login?returnUrl=/admin/applications");
   }
 
-  // Get user role from users table
+  // Get user role from profiles table
   const { data: userData, error: userError } = await supabase
-    .from("users")
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
@@ -54,7 +55,7 @@ export default async function AdminApplicationsPage() {
   }
 
   // Transform the data to match the expected structure
-  const transformedApplications = (applications || []).map((app) => ({
+  const transformedApplications = (applications || []).map((app: Application) => ({
     ...app,
     gigs: null, // We'll fetch gig data separately if needed
     talent: null, // We'll fetch talent data separately if needed

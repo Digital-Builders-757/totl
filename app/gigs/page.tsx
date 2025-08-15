@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+﻿export const dynamic = "force-dynamic";
 
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
@@ -9,10 +9,10 @@ import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 export default async function GigsPage() {
-  const cookieStore = cookies(); // ✅ Fixed: cookies() is synchronous
+  const cookieStore = cookies(); // âœ… Fixed: cookies() is synchronous
   const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
   // FIXED: Explicit column selection, no aggregates

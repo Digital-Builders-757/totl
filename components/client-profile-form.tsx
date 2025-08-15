@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -15,20 +15,10 @@ import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/components/ui/use-toast";
 
-// Define the client profile interface based on database schema
-interface ClientProfile {
-  id?: string;
-  user_id?: string;
-  company_name: string;
-  industry?: string | null;
-  website?: string | null;
-  contact_name: string;
-  contact_email: string;
-  contact_phone?: string | null;
-  company_size?: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
+// Import the generated type instead of defining our own
+import type { Database } from "@/types/supabase";
+
+type ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 // Define the form schema
 const profileSchema = z.object({
@@ -45,7 +35,9 @@ const profileSchema = z.object({
   contact_name: z
     .string()
     .min(2, { message: "Contact name must be at least 2 characters" })
-    .max(100, { message: "Contact name cannot exceed 100 characters" }),
+    .max(100, { message: "Contact name cannot exceed 100 characters" })
+    .optional()
+    .or(z.literal("")),
   contact_email: z.string().email({ message: "Please enter a valid email address" }),
   contact_phone: z
     .string()
@@ -102,7 +94,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
         company_name: data.company_name,
         industry: data.industry || null,
         website: data.website || null,
-        contact_name: data.contact_name,
+        contact_name: data.contact_name || null,
         contact_email: data.contact_email,
         contact_phone: data.contact_phone || null,
         company_size: data.company_size || null,

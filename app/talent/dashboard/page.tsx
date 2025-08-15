@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
@@ -101,7 +101,6 @@ export default function TalentDashboard() {
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("overview");
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -114,7 +113,7 @@ export default function TalentDashboard() {
   // Calculate dashboard stats from real data
   const dashboardStats = {
     totalApplications: applications.length,
-    pendingApplications: applications.filter(
+    newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
     acceptedApplications: applications.filter((app) => app.status === "accepted").length,
@@ -419,7 +418,7 @@ export default function TalentDashboard() {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="overview" className="space-y-6" onValueChange={setActiveTab}>
+        <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <Activity className="h-4 w-4" />
@@ -630,7 +629,9 @@ export default function TalentDashboard() {
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
-                    <Button onClick={() => setActiveTab("discover")}>Browse Available Gigs</Button>
+                    <Button asChild>
+                      <Link href="/gigs">Browse Available Gigs</Link>
+                    </Button>
                   </div>
                 )}
               </CardContent>

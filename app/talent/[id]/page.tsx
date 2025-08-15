@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -25,7 +25,10 @@ export default async function TalentDetailPage({ params }: { params: Promise<{ i
       profiles!inner (
         display_name,
         avatar_url,
-        email_verified
+        email_verified,
+        bio,
+        instagram_handle,
+        website
       )
     `
     )
@@ -204,7 +207,7 @@ export default async function TalentDetailPage({ params }: { params: Promise<{ i
                       </h3>
                       <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description}</p>
                       <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{item.category}</span>
+                        <span>{item.caption || "Portfolio Item"}</span>
                         <span>{new Date(item.created_at).getFullYear()}</span>
                       </div>
                     </div>

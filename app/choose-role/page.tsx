@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -55,15 +55,15 @@ export default function ChooseRolePage() {
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Apply to exclusive modeling opportunities</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Build a professional portfolio</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Get discovered by top brands and agencies</span>
                   </li>
                 </ul>
@@ -87,15 +87,15 @@ export default function ChooseRolePage() {
                 </p>
                 <ul className="space-y-2 mb-6">
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Post modeling opportunities</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Browse our curated talent roster</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
+                    <span className="text-green-500 mr-2">âœ“</span>
                     <span>Manage bookings and communications</span>
                   </li>
                 </ul>

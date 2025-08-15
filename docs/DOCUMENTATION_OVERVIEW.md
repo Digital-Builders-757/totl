@@ -51,6 +51,7 @@ This document provides an overview of all TOTL Agency documentation and how to n
 | File | Purpose | Audience | Priority |
 |------|---------|----------|----------|
 | [SCHEMA_TRUTH_RULES.md](./SCHEMA_TRUTH_RULES.md) | Schema management and type safety rules | All developers | ⭐⭐⭐⭐⭐ |
+| [SCHEMA_DEBUGGING_GUIDE.md](./SCHEMA_DEBUGGING_GUIDE.md) | Schema verification troubleshooting | All developers | ⭐⭐⭐⭐ |
 | [POWERSHELL_COMMANDS.md](./POWERSHELL_COMMANDS.md) | PowerShell environment reference | All developers | ⭐⭐⭐⭐ |
 
 ### **Operational Documentation**
@@ -59,11 +60,14 @@ This document provides an overview of all TOTL Agency documentation and how to n
 |------|---------|----------|----------|
 | [DEPLOYMENT.md](../DEPLOYMENT.md) | Deployment guide | DevOps/Deployers | ⭐⭐⭐⭐ |
 | [SECURITY_FIXES_SUMMARY.md](../SECURITY_FIXES_SUMMARY.md) | Security improvements | Security team | ⭐⭐⭐⭐ |
+| [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md) | CI/CD setup guide | DevOps/Developers | ⭐⭐⭐⭐ |
 
 ### **Cursor AI Context**
 
 | File | Purpose | Audience | Priority |
 |------|---------|----------|----------|
+| [ENHANCED_LLM_RULES_SUMMARY.md](./ENHANCED_LLM_RULES_SUMMARY.md) | LLM rules and debugging guidelines | AI tools & Developers | ⭐⭐⭐⭐⭐ |
+| [PROMPT_ENGINEERING_GUIDE.md](./PROMPT_ENGINEERING_GUIDE.md) | Effective LLM communication strategies | All developers | ⭐⭐⭐⭐ |
 | [.cursor/project-context.md](../.cursor/project-context.md) | AI assistant context | AI tools | ⭐⭐⭐⭐ |
 | [.cursor/global-context.md](../.cursor/global-context.md) | Global development standards | AI tools | ⭐⭐⭐ |
 
@@ -88,11 +92,16 @@ This document provides an overview of all TOTL Agency documentation and how to n
 - ❌ Using Unix commands in PowerShell environment
 - ❌ Manually editing generated types
 - ❌ Creating duplicate interface definitions
+- ❌ Inconsistent CLI versions across environments
+- ❌ Schema verification in pre-commit hooks (causes loops)
+- ❌ Shell redirection in cross-platform scripts
+- ❌ Emoji characters in PowerShell scripts
 
 ## 🔍 Finding Information by Topic
 
 ### **Database & Schema**
 - **Schema Management:** [SCHEMA_TRUTH_RULES.md](./SCHEMA_TRUTH_RULES.md)
+- **Schema Debugging:** [SCHEMA_DEBUGGING_GUIDE.md](./SCHEMA_DEBUGGING_GUIDE.md)
 - **Current Schema:** [database_schema_audit.md](../database_schema_audit.md)
 - **Database Patterns:** [DEVELOPER_QUICK_REFERENCE.md](./DEVELOPER_QUICK_REFERENCE.md)
 - **Migrations:** [ONBOARDING.md](./ONBOARDING.md)

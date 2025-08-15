@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { format } from "date-fns";
 import { Calendar, MapPin, DollarSign } from "lucide-react";
@@ -6,7 +6,9 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Gig } from "@/types/database";
+import type { Database } from "@/types/supabase";
+
+type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 
 interface GigListProps {
   gigs: Gig[];
@@ -24,14 +26,16 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
 
   const getStatusColor = (status: Gig["status"]) => {
     switch (status) {
-      case "published":
+      case "active":
         return "bg-green-100 text-green-800";
       case "draft":
         return "bg-gray-100 text-gray-800";
       case "closed":
         return "bg-red-100 text-red-800";
-      case "completed":
-        return "bg-blue-100 text-blue-800";
+      case "featured":
+        return "bg-purple-100 text-purple-800";
+      case "urgent":
+        return "bg-orange-100 text-orange-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -62,16 +66,12 @@ export function GigList({ gigs, onGigClick, showApplyButton = true }: GigListPro
               </div>
               <div className="flex items-center text-sm">
                 <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                {format(new Date(gig.start_date), "MMM d, yyyy")}
+                {format(new Date(gig.date), "MMM d, yyyy")}
               </div>
-              {(gig.compensation_min || gig.compensation_max) && (
+              {gig.compensation && (
                 <div className="flex items-center text-sm">
                   <DollarSign className="mr-2 h-4 w-4 text-muted-foreground" />
-                  {gig.compensation_min && gig.compensation_max
-                    ? `$${gig.compensation_min} - $${gig.compensation_max}`
-                    : gig.compensation_min
-                      ? `$${gig.compensation_min}+`
-                      : `Up to $${gig.compensation_max}`}
+                  {gig.compensation}
                 </div>
               )}
             </div>

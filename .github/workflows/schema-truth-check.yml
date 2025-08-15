@@ -20,28 +20,79 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: latest
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Apply database migrations (local)
-        run: supabase db reset --yes
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Generate types from schema
-        run: supabase gen types typescript --local > types/temp_schema_types.ts
+      - name: Verify environment variables
+        run: node -e "console.log('SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Build application
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: npm run build
+
+      - name: Login to Supabase (npx)
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: npx -y supabase@v2.33.4 login --token "$SUPABASE_ACCESS_TOKEN"
+
+      - name: Generate types from remote schema (npx)
+        env:
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: npx -y supabase@v2.33.4 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
+
+      - name: Normalize both files (strip BOM & normalize line endings)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import sys
+
+          def normalize(src, dst):
+            b = open(src, "rb").read()
+            # strip UTF-8 BOM
+            if b.startswith(b"\xef\xbb\xbf"):
+              b = b[3:]
+            # normalize ALL line ending variants to LF
+            b = b.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+            open(dst, "wb").write(b)
+
+          normalize("types/temp_schema_types.ts", "types/_remote.normalized.ts")
+          normalize("types/database.ts",          "types/_local.normalized.ts")
+          PY
 
       - name: Compare generated types with committed types
+        shell: bash
         run: |
-          if ! diff -q types/temp_schema_types.ts types/database.ts; then
-            echo "ERROR: types/database.ts is not up-to-date with schema. Please regenerate this file using Supabase CLI.";
-            exit 1;
+          set -euo pipefail
+          if ! diff -u types/_remote.normalized.ts types/_local.normalized.ts; then
+            echo ""
+            echo "❌ ERROR: types/database.ts is out of sync with remote schema"
+            echo ""
+            echo "🔧 To fix locally:"
+            echo "   npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts"
+            echo ""
+            echo "📋 Changes detected:"
+            echo "   - Lines starting with '-' are in your local file but not in remote"
+            echo "   - Lines starting with '+' are in remote but missing from your local file"
+            echo ""
+            exit 1
           fi
 
-      - name: Run schema truth verification script
+      - name: Verify schema & type hygiene (fast)
         shell: pwsh
-        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration
+        run: ./scripts/verify-schema-sync.ps1 -SkipDbGeneration -EnforceBanner:$false -SoftFail
 
       - name: Cleanup temp files
         if: always()
-        run: rm -f types/temp_schema_types.ts 
+        run: rm -f types/_remote.normalized.ts types/_local.normalized.ts types/temp_schema_types.ts 

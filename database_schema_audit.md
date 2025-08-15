@@ -81,7 +81,8 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `id` | `uuid` | NO | - | Primary key, links to auth.users |
 | `role` | `user_role` | NO | `'talent'` | User role (talent/client/admin) |
 | `display_name` | `text` | YES | - | User's display name |
-| `avatar_url` | `text` | YES | - | Profile picture URL |
+| `avatar_url` | `text` | YES | - | Profile picture URL (legacy) |
+| `avatar_path` | `text` | YES | - | Storage path for avatar |
 | `email_verified` | `boolean` | NO | `false` | Email verification status |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |

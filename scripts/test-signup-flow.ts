@@ -1,5 +1,7 @@
 #!/usr/bin/env tsx
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /**
  * TOTL Agency Signup Flow Test Script
  *

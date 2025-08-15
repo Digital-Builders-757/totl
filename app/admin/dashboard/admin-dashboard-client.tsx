@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { User } from "@supabase/supabase-js";
 import {
@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type Application = Database["public"]["Tables"]["applications"]["Row"];
@@ -156,7 +156,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Active Gigs</p>
                 <p className="text-2xl font-bold">
-                  {gigs.filter((g) => g.status === "published").length}
+                  {gigs.filter((g) => g.status === "active").length}
                 </p>
               </div>
             </div>
@@ -184,7 +184,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Pending Applications</p>
                 <p className="text-2xl font-bold">
-                  {applications.filter((a) => a.status === "pending").length}
+                  {applications.filter((a) => a.status === "new").length}
                 </p>
               </div>
             </div>
@@ -261,7 +261,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                     <td className="py-4 px-6">
                       <Badge
                         className={`${
-                          gig.status === "published"
+                          gig.status === "active"
                             ? "bg-green-100 text-green-800"
                             : gig.status === "draft"
                               ? "bg-gray-100 text-gray-800"

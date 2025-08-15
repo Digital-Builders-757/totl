@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useState } from "react";
@@ -13,7 +13,8 @@ interface SafeImageProps {
   className?: string;
   fallbackSrc?: string;
   context?: string;
-  placeholderQuery?: string; // Add support for placeholderQuery prop
+  /** @deprecated Do not use. Ignored internally and blocked by ESLint. */
+  placeholderQuery?: string;
 }
 
 export function SafeImage({
@@ -25,7 +26,8 @@ export function SafeImage({
   className = "",
   fallbackSrc = "/images/totl-logo.png",
   context = "unknown",
-  placeholderQuery, // Destructure but don't use for now
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);

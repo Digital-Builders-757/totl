@@ -1,4 +1,4 @@
-import { CheckCircle, ArrowLeft } from "lucide-react";
+﻿import { CheckCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -37,8 +37,8 @@ export default function ApplicationSuccessPage() {
                     2
                   </span>
                   <span>
-                    If approved, you&apos;ll receive an email with instructions to set up your account
-                    and access our talent roster
+                    If approved, you&apos;ll receive an email with instructions to set up your
+                    account and access our talent roster
                   </span>
                 </li>
                 <li className="flex items-start">

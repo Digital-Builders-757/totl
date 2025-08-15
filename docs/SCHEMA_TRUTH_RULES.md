@@ -1,6 +1,6 @@
 # 🔒 Schema Truth Rules & Workflow
 
-**Last Updated:** July 25, 2025  
+**Last Updated:** August 14, 2025  
 **Status:** Production Ready
 
 This document describes the **schema-first workflow** adopted at TOTL Agency to prevent schema drift and ensure our database types in code always remain accurate. By following these rules, we maintain one source of truth for the database and eliminate mismatches between the database, the documentation, and the TypeScript types.
@@ -21,7 +21,7 @@ All schema changes are applied via **Supabase migrations**. We do not manually e
 3. **Apply Locally:** Run `supabase db reset` (or `db push`) to apply the new migration to your local dev database. This lets you verify the change works as expected.
 4. **Update Types:** After applying the migration, regenerate the TypeScript types:  
    ```bash
-   npx supabase gen types typescript --project-id <PROJECT_ID> --schema public > types/database.ts
+   npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts
    ```
    (Ensure you are logged in to Supabase CLI or using `--local` if working with the local DB.) This step updates `types/database.ts` to exactly match the new schema.
 5. **Review Changes:** In your pull request, include the updated `database_schema_audit.md`, the new migration SQL, and the regenerated `types/database.ts`. These three should consistently represent the same changes. Reviewers will compare the audit file and types to ensure they correspond to the migration.
@@ -56,11 +56,53 @@ Make sure to fix any issues the script or CI reports:
 * If the audit is outdated, bring it up to date by describing the latest schema changes.
 * If local interfaces or `any` usages exist, refactor them to use generated types.
 
+## 🚨 Schema Verification Best Practices ⚠️ **UPDATED**
+
+### **When to Run Schema Verification**
+- ✅ **Before major releases** - ensure types are in sync
+- ✅ **After database migrations** - verify types were regenerated  
+- ✅ **When debugging type issues** - check for schema drift
+- ✅ **Manual verification** - when you suspect schema drift
+- ❌ **NOT in pre-commit hooks** - causes loops and delays
+- ❌ **NOT in CI for every PR** - only when migrations change
+
+### **CLI Version Management** ⚠️ **CRITICAL**
+```bash
+# Always use consistent version across all environments
+npx supabase@v2.33.4 gen types typescript --linked --schema public
+
+# Update ALL of these when changing versions:
+# 1. CI workflow (.github/workflows/schema-truth-check.yml)
+# 2. Package.json scripts
+# 3. All verification scripts
+# 4. Error messages and troubleshooting guides
+```
+
+### **Cross-Platform Script Guidelines** ⚠️ **NEW**
+```javascript
+// ✅ Good: Use Node.js built-ins
+const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString("utf8");
+writeFileSync(tmp, out, "utf8");
+
+// ❌ Bad: Shell redirection (breaks on Windows)
+execSync(`cmd > /dev/null 2>&1`);  // /dev/null doesn't exist on Windows
+```
+
+### **PowerShell Script Guidelines** ⚠️ **NEW**
+```powershell
+# ✅ Good: Plain text without emoji characters
+Write-Host "Scanning for issues..." -ForegroundColor Yellow
+
+# ❌ Bad: Emoji characters can cause encoding issues
+Write-Host "🔍 Scanning for issues..." -ForegroundColor Yellow
+```
+
 ## 🎯 Guiding Principles
 
 * **Schema-first:** The database schema drives application development, not the other way around. The truth lives in the schema (and audit file), which then propagates to code via generated types.
 * **No manual drift:** Developers should never manually modify `types/database.ts` or create their own versions of those types. The moment something is hard-coded, it risks drifting from the actual schema. Always rely on generation and single-source definitions.
 * **Visibility:** The `database_schema_audit.md` provides a clear and readable overview of the schema for any team member or reviewer. It should be kept up-to-date to serve as reliable documentation at all times.
+* **Consistent tooling:** All schema-related operations must use the same CLI version and approach across local development, CI/CD, and production environments.
 
 ## 🚨 Critical Rules
 
@@ -92,6 +134,13 @@ Make sure to fix any issues the script or CI reports:
 - **NEVER** use wrong enum values
 - **ALWAYS** validate type compatibility before implementation
 
+### **Script Development** ⚠️ **NEW**
+- **ALWAYS** use consistent CLI versions across all scripts
+- **NEVER** use shell redirection in cross-platform scripts
+- **ALWAYS** use Node.js built-ins for file operations
+- **NEVER** use emoji characters in PowerShell scripts
+- **ALWAYS** test scripts on both Windows and Unix environments
+
 ## 📋 Implementation Checklist
 
 ### **Before Making Any Changes**
@@ -102,7 +151,7 @@ Make sure to fix any issues the script or CI reports:
 
 ### **After Database Changes**
 - [ ] Update `database_schema_audit.md`
-- [ ] Regenerate types using `npx supabase gen types typescript --local > types/database.ts`
+- [ ] Regenerate types using `npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts`
 - [ ] Remove any duplicate interface definitions
 - [ ] Update component imports to use generated types
 - [ ] Test type compatibility
@@ -113,6 +162,13 @@ Make sure to fix any issues the script or CI reports:
 - [ ] Use correct enum values from database schema
 - [ ] Validate form schemas against database types
 - [ ] Test type safety
+
+### **Script Development** ⚠️ **NEW**
+- [ ] Use consistent CLI version (v2.33.4) in all scripts
+- [ ] Use Node.js built-ins instead of shell redirection
+- [ ] Avoid emoji characters in PowerShell scripts
+- [ ] Test scripts on multiple platforms
+- [ ] Update all related scripts when changing CLI version
 
 ## 🔧 Verification Commands
 
@@ -125,16 +181,64 @@ Make sure to fix any issues the script or CI reports:
 ### **Type Generation**
 ```powershell
 # Generate types from local database
-npx supabase gen types typescript --local > types/database.ts
+npx supabase@v2.33.4 gen types typescript --local > types/database.ts
 
 # Generate types from remote database
-npx supabase gen types typescript --project-id <PROJECT_ID> > types/database.ts
+npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts
 ```
 
 ### **Database Reset**
 ```powershell
 # Reset local database and apply all migrations
 supabase db reset --yes
+```
+
+### **Manual Schema Verification** ⚠️ **NEW**
+```bash
+# Quick status check
+npm run schema:check
+
+# Full verification with diff
+npm run schema:verify-local
+
+# Pre-commit (no schema verification)
+npm run pre-commit
+```
+
+## 🚨 Troubleshooting Common Issues
+
+### **CI 404 Errors**
+```yaml
+# Problem: supabase/setup-cli@v1 getting 404
+# Solution: Use known working version
+- uses: supabase/setup-cli@v1
+  with:
+    version: v2.33.4  # Not v2.34.3 or "latest"
+```
+
+### **Pre-commit Loops**
+```json
+// Problem: lint-staged running schema checks
+// Solution: Remove from lint-staged, keep manual verification
+"lint-staged": {
+  "*.{js,jsx,ts,tsx}": ["eslint --fix", "prettier --write"]
+  // No schema verification here
+}
+```
+
+### **PowerShell Encoding Issues**
+```powershell
+# Problem: Emoji characters causing syntax errors
+# Solution: Use plain text
+Write-Host "Scanning..." -ForegroundColor Yellow  # Not "🔍 Scanning..."
+```
+
+### **Cross-Platform Script Issues**
+```javascript
+// Problem: /dev/null doesn't exist on Windows
+// Solution: Use Node.js built-ins
+const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"] }).toString("utf8");
+writeFileSync(tmp, out, "utf8");
 ```
 
 ## 📊 Benefits
@@ -146,6 +250,9 @@ By adhering to these rules, we guarantee that our front-end, back-end, and docum
 - ❌ Runtime errors possible
 - ❌ Inconsistent data handling
 - ❌ Maintenance burden increased
+- ❌ Schema verification loops
+- ❌ CI/CD failures due to version mismatches
+- ❌ Cross-platform script incompatibilities
 
 ### **After Implementation**
 - ✅ Full type safety
@@ -154,7 +261,10 @@ By adhering to these rules, we guarantee that our front-end, back-end, and docum
 - ✅ Easier maintenance
 - ✅ Automated verification
 - ✅ CI/CD enforcement
+- ✅ No verification loops
+- ✅ Cross-platform compatibility
+- ✅ Consistent tooling across environments
 
 ---
 
-**Remember: The database schema is the single source of truth. Everything else flows from it.** 
+**Remember: The database schema is the single source of truth. Everything else flows from it. Use consistent tooling and avoid verification loops.** 

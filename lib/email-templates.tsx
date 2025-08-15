@@ -1,4 +1,4 @@
-// This file must only be imported in server-side code (API routes, server actions, or server components).
+﻿// This file must only be imported in server-side code (API routes, server actions, or server components).
 // Do NOT import in any Client Component or file with "use client".
 
 // Pure TypeScript approach - no React dependencies
