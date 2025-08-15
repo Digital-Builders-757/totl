@@ -2,18 +2,21 @@
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!URL || !ANON) {
-  throw new Error("Missing Supabase environment variables");
+function validateEnvVars() {
+  if (!URL || !ANON) {
+    throw new Error("Missing Supabase environment variables");
+  }
 }
 
 /** Use in React Server Components (read-only cookies) */
 export async function createSupabaseServerClient() {
+  validateEnvVars();
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(URL, ANON, {
+  return createServerClient<Database>(URL!, ANON!, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value;
@@ -30,8 +33,9 @@ export async function createSupabaseServerClient() {
 
 /** Use in server actions / route handlers (can set/remove cookies) */
 export async function createSupabaseActionClient() {
+  validateEnvVars();
   const cookieStore = await cookies(); // <-- MUST await
-  return createServerClient<Database>(URL, ANON, {
+  return createServerClient<Database>(URL!, ANON!, {
     cookies: {
       get(name: string) {
         return cookieStore.get(name)?.value;
@@ -48,7 +52,8 @@ export async function createSupabaseActionClient() {
 
 /** Use in client components */
 export function createSupabaseBrowserClient() {
-  return createBrowserClient<Database>(URL, ANON);
+  validateEnvVars();
+  return createBrowserClient<Database>(URL!, ANON!);
 }
 
 // Legacy export for backward compatibility
