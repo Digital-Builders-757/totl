@@ -20,23 +20,24 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Install Supabase CLI
-        uses: supabase/setup-cli@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          version: v2.33.4
+          node-version: '18'
+          cache: 'npm'
 
-      - name: Login to Supabase
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Login to Supabase (npx)
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: |
-          echo $SUPABASE_ACCESS_TOKEN | supabase login
+        run: npx -y supabase@v2.33.4 login --token "$SUPABASE_ACCESS_TOKEN"
 
-      - name: Generate types from remote schema
+      - name: Generate types from remote schema (npx)
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-        run: |
-          npx supabase@v2.33.4 gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public > types/temp_schema_types.ts
+        run: npx -y supabase@v2.33.4 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
 
       - name: Compare generated types with committed types
         run: |
