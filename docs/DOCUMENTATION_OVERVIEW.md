@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Overview
 
-**Last Updated:** July 25, 2025  
+**Last Updated:** January 15, 2025  
 **Status:** Production Ready
 
 ## 📚 Documentation Structure
@@ -42,6 +42,7 @@ This document provides an overview of all TOTL Agency documentation and how to n
 |------|---------|----------|----------|
 | [ONBOARDING.md](./ONBOARDING.md) | Complete setup guide | New developers | ⭐⭐⭐⭐⭐ |
 | [DEVELOPER_QUICK_REFERENCE.md](./DEVELOPER_QUICK_REFERENCE.md) | Daily development patterns | All developers | ⭐⭐⭐⭐⭐ |
+| [TROUBLESHOOTING_GUIDE.md](./TROUBLESHOOTING_GUIDE.md) | Common issues and debugging strategies | All developers | ⭐⭐⭐⭐⭐ |
 | [CODING_STANDARDS.md](./CODING_STANDARDS.md) | Code quality guidelines | All developers | ⭐⭐⭐⭐ |
 | [AUTH_STRATEGY.md](./AUTH_STRATEGY.md) | Authentication implementation | Backend developers | ⭐⭐⭐⭐ |
 | [email-service.md](./email-service.md) | Email integration | Full-stack developers | ⭐⭐⭐ |
@@ -116,6 +117,7 @@ This document provides an overview of all TOTL Agency documentation and how to n
 - **PowerShell Commands:** [POWERSHELL_COMMANDS.md](./POWERSHELL_COMMANDS.md)
 - **Coding Standards:** [CODING_STANDARDS.md](./CODING_STANDARDS.md)
 - **Quick Reference:** [DEVELOPER_QUICK_REFERENCE.md](./DEVELOPER_QUICK_REFERENCE.md)
+- **Troubleshooting:** [TROUBLESHOOTING_GUIDE.md](./TROUBLESHOOTING_GUIDE.md)
 
 ### **Deployment & Operations**
 - **Deployment:** [DEPLOYMENT.md](../DEPLOYMENT.md)

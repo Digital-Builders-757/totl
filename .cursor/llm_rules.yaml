@@ -1,5 +1,5 @@
 # Totl Agency LLM Coding Rules
-# Version: 2.2
+# Version: 2.3
 # This file provides a comprehensive set of rules for the LLM to follow when
 # generating code for the Totl Agency platform. Adhering to these rules ensures
 # consistency, maintainability, and alignment with the project's architecture.
@@ -10,7 +10,10 @@ task_prompt_template: |
   
   1. Read this entire rules file and follow it strictly
   2. Do not invent props or types - if a prop is missing, first update the component type and all call sites
-  3. Never import @supabase/supabase-js directly - use our clients in lib/
+  3. CRITICAL: Use correct Supabase client for context:
+     * Server Components: createSupabaseServerClient() (read-only cookies)
+     * Server Actions/Route Handlers: createSupabaseActionClient() (can modify cookies)
+     * Client Components: createSupabaseBrowserClient()
   4. No DB calls in client components - mutations must be Server Actions
   5. After changes, ensure this "Definition of Done" is met:
      * npx tsc --noEmit passes
@@ -18,12 +21,14 @@ task_prompt_template: |
      * No use of placeholderQuery prop on <SafeImage />
      * No any types
      * If schema changed → create migration + regenerate types/database.ts
+     * Test in production mode: npm run build && npm run start
   
   Output: a unified diff (git patch) and a short note of why the change satisfies the DoD.
 
 # 📌 CRITICAL FILES TO PIN IN CURSOR
 critical_files:
   - "docs/DOCUMENTATION_OVERVIEW.md - Navigation guide for all documentation"
+  - "docs/TROUBLESHOOTING_GUIDE.md - Common issues and debugging strategies"
   - "database_schema_audit.md - Database schema (single source of truth)"
   - "types/supabase.ts - TypeScript type re-exports"
   - "lib/supabase-client.ts - Centralized Supabase client"
@@ -48,6 +53,37 @@ documentation_requirements:
     - "Remove outdated information and patterns"
     - "Ensure cross-references between files remain accurate"
     - "Update docs/DOCUMENTATION_OVERVIEW.md if adding new documentation"
+
+# 🔧 DEBUGGING & ERROR HANDLING PATTERNS
+debugging_guidelines:
+  error_investigation:
+    - "Always check docs/TROUBLESHOOTING_GUIDE.md for known issues first"
+    - "Look for production error digests in deployment logs"
+    - "Test in production mode locally: npm run build && npm run start"
+    - "Verify environment variables are available in correct context"
+    - "Check Supabase client usage matches component type (Server vs Client)"
+  
+  common_patterns:
+    cookie_errors:
+      - "Server Components cannot modify cookies"
+      - "Use createSupabaseServerClient() for read-only operations"
+      - "Use createSupabaseActionClient() for Server Actions/Route Handlers"
+    
+    build_failures:
+      - "Missing environment variables during build"
+      - "UTF-8 BOM or line ending issues in generated files"
+      - "Type mismatches from outdated generated types"
+    
+    schema_sync_issues:
+      - "Always regenerate types after schema changes"
+      - "Use consistent Supabase CLI version (v2.33.4)"
+      - "Never hand-edit types/database.ts"
+  
+  prevention_strategies:
+    - "Use npm run schema:verify-fast for quick validation"
+    - "Test both development and production builds"
+    - "Keep documentation updated with new patterns"
+    - "Add troubleshooting entries for new issue types"
   
   documentation_files:
     - "README.md - Project overview and quick start"

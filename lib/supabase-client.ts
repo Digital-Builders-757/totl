@@ -19,11 +19,12 @@ export async function createSupabaseServerClient() {
       get(name: string) {
         return cookieStore.get(name)?.value;
       },
-      set(name: string, value: string, options: CookieOptions) {
-        cookieStore.set(name, value, options);
+      // IMPORTANT: no-ops in RSC to prevent "Cookies can only be modified in Server Action" error
+      set(_name: string, _value: string, _options: CookieOptions) {
+        // No-op: cannot modify cookies in Server Components
       },
-      remove(name: string, options: CookieOptions) {
-        cookieStore.set(name, "", { ...options, maxAge: 0 });
+      remove(_name: string, _options: CookieOptions) {
+        // No-op: cannot modify cookies in Server Components
       },
     },
   });
@@ -49,7 +50,7 @@ export async function createSupabaseActionClient() {
         cookieStore.set(name, value, options);
       },
       remove(name: string, options: CookieOptions) {
-        cookieStore.set(name, "", { ...options, maxAge: 0 });
+        cookieStore.delete(name);
       },
     },
   });

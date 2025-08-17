@@ -1,6 +1,6 @@
 # 📕 Developer Quick Reference (Database & Type Usage)
 
-**Last Updated:** July 25, 2025  
+**Last Updated:** January 15, 2025  
 **Status:** Production Ready
 
 This reference outlines how to interact with the database in our Next.js codebase, ensuring type safety and compliance with our security policies. It covers writing queries, using the generated types, creating migrations, and working with Row-Level Security (RLS).
@@ -22,8 +22,9 @@ const { data: gigs, error } = await supabase
   .eq('status', 'active');
 ```
 
-#### **Server-Side (Next.js 15+)**
+#### **Server Components (Read-Only)**
 ```ts
+// Use in pages, layouts, and other Server Components
 import { createSupabaseServerClient } from "@/lib/supabase-client";
 
 const supabase = await createSupabaseServerClient();
@@ -33,6 +34,19 @@ const { data: gigs, error } = await supabase
   .select('id, title, description, location, compensation')
   .eq('status', 'active');
 ```
+
+#### **Server Actions & Route Handlers (Can Modify Cookies)**
+```ts
+// Use in Server Actions ('use server') and Route Handlers (app/api/**/route.ts)
+import { createSupabaseActionClient } from "@/lib/supabase-client";
+
+const supabase = await createSupabaseActionClient();
+
+// Can perform auth operations that modify cookies
+const { data: user, error } = await supabase.auth.getUser();
+```
+
+> **⚠️ Critical:** Server Components cannot modify cookies. Use `createSupabaseServerClient()` for read-only operations in pages/layouts. Use `createSupabaseActionClient()` only in Server Actions and Route Handlers where cookie modification is allowed.
 
 In the above example, `gigs` will be strongly-typed (an array of Gig objects) because our Supabase client is configured with the generated `Database` types.
 
