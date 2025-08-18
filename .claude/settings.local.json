@@ -23,7 +23,9 @@
       "WebSearch",
       "WebFetch(domain:supabase.com)",
       "Bash(npx tsc:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(npx @supabase/mcp-server-supabase@latest:*)",
+      "Bash(npx supabase:*)"
     ],
     "deny": [],
     "ask": []
