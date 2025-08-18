@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { email, userId, firstName, verificationLink } = result.data;
+    const { email, firstName, verificationLink } = result.data;
 
     let verificationUrl: string;
 
