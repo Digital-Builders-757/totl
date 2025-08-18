@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
@@ -39,7 +39,7 @@ export default async function SettingsPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   // Get current user
   const {

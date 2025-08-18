@@ -5,8 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
-import { createSupabaseBrowserClient } from "@/lib/supabase-client";
+
+import { createSupabaseBrowser } from "@/lib/supabase-browser";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -71,7 +71,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const supabase = createSupabaseBrowserClient();
+  const supabase = createSupabaseBrowser();
 
   useEffect(() => {
     // Prevent initialization during static generation
@@ -234,22 +234,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // 1. Generate new verification link
-      const supabaseAdmin = createSupabaseAdminClient();
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: "signup",
-        email: user.email,
-        password: "",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (linkError || !linkData.properties?.action_link) {
-        return { error: linkError ?? new Error("No action link returned") };
-      }
-
-      // 2. Send the verification email using Resend
+      // Send the verification email using our API route that handles admin operations
       const response = await fetch("/api/email/send-verification", {
         method: "POST",
         headers: {
@@ -257,7 +242,6 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         },
         body: JSON.stringify({
           email: user.email,
-          verificationLink: linkData.properties.action_link,
         }),
       });
 

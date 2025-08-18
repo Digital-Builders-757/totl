@@ -1,12 +1,12 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "./admin-dashboard-client";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   // Check if user is authenticated and is admin
   const {

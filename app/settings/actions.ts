@@ -1,7 +1,8 @@
 ﻿"use server";
 
+import "server-only";
 import { revalidatePath } from "next/cache";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
 
 type ProfilesRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -14,7 +15,7 @@ function assertUserId(user: { id?: string }): asserts user is { id: ProfilesRow[
 }
 
 export async function updateBasicProfile(formData: FormData) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
     error: sessionErr,
@@ -45,7 +46,7 @@ export async function updateBasicProfile(formData: FormData) {
 
 export async function updateEmail(newEmail: string) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -64,7 +65,7 @@ export async function updateEmail(newEmail: string) {
 
 export async function changePassword(password: string) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -94,7 +95,7 @@ export async function upsertTalentProfile(payload: {
   specialties?: string[];
 }) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -145,7 +146,7 @@ export async function upsertClientProfile(payload: {
   company_size?: string;
 }) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -183,7 +184,7 @@ export async function uploadAvatar(formData: FormData) {
   "use server";
 
   try {
-    const supabase = await createSupabaseActionClient();
+    const supabase = await createSupabaseServer();
     const {
       data: { user },
       error: authError,

@@ -27,7 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SafeImage } from "@/components/ui/safe-image";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -52,7 +52,7 @@ export default async function TalentDashboard() {
     redirect("/login?returnUrl=/admin/talentdashboard");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   const {
     data: { user },

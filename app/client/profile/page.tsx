@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import ClientProfileForm from "@/components/client-profile-form";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export default async function ClientProfilePage() {
     redirect("/login?returnUrl=/client/profile");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
     error: authError,

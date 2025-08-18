@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 import type { Database } from "@/types/supabase";
 
 type Application = Database["public"]["Tables"]["applications"]["Row"];
@@ -9,7 +9,7 @@ type Application = Database["public"]["Tables"]["applications"]["Row"];
 export const dynamic = "force-dynamic";
 
 export default async function AdminApplicationsPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   // Check if user is authenticated and is admin
   const {
