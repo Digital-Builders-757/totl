@@ -1,19 +1,16 @@
 ﻿export const dynamic = "force-dynamic";
 
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
-import { cookies } from "next/headers";
 
 import Link from "next/link";
 import { SafeImage } from "@/components/safe-image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Database } from "@/types/supabase";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 export default async function GigsPage() {
-  const cookieStore = cookies(); // âœ… Fixed: cookies() is synchronous
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+  const supabase = await createSupabaseServer();
 
   // FIXED: Explicit column selection, no aggregates
   const { data: gigs, error } = await supabase
