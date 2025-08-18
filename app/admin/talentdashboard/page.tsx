@@ -27,6 +27,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SafeImage } from "@/components/ui/safe-image";
+import {
+  castUserId,
+  type TalentProfileRow,
+  type ProfileRow,
+  type PortfolioItemRow,
+  type AdminTalentDashboardRow,
+  type AdminBookingsDashboardRow,
+} from "@/lib/db-types";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 export default async function TalentDashboard() {
@@ -42,35 +50,43 @@ export default async function TalentDashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profileData: unknown = null;
+  let profileData: TalentProfileRow | null = null;
   let isProfileComplete = false;
-  let applicationsData: unknown[] = [];
-  let bookingsData: unknown[] = [];
-  let portfolioData: unknown[] = [];
-  let mainProfileData: unknown = null;
+  let applicationsData: AdminTalentDashboardRow[] = [];
+  let bookingsData: AdminBookingsDashboardRow[] = [];
+  let portfolioData: PortfolioItemRow[] = [];
+  let mainProfileData: ProfileRow | null = null;
 
   if (user) {
     const [profileResult, applicationsResult, bookingsResult, portfolioResult, mainProfileResult] =
       await Promise.all([
-        supabase.from("talent_profiles").select("*").eq("user_id", user.id).single(),
+        supabase
+          .from("talent_profiles")
+          .select("*")
+          .eq("user_id", castUserId<"talent_profiles">(user.id))
+          .single(),
         supabase
           .from("admin_talent_dashboard")
           .select(
             "application_id,talent_id,application_status,application_created_at,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
-          .eq("talent_id", user.id),
+          .eq("talent_id", castUserId<"profiles">(user.id)),
         supabase
           .from("admin_bookings_dashboard")
           .select(
             "booking_id,booking_date,booking_compensation,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
-          .eq("talent_id", user.id),
+          .eq("talent_id", castUserId<"profiles">(user.id)),
         supabase
           .from("portfolio_items")
           .select("image_url, caption")
-          .eq("talent_id", user.id)
+          .eq("talent_id", castUserId<"portfolio_items">(user.id))
           .limit(4),
-        supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
+        supabase
+          .from("profiles")
+          .select("avatar_url")
+          .eq("id", castUserId<"profiles">(user.id))
+          .single(),
       ]);
 
     if (profileResult.error) console.error("Error fetching talent profile:", profileResult.error);
@@ -83,14 +99,14 @@ export default async function TalentDashboard() {
 
     if (profileResult.data) {
       profileData = profileResult.data;
-      const requiredFields = ["height", "weight", "experience_years"];
+      const requiredFields: (keyof TalentProfileRow)[] = ["height", "weight", "experience_years"];
       isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
     }
 
-    applicationsData = applicationsResult.data || [];
-    bookingsData = bookingsResult.data || [];
-    portfolioData = portfolioResult.data || [];
-    mainProfileData = mainProfileResult.data || null;
+    applicationsData = (applicationsResult.data || []) as AdminTalentDashboardRow[];
+    bookingsData = (bookingsResult.data || []) as AdminBookingsDashboardRow[];
+    portfolioData = (portfolioResult.data || []) as PortfolioItemRow[];
+    mainProfileData = mainProfileResult.data as ProfileRow | null;
   }
 
   const gigs = {

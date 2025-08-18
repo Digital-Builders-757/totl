@@ -1,5 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
+import { castUserId, type ProfileRow, type ApplicationRow } from "@/lib/db-types";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
@@ -22,11 +23,10 @@ export default async function AdminApplicationsPage() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id as string)
+    .eq("id", castUserId<"profiles">(user.id))
     .single();
 
-  if (userError || (userData as any)?.role !== "admin") {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (userError || (userData as ProfileRow)?.role !== "admin") {
     redirect("/login?returnUrl=/admin/applications");
   }
 
@@ -42,8 +42,7 @@ export default async function AdminApplicationsPage() {
   }
 
   // Transform the data to match the expected structure
-  const transformedApplications = (applications || []).map((app: any) => ({
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  const transformedApplications = (applications || []).map((app: ApplicationRow) => ({
     ...app,
     gigs: null, // We'll fetch gig data separately if needed
     talent: null, // We'll fetch talent data separately if needed

@@ -21,7 +21,9 @@
       "Bash(\"C:\\Users\\young\\.local\\bin\\serena.exe\" start-mcp-server --help)",
       "Bash(\"C:\\Users\\young\\.local\\bin\\serena.exe\" start-mcp-server --project \"C:\\Users\\young\\OneDrive\\Desktop\\Project Files\\totl\")",
       "WebSearch",
-      "WebFetch(domain:supabase.com)"
+      "WebFetch(domain:supabase.com)",
+      "Bash(npx tsc:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
