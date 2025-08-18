@@ -1,12 +1,12 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { SupabaseClient, User, Session, AuthError } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { createSupabaseBrowserClient } from "@/lib/supabase-client";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -66,9 +66,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const router = useRouter();
+  const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
 
-  const supabase = createClientComponentClient<Database>();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const supabase = createSupabaseBrowserClient();
 
   useEffect(() => {
     // Prevent initialization during static generation
@@ -91,6 +94,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // If there is no session on initial load, we can stop loading.
         if (!session) {
           setIsLoading(false);
+          setHasHandledInitialSession(true);
           return;
         }
 
@@ -110,10 +114,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
         setIsLoading(false);
+        setHasHandledInitialSession(true);
       } catch (error) {
         console.error("Error in initial session check:", error);
         if (mounted) {
           setIsLoading(false);
+          setHasHandledInitialSession(true);
         }
       }
     };
@@ -144,16 +150,25 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           setUserRole(role);
           setIsEmailVerified(session.user.email_confirmed_at !== null);
 
-          // Redirect based on role - FIXED PATHS
-          if (role === "talent") {
-            router.push("/talent/dashboard");
-          } else if (role === "client") {
-            router.push("/client/dashboard");
-          } else if (role === "admin") {
-            router.push("/admin/dashboard");
-          } else {
-            // If no role, perhaps go to a role selection or onboarding page
-            router.push("/choose-role");
+          // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
+          // Check if this is a fresh sign-in (not an initial session load)
+          if (hasHandledInitialSession) {
+            // Also check if user is not already on an allowed page
+            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role"];
+            const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
+
+            if (!isOnAllowedPage) {
+              // Redirect based on role - only for actual sign-ins
+              if (role === "talent") {
+                router.push("/talent/dashboard");
+              } else if (role === "client") {
+                router.push("/client/dashboard");
+              } else if (role === "admin") {
+                router.push("/admin/dashboard");
+              } else {
+                router.push("/choose-role");
+              }
+            }
           }
         } catch (error) {
           console.error("Error fetching profile on sign in:", error);
@@ -163,6 +178,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setSession(null);
         setUserRole(null);
         setIsEmailVerified(false);
+        setHasHandledInitialSession(false);
         router.push("/login");
       } else if (event === "TOKEN_REFRESHED") {
         // Just update the session, no need to refetch profile
@@ -182,7 +198,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase, router]);
+  }, [supabase, router, pathname, hasHandledInitialSession]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

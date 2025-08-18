@@ -25,7 +25,13 @@ export async function GET() {
 
     const { data: signed } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(profile.avatar_path, 60 * 60); // 1 hour
+      .createSignedUrl(profile.avatar_path, 60 * 60, {
+        transform: {
+          width: 200,
+          height: 200,
+          resize: "cover",
+        },
+      }); // 1 hour with optimizations
 
     return NextResponse.json({ url: signed?.signedUrl ?? null });
   } catch (error) {

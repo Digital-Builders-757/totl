@@ -76,12 +76,18 @@ export default async function SettingsPage() {
       .maybeSingle(),
   ]);
 
-  // Generate signed URL for avatar if path exists
+  // Generate signed URL with image transformations for avatar if path exists
   let avatarSrc: string | null = null;
   if (profile?.avatar_path) {
     const { data: signed } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7); // 7 days
+      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7, {
+        transform: {
+          width: 200,
+          height: 200,
+          resize: "cover",
+        },
+      }); // 7 days with optimizations
     avatarSrc = signed?.signedUrl ?? null;
   }
 
