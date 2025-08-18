@@ -1,0 +1,98 @@
+[1mdiff --git a/components/auth-provider.tsx b/components/auth-provider.tsx[m
+[1mindex 55eeba6..30b94d9 100644[m
+[1m--- a/components/auth-provider.tsx[m
+[1m+++ b/components/auth-provider.tsx[m
+[36m@@ -2,7 +2,7 @@[m
+ [m
+ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";[m
+ import type { SupabaseClient, User, Session, AuthError } from "@supabase/supabase-js";[m
+[31m-import { useRouter } from "next/navigation";[m
+[32m+[m[32mimport { useRouter, usePathname } from "next/navigation";[m
+ import type React from "react";[m
+ [m
+ import { createContext, useContext, useEffect, useState } from "react";[m
+[36m@@ -66,7 +66,10 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+   const [userRole, setUserRole] = useState<UserRole>(null);[m
+   const [isLoading, setIsLoading] = useState(true);[m
+   const [isEmailVerified, setIsEmailVerified] = useState(false);[m
+[32m+[m[32m  const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);[m
+[32m+[m[41m  [m
+   const router = useRouter();[m
+[32m+[m[32m  const pathname = usePathname();[m
+ [m
+   const supabase = createClientComponentClient<Database>();[m
+ [m
+[36m@@ -91,6 +94,7 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+         // If there is no session on initial load, we can stop loading.[m
+         if (!session) {[m
+           setIsLoading(false);[m
+[32m+[m[32m          setHasHandledInitialSession(true);[m
+           return;[m
+         }[m
+ [m
+[36m@@ -110,10 +114,12 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+         setUserRole(role);[m
+         setIsEmailVerified(session.user.email_confirmed_at !== null);[m
+         setIsLoading(false);[m
+[32m+[m[32m        setHasHandledInitialSession(true);[m
+       } catch (error) {[m
+         console.error("Error in initial session check:", error);[m
+         if (mounted) {[m
+           setIsLoading(false);[m
+[32m+[m[32m          setHasHandledInitialSession(true);[m
+         }[m
+       }[m
+     };[m
+[36m@@ -144,16 +150,25 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+           setUserRole(role);[m
+           setIsEmailVerified(session.user.email_confirmed_at !== null);[m
+ [m
+[31m-          // Redirect based on role - FIXED PATHS[m
+[31m-          if (role === "talent") {[m
+[31m-            router.push("/talent/dashboard");[m
+[31m-          } else if (role === "client") {[m
+[31m-            router.push("/client/dashboard");[m
+[31m-          } else if (role === "admin") {[m
+[31m-            router.push("/admin/dashboard");[m
+[31m-          } else {[m
+[31m-            // If no role, perhaps go to a role selection or onboarding page[m
+[31m-            router.push("/choose-role");[m
+[32m+[m[32m          // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads[m
+[32m+[m[32m          // Check if this is a fresh sign-in (not an initial session load)[m
+[32m+[m[32m          if (hasHandledInitialSession) {[m
+[32m+[m[32m            // Also check if user is not already on an allowed page[m
+[32m+[m[32m            const allowedPages = ['/settings', '/profile', '/onboarding', '/choose-role'];[m
+[32m+[m[32m            const isOnAllowedPage = allowedPages.some(page => pathname.startsWith(page));[m
+[32m+[m[41m            [m
+[32m+[m[32m            if (!isOnAllowedPage) {[m
+[32m+[m[32m              // Redirect based on role - only for actual sign-ins[m
+[32m+[m[32m              if (role === "talent") {[m
+[32m+[m[32m                router.push("/talent/dashboard");[m
+[32m+[m[32m              } else if (role === "client") {[m
+[32m+[m[32m                router.push("/client/dashboard");[m
+[32m+[m[32m              } else if (role === "admin") {[m
+[32m+[m[32m                router.push("/admin/dashboard");[m
+[32m+[m[32m              } else {[m
+[32m+[m[32m                router.push("/choose-role");[m
+[32m+[m[32m              }[m
+[32m+[m[32m            }[m
+           }[m
+         } catch (error) {[m
+           console.error("Error fetching profile on sign in:", error);[m
+[36m@@ -163,6 +178,7 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+         setSession(null);[m
+         setUserRole(null);[m
+         setIsEmailVerified(false);[m
+[32m+[m[32m        setHasHandledInitialSession(false);[m
+         router.push("/login");[m
+       } else if (event === "TOKEN_REFRESHED") {[m
+         // Just update the session, no need to refetch profile[m
+[36m@@ -182,7 +198,7 @@[m [mfunction SupabaseAuthProvider({ children }: { children: React.ReactNode }) {[m
+       mounted = false;[m
+       subscription.unsubscribe();[m
+     };[m
+[31m-  }, [supabase, router]);[m
+[32m+[m[32m  }, [supabase, router, pathname, hasHandledInitialSession]);[m
+ [m
+   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {[m
+     const { error } = await supabase.auth.signInWithPassword({ email, password });[m

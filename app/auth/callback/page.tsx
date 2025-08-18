@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export default async function AuthCallbackPage({
 }: {
   searchParams: Promise<{ code?: string; error?: string; error_description?: string }>;
 }) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
   const params = await searchParams;
   const code = params.code;
   const error = params.error;
@@ -100,7 +100,7 @@ export default async function AuthCallbackPage({
         // Check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("role, email_verified")
+          .select("role,email_verified")
           .eq("id", data.session.user.id)
           .single();
 

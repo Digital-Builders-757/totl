@@ -1,11 +1,10 @@
-﻿import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { ArrowLeft } from "lucide-react";
-import { cookies } from "next/headers";
+﻿import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UpdatePasswordForm } from "./update-password-form";
 import { Button } from "@/components/ui/button";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -15,7 +14,7 @@ export default async function UpdatePasswordPage({
 }: {
   searchParams: Promise<{ token_hash?: string; type?: string; access_token?: string }>;
 }) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createSupabaseServer();
   const params = await searchParams;
   const tokenHash = params.token_hash;
   const type = params.type;

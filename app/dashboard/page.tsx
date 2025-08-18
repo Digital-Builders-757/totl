@@ -1,13 +1,11 @@
-﻿export const dynamic = "force-dynamic";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
-import type { Database } from "@/types/supabase";
+import { createSupabaseServer } from "@/lib/supabase-server";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const cookieStore = cookies(); // âœ… Fixed: no await needed
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+  const supabase = await createSupabaseServer();
 
   // Get user profile data directly - no need for getSession since middleware handles auth
   const { data: profile, error } = await supabase.from("profiles").select("*").single();

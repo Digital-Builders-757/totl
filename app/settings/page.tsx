@@ -1,27 +1,10 @@
 ﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
-import type { Database } from "@/types/supabase";
+import { type ProfileRow, type TalentProfileRow, type ClientProfileRow } from "@/lib/db-types";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
-
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
-type Client = Database["public"]["Tables"]["client_profiles"]["Row"];
-
-// Type for the exact columns we select
-type ProfileData = Pick<
-  Profile,
-  | "id"
-  | "role"
-  | "display_name"
-  | "avatar_url"
-  | "avatar_path"
-  | "email_verified"
-  | "created_at"
-  | "updated_at"
->;
 
 export default async function SettingsPage() {
   // Check if Supabase is configured
@@ -39,7 +22,7 @@ export default async function SettingsPage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   // Get current user
   const {
@@ -76,12 +59,18 @@ export default async function SettingsPage() {
       .maybeSingle(),
   ]);
 
-  // Generate signed URL for avatar if path exists
+  // Generate signed URL with image transformations for avatar if path exists
   let avatarSrc: string | null = null;
   if (profile?.avatar_path) {
     const { data: signed } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7); // 7 days
+      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7, {
+        transform: {
+          width: 200,
+          height: 200,
+          resize: "cover",
+        },
+      }); // 7 days with optimizations
     avatarSrc = signed?.signedUrl ?? null;
   }
 
@@ -96,9 +85,9 @@ export default async function SettingsPage() {
 
           <ProfileEditor
             user={user}
-            profile={profile as ProfileData}
-            talent={talent as Talent | null}
-            client={client as Client | null}
+            profile={profile as ProfileRow}
+            talent={talent as TalentProfileRow | null}
+            client={client as ClientProfileRow | null}
             avatarSrc={avatarSrc}
           />
         </div>

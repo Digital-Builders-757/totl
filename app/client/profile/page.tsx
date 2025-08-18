@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import ClientProfileForm from "@/components/client-profile-form";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export default async function ClientProfilePage() {
     redirect("/login?returnUrl=/client/profile");
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
     error: authError,
@@ -24,7 +24,7 @@ export default async function ClientProfilePage() {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", user.id as string)
     .single();
 
   if (profileError || !profile) {
@@ -38,7 +38,7 @@ export default async function ClientProfilePage() {
   const { data: clientProfile } = await supabase
     .from("client_profiles")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", user.id as string)
     .single();
 
   return (

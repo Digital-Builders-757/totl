@@ -1,9 +1,9 @@
 ﻿import { NextResponse } from "next/server";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseActionClient();
+    const supabase = await createSupabaseServer();
 
     const {
       data: { user },
@@ -16,7 +16,7 @@ export async function GET() {
     const { data: profile } = await supabase
       .from("profiles")
       .select("avatar_path")
-      .eq("id", user.id)
+      .eq("id", user.id as string)
       .single();
 
     if (!profile?.avatar_path) {
@@ -25,7 +25,13 @@ export async function GET() {
 
     const { data: signed } = await supabase.storage
       .from("avatars")
-      .createSignedUrl(profile.avatar_path, 60 * 60); // 1 hour
+      .createSignedUrl(profile.avatar_path, 60 * 60, {
+        transform: {
+          width: 200,
+          height: 200,
+          resize: "cover",
+        },
+      }); // 1 hour with optimizations
 
     return NextResponse.json({ url: signed?.signedUrl ?? null });
   } catch (error) {

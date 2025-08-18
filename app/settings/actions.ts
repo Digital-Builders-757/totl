@@ -1,20 +1,15 @@
 ﻿"use server";
 
+import "server-only";
 import { revalidatePath } from "next/cache";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
-import type { Database } from "@/types/supabase";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
-type ProfilesRow = Database["public"]["Tables"]["profiles"]["Row"];
-type ProfilesUpdate = Database["public"]["Tables"]["profiles"]["Update"];
-type TalentInsert = Database["public"]["Tables"]["talent_profiles"]["Insert"];
-type ClientInsert = Database["public"]["Tables"]["client_profiles"]["Insert"];
-
-function assertUserId(user: { id?: string }): asserts user is { id: ProfilesRow["id"] } {
+function assertUserId(user: { id?: string }): asserts user is { id: string } {
   if (!user.id) throw new Error("Missing user id");
 }
 
 export async function updateBasicProfile(formData: FormData) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
     error: sessionErr,
@@ -27,11 +22,11 @@ export async function updateBasicProfile(formData: FormData) {
   assertUserId(user);
   const display_name = String(formData.get("display_name") ?? "").trim();
 
-  const patch: ProfilesUpdate = { display_name };
+  const patch = { display_name };
   const { error } = await supabase
     .from("profiles")
-    .update(patch)
-    .eq("id", user.id)
+    .update(patch as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+    .eq("id", user.id as string)
     .select("id,display_name,avatar_url,avatar_path,email_verified,created_at,updated_at")
     .single();
 
@@ -45,7 +40,7 @@ export async function updateBasicProfile(formData: FormData) {
 
 export async function updateEmail(newEmail: string) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -64,7 +59,7 @@ export async function updateEmail(newEmail: string) {
 
 export async function changePassword(password: string) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -94,7 +89,7 @@ export async function upsertTalentProfile(payload: {
   specialties?: string[];
 }) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -104,7 +99,7 @@ export async function upsertTalentProfile(payload: {
   }
 
   assertUserId(user);
-  const values: TalentInsert = {
+  const values = {
     user_id: user.id,
     first_name: payload.first_name,
     last_name: payload.last_name,
@@ -123,7 +118,7 @@ export async function upsertTalentProfile(payload: {
   };
   const { error } = await supabase
     .from("talent_profiles")
-    .upsert(values, { onConflict: "user_id" })
+    .upsert(values as any, { onConflict: "user_id" }) // eslint-disable-line @typescript-eslint/no-explicit-any
     .select("user_id")
     .single();
 
@@ -145,7 +140,7 @@ export async function upsertClientProfile(payload: {
   company_size?: string;
 }) {
   "use server";
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -155,7 +150,7 @@ export async function upsertClientProfile(payload: {
   }
 
   assertUserId(user);
-  const values: ClientInsert = {
+  const values = {
     user_id: user.id,
     company_name: payload.company_name,
     industry: payload.industry,
@@ -167,7 +162,7 @@ export async function upsertClientProfile(payload: {
   };
   const { error } = await supabase
     .from("client_profiles")
-    .upsert(values, { onConflict: "user_id" })
+    .upsert(values as any, { onConflict: "user_id" }) // eslint-disable-line @typescript-eslint/no-explicit-any
     .select("user_id")
     .single();
 
@@ -181,60 +176,101 @@ export async function upsertClientProfile(payload: {
 
 export async function uploadAvatar(formData: FormData) {
   "use server";
-  const supabase = await createSupabaseActionClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (!user) {
-    return { error: "Not authenticated" };
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: "Authentication failed" };
+    }
+
+    assertUserId(user);
+
+    const file = formData.get("avatar") as File | null;
+    if (!file || file.size === 0) {
+      return { error: "No file provided" };
+    }
+
+    // Enhanced file validation
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      return { error: "Invalid file type. Please use JPEG, PNG, GIF, or WebP" };
+    }
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      return { error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB` };
+    }
+
+    // Generate optimized path following user-specific folder pattern
+    const ext =
+      file.type === "image/jpeg"
+        ? "jpg"
+        : file.type === "image/png"
+          ? "png"
+          : file.type === "image/webp"
+            ? "webp"
+            : "gif";
+    const timestamp = Date.now();
+    const path = `${user.id}/avatar-${timestamp}.${ext}`;
+
+    // Upload new file first
+    const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, {
+      contentType: file.type,
+      upsert: true,
+    });
+
+    if (uploadError) {
+      console.error("Avatar upload error:", uploadError);
+      return { error: "Failed to upload image. Please try again." };
+    }
+
+    // Update database with new path
+    const patch = {
+      avatar_path: path,
+      updated_at: new Date().toISOString(),
+    };
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update(patch as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .eq("id", user.id as string)
+      .select("id,display_name,avatar_url,avatar_path,email_verified,created_at,updated_at")
+      .single();
+
+    if (updateError) {
+      // Rollback: remove the uploaded file
+      await supabase.storage.from("avatars").remove([path]);
+      console.error("Database update error:", updateError);
+      return { error: "Failed to update profile. Please try again." };
+    }
+
+    // Clean up old avatars after successful update
+    try {
+      const { data: list } = await supabase.storage.from("avatars").list(user.id);
+      if (list && list.length > 1) {
+        const filesToDelete = list.map((f) => `${user.id}/${f.name}`).filter((p) => p !== path); // Keep only the new file
+
+        if (filesToDelete.length > 0) {
+          await supabase.storage.from("avatars").remove(filesToDelete);
+        }
+      }
+    } catch (cleanupError) {
+      // Log but don't fail the operation for cleanup errors
+      console.warn("Avatar cleanup warning:", cleanupError);
+    }
+
+    revalidatePath("/settings");
+    return {
+      success: true,
+      avatarPath: path,
+      message: "Avatar updated successfully",
+    };
+  } catch (error) {
+    console.error("Unexpected avatar upload error:", error);
+    return { error: "An unexpected error occurred. Please try again." };
   }
-
-  assertUserId(user);
-
-  const file = formData.get("avatar") as File | null;
-  if (!file) {
-    return { error: "No file provided" };
-  }
-
-  if (!["image/jpeg", "image/png", "image/gif"].includes(file.type)) {
-    return { error: "Invalid file type" };
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    return { error: "File too large" };
-  }
-
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${user.id}/avatar-${Date.now()}.${ext}`;
-
-  // Optional: delete previous avatar(s) to avoid orphans
-  const { data: list } = await supabase.storage.from("avatars").list(user.id);
-  if (list?.length) {
-    await supabase.storage.from("avatars").remove(list.map((f) => `${user.id}/${f.name}`));
-  }
-
-  const { error: upErr } = await supabase.storage
-    .from("avatars")
-    .upload(path, file, { upsert: true });
-
-  if (upErr) {
-    return { error: upErr.message };
-  }
-
-  // Store the storage path, not a signed URL
-  const patch: ProfilesUpdate = { avatar_path: path };
-  const { error: updErr } = await supabase
-    .from("profiles")
-    .update(patch)
-    .eq("id", user.id)
-    .select("id,display_name,avatar_url,avatar_path,email_verified,created_at,updated_at")
-    .single();
-
-  if (updErr) {
-    return { error: updErr.message };
-  }
-
-  revalidatePath("/settings");
-  return { success: true, avatarPath: path };
 }

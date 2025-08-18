@@ -1,12 +1,13 @@
 ﻿import { redirect } from "next/navigation";
 import { CreateGigForm } from "./create-gig-form";
-import { createSupabaseServerClient } from "@/lib/supabase-client";
+import { castUserId, type ProfileRow } from "@/lib/db-types";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function CreateGigPage() {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServer();
 
   // Check if user is authenticated and is admin
   const {
@@ -22,10 +23,10 @@ export default async function CreateGigPage() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", castUserId<"profiles">(user.id))
     .single();
 
-  if (userError || userData?.role !== "admin") {
+  if (userError || (userData as ProfileRow)?.role !== "admin") {
     redirect("/login?returnUrl=/admin/gigs/create");
   }
 

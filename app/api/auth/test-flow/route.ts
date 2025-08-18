@@ -1,9 +1,9 @@
 ﻿import { NextResponse } from "next/server";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = await createSupabaseActionClient();
+    const supabase = await createSupabaseServer();
 
     // Get current user
     const {
@@ -24,8 +24,8 @@ export async function GET() {
     // Get user profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
-      .eq("id", user.id)
+      .select("id,role,display_name,email_verified,created_at")
+      .eq("id", user.id as string)
       .single();
 
     if (profileError) {
@@ -45,15 +45,15 @@ export async function GET() {
     if (profile.role === "talent") {
       const { data: talentProfile } = await supabase
         .from("talent_profiles")
-        .select("*")
-        .eq("user_id", user.id)
+        .select("id,user_id,first_name,last_name,height,weight")
+        .eq("user_id", user.id as string)
         .single();
       roleProfile = talentProfile;
     } else if (profile.role === "client") {
       const { data: clientProfile } = await supabase
         .from("client_profiles")
-        .select("*")
-        .eq("user_id", user.id)
+        .select("id,user_id,company_name,company_type,contact_name")
+        .eq("user_id", user.id as string)
         .single();
       roleProfile = clientProfile;
     }
