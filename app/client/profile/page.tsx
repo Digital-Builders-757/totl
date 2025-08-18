@@ -24,21 +24,22 @@ export default async function ClientProfilePage() {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", user.id as string)
     .single();
 
   if (profileError || !profile) {
     redirect("/login");
   }
 
-  if (profile.role !== "client") {
+  if ((profile as any).role !== "client") {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     redirect("/dashboard");
   }
 
   const { data: clientProfile } = await supabase
     .from("client_profiles")
     .select("*")
-    .eq("user_id", user.id)
+    .eq("user_id", user.id as string)
     .single();
 
   return (

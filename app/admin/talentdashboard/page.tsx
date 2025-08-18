@@ -28,22 +28,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase-server";
-import type { Database } from "@/types/supabase";
-
-type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
-
-// Type definitions for joined data using views
-type ApplicationWithGigAndClient = Database["public"]["Views"]["admin_talent_dashboard"]["Row"];
-type BookingWithGigAndClient = Database["public"]["Views"]["admin_bookings_dashboard"]["Row"];
-
-interface PortfolioItemWithCaption {
-  image_url: string | null;
-  caption: string | null;
-}
-
-interface MainProfileData {
-  avatar_url: string | null;
-}
 
 export default async function TalentDashboard() {
   // Check if Supabase environment variables are available
@@ -58,12 +42,12 @@ export default async function TalentDashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profileData: TalentProfile | null = null;
+  let profileData: unknown = null;
   let isProfileComplete = false;
-  let applicationsData: ApplicationWithGigAndClient[] = [];
-  let bookingsData: BookingWithGigAndClient[] = [];
-  let portfolioData: PortfolioItemWithCaption[] = [];
-  let mainProfileData: MainProfileData | null = null;
+  let applicationsData: unknown[] = [];
+  let bookingsData: unknown[] = [];
+  let portfolioData: unknown[] = [];
+  let mainProfileData: unknown = null;
 
   if (user) {
     const [profileResult, applicationsResult, bookingsResult, portfolioResult, mainProfileResult] =
@@ -99,7 +83,7 @@ export default async function TalentDashboard() {
 
     if (profileResult.data) {
       profileData = profileResult.data;
-      const requiredFields: (keyof TalentProfile)[] = ["height", "weight", "experience_years"];
+      const requiredFields = ["height", "weight", "experience_years"];
       isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
     }
 

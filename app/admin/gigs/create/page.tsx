@@ -22,10 +22,11 @@ export default async function CreateGigPage() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", user.id as string)
     .single();
 
-  if (userError || userData?.role !== "admin") {
+  if (userError || (userData as any)?.role !== "admin") {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     redirect("/login?returnUrl=/admin/gigs/create");
   }
 

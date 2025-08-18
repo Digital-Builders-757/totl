@@ -16,7 +16,7 @@ export async function GET() {
     const { data: profile } = await supabase
       .from("profiles")
       .select("avatar_path")
-      .eq("id", user.id)
+      .eq("id", user.id as string)
       .single();
 
     if (!profile?.avatar_path) {

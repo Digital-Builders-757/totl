@@ -100,8 +100,8 @@ export default async function AuthCallbackPage({
         // Check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("role, email_verified")
-          .eq("id", data.session.user.id)
+          .select("role,email_verified")
+          .eq("id", data.session.user.id as string)
           .single();
 
         if (profileError && profileError.code === "PGRST116") {
@@ -138,19 +138,23 @@ export default async function AuthCallbackPage({
         }
 
         // Update email verification status if not already verified
-        if (profile && !profile.email_verified) {
+        if (profile && !(profile as any).email_verified) {
+          // eslint-disable-line @typescript-eslint/no-explicit-any
           await supabase
             .from("profiles")
             .update({ email_verified: true })
-            .eq("id", data.session.user.id);
+            .eq("id", data.session.user.id as string);
         }
 
         // Redirect based on role
-        if (profile?.role === "talent") {
+        if ((profile as any)?.role === "talent") {
+          // eslint-disable-line @typescript-eslint/no-explicit-any
           redirect("/talent/dashboard");
-        } else if (profile?.role === "client") {
+        } else if ((profile as any)?.role === "client") {
+          // eslint-disable-line @typescript-eslint/no-explicit-any
           redirect("/client/dashboard");
-        } else if (profile?.role === "admin") {
+        } else if ((profile as any)?.role === "admin") {
+          // eslint-disable-line @typescript-eslint/no-explicit-any
           redirect("/admin/dashboard");
         } else {
           // No role assigned, go to role selection

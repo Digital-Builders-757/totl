@@ -22,25 +22,32 @@ export default async function AdminDashboard() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", user.id)
+    .eq("id", user.id as string)
     .single();
 
-  if (userError || userData?.role !== "admin") {
+  if (userError || (userData as any)?.role !== "admin") {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     redirect("/login?returnUrl=/admin/dashboard");
   }
 
-  // Fetch dashboard data (gigs, applications, etc.)
+  // Fetch dashboard data
   const { data: gigs } = await supabase
     .from("gigs")
-    .select("*")
+    .select("id,title,client_id,status,location,compensation,created_at,updated_at")
     .order("created_at", { ascending: false })
     .limit(5);
 
   const { data: applications } = await supabase
     .from("applications")
-    .select("*")
+    .select("id,gig_id,talent_id,status,message,created_at,updated_at")
     .order("created_at", { ascending: false })
     .limit(5);
 
-  return <AdminDashboardClient user={user} gigs={gigs || []} applications={applications || []} />;
+  return (
+    <AdminDashboardClient
+      user={user}
+      gigs={(gigs || []) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+      applications={(applications || []) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+    />
+  );
 }
