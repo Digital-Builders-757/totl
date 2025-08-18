@@ -1,5 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
+import { type ProfileRow, type TalentProfileRow, type ClientProfileRow } from "@/lib/db-types";
 import { createSupabaseServer } from "@/lib/supabase-server";
 
 // Force dynamic rendering to prevent build-time issues
@@ -40,32 +41,30 @@ export default async function SettingsPage() {
       .select(
         "id, role, display_name, avatar_url, avatar_path, email_verified, created_at, updated_at"
       )
-      .eq("id", user.id as string)
+      .eq("id", user.id)
       .single(),
     supabase
       .from("talent_profiles")
       .select(
         "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, created_at, updated_at"
       )
-      .eq("user_id", user.id as string)
+      .eq("user_id", user.id)
       .maybeSingle(),
     supabase
       .from("client_profiles")
       .select(
         "id, user_id, company_name, industry, website, contact_name, contact_email, contact_phone, company_size, created_at, updated_at"
       )
-      .eq("user_id", user.id as string)
+      .eq("user_id", user.id)
       .maybeSingle(),
   ]);
 
   // Generate signed URL with image transformations for avatar if path exists
   let avatarSrc: string | null = null;
-  if ((profile as any)?.avatar_path) {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (profile?.avatar_path) {
     const { data: signed } = await supabase.storage
       .from("avatars")
-      .createSignedUrl((profile as any).avatar_path, 60 * 60 * 24 * 7, {
-        // eslint-disable-line @typescript-eslint/no-explicit-any
+      .createSignedUrl(profile.avatar_path, 60 * 60 * 24 * 7, {
         transform: {
           width: 200,
           height: 200,
@@ -86,9 +85,9 @@ export default async function SettingsPage() {
 
           <ProfileEditor
             user={user}
-            profile={profile as any} // eslint-disable-line @typescript-eslint/no-explicit-any
-            talent={talent as any} // eslint-disable-line @typescript-eslint/no-explicit-any
-            client={client as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+            profile={profile as ProfileRow}
+            talent={talent as TalentProfileRow | null}
+            client={client as ClientProfileRow | null}
             avatarSrc={avatarSrc}
           />
         </div>

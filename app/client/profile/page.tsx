@@ -31,8 +31,7 @@ export default async function ClientProfilePage() {
     redirect("/login");
   }
 
-  if ((profile as any).role !== "client") {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  if (profile.role !== "client") {
     redirect("/dashboard");
   }
 
