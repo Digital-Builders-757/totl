@@ -201,7 +201,41 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, router, pathname, hasHandledInitialSession]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (!error && data.session) {
+      // Manually set the session if the sign-in was successful
+      setUser(data.session.user);
+      setSession(data.session);
+      setIsEmailVerified(data.session.user.email_confirmed_at !== null);
+
+      // Fetch user role
+      try {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.session.user.id)
+          .single();
+
+        const role = profileData?.role as UserRole;
+        setUserRole(role);
+
+        // Redirect based on role
+        if (role === "talent") {
+          router.push("/talent/dashboard");
+        } else if (role === "client") {
+          router.push("/client/dashboard");
+        } else if (role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/choose-role");
+        }
+      } catch (profileError) {
+        console.error("Error fetching profile on sign in:", profileError);
+        router.push("/choose-role");
+      }
+    }
+
     return { error };
   };
 
