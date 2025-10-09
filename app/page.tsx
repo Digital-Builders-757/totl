@@ -2,7 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { ArrowRight, Star, MapPin, Search, Handshake, Sparkles } from "lucide-react";
-import Image from "next/image";
+// import Image from "next/image";
 import Link from "next/link";
 import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Badge } from "@/components/ui/badge";
@@ -18,14 +18,19 @@ export default function HomePage() {
         {/* Apple-Inspired Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
         <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float" style={{animationDelay: '1s'}}></div>
-        
+        <div
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float"
+          style={{ animationDelay: "1s" }}
+        ></div>
+
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-20 items-start">
             <div className="space-y-6 pt-4">
               <div className="space-y-6">
                 <div className="apple-glass rounded-2xl px-6 py-3 w-fit">
-                  <span className="text-white font-medium text-sm">The Future of Talent Booking</span>
+                  <span className="text-white font-medium text-sm">
+                    The Future of Talent Booking
+                  </span>
                 </div>
                 <h1 className="text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
                   Connect with
@@ -40,12 +45,19 @@ export default function HomePage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-6">
                 <Link href="/choose-role">
-                  <Button size="lg" className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer">
+                  <Button
+                    size="lg"
+                    className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer"
+                  >
                     Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </Link>
                 <Link href="/talent">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold"
+                  >
                     Browse Talent
                   </Button>
                 </Link>
@@ -56,7 +68,10 @@ export default function HomePage() {
                   <span className="font-medium">500+ Verified Talent</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-white rounded-full animate-apple-glow" style={{animationDelay: '0.5s'}}></div>
+                  <div
+                    className="w-3 h-3 bg-white rounded-full animate-apple-glow"
+                    style={{ animationDelay: "0.5s" }}
+                  ></div>
                   <span className="font-medium">1000+ Projects Completed</span>
                 </div>
               </div>
@@ -93,11 +108,11 @@ export default function HomePage() {
               <span className="apple-text-gradient"> Stars</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Discover exceptional talent ready to bring your vision to life. From fashion to fitness, 
-              our curated selection represents the best in the industry.
+              Discover exceptional talent ready to bring your vision to life. From fashion to
+              fitness, our curated selection represents the best in the industry.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
@@ -107,7 +122,7 @@ export default function HomePage() {
                 rating: 4.8,
                 price: "$450/day",
                 image: "https://picsum.photos/400/500?random=2",
-                specialties: ["Fitness", "Lifestyle", "Commercial"]
+                specialties: ["Fitness", "Lifestyle", "Commercial"],
               },
               {
                 name: "Isabella Martinez",
@@ -116,7 +131,7 @@ export default function HomePage() {
                 rating: 4.9,
                 price: "$400/day",
                 image: "https://picsum.photos/400/500?random=3",
-                specialties: ["Beauty", "Fashion", "Editorial"]
+                specialties: ["Beauty", "Fashion", "Editorial"],
               },
               {
                 name: "Alex Thompson",
@@ -125,13 +140,13 @@ export default function HomePage() {
                 rating: 4.7,
                 price: "$350/day",
                 image: "https://picsum.photos/400/500?random=4",
-                specialties: ["Commercial", "Corporate", "Lifestyle"]
-              }
+                specialties: ["Commercial", "Corporate", "Lifestyle"],
+              },
             ].map((talent, index) => (
               <Card
                 key={talent.name}
                 className="group apple-card hover-lift cursor-pointer overflow-hidden"
-                style={{animationDelay: `${index * 0.1}s`}}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
                   <div className="relative overflow-hidden">
@@ -150,12 +165,8 @@ export default function HomePage() {
                       </Badge>
                     </div>
                     <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white text-xl font-bold mb-1">
-                        {talent.name}
-                      </h3>
-                      <p className="text-gray-300 text-sm font-medium">
-                        {talent.role}
-                      </p>
+                      <h3 className="text-white text-xl font-bold mb-1">{talent.name}</h3>
+                      <p className="text-gray-300 text-sm font-medium">{talent.role}</p>
                     </div>
                   </div>
                   <div className="p-6 space-y-4">
@@ -171,7 +182,11 @@ export default function HomePage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {talent.specialties.map((specialty, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                        <Badge
+                          key={idx}
+                          variant="secondary"
+                          className="text-xs bg-white/10 text-white border-white/20"
+                        >
                           {specialty}
                         </Badge>
                       ))}
@@ -196,11 +211,11 @@ export default function HomePage() {
               <span className="apple-text-gradient"> Process</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              From discovery to booking, we've streamlined the entire process to make talent 
+              From discovery to booking, we've streamlined the entire process to make talent
               acquisition effortless and efficient.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center space-y-6">
               <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center apple-glass">
@@ -208,7 +223,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Discover</h3>
               <p className="text-gray-300 leading-relaxed">
-                Browse our curated selection of verified talent across all categories and specialties.
+                Browse our curated selection of verified talent across all categories and
+                specialties.
               </p>
             </div>
             <div className="text-center space-y-6">
@@ -217,7 +233,8 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Connect</h3>
               <p className="text-gray-300 leading-relaxed">
-                Reach out directly to talent or let us facilitate the perfect match for your project.
+                Reach out directly to talent or let us facilitate the perfect match for your
+                project.
               </p>
             </div>
             <div className="text-center space-y-6">
@@ -270,12 +287,19 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link href="/choose-role">
-                <Button size="lg" className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer"
+                >
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
               <Link href="/talent">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold"
+                >
                   Browse Talent
                 </Button>
               </Link>
@@ -303,13 +327,22 @@ export default function HomePage() {
             <div className="space-y-4">
               <h3 className="text-white font-semibold">Platform</h3>
               <div className="space-y-2">
-                <Link href="/talent" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/talent"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Browse Talent
                 </Link>
-                <Link href="/gigs" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/gigs"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Find Gigs
                 </Link>
-                <Link href="/about" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/about"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   About Us
                 </Link>
               </div>
@@ -317,13 +350,22 @@ export default function HomePage() {
             <div className="space-y-4">
               <h3 className="text-white font-semibold">Support</h3>
               <div className="space-y-2">
-                <Link href="/help" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/help"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Help Center
                 </Link>
-                <Link href="/contact" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/contact"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Contact Us
                 </Link>
-                <Link href="/privacy" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/privacy"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Privacy Policy
                 </Link>
               </div>
@@ -331,7 +373,10 @@ export default function HomePage() {
             <div className="space-y-4">
               <h3 className="text-white font-semibold">Get Started</h3>
               <div className="space-y-2">
-                <Link href="/choose-role" className="block text-gray-400 hover:text-white transition-colors">
+                <Link
+                  href="/choose-role"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
                   Apply as Talent
                 </Link>
                 <PostGigFooterLink />

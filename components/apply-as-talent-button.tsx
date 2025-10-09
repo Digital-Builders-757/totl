@@ -2,7 +2,7 @@
 
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
-import TalentSignupForm from "@/components/talent-signup-form";
+import TalentSignupForm from "@/components/forms/talent-signup-form";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import {
   Dialog,

@@ -1,7 +1,11 @@
 ﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
-import { type ProfileRow, type TalentProfileRow, type ClientProfileRow } from "@/types/database";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import {
+  type ProfileRow,
+  type TalentProfileRow,
+  type ClientProfileRow,
+} from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";

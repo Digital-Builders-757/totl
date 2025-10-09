@@ -1,11 +1,11 @@
 ﻿"use server";
 
-import { createServerActionClient } from "@/lib/supabase/supabase-browser";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { createSupabaseActionClient } from "@/lib/supabase-client";
 
 export async function updateProfile(formData: FormData) {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   // Get the current session to verify the user
   const {
@@ -36,7 +36,7 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function createTalentProfile(formData: FormData) {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   // Get the current session to verify the user
   const {

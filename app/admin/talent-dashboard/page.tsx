@@ -15,7 +15,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
-import { EmailVerificationReminder } from "@/components/ui/email-verification-reminder";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -26,15 +25,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmailVerificationReminder } from "@/components/ui/email-verification-reminder";
 import { SafeImage } from "@/components/ui/safe-image";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import {
   type TalentProfileRow,
   type ProfileRow,
   type PortfolioItemRow,
   type AdminTalentDashboardRow,
   type AdminBookingsDashboardRow,
-} from "@/types/database";
-import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+} from "@/types/database-helpers";
 
 export default async function TalentDashboard() {
   // Check if Supabase environment variables are available

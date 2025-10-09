@@ -1,8 +1,8 @@
 ﻿"use server";
 
-import { createServerActionClient } from "@/lib/supabase/supabase-browser";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createSupabaseActionClient } from "@/lib/supabase-client";
 
 export async function createProfile(formData: {
   full_name: string;
@@ -11,7 +11,7 @@ export async function createProfile(formData: {
   location?: string;
   website?: string;
 }) {
-  const supabase = createServerActionClient({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   // Get the current user
   const {

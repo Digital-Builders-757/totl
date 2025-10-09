@@ -1,4 +1,3 @@
-import { createServerComponentClient } from "@/lib/supabase/supabase-browser";
 import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
@@ -7,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering
@@ -19,7 +19,7 @@ interface GigDetailsPageProps {
 export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
   const { id } = await params;
   const cookieStore = cookies(); // ✅ Fixed: cookies() is synchronous
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+  const supabase = await createSupabaseServerComponentClient();
 
   // Get current user session
   const {

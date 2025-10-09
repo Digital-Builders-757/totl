@@ -1,7 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
-import { type ProfileRow, type ApplicationRow } from "@/types/database";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { type ProfileRow, type ApplicationRow } from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
