@@ -2,13 +2,13 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
-import type { Database } from "@/types/supabase";
+import type { Database } from "../types/supabase";
 
 let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
 
 export function createSupabaseBrowser() {
   // Only create client on client-side
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return null;
   }
 
@@ -20,14 +20,14 @@ export function createSupabaseBrowser() {
     {
       cookies: {
         getAll: () => {
-          if (typeof document === 'undefined') return [];
+          if (typeof document === "undefined") return [];
           return document.cookie.split(";").map((c) => {
             const [name, ...rest] = c.trim().split("=");
             return { name, value: rest.join("=") };
           });
         },
         setAll: (cookies) => {
-          if (typeof document === 'undefined') return;
+          if (typeof document === "undefined") return;
           cookies.forEach(({ name, value, options }) => {
             let cookieString = `${name}=${value}`;
             if (options?.maxAge) cookieString += `; Max-Age=${options.maxAge}`;
