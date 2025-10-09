@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createSupabaseBrowser();
 
   const handleSignOut = async () => {
     setIsLoading(true);

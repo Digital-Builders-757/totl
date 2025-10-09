@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { logImageFallback } from "@/lib/error-logger";
+import { logImageFallback } from "@/lib/utils/error-logger";
 
 interface SafeImageProps {
   src: string;
@@ -24,7 +24,7 @@ export function SafeImage({
   height = 300,
   fill = false,
   className = "",
-  fallbackSrc = "/images/totl-logo.png",
+  fallbackSrc = "/images/solo_logo.png",
   context = "unknown",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placeholderQuery: _placeholderQuery,

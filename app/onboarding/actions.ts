@@ -1,6 +1,6 @@
 ﻿"use server";
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
+import { createServerActionClient } from "@/lib/supabase/supabase-browser";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 

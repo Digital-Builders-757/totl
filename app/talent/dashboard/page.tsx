@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import {
   Clock,
   MapPin,
@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,7 @@ export default function TalentDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   // Calculate dashboard stats from real data
   const dashboardStats = {

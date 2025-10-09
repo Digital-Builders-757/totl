@@ -1,7 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminDashboardClient } from "./admin-dashboard-client";
-import { castUserId, type ProfileRow } from "@/lib/db-types";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { type ProfileRow } from "@/types/database";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export default async function AdminDashboard() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", castUserId<"profiles">(user.id))
+    .eq("id", user.id as string)
     .single();
 
   if (userError || (userData as ProfileRow)?.role !== "admin") {

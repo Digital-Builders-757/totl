@@ -1,9 +1,9 @@
 ﻿import "server-only";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { sendEmail, logEmailSent } from "@/lib/email-service";
-import { generateVerificationEmail } from "@/lib/email-templates";
-import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { sendEmail, logEmailSent } from "@/lib/services/email-service";
+import { generateVerificationEmail } from "@/lib/services/email-templates";
+import { createSupabaseAdminClient } from "@/lib/supabase/supabase-admin-client";
 
 export const runtime = "nodejs"; // Needed for email operations
 

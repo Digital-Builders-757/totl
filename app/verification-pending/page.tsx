@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -24,7 +24,7 @@ export default function VerificationPendingPage() {
   const [justSent, setJustSent] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"unknown" | "sent" | "error">("unknown");
   const { toast } = useToast();
-  const supabase = createClientComponentClient();
+  const supabase = createSupabaseBrowser();
 
   useEffect(() => {
     // Check if we just created the account
@@ -103,7 +103,7 @@ export default function VerificationPendingPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-center text-gray-600">
+              <p className="text-center text-white">
                 Please check your inbox and click the verification link to complete your
                 registration.
               </p>
@@ -130,12 +130,24 @@ export default function VerificationPendingPage() {
               )}
 
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Didn&apos;t receive the email?</h4>
+                <h4 className="font-medium mb-2 text-black">Didn&apos;t receive the email?</h4>
                 <ul className="text-sm text-gray-600 space-y-2">
-                  <li>â€¢ Check your spam or junk folder</li>
-                  <li>â€¢ Make sure you entered the correct email address</li>
-                  <li>â€¢ Wait a few minutes for the email to arrive</li>
-                  <li>â€¢ If you still don&apos;t see it, try clicking the resend button below</li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    Check your spam or junk folder
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    Make sure you entered the correct email address
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    Wait a few minutes for the email to arrive
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-green-500 mr-2">•</span>
+                    If you still don&apos;t see it, try clicking the resend button below
+                  </li>
                 </ul>
               </div>
             </CardContent>
@@ -150,7 +162,7 @@ export default function VerificationPendingPage() {
               </Button>
               <div className="text-center text-sm text-gray-500">
                 Already verified?{" "}
-                <Link href="/login" className="text-black font-medium hover:underline">
+                <Link href="/login" className="text-white font-semibold hover:text-gray-200 hover:underline border-b border-gray-400 hover:border-gray-200 transition-colors">
                   Sign in
                 </Link>
               </div>

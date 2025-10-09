@@ -1,7 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { AdminApplicationsClient } from "./admin-applications-client";
-import { castUserId, type ProfileRow, type ApplicationRow } from "@/lib/db-types";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { type ProfileRow, type ApplicationRow } from "@/types/database";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export default async function AdminApplicationsPage() {
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", castUserId<"profiles">(user.id))
+    .eq("id", user.id as string)
     .single();
 
   if (userError || (userData as ProfileRow)?.role !== "admin") {

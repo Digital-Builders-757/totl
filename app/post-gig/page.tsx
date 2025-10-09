@@ -1,12 +1,12 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ export default function PostGigPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   const [formData, setFormData] = useState({
     title: "",

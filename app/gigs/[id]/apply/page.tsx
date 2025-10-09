@@ -1,6 +1,6 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ interface Gig {
 }
 
 export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createSupabaseBrowser<Database>();
   const router = useRouter();
 
   const [gig, setGig] = useState<Gig | null>(null);

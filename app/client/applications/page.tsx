@@ -1,10 +1,10 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { FileText, Clock, MapPin, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -50,7 +50,7 @@ export default function ClientApplicationsPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   const fetchApplications = useCallback(async () => {
     if (!supabase || !user) return;

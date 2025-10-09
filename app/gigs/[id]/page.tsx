@@ -1,4 +1,4 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createServerComponentClient } from "@/lib/supabase/supabase-browser";
 import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";

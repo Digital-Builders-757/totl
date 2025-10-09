@@ -1,0 +1,63 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+  - generic [ref=e10]:
+    - link "Back to Home" [ref=e11] [cursor=pointer]:
+      - /url: /
+      - img [ref=e12]
+      - text: Back to Home
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading "Choose Your Role" [level=1] [ref=e16]
+        - paragraph [ref=e17]: Select whether you're joining as talent looking for opportunities or a client looking to hire talent.
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - img "Talent" [ref=e21]
+            - heading "Join as Talent" [level=2] [ref=e24]
+          - generic [ref=e25]:
+            - paragraph [ref=e26]: Create a profile, showcase your portfolio, and get discovered by top clients looking for talent like you.
+            - list [ref=e27]:
+              - listitem [ref=e28]:
+                - generic [ref=e29]: ✓
+                - generic [ref=e30]: Apply to exclusive modeling opportunities
+              - listitem [ref=e31]:
+                - generic [ref=e32]: ✓
+                - generic [ref=e33]: Build a professional portfolio
+              - listitem [ref=e34]:
+                - generic [ref=e35]: ✓
+                - generic [ref=e36]: Get discovered by top brands and agencies
+            - button "Apply as Talent" [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+              - text: Apply as Talent
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - img "Client" [ref=e44]
+            - heading "Join as Client" [level=2] [ref=e47]
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: Post gigs, browse our talent roster, and find the perfect models for your projects, campaigns, and events.
+            - list [ref=e50]:
+              - listitem [ref=e51]:
+                - generic [ref=e52]: ✓
+                - generic [ref=e53]: Post modeling opportunities
+              - listitem [ref=e54]:
+                - generic [ref=e55]: ✓
+                - generic [ref=e56]: Browse our curated talent roster
+              - listitem [ref=e57]:
+                - generic [ref=e58]: ✓
+                - generic [ref=e59]: Manage bookings and communications
+            - link "Apply as Client" [ref=e61] [cursor=pointer]:
+              - /url: /client/apply
+              - button "Apply as Client" [ref=e62]
+  - button "Open Next.js Dev Tools" [ref=e68] [cursor=pointer]:
+    - img [ref=e69]
+  - alert [ref=e72]: TOTL Agency - Premium Modeling Agency
+```

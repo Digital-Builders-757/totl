@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,7 +18,7 @@ export function UpdatePasswordForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createSupabaseBrowser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,7 +1,7 @@
-﻿import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+﻿import { createServerComponentClient } from "@/lib/supabase/supabase-browser";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import TalentProfileForm from "@/components/talent-profile-form";
+import TalentProfileForm from "@/components/forms/talent-profile-form";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";

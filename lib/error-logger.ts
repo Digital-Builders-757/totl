@@ -47,7 +47,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your logging service
     if (process.env.NODE_ENV === "development") {
-      console.error("ðŸ”´ Error Logged:", logData);
+      console.error("🚨 Error Logged:", logData);
     }
 
     // You could also send to Supabase, Sentry, or other services here
@@ -75,7 +75,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your analytics service
     if (process.env.NODE_ENV === "development") {
-      console.log("ðŸ“Š Analytics Event:", analyticsData);
+      console.log("📊 Analytics Event:", analyticsData);
     }
   }
 

@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+  - generic [ref=e13]:
+    - link "Back" [ref=e14] [cursor=pointer]:
+      - /url: /
+      - img [ref=e15]
+      - text: Back
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - heading "Create Your Talent Account" [level=3] [ref=e20]
+        - paragraph [ref=e21]: Apply to join our talent roster. It's completely free to create an account.
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - text: First Name *
+            - textbox "First Name *" [ref=e26]:
+              - /placeholder: Enter your first name
+          - generic [ref=e27]:
+            - text: Last Name *
+            - textbox "Last Name *" [ref=e28]:
+              - /placeholder: Enter your last name
+        - generic [ref=e29]:
+          - text: Email Address *
+          - textbox "Email Address *" [ref=e30]:
+            - /placeholder: Enter your email address
+        - generic [ref=e31]:
+          - text: Password *
+          - generic [ref=e32]:
+            - textbox "Password *" [ref=e33]:
+              - /placeholder: Create a password
+            - button [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+          - paragraph [ref=e38]: Password must be at least 8 characters with uppercase, lowercase, and numbers
+        - generic [ref=e39]:
+          - text: Confirm Password *
+          - generic [ref=e40]:
+            - textbox "Confirm Password *" [ref=e41]:
+              - /placeholder: Confirm your password
+            - button [ref=e42] [cursor=pointer]:
+              - img [ref=e43]
+        - generic [ref=e46]:
+          - checkbox "I agree to the Terms of Service and Privacy Policy *" [ref=e47] [cursor=pointer]
+          - checkbox
+          - generic [ref=e49]:
+            - text: I agree to the
+            - link "Terms of Service" [ref=e50] [cursor=pointer]:
+              - /url: /terms
+            - text: and
+            - link "Privacy Policy" [ref=e51] [cursor=pointer]:
+              - /url: /privacy
+            - text: "*"
+        - alert [ref=e52]:
+          - img [ref=e53]
+          - generic [ref=e57]: After signing up, you'll need to verify your email address and complete your profile in your dashboard.
+        - button "Create Free Account" [ref=e59] [cursor=pointer]
+```

@@ -1,6 +1,6 @@
 ﻿import { NextResponse } from "next/server";
-import { sendEmail, logEmailSent } from "@/lib/email-service";
-import { generateWelcomeEmail } from "@/lib/email-templates";
+import { sendEmail, logEmailSent } from "@/lib/services/email-service";
+import { generateWelcomeEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {
   try {

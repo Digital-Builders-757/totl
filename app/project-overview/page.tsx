@@ -39,7 +39,7 @@ export default function ProjectOverview() {
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full bg-black text-white hover:bg-black/90">
-                  <Link href="/admin/talentdashboard">View Talent Dashboard</Link>
+                  <Link href="/admin/talent-dashboard">View Talent Dashboard</Link>
                 </Button>
               </CardContent>
             </Card>

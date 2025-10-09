@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import {
   Calendar,
   Clock,
@@ -28,8 +28,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
-import { ProfileCompletionBanner } from "@/components/profile-completion-banner";
+import { useAuth } from "@/components/auth/auth-provider";
+import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { logEmptyState, logFallbackUsage } from "@/lib/error-logger";
+import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -110,7 +110,7 @@ export default function ClientDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   // Calculate dashboard stats from real data
   const dashboardStats = {

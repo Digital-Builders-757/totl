@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { User } from "@supabase/supabase-js";
 import {
   Search,
@@ -68,7 +68,7 @@ export function AdminApplicationsClient({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { toast } = useToast();
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createSupabaseBrowser<Database>();
 
   // Filter applications based on search query and active tab
   useEffect(() => {
