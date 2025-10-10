@@ -48,9 +48,9 @@ export async function createTalentProfile(formData: FormData) {
   }
 
   // Extract form data
-  const bio = formData.get("bio") as string;
-  const skills = (formData.get("skills") as string).split(",").map((skill) => skill.trim());
-  const experienceYears = Number.parseInt(formData.get("experience_years") as string);
+  const experience = formData.get("bio") as string; // Using bio as experience description
+  const languages = (formData.get("skills") as string).split(",").map((skill) => skill.trim());
+  const age = Number.parseInt(formData.get("experience_years") as string);
   const portfolioUrl = formData.get("portfolio_url") as string;
 
   // Check if a talent profile already exists
@@ -67,9 +67,9 @@ export async function createTalentProfile(formData: FormData) {
     const { error: updateError } = await supabase
       .from("talent_profiles")
       .update({
-        bio,
-        skills,
-        experience_years: experienceYears,
+        experience,
+        languages,
+        age,
         portfolio_url: portfolioUrl,
       })
       .eq("user_id", session.user.id);
@@ -79,9 +79,11 @@ export async function createTalentProfile(formData: FormData) {
     // Create new profile
     const { error: insertError } = await supabase.from("talent_profiles").insert({
       user_id: session.user.id,
-      bio,
-      skills,
-      experience_years: experienceYears,
+      first_name: "", // Required field
+      last_name: "", // Required field
+      experience,
+      languages,
+      age,
       portfolio_url: portfolioUrl,
     });
 

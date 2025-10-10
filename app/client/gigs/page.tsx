@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import {
   Plus,
   MapPin,
@@ -25,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -37,9 +37,9 @@ interface Gig {
   compensation: string;
   category?: string;
   status?: string;
-  image_url?: string;
+  image_url?: string | null;
   created_at: string;
-  application_deadline?: string;
+  application_deadline?: string | null;
   applications_count?: number;
 }
 

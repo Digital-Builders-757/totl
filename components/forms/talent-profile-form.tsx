@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { AlertCircle, Save, User, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Define the talent profile interface based on database schema
 interface TalentProfile {
@@ -121,6 +121,15 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
     setServerError(null);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Get current user
       const {
         data: { user },

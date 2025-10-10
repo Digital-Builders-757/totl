@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 type UserRole = "talent" | "client" | "admin" | null;
 
@@ -26,6 +26,10 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
     setError(null);
 
     try {
+      if (!supabase) {
+        setError("Database connection not available");
+        return;
+      }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       router.push("/");

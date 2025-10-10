@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -16,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export default function VerificationPendingPage() {
   const searchParams = useSearchParams();
@@ -47,6 +47,15 @@ export default function VerificationPendingPage() {
     setIsSending(true);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.auth.resend({
         type: "signup",
         email: email,
@@ -162,7 +171,10 @@ export default function VerificationPendingPage() {
               </Button>
               <div className="text-center text-sm text-gray-500">
                 Already verified?{" "}
-                <Link href="/login" className="text-white font-semibold hover:text-gray-200 hover:underline border-b border-gray-400 hover:border-gray-200 transition-colors">
+                <Link
+                  href="/login"
+                  className="text-white font-semibold hover:text-gray-200 hover:underline border-b border-gray-400 hover:border-gray-200 transition-colors"
+                >
                   Sign in
                 </Link>
               </div>

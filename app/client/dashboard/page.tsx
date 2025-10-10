@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import {
   Calendar,
   Clock,
@@ -29,14 +28,15 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
-import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 
 // Force dynamic rendering to prevent build-time issues
@@ -48,8 +48,8 @@ interface ClientProfile {
   company_name: string;
   industry?: string | null;
   website?: string | null;
-  contact_name: string;
-  contact_email: string;
+  contact_name: string | null;
+  contact_email: string | null;
   contact_phone?: string | null;
   company_size?: string | null;
 }
@@ -59,7 +59,7 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
-  message?: string;
+  message: string | null;
   created_at: string;
   updated_at: string;
   gigs?: {
@@ -71,11 +71,11 @@ interface Application {
   talent_profiles?: {
     first_name: string;
     last_name: string;
-    location?: string;
-    experience?: string;
+    location: string | null;
+    experience: string | null;
   };
   profiles?: {
-    display_name: string;
+    display_name: string | null;
     email_verified: boolean;
     role: string;
   };
@@ -89,10 +89,10 @@ interface Gig {
   compensation: string;
   category?: string;
   status?: string;
-  image_url?: string;
+  image_url?: string | null;
   created_at: string;
   applications_count?: number;
-  application_deadline?: string;
+  application_deadline?: string | null;
 }
 
 export default function ClientDashboard() {
@@ -184,7 +184,7 @@ export default function ClientDashboard() {
         .select(
           `
           *,
-          gigs!inner(id, title, client_id),
+          gigs!inner(title, category, location, compensation),
           profiles!talent_id(display_name, email_verified, role)
         `
         )
@@ -194,28 +194,7 @@ export default function ClientDashboard() {
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);
       } else {
-        // Fetch talent profiles separately if needed
-        if (applicationsData && applicationsData.length > 0) {
-          const talentIds = applicationsData.map((app) => app.talent_id);
-          const { data: talentProfilesData, error: talentProfilesError } = await supabase
-            .from("talent_profiles")
-            .select("user_id, first_name, last_name, location, experience")
-            .in("user_id", talentIds);
-
-          if (!talentProfilesError && talentProfilesData) {
-            // Merge talent profiles with applications
-            const applicationsWithProfiles = applicationsData.map((app) => ({
-              ...app,
-              talent_profiles:
-                talentProfilesData.find((tp) => tp.user_id === app.talent_id) || null,
-            }));
-            setApplications(applicationsWithProfiles);
-          } else {
-            setApplications(applicationsData || []);
-          }
-        } else {
-          setApplications(applicationsData || []);
-        }
+        setApplications((applicationsData as Application[]) || []);
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);

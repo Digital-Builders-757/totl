@@ -24,14 +24,11 @@ export async function createProfile(formData: {
 
   const userId = session.user.id;
 
-  // Create the profile
+  // Create the profile with only the fields that exist in the profiles table
   const { error } = await supabase.from("profiles").insert({
     id: userId,
-    full_name: formData.full_name,
-    bio: formData.bio || null,
+    display_name: formData.full_name,
     role: formData.role,
-    location: formData.location || null,
-    website: formData.website || null,
   });
 
   if (error) {
@@ -39,10 +36,15 @@ export async function createProfile(formData: {
     throw new Error("Failed to create profile. Please try again.");
   }
 
-  // If role is talent, create a talent profile
+  // If role is talent, create a talent profile with bio and other fields
   if (formData.role === "talent") {
     const { error: talentError } = await supabase.from("talent_profiles").insert({
       user_id: userId,
+      first_name: formData.full_name.split(" ")[0] || "",
+      last_name: formData.full_name.split(" ").slice(1).join(" ") || "",
+      bio: formData.bio || null,
+      location: formData.location || null,
+      portfolio_url: formData.website || null,
     });
 
     if (talentError) {
@@ -55,6 +57,8 @@ export async function createProfile(formData: {
   if (formData.role === "client") {
     const { error: clientError } = await supabase.from("client_profiles").insert({
       user_id: userId,
+      company_name: formData.full_name, // Use full_name as company_name for clients
+      website: formData.website || null,
     });
 
     if (clientError) {

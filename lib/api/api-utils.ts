@@ -7,7 +7,7 @@ import { ZodSchema } from "zod";
 export function createErrorResponse(
   message: string,
   status: number = 500,
-  details?: any
+  details?: Record<string, unknown>
 ) {
   return NextResponse.json(
     {
@@ -21,7 +21,7 @@ export function createErrorResponse(
 /**
  * Standard API success response
  */
-export function createSuccessResponse(data?: any, status: number = 200) {
+export function createSuccessResponse(data?: Record<string, unknown>, status: number = 200) {
   return NextResponse.json(
     {
       success: true,
@@ -41,18 +41,14 @@ export async function validateRequestBody<T>(
   try {
     const body = await request.json();
     const result = schema.safeParse(body);
-    
+
     if (!result.success) {
       return {
         success: false,
-        error: createErrorResponse(
-          "Invalid input",
-          400,
-          result.error.errors
-        ),
+        error: createErrorResponse("Invalid input", 400, { validationErrors: result.error.errors }),
       };
     }
-    
+
     return { success: true, data: result.data };
   } catch (error) {
     return {
@@ -67,10 +63,10 @@ export async function validateRequestBody<T>(
  */
 export function handleApiError(error: unknown, context: string) {
   console.error(`Error in ${context}:`, error);
-  
+
   if (error instanceof Error) {
     return createErrorResponse(error.message, 500);
   }
-  
+
   return createErrorResponse("Unknown error", 500);
 }

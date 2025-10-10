@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -44,6 +44,15 @@ export function UpdatePasswordForm() {
     setIsSubmitting(true);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {

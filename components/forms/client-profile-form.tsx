@@ -1,7 +1,6 @@
 ﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { AlertCircle, Save, Building } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Import the generated type instead of defining our own
 import type { Database } from "@/types/supabase";
@@ -79,6 +79,15 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
     setError(null);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const {
         data: { user },
         error: authError,

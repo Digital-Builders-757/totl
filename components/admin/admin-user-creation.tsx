@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { AlertCircle } from "lucide-react";
 import type React from "react";
 
@@ -25,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export default function AdminUserCreation() {
   const [email, setEmail] = useState("");
@@ -45,6 +45,11 @@ export default function AdminUserCreation() {
     setSuccess(null);
 
     try {
+      if (!supabase) {
+        setError("Database connection not available");
+        return;
+      }
+
       // Try to create user with direct API call
       const { data, error } = await supabase.functions.invoke("create-user", {
         body: {

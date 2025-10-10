@@ -1,11 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import type { Database } from "@/types/supabase";
-import { notFound } from "next/navigation";
-import { SafeImage } from "@/components/ui/safe-image";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft, Mail, Phone, MapPin, Calendar, Star } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/ui/safe-image";
+import type { Database } from "@/types/supabase";
 
 interface TalentProfile {
   id: string;
@@ -70,9 +70,9 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
     } else {
       talent = data as TalentProfile;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Unexpected error fetching talent profile:", err);
-    error = err.message || "An unexpected error occurred.";
+    error = err instanceof Error ? err.message : "An unexpected error occurred.";
   }
 
   if (error || !talent) {
@@ -88,7 +88,10 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         {/* Back Button */}
         <div className="mb-6">
           <Link href="/talent">
-            <Button variant="outline" className="flex items-center border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+            <Button
+              variant="outline"
+              className="flex items-center border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Talent
             </Button>
@@ -243,19 +246,34 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
 
                   {/* Action Buttons */}
                   <div className="flex gap-4">
-                    <a href={`mailto:contact@thetotlagency.com?subject=Booking Inquiry for ${talent.first_name} ${talent.last_name}&body=Hi, I'm interested in booking ${talent.first_name} ${talent.last_name} for a project. Please provide more information.`} className="flex-1">
+                    <a
+                      href={`mailto:contact@thetotlagency.com?subject=Booking Inquiry for ${talent.first_name} ${talent.last_name}&body=Hi, I'm interested in booking ${talent.first_name} ${talent.last_name} for a project. Please provide more information.`}
+                      className="flex-1"
+                    >
                       <Button className="w-full bg-white text-black hover:bg-gray-200">
                         Contact Talent
                       </Button>
                     </a>
                     {talent.portfolio_url ? (
-                      <a href={talent.portfolio_url} target="_blank" rel="noopener noreferrer" className="flex-1">
-                        <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+                      <a
+                        href={talent.portfolio_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                        >
                           View Portfolio
                         </Button>
                       </a>
                     ) : (
-                      <Button variant="outline" className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50 flex-1" disabled>
+                      <Button
+                        variant="outline"
+                        className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50 flex-1"
+                        disabled
+                      >
                         View Portfolio
                       </Button>
                     )}

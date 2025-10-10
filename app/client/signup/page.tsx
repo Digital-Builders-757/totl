@@ -74,6 +74,16 @@ export default function ClientSignup() {
       }
 
       // Create client profile
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available. Please try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const user = (await supabase.auth.getUser()).data.user;
 
       if (user) {
@@ -104,8 +114,7 @@ export default function ClientSignup() {
         const { error: updateError } = await supabase
           .from("profiles")
           .update({
-            first_name: formData.firstName,
-            last_name: formData.lastName,
+            display_name: `${formData.firstName} ${formData.lastName}`,
             updated_at: new Date().toISOString(),
           })
           .eq("id", user.id);

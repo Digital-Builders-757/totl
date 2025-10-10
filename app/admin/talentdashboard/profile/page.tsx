@@ -69,7 +69,7 @@ export default function TalentProfilePage() {
 
   useEffect(() => {
     const fetchProfileData = async () => {
-      if (!user) return;
+      if (!user || !supabase) return;
 
       try {
         setIsLoading(true);
@@ -97,7 +97,7 @@ export default function TalentProfilePage() {
 
   const handleProfileUpdate = () => {
     // Refresh profile data after update
-    if (user) {
+    if (user && supabase) {
       setIsLoading(true);
       supabase
         .from("talent_profiles")

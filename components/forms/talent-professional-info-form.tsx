@@ -89,6 +89,15 @@ export default function TalentProfessionalInfoForm({
     setIsSubmitting(true);
 
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from("talent_profiles")
         .update({
