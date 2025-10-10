@@ -1,11 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, Star } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Star } from "lucide-react";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database } from "@/types/supabase";
 
 interface TalentProfile {
   id: string;
@@ -39,7 +39,7 @@ interface TalentProfilePageProps {
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { id } = await params;
   const cookieStore = await cookies();
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {

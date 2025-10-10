@@ -1,6 +1,6 @@
 ﻿import { Suspense } from "react";
-import AuthSchemaCheck from "@/components/auth/auth-schema-check";
 import DirectUserCreation from "@/components/admin/direct-user-creation";
+import AuthSchemaCheck from "@/components/auth/auth-schema-check";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DiagnosticPage() {

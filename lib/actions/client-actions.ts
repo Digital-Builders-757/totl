@@ -1,7 +1,6 @@
 ﻿"use server";
 
 import { createSupabaseActionClient } from "@/lib/supabase-client";
-import type { Database } from "@/types/supabase";
 
 type ClientApplicationData = {
   firstName: string;

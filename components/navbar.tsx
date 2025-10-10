@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ApplyAsTalentButton } from "@/components/ui/apply-as-talent-button";
+
 import { useAuth } from "@/components/auth/auth-provider";
+import { ApplyAsTalentButton } from "@/components/ui/apply-as-talent-button";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
@@ -38,13 +39,19 @@ export default function Navbar() {
   const isHomepage = pathname === "/";
 
   // Determine navbar background color based on scroll position and current page
-  const navbarBg = isScrolled ? "apple-glass shadow-lg shadow-white/10" : isHomepage ? "apple-glass" : "bg-black";
+  const navbarBg = isScrolled
+    ? "apple-glass shadow-lg shadow-white/10"
+    : isHomepage
+      ? "apple-glass"
+      : "bg-black";
 
   // Determine text color based on scroll position and current page
   const textColor = isScrolled || !isHomepage ? "text-white" : "text-white";
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBg} backdrop-blur-md`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBg} backdrop-blur-md`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -87,50 +94,50 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="relative group">
-                       <Button
-                         variant="ghost"
-                         className={`${textColor} hover:text-gray-300 font-medium transition-colors flex items-center`}
-                       >
-                         My Account
-                         <ChevronDown className="ml-1 h-4 w-4" />
-                       </Button>
-                       <div className="absolute right-0 mt-2 w-48 bg-black/95 rounded-md shadow-lg shadow-white/10 overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 backdrop-blur-sm border border-white/10">
-                         {userRole === "talent" && (
-                           <Link
-                             href="/admin/talent-dashboard"
-                             className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                           >
-                             Talent Dashboard
-                           </Link>
-                         )}
-                         {userRole === "client" && (
-                           <Link
-                             href="/admin/dashboard"
-                             className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                           >
-                             Client Dashboard
-                           </Link>
-                         )}
-                         {userRole === "admin" && (
-                           <Link
-                             href="/admin/applications"
-                             className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                           >
-                             Admin Dashboard
-                           </Link>
-                         )}
-                         <Link
-                           href="/settings"
-                           className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                         >
-                           Profile Settings
-                         </Link>
-                         <button
-                           onClick={handleSignOut}
-                           className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                           >
-                           Sign Out
-                         </button>
+                <Button
+                  variant="ghost"
+                  className={`${textColor} hover:text-gray-300 font-medium transition-colors flex items-center`}
+                >
+                  My Account
+                  <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+                <div className="absolute right-0 mt-2 w-48 bg-black/95 rounded-md shadow-lg shadow-white/10 overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 backdrop-blur-sm border border-white/10">
+                  {userRole === "talent" && (
+                    <Link
+                      href="/admin/talent-dashboard"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                    >
+                      Talent Dashboard
+                    </Link>
+                  )}
+                  {userRole === "client" && (
+                    <Link
+                      href="/admin/dashboard"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                    >
+                      Client Dashboard
+                    </Link>
+                  )}
+                  {userRole === "admin" && (
+                    <Link
+                      href="/admin/applications"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <Link
+                    href="/settings"
+                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                  >
+                    Profile Settings
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                  >
+                    Sign Out
+                  </button>
                 </div>
               </div>
             ) : (

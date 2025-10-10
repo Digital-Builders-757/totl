@@ -1,7 +1,6 @@
 ﻿"use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
 import { createSupabaseActionClient } from "@/lib/supabase-client";
 
 export async function updateProfile(formData: FormData) {

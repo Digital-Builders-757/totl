@@ -1,5 +1,5 @@
-﻿import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
+
 import TalentProfileForm from "@/components/forms/talent-profile-form";
 import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
 

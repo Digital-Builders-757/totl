@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/supabase";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;

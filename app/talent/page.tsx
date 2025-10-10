@@ -1,9 +1,8 @@
 ﻿import { createClient } from "@supabase/supabase-js";
-import { Search, ArrowRight, AlertCircle, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { SafeImage } from "@/components/ui/safe-image";
+import { AlertCircle, Users } from "lucide-react";
+
 import TalentClient from "./talent-client";
+import { Button } from "@/components/ui/button";
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";
@@ -33,7 +32,7 @@ interface TalentProfile {
 
 async function getTalentProfiles(): Promise<TalentProfile[]> {
   console.log("Server-side: Fetching talent profiles...");
-  
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -64,36 +63,42 @@ export default async function TalentPage() {
     error = err instanceof Error ? err.message : "Unknown error";
   }
 
-         return (
-           <div className="min-h-screen bg-seamless-primary text-white pt-20">
-             <div className="container mx-auto px-4 py-16">
-               {/* Header */}
-               <div className="text-center mb-20 animate-apple-fade-in">
-                 <h1 className="text-6xl lg:text-7xl font-bold text-white mb-8 font-display">
-                   Discover Amazing Talent
-                 </h1>
-                 <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                   Browse our curated collection of professional models and talent ready for your next project
-                 </p>
-                 <div className="w-40 h-1 bg-gradient-to-r from-white to-gray-400 mx-auto rounded-full mt-8"></div>
-               </div>
+  return (
+    <div className="min-h-screen bg-seamless-primary text-white pt-20">
+      <div className="container mx-auto px-4 py-16">
+        {/* Header */}
+        <div className="text-center mb-20 animate-apple-fade-in">
+          <h1 className="text-6xl lg:text-7xl font-bold text-white mb-8 font-display">
+            Discover Amazing Talent
+          </h1>
+          <p className="text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
+            Browse our curated collection of professional models and talent ready for your next
+            project
+          </p>
+          <div className="w-40 h-1 bg-gradient-to-r from-white to-gray-400 mx-auto rounded-full mt-8"></div>
+        </div>
 
-               {error ? (
-                 <div className="text-center py-12">
-                   <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-                   <h2 className="text-xl font-semibold text-white mb-2">Error Loading Talent</h2>
-                   <p className="text-gray-300 mb-4">{error}</p>
-                   <Button onClick={() => window.location.reload()} className="bg-white text-black hover:bg-gray-200">Try Again</Button>
-                 </div>
-               ) : talent.length === 0 ? (
-                 <div className="text-center py-12">
-                   <Users className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                   <h2 className="text-xl font-semibold text-white mb-2">No Talent Found</h2>
-                   <p className="text-gray-300">No talent profiles available at the moment.</p>
-                 </div>
-               ) : (
-                 <TalentClient initialTalent={talent} />
-               )}
+        {error ? (
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Error Loading Talent</h2>
+            <p className="text-gray-300 mb-4">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-white text-black hover:bg-gray-200"
+            >
+              Try Again
+            </Button>
+          </div>
+        ) : talent.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">No Talent Found</h2>
+            <p className="text-gray-300">No talent profiles available at the moment.</p>
+          </div>
+        ) : (
+          <TalentClient initialTalent={talent} />
+        )}
       </div>
     </div>
   );

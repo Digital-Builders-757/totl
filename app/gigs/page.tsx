@@ -1,12 +1,12 @@
 ﻿export const dynamic = "force-dynamic";
 
 import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
-
 import Link from "next/link";
-import { SafeImage } from "@/components/ui/safe-image";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export default async function GigsPage() {
@@ -38,7 +38,9 @@ export default async function GigsPage() {
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 text-center">
-              <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">Find Gigs</h1>
+              <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
+                Find Gigs
+              </h1>
               <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
                 Browse through available casting opportunities and gigs. Filter by category,
                 location, and more to find the perfect match for your talents.
@@ -51,9 +53,11 @@ export default async function GigsPage() {
                     <Search className="h-12 w-12 text-red-400" />
                   </div>
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">Unable to Load Gigs</h3>
+                <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
+                  Unable to Load Gigs
+                </h3>
                 <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
-                  We're experiencing technical difficulties. Please try again later.
+                  We&apos;re experiencing technical difficulties. Please try again later.
                 </p>
                 <Button className="apple-button px-8 py-4 text-lg animate-apple-glow">
                   Try Again
@@ -73,7 +77,9 @@ export default async function GigsPage() {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 text-center">
-            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">Find Gigs</h1>
+            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
+              Find Gigs
+            </h1>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
               Browse through available casting opportunities and gigs. Filter by category, location,
               and more to find the perfect match for your talents.
@@ -91,7 +97,10 @@ export default async function GigsPage() {
                   />
                 </div>
                 <div className="flex gap-4">
-                  <Button variant="outline" className="apple-glass px-8 py-6 text-lg border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+                  <Button
+                    variant="outline"
+                    className="apple-glass px-8 py-6 text-lg border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                  >
                     <Filter size={20} className="mr-2" />
                     Filters
                   </Button>
@@ -109,7 +118,9 @@ export default async function GigsPage() {
                   <div className="w-24 h-24 mx-auto bg-white/5 rounded-full flex items-center justify-center mb-6">
                     <Search className="h-12 w-12 text-white" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">No Active Gigs</h3>
+                  <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
+                    No Active Gigs
+                  </h3>
                   <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
                     There are currently no active gigs available. Check back later for new
                     opportunities!
@@ -120,7 +131,10 @@ export default async function GigsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {gigsList.map((gig) => (
-                <div key={gig.id} className="bg-gray-900 rounded-xl shadow-sm overflow-hidden group border border-gray-700">
+                <div
+                  key={gig.id}
+                  className="bg-gray-900 rounded-xl shadow-sm overflow-hidden group border border-gray-700"
+                >
                   <div className="relative aspect-[4/3]">
                     <SafeImage
                       src={gig.image_url || ""}
@@ -142,7 +156,10 @@ export default async function GigsPage() {
                       <h3 className="text-lg font-semibold text-white group-hover:text-gray-300 transition-colors">
                         {gig.title}
                       </h3>
-                      <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20">
+                      <Badge
+                        variant="secondary"
+                        className="text-xs bg-white/10 text-white border-white/20"
+                      >
                         {gig.category}
                       </Badge>
                     </div>

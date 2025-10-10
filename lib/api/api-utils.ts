@@ -50,7 +50,7 @@ export async function validateRequestBody<T>(
     }
 
     return { success: true, data: result.data };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: createErrorResponse("Invalid JSON", 400),

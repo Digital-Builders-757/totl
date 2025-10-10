@@ -211,7 +211,7 @@ export default function HomePage() {
               <span className="apple-text-gradient"> Process</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              From discovery to booking, we've streamlined the entire process to make talent
+              From discovery to booking, we&apos;ve streamlined the entire process to make talent
               acquisition effortless and efficient.
             </p>
           </div>
