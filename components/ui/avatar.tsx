@@ -1,6 +1,6 @@
 ﻿import { User } from "lucide-react";
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/utils";
 
 // Standard shadcn/ui Avatar component
 const Avatar = React.forwardRef<React.ElementRef<"div">, React.HTMLAttributes<HTMLDivElement>>(

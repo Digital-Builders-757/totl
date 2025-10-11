@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Plus,
   MapPin,
@@ -18,13 +17,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -37,9 +37,9 @@ interface Gig {
   compensation: string;
   category?: string;
   status?: string;
-  image_url?: string;
+  image_url?: string | null;
   created_at: string;
-  application_deadline?: string;
+  application_deadline?: string | null;
   applications_count?: number;
 }
 
@@ -58,7 +58,7 @@ export default function ClientGigsPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   const fetchGigs = useCallback(async () => {
     if (!supabase || !user) return;

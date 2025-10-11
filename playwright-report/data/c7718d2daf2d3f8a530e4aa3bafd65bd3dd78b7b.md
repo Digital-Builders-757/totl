@@ -1,0 +1,43 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - navigation [ref=e7]:
+        - link "Gigs" [ref=e8]:
+          - /url: /gigs
+          - text: Gigs
+        - link "Talent" [ref=e9]:
+          - /url: /talent
+          - text: Talent
+        - link "About" [ref=e10]:
+          - /url: /about
+          - text: About
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12]:
+          - /url: /login
+          - button "Sign In" [ref=e13] [cursor=pointer]
+        - button "Apply as Talent" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - text: Apply as Talent
+  - generic [ref=e19]:
+    - link "Back to login" [ref=e20]:
+      - /url: /login
+      - img [ref=e21]
+      - text: Back to login
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - img "TOTL Agency" [ref=e26]
+        - heading "Reset Password" [level=1] [ref=e27]
+        - paragraph [ref=e28]: Enter your email address and we'll send you a link to reset your password.
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - text: Email
+          - textbox "Email" [ref=e31]:
+            - /placeholder: Enter your email
+        - button "Send Reset Link" [ref=e32] [cursor=pointer]
+```

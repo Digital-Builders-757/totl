@@ -1,14 +1,14 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { FileText, Clock, MapPin, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
-  message?: string;
+  message: string | null;
   created_at: string;
   updated_at: string;
   gigs?: {
@@ -28,7 +28,7 @@ interface Application {
     compensation: string;
   };
   profiles?: {
-    display_name: string;
+    display_name: string | null;
     email_verified: boolean;
     role: string;
   };
@@ -50,7 +50,7 @@ export default function ClientApplicationsPage() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   const fetchApplications = useCallback(async () => {
     if (!supabase || !user) return;
@@ -61,7 +61,7 @@ export default function ClientApplicationsPage() {
         .select(
           `
           *,
-          gigs!inner(client_id),
+          gigs!inner(title, category, location, compensation),
           profiles!talent_id(display_name, email_verified, role)
         `
         )
@@ -72,7 +72,7 @@ export default function ClientApplicationsPage() {
         console.error("Error fetching applications:", fetchError);
         setError("Failed to load applications");
       } else {
-        setApplications(data || []);
+        setApplications((data as Application[]) || []);
       }
     } catch (err) {
       console.error("Error in fetchApplications:", err);

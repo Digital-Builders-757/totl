@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fix workspace root warning
+  outputFileTracingRoot: process.cwd(),
+  
   // Temporarily keep ignores - will fix type issues in separate PR
   eslint: {
     ignoreDuringBuilds: true,
@@ -14,6 +17,21 @@ const nextConfig = {
         protocol: 'https', 
         hostname: '**.supabase.co', 
         pathname: '/storage/v1/object/**' 
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**'
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+        pathname: '/**'
       },
     ],
     // Optimize avatar images

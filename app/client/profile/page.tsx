@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
-import ClientProfileForm from "@/components/client-profile-form";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import ClientProfileForm from "@/components/forms/client-profile-form";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export const dynamic = "force-dynamic";
 

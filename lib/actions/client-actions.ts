@@ -1,8 +1,6 @@
 ﻿"use server";
 
-import { createServerActionClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import type { Database } from "@/types/supabase";
+import { createSupabaseActionClient } from "@/lib/supabase-client";
 
 type ClientApplicationData = {
   firstName: string;
@@ -17,7 +15,7 @@ type ClientApplicationData = {
 };
 
 export async function submitClientApplication(data: ClientApplicationData) {
-  const supabase = createServerActionClient<Database>({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   try {
     // Insert the application into the client_applications table
@@ -51,7 +49,7 @@ export async function submitClientApplication(data: ClientApplicationData) {
 }
 
 export async function approveClientApplication(applicationId: string, adminNotes?: string) {
-  const supabase = createServerActionClient<Database>({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   try {
     // First, check if the current user is an admin
@@ -97,7 +95,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
 }
 
 export async function rejectClientApplication(applicationId: string, adminNotes?: string) {
-  const supabase = createServerActionClient<Database>({ cookies });
+  const supabase = await createSupabaseActionClient();
 
   try {
     // First, check if the current user is an admin

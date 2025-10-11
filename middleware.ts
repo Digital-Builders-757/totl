@@ -24,6 +24,11 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // Allow public access to individual talent profiles
+  if (path.startsWith("/talent/") && path !== "/talent/signup" && path !== "/talent/dashboard") {
+    return res;
+  }
+
   // Create Supabase client with proper cookie handling
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

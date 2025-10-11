@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import type React from "react";
 import "./globals.css";
-import { AuthProvider } from "@/components/auth-provider";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import Navbar from "@/components/navbar";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

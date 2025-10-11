@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type React from "react";
 import { useState, useEffect } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,24 +111,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
+    <div className="min-h-screen bg-black pt-40">
       <div className="container mx-auto px-4 py-12">
-        <Link href="/" className="inline-flex items-center text-gray-600 hover:text-black mb-8">
+        <Link href="/" className="inline-flex items-center text-gray-300 hover:text-white mb-8">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
 
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="p-8">
             <div className="text-center mb-8">
               <Image
-                src="/images/totl-logo-transparent.png"
+                src="/images/totl_logo_black.png"
                 alt="TOTL Agency"
-                width={120}
-                height={50}
+                width={180}
+                height={75}
                 className="mx-auto mb-6"
               />
-              <h1 className="text-2xl font-bold mb-2">Sign In</h1>
+              <h1 className="text-2xl font-bold mb-2 text-black">Sign In</h1>
               <p className="text-gray-600">Sign in to access your TOTL Agency account</p>
             </div>
 
@@ -150,7 +150,7 @@ export default function Login() {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="email" className={formErrors.email ? "text-red-500" : ""}>
+                <Label htmlFor="email" className={`text-black ${formErrors.email ? "text-red-500" : ""}`}>
                   Email
                 </Label>
                 <Input
@@ -176,7 +176,7 @@ export default function Login() {
                     }
                   }}
                   required
-                  className={formErrors.email ? "border-red-500" : ""}
+                  className={`bg-white text-black border-gray-300 focus:border-black focus:ring-black ${formErrors.email ? "border-red-500" : ""}`}
                 />
                 {formErrors.email && (
                   <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
@@ -185,7 +185,7 @@ export default function Login() {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className={formErrors.password ? "text-red-500" : ""}>
+                  <Label htmlFor="password" className={`text-black ${formErrors.password ? "text-red-500" : ""}`}>
                     Password
                   </Label>
                   <Link href="/reset-password" className="text-sm text-gray-500 hover:text-black">
@@ -216,7 +216,7 @@ export default function Login() {
                       }
                     }}
                     required
-                    className={formErrors.password ? "border-red-500" : ""}
+                    className={`bg-white text-black border-gray-300 focus:border-black focus:ring-black ${formErrors.password ? "border-red-500" : ""}`}
                   />
                   <button
                     type="button"
@@ -233,7 +233,7 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-black text-white hover:bg-black/90"
+                className="w-full bg-black text-white hover:bg-gray-800"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign In"}

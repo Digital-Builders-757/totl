@@ -90,7 +90,7 @@ export function OnboardingForm() {
 
       // Redirect based on role
       if (data.role === "talent") {
-        router.push("/admin/talentdashboard");
+        router.push("/admin/talent-dashboard");
       } else {
         router.push("/admin/dashboard");
       }

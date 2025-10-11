@@ -1,4 +1,4 @@
-﻿import AdminUserCreation from "@/components/admin-user-creation";
+﻿import AdminUserCreation from "@/components/admin/admin-user-creation";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";

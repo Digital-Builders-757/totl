@@ -5,24 +5,29 @@ import { Button } from "@/components/ui/button";
 
 export default function AboutPage() {
   return (
-    <main className="pt-20">
+    <main className="pt-20 bg-seamless-primary">
       {/* Hero Section */}
       <section className="relative bg-black text-white">
-        <div className="absolute inset-0 z-0 opacity-50">
-          <Image
-            src="/images/totl-logo.png"
-            alt="TOTL Agency Team"
-            fill
-            className="object-cover"
-            priority
-          />
+        <div className="absolute inset-0 z-0 opacity-20">
+          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-20">
+               <Image
+                 src="/images/solo_logo.png"
+                 alt="TOTL Agency Logo"
+                 width={800}
+                 height={800}
+                 className="object-contain opacity-30"
+                 priority
+               />
+          </div>
         </div>
         <div className="relative z-10 container mx-auto px-4 py-32 md:py-40">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">About TOTL Agency</h1>
-          <p className="text-xl md:text-2xl max-w-2xl">
-            Representing exceptional modeling talent worldwide. We rise above the rest to connect
-            the right talent with the right opportunities.
-          </p>
+          <div className="max-w-3xl">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white">About TOTL Agency</h1>
+            <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">
+              Representing exceptional modeling talent worldwide. We rise above the rest to connect
+              the right talent with the right opportunities.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -31,19 +36,19 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="md:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Story</h2>
-              <p className="text-gray-700 mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-black">Our Story</h2>
+              <p className="text-black mb-4">
                 Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
                 industry. We recognized a gap between exceptional talent and quality opportunities,
                 and set out to bridge that divide with integrity and innovation.
               </p>
-              <p className="text-gray-700 mb-4">
+              <p className="text-black mb-4">
                 Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
                 aspect of our business. We believe in fostering genuine relationships with both our
                 talent and clients, creating a supportive community rather than just a transactional
                 agency.
               </p>
-              <p className="text-gray-700">
+              <p className="text-black">
                 Today, we&rsquo;re proud to represent diverse talent across various modeling
                 specialties, connecting them with brands that value authenticity and creativity as
                 much as we do.
@@ -64,7 +69,7 @@ export default function AboutPage() {
       {/* Our Mission Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12">Our Mission</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Our Mission</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-sm">
               <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
@@ -83,8 +88,8 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4">Empower Talent</h3>
-              <p className="text-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-black">Empower Talent</h3>
+              <p className="text-black">
                 We empower models to take control of their careers through education, mentorship,
                 and transparent business practices.
               </p>
@@ -106,8 +111,8 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4">Foster Diversity</h3>
-              <p className="text-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-black">Foster Diversity</h3>
+              <p className="text-black">
                 We celebrate diversity in all forms, actively working to create inclusive
                 opportunities in the modeling industry.
               </p>
@@ -129,8 +134,8 @@ export default function AboutPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4">Elevate Standards</h3>
-              <p className="text-gray-700">
+              <h3 className="text-xl font-bold mb-4 text-black">Elevate Standards</h3>
+              <p className="text-black">
                 We&rsquo;re committed to raising industry standards through ethical practices, fair
                 compensation, and professional development.
               </p>
@@ -142,7 +147,7 @@ export default function AboutPage() {
       {/* Services Section */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Our Services</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-black">Our Services</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-sm flex">
               <div className="mr-6">
@@ -164,8 +169,8 @@ export default function AboutPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2">Talent Representation</h3>
-                <p className="text-gray-700">
+                <h3 className="text-xl font-bold mb-2 text-black">Talent Representation</h3>
+                <p className="text-black">
                   We provide comprehensive representation for models, including portfolio
                   development, career guidance, and booking management.
                 </p>
@@ -191,8 +196,8 @@ export default function AboutPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2">Client Casting</h3>
-                <p className="text-gray-700">
+                <h3 className="text-xl font-bold mb-2 text-black">Client Casting</h3>
+                <p className="text-black">
                   We help brands find the perfect talent for their campaigns, events, and
                   promotional activities.
                 </p>
@@ -224,8 +229,8 @@ export default function AboutPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2">Portfolio Development</h3>
-                <p className="text-gray-700">
+                <h3 className="text-xl font-bold mb-2 text-black">Portfolio Development</h3>
+                <p className="text-black">
                   We offer professional photoshoot coordination and portfolio curation to showcase
                   our talent&rsquo;s unique qualities.
                 </p>
@@ -251,8 +256,8 @@ export default function AboutPage() {
                 </div>
               </div>
               <div>
-                <h3 className="text-xl font-bold mb-2">Event Management</h3>
-                <p className="text-gray-700">
+                <h3 className="text-xl font-bold mb-2 text-black">Event Management</h3>
+                <p className="text-black">
                   We coordinate fashion shows, promotional events, and brand activations with our
                   roster of professional models.
                 </p>
@@ -327,7 +332,7 @@ export default function AboutPage() {
                   <input
                     type="text"
                     id="name"
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Your name"
                   />
                 </div>
@@ -338,7 +343,7 @@ export default function AboutPage() {
                   <input
                     type="email"
                     id="email"
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Your email"
                   />
                 </div>
@@ -349,7 +354,7 @@ export default function AboutPage() {
                   <input
                     type="text"
                     id="subject"
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Subject"
                   />
                 </div>
@@ -360,7 +365,7 @@ export default function AboutPage() {
                   <textarea
                     id="message"
                     rows={5}
-                    className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white"
+                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                     placeholder="Your message"
                   ></textarea>
                 </div>
@@ -381,7 +386,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/talent/signup">
-              <Button size="lg">Apply as Talent</Button>
+              <Button size="lg" className="bg-black text-white hover:bg-gray-800">Apply as Talent</Button>
             </Link>
             <Link href="/client/apply">
               <Button size="lg" variant="outline">

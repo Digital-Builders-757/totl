@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 type UserRole = "talent" | "client" | "admin" | null;
 
@@ -19,13 +19,17 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createSupabaseBrowser();
 
   const handleSignOut = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
+      if (!supabase) {
+        setError("Database connection not available");
+        return;
+      }
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       router.push("/");

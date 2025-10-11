@@ -1,7 +1,7 @@
 ﻿import { NextResponse } from "next/server";
-import { sendEmail, logEmailSent } from "@/lib/email-service";
-import { generatePasswordResetEmail } from "@/lib/email-templates";
-import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { sendEmail, logEmailSent } from "@/lib/services/email-service";
+import { generatePasswordResetEmail } from "@/lib/services/email-templates";
+import { createSupabaseAdminClient } from "@/lib/supabase/supabase-admin-client";
 
 export async function POST(request: Request) {
   try {

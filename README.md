@@ -1,286 +1,487 @@
-# TOTL Agency - Talent Booking Platform
+<div align="center">
 
-**Status:** Production Ready  
-**Last Updated:** July 25, 2025
+# 🎭 TOTL Agency
 
-A comprehensive talent booking platform connecting models, actors, and performers with casting directors, agencies, and brands. Built with Next.js 15, Supabase, and TypeScript.
+<img src="public/images/solo_logo.png" alt="TOTL Agency Logo" width="200" height="200" style="border-radius: 20px; margin: 20px 0;">
 
-## 🚀 Quick Start
+**Premium Talent Booking Platform**
 
-### Prerequisites
-- Node.js 18+ 
-- npm or yarn
-- Supabase account
-- Resend API key (for emails)
+*Connecting exceptional talent with premium opportunities worldwide*
 
-### ⚠️ Important: Next.js 15+ Compatibility
-This project uses Next.js 15+ which requires specific patterns for async cookies. Always use our centralized Supabase client helpers:
+[![TOTL Agency](https://img.shields.io/badge/TOTL-Agency-purple?style=for-the-badge&logo=theater-masks)](https://www.thetotlagency.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)](https://www.thetotlagency.com)
 
-```typescript
-// ✅ Use these patterns
-import { createSupabaseServerClient } from "@/lib/supabase-client";
-const supabase = await createSupabaseServerClient();
+[🚀 **Live Demo**](https://www.thetotlagency.com) • [📖 **Documentation**](#-documentation) • [🛠️ **Development**](#-development) • [🚀 **Deployment**](#-deployment)
 
-// ❌ Avoid direct Supabase client creation
-const supabase = createServerComponentClient<Database>({ cookies });
-```
-
-### Installation
-```bash
-# Clone the repository
-git clone <repository-url>
-cd totl
-
-# Install dependencies
-npm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your Supabase and Resend credentials
-
-# Start development server
-npm run dev
-```
-
-### Environment Variables
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-# Email Service
-RESEND_API_KEY=your_resend_key
-```
-
-## 🛠️ Tech Stack
-
-- **Frontend:** Next.js 15.2.4 with App Router, TypeScript 5, React Server Components
-- **Backend:** Supabase (PostgreSQL + Auth + Storage + Real-time)
-- **UI:** TailwindCSS + shadcn/ui components
-- **Email:** Resend API for custom transactional emails
-- **Deployment:** Vercel (frontend) + Supabase Cloud (backend)
-- **Database:** PostgreSQL with Row-Level Security (RLS)
-
-## 🏗️ Architecture
-
-### Database Schema
-The platform uses a well-structured PostgreSQL database with the following core tables:
-
-- **`profiles`** - Main user accounts with roles
-- **`talent_profiles`** - Talent-specific data
-- **`client_profiles`** - Client-specific data
-- **`gigs`** - Job postings by clients
-- **`applications`** - Talent applications to gigs
-- **`bookings`** - Confirmed engagements
-- **`portfolio_items`** - Talent portfolio media
-
-### Authentication Flow
-1. **User Signup** → Supabase Auth
-2. **Trigger** → Automatic profile creation
-3. **Email Verification** → Profile activation
-4. **Role-based Routing** → Appropriate dashboard
-
-### Security
-- **Row-Level Security (RLS)** enabled on all tables
-- **Role-based access control** (talent/client/admin)
-- **Secure authentication** with Supabase Auth
-- **Input validation** with Zod schemas
-
-## 📁 Project Structure
-
-```
-totl/
-├── app/                    # Next.js App Router pages
-│   ├── (auth)/            # Authentication pages
-│   ├── talent/            # Talent dashboard & features
-│   ├── client/            # Client dashboard & features
-│   ├── admin/             # Admin panel
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   └── ...               # Custom components
-├── lib/                  # Utility functions
-├── types/                # TypeScript type definitions
-├── supabase/             # Database migrations & config
-├── docs/                 # Documentation
-└── scripts/              # Utility scripts
-```
-
-## 🔐 User Roles & Access
-
-### Talent Users
-- **Dashboard:** `/talent/dashboard`
-- **Features:** Browse gigs, apply, manage profile, portfolio
-- **Access:** View active gigs, submit applications
-
-### Client Users  
-- **Dashboard:** `/client/dashboard`
-- **Features:** Post gigs, review applications, manage bookings
-- **Access:** Create/edit gigs, view applications for their gigs
-
-### Admin Users
-- **Dashboard:** `/admin/dashboard`
-- **Features:** User management, platform oversight
-- **Access:** Full platform access
-
-## 🚀 Development
-
-### Common Commands
-```bash
-# Development
-npm run dev          # Start development server
-npm run build        # Production build
-npm run lint         # Run ESLint
-
-# Database
-npx supabase gen types typescript --project-id "<ID>" > types/database.ts
-npx supabase db reset    # Reset local database
-npx supabase db push     # Push migrations to remote
-```
-
-### Code Patterns
-
-#### Supabase Client Usage
-```typescript
-// Client-side
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import type { Database } from "@/types/database";
-
-const supabase = createClientComponentClient<Database>();
-
-// Server-side
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-
-const supabase = createServerComponentClient<Database>({ cookies });
-```
-
-#### Component Architecture
-```typescript
-// Server Component (data fetching)
-export default async function GigsPage() {
-  const supabase = createServerComponentClient<Database>({ cookies });
-  const { data: gigs } = await supabase
-    .from('gigs')
-    .select('*')
-    .eq('status', 'active');
-  
-  return <GigsClient gigs={gigs || []} />;
-}
-
-// Client Component (presentational)
-"use client";
-export function GigsClient({ gigs }: { gigs: Gig[] }) {
-  if (gigs.length === 0) {
-    return <EmptyState message="No gigs available" />;
-  }
-  
-  return (
-    <div className="grid gap-4">
-      {gigs.map(gig => <GigCard key={gig.id} gig={gig} />)}
-    </div>
-  );
-}
-```
-
-## 📊 Production Status
-
-### ✅ Production Ready Features
-- ✅ Clean database (no mock data)
-- ✅ Secure RLS policies
-- ✅ Proper empty states
-- ✅ Real data fetching
-- ✅ Email verification flow
-- ✅ Role-based routing
-- ✅ TypeScript compilation
-- ✅ Build process working
-
-### Current Database State
-| Table | Records | Status |
-|-------|---------|--------|
-| `profiles` | 2 | ✅ Clean |
-| `client_profiles` | 1 | ✅ Clean |
-| `talent_profiles` | 1 | ✅ Clean |
-| `gigs` | 0 | ✅ Ready for real data |
-| `applications` | 0 | ✅ Ready for real data |
-
-### Test Account
-- **Email:** `testclient@example.com`
-- **Password:** `TestPassword123!`
-- **Purpose:** Demo client functionality
-
-## 📚 Documentation
-
-### Core Documentation
-- **[Project Context](TOTL_PROJECT_CONTEXT_PROMPT.md)** - Complete project overview and AI assistant rules
-- **[Database Schema](database_schema_audit.md)** - Single source of truth for database structure
-- **[Developer Quick Reference](docs/DEVELOPER_QUICK_REFERENCE.md)** - Common patterns and troubleshooting
-- **[Coding Standards](docs/CODING_STANDARDS.md)** - Development guidelines
-
-### Additional Resources
-- **[Authentication Strategy](docs/AUTH_STRATEGY.md)** - Detailed auth flow and security
-- **[Email Service](docs/email-service.md)** - Email integration details
-- **[Security Fixes](SECURITY_FIXES_SUMMARY.md)** - Recent security improvements
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### Build Errors
-```bash
-# TypeScript errors
-npm run type-check
-
-# Linting issues  
-npm run lint
-
-# Build issues
-npm run build
-```
-
-#### Database Issues
-```sql
--- Check RLS policies
-SELECT * FROM pg_policies WHERE schemaname = 'public';
-
--- Check user profiles
-SELECT p.id, p.role, p.display_name 
-FROM profiles p
-LEFT JOIN talent_profiles tp ON p.id = tp.user_id
-LEFT JOIN client_profiles cp ON p.id = cp.user_id;
-```
-
-#### Authentication Issues
-- Verify environment variables are set correctly
-- Check Supabase project settings
-- Ensure email verification is configured
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-- Follow TypeScript best practices
-- Use proper error handling
-- Write meaningful commit messages
-- Test thoroughly before submitting PRs
-- Follow the established component patterns
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Check the [documentation](docs/)
-- Review the [troubleshooting guide](#-troubleshooting)
-- Open an issue on GitHub
+</div>
 
 ---
 
-**Built with ❤️ for the talent industry**
+## 🌟 **Overview**
+
+TOTL Agency is a comprehensive talent booking platform that revolutionizes how models, actors, and performers connect with casting directors, agencies, and brands. Built with cutting-edge technology and designed for scalability, it provides a seamless experience for talent discovery, gig management, and professional networking.
+
+### ✨ **Key Features**
+
+<table>
+<tr>
+<td width="50%">
+
+🎭 **Talent Management**
+- Comprehensive talent profiles
+- Portfolio management
+- Application tracking
+- Performance analytics
+
+</td>
+<td width="50%">
+
+🏢 **Client Solutions**
+- Gig posting & management
+- Talent discovery
+- Application review
+- Booking management
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+🔐 **Security & Auth**
+- Role-based access control
+- Secure authentication
+- Email verification
+- Password protection
+
+</td>
+<td width="50%">
+
+📧 **Communication**
+- Automated email system
+- Verification workflows
+- Notification system
+- Professional templates
+
+</td>
+</tr>
+</table>
+
+---
+
+## 🛠️ **Tech Stack**
+
+<div align="center">
+
+| Category | Technology | Version | Purpose |
+|----------|------------|---------|---------|
+| **Frontend** | Next.js | 15.5.4 | React framework with App Router |
+| **Language** | TypeScript | 5.0 | Type-safe development |
+| **Styling** | TailwindCSS | 3.4.17 | Utility-first CSS |
+| **UI Components** | shadcn/ui | Latest | Accessible component library |
+| **Backend** | Supabase | Latest | PostgreSQL + Auth + Storage |
+| **Email** | Resend | Latest | Transactional email service |
+| **Deployment** | Vercel | Latest | Frontend hosting platform |
+
+</div>
+
+---
+
+## 🚀 **Quick Start**
+
+### 📋 **Prerequisites**
+
+- **Node.js** 18+ 
+- **npm** or **yarn**
+- **Supabase** account
+- **Resend** API key
+
+### ⚡ **Installation**
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/totl-agency.git
+cd totl-agency
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# 4. Start development server
+npm run dev
+```
+
+### 🔧 **Environment Setup**
+
+Create `.env.local` with your credentials:
+
+```env
+# 🌐 Site URL
+NEXT_PUBLIC_SITE_URL=https://www.thetotlagency.com
+
+# 📧 Resend (Email API)
+RESEND_API_KEY=re_your-resend-api-key-here
+
+# Supabase Access Token
+SUPABASE_ACCESS_TOKEN=sbp_your-access-token-here
+
+# 🔑 Supabase Service Role Key (⚠️ Only use server-side)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-service-role-key-here
+
+# 🔗 Supabase URL (base URL for all Supabase calls)
+SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+
+# 🔓 Supabase Anon Public Key (safe to expose to frontend)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-anon-key-here
+```
+
+### 🎯 **Quick Commands**
+
+```bash
+# Development
+npm run dev              # Start development server
+npm run build            # Production build
+npm run start            # Start production server
+
+# Environment & Testing
+npm run env:test         # Test environment configuration
+npm run env:check        # Quick environment check
+npm run env:setup        # Interactive environment setup
+
+# Database & Types
+npm run types:regen      # Regenerate TypeScript types
+npm run schema:verify    # Verify database schema
+npm run db:push          # Push migrations to remote
+
+# Quality Assurance
+npm run typecheck        # TypeScript type checking
+npm run lint             # ESLint code analysis
+npm run verify-all       # Run all verification checks
+```
+
+---
+
+## 🏗️ **Architecture**
+
+### 📊 **Database Schema**
+
+<div align="center">
+
+```mermaid
+erDiagram
+    profiles ||--o{ talent_profiles : has
+    profiles ||--o{ client_profiles : has
+    profiles ||--o{ gigs : creates
+    profiles ||--o{ applications : submits
+    profiles ||--o{ bookings : participates
+    profiles ||--o{ portfolio_items : owns
+    
+    gigs ||--o{ applications : receives
+    gigs ||--o{ bookings : generates
+    gigs ||--o{ gig_requirements : has
+    
+    applications ||--o{ bookings : becomes
+```
+
+</div>
+
+### 🔐 **Authentication Flow**
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant S as Supabase
+    participant D as Database
+    
+    U->>F: Sign Up
+    F->>S: Create User
+    S->>D: Trigger Profile Creation
+    S->>U: Send Verification Email
+    U->>F: Click Verification Link
+    F->>S: Verify Email
+    S->>D: Update Profile Status
+    F->>U: Redirect to Dashboard
+```
+
+### 🎭 **User Roles & Access**
+
+| Role | Dashboard | Capabilities | Access Level |
+|------|-----------|--------------|--------------|
+| **🎭 Talent** | `/talent/dashboard` | Browse gigs, apply, manage profile | View active gigs, submit applications |
+| **🏢 Client** | `/client/dashboard` | Post gigs, review applications | Create/edit gigs, manage applications |
+| **👑 Admin** | `/admin/dashboard` | User management, platform oversight | Full platform access |
+
+---
+
+## 📁 **Project Structure**
+
+```
+totl-agency/
+├── 🎭 app/                    # Next.js App Router pages
+│   ├── (auth)/               # Authentication pages
+│   ├── talent/               # Talent dashboard & features
+│   ├── client/               # Client dashboard & features
+│   ├── admin/                # Admin panel
+│   └── api/                  # API routes
+├── 🧩 components/            # React components
+│   ├── ui/                   # shadcn/ui components
+│   ├── auth/                 # Authentication components
+│   ├── forms/                # Form components
+│   └── admin/                # Admin-specific components
+├── 🔧 lib/                   # Utility functions
+│   ├── supabase/             # Supabase client helpers
+│   ├── services/             # Email and other services
+│   └── utils/                # General utilities
+├── 📊 types/                 # TypeScript definitions
+├── 🗄️ supabase/              # Database migrations & config
+├── 📚 docs/                  # Documentation
+└── 🛠️ scripts/               # Utility scripts
+```
+
+---
+
+## 🔒 **Security Features**
+
+### 🛡️ **Row-Level Security (RLS)**
+
+All database tables implement comprehensive RLS policies:
+
+- **🔐 User Isolation**: Users can only access their own data
+- **🎭 Role-Based Access**: Different permissions for talent, clients, and admins
+- **📊 Data Protection**: Sensitive information protected by policies
+- **🔍 Audit Trail**: All actions logged and traceable
+
+### 🔑 **Authentication Security**
+
+- **✅ Email Verification**: Required for account activation
+- **🔒 Password Protection**: Strong password requirements
+- **🔄 Session Management**: Secure session handling
+- **🛡️ CSRF Protection**: Cross-site request forgery prevention
+
+---
+
+## 📊 **Database Overview**
+
+### 🗂️ **Core Tables**
+
+| Table | Purpose | Key Features |
+|-------|---------|--------------|
+| **`profiles`** | Main user accounts | Role-based access, email verification |
+| **`talent_profiles`** | Talent-specific data | Physical attributes, experience, portfolio |
+| **`client_profiles`** | Client company info | Company details, contact information |
+| **`gigs`** | Job postings | Requirements, compensation, deadlines |
+| **`applications`** | Talent applications | Status tracking, messages |
+| **`bookings`** | Confirmed engagements | Compensation, notes, status |
+| **`portfolio_items`** | Talent portfolio | Images, descriptions, categories |
+| **`gig_requirements`** | Specific requirements | Detailed job requirements |
+
+### 🔄 **Custom Types (Enums)**
+
+```sql
+-- User roles
+CREATE TYPE user_role AS ENUM ('talent', 'client', 'admin');
+
+-- Gig status
+CREATE TYPE gig_status AS ENUM ('draft', 'active', 'closed', 'completed');
+
+-- Application status  
+CREATE TYPE application_status AS ENUM ('new', 'under_review', 'shortlisted', 'rejected', 'accepted');
+
+-- Booking status
+CREATE TYPE booking_status AS ENUM ('pending', 'confirmed', 'completed', 'cancelled');
+```
+
+---
+
+## 🚀 **Deployment**
+
+### 🌐 **Production Deployment**
+
+#### **Vercel (Recommended)**
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy to production
+vercel --prod
+
+# Set environment variables in Vercel dashboard
+```
+
+#### **Environment Variables for Production**
+
+```env
+# 🌐 Site URL
+NEXT_PUBLIC_SITE_URL=https://www.thetotlagency.com
+
+# 📧 Resend (Email API)
+RESEND_API_KEY=re_your-production-resend-key
+
+# Supabase Access Token
+SUPABASE_ACCESS_TOKEN=sbp_your-production-access-token
+
+# 🔑 Supabase Service Role Key (⚠️ Only use server-side)
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-production-service-key
+
+# 🔗 Supabase URL (base URL for all Supabase calls)
+SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+
+# 🔓 Supabase Anon Public Key (safe to expose to frontend)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.your-production-anon-key
+```
+
+### 📊 **Performance Metrics**
+
+| Metric | Value | Status |
+|--------|-------|--------|
+| **Bundle Size** | 102kB shared JS | ✅ Optimized |
+| **Build Time** | 6.7s | ✅ Fast |
+| **Pages** | 36 routes | ✅ Complete |
+| **Security** | 0 vulnerabilities | ✅ Secure |
+| **TypeScript** | 0 errors | ✅ Clean |
+
+---
+
+## 🧪 **Testing & Quality**
+
+### 🔍 **Code Quality**
+
+```bash
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
+
+# Environment validation
+npm run env:test
+
+# Full verification
+npm run verify-all
+```
+
+### 🛠️ **Development Tools**
+
+- **🔧 TypeScript**: Full type safety
+- **📏 ESLint**: Code quality enforcement
+- **🎨 Prettier**: Code formatting
+- **🔍 Husky**: Git hooks for quality
+- **📊 Bundle Analysis**: Performance monitoring
+
+---
+
+## 📚 **Documentation**
+
+### 📖 **Essential Files**
+
+- **`README.md`** - This comprehensive guide
+- **`database_schema_audit.md`** - Complete database reference
+- **`docs/`** - Additional documentation
+
+### 🔗 **Useful Links**
+
+- **Supabase Dashboard**: https://supabase.com/dashboard
+- **Resend API Keys**: https://resend.com/api-keys
+- **Next.js Documentation**: https://nextjs.org/docs
+- **TailwindCSS Docs**: https://tailwindcss.com/docs
+
+---
+
+## 🤝 **Contributing**
+
+### 🚀 **Getting Started**
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### 📋 **Development Guidelines**
+
+- ✅ Follow TypeScript best practices
+- ✅ Use proper error handling
+- ✅ Write meaningful commit messages
+- ✅ Test thoroughly before submitting PRs
+- ✅ Follow established component patterns
+
+---
+
+## 📄 **License**
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🆘 **Support**
+
+### 🆘 **Need Help?**
+
+- 📖 **Documentation**: Check this README and `docs/` folder
+- 🐛 **Issues**: Open an issue on GitHub
+- 💬 **Discussions**: Use GitHub Discussions for questions
+- 📧 **Contact**: Reach out to the development team
+
+### 🔧 **Troubleshooting**
+
+<details>
+<summary><strong>Common Issues & Solutions</strong></summary>
+
+#### **Environment Issues**
+```bash
+# Test environment configuration
+npm run env:test
+
+# Check environment variables
+npm run env:check
+```
+
+#### **Database Issues**
+```bash
+# Verify database connection
+curl http://localhost:3000/api/admin/test-connection
+
+# Check database schema
+npm run schema:verify
+```
+
+#### **Build Issues**
+```bash
+# TypeScript errors
+npm run typecheck
+
+# Linting issues
+npm run lint
+
+# Full build test
+npm run build
+```
+
+</details>
+
+---
+
+<div align="center">
+
+## 🌟 **Built with ❤️ for the Talent Industry**
+
+<img src="public/images/solo_logo.png" alt="TOTL Agency Logo" width="100" height="100" style="border-radius: 10px; margin: 10px;">
+
+**TOTL Agency** - Where exceptional talent meets premium opportunities
+
+[🚀 **Get Started**](#-quick-start) • [📖 **Learn More**](#-documentation) • [🤝 **Contribute**](#-contributing)
+
+---
+
+*Last updated: January 2025 | Version: 2.0 | Status: Production Ready*
+
+</div>

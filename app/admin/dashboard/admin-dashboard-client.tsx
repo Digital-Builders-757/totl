@@ -80,7 +80,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                 <Link href="/talent" className="text-gray-600 hover:text-black">
                   Applications
                 </Link>
-                <Link href="/admin/talentdashboard" className="text-gray-600 hover:text-black">
+                <Link href="/admin/talent-dashboard" className="text-gray-600 hover:text-black">
                   Talent View
                 </Link>
               </nav>
