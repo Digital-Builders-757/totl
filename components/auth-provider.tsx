@@ -17,7 +17,7 @@ type SignUpOptions = {
 };
 
 type AuthContextType = {
-  supabase: SupabaseClient<Database>;
+  supabase: SupabaseClient<Database> | null;
   user: User | null;
   session: Session | null;
   userRole: UserRole;
@@ -85,6 +85,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     // Initial session check - only once on mount
     const initialSession = async () => {
       try {
+        if (!supabase) return;
+        
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -102,7 +104,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         setSession(session);
 
-        const { data: profileData } = await supabase
+        const { data: profileData } = await supabase!
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
@@ -129,7 +131,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener - this is the main way to handle auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    } = supabase!.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
       setIsLoading(true);
@@ -138,7 +140,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === "SIGNED_IN" && session) {
         try {
-          const { data: profileData } = await supabase
+          const { data: profileData } = await supabase!
             .from("profiles")
             .select("role")
             .eq("id", session.user.id)
@@ -201,6 +203,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, router, pathname, hasHandledInitialSession]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
+    if (!supabase) return { error: null };
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (!error && data.session) {
@@ -244,6 +248,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     options?: SignUpOptions
   ): Promise<{ error: AuthError | null }> => {
+    if (!supabase) return { error: null };
+    
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -253,6 +259,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async (): Promise<{ error: AuthError | null }> => {
+    if (!supabase) return { error: null };
+    
     const { error } = await supabase.auth.signOut();
     setUser(null);
     setSession(null);
@@ -293,6 +301,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string): Promise<{ error: AuthError | null }> => {
     try {
+      if (!supabase) return { error: null };
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/update-password`,
       });

@@ -1,7 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent build-time Supabase access
 export const dynamic = "force-dynamic";

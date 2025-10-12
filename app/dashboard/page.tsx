@@ -1,6 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export const dynamic = "force-dynamic";
 

@@ -1,7 +1,6 @@
-﻿import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
-import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+﻿import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { createSupabaseRouteHandlerClient } from "@/lib/supabase-client";
 
 export const POST = async (request: Request) => {
   const { userId } = await request.json();
@@ -10,7 +9,7 @@ export const POST = async (request: Request) => {
     return NextResponse.json({ error: "User ID is required." }, { status: 400 });
   }
 
-  const supabase = createRouteHandlerClient({ cookies });
+  const supabase = await createSupabaseRouteHandlerClient();
 
   // First, get the current session to ensure the user making the request
   // is authenticated. You could add more checks here, e.g., only an admin

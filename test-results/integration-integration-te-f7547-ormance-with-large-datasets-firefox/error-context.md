@@ -1,0 +1,45 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - navigation [ref=e7]:
+        - link "Gigs" [ref=e8] [cursor=pointer]:
+          - /url: /gigs
+          - text: Gigs
+        - link "Talent" [ref=e9] [cursor=pointer]:
+          - /url: /talent
+          - text: Talent
+        - link "About" [ref=e10] [cursor=pointer]:
+          - /url: /about
+          - text: About
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e13]
+        - button "Apply as Talent" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - text: Apply as Talent
+  - button "Open Next.js Dev Tools" [ref=e25] [cursor=pointer]:
+    - img [ref=e26]
+  - alert [ref=e30]: TOTL Agency - Premium Modeling Agency
+  - generic [ref=e33]:
+    - generic [ref=e34]:
+      - heading "Find Gigs" [level=1] [ref=e35]
+      - paragraph [ref=e36]: Browse through available casting opportunities and gigs. Filter by category, location, and more to find the perfect match for your talents.
+    - generic [ref=e39]:
+      - textbox "Search for gigs, roles, or keywords" [ref=e41]
+      - generic [ref=e42]:
+        - button "Filters" [ref=e43] [cursor=pointer]:
+          - img [ref=e44]
+          - text: Filters
+        - button "Search" [ref=e46] [cursor=pointer]
+    - generic [ref=e49]:
+      - img [ref=e51]
+      - heading "No Active Gigs" [level=3] [ref=e54]
+      - paragraph [ref=e55]: There are currently no active gigs available. Check back later for new opportunities!
+```

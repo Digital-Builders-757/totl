@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { User } from "@supabase/supabase-js";
 import {
   Search,
@@ -39,6 +38,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
 // Type for the joined application data
@@ -68,7 +68,7 @@ export function AdminApplicationsClient({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { toast } = useToast();
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createSupabaseBrowser();
 
   // Filter applications based on search query and active tab
   useEffect(() => {
@@ -102,7 +102,7 @@ export function AdminApplicationsClient({
   }, [applications, searchQuery, activeTab]);
 
   const handleApprove = async () => {
-    if (!selectedApplication) return;
+    if (!selectedApplication || !supabase) return;
 
     setIsProcessing(true);
     try {
@@ -147,7 +147,7 @@ export function AdminApplicationsClient({
   };
 
   const handleReject = async () => {
-    if (!selectedApplication) return;
+    if (!selectedApplication || !supabase) return;
 
     setIsProcessing(true);
     try {

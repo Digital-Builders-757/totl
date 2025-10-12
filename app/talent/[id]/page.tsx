@@ -1,221 +1,287 @@
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { ArrowLeft, MapPin, Instagram, Globe, Star, Calendar, User } from "lucide-react";
+import { createServerClient } from "@supabase/ssr";
+import { ArrowLeft, Mail, Phone, MapPin, Star } from "lucide-react";
 import { cookies } from "next/headers";
-
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SafeImage } from "@/components/safe-image";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/supabase";
+import { SafeImage } from "@/components/ui/safe-image";
 
-// Force dynamic rendering to prevent static pre-rendering
-export const dynamic = "force-dynamic";
+interface TalentProfile {
+  id: string;
+  user_id: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  age: number | null;
+  location: string | null;
+  experience: string | null;
+  portfolio_url: string | null;
+  height: string | null;
+  measurements: string | null;
+  hair_color: string | null;
+  eye_color: string | null;
+  shoe_size: string | null;
+  languages: string[] | null;
+  created_at: string;
+  updated_at: string;
+  experience_years: number | null;
+  specialties: string[] | null;
+  weight: number | null;
+}
 
-export default async function TalentDetailPage({ params }: { params: Promise<{ id: string }> }) {
+interface TalentProfilePageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { id } = await params;
-  const supabase = createServerComponentClient<Database>({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookieStore.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
 
-  // Fetch the specific talent profile
-  const { data: talent, error } = await supabase
-    .from("talent_profiles")
-    .select(
-      `
-      *,
-      profiles!inner (
-        display_name,
-        avatar_url,
-        email_verified,
-        bio,
-        instagram_handle,
-        website
-      )
-    `
-    )
-    .eq("user_id", id)
-    .single();
+  let talent: TalentProfile | null = null;
+  let error: string | null = null;
+
+  try {
+    const { data, error: dbError } = await supabase
+      .from("talent_profiles")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (dbError) {
+      console.error("Supabase error fetching talent profile:", dbError);
+      error = `Database error: ${dbError.message}`;
+    } else {
+      talent = data as TalentProfile;
+    }
+  } catch (err: unknown) {
+    console.error("Unexpected error fetching talent profile:", err);
+    error = err instanceof Error ? err.message : "An unexpected error occurred.";
+  }
 
   if (error || !talent) {
     notFound();
   }
 
-  // Fetch portfolio items for this talent
-  const { data: portfolioItems } = await supabase
-    .from("portfolio_items")
-    .select("*")
-    .eq("talent_id", id)
-    .order("created_at", { ascending: false });
+  // For now, we'll use a placeholder contact method since we can't access auth.users directly
+  // In a real app, you might want to add an email field to the profiles table or use a contact form
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Back Button */}
-          <Link
-            href="/talent"
-            className="inline-flex items-center text-gray-600 hover:text-black mb-8"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Talent
+    <div className="min-h-screen bg-seamless-primary">
+      <div className="container mx-auto px-4 py-8">
+        {/* Back Button */}
+        <div className="mb-6">
+          <Link href="/talent">
+            <Button
+              variant="outline"
+              className="flex items-center border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Talent
+            </Button>
           </Link>
+        </div>
 
-          {/* Talent Header */}
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="relative h-64 md:h-96 bg-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-black rounded-xl shadow-lg overflow-hidden border border-gray-600">
+            {/* Header Section */}
+            <div className="relative h-96">
               <SafeImage
-                src={talent.profiles?.avatar_url}
-                alt={talent.profiles?.display_name || "Talent"}
+                src={talent.portfolio_url || "https://picsum.photos/800/400"}
+                alt={`${talent.first_name} ${talent.last_name}`}
                 fill
                 className="object-cover"
-                placeholderQuery="professional portrait"
-                fallbackSrc="/images/totl-logo-transparent.png"
+                context="talent-profile-header"
               />
-            </div>
-
-            <div className="p-8">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6">
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">
-                    {talent.profiles?.display_name || `${talent.first_name} ${talent.last_name}`}
-                  </h1>
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Professional Model</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+              <div className="absolute bottom-6 left-6">
+                <h1 className="text-white text-4xl font-bold mb-2">
+                  {talent.first_name} {talent.last_name}
+                </h1>
+                {talent.location && (
+                  <div className="flex items-center text-gray-300">
+                    <MapPin className="mr-2 h-4 w-4" />
+                    {talent.location}
                   </div>
-                </div>
-                <div className="md:text-right">
-                  <div className="flex items-center mb-2">
-                    <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 mr-1" />
-                    <span className="font-medium">4.8</span>
-                    <span className="text-gray-500 ml-1">(24 reviews)</span>
-                  </div>
-                  <div className="text-sm text-gray-500">Available for bookings</div>
-                </div>
-              </div>
-
-              {/* Talent Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div className="flex items-center">
-                  <MapPin className="mr-3 h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-medium">Location</div>
-                    <div className="text-gray-600">New York, NY</div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <Calendar className="mr-3 h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-medium">Experience</div>
-                    <div className="text-gray-600">{talent.experience_years || 0} years</div>
-                  </div>
-                </div>
-                <div className="flex items-center">
-                  <User className="mr-3 h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-medium">Specialties</div>
-                    <div className="text-gray-600">
-                      {talent.specialties?.slice(0, 2).join(", ") || "Fashion, Editorial"}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bio */}
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">About</h2>
-                <p className="text-gray-700 leading-relaxed">
-                  {talent.profiles?.bio ||
-                    "Professional model with experience in fashion, editorial, and commercial work. Passionate about creating compelling visual stories and bringing creative visions to life."}
-                </p>
-              </div>
-
-              {/* Specialties */}
-              {talent.specialties && talent.specialties.length > 0 && (
-                <div className="mb-8">
-                  <h2 className="text-xl font-semibold mb-4">Specialties</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {talent.specialties.map((specialty: string, index: number) => (
-                      <Badge key={index} variant="outline" className="bg-gray-50">
-                        {specialty}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Contact & Social */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="bg-black text-white hover:bg-black/90 flex-1">
-                  Book This Talent
-                </Button>
-                <Button variant="outline" className="flex-1">
-                  View Portfolio
-                </Button>
-              </div>
-
-              {/* Social Links */}
-              <div className="flex gap-4 mt-6">
-                {talent.profiles?.instagram_handle && (
-                  <a
-                    href={`https://instagram.com/${talent.profiles.instagram_handle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-gray-600 hover:text-black"
-                  >
-                    <Instagram className="mr-2 h-4 w-4" />
-                    <span>@{talent.profiles.instagram_handle}</span>
-                  </a>
-                )}
-                {talent.profiles?.website && (
-                  <a
-                    href={talent.profiles.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center text-gray-600 hover:text-black"
-                  >
-                    <Globe className="mr-2 h-4 w-4" />
-                    <span>Website</span>
-                  </a>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Portfolio */}
-          {portfolioItems && portfolioItems.length > 0 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Portfolio</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {portfolioItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
-                  >
-                    <div className="relative h-48 bg-gray-100">
-                      <SafeImage
-                        src={item.image_url}
-                        alt={item.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        placeholderQuery="fashion photography"
-                        fallbackSrc="/images/totl-logo-transparent.png"
-                      />
+            {/* Content Section */}
+            <div className="p-8 bg-black">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2">
+                  {/* About Section */}
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-bold text-white mb-4">About</h2>
+                    <p className="text-gray-300 leading-relaxed">
+                      {talent.experience || "No experience details provided."}
+                    </p>
+                  </div>
+
+                  {/* Specialties */}
+                  {talent.specialties && talent.specialties.length > 0 && (
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-bold text-white mb-4">Specialties</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {talent.specialties.map((specialty, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div className="p-6">
-                      <h3 className="font-semibold text-lg mb-2 group-hover:text-blue-600 transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{item.description}</p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{item.caption || "Portfolio Item"}</span>
-                        <span>{new Date(item.created_at).getFullYear()}</span>
+                  )}
+
+                  {/* Languages */}
+                  {talent.languages && talent.languages.length > 0 && (
+                    <div className="mb-8">
+                      <h2 className="text-2xl font-bold text-white mb-4">Languages</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {talent.languages.map((language, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                          >
+                            {language}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Sidebar */}
+                <div className="space-y-6">
+                  {/* Contact Information */}
+                  <div className="bg-white rounded-lg p-6 border border-gray-300">
+                    <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+                    <div className="space-y-3">
+                      {talent.phone && (
+                        <div className="flex items-center text-black">
+                          <Phone className="mr-3 h-4 w-4 text-black" />
+                          {talent.phone}
+                        </div>
+                      )}
+                      <div className="flex items-center text-black">
+                        <Mail className="mr-3 h-4 w-4 text-black" />
+                        Contact through agency
                       </div>
                     </div>
                   </div>
-                ))}
+
+                  {/* Physical Stats */}
+                  <div className="bg-white rounded-lg p-6 border border-gray-300">
+                    <h3 className="text-lg font-semibold text-black mb-4">Physical Stats</h3>
+                    <div className="space-y-2 text-sm text-black">
+                      {talent.age && (
+                        <div className="flex justify-between">
+                          <span>Age:</span>
+                          <span className="font-medium text-black">{talent.age}</span>
+                        </div>
+                      )}
+                      {talent.height && (
+                        <div className="flex justify-between">
+                          <span>Height:</span>
+                          <span className="font-medium text-black">{talent.height}</span>
+                        </div>
+                      )}
+                      {talent.weight && (
+                        <div className="flex justify-between">
+                          <span>Weight:</span>
+                          <span className="font-medium text-black">{talent.weight} lbs</span>
+                        </div>
+                      )}
+                      {talent.hair_color && (
+                        <div className="flex justify-between">
+                          <span>Hair:</span>
+                          <span className="font-medium text-black">{talent.hair_color}</span>
+                        </div>
+                      )}
+                      {talent.eye_color && (
+                        <div className="flex justify-between">
+                          <span>Eyes:</span>
+                          <span className="font-medium text-black">{talent.eye_color}</span>
+                        </div>
+                      )}
+                      {talent.shoe_size && (
+                        <div className="flex justify-between">
+                          <span>Shoe Size:</span>
+                          <span className="font-medium text-black">{talent.shoe_size}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Experience */}
+                  {talent.experience_years && (
+                    <div className="bg-white rounded-lg p-6 border border-gray-300">
+                      <h3 className="text-lg font-semibold text-black mb-4">Experience</h3>
+                      <div className="flex items-center text-black">
+                        <Star className="mr-2 h-4 w-4 text-black" />
+                        <span>{talent.experience_years} years in the industry</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-4">
+                    <a
+                      href={`mailto:contact@thetotlagency.com?subject=Booking Inquiry for ${talent.first_name} ${talent.last_name}&body=Hi, I'm interested in booking ${talent.first_name} ${talent.last_name} for a project. Please provide more information.`}
+                      className="flex-1"
+                    >
+                      <Button className="w-full bg-white text-black hover:bg-gray-200">
+                        Contact Talent
+                      </Button>
+                    </a>
+                    {talent.portfolio_url ? (
+                      <a
+                        href={talent.portfolio_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                        >
+                          View Portfolio
+                        </Button>
+                      </a>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full border-white/30 text-white hover:bg-white/10 hover:border-white/50 flex-1"
+                        disabled
+                      >
+                        View Portfolio
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 function assertUserId(user: { id?: string }): asserts user is { id: string } {
   if (!user.id) throw new Error("Missing user id");

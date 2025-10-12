@@ -1,0 +1,47 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+  - generic [ref=e10]:
+    - link "Back to Home" [ref=e11]:
+      - /url: /
+      - img [ref=e12]
+      - text: Back to Home
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - img [ref=e18]
+        - heading "Verify your email" [level=3] [ref=e21]
+        - paragraph [ref=e22]:
+          - text: We've sent a verification email to
+          - strong [ref=e23]: test@example.com
+      - generic [ref=e24]:
+        - paragraph [ref=e25]: Please check your inbox and click the verification link to complete your registration.
+        - generic [ref=e26]:
+          - heading "Didn't receive the email?" [level=4] [ref=e27]
+          - list [ref=e28]:
+            - listitem [ref=e29]:
+              - generic [ref=e30]: •
+              - text: Check your spam or junk folder
+            - listitem [ref=e31]:
+              - generic [ref=e32]: •
+              - text: Make sure you entered the correct email address
+            - listitem [ref=e33]:
+              - generic [ref=e34]: •
+              - text: Wait a few minutes for the email to arrive
+            - listitem [ref=e35]:
+              - generic [ref=e36]: •
+              - text: If you still don't see it, try clicking the resend button below
+      - generic [ref=e37]:
+        - button "Resend verification email" [ref=e38] [cursor=pointer]
+        - generic [ref=e39]:
+          - text: Already verified?
+          - link "Sign in" [ref=e40]:
+            - /url: /login
+```

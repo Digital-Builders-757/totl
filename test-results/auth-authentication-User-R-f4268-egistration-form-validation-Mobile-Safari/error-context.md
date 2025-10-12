@@ -1,0 +1,68 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+  - generic [ref=e10]:
+    - link "Back" [ref=e11]:
+      - /url: /
+      - img [ref=e12]
+      - text: Back
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - heading "Create Your Talent Account" [level=3] [ref=e16]
+        - paragraph [ref=e17]: Apply to join our talent roster. It's completely free to create an account.
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - text: First Name *
+            - textbox "First Name *" [ref=e22]:
+              - /placeholder: Enter your first name
+          - generic [ref=e23]:
+            - text: Last Name *
+            - textbox "Last Name *" [ref=e24]:
+              - /placeholder: Enter your last name
+        - generic [ref=e25]:
+          - text: Email Address *
+          - textbox "Email Address *" [ref=e26]:
+            - /placeholder: Enter your email address
+        - generic [ref=e27]:
+          - text: Password *
+          - generic [ref=e28]:
+            - textbox "Password *" [ref=e29]:
+              - /placeholder: Create a password
+            - button [ref=e30] [cursor=pointer]:
+              - img [ref=e31]
+          - paragraph [ref=e34]: Password must be at least 8 characters with uppercase, lowercase, and numbers
+        - generic [ref=e35]:
+          - text: Confirm Password *
+          - generic [ref=e36]:
+            - textbox "Confirm Password *" [ref=e37]:
+              - /placeholder: Confirm your password
+            - button [ref=e38] [cursor=pointer]:
+              - img [ref=e39]
+        - generic [ref=e42]:
+          - checkbox "I agree to the Terms of Service and Privacy Policy *" [ref=e43] [cursor=pointer]
+          - checkbox
+          - generic [ref=e45]:
+            - text: I agree to the
+            - link "Terms of Service" [ref=e46]:
+              - /url: /terms
+            - text: and
+            - link "Privacy Policy" [ref=e47]:
+              - /url: /privacy
+            - text: "*"
+        - alert [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: After signing up, you'll need to verify your email address and complete your profile in your dashboard.
+        - button "Create Free Account" [ref=e53] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e59] [cursor=pointer]:
+    - img [ref=e60]
+  - alert [ref=e65]: TOTL Agency - Premium Modeling Agency
+```

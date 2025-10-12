@@ -1,0 +1,189 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - navigation [ref=e7]:
+        - link "Gigs" [ref=e8] [cursor=pointer]:
+          - /url: /gigs
+          - text: Gigs
+        - link "Talent" [ref=e9] [cursor=pointer]:
+          - /url: /talent
+          - text: Talent
+        - link "About" [ref=e10] [cursor=pointer]:
+          - /url: /about
+          - text: About
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e13]
+        - button "Apply as Talent" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - text: Apply as Talent
+  - generic [ref=e20]:
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - generic [ref=e29]: The Future of Talent Booking
+          - heading "Connect with Top Talent Instantly" [level=1] [ref=e30]:
+            - text: Connect with Top Talent
+            - text: Instantly
+          - paragraph [ref=e31]: TOTL Agency is the fastest way to discover, book, and work with exceptional talent. From models to influencers, find the perfect match for your next project.
+        - generic [ref=e32]:
+          - link "Start Booking" [ref=e33] [cursor=pointer]:
+            - /url: /choose-role
+            - button "Start Booking" [ref=e34]:
+              - text: Start Booking
+              - img [ref=e35]
+          - link "Browse Talent" [ref=e38] [cursor=pointer]:
+            - /url: /talent
+            - button "Browse Talent" [ref=e39]
+        - generic [ref=e40]:
+          - generic [ref=e43]: 500+ Verified Talent
+          - generic [ref=e46]: 1000+ Projects Completed
+      - generic [ref=e49]: Your browser does not support the video tag.
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - generic [ref=e55]: Featured Talent
+        - heading "Meet Our Stars" [level=2] [ref=e56]
+        - paragraph [ref=e57]: Discover exceptional talent ready to bring your vision to life. From fashion to fitness, our curated selection represents the best in the industry.
+      - generic [ref=e58]:
+        - generic [ref=e60] [cursor=pointer]:
+          - generic [ref=e61]:
+            - img "Marcus Rodriguez" [ref=e62]
+            - generic [ref=e65]: $450/day
+            - generic [ref=e66]:
+              - heading "Marcus Rodriguez" [level=3] [ref=e67]
+              - paragraph [ref=e68]: Fitness Model
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]:
+                - img [ref=e72]
+                - generic [ref=e74]: "4.8"
+              - generic [ref=e75]:
+                - img [ref=e76]
+                - text: Los Angeles
+            - generic [ref=e79]:
+              - generic [ref=e80]: Fitness
+              - generic [ref=e81]: Lifestyle
+              - generic [ref=e82]: Commercial
+        - generic [ref=e84] [cursor=pointer]:
+          - generic [ref=e85]:
+            - img "Isabella Martinez" [ref=e86]
+            - generic [ref=e89]: $400/day
+            - generic [ref=e90]:
+              - heading "Isabella Martinez" [level=3] [ref=e91]
+              - paragraph [ref=e92]: Beauty Model
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - img [ref=e96]
+                - generic [ref=e98]: "4.9"
+              - generic [ref=e99]:
+                - img [ref=e100]
+                - text: Miami
+            - generic [ref=e103]:
+              - generic [ref=e104]: Beauty
+              - generic [ref=e105]: Fashion
+              - generic [ref=e106]: Editorial
+        - generic [ref=e108] [cursor=pointer]:
+          - generic [ref=e109]:
+            - img "Alex Thompson" [ref=e110]
+            - generic [ref=e113]: $350/day
+            - generic [ref=e114]:
+              - heading "Alex Thompson" [level=3] [ref=e115]
+              - paragraph [ref=e116]: Commercial Model
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]:
+                - img [ref=e120]
+                - generic [ref=e122]: "4.7"
+              - generic [ref=e123]:
+                - img [ref=e124]
+                - text: Chicago
+            - generic [ref=e127]:
+              - generic [ref=e128]: Commercial
+              - generic [ref=e129]: Corporate
+              - generic [ref=e130]: Lifestyle
+    - generic [ref=e132]:
+      - generic [ref=e133]:
+        - generic [ref=e134]: How It Works
+        - heading "Simple Process" [level=2] [ref=e135]
+        - paragraph [ref=e136]: From discovery to booking, we've streamlined the entire process to make talent acquisition effortless and efficient.
+      - generic [ref=e137]:
+        - generic [ref=e138]:
+          - img [ref=e140]
+          - heading "Discover" [level=3] [ref=e143]
+          - paragraph [ref=e144]: Browse our curated selection of verified talent across all categories and specialties.
+        - generic [ref=e145]:
+          - img [ref=e147]
+          - heading "Connect" [level=3] [ref=e153]
+          - paragraph [ref=e154]: Reach out directly to talent or let us facilitate the perfect match for your project.
+        - generic [ref=e155]:
+          - img [ref=e157]
+          - heading "Create" [level=3] [ref=e163]
+          - paragraph [ref=e164]: Bring your vision to life with professional talent and seamless project management.
+    - generic [ref=e167]:
+      - generic [ref=e168]:
+        - generic [ref=e169]: 500+
+        - generic [ref=e170]: Verified Talent
+      - generic [ref=e171]:
+        - generic [ref=e172]: 1000+
+        - generic [ref=e173]: Projects Completed
+      - generic [ref=e174]:
+        - generic [ref=e175]: 50+
+        - generic [ref=e176]: Cities Covered
+      - generic [ref=e177]:
+        - generic [ref=e178]: "4.9"
+        - generic [ref=e179]: Average Rating
+    - generic [ref=e182]:
+      - heading "Ready to Get Started?" [level=2] [ref=e183]
+      - paragraph [ref=e184]: Join thousands of brands and creators who trust TOTL Agency for their talent needs.
+      - generic [ref=e185]:
+        - link "Start Booking" [ref=e186] [cursor=pointer]:
+          - /url: /choose-role
+          - button "Start Booking" [ref=e187]:
+            - text: Start Booking
+            - img [ref=e188]
+        - link "Browse Talent" [ref=e191] [cursor=pointer]:
+          - /url: /talent
+          - button "Browse Talent" [ref=e192]
+    - contentinfo [ref=e193]:
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - img "TOTL Agency" [ref=e197]
+            - paragraph [ref=e198]: The future of talent booking. Connect with exceptional talent instantly.
+          - generic [ref=e199]:
+            - heading "Platform" [level=3] [ref=e200]
+            - generic [ref=e201]:
+              - link "Browse Talent" [ref=e202] [cursor=pointer]:
+                - /url: /talent
+              - link "Find Gigs" [ref=e203] [cursor=pointer]:
+                - /url: /gigs
+              - link "About Us" [ref=e204] [cursor=pointer]:
+                - /url: /about
+          - generic [ref=e205]:
+            - heading "Support" [level=3] [ref=e206]
+            - generic [ref=e207]:
+              - link "Help Center" [ref=e208] [cursor=pointer]:
+                - /url: /help
+              - link "Contact Us" [ref=e209] [cursor=pointer]:
+                - /url: /contact
+              - link "Privacy Policy" [ref=e210] [cursor=pointer]:
+                - /url: /privacy
+          - generic [ref=e211]:
+            - heading "Get Started" [level=3] [ref=e212]
+            - generic [ref=e213]:
+              - link "Apply as Talent" [ref=e214] [cursor=pointer]:
+                - /url: /choose-role
+              - button "Post a Gig" [ref=e215] [cursor=pointer]
+        - paragraph [ref=e217]: © 2024 TOTL Agency. All rights reserved.
+  - button "Open Next.js Dev Tools" [ref=e223] [cursor=pointer]:
+    - img [ref=e224]
+  - alert [ref=e228]
+```

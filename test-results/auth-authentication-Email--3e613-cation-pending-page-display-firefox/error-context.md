@@ -1,0 +1,65 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - navigation [ref=e7]:
+        - link "Gigs" [ref=e8] [cursor=pointer]:
+          - /url: /gigs
+          - text: Gigs
+        - link "Talent" [ref=e9] [cursor=pointer]:
+          - /url: /talent
+          - text: Talent
+        - link "About" [ref=e10] [cursor=pointer]:
+          - /url: /about
+          - text: About
+      - generic [ref=e11]:
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /login
+          - button "Sign In" [ref=e13]
+        - button "Apply as Talent" [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - text: Apply as Talent
+  - generic [ref=e21]:
+    - link "Back to Home" [ref=e22] [cursor=pointer]:
+      - /url: /
+      - img [ref=e23]
+      - text: Back to Home
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - img [ref=e30]
+        - heading "Verify your email" [level=3] [ref=e33]
+        - paragraph [ref=e34]:
+          - text: We've sent a verification email to
+          - strong [ref=e35]: test@example.com
+      - generic [ref=e36]:
+        - paragraph [ref=e37]: Please check your inbox and click the verification link to complete your registration.
+        - generic [ref=e38]:
+          - heading "Didn't receive the email?" [level=4] [ref=e39]
+          - list [ref=e40]:
+            - listitem [ref=e41]:
+              - generic [ref=e42]: •
+              - text: Check your spam or junk folder
+            - listitem [ref=e43]:
+              - generic [ref=e44]: •
+              - text: Make sure you entered the correct email address
+            - listitem [ref=e45]:
+              - generic [ref=e46]: •
+              - text: Wait a few minutes for the email to arrive
+            - listitem [ref=e47]:
+              - generic [ref=e48]: •
+              - text: If you still don't see it, try clicking the resend button below
+      - generic [ref=e49]:
+        - button "Resend verification email" [ref=e50] [cursor=pointer]
+        - generic [ref=e51]:
+          - text: Already verified?
+          - link "Sign in" [ref=e52] [cursor=pointer]:
+            - /url: /login
+  - button "Open Next.js Dev Tools" [ref=e58] [cursor=pointer]:
+    - img [ref=e59]
+  - alert [ref=e63]
+```

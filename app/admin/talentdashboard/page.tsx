@@ -15,8 +15,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TalentDashboardClient } from "./talent-dashboard-client";
-import { EmailVerificationReminder } from "@/components/email-verification-reminder";
-import { RequireAuth } from "@/components/require-auth";
+import { RequireAuth } from "@/components/auth/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,16 +25,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { EmailVerificationReminder } from "@/components/ui/email-verification-reminder";
 import { SafeImage } from "@/components/ui/safe-image";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import {
-  castUserId,
   type TalentProfileRow,
   type ProfileRow,
   type PortfolioItemRow,
   type AdminTalentDashboardRow,
   type AdminBookingsDashboardRow,
-} from "@/lib/db-types";
-import { createSupabaseServer } from "@/lib/supabase-server";
+} from "@/types/database-helpers";
 
 export default async function TalentDashboard() {
   // Check if Supabase environment variables are available
@@ -63,29 +62,29 @@ export default async function TalentDashboard() {
         supabase
           .from("talent_profiles")
           .select("*")
-          .eq("user_id", castUserId<"talent_profiles">(user.id))
+          .eq("user_id", user.id as string)
           .single(),
         supabase
           .from("admin_talent_dashboard")
           .select(
             "application_id,talent_id,application_status,application_created_at,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
-          .eq("talent_id", castUserId<"profiles">(user.id)),
+          .eq("talent_id", user.id as string),
         supabase
           .from("admin_bookings_dashboard")
           .select(
             "booking_id,booking_date,booking_compensation,gig_id,gig_title,gig_status,gig_location,talent_display_name,talent_avatar_url,client_company_name"
           )
-          .eq("talent_id", castUserId<"profiles">(user.id)),
+          .eq("talent_id", user.id as string),
         supabase
           .from("portfolio_items")
           .select("image_url, caption")
-          .eq("talent_id", castUserId<"portfolio_items">(user.id))
+          .eq("talent_id", user.id as string)
           .limit(4),
         supabase
           .from("profiles")
           .select("avatar_url")
-          .eq("id", castUserId<"profiles">(user.id))
+          .eq("id", user.id as string)
           .single(),
       ]);
 

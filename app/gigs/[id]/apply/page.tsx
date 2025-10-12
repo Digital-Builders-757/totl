@@ -1,6 +1,5 @@
 "use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import type { Database } from "@/types/supabase";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;
@@ -29,7 +28,7 @@ interface Gig {
 }
 
 export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
-  const supabase = createClientComponentClient<Database>();
+  const supabase = createSupabaseBrowser();
   const router = useRouter();
 
   const [gig, setGig] = useState<Gig | null>(null);
@@ -45,6 +44,12 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     async (gigId: string) => {
       setLoading(true);
       setError("");
+
+      if (!supabase) {
+        setError("Database connection not available");
+        setLoading(false);
+        return;
+      }
 
       try {
         // Get current user first
@@ -129,6 +134,12 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     e.preventDefault();
     setSubmitting(true);
     setError("");
+
+    if (!supabase) {
+      setError("Database connection not available");
+      setSubmitting(false);
+      return;
+    }
 
     try {
       if (!user || !gig) {

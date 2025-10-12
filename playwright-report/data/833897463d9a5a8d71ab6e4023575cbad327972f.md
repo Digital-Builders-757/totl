@@ -1,0 +1,171 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "TOTL Agency" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - img "TOTL Agency" [ref=e6]
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+  - generic [ref=e12]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - generic [ref=e21]: The Future of Talent Booking
+          - heading "Connect with Top Talent Instantly" [level=1] [ref=e22]:
+            - text: Connect with Top Talent
+            - text: Instantly
+          - paragraph [ref=e23]: TOTL Agency is the fastest way to discover, book, and work with exceptional talent. From models to influencers, find the perfect match for your next project.
+        - generic [ref=e24]:
+          - link "Start Booking" [ref=e25] [cursor=pointer]:
+            - /url: /choose-role
+            - button "Start Booking" [ref=e26]:
+              - text: Start Booking
+              - img [ref=e27]
+          - link "Browse Talent" [ref=e30] [cursor=pointer]:
+            - /url: /talent
+            - button "Browse Talent" [ref=e31]
+        - generic [ref=e32]:
+          - generic [ref=e35]: 500+ Verified Talent
+          - generic [ref=e38]: 1000+ Projects Completed
+      - generic [ref=e41]: Your browser does not support the video tag.
+    - generic [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]: Featured Talent
+        - heading "Meet Our Stars" [level=2] [ref=e48]
+        - paragraph [ref=e49]: Discover exceptional talent ready to bring your vision to life. From fashion to fitness, our curated selection represents the best in the industry.
+      - generic [ref=e50]:
+        - generic [ref=e52] [cursor=pointer]:
+          - generic [ref=e53]:
+            - img "Marcus Rodriguez" [ref=e54]
+            - generic [ref=e57]: $450/day
+            - generic [ref=e58]:
+              - heading "Marcus Rodriguez" [level=3] [ref=e59]
+              - paragraph [ref=e60]: Fitness Model
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - img [ref=e64]
+                - generic [ref=e66]: "4.8"
+              - generic [ref=e67]:
+                - img [ref=e68]
+                - text: Los Angeles
+            - generic [ref=e71]:
+              - generic [ref=e72]: Fitness
+              - generic [ref=e73]: Lifestyle
+              - generic [ref=e74]: Commercial
+        - generic [ref=e76] [cursor=pointer]:
+          - generic [ref=e77]:
+            - img "Isabella Martinez" [ref=e78]
+            - generic [ref=e81]: $400/day
+            - generic [ref=e82]:
+              - heading "Isabella Martinez" [level=3] [ref=e83]
+              - paragraph [ref=e84]: Beauty Model
+          - generic [ref=e85]:
+            - generic [ref=e86]:
+              - generic [ref=e87]:
+                - img [ref=e88]
+                - generic [ref=e90]: "4.9"
+              - generic [ref=e91]:
+                - img [ref=e92]
+                - text: Miami
+            - generic [ref=e95]:
+              - generic [ref=e96]: Beauty
+              - generic [ref=e97]: Fashion
+              - generic [ref=e98]: Editorial
+        - generic [ref=e100] [cursor=pointer]:
+          - generic [ref=e101]:
+            - img "Alex Thompson" [ref=e102]
+            - generic [ref=e105]: $350/day
+            - generic [ref=e106]:
+              - heading "Alex Thompson" [level=3] [ref=e107]
+              - paragraph [ref=e108]: Commercial Model
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - generic [ref=e111]:
+                - img [ref=e112]
+                - generic [ref=e114]: "4.7"
+              - generic [ref=e115]:
+                - img [ref=e116]
+                - text: Chicago
+            - generic [ref=e119]:
+              - generic [ref=e120]: Commercial
+              - generic [ref=e121]: Corporate
+              - generic [ref=e122]: Lifestyle
+    - generic [ref=e124]:
+      - generic [ref=e125]:
+        - generic [ref=e126]: How It Works
+        - heading "Simple Process" [level=2] [ref=e127]
+        - paragraph [ref=e128]: From discovery to booking, we've streamlined the entire process to make talent acquisition effortless and efficient.
+      - generic [ref=e129]:
+        - generic [ref=e130]:
+          - img [ref=e132]
+          - heading "Discover" [level=3] [ref=e135]
+          - paragraph [ref=e136]: Browse our curated selection of verified talent across all categories and specialties.
+        - generic [ref=e137]:
+          - img [ref=e139]
+          - heading "Connect" [level=3] [ref=e145]
+          - paragraph [ref=e146]: Reach out directly to talent or let us facilitate the perfect match for your project.
+        - generic [ref=e147]:
+          - img [ref=e149]
+          - heading "Create" [level=3] [ref=e155]
+          - paragraph [ref=e156]: Bring your vision to life with professional talent and seamless project management.
+    - generic [ref=e159]:
+      - generic [ref=e160]:
+        - generic [ref=e161]: 500+
+        - generic [ref=e162]: Verified Talent
+      - generic [ref=e163]:
+        - generic [ref=e164]: 1000+
+        - generic [ref=e165]: Projects Completed
+      - generic [ref=e166]:
+        - generic [ref=e167]: 50+
+        - generic [ref=e168]: Cities Covered
+      - generic [ref=e169]:
+        - generic [ref=e170]: "4.9"
+        - generic [ref=e171]: Average Rating
+    - generic [ref=e174]:
+      - heading "Ready to Get Started?" [level=2] [ref=e175]
+      - paragraph [ref=e176]: Join thousands of brands and creators who trust TOTL Agency for their talent needs.
+      - generic [ref=e177]:
+        - link "Start Booking" [ref=e178] [cursor=pointer]:
+          - /url: /choose-role
+          - button "Start Booking" [ref=e179]:
+            - text: Start Booking
+            - img [ref=e180]
+        - link "Browse Talent" [ref=e183] [cursor=pointer]:
+          - /url: /talent
+          - button "Browse Talent" [ref=e184]
+    - contentinfo [ref=e185]:
+      - generic [ref=e186]:
+        - generic [ref=e187]:
+          - generic [ref=e188]:
+            - img "TOTL Agency" [ref=e189]
+            - paragraph [ref=e190]: The future of talent booking. Connect with exceptional talent instantly.
+          - generic [ref=e191]:
+            - heading "Platform" [level=3] [ref=e192]
+            - generic [ref=e193]:
+              - link "Browse Talent" [ref=e194] [cursor=pointer]:
+                - /url: /talent
+              - link "Find Gigs" [ref=e195] [cursor=pointer]:
+                - /url: /gigs
+              - link "About Us" [ref=e196] [cursor=pointer]:
+                - /url: /about
+          - generic [ref=e197]:
+            - heading "Support" [level=3] [ref=e198]
+            - generic [ref=e199]:
+              - link "Help Center" [ref=e200] [cursor=pointer]:
+                - /url: /help
+              - link "Contact Us" [ref=e201] [cursor=pointer]:
+                - /url: /contact
+              - link "Privacy Policy" [ref=e202] [cursor=pointer]:
+                - /url: /privacy
+          - generic [ref=e203]:
+            - heading "Get Started" [level=3] [ref=e204]
+            - generic [ref=e205]:
+              - link "Apply as Talent" [ref=e206] [cursor=pointer]:
+                - /url: /choose-role
+              - button "Post a Gig" [ref=e207] [cursor=pointer]
+        - paragraph [ref=e209]: © 2024 TOTL Agency. All rights reserved.
+```

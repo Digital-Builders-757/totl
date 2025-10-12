@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Clock,
   MapPin,
@@ -30,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +38,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -66,7 +66,7 @@ interface Application {
   gig_id: string;
   talent_id: string;
   status: string;
-  message?: string;
+  message: string | null;
   created_at: string;
   updated_at: string;
   gigs?: {
@@ -74,7 +74,7 @@ interface Application {
     category?: string;
     location: string;
     compensation: string;
-    image_url?: string;
+    image_url?: string | null;
     client_profiles?: {
       company_name: string;
     };
@@ -89,9 +89,9 @@ interface Gig {
   compensation: string;
   category?: string;
   status?: string;
-  image_url?: string;
+  image_url?: string | null;
   created_at: string;
-  application_deadline?: string;
+  application_deadline?: string | null;
 }
 
 export default function TalentDashboard() {
@@ -108,7 +108,7 @@ export default function TalentDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const supabase = isSupabaseConfigured ? createClientComponentClient() : null;
+  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
   // Calculate dashboard stats from real data
   const dashboardStats = {
@@ -152,7 +152,7 @@ export default function TalentDashboard() {
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);
       } else {
-        setApplications(applicationsData || []);
+        setApplications((applicationsData as Application[]) || []);
       }
 
       // Fetch active gigs for discovery
@@ -167,7 +167,7 @@ export default function TalentDashboard() {
         console.error("Error fetching gigs:", gigsError);
         setError("Failed to load gigs");
       } else {
-        setGigs(gigsData || []);
+        setGigs((gigsData as Gig[]) || []);
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);

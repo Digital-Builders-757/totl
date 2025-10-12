@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "TOTL Agency",
     images: [
       {
-        url: "/images/totl-logo-new.png",
+        url: "/images/solo_logo.png",
         width: 1200,
         height: 630,
         alt: "TOTL Agency",
