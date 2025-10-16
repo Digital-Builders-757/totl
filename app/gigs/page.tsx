@@ -1,6 +1,7 @@
 ﻿export const dynamic = "force-dynamic";
 
-import { Search, MapPin, DollarSign, Filter, ArrowRight, Calendar } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
+import { Search, MapPin, DollarSign, ArrowRight, Calendar } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +9,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import type { Database } from "@/types/database";
 
-export default async function GigsPage() {
+type GigRow = Pick<
+  Database["public"]["Tables"]["gigs"]["Row"],
+  | "id"
+  | "title"
+  | "description"
+  | "location"
+  | "compensation"
+  | "date"
+  | "category"
+  | "image_url"
+  | "client_id"
+>;
+
+export default async function GigsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const supabase = await createSupabaseServer();
 
-  // FIXED: Explicit column selection, no aggregates
-  const { data: gigs, error } = await supabase
+  const sp = await searchParams;
+  const keyword = typeof sp.q === "string" ? sp.q.trim() : "";
+  const category = typeof sp.category === "string" ? sp.category.trim() : "";
+  const location = typeof sp.location === "string" ? sp.location.trim() : "";
+  const compensation =
+    typeof sp.compensation === "string" ? sp.compensation.trim() : "";
+  const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
+  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+  const pageSize = 9;
+
+  let query = supabase
     .from("gigs")
     .select(
       `
@@ -26,12 +54,37 @@ export default async function GigsPage() {
       category,
       image_url,
       client_id
-    `
+    `,
+      { count: "exact" }
     )
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+    .eq("status", "active");
+
+  // Apply filters
+  if (keyword) {
+    // Search title OR description OR location
+    query = query.or(
+      `title.ilike.%${keyword}%,description.ilike.%${keyword}%,location.ilike.%${keyword}%`
+    );
+  }
+  if (category) {
+    query = query.eq("category", category);
+  }
+  if (location) {
+    query = query.ilike("location", `%${location}%`);
+  }
+  if (compensation) {
+    query = query.ilike("compensation", `%${compensation}%`);
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  const { data: gigs, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
+    Sentry.captureException(error);
     console.error("Error fetching gigs:", error);
     return (
       <div className="min-h-screen bg-black pt-40">
@@ -70,7 +123,20 @@ export default async function GigsPage() {
     );
   }
 
-  const gigsList = gigs || [];
+  const gigsList = (gigs || []) as GigRow[];
+  const total = typeof count === "number" ? count : gigsList.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  // Helper to preserve query params while changing page
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (keyword) params.set("q", keyword);
+    if (category) params.set("category", category);
+    if (location) params.set("location", location);
+    if (compensation) params.set("compensation", compensation);
+    params.set("page", String(targetPage));
+    return `/gigs?${params.toString()}`;
+  };
 
   return (
     <div className="min-h-screen bg-black pt-40">
@@ -89,24 +155,53 @@ export default async function GigsPage() {
           {/* Search and Filter */}
           <div className="max-w-4xl mx-auto mb-16">
             <div className="apple-glass rounded-2xl p-8 shadow-lg">
-              <div className="flex flex-col md:flex-row gap-6">
+              <form className="flex flex-col md:flex-row gap-6" method="get">
                 <div className="relative flex-grow">
                   <Input
-                    placeholder="Search for gigs, roles, or keywords"
+                    name="q"
+                    defaultValue={keyword}
+                    placeholder="Search keywords"
                     className="apple-input py-6 text-xl h-16"
                   />
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3 w-full md:w-auto">
+                  <select
+                    name="category"
+                    defaultValue={category}
+                    className="apple-input h-16 bg-transparent text-white border-white/30 rounded-md px-3"
+                  >
+                    <option value="">All categories</option>
+                    <option value="editorial">Editorial</option>
+                    <option value="commercial">Commercial</option>
+                    <option value="runway">Runway</option>
+                    <option value="beauty">Beauty</option>
+                    <option value="fitness">Fitness</option>
+                    <option value="e-commerce">E-commerce</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <Input
+                    name="location"
+                    defaultValue={location}
+                    placeholder="Location"
+                    className="apple-input h-16"
+                  />
+                  <Input
+                    name="compensation"
+                    defaultValue={compensation}
+                    placeholder="Compensation"
+                    className="apple-input h-16"
+                  />
+                  <input type="hidden" name="page" value={String(page)} />
+                </div>
                 <div className="flex gap-4">
                   <Button
-                    variant="outline"
-                    className="apple-glass px-8 py-6 text-lg border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+                    type="submit"
+                    className="apple-button px-8 py-6 text-lg"
                   >
-                    <Filter size={20} className="mr-2" />
-                    Filters
+                    Search
                   </Button>
-                  <Button className="apple-button px-8 py-6 text-lg">Search</Button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
 
@@ -183,6 +278,24 @@ export default async function GigsPage() {
               ))}
             </div>
           )}
+
+          {/* Pagination */}
+          <div className="max-w-4xl mx-auto mt-10">
+            <div className="flex items-center justify-between text-white/80">
+              <div className="text-sm">
+                Showing {Math.min(total, from + 1)}–{Math.min(total, to + 1)} of {total}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="apple-glass border-white/30"
+                  asChild disabled={page <= 1}>
+                  <Link href={buildPageHref(page - 1)}>Previous</Link>
+                </Button>
+                <Button variant="outline" className="apple-glass border-white/30" asChild disabled={page >= totalPages}>
+                  <Link href={buildPageHref(page + 1)}>Next</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

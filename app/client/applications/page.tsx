@@ -52,6 +52,28 @@ export default function ClientApplicationsPage() {
 
   const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
+  const acceptApplication = useCallback(
+    async (applicationId: string) => {
+      try {
+        const res = await fetch("/api/client/applications/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ applicationId }),
+        });
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.error || "Failed to accept application");
+        // Optimistically update UI
+        setApplications((prev) =>
+          prev.map((a) => (a.id === applicationId ? { ...a, status: "accepted" } : a))
+        );
+      } catch (e) {
+        console.error(e);
+        alert("Failed to accept application");
+      }
+    },
+    []
+  );
+
   const fetchApplications = useCallback(async () => {
     if (!supabase || !user) return;
 
@@ -151,11 +173,11 @@ export default function ClientApplicationsPage() {
   // Show error state if Supabase is not configured
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="h-12 w-12 text-red-500 mx-auto mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Configuration Error</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>
@@ -166,26 +188,26 @@ export default function ClientApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading applications...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading applications...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               {/* Removed Users icon as it's no longer imported */}
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-                <p className="text-gray-600">Review and manage talent applications for your gigs</p>
+                <h1 className="text-2xl font-bold text-white">Applications</h1>
+                <p className="text-gray-300">Review and manage talent applications for your gigs</p>
               </div>
             </div>
             <Button variant="outline" asChild>
@@ -201,61 +223,61 @@ export default function ClientApplicationsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">{applications.length}</p>
+                  <p className="text-sm font-medium text-gray-300">Total Applications</p>
+                  <p className="text-2xl font-bold text-white">{applications.length}</p>
                 </div>
                 {/* Removed Users icon as it's no longer imported */}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Under Review</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Under Review</p>
+                  <p className="text-2xl font-bold text-white">
                     {applications.filter((app) => app.status === "Under Review").length}
                   </p>
                 </div>
-                <div className="bg-yellow-100 p-2 rounded-full">
-                  <Clock className="h-4 w-4 text-yellow-600" />
+                <div className="bg-yellow-500/20 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-yellow-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Interviews</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Interviews</p>
+                  <p className="text-2xl font-bold text-white">
                     {applications.filter((app) => app.status === "Interview Scheduled").length}
                   </p>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Clock className="h-4 w-4 text-purple-600" />
+                <div className="bg-purple-500/20 p-2 rounded-full">
+                  <Clock className="h-4 w-4 text-purple-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Hired</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Hired</p>
+                  <p className="text-2xl font-bold text-white">
                     {applications.filter((app) => app.status === "Hired").length}
                   </p>
                 </div>
-                <div className="bg-green-100 p-2 rounded-full">
-                  <DollarSign className="h-4 w-4 text-green-600" />
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <DollarSign className="h-4 w-4 text-green-300" />
                 </div>
               </div>
             </CardContent>
@@ -270,14 +292,14 @@ export default function ClientApplicationsPage() {
               placeholder="Search by talent name, gig title, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400 rounded-md px-3 py-2 border"
             />
           </div>
           <div className="flex gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="under review">Under Review</option>
@@ -288,7 +310,7 @@ export default function ClientApplicationsPage() {
             <select
               value={gigFilter}
               onChange={(e) => setGigFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Gigs</option>
               {uniqueGigs.map((gigId) => {
@@ -321,11 +343,11 @@ export default function ClientApplicationsPage() {
 
           <TabsContent value={activeTab} className="space-y-6">
             {filteredApplications.length === 0 ? (
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardContent className="p-12 text-center">
                   {/* Removed Users icon as it's no longer imported */}
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No applications found</h3>
-                  <p className="text-gray-600 mb-6">
+                  <h3 className="text-lg font-medium text-white mb-2">No applications found</h3>
+                  <p className="text-gray-300 mb-6">
                     {searchTerm || statusFilter !== "all" || gigFilter !== "all"
                       ? "Try adjusting your search or filters"
                       : "Applications will appear here once talent applies to your gigs"}
@@ -340,7 +362,7 @@ export default function ClientApplicationsPage() {
             ) : (
               <div className="space-y-4">
                 {filteredApplications.map((application) => (
-                  <Card key={application.id} className="hover:shadow-md transition-shadow">
+                  <Card key={application.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         {/* Removed Avatar component as it's no longer imported */}
@@ -348,20 +370,20 @@ export default function ClientApplicationsPage() {
                         <div className="flex-1">
                           <div className="flex items-start justify-between mb-3">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold text-white">
                                 {application.profiles?.display_name}
                               </h3>
-                              <p className="text-gray-600">{application.gigs?.title}</p>
+                              <p className="text-gray-300">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
-                                <span className="text-sm text-gray-600 flex items-center gap-1">
+                                <span className="text-sm text-gray-300 flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
                                   {application.gigs?.location}
                                 </span>
-                                <span className="text-sm text-gray-600 flex items-center gap-1">
+                                <span className="text-sm text-gray-300 flex items-center gap-1">
                                   {/* Removed Star icon as it's no longer imported */}
                                   {application.profiles?.role}
                                 </span>
-                                <span className="text-sm text-gray-600 flex items-center gap-1">
+                                <span className="text-sm text-gray-300 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
                                   Applied {application.created_at}
                                 </span>
@@ -376,22 +398,31 @@ export default function ClientApplicationsPage() {
                           </div>
 
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
                               <Link href={`/talent/${application.talent_id}`}>
                                 {/* Removed Eye icon as it's no longer imported */}
                                 View Profile
                               </Link>
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
                               {/* Removed Phone icon as it's no longer imported */}
                               Contact
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
                               {/* Removed Mail icon as it's no longer imported */}
                               Email
                             </Button>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              data-test="accept-application"
+                              onClick={() => acceptApplication(application.id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              Accept
+                            </Button>
                             {application.profiles?.email_verified && (
-                              <Button variant="outline" size="sm" asChild>
+                              <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
                                 <a
                                   href={`/talent/${application.talent_id}`}
                                   target="_blank"

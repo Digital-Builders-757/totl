@@ -112,7 +112,7 @@ export default function Navbar() {
                   )}
                   {userRole === "client" && (
                     <Link
-                      href="/admin/dashboard"
+                      href="/client/dashboard"
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Client Dashboard
@@ -204,7 +204,7 @@ export default function Navbar() {
                     )}
                     {userRole === "client" && (
                       <Link
-                        href="/admin/dashboard"
+                        href="/client/dashboard"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Client Dashboard
