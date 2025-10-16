@@ -28,8 +28,11 @@ import {
   Heart,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
+import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
+import { SafeDate } from "@/components/safe-date";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,6 +41,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UrgentBadge } from "@/components/urgent-badge";
+import { useToast } from "@/hooks/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
@@ -96,11 +101,15 @@ interface Gig {
 
 export default function TalentDashboard() {
   const { user, signOut } = useAuth();
+  const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -188,6 +197,34 @@ export default function TalentDashboard() {
     }
   }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
 
+  // Show success toast when application is submitted
+  useEffect(() => {
+    const applied = searchParams.get("applied");
+    if (applied === "success") {
+      toast({
+        title: "Application Submitted Successfully! 🎉",
+        description:
+          "Your application has been sent to the client. You'll be notified when they respond.",
+        duration: 5000,
+      });
+
+      // Clean up URL by removing the parameter
+      const url = new URL(window.location.href);
+      url.searchParams.delete("applied");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [searchParams, toast]);
+
+  const handleViewDetails = (application: Application) => {
+    setSelectedApplication(application);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedApplication(null);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "accepted":
@@ -267,9 +304,9 @@ export default function TalentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
@@ -281,24 +318,38 @@ export default function TalentDashboard() {
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-white">
                   Welcome back, {talentProfile?.first_name || "Talent"}!
                 </h1>
-                <p className="text-gray-600">Ready to discover your next opportunity?</p>
+                <p className="text-gray-300">Ready to discover your next opportunity?</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-700 text-white hover:bg-gray-800"
+              >
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
-              <Button variant="outline" size="sm" asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="border-gray-700 text-white hover:bg-gray-800"
+              >
                 <Link href="/talent/profile">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={signOut}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={signOut}
+                className="border-gray-700 text-white hover:bg-gray-800"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
@@ -310,18 +361,18 @@ export default function TalentDashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Profile Completion Alert */}
         {needsProfileCompletion && (
-          <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="mb-6 bg-amber-900/20 border border-amber-700 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <AlertCircle className="h-5 w-5 text-amber-400" />
                 <div>
-                  <h3 className="font-medium text-amber-800">Complete Your Profile</h3>
-                  <p className="text-sm text-amber-700">
+                  <h3 className="font-medium text-amber-200">Complete Your Profile</h3>
+                  <p className="text-sm text-amber-300">
                     Add your name and contact information to make your profile visible to clients.
                   </p>
                 </div>
               </div>
-              <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700">
+              <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
                 <Link href="/talent/profile">Complete Profile</Link>
               </Button>
             </div>
@@ -330,87 +381,87 @@ export default function TalentDashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Profile Views</p>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-sm font-medium text-white">Profile Views</p>
+                  <p className="text-2xl font-bold text-white">0</p>
                 </div>
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Eye className="h-4 w-4 text-blue-600" />
+                <div className="bg-blue-900/30 p-2 rounded-full">
+                  <Eye className="h-4 w-4 text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-white">Applications</p>
+                  <p className="text-2xl font-bold text-white">
                     {dashboardStats.totalApplications}
                   </p>
                 </div>
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Users className="h-4 w-4 text-green-600" />
+                <div className="bg-green-900/30 p-2 rounded-full">
+                  <Users className="h-4 w-4 text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Bookings</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.completedGigs}</p>
+                  <p className="text-sm font-medium text-white">Bookings</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</p>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Calendar className="h-4 w-4 text-purple-600" />
+                <div className="bg-purple-900/30 p-2 rounded-full">
+                  <Calendar className="h-4 w-4 text-purple-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Earnings</p>
-                  <p className="text-2xl font-bold text-gray-900">${0}</p>
+                  <p className="text-sm font-medium text-white">Earnings</p>
+                  <p className="text-2xl font-bold text-white">${0}</p>
                 </div>
-                <div className="bg-yellow-100 p-2 rounded-full">
-                  <DollarSign className="h-4 w-4 text-yellow-600" />
+                <div className="bg-yellow-900/30 p-2 rounded-full">
+                  <DollarSign className="h-4 w-4 text-yellow-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Rating</p>
-                  <p className="text-2xl font-bold text-gray-900">0</p>
+                  <p className="text-sm font-medium text-white">Rating</p>
+                  <p className="text-2xl font-bold text-white">0</p>
                 </div>
-                <div className="bg-orange-100 p-2 rounded-full">
-                  <Star className="h-4 w-4 text-orange-600" />
+                <div className="bg-orange-900/30 p-2 rounded-full">
+                  <Star className="h-4 w-4 text-orange-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                  <p className="text-2xl font-bold text-gray-900">0%</p>
+                  <p className="text-sm font-medium text-white">Success Rate</p>
+                  <p className="text-2xl font-bold text-white">0%</p>
                 </div>
-                <div className="bg-teal-100 p-2 rounded-full">
-                  <TrendingUp className="h-4 w-4 text-teal-600" />
+                <div className="bg-teal-900/30 p-2 rounded-full">
+                  <TrendingUp className="h-4 w-4 text-teal-400" />
                 </div>
               </div>
             </CardContent>
@@ -419,20 +470,32 @@ export default function TalentDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gray-900 border-gray-800">
+            <TabsTrigger
+              value="overview"
+              className="flex items-center gap-2 text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+            >
               <Activity className="h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="applications" className="flex items-center gap-2">
+            <TabsTrigger
+              value="applications"
+              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+            >
               <Target className="h-4 w-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center gap-2">
+            <TabsTrigger
+              value="bookings"
+              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+            >
               <Calendar className="h-4 w-4" />
               Bookings
             </TabsTrigger>
-            <TabsTrigger value="discover" className="flex items-center gap-2">
+            <TabsTrigger
+              value="discover"
+              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+            >
               <Search className="h-4 w-4" />
               Discover
             </TabsTrigger>
@@ -441,17 +504,19 @@ export default function TalentDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Profile Completion */}
-              <Card className="lg:col-span-1">
+              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Award className="h-5 w-5 text-blue-400" />
                     Profile Strength
                   </CardTitle>
-                  <CardDescription>Complete your profile to get more opportunities</CardDescription>
+                  <CardDescription className="text-gray-300">
+                    Complete your profile to get more opportunities
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm text-white">
                       <span>Profile Completion</span>
                       <span className="font-medium">{needsProfileCompletion ? "60%" : "85%"}</span>
                     </div>
@@ -459,7 +524,7 @@ export default function TalentDashboard() {
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 text-white">
                         <User className="h-4 w-4" />
                         Basic Information
                       </span>
@@ -467,33 +532,43 @@ export default function TalentDashboard() {
                         variant="outline"
                         className={
                           needsProfileCompletion
-                            ? "bg-red-50 text-red-700"
-                            : "bg-green-50 text-green-700"
+                            ? "bg-red-900/30 text-red-400 border-red-700"
+                            : "bg-green-900/30 text-green-400 border-green-700"
                         }
                       >
                         {needsProfileCompletion ? "Incomplete" : "Complete"}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 text-white">
                         <Phone className="h-4 w-4" />
                         Contact Details
                       </span>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-900/30 text-green-400 border-green-700"
+                      >
                         Complete
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-2 text-white">
                         <Globe className="h-4 w-4" />
                         Portfolio
                       </span>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <Badge
+                        variant="outline"
+                        className="bg-green-900/30 text-green-400 border-green-700"
+                      >
                         Complete
                       </Badge>
                     </div>
                   </div>
-                  <Button className="w-full bg-transparent" variant="outline" asChild>
+                  <Button
+                    className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                    variant="outline"
+                    asChild
+                  >
                     <Link href="/talent/profile" className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
                       Update Profile
@@ -503,20 +578,22 @@ export default function TalentDashboard() {
               </Card>
 
               {/* Browse Available Gigs */}
-              <Card className="lg:col-span-1">
+              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5 text-green-600" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Briefcase className="h-5 w-5 text-green-400" />
                     Available Gigs
                   </CardTitle>
-                  <CardDescription>Discover new opportunities</CardDescription>
+                  <CardDescription className="text-gray-300">
+                    Discover new opportunities
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">{gigs.length}</div>
-                    <p className="text-sm text-gray-600">Active gigs available</p>
+                    <div className="text-3xl font-bold text-green-400 mb-2">{gigs.length}</div>
+                    <p className="text-sm text-white">Active gigs available</p>
                   </div>
-                  <Button className="w-full" asChild>
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                     <Link href="/gigs" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
                       Browse All Gigs
@@ -526,27 +603,27 @@ export default function TalentDashboard() {
               </Card>
 
               {/* Quick Stats */}
-              <Card className="lg:col-span-1">
+              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <BarChart3 className="h-5 w-5 text-purple-400" />
                     Quick Stats
                   </CardTitle>
-                  <CardDescription>Your activity summary</CardDescription>
+                  <CardDescription className="text-gray-300">Your activity summary</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-600">
+                      <div className="text-2xl font-bold text-blue-400">
                         {dashboardStats.totalApplications}
                       </div>
-                      <p className="text-xs text-gray-600">Applications</p>
+                      <p className="text-xs text-white">Applications</p>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-green-600">
+                      <div className="text-2xl font-bold text-green-400">
                         {dashboardStats.acceptedApplications}
                       </div>
-                      <p className="text-xs text-gray-600">Accepted</p>
+                      <p className="text-xs text-white">Accepted</p>
                     </div>
                   </div>
                 </CardContent>
@@ -554,13 +631,15 @@ export default function TalentDashboard() {
             </div>
 
             {/* Upcoming Gigs */}
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-purple-600" />
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Clock className="h-5 w-5 text-purple-400" />
                   Upcoming Gigs
                 </CardTitle>
-                <CardDescription>Your confirmed and pending bookings</CardDescription>
+                <CardDescription className="text-gray-300">
+                  Your confirmed and pending bookings
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {applications.filter((app) => app.status === "accepted").length > 0 ? (
@@ -574,8 +653,9 @@ export default function TalentDashboard() {
                         >
                           <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
-                              src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                              src={app.gigs?.image_url}
                               alt={app.gigs?.title || "Unknown Gig"}
+                              fallbackSrc="/images/totl-logo-transparent.png"
                               fill
                               className="object-cover"
                               placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
@@ -594,7 +674,7 @@ export default function TalentDashboard() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
-                                {new Date(app.created_at).toLocaleDateString()}
+                                <SafeDate date={app.created_at} />
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
@@ -628,8 +708,8 @@ export default function TalentDashboard() {
                 ) : (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500 mb-4">You don&apos;t have any upcoming gigs.</p>
-                    <Button asChild>
+                    <p className="text-gray-300 mb-4">You don&apos;t have any upcoming gigs.</p>
+                    <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
                       <Link href="/gigs">Browse Available Gigs</Link>
                     </Button>
                   </div>
@@ -639,21 +719,29 @@ export default function TalentDashboard() {
           </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">
-            <Card>
+            <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
-                    <CardTitle>My Applications</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-white">My Applications</CardTitle>
+                    <CardDescription className="text-gray-300">
                       Track all your gig applications and their status
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-700 text-white hover:bg-gray-800"
+                    >
                       <Filter className="h-4 w-4 mr-2" />
                       Filter
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-gray-700 text-white hover:bg-gray-800"
+                    >
                       Export
                     </Button>
                   </div>
@@ -664,12 +752,13 @@ export default function TalentDashboard() {
                   {applications.map((app) => (
                     <div
                       key={app.id}
-                      className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                      className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
                     >
                       <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                         <SafeImage
-                          src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                          src={app.gigs?.image_url}
                           alt={app.gigs?.title || "Unknown Gig"}
+                          fallbackSrc="/images/totl-logo-transparent.png"
                           fill
                           className="object-cover"
                           placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
@@ -677,13 +766,13 @@ export default function TalentDashboard() {
                       </div>
                       <div className="flex-grow space-y-2">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <h4 className="font-semibold text-lg text-gray-900">{app.gigs?.title}</h4>
+                          <h4 className="font-semibold text-lg text-white">{app.gigs?.title}</h4>
                           <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                         </div>
-                        <p className="text-gray-600 font-medium">
+                        <p className="text-gray-300 font-medium">
                           {app.gigs?.client_profiles?.company_name || "Private Client"}
                         </p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                           <Badge
                             variant="outline"
                             className={getCategoryColor(app.gigs?.category || "General")}
@@ -694,18 +783,25 @@ export default function TalentDashboard() {
                             <DollarSign className="h-4 w-4" />
                             {app.gigs?.compensation || "TBD"}
                           </span>
-                          <span>Applied: {new Date(app.created_at).toLocaleDateString()}</span>
+                          <span>
+                            Applied: <SafeDate date={app.created_at} />
+                          </span>
                         </div>
                       </div>
                       <div className="flex md:flex-col gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 md:flex-none bg-transparent"
+                          className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                          onClick={() => handleViewDetails(app)}
                         >
                           View Details
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400 hover:bg-gray-700"
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -733,8 +829,9 @@ export default function TalentDashboard() {
                       >
                         <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                           <SafeImage
-                            src={app.gigs?.image_url || "/images/totl-logo-transparent.png"}
+                            src={app.gigs?.image_url}
                             alt={app.gigs?.title || "Unknown Gig"}
+                            fallbackSrc="/images/totl-logo-transparent.png"
                             fill
                             className="object-cover"
                             placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
@@ -753,7 +850,7 @@ export default function TalentDashboard() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
-                              {new Date(app.created_at).toLocaleDateString()}
+                              <SafeDate date={app.created_at} />
                             </div>
                             <div className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
@@ -774,6 +871,7 @@ export default function TalentDashboard() {
                             variant="outline"
                             size="sm"
                             className="flex-1 md:flex-none bg-transparent"
+                            onClick={() => handleViewDetails(app)}
                           >
                             View Details
                           </Button>
@@ -847,19 +945,16 @@ export default function TalentDashboard() {
                       >
                         <div className="h-48 relative">
                           <SafeImage
-                            src={gig.image_url || "/images/totl-logo-transparent.png"}
+                            src={gig.image_url}
                             alt={gig.title}
+                            fallbackSrc="/images/totl-logo-transparent.png"
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                             placeholderQuery={gig.category?.toLowerCase() || "general"}
                           />
-                          {gig.application_deadline &&
-                            new Date(gig.application_deadline) <
-                              new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) && (
-                              <Badge className="absolute top-3 left-3 bg-red-500 text-white">
-                                Urgent
-                              </Badge>
-                            )}
+                          {gig.application_deadline && (
+                            <UrgentBadge deadline={gig.application_deadline} />
+                          )}
                           <div className="absolute top-3 right-3 flex gap-1">
                             <Button
                               variant="ghost"
@@ -891,9 +986,11 @@ export default function TalentDashboard() {
                             <div className="flex items-center text-sm text-gray-500">
                               <Calendar className="h-4 w-4 mr-1" />
                               Deadline:{" "}
-                              {gig.application_deadline
-                                ? new Date(gig.application_deadline).toLocaleDateString()
-                                : "No deadline"}
+                              {gig.application_deadline ? (
+                                <SafeDate date={gig.application_deadline} />
+                              ) : (
+                                "No deadline"
+                              )}
                             </div>
                             <div className="flex items-center text-sm font-medium text-gray-900">
                               <DollarSign className="h-4 w-4 mr-1" />
@@ -920,6 +1017,13 @@ export default function TalentDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Application Details Modal */}
+      <ApplicationDetailsModal
+        application={selectedApplication}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </div>
   );
 }

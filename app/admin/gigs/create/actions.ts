@@ -29,15 +29,12 @@ export async function createGig(formData: FormData) {
 
   // Extract form data
   const title = formData.get("title") as string;
-  const company = formData.get("company") as string;
   const category = formData.get("category") as string;
   const location = formData.get("location") as string;
   const description = formData.get("description") as string;
   const startDate = formData.get("start_date") as string;
   const compensationMin = formData.get("compensation_min") as string;
   const compensationMax = formData.get("compensation_max") as string;
-  const isUrgent = formData.get("urgent") === "on";
-  const isFeatured = formData.get("featured") === "on";
 
   // Get requirements (they come as multiple form fields)
   const requirements: string[] = [];
@@ -57,15 +54,7 @@ export async function createGig(formData: FormData) {
   const maxComp = parseInt(compensationMax) || 0;
   const compensation = maxComp > minComp ? `$${minComp} - $${maxComp}` : `$${minComp}`;
 
-  // Determine status based on urgent/featured flags
-  let status = "active";
-  if (isUrgent) {
-    status = "urgent";
-  } else if (isFeatured) {
-    status = "featured";
-  }
-
-  // Insert gig into database
+  // Insert gig into database (always active when created)
   const { data: gig, error: insertError } = await supabase
     .from("gigs")
     .insert({
@@ -77,7 +66,7 @@ export async function createGig(formData: FormData) {
       compensation,
       duration: "TBD", // Default duration
       date: startDate || new Date().toISOString().split("T")[0],
-      status,
+      status: "active" as const,
     })
     .select()
     .single();
