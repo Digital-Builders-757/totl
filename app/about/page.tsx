@@ -1,142 +1,151 @@
-﻿import { Instagram, Mail, MapPin, Phone } from "lucide-react";
-import Image from "next/image";
+﻿import { Instagram, Mail, MapPin, Phone, Users, Target, Award, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function AboutPage() {
   return (
-    <main className="pt-20 bg-seamless-primary">
-      {/* Hero Section */}
-      <section className="relative bg-black text-white">
-        <div className="absolute inset-0 z-0 opacity-20">
-          <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-20">
-               <Image
-                 src="/images/solo_logo.png"
-                 alt="TOTL Agency Logo"
-                 width={800}
-                 height={800}
-                 className="object-contain opacity-30"
-                 priority
-               />
-          </div>
-        </div>
-        <div className="relative z-10 container mx-auto px-4 py-32 md:py-40">
-          <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold mb-8 text-white">About TOTL Agency</h1>
-            <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">
-              Representing exceptional modeling talent worldwide. We rise above the rest to connect
-              the right talent with the right opportunities.
-            </p>
+    <main className="min-h-screen bg-black text-white pt-20">
+      {/* Hero Section - Matching Homepage Style */}
+      <section className="relative py-32 lg:py-40 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float"></div>
+        <div
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float"
+          style={{ animationDelay: "1s" }}
+        ></div>
+
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-6">
+              <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
+                ✨ About TOTL Agency
+              </Badge>
+              <h1 className="text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
+                Rise Above
+                <span className="apple-text-gradient"> The Rest</span>
+              </h1>
+              <p className="text-2xl text-gray-300 leading-relaxed max-w-lg">
+                Representing exceptional modeling talent worldwide. We connect the right talent with
+                the right opportunities through innovation and integrity.
+              </p>
+            </div>
+            <div className="relative">
+              <div className="relative z-10 apple-card p-8">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto object-contain rounded-lg"
+                >
+                  <source src="/videos/slowmo_woman.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-white/5 rounded-3xl transform rotate-2"></div>
+              <div className="absolute -inset-4 bg-gradient-to-tr from-white/5 to-white/2 rounded-3xl transform -rotate-2"></div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Our Story Section */}
-      <section className="py-20 bg-white">
+      <section className="py-32 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-black">Our Story</h2>
-              <p className="text-black mb-4">
-                Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
-                industry. We recognized a gap between exceptional talent and quality opportunities,
-                and set out to bridge that divide with integrity and innovation.
-              </p>
-              <p className="text-black mb-4">
-                Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
-                aspect of our business. We believe in fostering genuine relationships with both our
-                talent and clients, creating a supportive community rather than just a transactional
-                agency.
-              </p>
-              <p className="text-black">
-                Today, we&rsquo;re proud to represent diverse talent across various modeling
-                specialties, connecting them with brands that value authenticity and creativity as
-                much as we do.
-              </p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-6 animate-apple-fade-in">
+              <div className="apple-glass rounded-2xl px-6 py-3 w-fit">
+                <span className="text-white font-medium text-sm flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Our Story
+                </span>
+              </div>
+              <h2 className="text-5xl lg:text-6xl font-bold text-white">
+                Building the Future of Talent
+              </h2>
+              <div className="space-y-4 text-lg text-gray-300 leading-relaxed">
+                <p>
+                  Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
+                  industry. We recognized a gap between exceptional talent and quality
+                  opportunities, and set out to bridge that divide with integrity and innovation.
+                </p>
+                <p>
+                  Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
+                  aspect of our business. We believe in fostering genuine relationships with both
+                  our talent and clients, creating a supportive community rather than just a
+                  transactional agency.
+                </p>
+                <p>
+                  Today, we&apos;re proud to represent diverse talent across various modeling
+                  specialties, connecting them with brands that value authenticity and creativity as
+                  much as we do.
+                </p>
+              </div>
             </div>
-            <div className="md:w-1/2 relative h-[400px] md:h-[500px] w-full">
-              <Image
-                src="/placeholder.jpg"
-                alt="TOTL Agency Journey"
-                fill
-                className="object-cover rounded-lg"
-              />
+            <div className="relative animate-apple-slide-up">
+              <div className="relative z-10 apple-card p-8">
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto object-contain rounded-lg"
+                >
+                  <source src="/videos/slowmo_woman.mp4" type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-white/5 rounded-3xl transform rotate-2"></div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Our Mission Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-black">Our Mission</h2>
+      <section className="py-32 bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16 animate-apple-fade-in">
+            <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
+              💎 Our Mission
+            </Badge>
+            <h2 className="text-5xl lg:text-6xl font-bold text-white">What Drives Us</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+            <div className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Users className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-black">Empower Talent</h3>
-              <p className="text-black">
+              <h3 className="text-2xl font-bold mb-4 text-white">Empower Talent</h3>
+              <p className="text-gray-300 leading-relaxed">
                 We empower models to take control of their careers through education, mentorship,
                 and transparent business practices.
               </p>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
+            <div
+              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Target className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-black">Foster Diversity</h3>
-              <p className="text-black">
+              <h3 className="text-2xl font-bold mb-4 text-white">Foster Diversity</h3>
+              <p className="text-gray-300 leading-relaxed">
                 We celebrate diversity in all forms, actively working to create inclusive
                 opportunities in the modeling industry.
               </p>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-sm">
-              <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  className="w-8 h-8"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
+            <div
+              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              style={{ animationDelay: "0.2s" }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Award className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold mb-4 text-black">Elevate Standards</h3>
-              <p className="text-black">
-                We&rsquo;re committed to raising industry standards through ethical practices, fair
+              <h3 className="text-2xl font-bold mb-4 text-white">Elevate Standards</h3>
+              <p className="text-gray-300 leading-relaxed">
+                We&apos;re committed to raising industry standards through ethical practices, fair
                 compensation, and professional development.
               </p>
             </div>
@@ -144,123 +153,81 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section className="py-20 bg-gray-50">
+      {/* Our Services Section */}
+      <section className="py-32 bg-black">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center text-black">Our Services</h2>
+          <div className="text-center mb-16 animate-apple-fade-in">
+            <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
+              🌟 What We Offer
+            </Badge>
+            <h2 className="text-5xl lg:text-6xl font-bold text-white">Our Services</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-white p-8 rounded-lg shadow-sm flex">
-              <div className="mr-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Users className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-black">Talent Representation</h3>
-                <p className="text-black">
-                  We provide comprehensive representation for models, including portfolio
-                  development, career guidance, and booking management.
-                </p>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Talent Representation</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    We provide comprehensive representation for models, including portfolio
+                    development, career guidance, and booking management.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-sm flex">
-              <div className="mr-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
+
+            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Target className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-black">Client Casting</h3>
-                <p className="text-black">
-                  We help brands find the perfect talent for their campaigns, events, and
-                  promotional activities.
-                </p>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Client Casting</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    We help brands find the perfect talent for their campaigns, events, and
+                    promotional activities.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-sm flex">
-              <div className="mr-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+
+            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Award className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-black">Portfolio Development</h3>
-                <p className="text-black">
-                  We offer professional photoshoot coordination and portfolio curation to showcase
-                  our talent&rsquo;s unique qualities.
-                </p>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Portfolio Development</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    We offer professional photoshoot coordination and portfolio curation to showcase
+                    our talent&apos;s unique qualities.
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-sm flex">
-              <div className="mr-6">
-                <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+
+            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+              <div className="flex gap-6">
+                <div className="flex-shrink-0">
+                  <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2 text-black">Event Management</h3>
-                <p className="text-black">
-                  We coordinate fashion shows, promotional events, and brand activations with our
-                  roster of professional models.
-                </p>
+                <div>
+                  <h3 className="text-2xl font-bold mb-3 text-white">Event Management</h3>
+                  <p className="text-gray-300 leading-relaxed">
+                    We coordinate fashion shows, promotional events, and brand activations with our
+                    roster of professional models.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -268,9 +235,14 @@ export default function AboutPage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-black text-white">
+      <section id="contact" className="py-32 bg-gray-900">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">Get In Touch</h2>
+          <div className="text-center mb-16 animate-apple-fade-in">
+            <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
+              📧 Contact Us
+            </Badge>
+            <h2 className="text-5xl lg:text-6xl font-bold text-white">Get In Touch</h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
               <h3 className="text-2xl font-bold mb-6">Contact Information</h3>
@@ -322,54 +294,56 @@ export default function AboutPage() {
                 <p>Sunday: Closed</p>
               </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-bold mb-6">Send Us a Message</h3>
-              <form className="space-y-4">
+            <div className="apple-glass p-8 rounded-2xl">
+              <h3 className="text-2xl font-bold mb-6 text-white">Send Us a Message</h3>
+              <form className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="block mb-2">
+                  <label htmlFor="name" className="block mb-2 text-gray-300 font-medium">
                     Name
                   </label>
                   <input
                     type="text"
                     id="name"
-                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
                     placeholder="Your name"
                   />
                 </div>
                 <div>
-                  <label htmlFor="email" className="block mb-2">
+                  <label htmlFor="email" className="block mb-2 text-gray-300 font-medium">
                     Email
                   </label>
                   <input
                     type="email"
                     id="email"
-                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
                     placeholder="Your email"
                   />
                 </div>
                 <div>
-                  <label htmlFor="subject" className="block mb-2">
+                  <label htmlFor="subject" className="block mb-2 text-gray-300 font-medium">
                     Subject
                   </label>
                   <input
                     type="text"
                     id="subject"
-                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all"
                     placeholder="Subject"
                   />
                 </div>
                 <div>
-                  <label htmlFor="message" className="block mb-2">
+                  <label htmlFor="message" className="block mb-2 text-gray-300 font-medium">
                     Message
                   </label>
                   <textarea
                     id="message"
                     rows={5}
-                    className="w-full px-4 py-2 bg-white text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    className="w-full px-4 py-3 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all resize-none"
                     placeholder="Your message"
                   ></textarea>
                 </div>
-                <Button className="w-full">Send Message</Button>
+                <Button className="w-full apple-button py-6 text-lg font-semibold">
+                  Send Message
+                </Button>
               </form>
             </div>
           </div>
@@ -377,22 +351,37 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Work With Us?</h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Whether you&rsquo;re a model looking for representation or a brand seeking talent,
-            we&rsquo;re here to help you succeed.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/talent/signup">
-              <Button size="lg" className="bg-black text-white hover:bg-gray-800">Apply as Talent</Button>
-            </Link>
-            <Link href="/client/apply">
-              <Button size="lg" variant="outline">
-                Become a Client
-              </Button>
-            </Link>
+      <section className="py-32 bg-black relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="max-w-4xl mx-auto space-y-8 animate-apple-fade-in">
+            <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
+              🚀 Join Us
+            </Badge>
+            <h2 className="text-5xl lg:text-6xl font-bold text-white">Ready to Work With Us?</h2>
+            <p className="text-2xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+              Whether you&apos;re a model looking for representation or a brand seeking talent,
+              we&apos;re here to help you succeed.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+              <Link href="/talent/signup">
+                <Button size="lg" className="apple-button px-10 py-6 text-xl font-semibold">
+                  Apply as Talent
+                </Button>
+              </Link>
+              <Link href="/client/apply">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-6 text-xl font-semibold"
+                >
+                  Become a Client
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
