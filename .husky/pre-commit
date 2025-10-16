@@ -1,1 +1,25 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Block commit if code changes are staged but MVP_STATUS_NOTION.md is not
+
+changed_files=$(git diff --cached --name-only)
+
+needs_doc=false
+for f in $changed_files; do
+  case "$f" in
+    app/*|components/*|lib/*|types/*|supabase/*|pages/*|tests/*|package.json|tsconfig.*|next.config.*)
+      needs_doc=true ;;
+  esac
+done
+
+doc_staged=false
+echo "$changed_files" | grep -q "^MVP_STATUS_NOTION.md$" && doc_staged=true || true
+
+if [ "$needs_doc" = true ] && [ "$doc_staged" = false ]; then
+  echo "\n✋ MVP status doc not updated. Please update MVP_STATUS_NOTION.md or run: npm run status:auto\n"
+  exit 1
+fi
+
+exit 0
 npx lint-staged 

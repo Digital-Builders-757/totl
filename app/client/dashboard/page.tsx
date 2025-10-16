@@ -340,9 +340,9 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
@@ -354,26 +354,26 @@ export default function ClientDashboard() {
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-white">
                   Welcome back, {clientProfile?.contact_name || "Client"}!
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-300">
                   {clientProfile?.company_name || "Manage your gigs and applications"}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
                 <Link href="/settings">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={signOut}>
+              <Button variant="outline" size="sm" onClick={signOut} className="apple-glass border-white/30 text-white">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
@@ -394,91 +394,91 @@ export default function ClientDashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Gigs</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalGigs}</p>
+                  <p className="text-sm font-medium text-gray-300">Total Gigs</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</p>
                 </div>
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Briefcase className="h-4 w-4 text-blue-600" />
+                <div className="bg-blue-500/20 p-2 rounded-full">
+                  <Briefcase className="h-4 w-4 text-blue-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Gigs</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.activeGigs}</p>
+                  <p className="text-sm font-medium text-gray-300">Active Gigs</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</p>
                 </div>
-                <div className="bg-green-100 p-2 rounded-full">
-                  <Activity className="h-4 w-4 text-green-600" />
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-green-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Applications</p>
+                  <p className="text-2xl font-bold text-white">
                     {dashboardStats.totalApplications}
                   </p>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Users className="h-4 w-4 text-purple-600" />
+                <div className="bg-purple-500/20 p-2 rounded-full">
+                  <Users className="h-4 w-4 text-purple-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">New</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">New</p>
+                  <p className="text-2xl font-bold text-white">
                     {dashboardStats.newApplications}
                   </p>
                 </div>
-                <div className="bg-yellow-100 p-2 rounded-full">
-                  <ClockIcon className="h-4 w-4 text-yellow-600" />
+                <div className="bg-yellow-500/20 p-2 rounded-full">
+                  <ClockIcon className="h-4 w-4 text-yellow-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-gray-900">{dashboardStats.completedGigs}</p>
+                  <p className="text-sm font-medium text-gray-300">Completed</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</p>
                 </div>
-                <div className="bg-green-100 p-2 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-green-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow">
+          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Spent</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Total Spent</p>
+                  <p className="text-2xl font-bold text-white">
                     ${dashboardStats.totalSpent.toLocaleString()}
                   </p>
                 </div>
-                <div className="bg-emerald-100 p-2 rounded-full">
-                  <DollarSign className="h-4 w-4 text-emerald-600" />
+                <div className="bg-emerald-500/20 p-2 rounded-full">
+                  <DollarSign className="h-4 w-4 text-emerald-300" />
                 </div>
               </div>
             </CardContent>
@@ -510,18 +510,18 @@ export default function ClientDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Gigs */}
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Briefcase className="h-5 w-5 text-white" />
                     Recent Gigs
                   </CardTitle>
-                  <CardDescription>Your latest gig postings and their status</CardDescription>
+                  <CardDescription className="text-gray-400">Your latest gig postings and their status</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {gigs.length > 0 ? (
                     gigs.slice(0, 3).map((gig) => (
-                      <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border">
+                      <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
                         <SafeImage
                           src={gig.image_url || "/images/totl-logo.png"}
                           alt={gig.title}
@@ -531,7 +531,7 @@ export default function ClientDashboard() {
                           fallbackSrc="/images/totl-logo-transparent.png"
                         />
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900 truncate">{gig.title}</h4>
+                          <h4 className="font-medium text-white truncate">{gig.title}</h4>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline" className={getCategoryColor(gig.category)}>
                               {gig.category}
@@ -540,13 +540,13 @@ export default function ClientDashboard() {
                               {gig.status}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-gray-400 mt-1">
                             {gig.applications_count || 0} applications â€¢ {gig.location}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium text-gray-900">{gig.compensation}</p>
-                          <p className="text-sm text-gray-600">{gig.created_at}</p>
+                          <p className="font-medium text-white">{gig.compensation}</p>
+                          <p className="text-sm text-gray-400">{gig.created_at}</p>
                         </div>
                       </div>
                     ))
@@ -561,28 +561,25 @@ export default function ClientDashboard() {
                       }}
                     />
                   )}
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
                     <Link href="/client/gigs">View All Gigs</Link>
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Recent Applications */}
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Users className="h-5 w-5 text-white" />
                     Recent Applications
                   </CardTitle>
-                  <CardDescription>Latest talent applications to review</CardDescription>
+                  <CardDescription className="text-gray-400">Latest talent applications to review</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {applications.length > 0 ? (
                     applications.slice(0, 3).map((application) => (
-                      <div
-                        key={application.id}
-                        className="flex items-center gap-4 p-3 rounded-lg border"
-                      >
+                      <div key={application.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
                             src={
@@ -597,27 +594,27 @@ export default function ClientDashboard() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-900">
+                          <h4 className="font-medium text-white">
                             {application.talent_profiles?.first_name}{" "}
                             {application.talent_profiles?.last_name}
                           </h4>
-                          <p className="text-sm text-gray-600 truncate">
+                          <p className="text-sm text-gray-400 truncate">
                             {application.gigs?.title}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline" className={getStatusColor(application.status)}>
                               {application.status}
                             </Badge>
-                            <span className="text-sm text-gray-600">
+                            <span className="text-sm text-gray-400">
                               {application.talent_profiles?.location}
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-400">
                             {new Date(application.created_at).toLocaleDateString()}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-400">
                             {application.talent_profiles?.experience}
                           </p>
                         </div>
@@ -630,7 +627,7 @@ export default function ClientDashboard() {
                       description="Applications will appear here once talent starts applying to your gigs"
                     />
                   )}
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
                     <Link href="/client/applications">View All Applications</Link>
                   </Button>
                 </CardContent>

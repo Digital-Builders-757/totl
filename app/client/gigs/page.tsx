@@ -176,11 +176,11 @@ export default function ClientGigsPage() {
   // Show error state if Supabase is not configured
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <h2 className="text-xl font-semibold text-white mb-2">Configuration Error</h2>
+          <p className="text-gray-300 mb-4">{error}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>
@@ -191,26 +191,26 @@ export default function ClientGigsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your gigs...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading your gigs...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Building className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">My Gigs</h1>
-                <p className="text-gray-600">Manage your posted gigs and track applications</p>
+                <h1 className="text-2xl font-bold text-white">My Gigs</h1>
+                <p className="text-gray-300">Manage your posted gigs and track applications</p>
               </div>
             </div>
             <Button asChild>
@@ -226,63 +226,63 @@ export default function ClientGigsPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Gigs</p>
-                  <p className="text-2xl font-bold text-gray-900">{gigs.length}</p>
+                  <p className="text-sm font-medium text-gray-300">Total Gigs</p>
+                  <p className="text-2xl font-bold text-white">{gigs.length}</p>
                 </div>
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Building className="h-4 w-4 text-blue-600" />
+                <div className="bg-blue-500/20 p-2 rounded-full">
+                  <Building className="h-4 w-4 text-blue-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Active</p>
+                  <p className="text-2xl font-bold text-white">
                     {gigs.filter((g) => g.status === "Active").length}
                   </p>
                 </div>
-                <div className="bg-green-100 p-2 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-green-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Applications</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Total Applications</p>
+                  <p className="text-2xl font-bold text-white">
                     {gigs.reduce((sum, gig) => sum + (gig.applications_count || 0), 0)}
                   </p>
                 </div>
-                <div className="bg-purple-100 p-2 rounded-full">
-                  <Users className="h-4 w-4 text-purple-600" />
+                <div className="bg-purple-500/20 p-2 rounded-full">
+                  <Users className="h-4 w-4 text-purple-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Completed</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-gray-300">Completed</p>
+                  <p className="text-2xl font-bold text-white">
                     {gigs.filter((g) => g.status === "Completed").length}
                   </p>
                 </div>
-                <div className="bg-emerald-100 p-2 rounded-full">
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <div className="bg-emerald-500/20 p-2 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-emerald-300" />
                 </div>
               </div>
             </CardContent>
@@ -297,14 +297,14 @@ export default function ClientGigsPage() {
               placeholder="Search gigs by title, description, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
             />
           </div>
           <div className="flex gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -332,11 +332,11 @@ export default function ClientGigsPage() {
 
           <TabsContent value={activeTab} className="space-y-6">
             {filteredGigs.length === 0 ? (
-              <Card>
+              <Card className="bg-gray-900 border-gray-700">
                 <CardContent className="p-12 text-center">
                   <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No gigs found</h3>
-                  <p className="text-gray-600 mb-6">
+                  <h3 className="text-lg font-medium text-white mb-2">No gigs found</h3>
+                  <p className="text-gray-300 mb-6">
                     {searchTerm || statusFilter !== "all"
                       ? "Try adjusting your search or filters"
                       : "Get started by posting your first gig"}
@@ -354,7 +354,7 @@ export default function ClientGigsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredGigs.map((gig) => (
-                  <Card key={gig.id} className="hover:shadow-lg transition-shadow">
+                  <Card key={gig.id} className="hover:shadow-lg transition-shadow bg-gray-900 border-gray-700">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -379,7 +379,7 @@ export default function ClientGigsPage() {
                         fallbackSrc="/images/totl-logo-transparent.png"
                       />
 
-                      <p className="text-sm text-gray-600 line-clamp-2">{gig.description}</p>
+                      <p className="text-sm text-gray-300 line-clamp-2">{gig.description}</p>
 
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className={getCategoryColor(gig.category || "")}>
@@ -395,33 +395,33 @@ export default function ClientGigsPage() {
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Pay Rate:</span>
-                          <span className="font-medium">{gig.compensation}</span>
+                          <span className="text-gray-300">Pay Rate:</span>
+                          <span className="font-medium text-white">{gig.compensation}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Applications:</span>
-                          <span className="font-medium">{gig.applications_count || 0}</span>
+                          <span className="text-gray-300">Applications:</span>
+                          <span className="font-medium text-white">{gig.applications_count || 0}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Posted:</span>
-                          <span className="font-medium">{gig.created_at}</span>
+                          <span className="text-gray-300">Posted:</span>
+                          <span className="font-medium text-white">{gig.created_at}</span>
                         </div>
                         {gig.application_deadline && (
                           <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600">Deadline:</span>
-                            <span className="font-medium">{gig.application_deadline}</span>
+                            <span className="text-gray-300">Deadline:</span>
+                            <span className="font-medium text-white">{gig.application_deadline}</span>
                           </div>
                         )}
                       </div>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
+                        <Button variant="outline" size="sm" className="flex-1 apple-glass border-white/30 text-white" asChild>
                           <Link href={`/gigs/${gig.id}`}>
                             <Eye className="h-4 w-4 mr-2" />
                             View
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
+                        <Button variant="outline" size="sm" className="flex-1 apple-glass border-white/30 text-white" asChild>
                           <Link href={`/client/applications?gig=${gig.id}`}>
                             <Users className="h-4 w-4 mr-2" />
                             Applications
@@ -430,11 +430,11 @@ export default function ClientGigsPage() {
                       </div>
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1 apple-glass border-white/30 text-white">
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1 apple-glass border-white/30 text-white">
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </Button>
