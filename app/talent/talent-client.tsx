@@ -117,7 +117,13 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
             >
               <div className="relative h-80 image-sophisticated">
                 <SafeImage
-                  src={person.portfolio_url || "https://picsum.photos/400/600"}
+                  src={
+                    person.portfolio_url &&
+                    !person.portfolio_url.includes("youtube.com") &&
+                    !person.portfolio_url.includes("youtu.be")
+                      ? person.portfolio_url
+                      : "https://picsum.photos/400/600"
+                  }
                   alt={`${person.first_name} ${person.last_name}`}
                   fill
                   className="object-cover"

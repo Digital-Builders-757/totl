@@ -103,7 +103,13 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
             {/* Header Section */}
             <div className="relative h-96">
               <SafeImage
-                src={talent.portfolio_url || "https://picsum.photos/800/400"}
+                src={
+                  talent.portfolio_url &&
+                  !talent.portfolio_url.includes("youtube.com") &&
+                  !talent.portfolio_url.includes("youtu.be")
+                    ? talent.portfolio_url
+                    : "https://picsum.photos/800/400"
+                }
                 alt={`${talent.first_name} ${talent.last_name}`}
                 fill
                 className="object-cover"
