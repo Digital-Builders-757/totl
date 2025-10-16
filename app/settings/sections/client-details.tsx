@@ -134,26 +134,35 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
   ];
 
   return (
-    <Card>
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle>Client Details</CardTitle>
-        <CardDescription>Update your company and contact information</CardDescription>
+        <CardTitle className="text-white">Client Details</CardTitle>
+        <CardDescription className="text-gray-400">
+          Update your company and contact information
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Company Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Company Information</h3>
+            <h3 className="text-lg font-medium text-white">Company Information</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="company_name" className={errors.company_name ? "text-red-500" : ""}>
+              <Label
+                htmlFor="company_name"
+                className={errors.company_name ? "text-red-400" : "text-gray-300"}
+              >
                 Company Name *
               </Label>
               <Input
                 id="company_name"
                 placeholder="Enter your company name"
                 {...register("company_name")}
-                className={errors.company_name ? "border-red-500" : ""}
+                className={
+                  errors.company_name
+                    ? "border-red-500 bg-gray-700 text-white"
+                    : "bg-gray-700 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.company_name && (
@@ -163,18 +172,24 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="industry">Industry</Label>
+                <Label htmlFor="industry" className="text-gray-300">
+                  Industry
+                </Label>
                 <Select
                   value={watch("industry") || ""}
                   onValueChange={(value) => setValue("industry", value)}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-gray-700 border-gray-600">
                     {industryOptions.map((industry) => (
-                      <SelectItem key={industry} value={industry}>
+                      <SelectItem
+                        key={industry}
+                        value={industry}
+                        className="text-white hover:bg-gray-600"
+                      >
                         {industry}
                       </SelectItem>
                     ))}
@@ -183,18 +198,20 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company_size">Company Size</Label>
+                <Label htmlFor="company_size" className="text-gray-300">
+                  Company Size
+                </Label>
                 <Select
                   value={watch("company_size") || ""}
                   onValueChange={(value) => setValue("company_size", value)}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue placeholder="Select company size" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-gray-700 border-gray-600">
                     {companySizeOptions.map((size) => (
-                      <SelectItem key={size} value={size}>
+                      <SelectItem key={size} value={size} className="text-white hover:bg-gray-600">
                         {size}
                       </SelectItem>
                     ))}
@@ -204,7 +221,10 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="website" className={errors.website ? "text-red-500" : ""}>
+              <Label
+                htmlFor="website"
+                className={errors.website ? "text-red-400" : "text-gray-300"}
+              >
                 Company Website
               </Label>
               <Input
@@ -212,30 +232,41 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                 type="url"
                 placeholder="https://your-company.com"
                 {...register("website")}
-                className={errors.website ? "border-red-500" : ""}
+                className={
+                  errors.website
+                    ? "border-red-500 bg-gray-700 text-white"
+                    : "bg-gray-700 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
-              {errors.website && <p className="text-sm text-red-500">{errors.website.message}</p>}
+              {errors.website && <p className="text-sm text-red-400">{errors.website.message}</p>}
             </div>
           </div>
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Contact Information</h3>
+            <h3 className="text-lg font-medium text-white">Contact Information</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="contact_name" className={errors.contact_name ? "text-red-500" : ""}>
+              <Label
+                htmlFor="contact_name"
+                className={errors.contact_name ? "text-red-400" : "text-gray-300"}
+              >
                 Contact Person Name *
               </Label>
               <Input
                 id="contact_name"
                 placeholder="Enter the primary contact person's name"
                 {...register("contact_name")}
-                className={errors.contact_name ? "border-red-500" : ""}
+                className={
+                  errors.contact_name
+                    ? "border-red-500 bg-gray-700 text-white"
+                    : "bg-gray-700 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.contact_name && (
-                <p className="text-sm text-red-500">{errors.contact_name.message}</p>
+                <p className="text-sm text-red-400">{errors.contact_name.message}</p>
               )}
             </div>
 
@@ -243,7 +274,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
               <div className="space-y-2">
                 <Label
                   htmlFor="contact_email"
-                  className={errors.contact_email ? "text-red-500" : ""}
+                  className={errors.contact_email ? "text-red-400" : "text-gray-300"}
                 >
                   Contact Email *
                 </Label>
@@ -252,28 +283,39 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                   type="email"
                   placeholder="contact@your-company.com"
                   {...register("contact_email")}
-                  className={errors.contact_email ? "border-red-500" : ""}
+                  className={
+                    errors.contact_email
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 {errors.contact_email && (
-                  <p className="text-sm text-red-500">{errors.contact_email.message}</p>
+                  <p className="text-sm text-red-400">{errors.contact_email.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_phone">Contact Phone</Label>
+                <Label htmlFor="contact_phone" className="text-gray-300">
+                  Contact Phone
+                </Label>
                 <Input
                   id="contact_phone"
                   placeholder="Enter contact phone number"
                   {...register("contact_phone")}
                   disabled={isSubmitting}
+                  className="bg-gray-700 border-gray-600 text-white"
                 />
               </div>
             </div>
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={isSubmitting || !isDirty} className="min-w-[100px]">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !isDirty}
+              className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+            >
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

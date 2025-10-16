@@ -90,56 +90,71 @@ export function BasicInfoSection({ user, profile }: BasicInfoSectionProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-white">
           <div className="h-5 w-5">👤</div>
           Basic Information
         </CardTitle>
-        <CardDescription>Update your basic profile information</CardDescription>
+        <CardDescription className="text-gray-400">
+          Update your basic profile information
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-gray-300">
+              Email
+            </Label>
             <Input
               id="email"
               type="email"
               value={user.email || ""}
               disabled
-              className="bg-gray-50"
+              className="bg-gray-700 border-gray-600 text-gray-400"
             />
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               Email cannot be changed. Contact support if you need to update your email.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="display_name" className={errors.display_name ? "text-red-500" : ""}>
+            <Label
+              htmlFor="display_name"
+              className={errors.display_name ? "text-red-400" : "text-gray-300"}
+            >
               Display Name *
             </Label>
             <Input
               id="display_name"
               placeholder="Enter your display name"
               {...register("display_name")}
-              className={errors.display_name ? "border-red-500" : ""}
+              className={
+                errors.display_name
+                  ? "border-red-500 bg-gray-700 text-white"
+                  : "bg-gray-700 border-gray-600 text-white"
+              }
               disabled={isSubmitting}
             />
             {errors.display_name && (
-              <p className="text-sm text-red-500">{errors.display_name.message}</p>
+              <p className="text-sm text-red-400">{errors.display_name.message}</p>
             )}
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-400">
               {profile.email_verified ? (
-                <span className="text-green-600">✅ Email verified</span>
+                <span className="text-green-400">✅ Email verified</span>
               ) : (
-                <span className="text-yellow-600">⚠️ Email not verified</span>
+                <span className="text-yellow-400">⚠️ Email not verified</span>
               )}
             </div>
 
-            <Button type="submit" disabled={isSubmitting || !isDirty} className="min-w-[100px]">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !isDirty}
+              className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+            >
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>

@@ -195,86 +195,116 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {serverError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{serverError}</AlertDescription>
+        <Alert variant="destructive" className="bg-red-900/20 border-red-700">
+          <AlertCircle className="h-4 w-4 text-red-400" />
+          <AlertDescription className="text-red-300">{serverError}</AlertDescription>
         </Alert>
       )}
 
       {/* Basic Information */}
-      <Card>
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <User className="h-5 w-5" />
             Basic Information
           </CardTitle>
-          <CardDescription>Your name and contact information</CardDescription>
+          <CardDescription className="text-gray-400">
+            Your name and contact information
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="first_name" className={errors.first_name ? "text-red-500" : ""}>
+              <Label
+                htmlFor="first_name"
+                className={errors.first_name ? "text-red-400" : "text-gray-300"}
+              >
                 First Name *
               </Label>
               <Input
                 id="first_name"
                 placeholder="Enter your first name"
                 {...register("first_name")}
-                className={errors.first_name ? "border-red-500" : ""}
+                className={
+                  errors.first_name
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.first_name && (
-                <p className="text-sm text-red-500">{errors.first_name.message}</p>
+                <p className="text-sm text-red-400">{errors.first_name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name" className={errors.last_name ? "text-red-500" : ""}>
+              <Label
+                htmlFor="last_name"
+                className={errors.last_name ? "text-red-400" : "text-gray-300"}
+              >
                 Last Name *
               </Label>
               <Input
                 id="last_name"
                 placeholder="Enter your last name"
                 {...register("last_name")}
-                className={errors.last_name ? "border-red-500" : ""}
+                className={
+                  errors.last_name
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.last_name && (
-                <p className="text-sm text-red-500">{errors.last_name.message}</p>
+                <p className="text-sm text-red-400">{errors.last_name.message}</p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone" className={errors.phone ? "text-red-500" : ""}>
+              <Label htmlFor="phone" className={errors.phone ? "text-red-400" : "text-gray-300"}>
                 Phone Number
               </Label>
               <Input
                 id="phone"
                 placeholder="Enter your phone number"
                 {...register("phone")}
-                className={errors.phone ? "border-red-500" : ""}
+                className={
+                  errors.phone
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
-              {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+              {errors.phone && <p className="text-sm text-red-400">{errors.phone.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location" className={errors.location ? "text-red-500" : ""}>
+              <Label
+                htmlFor="location"
+                className={errors.location ? "text-red-400" : "text-gray-300"}
+              >
                 Location
               </Label>
               <Input
                 id="location"
                 placeholder="City, State"
                 {...register("location")}
-                className={errors.location ? "border-red-500" : ""}
+                className={
+                  errors.location
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
-              {errors.location && <p className="text-sm text-red-500">{errors.location.message}</p>}
+              {errors.location && <p className="text-sm text-red-400">{errors.location.message}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="portfolio_url" className={errors.portfolio_url ? "text-red-500" : ""}>
+            <Label
+              htmlFor="portfolio_url"
+              className={errors.portfolio_url ? "text-red-400" : "text-gray-300"}
+            >
               Portfolio URL
             </Label>
             <Input
@@ -282,29 +312,35 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               type="url"
               placeholder="https://your-portfolio.com"
               {...register("portfolio_url")}
-              className={errors.portfolio_url ? "border-red-500" : ""}
+              className={
+                errors.portfolio_url
+                  ? "border-red-500 bg-gray-800 text-white"
+                  : "bg-gray-800 border-gray-600 text-white"
+              }
               disabled={isSubmitting}
             />
             {errors.portfolio_url && (
-              <p className="text-sm text-red-500">{errors.portfolio_url.message}</p>
+              <p className="text-sm text-red-400">{errors.portfolio_url.message}</p>
             )}
           </div>
         </CardContent>
       </Card>
 
       {/* Physical Characteristics */}
-      <Card>
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <User className="h-5 w-5" />
             Physical Characteristics
           </CardTitle>
-          <CardDescription>Your physical measurements and characteristics</CardDescription>
+          <CardDescription className="text-gray-400">
+            Your physical measurements and characteristics
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="age" className={errors.age ? "text-red-500" : ""}>
+              <Label htmlFor="age" className={errors.age ? "text-red-400" : "text-gray-300"}>
                 Age
               </Label>
               <Input
@@ -312,87 +348,123 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 type="number"
                 placeholder="25"
                 {...register("age")}
-                className={errors.age ? "border-red-500" : ""}
+                className={
+                  errors.age
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
-              {errors.age && <p className="text-sm text-red-500">{errors.age.message}</p>}
+              {errors.age && <p className="text-sm text-red-400">{errors.age.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="height" className={errors.height ? "text-red-500" : ""}>
+              <Label htmlFor="height" className={errors.height ? "text-red-400" : "text-gray-300"}>
                 Height
               </Label>
               <Input
                 id="height"
                 placeholder="5'8&quot;"
                 {...register("height")}
-                className={errors.height ? "border-red-500" : ""}
+                className={
+                  errors.height
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
-              {errors.height && <p className="text-sm text-red-500">{errors.height.message}</p>}
+              {errors.height && <p className="text-sm text-red-400">{errors.height.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="shoe_size" className={errors.shoe_size ? "text-red-500" : ""}>
+              <Label
+                htmlFor="shoe_size"
+                className={errors.shoe_size ? "text-red-400" : "text-gray-300"}
+              >
                 Shoe Size
               </Label>
               <Input
                 id="shoe_size"
                 placeholder="8"
                 {...register("shoe_size")}
-                className={errors.shoe_size ? "border-red-500" : ""}
+                className={
+                  errors.shoe_size
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.shoe_size && (
-                <p className="text-sm text-red-500">{errors.shoe_size.message}</p>
+                <p className="text-sm text-red-400">{errors.shoe_size.message}</p>
               )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="hair_color" className={errors.hair_color ? "text-red-500" : ""}>
+              <Label
+                htmlFor="hair_color"
+                className={errors.hair_color ? "text-red-400" : "text-gray-300"}
+              >
                 Hair Color
               </Label>
               <Input
                 id="hair_color"
                 placeholder="Brown"
                 {...register("hair_color")}
-                className={errors.hair_color ? "border-red-500" : ""}
+                className={
+                  errors.hair_color
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.hair_color && (
-                <p className="text-sm text-red-500">{errors.hair_color.message}</p>
+                <p className="text-sm text-red-400">{errors.hair_color.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="eye_color" className={errors.eye_color ? "text-red-500" : ""}>
+              <Label
+                htmlFor="eye_color"
+                className={errors.eye_color ? "text-red-400" : "text-gray-300"}
+              >
                 Eye Color
               </Label>
               <Input
                 id="eye_color"
                 placeholder="Blue"
                 {...register("eye_color")}
-                className={errors.eye_color ? "border-red-500" : ""}
+                className={
+                  errors.eye_color
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
                 disabled={isSubmitting}
               />
               {errors.eye_color && (
-                <p className="text-sm text-red-500">{errors.eye_color.message}</p>
+                <p className="text-sm text-red-400">{errors.eye_color.message}</p>
               )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="measurements" className={errors.measurements ? "text-red-500" : ""}>
+            <Label
+              htmlFor="measurements"
+              className={errors.measurements ? "text-red-400" : "text-gray-300"}
+            >
               Measurements
             </Label>
             <Input
               id="measurements"
               placeholder="34-26-36"
               {...register("measurements")}
-              className={errors.measurements ? "border-red-500" : ""}
+              className={
+                errors.measurements
+                  ? "border-red-500 bg-gray-800 text-white"
+                  : "bg-gray-800 border-gray-600 text-white"
+              }
               disabled={isSubmitting}
             />
             {errors.measurements && (
-              <p className="text-sm text-red-500">{errors.measurements.message}</p>
+              <p className="text-sm text-red-400">{errors.measurements.message}</p>
             )}
           </div>
         </CardContent>
@@ -409,34 +481,48 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="experience" className={errors.experience ? "text-red-500" : ""}>
+            <Label
+              htmlFor="experience"
+              className={errors.experience ? "text-red-400" : "text-gray-300"}
+            >
               Experience
             </Label>
             <Textarea
               id="experience"
               placeholder="Describe your modeling/acting experience..."
               {...register("experience")}
-              className={errors.experience ? "border-red-500" : ""}
+              className={
+                errors.experience
+                  ? "border-red-500 bg-gray-800 text-white"
+                  : "bg-gray-800 border-gray-600 text-white"
+              }
               disabled={isSubmitting}
               rows={4}
             />
             {errors.experience && (
-              <p className="text-sm text-red-500">{errors.experience.message}</p>
+              <p className="text-sm text-red-400">{errors.experience.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="languages" className={errors.languages ? "text-red-500" : ""}>
+            <Label
+              htmlFor="languages"
+              className={errors.languages ? "text-red-400" : "text-gray-300"}
+            >
               Languages (comma-separated)
             </Label>
             <Input
               id="languages"
               placeholder="English, Spanish, French"
               {...register("languages")}
-              className={errors.languages ? "border-red-500" : ""}
+              className={
+                errors.languages
+                  ? "border-red-500 bg-gray-800 text-white"
+                  : "bg-gray-800 border-gray-600 text-white"
+              }
               disabled={isSubmitting}
             />
-            {errors.languages && <p className="text-sm text-red-500">{errors.languages.message}</p>}
+            {errors.languages && <p className="text-sm text-red-400">{errors.languages.message}</p>}
           </div>
         </CardContent>
       </Card>
@@ -448,13 +534,14 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           variant="outline"
           onClick={() => router.push("/talent/dashboard")}
           disabled={isSubmitting}
+          className="border-gray-600 text-gray-300 hover:bg-gray-800"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !isDirty}
-          className="bg-black text-white hover:bg-black/90"
+          className="bg-white text-black hover:bg-gray-200"
         >
           {isSubmitting ? (
             <>

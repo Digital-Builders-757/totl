@@ -42,7 +42,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
   return (
     <div className="space-y-6">
       {/* Profile Header with Avatar */}
-      <Card>
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
             <AvatarUpload
@@ -51,24 +51,41 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
               displayName={profile.display_name}
             />
             <div>
-              <h2 className="text-2xl font-bold">{profile.display_name || "Profile"}</h2>
-              <p className="text-sm text-gray-500">{user.email}</p>
+              <h2 className="text-2xl font-bold text-white">{profile.display_name || "Profile"}</h2>
+              <p className="text-sm text-gray-400">{user.email}</p>
             </div>
           </CardTitle>
         </CardHeader>
       </Card>
 
       {/* Tabbed Interface */}
-      <Card>
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
-          <CardDescription>Manage your profile information and account settings</CardDescription>
+          <CardDescription className="text-gray-300">
+            Manage your profile information and account settings
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1 md:grid-cols-4">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="account">Account</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 bg-gray-800 border-gray-700">
+              <TabsTrigger
+                value="basic"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+              >
+                Basic Info
+              </TabsTrigger>
+              <TabsTrigger
+                value="details"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+              >
+                Details
+              </TabsTrigger>
+              <TabsTrigger
+                value="account"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+              >
+                Account
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4 mt-6">
@@ -82,7 +99,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
                 <ClientDetailsSection client={client} />
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No role-specific details available.</p>
+                  <p className="text-gray-400">No role-specific details available.</p>
                 </div>
               )}
             </TabsContent>

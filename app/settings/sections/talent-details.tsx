@@ -124,60 +124,83 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle>Talent Details</CardTitle>
-          <CardDescription>Update your talent-specific information</CardDescription>
+          <CardTitle className="text-white">Talent Details</CardTitle>
+          <CardDescription className="text-gray-400">
+            Update your talent-specific information
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="first_name" className={errors.first_name ? "text-red-500" : ""}>
+                <Label
+                  htmlFor="first_name"
+                  className={errors.first_name ? "text-red-400" : "text-gray-300"}
+                >
                   First Name *
                 </Label>
                 <Input
                   id="first_name"
                   placeholder="Enter your first name"
                   {...register("first_name")}
-                  className={errors.first_name ? "border-red-500" : ""}
+                  className={
+                    errors.first_name
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 {errors.first_name && (
-                  <p className="text-sm text-red-500">{errors.first_name.message}</p>
+                  <p className="text-sm text-red-400">{errors.first_name.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="last_name" className={errors.last_name ? "text-red-500" : ""}>
+                <Label
+                  htmlFor="last_name"
+                  className={errors.last_name ? "text-red-400" : "text-gray-300"}
+                >
                   Last Name *
                 </Label>
                 <Input
                   id="last_name"
                   placeholder="Enter your last name"
                   {...register("last_name")}
-                  className={errors.last_name ? "border-red-500" : ""}
+                  className={
+                    errors.last_name
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 {errors.last_name && (
-                  <p className="text-sm text-red-500">{errors.last_name.message}</p>
+                  <p className="text-sm text-red-400">{errors.last_name.message}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="experience">Experience</Label>
+              <Label htmlFor="experience" className="text-gray-300">
+                Experience
+              </Label>
               <Textarea
                 id="experience"
                 placeholder="Describe your experience and background"
                 {...register("experience")}
                 disabled={isSubmitting}
                 rows={4}
+                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500"
               />
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting || !isDirty} className="min-w-[100px]">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !isDirty}
+                className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+              >
                 {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>
