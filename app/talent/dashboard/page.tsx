@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SafeDate } from "@/components/safe-date";
@@ -99,7 +99,7 @@ interface Gig {
   application_deadline?: string | null;
 }
 
-export default function TalentDashboard() {
+function TalentDashboardContent() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -1025,5 +1025,19 @@ export default function TalentDashboard() {
         onClose={closeModal}
       />
     </div>
+  );
+}
+
+export default function TalentDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
+      }
+    >
+      <TalentDashboardContent />
+    </Suspense>
   );
 }
