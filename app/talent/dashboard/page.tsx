@@ -104,6 +104,10 @@ function TalentDashboardContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<{
+    avatar_url?: string | null;
+    display_name?: string | null;
+  } | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,6 +142,17 @@ function TalentDashboardContent() {
     if (!supabase || !user) return;
 
     try {
+      // Fetch user profile for avatar
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("avatar_url, avatar_path, display_name")
+        .eq("id", user.id)
+        .single();
+
+      if (!profileError && profileData) {
+        setUserProfile(profileData);
+      }
+
       // Fetch talent profile
       const { data: talentProfileData, error: talentProfileError } = await supabase
         .from("talent_profiles")
@@ -311,7 +326,10 @@ function TalentDashboardContent() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/images/totl-logo-transparent.png" alt="Profile" />
+                <AvatarImage
+                  src={userProfile?.avatar_url || "/images/totl-logo-transparent.png"}
+                  alt="Profile"
+                />
                 <AvatarFallback>
                   {talentProfile?.first_name?.[0]}
                   {talentProfile?.last_name?.[0] || "T"}

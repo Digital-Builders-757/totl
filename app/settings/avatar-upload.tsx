@@ -151,17 +151,17 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
       <div className="flex-1 space-y-2">
         <button
           type="button"
-          className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-gray-400 transition-colors cursor-pointer text-left"
+          className="w-full border-2 border-dashed border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors cursor-pointer text-left bg-gray-800"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
           <div className="text-center">
             <Upload className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-300">
               {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
             </p>
-            <p className="text-xs text-gray-500 mt-1">JPG, PNG or GIF. Max 5MB.</p>
+            <p className="text-xs text-gray-400 mt-1">JPG, PNG or GIF. Max 5MB.</p>
           </div>
         </button>
 

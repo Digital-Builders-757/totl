@@ -117,30 +117,36 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
   return (
     <div className="space-y-6">
       {/* Account Information */}
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle>Account Information</CardTitle>
-          <CardDescription>Your account details and verification status</CardDescription>
+          <CardTitle className="text-white">Account Information</CardTitle>
+          <CardDescription className="text-gray-400">
+            Your account details and verification status
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Email Address</Label>
-              <Input value={user.email || ""} disabled className="bg-gray-50" />
+              <Label className="text-gray-300">Email Address</Label>
+              <Input
+                value={user.email || ""}
+                disabled
+                className="bg-gray-700 border-gray-600 text-gray-400"
+              />
             </div>
             <div className="space-y-2">
-              <Label>Account Created</Label>
+              <Label className="text-gray-300">Account Created</Label>
               <Input
                 value={user.created_at ? new Date(user.created_at).toLocaleDateString() : "Unknown"}
                 disabled
-                className="bg-gray-50"
+                className="bg-gray-700 border-gray-600 text-gray-400"
               />
             </div>
           </div>
 
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="bg-gray-700 border-gray-600">
+            <AlertTriangle className="h-4 w-4 text-yellow-400" />
+            <AlertDescription className="text-gray-300">
               For security reasons, email changes require contacting support. Password changes are
               handled securely through Supabase authentication.
             </AlertDescription>
@@ -149,17 +155,19 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
       </Card>
 
       {/* Password Change */}
-      <Card>
+      <Card className="bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle>Change Password</CardTitle>
-          <CardDescription>Update your account password securely</CardDescription>
+          <CardTitle className="text-white">Change Password</CardTitle>
+          <CardDescription className="text-gray-400">
+            Update your account password securely
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label
                 htmlFor="currentPassword"
-                className={errors.currentPassword ? "text-red-500" : ""}
+                className={errors.currentPassword ? "text-red-400" : "text-gray-300"}
               >
                 Current Password
               </Label>
@@ -169,14 +177,18 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
                   type={showCurrentPassword ? "text" : "password"}
                   placeholder="Enter your current password"
                   {...register("currentPassword")}
-                  className={errors.currentPassword ? "border-red-500" : ""}
+                  className={
+                    errors.currentPassword
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 >
                   {showCurrentPassword ? (
@@ -187,12 +199,15 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
                 </Button>
               </div>
               {errors.currentPassword && (
-                <p className="text-sm text-red-500">{errors.currentPassword.message}</p>
+                <p className="text-sm text-red-400">{errors.currentPassword.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="newPassword" className={errors.newPassword ? "text-red-500" : ""}>
+              <Label
+                htmlFor="newPassword"
+                className={errors.newPassword ? "text-red-400" : "text-gray-300"}
+              >
                 New Password
               </Label>
               <div className="relative">
@@ -201,59 +216,63 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
                   type={showNewPassword ? "text" : "password"}
                   placeholder="Enter your new password"
                   {...register("newPassword")}
-                  className={errors.newPassword ? "border-red-500" : ""}
+                  className={
+                    errors.newPassword
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                 >
                   {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
               {errors.newPassword && (
-                <p className="text-sm text-red-500">{errors.newPassword.message}</p>
+                <p className="text-sm text-red-400">{errors.newPassword.message}</p>
               )}
 
               {/* Password Strength Indicator */}
               {newPassword && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div className="flex-1 bg-gray-700 rounded-full h-2">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                         style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
                       />
                     </div>
-                    <span className="text-sm text-gray-600">{passwordStrength.text}</span>
+                    <span className="text-sm text-gray-300">{passwordStrength.text}</span>
                   </div>
-                  <div className="text-xs text-gray-500 space-y-1">
+                  <div className="text-xs text-gray-400 space-y-1">
                     <p>Password must contain:</p>
                     <ul className="list-disc list-inside space-y-1">
-                      <li className={newPassword.length >= 8 ? "text-green-600" : "text-gray-400"}>
+                      <li className={newPassword.length >= 8 ? "text-green-400" : "text-gray-500"}>
                         At least 8 characters
                       </li>
                       <li
-                        className={/[A-Z]/.test(newPassword) ? "text-green-600" : "text-gray-400"}
+                        className={/[A-Z]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
                       >
                         One uppercase letter
                       </li>
                       <li
-                        className={/[a-z]/.test(newPassword) ? "text-green-600" : "text-gray-400"}
+                        className={/[a-z]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
                       >
                         One lowercase letter
                       </li>
                       <li
-                        className={/[0-9]/.test(newPassword) ? "text-green-600" : "text-gray-400"}
+                        className={/[0-9]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
                       >
                         One number
                       </li>
                       <li
                         className={
-                          /[^A-Za-z0-9]/.test(newPassword) ? "text-green-600" : "text-gray-400"
+                          /[^A-Za-z0-9]/.test(newPassword) ? "text-green-400" : "text-gray-500"
                         }
                       >
                         One special character
@@ -267,7 +286,7 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
-                className={errors.confirmPassword ? "text-red-500" : ""}
+                className={errors.confirmPassword ? "text-red-400" : "text-gray-300"}
               >
                 Confirm New Password
               </Label>
@@ -277,14 +296,18 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your new password"
                   {...register("confirmPassword")}
-                  className={errors.confirmPassword ? "border-red-500" : ""}
+                  className={
+                    errors.confirmPassword
+                      ? "border-red-500 bg-gray-700 text-white"
+                      : "bg-gray-700 border-gray-600 text-white"
+                  }
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -295,12 +318,16 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
                 </Button>
               </div>
               {errors.confirmPassword && (
-                <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                <p className="text-sm text-red-400">{errors.confirmPassword.message}</p>
               )}
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting || !isDirty} className="min-w-[100px]">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !isDirty}
+                className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+              >
                 {isSubmitting ? "Updating..." : "Update Password"}
               </Button>
             </div>
