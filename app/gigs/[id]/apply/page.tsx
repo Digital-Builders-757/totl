@@ -1,4 +1,4 @@
-import { ArrowLeft, Send, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ApplyToGigForm } from "./apply-to-gig-form";
@@ -10,18 +10,6 @@ import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;
-}
-
-interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  compensation: string;
-  category?: string;
-  date?: string;
-  image_url: string | null;
-  client_id: string;
 }
 
 export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {

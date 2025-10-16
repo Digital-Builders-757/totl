@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
 import * as Sentry from "@sentry/nextjs";
+import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/database";
 
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     }
 
     const bookingDate = date ? new Date(date).toISOString() : new Date(Date.now() + 7 * 864e5).toISOString();
-    const numericComp = compensation ? Number(String(compensation).replace(/[^0-9.\-]/g, "")) : null;
+    const numericComp = compensation ? Number(String(compensation).replace(/[^0-9.-]/g, "")) : null;
 
     // Create booking
     const { data: booking, error: bookErr } = await supabase
