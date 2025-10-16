@@ -38,7 +38,9 @@ export function SafeImage({
     if (!hasError) {
       setHasError(true);
       setImgSrc(fallbackSrc);
-      logImageFallback(src, context);
+      if (src) {
+        logImageFallback(src, context);
+      }
     }
   };
 
