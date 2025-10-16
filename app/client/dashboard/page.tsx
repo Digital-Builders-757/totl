@@ -78,6 +78,7 @@ interface Application {
     display_name: string | null;
     email_verified: boolean;
     role: string;
+    avatar_url: string | null;
   };
 }
 
@@ -99,6 +100,10 @@ export default function ClientDashboard() {
   const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<{
+    avatar_url?: string | null;
+    display_name?: string | null;
+  } | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,16 +145,20 @@ export default function ClientDashboard() {
     if (!supabase || !user) return;
 
     try {
-      // Fetch user profile
-      const { error: profileError } = await supabase
+      // Fetch user profile with avatar
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
-        .select("*")
+        .select("avatar_url, avatar_path, display_name")
         .eq("id", user.id)
         .single();
 
       if (profileError) {
         console.error("Error fetching profile:", profileError);
         return;
+      }
+
+      if (profileData) {
+        setUserProfile(profileData);
       }
 
       // Fetch client profile
@@ -185,7 +194,8 @@ export default function ClientDashboard() {
           `
           *,
           gigs!inner(title, category, location, compensation),
-          profiles!talent_id(display_name, email_verified, role)
+          talent_profiles!talent_id(first_name, last_name, location, experience),
+          profiles!talent_id(display_name, email_verified, role, avatar_url)
         `
         )
         .eq("gigs.client_id", user.id)
@@ -337,7 +347,10 @@ export default function ClientDashboard() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/images/totl-logo.png" alt="Company" />
+                <AvatarImage
+                  src={userProfile?.avatar_url || "/images/totl-logo.png"}
+                  alt="Company"
+                />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
@@ -572,7 +585,10 @@ export default function ClientDashboard() {
                       >
                         <Avatar className="h-10 w-10">
                           <AvatarImage
-                            src="/images/totl-logo-transparent.png"
+                            src={
+                              application.profiles?.avatar_url ||
+                              "/images/totl-logo-transparent.png"
+                            }
                             alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
                           />
                           <AvatarFallback>
@@ -784,7 +800,10 @@ export default function ClientDashboard() {
                       <div className="flex items-center gap-4">
                         <Avatar className="h-16 w-16">
                           <AvatarImage
-                            src="/images/totl-logo-transparent.png"
+                            src={
+                              application.profiles?.avatar_url ||
+                              "/images/totl-logo-transparent.png"
+                            }
                             alt={
                               application.talent_profiles?.first_name &&
                               application.talent_profiles?.last_name
