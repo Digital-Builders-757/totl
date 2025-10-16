@@ -34,9 +34,12 @@ next-env.d.ts
 # IDE files
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 
 # OS files
 .DS_Store
 Thumbs.db
+# Sentry Config File
+.env.sentry-build-plugin

@@ -137,7 +137,7 @@ export default async function GigsPage() {
                 >
                   <div className="relative aspect-[4/3]">
                     <SafeImage
-                      src={gig.image_url || ""}
+                      src={gig.image_url}
                       alt={gig.title}
                       fill
                       className="transition-transform duration-500 group-hover:scale-105"

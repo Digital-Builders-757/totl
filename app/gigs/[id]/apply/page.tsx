@@ -1,15 +1,12 @@
-"use client";
-
-import { ArrowLeft, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { notFound, redirect } from "next/navigation";
+import { ApplyToGigForm } from "./apply-to-gig-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;
@@ -27,166 +24,51 @@ interface Gig {
   client_id: string;
 }
 
-export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
-  const supabase = createSupabaseBrowser();
-  const router = useRouter();
+export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
+  const { id } = await params;
+  const supabase = await createSupabaseServerComponentClient();
 
-  const [gig, setGig] = useState<Gig | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [coverLetter, setCoverLetter] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [alreadyApplied, setAlreadyApplied] = useState(false);
-  const [user, setUser] = useState<{ id: string } | null>(null);
+  // Get current user session
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  // Get params and fetch data
-  const fetchData = useCallback(
-    async (gigId: string) => {
-      setLoading(true);
-      setError("");
-
-      if (!supabase) {
-        setError("Database connection not available");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Get current user first
-        const {
-          data: { user: currentUser },
-          error: userError,
-        } = await supabase.auth.getUser();
-
-        if (userError || !currentUser) {
-          setError("You must be logged in to apply for gigs.");
-          setLoading(false);
-          return;
-        }
-
-        setUser(currentUser);
-
-        // Check if user has talent role
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", currentUser.id)
-          .single();
-
-        if (profileError || !profile || profile.role !== "talent") {
-          setError("Only talent users can apply for gigs.");
-          setLoading(false);
-          return;
-        }
-
-        // Fetch gig details
-        const { data: gigData, error: gigError } = await supabase
-          .from("gigs")
-          .select("*")
-          .eq("id", gigId)
-          .eq("status", "active")
-          .single();
-
-        if (gigError || !gigData) {
-          setError("Gig not found or no longer available.");
-          setLoading(false);
-          return;
-        }
-
-        setGig(gigData);
-
-        // Check if user already applied
-        const { data: existingApplication } = await supabase
-          .from("applications")
-          .select("id, status")
-          .eq("gig_id", gigId)
-          .eq("talent_id", currentUser.id)
-          .single();
-
-        if (existingApplication) {
-          setAlreadyApplied(true);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching data:", err);
-        setError("An error occurred while loading the gig.");
-      } finally {
-        setLoading(false); // Always set loading to false
-      }
-    },
-    [supabase]
-  );
-
-  useEffect(() => {
-    async function initialize() {
-      try {
-        const { id: gigId } = await params;
-        await fetchData(gigId);
-      } catch (error) {
-        console.error("Error initializing:", error);
-        setError("Failed to load application form.");
-        setLoading(false);
-      }
-    }
-    initialize();
-  }, [params, fetchData]);
-
-  async function handleApply(e: React.FormEvent) {
-    e.preventDefault();
-    setSubmitting(true);
-    setError("");
-
-    if (!supabase) {
-      setError("Database connection not available");
-      setSubmitting(false);
-      return;
-    }
-
-    try {
-      if (!user || !gig) {
-        setError("Missing user or gig data.");
-        setSubmitting(false);
-        return;
-      }
-
-      // Double-check if already applied
-      const { data: existingApplication } = await supabase
-        .from("applications")
-        .select("id")
-        .eq("gig_id", gig.id)
-        .eq("talent_id", user.id)
-        .single();
-
-      if (existingApplication) {
-        setAlreadyApplied(true);
-        setSubmitting(false);
-        return;
-      }
-
-      // Submit application
-      const { error: insertError } = await supabase.from("applications").insert([
-        {
-          gig_id: gig.id,
-          talent_id: user.id,
-          status: "under_review",
-          message: coverLetter.trim() || null,
-        },
-      ]);
-
-      if (insertError) {
-        console.error("Application insert error:", insertError);
-        setError("There was an error submitting your application. Please try again.");
-        setSubmitting(false);
-        return;
-      }
-
-      // Success! Redirect to dashboard with success message
-      router.push("/talent/dashboard?applied=success");
-    } catch (err) {
-      console.error("Error submitting application:", err);
-      setError("An unexpected error occurred. Please try again.");
-      setSubmitting(false);
-    }
+  if (!session) {
+    redirect("/login?returnUrl=" + encodeURIComponent(`/gigs/${id}/apply`));
   }
+
+  // Check if user has talent role
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", session.user.id)
+    .single();
+
+  if (profileError || !profile || profile.role !== "talent") {
+    redirect("/login?error=talent-only");
+  }
+
+  // Fetch gig details
+  const { data: gig, error: gigError } = await supabase
+    .from("gigs")
+    .select("*")
+    .eq("id", id)
+    .eq("status", "active")
+    .single();
+
+  if (gigError || !gig) {
+    notFound();
+  }
+
+  // Check if user already applied
+  const { data: existingApplication } = await supabase
+    .from("applications")
+    .select("id, status")
+    .eq("gig_id", id)
+    .eq("talent_id", session.user.id)
+    .single();
+
+  const alreadyApplied = !!existingApplication;
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -199,66 +81,6 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     };
     return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-24">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-600" />
-              <h2 className="text-xl font-semibold mb-2">Loading Application Form</h2>
-              <p className="text-gray-600">Please wait while we load the gig details...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-24">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <div className="mb-6">
-              <Button variant="ghost" asChild>
-                <Link href="/gigs" className="flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to All Gigs
-                </Link>
-              </Button>
-            </div>
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!gig) {
-    return (
-      <div className="min-h-screen bg-gray-50 pt-24">
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center py-12">
-              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-              <h2 className="text-xl font-semibold mb-2">Gig Not Found</h2>
-              <p className="text-gray-600 mb-6">
-                The gig you&apos;re looking for doesn&apos;t exist or is no longer available.
-              </p>
-              <Button asChild>
-                <Link href="/gigs">Browse Available Gigs</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">
@@ -331,53 +153,7 @@ export default function ApplyToGigPage({ params }: ApplyToGigPageProps) {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <form onSubmit={handleApply} className="space-y-6">
-                    <div className="space-y-2">
-                      <label htmlFor="coverLetter" className="text-sm font-medium">
-                        Cover Letter (Optional)
-                      </label>
-                      <Textarea
-                        id="coverLetter"
-                        value={coverLetter}
-                        onChange={(e) => setCoverLetter(e.target.value)}
-                        placeholder="Tell the client why you're perfect for this gig. Include any relevant experience, availability, or special skills..."
-                        className="min-h-[120px]"
-                        maxLength={1000}
-                      />
-                      <p className="text-xs text-gray-500">{coverLetter.length}/1000 characters</p>
-                    </div>
-
-                    <div className="flex gap-3">
-                      <Button type="submit" disabled={submitting} className="flex-1">
-                        {submitting ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            <Send className="h-4 w-4 mr-2" />
-                            Submit Application
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={submitting}
-                        onClick={() => router.push(`/gigs/${gig.id}`)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-
-                    {error && (
-                      <Alert variant="destructive">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-                  </form>
+                  <ApplyToGigForm gig={gig} />
                 )}
               </CardContent>
             </Card>

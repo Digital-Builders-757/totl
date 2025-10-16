@@ -5,7 +5,7 @@ import { useState } from "react";
 import { logImageFallback } from "@/lib/utils/error-logger";
 
 interface SafeImageProps {
-  src: string;
+  src: string | null | undefined;
   alt: string;
   width?: number;
   height?: number;
@@ -29,14 +29,18 @@ export function SafeImage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
-  const [imgSrc, setImgSrc] = useState(src);
-  const [hasError, setHasError] = useState(false);
+  // Handle empty strings and null values by using fallback immediately
+  const initialSrc = src && src.trim() !== "" ? src : fallbackSrc;
+  const [imgSrc, setImgSrc] = useState(initialSrc);
+  const [hasError, setHasError] = useState(src === "" || !src || src.trim() === "");
 
   const handleError = () => {
     if (!hasError) {
       setHasError(true);
       setImgSrc(fallbackSrc);
-      logImageFallback(src, context);
+      if (src) {
+        logImageFallback(src, context);
+      }
     }
   };
 

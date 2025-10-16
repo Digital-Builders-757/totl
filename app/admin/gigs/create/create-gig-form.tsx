@@ -2,7 +2,10 @@
 
 import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useActionState } from "react";
+import { useFormStatus } from "react-dom";
+import { createGig } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +19,32 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" disabled={pending}>
+      {pending ? "Creating..." : "Create Gig"}
+    </Button>
+  );
+}
+
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
+  const [category, setCategory] = useState<string>("commercial");
+  const router = useRouter();
+  const [state, formAction] = useActionState(
+    async (prevState: { error?: string; success?: boolean } | null, formData: FormData) => {
+      const result = await createGig(formData);
+      if (result?.success) {
+        // Redirect to dashboard on success
+        router.push("/admin/dashboard");
+        router.refresh();
+      }
+      return result || null;
+    },
+    null
+  );
 
   const addRequirement = () => {
     setRequirements([...requirements, ""]);
@@ -56,16 +83,27 @@ export function CreateGigForm() {
               </p>
             </div>
 
-            <form className="space-y-6">
+            <form action={formAction} className="space-y-6">
+              {state?.error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+                  {state.error}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label htmlFor="title">Gig Title</Label>
-                <Input id="title" placeholder="e.g., Luxury Jewelry Campaign" />
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="e.g., Luxury Jewelry Campaign"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="company">Company/Brand Name</Label>
                 <Input
                   id="company"
+                  name="company"
                   placeholder="Your company or brand name"
                   defaultValue="Admin Company"
                 />
@@ -74,7 +112,7 @@ export function CreateGigForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select defaultValue="commercial">
+                  <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -89,6 +127,7 @@ export function CreateGigForm() {
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
+                  <input type="hidden" name="category" value={category} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Location</Label>
@@ -97,7 +136,13 @@ export function CreateGigForm() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                       size={16}
                     />
-                    <Input id="location" placeholder="e.g., New York, NY" className="pl-9" />
+                    <Input
+                      id="location"
+                      name="location"
+                      placeholder="e.g., New York, NY"
+                      className="pl-9"
+                      required
+                    />
                   </div>
                 </div>
               </div>
@@ -106,8 +151,10 @@ export function CreateGigForm() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
+                  name="description"
                   placeholder="Describe the gig, requirements, and what you're looking for..."
                   rows={4}
+                  required
                 />
               </div>
 
@@ -119,7 +166,7 @@ export function CreateGigForm() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                       size={16}
                     />
-                    <Input id="start_date" type="date" className="pl-9" />
+                    <Input id="start_date" name="start_date" type="date" className="pl-9" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -129,7 +176,13 @@ export function CreateGigForm() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                       size={16}
                     />
-                    <Input id="compensation_min" placeholder="0" className="pl-9" />
+                    <Input
+                      id="compensation_min"
+                      name="compensation_min"
+                      type="number"
+                      placeholder="0"
+                      className="pl-9"
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -139,7 +192,13 @@ export function CreateGigForm() {
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                       size={16}
                     />
-                    <Input id="compensation_max" placeholder="1000" className="pl-9" />
+                    <Input
+                      id="compensation_max"
+                      name="compensation_max"
+                      type="number"
+                      placeholder="1000"
+                      className="pl-9"
+                    />
                   </div>
                 </div>
               </div>
@@ -149,6 +208,7 @@ export function CreateGigForm() {
                 {requirements.map((requirement, index) => (
                   <div key={index} className="flex space-x-2">
                     <Input
+                      name={`requirement_${index}`}
                       placeholder="e.g., Female, 18-25, athletic build"
                       value={requirement}
                       onChange={(e) => updateRequirement(index, e.target.value)}
@@ -172,12 +232,12 @@ export function CreateGigForm() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch id="urgent" />
+                <Switch id="urgent" name="urgent" />
                 <Label htmlFor="urgent">Mark as urgent</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch id="featured" />
+                <Switch id="featured" name="featured" />
                 <Label htmlFor="featured">Feature this gig</Label>
               </div>
 
@@ -185,7 +245,7 @@ export function CreateGigForm() {
                 <Button type="button" variant="outline" asChild>
                   <Link href="/admin/dashboard">Cancel</Link>
                 </Button>
-                <Button type="submit">Create Gig</Button>
+                <SubmitButton />
               </div>
             </form>
           </div>
