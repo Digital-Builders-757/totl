@@ -55,7 +55,7 @@ These are **PostgreSQL database views** - NOT traditional caches. Think of them 
 #### **`admin_talent_dashboard`** (USED ✅)
 - **Location:** Created in `supabase/migrations/20250813193749_admin_talent_dashboard_view.sql`
 - **Purpose:** Pre-joins applications + gigs + profiles data
-- **Used in:** `/admin/talentdashboard` and `/admin/talent-dashboard`
+- **Used in:** Admin dashboard for viewing talent data
 - **SQL:**
   ```sql
   SELECT 
@@ -230,10 +230,10 @@ Once you're logged in as admin, you have access to:
 - Review talent applications
 - Accept/reject applications
 
-### **Talent Dashboard View** (`/admin/talent-dashboard`)
-- See platform from talent perspective
-- View all talent profiles
-- Browse applications as if you were talent
+### **Talent Portal Access** (`/talent`)
+- Admins can view the talent portal (public-facing)
+- View talent profiles and gig listings
+- Understand the talent user experience
 - Quality assurance tool
 
 ### **User Management** (`/admin/users/create`)

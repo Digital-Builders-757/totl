@@ -289,9 +289,9 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                     </Link>
                   </Button>
                   <Button className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800" variant="outline" asChild>
-                    <Link href="/admin/talent-dashboard" className="flex items-center gap-2">
+                    <Link href="/talent" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      View Talent Dashboard
+                      View Talent Portal
                     </Link>
                   </Button>
                 </CardContent>
