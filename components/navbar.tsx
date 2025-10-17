@@ -104,7 +104,7 @@ export default function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-black/95 rounded-md shadow-lg shadow-white/10 overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 backdrop-blur-sm border border-white/10">
                   {userRole === "talent" && (
                     <Link
-                      href="/admin/talent-dashboard"
+                      href="/talent/dashboard"
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Talent Dashboard
@@ -196,7 +196,7 @@ export default function Navbar() {
                   <>
                     {userRole === "talent" && (
                       <Link
-                        href="/admin/talent-dashboard"
+                        href="/talent/dashboard"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Talent Dashboard

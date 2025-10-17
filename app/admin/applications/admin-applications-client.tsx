@@ -8,10 +8,6 @@ import {
   XCircle,
   Clock,
   Filter,
-  Settings,
-  LogOut,
-  Bell,
-  UserIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -40,6 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
+import { AdminHeader } from "@/components/admin/admin-header";
 
 // Type for the joined application data
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {
@@ -54,6 +51,7 @@ interface AdminApplicationsClientProps {
 
 export function AdminApplicationsClient({
   applications: initialApplications,
+  user,
 }: AdminApplicationsClientProps) {
   const [activeTab, setActiveTab] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
@@ -193,73 +191,7 @@ export function AdminApplicationsClient({
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
-      {/* Admin Header */}
-      <header className="bg-black/80 backdrop-blur-md border-b border-gray-700 sticky top-0 z-30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center mr-8">
-                <SafeImage
-                  src="/images/totl-logo-transparent.png"
-                  alt="TOTL Agency"
-                  width={100}
-                  height={40}
-                  placeholderQuery="agency logo"
-                  className="brightness-100"
-                />
-              </Link>
-              <nav className="hidden md:flex space-x-6">
-                <Link href="/admin/dashboard" className="text-gray-400 hover:text-white transition-colors duration-200">
-                  Dashboard
-                </Link>
-                <Link href="/admin/applications" className="text-white font-medium bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-                  Applications
-                </Link>
-                <Link href="/admin/talent" className="text-gray-400 hover:text-white transition-colors duration-200">
-                  Talent
-                </Link>
-                <Link href="/admin/gigs" className="text-gray-400 hover:text-white transition-colors duration-200">
-                  Gigs
-                </Link>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-gray-400 hover:text-white relative transition-colors duration-200">
-                <Bell size={20} />
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center animate-pulse">
-                  3
-                </span>
-              </button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center text-sm font-medium text-gray-300 hover:text-white transition-colors duration-200">
-                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-2 flex items-center justify-center">
-                      <UserIcon size={16} className="text-white" />
-                    </div>
-                    <span className="hidden md:inline">Admin</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                  <DropdownMenuItem className="text-gray-300 hover:bg-gray-700">
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="text-gray-300 hover:bg-gray-700">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="text-gray-300 hover:bg-gray-700">
-                    <Link href="/login">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        </div>
-      </header>
+      <AdminHeader user={user} notificationCount={3} />
 
       <div className="container mx-auto px-4 py-8">
         {/* Dashboard Header */}
