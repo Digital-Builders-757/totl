@@ -18,8 +18,11 @@ Sentry.init({
   // Set environment
   environment: process.env.VERCEL_ENV || "development",
 
-  // Enable logs to be sent to Sentry (disabled in production to reduce noise)
-  enableLogs: process.env.NODE_ENV !== "production",
+  // Enable logs to be sent to Sentry (enabled in development for better debugging)
+  enableLogs: true,
+  
+  // Set debug mode to see what's happening
+  debug: process.env.NODE_ENV === "development",
 
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
