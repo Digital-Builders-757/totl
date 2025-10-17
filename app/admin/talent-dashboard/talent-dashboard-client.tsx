@@ -65,26 +65,41 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
       <div className="flex items-center justify-between mb-6">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-          <Input placeholder="Search applications..." className="pl-10" />
+          <Input placeholder="Search applications..." className="pl-10 bg-gray-800 border-gray-700 text-white" />
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
           <Filter className="mr-2 h-4 w-4" />
           Filter
         </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active">Active ({gigs.active.length})</TabsTrigger>
-          <TabsTrigger value="accepted">Accepted ({gigs.accepted.length})</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected ({gigs.rejected.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-gray-900 border-gray-800">
+          <TabsTrigger 
+            value="active" 
+            className="text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+          >
+            Active ({gigs.active.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="accepted"
+            className="text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+          >
+            Accepted ({gigs.accepted.length})
+          </TabsTrigger>
+          <TabsTrigger 
+            value="rejected"
+            className="text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+          >
+            Rejected ({gigs.rejected.length})
+          </TabsTrigger>
         </TabsList>
         <TabsContent value={activeTab}>
           <div className="mt-6">
-            <div className="bg-white rounded-xl shadow-sm">
+            <div className="bg-gray-900 border-gray-800 rounded-xl shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-50 text-gray-600 font-medium">
+                  <thead className="bg-gray-800 text-gray-300 font-medium">
                     <tr>
                       <th className="py-3 px-6">Gig</th>
                       <th className="py-3 px-6">Applied</th>
@@ -92,10 +107,10 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
                       <th className="py-3 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
+                  <tbody className="divide-y divide-gray-700">
                     {activeApplications.length > 0 ? (
                       activeApplications.map((application: Gig) => (
-                        <tr key={application.id} className="hover:bg-gray-50">
+                        <tr key={application.id} className="hover:bg-gray-800">
                           <td className="py-4 px-6">
                             <div className="flex items-center">
                               <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
@@ -111,24 +126,24 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
                               <div>
                                 <Link
                                   href={`/gigs/${application.gigId}`}
-                                  className="font-semibold text-black hover:underline"
+                                  className="font-semibold text-white hover:underline"
                                 >
                                   {application.title}
                                 </Link>
-                                <p className="text-gray-600">
+                                <p className="text-gray-300">
                                   {application.company} - {application.location}
                                 </p>
                               </div>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-gray-600">{application.appliedDate}</td>
+                          <td className="py-4 px-6 text-gray-300">{application.appliedDate}</td>
                           <td className="py-4 px-6">
                             <Badge className={`capitalize ${getStatusBadge(application.status)}`}>
                               {application.status.replace("_", " ")}
                             </Badge>
                           </td>
                           <td className="py-4 px-6 text-right">
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-800">
                               <MoreVertical size={18} />
                             </Button>
                           </td>
@@ -136,7 +151,7 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="text-center py-12 text-gray-500">
+                        <td colSpan={4} className="text-center py-12 text-gray-400">
                           You have no {activeTab} applications yet.
                         </td>
                       </tr>
