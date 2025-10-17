@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import Image from "next/image";
 
 interface PortfolioUploadProps {

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import type React from "react";
 import ClientLayout from "./client-layout";
 import { ThemeProvider } from "@/components/theme-provider";
+import Providers from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,7 +44,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem={false}
           disableTransitionOnChange
         >
-          <ClientLayout>{children}</ClientLayout>
+          <Providers>
+            <ClientLayout>{children}</ClientLayout>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

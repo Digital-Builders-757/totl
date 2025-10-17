@@ -5,7 +5,6 @@ import type React from "react";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import Navbar from "@/components/navbar";
-import { Toaster } from "@/components/ui/toaster";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,7 +16,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <AuthProvider>
       {showNavbar && <Navbar />}
       {children}
-      <Toaster />
     </AuthProvider>
   );
 }
