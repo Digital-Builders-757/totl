@@ -39,7 +39,7 @@ export default async function SettingsPage() {
   }
 
   // Fetch profile data with explicit column selection
-  const [{ data: profile }, { data: talent }, { data: client }] = await Promise.all([
+  const [{ data: profile }, { data: talent }, { data: client }, { data: portfolioItems }] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -61,6 +61,11 @@ export default async function SettingsPage() {
       )
       .eq("user_id", user.id)
       .maybeSingle(),
+    supabase
+      .from("portfolio_items")
+      .select("id, talent_id, title, description, caption, image_url, image_path, display_order, is_primary, created_at, updated_at")
+      .eq("talent_id", user.id)
+      .order("display_order", { ascending: true }),
   ]);
 
   // Generate signed URL with image transformations for avatar if path exists
@@ -78,6 +83,19 @@ export default async function SettingsPage() {
     avatarSrc = signed?.signedUrl ?? null;
   }
 
+  // Get public URLs for portfolio images
+  const portfolioItemsWithUrls = await Promise.all(
+    (portfolioItems || []).map(async (item) => {
+      if (item.image_path) {
+        const { data } = supabase.storage
+          .from("portfolio")
+          .getPublicUrl(item.image_path);
+        return { ...item, imageUrl: data.publicUrl };
+      }
+      return { ...item, imageUrl: item.image_url || undefined };
+    })
+  );
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-8">
@@ -93,6 +111,7 @@ export default async function SettingsPage() {
             talent={talent as TalentProfileRow | null}
             client={client as ClientProfileRow | null}
             avatarSrc={avatarSrc}
+            portfolioItems={portfolioItemsWithUrls}
           />
         </div>
       </div>

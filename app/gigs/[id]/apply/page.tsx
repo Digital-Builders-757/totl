@@ -71,12 +71,12 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
+    <div className="min-h-screen bg-black pt-24">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           {/* Back Button */}
           <div className="mb-6">
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
               <Link href={`/gigs/${gig.id}`} className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
                 Back to Gig Details
@@ -87,12 +87,12 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
           {/* Main Content */}
           <div className="space-y-6">
             {/* Gig Summary Card */}
-            <Card>
+            <Card className="bg-gray-900 border-gray-700">
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
-                    <CardTitle className="text-2xl font-bold">{gig.title}</CardTitle>
-                    <CardDescription className="text-lg mt-2">{gig.description}</CardDescription>
+                    <CardTitle className="text-2xl font-bold text-white">{gig.title}</CardTitle>
+                    <CardDescription className="text-lg mt-2 text-gray-300">{gig.description}</CardDescription>
                   </div>
                   <Badge className={getCategoryColor(gig.category || "general")}>
                     {gig.category || "General"}
@@ -102,17 +102,17 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="font-medium text-gray-700">Location:</span>
-                    <p className="text-gray-600">{gig.location}</p>
+                    <span className="font-medium text-gray-300">Location:</span>
+                    <p className="text-gray-400">{gig.location}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-700">Compensation:</span>
-                    <p className="text-gray-600">${gig.compensation}</p>
+                    <span className="font-medium text-gray-300">Compensation:</span>
+                    <p className="text-gray-400">${gig.compensation}</p>
                   </div>
                   {gig.date && (
                     <div>
-                      <span className="font-medium text-gray-700">Date:</span>
-                      <p className="text-gray-600">{new Date(gig.date).toLocaleDateString()}</p>
+                      <span className="font-medium text-gray-300">Date:</span>
+                      <p className="text-gray-400">{new Date(gig.date).toLocaleDateString()}</p>
                     </div>
                   )}
                 </div>
@@ -120,22 +120,22 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
             </Card>
 
             {/* Application Form */}
-            <Card>
+            <Card className="bg-gray-900 border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-white">
                   <Send className="h-5 w-5" />
                   Submit Application
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-gray-300">
                   Complete your application for this gig. Your profile information will be
                   automatically included.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {alreadyApplied ? (
-                  <Alert>
-                    <CheckCircle className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="bg-green-500/10 border-green-500/20">
+                    <CheckCircle className="h-4 w-4 text-green-400" />
+                    <AlertDescription className="text-green-300">
                       You have already applied for this gig. Check your dashboard for updates on
                       your application status.
                     </AlertDescription>

@@ -7,6 +7,7 @@ import { AccountSettingsSection } from "./sections/account-settings";
 import { BasicInfoSection } from "./sections/basic-info";
 import { ClientDetailsSection } from "./sections/client-details";
 import { TalentDetailsSection } from "./sections/talent-details";
+import { PortfolioSection } from "./sections/portfolio-section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
@@ -14,6 +15,7 @@ import type { Database } from "@/types/supabase";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
 type Client = Database["public"]["Tables"]["client_profiles"]["Row"];
+type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & { imageUrl?: string };
 
 // Type for the exact columns we select
 type ProfileData = Pick<
@@ -34,10 +36,12 @@ interface ProfileEditorProps {
   talent: Talent | null;
   client: Client | null;
   avatarSrc: string | null;
+  portfolioItems?: PortfolioItem[];
 }
 
-export function ProfileEditor({ user, profile, talent, client, avatarSrc }: ProfileEditorProps) {
+export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfolioItems = [] }: ProfileEditorProps) {
   const [activeTab, setActiveTab] = useState("basic");
+  const isTalent = profile.role === "talent";
 
   return (
     <div className="space-y-6">
@@ -67,7 +71,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 bg-gray-800 border-gray-700">
+            <TabsList className={`grid w-full ${isTalent ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'} bg-gray-800 border-gray-700`}>
               <TabsTrigger
                 value="basic"
                 className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
@@ -80,6 +84,14 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
               >
                 Details
               </TabsTrigger>
+              {isTalent && (
+                <TabsTrigger
+                  value="portfolio"
+                  className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                >
+                  Portfolio
+                </TabsTrigger>
+              )}
               <TabsTrigger
                 value="account"
                 className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
@@ -103,6 +115,12 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc }: Prof
                 </div>
               )}
             </TabsContent>
+
+            {isTalent && (
+              <TabsContent value="portfolio" className="space-y-4 mt-6">
+                <PortfolioSection portfolioItems={portfolioItems} />
+              </TabsContent>
+            )}
 
             <TabsContent value="account" className="space-y-4 mt-6">
               <AccountSettingsSection user={user} />
