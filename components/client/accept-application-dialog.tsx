@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckCircle2, Calendar, DollarSign, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Calendar, DollarSign, FileText, Loader2 } from "lucide-react";
 import { acceptApplication } from "@/lib/actions/booking-actions";
 
 interface AcceptApplicationDialogProps {

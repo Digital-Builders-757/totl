@@ -305,7 +305,7 @@ export async function updateBookingStatus(params: {
     }
 
     // Update booking
-    const updateData: any = { status: params.status };
+    const updateData: { status: string; notes?: string } = { status: params.status };
     if (params.notes) {
       updateData.notes = params.notes;
     }

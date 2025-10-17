@@ -1,10 +1,10 @@
 "use client";
 
+import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {

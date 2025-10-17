@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
 import { useToast } from "@/components/ui/use-toast";
-import Image from "next/image";
+import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
 
 interface PortfolioUploadProps {
   onUploadSuccess?: () => void;
@@ -168,7 +168,15 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
         <div>
           <Label className="text-white mb-2 block">Image</Label>
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => fileInputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}

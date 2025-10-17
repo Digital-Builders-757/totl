@@ -4,13 +4,13 @@ import { FileText, Clock, MapPin, DollarSign, CheckCircle2, XCircle } from "luci
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AcceptApplicationDialog } from "@/components/client/accept-application-dialog";
+import { RejectApplicationDialog } from "@/components/client/reject-application-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import { AcceptApplicationDialog } from "@/components/client/accept-application-dialog";
-import { RejectApplicationDialog } from "@/components/client/reject-application-dialog";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";

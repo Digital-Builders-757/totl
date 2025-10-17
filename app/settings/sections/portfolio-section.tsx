@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { PortfolioUpload } from "@/components/portfolio/portfolio-upload";
-import { PortfolioGallery } from "@/components/portfolio/portfolio-gallery";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
+import { useState } from "react";
+import { PortfolioGallery } from "@/components/portfolio/portfolio-gallery";
+import { PortfolioUpload } from "@/components/portfolio/portfolio-upload";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & { imageUrl?: string };
@@ -14,9 +14,8 @@ interface PortfolioSectionProps {
   portfolioItems: PortfolioItem[];
 }
 
-export function PortfolioSection({ portfolioItems: initialItems }: PortfolioSectionProps) {
+export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
   const [showUpload, setShowUpload] = useState(false);
-  const [items, setItems] = useState(initialItems);
 
   const handleUploadSuccess = () => {
     setShowUpload(false);
@@ -68,10 +67,10 @@ export function PortfolioSection({ portfolioItems: initialItems }: PortfolioSect
       )}
 
       {/* Portfolio Gallery */}
-      <PortfolioGallery initialItems={items} onUpdate={handleGalleryUpdate} />
+      <PortfolioGallery initialItems={portfolioItems} onUpdate={handleGalleryUpdate} />
 
       {/* Help Text */}
-      {items.length === 0 && !showUpload && (
+      {portfolioItems.length === 0 && !showUpload && (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-white">Get Started with Your Portfolio</CardTitle>

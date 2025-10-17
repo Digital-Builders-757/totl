@@ -2,8 +2,8 @@
 import { Inter } from "next/font/google";
 import type React from "react";
 import ClientLayout from "./client-layout";
-import { ThemeProvider } from "@/components/theme-provider";
 import Providers from "./providers";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { XCircle, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { XCircle, FileText, Loader2 } from "lucide-react";
 import { rejectApplication } from "@/lib/actions/booking-actions";
 
 interface RejectApplicationDialogProps {

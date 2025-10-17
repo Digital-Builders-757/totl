@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Trash2, Star, GripVertical, Edit2, Check, X } from "lucide-react";
+import Image from "next/image";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,6 @@ import {
   setPrimaryPortfolioItem,
   updatePortfolioItem,
 } from "@/lib/actions/portfolio-actions";
-import Image from "next/image";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {
