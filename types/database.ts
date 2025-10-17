@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -48,13 +48,6 @@ export type Database = {
             columns: ["gig_id"]
             isOneToOne: false
             referencedRelation: "admin_bookings_dashboard"
-            referencedColumns: ["gig_id"]
-          },
-          {
-            foreignKeyName: "applications_gig_id_fkey"
-            columns: ["gig_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_cache"
             referencedColumns: ["gig_id"]
           },
           {
@@ -120,13 +113,6 @@ export type Database = {
             columns: ["gig_id"]
             isOneToOne: false
             referencedRelation: "admin_bookings_dashboard"
-            referencedColumns: ["gig_id"]
-          },
-          {
-            foreignKeyName: "bookings_gig_id_fkey"
-            columns: ["gig_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_cache"
             referencedColumns: ["gig_id"]
           },
           {
@@ -278,13 +264,6 @@ export type Database = {
             columns: ["gig_id"]
             isOneToOne: false
             referencedRelation: "admin_bookings_dashboard"
-            referencedColumns: ["gig_id"]
-          },
-          {
-            foreignKeyName: "gig_requirements_gig_id_fkey"
-            columns: ["gig_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_cache"
             referencedColumns: ["gig_id"]
           },
           {
@@ -544,30 +523,16 @@ export type Database = {
       }
       admin_dashboard_cache: {
         Row: {
-          application_created_at: string | null
-          application_id: string | null
-          application_status:
-            | Database["public"]["Enums"]["application_status"]
-            | null
-          cache_updated_at: string | null
-          client_company_name: string | null
-          gig_id: string | null
-          gig_location: string | null
-          gig_status: Database["public"]["Enums"]["gig_status"] | null
-          gig_title: string | null
-          talent_avatar_url: string | null
-          talent_display_name: string | null
-          talent_id: string | null
+          active_gigs: number | null
+          last_updated: string | null
+          total_applications: number | null
+          total_bookings: number | null
+          total_clients: number | null
+          total_gigs: number | null
+          total_talent: number | null
+          total_users: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "applications_talent_id_fkey"
-            columns: ["talent_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       admin_talent_dashboard: {
         Row: {
@@ -607,11 +572,12 @@ export type Database = {
       }
       query_stats: {
         Row: {
-          attname: unknown | null
-          correlation: number | null
-          n_distinct: number | null
-          schemaname: unknown | null
-          tablename: unknown | null
+          calls: number | null
+          max_exec_time: number | null
+          mean_exec_time: number | null
+          min_exec_time: number | null
+          query: string | null
+          total_exec_time: number | null
         }
         Relationships: []
       }
@@ -637,6 +603,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_admin_dashboard_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_gigs: number
+          last_updated: string
+          total_applications: number
+          total_bookings: number
+          total_clients: number
+          total_gigs: number
+          total_talent: number
+          total_users: number
+        }[]
+      }
       get_query_hints: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -650,7 +629,7 @@ export type Database = {
         Returns: {
           calls: number
           mean_time: number
-          query_text: string
+          query: string
           total_time: number
         }[]
       }
@@ -661,26 +640,6 @@ export type Database = {
           id: string
         }[]
       }
-      gtrgm_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      gtrgm_out: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
       maintenance_cleanup: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -688,18 +647,6 @@ export type Database = {
       refresh_admin_dashboard_cache: {
         Args: Record<PropertyKey, never>
         Returns: undefined
-      }
-      set_limit: {
-        Args: { "": number }
-        Returns: number
-      }
-      show_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      show_trgm: {
-        Args: { "": string }
-        Returns: string[]
       }
       test_enum_casting: {
         Args: { test_role: string }

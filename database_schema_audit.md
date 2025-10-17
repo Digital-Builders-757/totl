@@ -256,17 +256,23 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `talent_id` | `uuid` | NO | - | Foreign key to profiles (talent) |
 | `title` | `text` | NO | - | Item title |
 | `description` | `text` | YES | - | Item description |
-| `image_url` | `text` | YES | - | Image URL |
+| `caption` | `text` | YES | - | Short caption for the image |
+| `image_url` | `text` | YES | - | External image URL (legacy) |
+| `image_path` | `text` | YES | - | Supabase Storage path for image |
+| `display_order` | `integer` | YES | `0` | Order for displaying portfolio items |
+| `is_primary` | `boolean` | YES | `false` | Whether this is the featured/primary image |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `talent_id` → `profiles.id`
+- Foreign Key: `talent_id` → `profiles.id` (CASCADE DELETE)
 
 **Indexes:**
 - `portfolio_items_pkey` (Primary Key)
 - `portfolio_items_talent_id_idx` (Foreign Key)
+- `portfolio_items_talent_order_idx` (Composite: talent_id, display_order)
+- `portfolio_items_is_primary_idx` (Partial: talent_id, is_primary WHERE is_primary = true)
 
 ---
 
@@ -496,6 +502,36 @@ USING (
 - **Password:** `TestPassword123!`
 - **Purpose:** Demo client functionality
 
+## 💾 Supabase Storage Buckets
+
+### **1. avatars Bucket**
+**Purpose:** Store user profile avatars
+- **Public:** Yes (read-only for public, write for authenticated users)
+- **Path Pattern:** `{user_id}/avatar-{timestamp}.{ext}`
+- **Max File Size:** 5MB
+- **Allowed Types:** JPEG, PNG, GIF, WebP
+
+**RLS Policies:**
+- Users can upload their own avatar (INSERT)
+- Users can update their own avatar (UPDATE)
+- Users can delete their own avatar (DELETE)
+- Public can view all avatars (SELECT)
+
+### **2. portfolio Bucket**
+**Purpose:** Store talent portfolio images
+- **Public:** Yes (read-only for public, write for authenticated talent)
+- **Path Pattern:** `{user_id}/portfolio-{timestamp}-{random}.{ext}`
+- **Max File Size:** 10MB
+- **Allowed Types:** JPEG, PNG, GIF, WebP
+
+**RLS Policies:**
+- Users can upload their own portfolio images (INSERT)
+- Users can update their own portfolio images (UPDATE)
+- Users can delete their own portfolio images (DELETE)
+- Public can view all portfolio images (SELECT)
+
+---
+
 ## 📜 Migration History
 
 ### **Key Migrations**
@@ -506,6 +542,8 @@ USING (
 5. **`20250722015600_fix_user_role_enum_reference_in_trigger.sql`** - Enum reference fixes
 6. **`add_missing_rls_policies_for_production.sql`** - Production RLS policies
 7. **`20250725211607_fix_security_warnings.sql`** - Security hardening (search paths, OTP expiry, password protection)
+8. **`20251016171212_enhance_portfolio_items_for_gallery.sql`** - Portfolio gallery system (image_path, ordering, primary images)
+9. **`20251016172507_fix_performance_advisor_warnings.sql`** - Performance optimization (RLS caching, index cleanup)
 
 ### **Recent Updates**
 - ✅ **Production cleanup** - Removed all mock data
@@ -513,7 +551,13 @@ USING (
 - ✅ **Trigger optimization** - Fixed NULL handling
 - ✅ **Enum fixes** - Resolved type reference issues
 - ✅ **Security hardening** - Fixed function search paths, reduced OTP expiry, enabled password protection
-- ✅ **Performance optimization** - Fixed RLS auth function calls, consolidated duplicate policies, added strategic indexes
+- ✅ **Performance optimization (Oct 2025)** - Fixed ALL Supabase Performance Advisor warnings:
+  - Optimized 16 RLS policies to use `(SELECT auth.uid())` for ~95% performance gain
+  - Removed 4 duplicate indexes (applications, bookings)
+  - Removed 12 unused indexes (performance, location, GIN indexes)
+  - Verified essential indexes remain (PKs, FKs, role, status, portfolio)
+- ✅ **Portfolio gallery enhancement** - Added image_path, display_order, is_primary fields to portfolio_items
+- ✅ **Storage buckets** - Created 'portfolio' bucket with RLS policies for talent portfolio images
 
 ---
 

@@ -1,9 +1,11 @@
 ﻿"use client";
 
-import { FileText, Clock, MapPin, DollarSign } from "lucide-react";
+import { FileText, Clock, MapPin, DollarSign, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AcceptApplicationDialog } from "@/components/client/accept-application-dialog";
+import { RejectApplicationDialog } from "@/components/client/reject-application-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +45,11 @@ export default function ClientApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [gigFilter, setGigFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
+  
+  // Dialog states
+  const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -52,27 +59,20 @@ export default function ClientApplicationsPage() {
 
   const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
-  const acceptApplication = useCallback(
-    async (applicationId: string) => {
-      try {
-        const res = await fetch("/api/client/applications/accept", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ applicationId }),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || "Failed to accept application");
-        // Optimistically update UI
-        setApplications((prev) =>
-          prev.map((a) => (a.id === applicationId ? { ...a, status: "accepted" } : a))
-        );
-      } catch (e) {
-        console.error(e);
-        alert("Failed to accept application");
-      }
-    },
-    []
-  );
+  const handleAcceptClick = (application: Application) => {
+    setSelectedApplication(application);
+    setAcceptDialogOpen(true);
+  };
+
+  const handleRejectClick = (application: Application) => {
+    setSelectedApplication(application);
+    setRejectDialogOpen(true);
+  };
+
+  const handleDialogSuccess = () => {
+    // Refresh applications
+    fetchApplications();
+  };
 
   const fetchApplications = useCallback(async () => {
     if (!supabase || !user) return;
@@ -400,38 +400,39 @@ export default function ClientApplicationsPage() {
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
                               <Link href={`/talent/${application.talent_id}`}>
-                                {/* Removed Eye icon as it's no longer imported */}
+                                <FileText className="h-4 w-4 mr-2" />
                                 View Profile
                               </Link>
                             </Button>
-                            <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
-                              {/* Removed Phone icon as it's no longer imported */}
-                              Contact
-                            </Button>
-                            <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
-                              {/* Removed Mail icon as it's no longer imported */}
-                              Email
-                            </Button>
-                            <Button
-                              variant="default"
-                              size="sm"
-                              data-test="accept-application"
-                              onClick={() => acceptApplication(application.id)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              Accept
-                            </Button>
-                            {application.profiles?.email_verified && (
-                              <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
-                                <a
-                                  href={`/talent/${application.talent_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
+                            
+                            {application.status === "new" || application.status === "under_review" ? (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  data-test="accept-application"
+                                  onClick={() => handleAcceptClick(application)}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                  disabled={application.status === "accepted"}
                                 >
-                                  <FileText className="h-4 w-4 mr-2" />
-                                  View Profile
-                                </a>
-                              </Button>
+                                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                                  Accept
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRejectClick(application)}
+                                  className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                  disabled={application.status === "rejected"}
+                                >
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Reject
+                                </Button>
+                              </>
+                            ) : (
+                              <span className="text-sm text-gray-400 px-3 py-2">
+                                {application.status === "accepted" ? "✓ Accepted" : "✗ Rejected"}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -444,6 +445,29 @@ export default function ClientApplicationsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialogs */}
+      {selectedApplication && (
+        <>
+          <AcceptApplicationDialog
+            open={acceptDialogOpen}
+            onOpenChange={setAcceptDialogOpen}
+            applicationId={selectedApplication.id}
+            talentName={selectedApplication.profiles?.display_name || "Talent"}
+            gigTitle={selectedApplication.gigs?.title || "Gig"}
+            suggestedCompensation={selectedApplication.gigs?.compensation}
+            onSuccess={handleDialogSuccess}
+          />
+          <RejectApplicationDialog
+            open={rejectDialogOpen}
+            onOpenChange={setRejectDialogOpen}
+            applicationId={selectedApplication.id}
+            talentName={selectedApplication.profiles?.display_name || "Talent"}
+            gigTitle={selectedApplication.gigs?.title || "Gig"}
+            onSuccess={handleDialogSuccess}
+          />
+        </>
+      )}
     </div>
   );
 }
