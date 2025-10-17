@@ -14,10 +14,6 @@ import {
   Users,
   Briefcase,
   BarChart,
-  Settings,
-  LogOut,
-  Bell,
-  UserIcon,
   Activity,
   TrendingUp,
   Target,
@@ -47,6 +43,7 @@ import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
+import { AdminHeader } from "@/components/admin/admin-header";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type Application = Database["public"]["Tables"]["applications"]["Row"];
@@ -78,68 +75,9 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
     totalRevenue: 12450, // This would come from bookings data
   };
 
-  return (
-    <div className="min-h-screen bg-black">
-      {/* Modern Admin Header */}
-      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage
-                  src="/images/totl-logo-transparent.png"
-                  alt="Admin Profile"
-                />
-                <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white">
-                  <Crown className="h-6 w-6" />
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-purple-400" />
-                  Admin Dashboard
-                </h1>
-                <p className="text-gray-300">Welcome back, {user.email}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-700 text-white hover:bg-gray-800"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-                <span className="ml-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  3
-                </span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-gray-700 text-white hover:bg-gray-800"
-              >
-                <Link href="/settings">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="border-gray-700 text-white hover:bg-gray-800"
-              >
-                <Link href="/login">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+        return (
+          <div className="min-h-screen bg-black">
+            <AdminHeader user={user} notificationCount={3} />
 
       <div className="container mx-auto px-4 py-8">
         {/* Quick Stats */}
