@@ -51,6 +51,7 @@ interface AdminApplicationsClientProps {
 
 export function AdminApplicationsClient({
   applications: initialApplications,
+  user,
 }: AdminApplicationsClientProps) {
   const [activeTab, setActiveTab] = useState("new");
   const [searchQuery, setSearchQuery] = useState("");
