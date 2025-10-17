@@ -6,6 +6,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import Navbar from "@/components/navbar";
 import { Toaster } from "@/components/ui/toaster";
+import { ToastProvider } from "@/hooks/use-toast";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,9 +16,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   return (
     <AuthProvider>
-      {showNavbar && <Navbar />}
-      {children}
-      <Toaster />
+      <ToastProvider>
+        {showNavbar && <Navbar />}
+        {children}
+        <Toaster />
+      </ToastProvider>
     </AuthProvider>
   );
 }
