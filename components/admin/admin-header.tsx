@@ -30,6 +30,11 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   const pathname = usePathname();
   const { signOut } = useAuth();
 
+  // Safety check: if user is not available yet, return null or loading state
+  if (!user) {
+    return null;
+  }
+
   const navigationItems = [
     { href: "/admin/dashboard", label: "Overview", icon: "📊" },
     { href: "/admin/applications", label: "Applications", icon: "📝" },
