@@ -153,7 +153,52 @@ This rule applies to:
 - **Scripts:** All verification and automation scripts should be PowerShell-compatible
 
 **Documentation-First Approach**
-- **Check Documentation:** Always read `docs/DOCUMENTATION_OVERVIEW.md` before making changes
+- **Check Documentation FIRST:** Before making ANY changes, check `docs/DOCUMENTATION_INDEX.md` to find relevant documentation for the area you're working on
+- **Read Relevant Docs:** Read all applicable documentation files for the feature/component you're modifying
+- **Common Documentation to Check:**
+  - Authentication work → Read `docs/AUTH_STRATEGY.md`
+  - Security changes → Read `docs/SECURITY_CONFIGURATION.md`
+  - Database changes → Read `database_schema_audit.md` (root) and `docs/DATABASE_REPORT.md`
+  - Admin features → Read `docs/ADMIN_ACCOUNT_GUIDE.md`
+  - Feature implementation → Check `docs/` for related implementation guides
+  - Bug fixes → Check `docs/TROUBLESHOOTING_GUIDE.md`
 - **Update Documentation:** Always update relevant documentation after significant changes
 - **Reference Audit File:** Always reference `database_schema_audit.md` for database schema truth
-- **Maintain Consistency:** Ensure all documentation reflects the current state of the project 
+- **Maintain Consistency:** Ensure all documentation reflects the current state of the project
+
+## 📚 MANDATORY DOCUMENTATION CHECK WORKFLOW
+
+**BEFORE starting ANY work:**
+1. Check `docs/DOCUMENTATION_INDEX.md` to identify relevant documentation
+2. Read ALL relevant docs for the area you're working on
+3. Verify your approach aligns with documented patterns
+4. Only then proceed with implementation
+
+**AFTER completing work:**
+1. Update any relevant documentation
+2. Add new documentation if you created a significant feature
+3. Update `docs/DOCUMENTATION_INDEX.md` if you added new docs
+
+## 📝 DOCUMENTATION CREATION RULES
+
+**ALL new documentation files MUST be created in the `docs/` folder, NOT the root directory.**
+
+**Exceptions (ONLY these files belong in root):**
+- `README.md` - Project overview
+- `database_schema_audit.md` - Database schema single source of truth
+- `MVP_STATUS_NOTION.md` - MVP tracking (update before commits)
+- `notion_update.md` - Notion update tracking
+
+**Everything else goes in `docs/`:**
+- ✅ Feature implementation guides → `docs/`
+- ✅ Bug fix summaries → `docs/`
+- ✅ Setup guides → `docs/`
+- ✅ Troubleshooting docs → `docs/`
+- ✅ Security documentation → `docs/`
+- ✅ Any other documentation → `docs/`
+
+**When creating new documentation:**
+1. Always create files in `docs/` folder
+2. Use clear, descriptive filenames (ALL_CAPS_WITH_UNDERSCORES.md or lowercase-with-hyphens.md)
+3. Update `docs/DOCUMENTATION_INDEX.md` to include the new file
+4. Add appropriate category tags and cross-references 

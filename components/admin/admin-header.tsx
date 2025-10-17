@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +28,12 @@ interface AdminHeaderProps {
 
 export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   const pathname = usePathname();
+  const { signOut } = useAuth();
+
+  // Safety check: if user is not available yet, return null or loading state
+  if (!user) {
+    return null;
+  }
 
   const navigationItems = [
     { href: "/admin/dashboard", label: "Overview", icon: "📊" },
@@ -143,7 +150,10 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                     View Talent Portal
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-white hover:bg-gray-800">
+                <DropdownMenuItem 
+                  className="text-white hover:bg-gray-800 cursor-pointer"
+                  onClick={() => signOut()}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>

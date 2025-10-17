@@ -119,7 +119,7 @@ export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
       )}
 
       {/* Tips Card */}
-      {items.length > 0 && (
+      {portfolioItems.length > 0 && (
         <Card className="bg-zinc-900 border-zinc-800">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">

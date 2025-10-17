@@ -11,10 +11,22 @@ declare global {
   }
 }
 
-// Use the working project for all environments
-const SENTRY_DSN =
-  process.env.NEXT_PUBLIC_SENTRY_DSN ||
-  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
+// Determine which Sentry DSN to use based on environment
+const isDevelopment = process.env.NODE_ENV === "development";
+const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
+
+// Production DSN (from environment variable)
+const PRODUCTION_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN_PROD;
+
+// Development DSN (fallback for local development)
+const DEVELOPMENT_DSN = 
+  process.env.NEXT_PUBLIC_SENTRY_DSN_DEV ||
+  "https://3b65d7c0706cdd0196906fa0d45c0731@o4510190992424960.ingest.us.sentry.io/4510191032926215";
+
+// Select the appropriate DSN
+const SENTRY_DSN = isProduction && PRODUCTION_DSN 
+  ? PRODUCTION_DSN 
+  : DEVELOPMENT_DSN;
 
 // Prevent multiple initialization
 if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
