@@ -13,10 +13,17 @@ export async function createSupabaseServer() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (cookies) => {
-          cookies.forEach(({ name, value, options }) => {
-            cookieStore.set({ name, value, ...options });
-          });
+        setAll: (cookiesToSet) => {
+          try {
+            // Attempt to set cookies - this will fail in Server Components but succeed in Server Actions/Route Handlers
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set({ name, value, ...options });
+            });
+          } catch (error) {
+            // Cookies can only be modified in Server Actions or Route Handlers
+            // In Server Components (pages), this will silently fail which is expected
+            // The session will still work correctly with the cookies that are already set
+          }
         },
       },
     }
