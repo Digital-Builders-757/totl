@@ -81,6 +81,68 @@ export async function POST(req: Request) {
       Sentry.captureException(updErr);
     }
 
+    // Send email notifications
+    try {
+      // Get talent, client, and gig details for emails
+      const { data: talentProfile } = await supabase
+        .from("talent_profiles")
+        .select("first_name, last_name, user_id")
+        .eq("user_id", app.talent_id)
+        .single();
+
+      const { data: clientProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", userId)
+        .single();
+
+      const { data: gig } = await supabase
+        .from("gigs")
+        .select("title, location")
+        .eq("id", app.gig_id)
+        .single();
+
+      const { data: talentUser } = await supabase.auth.admin.getUserById(app.talent_id);
+
+      if (talentUser?.user?.email && talentProfile && gig) {
+        const talentName = `${talentProfile.first_name || ""} ${talentProfile.last_name || ""}`.trim();
+        
+        // 1. Send application accepted email to talent
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-accepted`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: talentUser.user.email,
+            talentName: talentName || "Talent",
+            gigTitle: gig.title,
+            clientName: clientProfile?.full_name || "Client",
+            dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
+          }),
+        });
+
+        // 2. Send booking confirmed email to talent
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-booking-confirmed`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: talentUser.user.email,
+            talentName: talentName || "Talent",
+            gigTitle: gig.title,
+            bookingDate: date ? new Date(date).toLocaleDateString() : new Date(Date.now() + 7 * 864e5).toLocaleDateString(),
+            bookingLocation: gig.location || "TBD",
+            compensation: compensation || "TBD",
+            dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
+          }),
+        });
+      }
+    } catch (emailError) {
+      // Log email errors but don't fail the application acceptance
+      console.error("Failed to send acceptance emails:", emailError);
+      Sentry.captureException(emailError, {
+        tags: { feature: "email-notifications", email_type: "application-accepted" },
+      });
+    }
+
     return NextResponse.json({ ok: true, bookingId: booking.id });
   } catch (e) {
     Sentry.captureException(e);

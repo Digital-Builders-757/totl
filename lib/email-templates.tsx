@@ -8,6 +8,16 @@ export interface EmailTemplateData {
   verificationUrl?: string;
   resetUrl?: string;
   gigTitle?: string;
+  clientName?: string;
+  bookingDate?: string;
+  bookingTime?: string;
+  bookingLocation?: string;
+  compensation?: string;
+  dashboardUrl?: string;
+  gigDescription?: string;
+  applicationDate?: string;
+  rejectionReason?: string;
+  bookingId?: string;
 }
 
 export interface EmailTemplate {
@@ -216,9 +226,205 @@ export function generateApplicationReceivedEmail(data: EmailTemplateData): Email
   };
 }
 
+export function generateApplicationAcceptedEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>🎉 Congratulations, ${escapeHtml(data.name)}!</h1>
+    <p>Great news! Your application for <strong>${escapeHtml(data.gigTitle || "")}</strong> has been accepted!</p>
+    <div class="highlight" style="background-color: #10b981; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <p style="color: white; margin: 0;"><strong>✨ Your Application Was Accepted!</strong></p>
+      <p style="color: white; margin: 10px 0 0 0;">The client, <strong>${escapeHtml(data.clientName || "")}</strong>, has selected you for this opportunity.</p>
+    </div>
+    <div class="highlight">
+      <p><strong>Next Steps:</strong></p>
+      <ul>
+        <li>A booking has been created automatically in your dashboard</li>
+        <li>Review the booking details and confirm your availability</li>
+        <li>The client may reach out to you directly with additional details</li>
+        <li>Make sure your calendar is clear for the booking date</li>
+      </ul>
+    </div>
+    <p>View your booking and get all the details in your dashboard:</p>
+    <div style="text-align: center;">
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Details</a>
+    </div>
+    <p>This is a great opportunity! Make sure you're prepared and ready to deliver your best work.</p>
+    <p>
+      Best of luck,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  return {
+    subject: `🎉 Application Accepted - ${data.gigTitle || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "Application Accepted!",
+      content,
+      "Congratulations! Your application has been accepted"
+    ),
+  };
+}
+
+export function generateApplicationRejectedEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>Application Update</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Thank you for your interest in <strong>${escapeHtml(data.gigTitle || "")}</strong>.</p>
+    <p>After careful consideration, we regret to inform you that your application was not selected for this particular opportunity.</p>
+    <div class="highlight">
+      <p><strong>Important to Remember:</strong></p>
+      <ul>
+        <li>This decision is specific to this one gig and doesn't reflect on your talent</li>
+        <li>Clients often have very specific requirements for each project</li>
+        <li>Many factors go into casting decisions beyond your control</li>
+        <li>Every "no" brings you closer to the right "yes"</li>
+      </ul>
+    </div>
+    <p>Don't let this discourage you! We encourage you to continue applying to other gigs that match your profile.</p>
+    <div style="text-align: center;">
+      <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com"}/gigs" class="button">Browse More Gigs</a>
+    </div>
+    <p>Keep building your portfolio and applying - the perfect opportunity is out there!</p>
+    <p>
+      Keep pushing forward,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  return {
+    subject: `Application Update - ${data.gigTitle || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "Application Update",
+      content,
+      "Update on your application"
+    ),
+  };
+}
+
+export function generateBookingConfirmedEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>✅ Booking Confirmed</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Your booking for <strong>${escapeHtml(data.gigTitle || "")}</strong> has been confirmed!</p>
+    <div class="highlight" style="background-color: #3b82f6; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <p style="color: white; margin: 0;"><strong>📅 Booking Details</strong></p>
+      <ul style="color: white; margin: 10px 0 0 0;">
+        ${data.bookingDate ? `<li><strong>Date:</strong> ${escapeHtml(data.bookingDate)}</li>` : ""}
+        ${data.bookingTime ? `<li><strong>Time:</strong> ${escapeHtml(data.bookingTime)}</li>` : ""}
+        ${data.bookingLocation ? `<li><strong>Location:</strong> ${escapeHtml(data.bookingLocation)}</li>` : ""}
+        ${data.compensation ? `<li><strong>Compensation:</strong> ${escapeHtml(data.compensation)}</li>` : ""}
+      </ul>
+    </div>
+    <div class="highlight">
+      <p><strong>Before the Booking:</strong></p>
+      <ul>
+        <li>Mark your calendar and set reminders</li>
+        <li>Confirm the location and arrival time</li>
+        <li>Prepare any required materials or wardrobe</li>
+        <li>Get a good night's sleep before the shoot</li>
+        <li>Arrive 15 minutes early to settle in</li>
+      </ul>
+    </div>
+    <p>You can view all booking details and communicate with the client through your dashboard:</p>
+    <div style="text-align: center;">
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Dashboard</a>
+    </div>
+    <p>We'll send you a reminder 24 hours before your booking. Good luck!</p>
+    <p>
+      Break a leg,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  return {
+    subject: `✅ Booking Confirmed - ${data.gigTitle || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "Booking Confirmed",
+      content,
+      "Your booking has been confirmed"
+    ),
+  };
+}
+
+export function generateBookingReminderEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>⏰ Booking Reminder</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>This is a friendly reminder that you have a booking coming up tomorrow!</p>
+    <div class="highlight" style="background-color: #f59e0b; color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <p style="color: white; margin: 0;"><strong>🎬 Tomorrow's Booking</strong></p>
+      <p style="color: white; margin: 10px 0 0 0; font-size: 18px;"><strong>${escapeHtml(data.gigTitle || "")}</strong></p>
+      <ul style="color: white; margin: 10px 0 0 0;">
+        ${data.bookingDate ? `<li><strong>Date:</strong> ${escapeHtml(data.bookingDate)}</li>` : ""}
+        ${data.bookingTime ? `<li><strong>Time:</strong> ${escapeHtml(data.bookingTime)}</li>` : ""}
+        ${data.bookingLocation ? `<li><strong>Location:</strong> ${escapeHtml(data.bookingLocation)}</li>` : ""}
+      </ul>
+    </div>
+    <div class="highlight">
+      <p><strong>Final Checklist:</strong></p>
+      <ul>
+        <li>✅ Confirm you know how to get to the location</li>
+        <li>✅ Check traffic/transit and plan to arrive early</li>
+        <li>✅ Pack any required wardrobe or materials</li>
+        <li>✅ Get a good night's sleep tonight</li>
+        <li>✅ Eat a good breakfast before you go</li>
+        <li>✅ Charge your phone and bring a charger</li>
+      </ul>
+    </div>
+    <p>Review your booking details one more time:</p>
+    <div style="text-align: center;">
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Details</a>
+    </div>
+    <p>You've got this! Have a great shoot tomorrow.</p>
+    <p>
+      Best wishes,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  return {
+    subject: `⏰ Reminder: Booking Tomorrow - ${data.gigTitle || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "Booking Reminder",
+      content,
+      "Your booking is tomorrow - don't forget!"
+    ),
+  };
+}
+
+export function generateNewApplicationClientEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>📬 New Application Received</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Good news! You've received a new application for your gig <strong>${escapeHtml(data.gigTitle || "")}</strong>.</p>
+    <div class="highlight">
+      <p><strong>What to do next:</strong></p>
+      <ul>
+        <li>Review the talent's profile and portfolio</li>
+        <li>Check their experience and measurements</li>
+        <li>Compare with other applications</li>
+        <li>Accept the application to create a booking</li>
+        <li>Or reject if they're not the right fit</li>
+      </ul>
+    </div>
+    <p>The talent is waiting to hear from you! Review their application now:</p>
+    <div style="text-align: center;">
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/client/dashboard")}" class="button">Review Application</a>
+    </div>
+    <p>The best talent gets booked quickly, so don't wait too long to make your decision!</p>
+    <p>
+      Best regards,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  return {
+    subject: `📬 New Application - ${data.gigTitle || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "New Application Received",
+      content,
+      "You have a new application to review"
+    ),
+  };
+}
+
 export function generateEmailBatch(
   templates: Array<{
-    type: "welcome" | "verification" | "passwordReset" | "applicationReceived";
+    type: "welcome" | "verification" | "passwordReset" | "applicationReceived" | "applicationAccepted" | "applicationRejected" | "bookingConfirmed" | "bookingReminder" | "newApplicationClient";
     data: EmailTemplateData;
   }>
 ): EmailTemplate[] {
@@ -232,6 +438,16 @@ export function generateEmailBatch(
         return generatePasswordResetEmail(data);
       case "applicationReceived":
         return generateApplicationReceivedEmail(data);
+      case "applicationAccepted":
+        return generateApplicationAcceptedEmail(data);
+      case "applicationRejected":
+        return generateApplicationRejectedEmail(data);
+      case "bookingConfirmed":
+        return generateBookingConfirmedEmail(data);
+      case "bookingReminder":
+        return generateBookingReminderEmail(data);
+      case "newApplicationClient":
+        return generateNewApplicationClientEmail(data);
       default:
         throw new Error(`Unknown email template type: ${type}`);
     }

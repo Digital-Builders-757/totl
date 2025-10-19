@@ -160,6 +160,46 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     return { error: "Failed to submit application. Please try again." };
   }
 
+  // Send email notifications
+  try {
+    // 1. Email to talent confirming application received
+    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-received`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: user.email,
+        firstName: talentProfile.first_name,
+        gigTitle: gig.title,
+      }),
+    });
+
+    // 2. Email to client about new application
+    const { data: clientProfile } = await supabase
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", gig.client_id)
+      .single();
+
+    if (clientProfile?.email) {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-new-application-client`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: clientProfile.email,
+          clientName: clientProfile.full_name || "Client",
+          gigTitle: gig.title,
+          dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/client/dashboard`,
+        }),
+      });
+    }
+  } catch (emailError) {
+    // Log email errors but don't fail the application
+    console.error("Failed to send application emails:", emailError);
+    Sentry.captureException(emailError, {
+      tags: { feature: "email-notifications", email_type: "application-submitted" },
+    });
+  }
+
   // Revalidate relevant paths
   revalidatePath("/gigs");
   revalidatePath(`/gigs/${gigId}`);
