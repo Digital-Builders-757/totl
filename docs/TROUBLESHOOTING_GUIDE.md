@@ -1,6 +1,6 @@
 # 🔧 TOTL Troubleshooting Guide
 
-**Last Updated:** January 15, 2025  
+**Last Updated:** October 19, 2025  
 **Status:** Production Ready
 
 This guide covers common issues encountered during development and deployment, with step-by-step solutions based on real debugging sessions.
@@ -107,6 +107,43 @@ npm run types:regen
 - Windows PowerShell can add UTF-8 BOM
 - Git line ending normalization required
 - CI expects exact byte-for-byte match
+
+### 5. "Requested range not satisfiable" (416 Error)
+
+**Error Message:**
+```
+Error: Requested range not satisfiable
+Code: PGRST103
+Details: An offset of 9 was requested, but there are only 7 rows.
+```
+
+**Root Cause:** Pagination logic requesting data beyond available rows.
+
+**Solution:**
+```ts
+// ❌ Wrong - No validation
+const from = (page - 1) * pageSize;
+const { data } = await query.range(from, from + pageSize - 1);
+
+// ✅ Correct - Validate before querying
+const { count } = await query.select("*", { count: "exact", head: true });
+const totalPages = Math.max(1, Math.ceil(count / pageSize));
+const validPage = Math.min(page, totalPages);
+const from = (validPage - 1) * pageSize;
+
+if (count > 0) {
+  const { data } = await query.range(from, from + pageSize - 1);
+}
+```
+
+**Prevention:**
+- Always get the count before applying range queries
+- Validate page numbers against total pages
+- Handle edge cases (0 results, invalid pages)
+
+**Reference:** See `docs/GIGS_PAGINATION_416_ERROR_FIX.md` for detailed implementation
+
+---
 
 ## 🔍 Debugging Strategies
 
