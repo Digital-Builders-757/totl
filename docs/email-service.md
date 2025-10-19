@@ -1,13 +1,14 @@
 # TOTL Agency - Email Service Integration
 
-**Last Updated:** July 25, 2025  
-**Status:** Production Ready
+**Last Updated:** October 19, 2025  
+**Status:** ✅ Production Ready - Full Email Notification System Implemented
 
 ## Table of Contents
 - [Overview](#overview)
 - [Setup](#setup)
 - [Email Templates](#email-templates)
 - [Usage Patterns](#usage-patterns)
+- [Integration Points](#integration-points)
 - [Troubleshooting](#troubleshooting)
 
 ## 📧 Overview
@@ -15,11 +16,24 @@
 TOTL Agency uses **Resend** for transactional emails, providing reliable email delivery for user notifications, verification, and platform communications.
 
 ### **Email Types**
+
+#### **Authentication Emails**
 - **Welcome Emails** - New user onboarding
 - **Verification Emails** - Email address verification
 - **Password Reset** - Account recovery
-- **Application Notifications** - Gig application updates
-- **Booking Confirmations** - Confirmed engagements
+
+#### **Application Workflow Emails** ✨ NEW
+- **Application Received** (to talent) - Confirmation of application submission
+- **New Application** (to client) - Alert client about new application
+- **Application Accepted** (to talent) - Congratulations on acceptance
+- **Application Rejected** (to talent) - Professional rejection notification
+
+#### **Booking Workflow Emails** ✨ NEW
+- **Booking Confirmed** (to talent) - Booking details and preparation checklist
+- **Booking Reminder** (to talent) - 24-hour reminder before booking
+
+#### **Coming Soon**
+- **Gig Invitations** - Direct invitations from clients to talent
 
 ## ⚙️ Setup
 
@@ -107,6 +121,117 @@ export function ApplicationNotificationEmail({
   );
 }
 ```
+
+## 🔗 Integration Points
+
+### **Application Submission Flow**
+**File:** `app/gigs/[id]/apply/actions.ts`
+
+When a talent applies to a gig:
+1. ✅ **Application Received Email** → Sent to talent
+2. ✅ **New Application Email** → Sent to client
+
+```typescript
+// After successful application insert
+await fetch('/api/email/send-application-received', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: talent.email,
+    firstName: talent.first_name,
+    gigTitle: gig.title,
+  }),
+});
+
+await fetch('/api/email/send-new-application-client', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: client.email,
+    clientName: client.full_name,
+    gigTitle: gig.title,
+  }),
+});
+```
+
+### **Application Acceptance Flow**
+**File:** `app/api/client/applications/accept/route.ts`
+
+When a client accepts an application:
+1. ✅ **Application Accepted Email** → Sent to talent
+2. ✅ **Booking Confirmed Email** → Sent to talent
+
+```typescript
+// After creating booking and updating application status
+await fetch('/api/email/send-application-accepted', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: talent.email,
+    talentName: `${talent.first_name} ${talent.last_name}`,
+    gigTitle: gig.title,
+    clientName: client.full_name,
+  }),
+});
+
+await fetch('/api/email/send-booking-confirmed', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: talent.email,
+    talentName: `${talent.first_name} ${talent.last_name}`,
+    gigTitle: gig.title,
+    bookingDate: booking.date,
+    bookingLocation: gig.location,
+    compensation: booking.compensation,
+  }),
+});
+```
+
+### **Application Rejection Flow**
+**File:** `lib/actions/booking-actions.ts`
+
+When a client rejects an application:
+1. ✅ **Application Rejected Email** → Sent to talent
+
+```typescript
+// After updating application status to rejected
+await fetch('/api/email/send-application-rejected', {
+  method: 'POST',
+  body: JSON.stringify({
+    email: talent.email,
+    talentName: `${talent.first_name} ${talent.last_name}`,
+    gigTitle: gig.title,
+  }),
+});
+```
+
+### **Email API Routes**
+
+All email routes are located in `app/api/email/`:
+
+| Route | Purpose | Recipient |
+|-------|---------|-----------|
+| `send-welcome/` | Welcome new users | New users |
+| `send-verification/` | Email verification | Users needing verification |
+| `send-password-reset/` | Password reset links | Users requesting reset |
+| `send-application-received/` | Application confirmation | Talent (applicant) |
+| `send-new-application-client/` | New application alert | Client (gig owner) |
+| `send-application-accepted/` | Application acceptance | Talent (applicant) |
+| `send-application-rejected/` | Application rejection | Talent (applicant) |
+| `send-booking-confirmed/` | Booking confirmation | Talent (booked) |
+
+### **Email Templates**
+
+All email templates are generated in `lib/services/email-templates.tsx`:
+
+| Template Function | Email Type |
+|------------------|------------|
+| `generateWelcomeEmail()` | Welcome |
+| `generateVerificationEmail()` | Verification |
+| `generatePasswordResetEmail()` | Password Reset |
+| `generateApplicationReceivedEmail()` | Application Received |
+| `generateNewApplicationClientEmail()` | New Application (Client) |
+| `generateApplicationAcceptedEmail()` | Application Accepted |
+| `generateApplicationRejectedEmail()` | Application Rejected |
+| `generateBookingConfirmedEmail()` | Booking Confirmed |
+| `generateBookingReminderEmail()` | Booking Reminder (CRON) |
 
 ## 💻 Usage Patterns
 

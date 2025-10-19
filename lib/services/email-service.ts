@@ -14,6 +14,11 @@ export type EmailTemplate =
   | "verification"
   | "password-reset"
   | "application-received"
+  | "application-accepted"
+  | "application-rejected"
+  | "booking-confirmed"
+  | "booking-reminder"
+  | "new-application-client"
   | "gig-invitation";
 
 /**

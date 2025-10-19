@@ -76,37 +76,27 @@ export default async function GigsPage({
     query = query.ilike("compensation", `%${compensation}%`);
   }
 
-  // First, get the count to avoid range errors
-  const { count: totalCount, error: countError } = await query
-    .select("*", { count: "exact", head: true });
-
-  if (countError) {
-    Sentry.captureException(countError);
-    console.error("Error fetching gigs count:", countError);
-  }
-
-  const total = typeof totalCount === "number" ? totalCount : 0;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  // If page is beyond available data, fetch the last valid page
-  const validPage = Math.min(page, totalPages);
-  const from = (validPage - 1) * pageSize;
+  // Calculate range for current page
+  const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // Only fetch if there's data to fetch
-  let gigs: GigRow[] = [];
-  let error = null;
-  
-  if (total > 0) {
-    const result = await query
-      .order("created_at", { ascending: false })
-      .range(from, to);
-    
-    gigs = (result.data || []) as GigRow[];
-    error = result.error;
-  }
+  // Fetch data with count in a single query
+  const { data: gigs, error, count } = await query
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
-  if (error) {
+  // If we got a range error, it means the page is beyond available data
+  // In this case, just show empty results instead of erroring
+  const gigsList = error?.code === "PGRST103" ? [] : ((gigs || []) as GigRow[]);
+  const total = typeof count === "number" ? count : gigsList.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  
+  // Handle errors - PGRST103 is expected for out-of-range pages, just show empty results
+  if (error && error.code === "PGRST103") {
+    // Pagination out of range - this is expected, just show empty results
+    console.warn(`Pagination out of range: page ${page}, total rows: ${total}`);
+  } else if (error && error.code !== "PGRST103") {
+    // Unexpected error - log to Sentry and show error page
     Sentry.captureException(error);
     console.error("Error fetching gigs:", error);
     return (
@@ -145,8 +135,6 @@ export default async function GigsPage({
       </div>
     );
   }
-
-  const gigsList = gigs;
 
   // Helper to preserve query params while changing page
   const buildPageHref = (targetPage: number) => {

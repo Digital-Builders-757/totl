@@ -161,6 +161,46 @@ export async function rejectApplication(params: {
       return { error: "Failed to reject application" };
     }
 
+    // Send email notification to talent
+    try {
+      // Get talent profile and gig details
+      const { data: fullApplication } = await supabase
+        .from("applications")
+        .select(`
+          talent_id,
+          gigs!inner(title),
+          talent_profiles!inner(first_name, last_name)
+        `)
+        .eq("id", params.applicationId)
+        .single();
+
+      if (fullApplication) {
+        const { data: talentUser } = await supabase.auth.admin.getUserById(fullApplication.talent_id);
+        
+        if (talentUser?.user?.email) {
+          // @ts-expect-error - joined column path
+          const talentProfile = fullApplication.talent_profiles;
+          // @ts-expect-error - joined column path
+          const gig = fullApplication.gigs;
+          
+          const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
+
+          await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-rejected`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email: talentUser.user.email,
+              talentName: talentName || "Talent",
+              gigTitle: gig?.title || "Gig",
+            }),
+          });
+        }
+      }
+    } catch (emailError) {
+      // Log email errors but don't fail the rejection
+      console.error("Failed to send rejection email:", emailError);
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Reject application error:", error);
