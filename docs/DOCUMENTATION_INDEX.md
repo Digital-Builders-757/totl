@@ -42,6 +42,7 @@ All other documentation has been organized into the `docs/` folder.
 - `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery feature (complete guide)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
+- `GIGS_PAGINATION_416_ERROR_FIX.md` - Gigs page pagination 416 error fix
 - `SIGN_OUT_FIX_SUMMARY.md` - Sign-out functionality fix
 
 ### **🛠️ Development & Setup**
@@ -119,15 +120,15 @@ All other documentation has been organized into the `docs/` folder.
 
 ## 📊 Documentation Statistics
 
-**Total Documentation Files:** 22 files (consolidated from 26)
+**Total Documentation Files:** 23 files (consolidated from 26)
 - Root Directory: 4 critical files
-- docs/ Directory: 22 organized files
+- docs/ Directory: 23 organized files
 
 **Categories:**
 - Authentication & Security: 2 docs
 - Admin & User Management: 2 docs
 - Database & Backend: 2 docs
-- Features & Implementation: 5 docs
+- Features & Implementation: 6 docs
 - Development & Setup: 5 docs
 - Services & Integrations: 2 docs
 - Troubleshooting: 2 docs (with overlap)
@@ -179,16 +180,17 @@ If you can't find what you're looking for:
 11. DOCS_CONSOLIDATION_COMPLETE.md
 12. email-service.md
 13. ENVIRONMENT_SETUP.md
-14. ONBOARDING.md
-15. PORTFOLIO_GALLERY_IMPLEMENTATION.md
-16. PROFILE_IMAGE_UPLOAD_SETUP.md
-17. SECURITY_CONFIGURATION.md
-18. SENTRY_SETUP_GUIDE.md
-19. SIGN_OUT_FIX_SUMMARY.md
-20. SUPABASE_PERFORMANCE_FIX_GUIDE.md
-21. TOTL_AGENCY_USER_GUIDE.md
-22. TROUBLESHOOTING_GUIDE.md
-23. TYPESCRIPT_ERRORS_EXPLANATION.md
+14. GIGS_PAGINATION_416_ERROR_FIX.md
+15. ONBOARDING.md
+16. PORTFOLIO_GALLERY_IMPLEMENTATION.md
+17. PROFILE_IMAGE_UPLOAD_SETUP.md
+18. SECURITY_CONFIGURATION.md
+19. SENTRY_SETUP_GUIDE.md
+20. SIGN_OUT_FIX_SUMMARY.md
+21. SUPABASE_PERFORMANCE_FIX_GUIDE.md
+22. TOTL_AGENCY_USER_GUIDE.md
+23. TROUBLESHOOTING_GUIDE.md
+24. TYPESCRIPT_ERRORS_EXPLANATION.md
 
 ---
 
