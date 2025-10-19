@@ -363,6 +363,12 @@ export default function HomePage() {
                   Contact Us
                 </Link>
                 <Link
+                  href="/terms"
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  Terms of Service
+                </Link>
+                <Link
                   href="/privacy"
                   className="block text-gray-400 hover:text-white transition-colors"
                 >
@@ -384,7 +390,12 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 TOTL Agency. All rights reserved.</p>
+            <p>&copy; 2025 TOTL Agency. All rights reserved.</p>
+            <p className="mt-2 text-sm">
+              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              {" · "}
+              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            </p>
           </div>
         </div>
       </footer>
