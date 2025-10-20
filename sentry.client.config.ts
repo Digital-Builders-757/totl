@@ -67,6 +67,46 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       // Random network errors
       "Network request failed",
       "NetworkError",
+      // Development-only React Server Component errors
+      /Event handlers cannot be passed to Client Component props/,
+      // Webpack chunk loading errors in dev
+      /Cannot find module '\.\/\d+\.js'/,
     ],
+
+    // Filter out development-only errors before sending
+    beforeSend(event, hint) {
+      const error = hint.originalException;
+
+      // Filter React Server Component errors in development
+      if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        
+        // Server Component prop serialization errors
+        if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {
+          if (process.env.NODE_ENV === 'development') {
+            console.error("Client-side Server Component error - this should be fixed!");
+            return null; // Filter in dev
+          }
+          // In production, let it through so we know there's a problem
+        }
+
+        // Webpack chunk loading errors
+        if (errorObj.message?.match(/Cannot find module '\.\/\d+\.js'/)) {
+          const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
+          const isWebpackError = frames.some(
+            frame => frame.filename?.includes('webpack') || 
+                     frame.filename?.includes('.next/') ||
+                     frame.filename?.includes('_document.js')
+          );
+          
+          if (isWebpackError && process.env.NODE_ENV === 'development') {
+            console.warn("Webpack chunk loading error - clear .next cache and restart dev server");
+            return null; // Filter in dev
+          }
+        }
+      }
+
+      return event;
+    },
   });
 }

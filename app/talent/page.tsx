@@ -1,8 +1,8 @@
 ﻿import { createClient } from "@supabase/supabase-js";
-import { AlertCircle, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import TalentClient from "./talent-client";
-import { Button } from "@/components/ui/button";
+import { ErrorState } from "./error-state";
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";
@@ -59,7 +59,14 @@ export default async function TalentPage() {
   try {
     talent = await getTalentProfiles();
   } catch (err) {
-    console.error("Server-side error:", err);
+    // Log detailed error information for debugging
+    console.error("Server-side error loading talent profiles:", {
+      error: err,
+      message: err instanceof Error ? err.message : "Unknown error",
+      stack: err instanceof Error ? err.stack : undefined,
+      timestamp: new Date().toISOString(),
+    });
+    
     error = err instanceof Error ? err.message : "Unknown error";
   }
 
@@ -79,17 +86,7 @@ export default async function TalentPage() {
         </div>
 
         {error ? (
-          <div className="text-center py-12">
-            <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Error Loading Talent</h2>
-            <p className="text-gray-300 mb-4">{error}</p>
-            <Button
-              onClick={() => window.location.reload()}
-              className="bg-white text-black hover:bg-gray-200"
-            >
-              Try Again
-            </Button>
-          </div>
+          <ErrorState message={error} />
         ) : talent.length === 0 ? (
           <div className="text-center py-12">
             <Users className="h-12 w-12 text-gray-500 mx-auto mb-4" />

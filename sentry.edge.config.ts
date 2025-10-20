@@ -36,4 +36,37 @@ Sentry.init({
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false, // Set to false for privacy in production
+
+  // Ignore common errors
+  ignoreErrors: [
+    "NEXT_NOT_FOUND", 
+    "NEXT_REDIRECT",
+    "EPIPE", // Ignore broken pipe errors from stdout/dev server
+    "write EPIPE", // Ignore write errors from dev server logging
+  ],
+
+  // Filter out non-critical system errors before sending to Sentry
+  beforeSend(event, hint) {
+    const error = hint.originalException;
+
+    // Filter out EPIPE errors (broken pipe from stdout/stderr)
+    if (error && typeof error === 'object') {
+      const errorObj = error as any;
+      
+      // Check for EPIPE system errors
+      if (errorObj.code === 'EPIPE' || errorObj.errno === -32) {
+        return null; // Don't send to Sentry
+      }
+
+      // Check for Next.js dev server logging errors
+      if (errorObj.message?.includes('EPIPE') && 
+          (errorObj.syscall === 'write' || event.exception?.values?.[0]?.stacktrace?.frames?.some(
+            frame => frame.filename?.includes('log-requests.js')
+          ))) {
+        return null; // Don't send to Sentry
+      }
+    }
+
+    return event;
+  },
 });

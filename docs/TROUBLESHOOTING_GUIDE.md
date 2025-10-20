@@ -1,13 +1,190 @@
 # 🔧 TOTL Troubleshooting Guide
 
-**Last Updated:** October 19, 2025  
+**Last Updated:** October 20, 2025  
 **Status:** Production Ready
 
 This guide covers common issues encountered during development and deployment, with step-by-step solutions based on real debugging sessions.
 
 ## 🚨 Critical Issues & Solutions
 
-### 1. "Cookies can only be modified in a Server Action or Route Handler"
+### 1. Server Component Render Error - Event Handlers in Server Components
+
+**Error Messages (two related errors):**
+```
+Error: An error occurred in the Server Components render. The specific message is omitted in production builds to avoid leaking sensitive details.
+```
+OR
+```
+Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, className: ..., children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+```
+
+**Root Cause:** Using client-side event handlers (like `onClick`, `onChange`, etc.) or browser APIs (like `window`) in Server Components, or passing event handlers as props from Server to Client Components. Server Components render on the server and cannot have client-side interactivity or serialize functions.
+
+**Common Violations:**
+```tsx
+// ❌ Wrong - onClick in Server Component
+export default async function Page() {
+  return <Button onClick={() => window.location.reload()}>Refresh</Button>;
+}
+
+// ❌ Wrong - Passing function from Server to Client Component
+export default async function ServerPage() {
+  const handleClick = () => console.log("clicked");
+  return <ClientButton onClick={handleClick} />; // Cannot serialize functions!
+}
+
+// ❌ Wrong - Browser API in Server Component  
+export default async function Page() {
+  const url = window.location.href; // window doesn't exist on server
+  return <div>{url}</div>;
+}
+```
+
+**Solution:**
+1. **Extract client-interactive parts to a Client Component:**
+```tsx
+// error-state.tsx (Client Component)
+"use client";
+import { Button } from "@/components/ui/button";
+
+export function ErrorState({ message }: { message: string }) {
+  return (
+    <div>
+      <p>{message}</p>
+      <Button onClick={() => window.location.reload()}>Try Again</Button>
+    </div>
+  );
+}
+
+// page.tsx (Server Component)
+import { ErrorState } from "./error-state";
+
+export default async function Page() {
+  return <ErrorState message="Something went wrong" />;
+}
+```
+
+2. **For callbacks, use data instead of functions:**
+```tsx
+// ❌ Wrong - Passing function as prop
+export default async function ServerPage() {
+  const items = getItems();
+  return <ClientList items={items} onDelete={(id) => deleteItem(id)} />;
+}
+
+// ✅ Correct - Let client component handle the action
+export default async function ServerPage() {
+  const items = getItems();
+  return <ClientList items={items} />; // Client handles deletion via API route
+}
+```
+
+3. **Or mark the entire page as a Client Component (last resort):**
+```tsx
+"use client"; // Add this at the top
+
+export default function Page() {
+  return <Button onClick={() => window.location.reload()}>Refresh</Button>;
+}
+```
+
+**When to use each approach:**
+- Use approach #1 when you want to keep data fetching on the server (recommended)
+- Use approach #2 when you need to coordinate server data with client actions
+- Use approach #3 when the entire page needs client-side interactivity (loses server benefits)
+
+**Prevention:**
+- Always check if your component has `"use client"` before adding event handlers
+- **Never pass functions as props from Server to Client Components** - functions cannot be serialized
+- Pass data IDs instead of callbacks - let the client component call API routes/Server Actions
+- Remember: no `onClick`, `onChange`, `onSubmit`, etc. in Server Components
+- Keep Server Components for data fetching, Client Components for interactivity
+
+### 2. Webpack HMR Errors (Development Only)
+
+**Error Messages:**
+```
+TypeError: Cannot read properties of undefined (reading 'call')
+    at webpack/bootstrap
+    at __webpack_modules__[moduleId].call
+```
+OR
+```
+Error: Cannot find module './6141.js'
+Require stack:
+- .next/server/webpack-runtime.js
+- .next/server/pages/_document.js
+```
+
+**Root Cause:** These are Next.js **development-only** errors that occur during Hot Module Replacement (HMR) / Fast Refresh when:
+- The webpack module cache becomes corrupted
+- Webpack chunks (numbered .js files) can't be found
+- The `.next` build folder is out of sync with source code
+- A module fails to load properly during hot reload
+- Circular dependencies are detected during Fast Refresh
+- Components are rapidly edited and saved
+
+**Impact:** Development experience only - does not affect production (0 users affected)
+
+**Solution:**
+
+**✅ Already filtered in Sentry** - These errors are now automatically filtered in development mode
+
+**To fix locally:**
+1. **Restart the development server:**
+   ```bash
+   # Stop the dev server (Ctrl+C)
+   npm run dev
+   ```
+
+2. **Clear Next.js cache if issue persists:**
+   ```bash
+   rm -rf .next
+   npm run dev
+   ```
+
+3. **Check for circular dependencies:**
+   - Review recent component imports
+   - Ensure components don't import each other in a loop
+   - Use `"use client"` directives appropriately
+
+**Prevention:**
+- These errors are filtered in development Sentry logs to reduce noise
+- They appear in the console so developers can see them
+- Restarting dev server usually resolves them
+- In production, these don't occur due to static bundling
+
+### 3. Sentry Error: "write EPIPE" (Next.js Dev Server)
+
+**Error Message:**
+```
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons)
+    at writeGeneric (node:internal/stream_base_commons)
+    at Socket._writeGeneric (node:net)
+```
+
+**Root Cause:** The Next.js development server tries to write request logs to `stdout`, but the terminal/console stream has been interrupted or closed. This is a harmless system-level error that occurs when:
+- The terminal is closed while the dev server is running
+- The stdout pipe is disconnected
+- A parent process terminates unexpectedly
+
+**Impact:** None - this is a non-critical error that doesn't affect functionality
+
+**Solution:** Already fixed in `sentry.server.config.ts` and `sentry.edge.config.ts` by:
+1. Adding EPIPE errors to the `ignoreErrors` list
+2. Implementing a `beforeSend` hook to filter out these errors before sending to Sentry
+3. Checking for error code `EPIPE` (errno -32) and blocking those events
+
+**Prevention:**
+- These errors are now automatically filtered and won't appear in Sentry
+- If you see them in local console, they can be safely ignored
+- They only occur in development mode with the Next.js dev server
+
+### 4. "Cookies can only be modified in a Server Action or Route Handler"
 
 **Error Message:**
 ```
@@ -33,17 +210,37 @@ const supabase = await createSupabaseServerClient(); // Read-only
 - **Server Actions** (`'use server'`): Use `createSupabaseActionClient()`
 - **Route Handlers** (`app/api/**/route.ts`): Use `createSupabaseActionClient()`
 
-### 2. "Missing Supabase environment variables"
+### 5. "Missing Supabase environment variables" (Middleware/Edge Runtime)
 
 **Error Message:**
+```
+Error: Your project's URL and Key are required to create a Supabase client!
+Check your Supabase project's API settings to find these values
+https://supabase.com/dashboard/project/_/settings/api
+```
+OR
 ```
 Error: Missing Supabase environment variables
     at createSupabaseServerClient (lib/supabase-client.ts:12)
 ```
 
-**Root Cause:** Environment variables not available during build or runtime.
+**Root Cause:** Environment variables not available during build, runtime, or in Edge runtime middleware. This commonly happens when:
+- Environment variables aren't set in Vercel/deployment platform
+- Edge runtime middleware tries to access vars before they're loaded
+- Preview deployments don't inherit environment variables properly
+- Local `.env.local` file is missing or not properly formatted
 
 **Solution:**
+
+**✅ Fixed in `middleware.ts`** - Now gracefully handles missing environment variables:
+- Validates environment variables before creating Supabase client
+- Logs detailed error information for debugging
+- Allows auth routes to continue (user will see login page)
+- Redirects protected routes to login
+- Allows public routes to continue normally
+
+**Manual verification steps:**
+
 1. **Check local environment:**
    ```bash
    # Verify .env.local exists and contains:
@@ -52,17 +249,36 @@ Error: Missing Supabase environment variables
    ```
 
 2. **Check deployment environment:**
-   - Vercel: Project Settings → Environment Variables
+   - **Vercel:** Project Settings → Environment Variables
    - Ensure variables are set for correct environment (Preview/Production)
-   - No trailing spaces or newlines in values
+   - Verify no trailing spaces or newlines in values
+   - **Important:** Preview deployments need explicit environment variable configuration
 
-3. **Force Node.js runtime if using Edge:**
+3. **Verify middleware configuration:**
+   ```ts
+   // middleware.ts should validate before using
+   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+   
+   if (!supabaseUrl || !supabaseAnonKey) {
+     // Handle gracefully - don't crash
+     console.error("Missing env vars");
+     return fallbackResponse;
+   }
+   ```
+
+4. **Force Node.js runtime if using Edge causes issues:**
    ```ts
    // app/settings/page.tsx
    export const runtime = 'nodejs'; // Instead of 'edge'
    ```
 
-### 3. Schema Verification Failures
+**Prevention:**
+- Always validate environment variables before using them (especially in Edge runtime)
+- Never use non-null assertion (`!`) with `process.env` values
+- Set up environment variables for all deployment environments (preview, production, development)
+
+### 6. Schema Verification Failures
 
 **Error Message:**
 ```
@@ -85,7 +301,7 @@ npx supabase@v2.33.4 gen types typescript --linked --schema public > types/datab
 - Run `npm run types:regen` after schema changes
 - Never hand-edit `types/database.ts`
 
-### 4. Build Failures with "Binary files differ"
+### 7. Build Failures with "Binary files differ"
 
 **Error Message:**
 ```
@@ -108,7 +324,7 @@ npm run types:regen
 - Git line ending normalization required
 - CI expects exact byte-for-byte match
 
-### 5. "Requested range not satisfiable" (416 Error)
+### 8. "Requested range not satisfiable" (416 Error)
 
 **Error Message:**
 ```
