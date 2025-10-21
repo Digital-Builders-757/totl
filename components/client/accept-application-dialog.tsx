@@ -166,7 +166,7 @@ export function AcceptApplicationDialog({
             <Button
               type="submit"
               disabled={loading}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="button-glow border-0"
             >
               {loading ? (
                 <>

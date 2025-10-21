@@ -23,14 +23,46 @@
 
 ## ✅ Completed Today
 
+### **UI/UX Polish - Premium Back-Lit UI (Phase 1 Foundation):**
+1. ✅ **OKLCH Color System Implemented** - Modern color foundation (2 hours)
+   - Implemented OKLCH color space (20+ tokens)
+   - Created premium component classes (panel-frosted, card-backlit, button-glow)
+   - Added Tailwind utilities for OKLCH colors
+   - Built /ui-showcase demo page
+   - Applied button-glow to all 8 primary CTAs
+   - **Updated to pure white/gray aesthetic** - Matches Apple-inspired brand
+   - Enhanced gigs page with premium frosted cards + better image handling
+   - Added breadcrumb navigation to gigs page (back to dashboard)
+   - **Comprehensive mobile optimization across entire app** ⭐ NEW!
+   - **Impact:** Premium, modern aesthetic + perfect mobile experience
+
+2. ✅ **Animated Background Paths** - Motion-powered SVG animations (20 minutes)
+   - Installed Motion library (Framer Motion successor)
+   - Created BackgroundPaths component with floating SVG paths
+   - Created FloatingPathsBackground for subtle background integration
+   - Integrated with OKLCH color system (brand-3 glow color)
+   - Added letter-by-letter animated title reveal
+   - Applied to homepage hero section (subtle background layer)
+   - Built demo page at /ui-showcase/animated-paths
+   - **Impact:** Homepage now has premium animated background, stunning visual depth
+
+3. ✅ **Comprehensive Mobile Optimization** - Touch-optimized UX (45 minutes)
+   - **Homepage Mobile:** Responsive text sizes, centered layouts, 44px touch targets
+   - **Gigs Page Mobile:** Icon-only breadcrumbs, stacked forms, optimized cards
+   - **Global Mobile CSS:** iOS safe areas, tap feedback, no zoom on inputs
+   - **Touch Optimization:** 44-52px touch targets, active states, truncate text
+   - **Impact:** Perfect mobile experience on iOS and Android
+
 ### **Critical Bug Fixes - Sentry Error Cleanup:**
-1. ✅ **ALL 10 Sentry Errors Resolved** - Complete Sentry dashboard cleanup
+1. ✅ **ALL Sentry Errors Resolved** - Complete Sentry dashboard cleanup
    - Fixed Server Component architecture errors on `/talent` route (NEXTJS-C/D/G/J)
    - Fixed environment variable handling in middleware (NEXTJS-B/E/F)
-   - Filtered development noise (EPIPE, webpack HMR, chunk loading - NEXTJS-A/H/K)
+   - Filtered development noise (EPIPE, webpack HMR, chunk loading - NEXTJS-A/H/K/M/N/P)
    - Created `app/talent/error-state.tsx` as proper Client Component
    - Enhanced middleware with graceful env var validation & fallback
    - Smart Sentry filtering: dev noise filtered, production errors monitored
+   - **Strengthened EPIPE filtering** - Now catches Webpack build logging variants
+   - **Added Webpack HMR build error filtering** - Filters transient syntax errors
    - **Impact:** Clean error tracking, production-ready monitoring
 
 ### **Comprehensive Documentation:**
@@ -40,6 +72,647 @@
    - Created `TESTING_CHECKLIST.md` - manual verification guide
    - Added Playwright test suite for automated verification
    - **Result:** Future developers can easily troubleshoot similar issues
+
+### **Avatar Upload Fix:**
+3. ✅ **Avatar Upload RLS Policy Fix** - Resolved conflicting storage policies
+   - Identified conflicting policies from two different migrations
+   - Created migration to clean up and fix policies
+   - Path structure now correct: `{user_id}/avatar-{timestamp}.{ext}`
+   - Created quick-fix SQL script for immediate dashboard application
+   - Created `AVATAR_UPLOAD_FIX.md` guide with step-by-step instructions
+   - **Impact:** Avatar upload in Settings now works correctly
+
+### **Technical Documentation:**
+4. ✅ **Complete Tech Stack Breakdown** - Comprehensive technical overview
+   - Created `TECH_STACK_BREAKDOWN.md` with 10 major sections
+   - Documented all 56+ dependencies with versions and purposes
+   - Detailed architecture patterns and design decisions
+   - Listed known limitations and improvement opportunities
+   - Included research questions for optimization
+   - **Impact:** Ready for deep technical analysis and improvement research
+
+---
+
+# 🎨 UI/UX POLISH ROADMAP - "Premium Back-Lit Future UI"
+
+> **Vision:** Soft neon accents over deep charcoal, frosted glass panels, subtle bloom, grain texture, and buttery-smooth micro-interactions. Premium feel, fast performance, accessible, type-safe.
+
+## 🔥 Visual Language: "Back-lit Minimalism"
+
+**Goal:** High contrast/readability, premium vibe, low paint cost  
+**Aesthetic:** Deep charcoal backgrounds, soft neon accents, frosted glass, subtle grain
+
+### 🔴 P1: Foundation - Modern Color System (3-5 days)
+
+**1.1 OKLCH Color Tokens** ⭐ NEW WEB STANDARD ✅ **COMPLETED!**
+- [x] Implement OKLCH color space for wide-gamut, perceptually uniform colors
+- [x] Define design tokens in CSS custom properties
+- [x] Create brand "back-light" ramp (70-78% lightness, 0.20-0.29 chroma)
+- [x] Base neutrals with consistent contrast
+- [x] Add Tailwind utilities for OKLCH colors
+- [x] Create pre-built component classes (panel-frosted, card-backlit, button-glow)
+- [x] Add status badge variants with OKLCH
+- [x] Implement browser fallbacks (@supports)
+- [x] Create showcase page at `/ui-showcase`
+- [x] Write complete implementation guide
+- **Why:** Better color consistency than HSL, modern browser support
+- **Resources:** [web.dev OKLCH guide](https://web.dev/blog/color-spaces-and-functions)
+- **Files:** `app/globals.css`, `tailwind.config.ts`
+- **Status:** ✅ Ready to use! Visit `/ui-showcase` to see it in action
+
+**1.2 Tokenized Status Colors** ✅ **COMPLETED!**
+- [x] Define semantic color tokens for application statuses
+- [x] Create accessible color scales (4.5:1 contrast minimum)
+- [x] Create status badge classes (badge-status-new, accepted, rejected, etc.)
+- [x] Implement consistent lightness (68-75%) with varying hues
+- [x] Ready to apply to Badge component
+- **Impact:** Consistent, accessible status visualization
+- **Status:** ✅ Classes ready, migration to components next
+
+**1.3 Frosted Glass Panels** ✅ **COMPLETED!**
+- [x] Add backdrop-blur utilities to key components
+- [x] Implement ring borders with white/5 opacity  
+- [x] Add subtle grain texture overlay (SVG-based, 2% opacity)
+- [x] Create `panel-frosted` and `grain-texture` utility classes
+- [x] Ready to apply to: Cards, Modals, Settings panels, Drawers
+- **Effect:** Premium "frosted glass" UI
+- **Files:** `app/globals.css`
+- **Status:** ✅ Classes ready, apply with `className="panel-frosted grain-texture"`
+
+**1.4 Ambient "Back-light" Cards** ✅ **COMPLETED!**
+- [x] Add inner-glow ring effect
+- [x] Implement faint outer bloom on hover/focus
+- [x] Create hover-lift animation with shadow growth
+- [x] Create `card-backlit` utility class
+- [x] Ready to apply to: Gig cards, Talent cards, Portfolio items
+- **Effect:** Tactile affordance, premium feel
+- **Status:** ✅ Classes ready, apply with `className="card-backlit"`
+
+---
+
+## 🧲 Motion System - Crisp, Measurable, Accessible (5-7 days)
+
+### 🔴 P1: Core Motion Features
+
+**2.1 View Transitions API** ⭐ CUTTING EDGE
+- [ ] Implement View Transitions for route changes
+- [ ] Add progressive enhancement with `@supports` detection
+- [ ] Create morphing transitions between similar layouts
+- [ ] Add view-transition-name to key elements (headings, cards)
+- [ ] Guard with feature detection (Chrome/Edge first, graceful fallback)
+- **Effect:** Buttery-smooth page transitions
+- **Resources:** [MDN View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API/Using)
+- **Files:** `app/layout.tsx`, client navigation components
+
+**2.2 Scroll-Driven Animations** ⭐ CSS-ONLY
+- [ ] Implement scroll-timeline for hero headings
+- [ ] Add parallax reveal for portfolio grid
+- [ ] Create scroll-triggered fades for feature sections
+- [ ] Progressive enhancement with `@supports`
+- **Effect:** Micro-parallax without JavaScript
+- **Resources:** [MDN animation-timeline](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline)
+- **Performance:** Zero JS overhead!
+
+**2.3 Motion Library Integration** (Successor to Framer Motion)
+- [ ] Install Motion library: `npm install motion`
+- [ ] Add spring animations to CTAs (Apply, Book Now)
+- [ ] Animate notification badge pops
+- [ ] Add filter chip entrance animations
+- [ ] Animate Radix primitives (Dialogs, Dropdowns, Toasts)
+- [ ] Respect `prefers-reduced-motion`
+- **Resources:** [motion.dev](https://motion.dev), [Motion + Radix guide](https://motion.dev/docs/radix)
+- **Files:** All interactive components
+
+**2.4 prefers-reduced-motion Support**
+- [ ] Add `prefers-reduced-motion: reduce` media query checks
+- [ ] Disable all animations for accessibility
+- [ ] Keep functional transitions only
+- [ ] Test with system settings enabled
+- **Impact:** Accessibility compliance, better UX for users with motion sensitivity
+
+---
+
+### 🟡 P2: Advanced Motion & Effects
+
+**2.5 Live Gradient "Glow" Background**
+- [ ] Install react-three-fiber: `npm install @react-three/fiber @react-three/drei three`
+- [ ] Create WebGL shader gradient for hero section
+- [ ] Implement GPU-light animation (<5% CPU)
+- [ ] Pause on visibility change for performance
+- [ ] Add to empty states for premium feel
+- **Effect:** Ambient animated glow
+- **Resources:** [React Three Fiber docs](https://r3f.docs.pmnd.rs/getting-started/introduction)
+- **Performance:** Monitor GPU usage, keep lightweight
+
+**2.6 Rive Micro-Animations**
+- [ ] Research Rive vs Lottie for use case
+- [ ] Create/source 2-3 micro-animations:
+  - "Application Sent" success animation
+  - Empty state playful illustration
+  - Loading state brand animation
+- [ ] Keep file sizes <150KB per animation
+- [ ] Implement with dynamic imports (SSR off)
+- [ ] Add interactive state machines for hover responses
+- **Resources:** [Rive vs Lottie comparison](https://rive.app/blog/rive-as-a-lottie-alternative)
+- **Files:** `components/animations/`
+
+---
+
+## 🧭 Navigation & Interaction Enhancements (3-4 days)
+
+### 🔴 P1: Core Navigation Features
+
+**3.1 Command Palette (⌘K)**
+- [ ] Implement global keyboard shortcut (Cmd+K / Ctrl+K)
+- [ ] Use cmdk library (already installed!)
+- [ ] Index common actions: "Create gig", "Browse talent", "Settings"
+- [ ] Show recent pages for quick navigation
+- [ ] Add fuzzy search for gigs and talent
+- [ ] Animate open/close with Motion
+- [ ] Add keyboard navigation hints
+- **Effect:** Power-user feature, faster navigation
+- **Library:** Already have `cmdk` 1.0.4 installed!
+- **Files:** `components/command-palette.tsx` (NEW)
+
+**3.2 Enhanced Navigation Feedback**
+- [ ] Add view-transitioned route headers (headings morph)
+- [ ] Implement loading skeletons for page transitions
+- [ ] Add breadcrumb navigation with transitions
+- [ ] Create smooth scroll-to-top on navigation
+- **Effect:** Premium navigation feel
+
+---
+
+### 🟡 P2: Advanced Navigation
+
+**3.3 Notification Tray**
+- [ ] Create notification tray component (anchored to avatar)
+- [ ] Add unread count badge with pulse animation
+- [ ] Implement Supabase Realtime for live notifications
+- [ ] Create notification event cards with status colors
+- [ ] Add "Mark all as read" functionality
+- **Effect:** Real-time engagement, better UX
+
+**3.4 Breadcrumb & Context Bar**
+- [ ] Add persistent breadcrumb navigation
+- [ ] Show current context (e.g., "Viewing: Fashion Model Gigs")
+- [ ] Animate breadcrumb changes with View Transitions
+- **Effect:** Better user orientation
+
+---
+
+## 🖼️ Media & Portfolio Enhancements (2-3 days)
+
+### 🔴 P1: Portfolio Visual Polish
+
+**4.1 Hover Depth on Portfolio Tiles**
+- [ ] Add shadow growth in OKLCH brand hue on hover
+- [ ] Implement caption slide-up animation
+- [ ] Add scroll-driven reveal for masonry grid
+- [ ] Create subtle scale transform (1.02x) on hover
+- **Effect:** Premium, tactile portfolio gallery
+- **Performance:** CSS-only, zero JavaScript
+
+**4.2 Image Loading Experience**
+- [ ] Add skeleton loaders for images
+- [ ] Implement blur-up placeholders
+- [ ] Show loading progress for large images
+- [ ] Add subtle fade-in on image load
+- **Files:** `components/ui/safe-image.tsx`
+
+---
+
+### 🟡 P2: Advanced Media Features
+
+**4.3 Lightbox Gallery**
+- [ ] Create full-screen portfolio lightbox
+- [ ] Add keyboard navigation (←/→ arrows)
+- [ ] Implement swipe gestures for mobile
+- [ ] Add zoom/pan for detail viewing
+- [ ] Animate with Motion exit transitions
+- **Effect:** Professional portfolio presentation
+
+**4.4 Video Preview Support**
+- [ ] Add video thumbnail generation
+- [ ] Implement hover-to-play previews
+- [ ] Support video uploads in portfolio
+- [ ] Add video controls overlay
+- **Impact:** Richer portfolio content
+
+---
+
+## 🎨 Component Library Polish (4-5 days)
+
+### 🔴 P1: Core Component Enhancements
+
+**5.1 Elevated Panel System**
+- [ ] Create reusable Panel component
+- [ ] Implement elevation levels (subtle, medium, high)
+- [ ] Add frosted glass variant
+- [ ] Apply consistent shadows, rings, blurs
+- [ ] Use for: Cards, Modals, Settings sections
+- **Template:**
+```tsx
+<Panel elevation="medium" frosted>
+  {/* content */}
+</Panel>
+```
+
+**5.2 Back-Lit CTA Buttons**
+- [ ] Create premium button variant
+- [ ] Add inner glow ring effect
+- [ ] Implement outer bloom shadow
+- [ ] Add hover state with increased glow
+- [ ] Apply to primary CTAs: "Apply Now", "Book Talent", "Post Gig"
+- **Effect:** Draws attention to key actions
+
+**5.3 Status Badge System**
+- [ ] Redesign badges with OKLCH status colors
+- [ ] Add subtle pulse animation for "new" status
+- [ ] Create badge variants: minimal, elevated, glowing
+- [ ] Implement consistent iconography
+- **Files:** `components/ui/badge.tsx`
+
+**5.4 Toast Notification Polish**
+- [ ] Enhance toast design with frosted glass
+- [ ] Add Motion spring animations
+- [ ] Implement success/error icons with micro-animations
+- [ ] Add progress bar for auto-dismiss
+- [ ] Create notification sound option (optional, muted by default)
+- **Library:** Enhance existing Sonner implementation
+
+---
+
+### 🟡 P2: Advanced Components
+
+**5.5 Empty State Illustrations**
+- [ ] Create/source Rive animations for empty states
+- [ ] Implement playful "No gigs found" animation
+- [ ] Add interactive "No applications yet" state
+- [ ] Create encouraging "Complete your profile" animation
+- [ ] Keep file sizes <150KB each
+- **Effect:** Delightful, engaging empty states
+
+**5.6 Loading States**
+- [ ] Create branded loading spinner with glow effect
+- [ ] Add skeleton screens for all major pages
+- [ ] Implement progressive loading for lists
+- [ ] Add shimmer effect to skeletons
+- **Files:** `components/ui/loading-skeleton.tsx`, `components/ui/spinner.tsx`
+
+---
+
+## 🎯 Interaction Design (2-3 days)
+
+### 🔴 P1: Micro-Interactions
+
+**6.1 Form Input Polish**
+- [ ] Add focus glow to input fields
+- [ ] Implement floating label animation
+- [ ] Add validation feedback animations
+- [ ] Create success checkmark animation
+- [ ] Error shake animation for failed validation
+- **Files:** `components/ui/input.tsx`, `components/ui/form.tsx`
+
+**6.2 Button States**
+- [ ] Add loading state with spinner
+- [ ] Implement success state (checkmark flash)
+- [ ] Create disabled state with reduced opacity
+- [ ] Add haptic feedback class for mobile (via vibration API)
+- **Effect:** Clear feedback for all actions
+
+**6.3 Hover Effects**
+- [ ] Standardize hover transitions (200ms ease-out)
+- [ ] Add subtle scale transforms
+- [ ] Implement cursor pointer on interactive elements
+- [ ] Create custom cursor for drag operations
+- **Consistency:** Uniform interaction language
+
+---
+
+## 📱 Responsive & Mobile Polish (2-3 days)
+
+### 🔴 P1: Mobile Experience
+
+**7.1 Touch-Optimized Interactions**
+- [ ] Increase touch target sizes to 44x44px minimum
+- [ ] Add swipe gestures for cards and galleries
+- [ ] Implement pull-to-refresh
+- [ ] Add bottom sheet for mobile filters
+- **Library:** Use `vaul` (already installed) for drawers
+
+**7.2 Mobile Navigation**
+- [ ] Create slide-up mobile menu
+- [ ] Add tab bar navigation for mobile
+- [ ] Implement gesture-based navigation
+- [ ] Add safe area insets for iOS
+- **Effect:** Native-app-like experience
+
+---
+
+### 🟡 P2: Progressive Web App
+
+**7.3 PWA Implementation**
+- [ ] Add manifest.json
+- [ ] Implement service worker for offline support
+- [ ] Create install prompt
+- [ ] Add push notification support
+- [ ] Implement background sync
+- **Impact:** Installable, works offline
+
+---
+
+## 🌟 Premium Features (P2) (1-2 weeks)
+
+### **8.1 Real-time Features**
+- [ ] Implement Supabase Realtime subscriptions
+- [ ] Live application status updates
+- [ ] Real-time notification badges
+- [ ] Live typing indicators for chat (future)
+- **Tech:** Supabase Realtime (already enabled!)
+
+### **8.2 Advanced Search**
+- [ ] Integrate Algolia or Meilisearch
+- [ ] Implement instant search with highlights
+- [ ] Add search suggestions/autocomplete
+- [ ] Create advanced filter UI
+- **Impact:** Professional search experience
+
+### **8.3 Performance Monitoring Dashboard**
+- [ ] Add Vercel Analytics
+- [ ] Implement custom performance metrics
+- [ ] Create admin performance dashboard
+- [ ] Track Core Web Vitals
+- **Tech:** Vercel Analytics + custom Sentry metrics
+
+---
+
+## 🎓 New Documentation Needed
+
+### 🔴 P1: Create UI/UX Guides
+
+- [ ] `docs/UI_VISUAL_LANGUAGE.md`
+  - OKLCH palette tokens
+  - Radix Color scale references
+  - Elevation system (shadows, rings, blurs)
+  - Grain texture asset & usage
+  - Component densities (compact/comfortable)
+
+- [ ] `docs/MOTION_SYSTEM.md`
+  - Motion principles (fast in, slower out)
+  - View Transitions usage + compatibility
+  - Scroll-driven animations + ranges
+  - Motion + Radix patterns
+  - Accessibility (prefers-reduced-motion)
+
+- [ ] `docs/RIVE_GUIDE.md`
+  - When to use Rive vs Lottie
+  - Performance checklist (<150KB ideal, <300KB max)
+  - Embed patterns for Next.js
+  - Interactive state machines
+
+- [ ] `docs/ACCESSIBILITY_AND_PREFS.md`
+  - prefers-reduced-motion support
+  - prefers-contrast variants
+  - Keyboard focus specifications
+  - Screen reader testing
+
+---
+
+## 📦 Dependencies to Add
+
+### 🔴 P1: Essential Libraries
+
+```bash
+# Motion (animation library)
+npm install motion
+
+# Optional: Radix Colors (if we want their accessible scales)
+npm install @radix-ui/colors
+```
+
+### 🟡 P2: Advanced Features
+
+```bash
+# React Three Fiber (ambient glow backgrounds)
+npm install @react-three/fiber @react-three/drei three
+
+# Rive (micro-animations)
+npm install @rive-app/react-canvas
+
+# Algolia (advanced search - if chosen)
+npm install algoliasearch react-instantsearch
+
+# Vercel Analytics
+npm install @vercel/analytics
+```
+
+---
+
+## 🎯 Prioritized Implementation Roadmap
+
+### **Phase 1: Foundation** (1 week)
+**Goal:** Modern color system + glass aesthetic
+
+- [ ] OKLCH color tokens
+- [ ] Frosted glass panels
+- [ ] Back-lit cards
+- [ ] Status badge redesign
+- [ ] Basic Motion integration
+
+**Deliverable:** Visually transformed core UI
+
+### **Phase 2: Motion** (1 week)
+**Goal:** Buttery-smooth interactions
+
+- [ ] View Transitions API (progressive)
+- [ ] Scroll-driven animations
+- [ ] Motion polish on all CTAs
+- [ ] Command Palette (⌘K)
+- [ ] Toast animations
+
+**Deliverable:** Premium interaction feel
+
+### **Phase 3: Polish** (1 week)
+**Goal:** Delight in details
+
+- [ ] Portfolio hover effects
+- [ ] Form input polish
+- [ ] Mobile touch optimization
+- [ ] Empty state Rive animations
+- [ ] Loading state improvements
+
+**Deliverable:** Polished, production-ready UI
+
+### **Phase 4: Advanced** (2 weeks)
+**Goal:** Next-level features
+
+- [ ] React Three Fiber ambient glow
+- [ ] Real-time notifications
+- [ ] Advanced search (Algolia/Meilisearch)
+- [ ] PWA implementation
+- [ ] Performance dashboard
+
+**Deliverable:** Best-in-class experience
+
+---
+
+## ♿ Accessibility & Performance Guardrails
+
+### **Performance Budgets**
+- [ ] GPU time < 5% when idle
+- [ ] No layout thrash from animations
+- [ ] Motion paused offscreen
+- [ ] Animations disabled with `prefers-reduced-motion`
+
+### **Accessibility Checklist**
+- [ ] All colors 4.5:1 contrast minimum
+- [ ] Visible focus indicators (`:focus-visible` rings)
+- [ ] Keyboard navigation for all features
+- [ ] Screen reader tested
+- [ ] Motion respects user preferences
+
+### **Browser Support**
+- [ ] Chrome/Edge: Full feature set
+- [ ] Safari: Progressive enhancement (most features)
+- [ ] Firefox: Core features work
+- [ ] Graceful fallbacks for all modern APIs
+
+---
+
+## 📊 Success Metrics
+
+**Visual Quality:**
+- [ ] Lighthouse score >90
+- [ ] Core Web Vitals all green
+- [ ] Zero layout shift (CLS = 0)
+- [ ] First Paint <1s
+
+**User Engagement:**
+- [ ] Reduced bounce rate
+- [ ] Increased time on site
+- [ ] More completed applications
+- [ ] Higher booking conversion
+
+**Developer Experience:**
+- [ ] Reusable component library
+- [ ] Documented motion patterns
+- [ ] Type-safe animations
+- [ ] Fast Hot Module Replacement
+
+---
+
+## 🎨 Design System Components to Create
+
+### New Components Needed:
+
+1. **Panel** - Frosted glass container with elevation levels
+2. **GlowButton** - Back-lit CTA with inner/outer glow
+3. **CommandPalette** - Global search/actions (⌘K)
+4. **NotificationTray** - Real-time notification center
+5. **LoadingSkeleton** - Shimmer loading states
+6. **EmptyState** - Rive-animated empty states
+7. **StatusBadge** - Enhanced badge with OKLCH colors
+8. **GlowCanvas** - Ambient WebGL gradient background
+
+### Component Enhancements:
+
+1. **Card** - Add frosted variant, hover glow
+2. **Dialog** - Add View Transition support
+3. **Toast** - Motion springs, better icons
+4. **Input** - Focus glow, floating labels
+5. **Button** - Loading states, success states
+6. **Avatar** - Presence indicator, online status
+7. **Badge** - Pulse animations, glow variants
+
+---
+
+## 🧪 Testing Requirements
+
+**Visual Regression:**
+- [ ] Screenshot tests for key components
+- [ ] Before/after comparison
+- [ ] Cross-browser visual testing
+
+**Motion Testing:**
+- [ ] Test with `prefers-reduced-motion: reduce`
+- [ ] Verify no motion sickness triggers
+- [ ] Performance profiling with animations
+
+**Accessibility:**
+- [ ] Keyboard navigation complete flows
+- [ ] Screen reader announcement tests
+- [ ] Color contrast validation
+- [ ] Focus indicator visibility
+
+---
+
+## 📚 Learning Resources
+
+**For Implementation:**
+1. [OKLCH Color Spaces](https://web.dev/blog/color-spaces-and-functions) - Wide-gamut colors
+2. [View Transitions API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API/Using) - Page morphs
+3. [Scroll-Driven Animations](https://developer.mozilla.org/en-US/docs/Web/CSS/animation-timeline) - CSS parallax
+4. [Motion Library](https://motion.dev) - React animations
+5. [Motion + Radix](https://motion.dev/docs/radix) - Primitive animations
+6. [React Three Fiber](https://r3f.docs.pmnd.rs) - 3D/WebGL in React
+7. [Rive Docs](https://rive.app/docs/runtimes/getting-started) - Interactive animations
+8. [Radix Colors](https://www.radix-ui.com/themes/docs/theme/color) - Accessible scales
+
+---
+
+## ⚡ Quick Wins (Can Start Today!)
+
+**1. OKLCH Tokens (1 hour)**
+Add to `app/globals.css`:
+```css
+:root {
+  --bg: oklch(12% 0.02 258);
+  --panel: oklch(18% 0.02 258);
+  --brand-glow: oklch(78% 0.29 270);
+}
+```
+
+**2. Frosted Card (30 mins)**
+Update `components/ui/card.tsx`:
+```tsx
+className="backdrop-blur-xl bg-[var(--panel)]/80 ring-1 ring-white/5"
+```
+
+**3. Scroll Fade-In (30 mins)**
+Add to hero section:
+```css
+@supports (animation-timeline: scroll()) {
+  .hero { animation: reveal linear both; animation-timeline: scroll(); }
+  @keyframes reveal { from { opacity: 0; transform: translateY(12px) } }
+}
+```
+
+**4. Command Palette Shortcut (2 hours)**
+Use existing `cmdk` library to add ⌘K search!
+
+---
+
+## 🎉 Expected Impact
+
+**Before Polish:**
+- ✅ Functional MVP
+- ✅ Core features working
+- ⚠️ Basic visual design
+
+**After Polish:**
+- ✨ Premium, modern UI
+- ✨ Buttery-smooth animations
+- ✨ Delightful micro-interactions
+- ✨ Best-in-class user experience
+- ✨ Competitive advantage
+
+**Estimated Time:** 3-4 weeks for full implementation  
+**Incremental Delivery:** Each phase can ship independently
+
+---
+
+**This roadmap transforms TOTL from "functional" to "exceptional"!** 🚀
 
 ---
 

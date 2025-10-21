@@ -43,6 +43,3 @@ ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'avatars');
 
--- Add comment to document the bucket
-COMMENT ON TABLE storage.buckets IS 'Storage buckets for file uploads';
-

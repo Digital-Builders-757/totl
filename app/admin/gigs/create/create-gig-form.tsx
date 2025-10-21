@@ -23,7 +23,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending}>
+    <Button type="submit" disabled={pending} className="button-glow border-0">
       {pending ? "Creating..." : "Create Gig"}
     </Button>
   );

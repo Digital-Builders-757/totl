@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** October 17, 2025
+**Last Updated:** October 20, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -52,13 +52,16 @@ All other documentation has been organized into the `docs/` folder.
 - `CODING_STANDARDS.md` - Project coding standards and best practices
 - `ONBOARDING.md` - New developer onboarding guide
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error troubleshooting
+- `TECH_STACK_BREAKDOWN.md` - **NEW** - Complete technical stack overview
 
 ### **📧 Services & Integrations**
 - `email-service.md` - Email service implementation
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 
 ### **🐛 Troubleshooting**
-- `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions
+- `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (8 error patterns)
+- `SENTRY_ERROR_FIXES_SUMMARY.md` - **NEW** - Complete Sentry error fix summary
+- `AVATAR_UPLOAD_FIX.md` - **NEW** - Avatar upload RLS policy fix guide
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error patterns
 
 ### **📖 Project Documentation & Organization**

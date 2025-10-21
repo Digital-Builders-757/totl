@@ -102,7 +102,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       </div>
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={submitting} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+        <Button type="submit" disabled={submitting} className="flex-1 button-glow border-0">
           {submitting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />

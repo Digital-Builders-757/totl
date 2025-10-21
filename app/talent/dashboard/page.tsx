@@ -1016,7 +1016,7 @@ function TalentDashboardContent() {
                             </div>
                           </div>
                           <div className="flex gap-2 pt-2">
-                            <Button className="flex-1" asChild>
+                            <Button className="flex-1 button-glow border-0" asChild>
                               <Link href={`/gigs/${gig.id}/apply`}>Apply Now</Link>
                             </Button>
                             <Button variant="outline" size="sm" asChild>
