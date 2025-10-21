@@ -38,6 +38,7 @@ All other documentation has been organized into the `docs/` folder.
 - `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - Performance optimization guide
 - `DATABASE_LINTER_FIX_OCT_2025.md` - Database linter performance fixes (Oct 2025)
 - `APPLY_LINTER_FIXES.md` - **NEW** - Step-by-step guide to apply linter fixes
+- `SCHEMA_SYNC_FIX_GUIDE.md` - **NEW** - Fix schema drift and CI verification (Oct 2025)
 
 ### **🎨 Features & Implementation**
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
