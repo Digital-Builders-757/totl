@@ -47,6 +47,7 @@ All other documentation has been organized into the `docs/` folder.
 - `GIGS_PAGINATION_416_ERROR_FIX.md` - Gigs page pagination 416 error fix
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system
 - `SIGN_OUT_FIX_SUMMARY.md` - Sign-out functionality fix
+- `LOGIN_PAGE_MOBILE_FIX.md` - **NEW** - Login page mobile responsiveness fix (Oct 2025)
 
 ### **🛠️ Development & Setup**
 - `DEVELOPER_QUICK_REFERENCE.md` - Quick reference for developers
