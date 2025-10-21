@@ -66,11 +66,15 @@
    - **Impact:** Clean error tracking, production-ready monitoring
 
 ### **Database Schema Updates:**
-2. ✅ **gig_notifications Table Sync** - Synced remote schema changes
+2. ✅ **gig_notifications Table Sync + Schema Truth Hardening** - Synced & protected
    - Regenerated `types/database.ts` from remote Supabase schema
    - Added `gig_notifications` table documentation to schema audit
    - Updated table count from 8 to 9 tables
-   - **Impact:** Types and documentation in sync with remote database
+   - **Added AUTO-GENERATED banner** to prevent manual edits
+   - **Pinned Supabase CLI** to v2.33.4 in package.json (matches CI)
+   - Verified .gitattributes enforces LF line endings
+   - Verified .prettierignore excludes types/database.ts
+   - **Impact:** Types in sync + CI-proof setup (no more drift!)
 
 ### **Comprehensive Documentation:**
 3. ✅ **Error Tracking Documentation** - Complete guide for all 10 error types
