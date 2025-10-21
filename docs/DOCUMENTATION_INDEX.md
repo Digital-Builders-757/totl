@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** October 20, 2025
+**Last Updated:** October 21, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -64,9 +64,11 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🐛 Troubleshooting**
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (8 error patterns)
-- `SENTRY_ERROR_FIXES_SUMMARY.md` - **NEW** - Complete Sentry error fix summary
-- `AVATAR_UPLOAD_FIX.md` - **NEW** - Avatar upload RLS policy fix guide
-- `TALENT_PROFILE_UPDATE_FIX.md` - **NEW** - Profile update error fix (Oct 2025)
+- `SENTRY_ERROR_FIXES_SUMMARY.md` - Complete Sentry error fix summary
+- `SENTRY_ERROR_FIX_EVENT_HANDLERS.md` - **NEW** - Event handler cache error fix (Oct 21, 2025)
+- `QUICK_FIX_CACHE_CLEAR.md` - **NEW** - Quick commands to clear Next.js cache
+- `AVATAR_UPLOAD_FIX.md` - Avatar upload RLS policy fix guide
+- `TALENT_PROFILE_UPDATE_FIX.md` - Profile update error fix (Oct 2025)
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error patterns
 
 ### **📖 Project Documentation & Organization**
@@ -129,9 +131,9 @@ All other documentation has been organized into the `docs/` folder.
 
 ## 📊 Documentation Statistics
 
-**Total Documentation Files:** 24 files (consolidated from 26)
+**Total Documentation Files:** 26 files
 - Root Directory: 4 critical files
-- docs/ Directory: 24 organized files
+- docs/ Directory: 26 organized files
 
 **Categories:**
 - Authentication & Security: 2 docs
