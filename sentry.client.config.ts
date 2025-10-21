@@ -71,6 +71,9 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       /Event handlers cannot be passed to Client Component props/,
       // Webpack chunk loading errors in dev
       /Cannot find module '\.\/\d+\.js'/,
+      // Webpack HMR module build errors (dev only)
+      /Module build failed/,
+      /Expected '<\/'/,
     ],
 
     // Filter out development-only errors before sending
@@ -101,6 +104,16 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
           
           if (isWebpackError && process.env.NODE_ENV === 'development') {
             console.warn("Webpack chunk loading error - clear .next cache and restart dev server");
+            return null; // Filter in dev
+          }
+        }
+
+        // Webpack HMR module build errors (development only)
+        if (process.env.NODE_ENV === 'development') {
+          if (errorObj.name === 'ModuleBuildError' || 
+              errorObj.message?.includes('Module build failed') ||
+              errorObj.message?.match(/Expected '<\/'/)) {
+            console.warn("Webpack HMR build error - transient syntax error during hot reload");
             return null; // Filter in dev
           }
         }
