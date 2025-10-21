@@ -22,7 +22,7 @@
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
 **Key Highlights:**
-- ✅ **8 tables** with proper relationships
+- ✅ **9 tables** with proper relationships
 - ✅ **RLS enabled** on all tables for security
 - ✅ **Custom enums** for status management
 - ✅ **Automatic triggers** for profile creation
@@ -30,7 +30,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 8
+- **Total Tables:** 9
 - **Total Columns:** 75+
 - **Custom Types (Enums):** 4
 - **Foreign Key Relationships:** 8
@@ -293,6 +293,38 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 **Indexes:**
 - `gig_requirements_pkey` (Primary Key)
 - `gig_requirements_gig_id_idx` (Foreign Key)
+
+---
+
+### 9. `gig_notifications` - Email Notification Preferences
+**Purpose:** Store user preferences for gig notification emails
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | YES | - | Optional foreign key to profiles |
+| `email` | `text` | NO | - | Email address for notifications |
+| `categories` | `text[]` | YES | - | Array of gig categories to notify about |
+| `locations` | `text[]` | YES | - | Array of locations to notify about |
+| `frequency` | `text` | YES | - | Notification frequency (immediate/daily/weekly) |
+| `is_active` | `boolean` | YES | `true` | Whether notifications are enabled |
+| `created_at` | `timestamp with time zone` | YES | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | YES | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Unique: `email` (one subscription per email)
+
+**Indexes:**
+- `gig_notifications_pkey` (Primary Key)
+- `gig_notifications_email_idx` (Email lookup)
+- `gig_notifications_user_id_idx` (User lookup)
+
+**RLS Policies:**
+- Users can view/update their own notification preferences
+- Anonymous users can create notification preferences via email
+
+---
 
 ## 🔗 Relationships & Constraints
 
