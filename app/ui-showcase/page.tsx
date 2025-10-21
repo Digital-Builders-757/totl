@@ -208,6 +208,19 @@ export default function UIShowcasePage() {
             </div>
           </section>
 
+          {/* 9. Animated Background Paths */}
+          <section className="panel-frosted p-8">
+            <h2 className="text-3xl font-bold mb-6">9. Animated Background Paths ⭐ NEW</h2>
+            <p className="text-[var(--oklch-text-secondary)] mb-6">
+              Beautiful floating SVG paths with Motion animations. Perfect for hero sections!
+            </p>
+            <Link href="/ui-showcase/animated-paths">
+              <Button className="button-glow border-0">
+                View Animated Demo →
+              </Button>
+            </Link>
+          </section>
+
           {/* Navigation */}
           <section className="text-center">
             <Link href="/">
