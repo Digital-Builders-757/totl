@@ -75,6 +75,8 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       /Module build failed/,
       /Expected '<\//, // Matches "Expected '</'" and "Expected '</', got..."
       /Syntax Error/, // Webpack SWC loader syntax errors
+      // Context provider HMR errors
+      /must be used within an? \w+Provider/i, // "must be used within an AuthProvider", etc.
     ],
 
     // Filter out development-only errors before sending

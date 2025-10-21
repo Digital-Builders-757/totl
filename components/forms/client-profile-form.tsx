@@ -98,20 +98,39 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       }
 
       // Update client profile
-      const { error: profileError } = await supabase.from("client_profiles").upsert({
-        user_id: user.id,
-        company_name: data.company_name,
-        industry: data.industry || null,
-        website: data.website || null,
-        contact_name: data.contact_name || null,
-        contact_email: data.contact_email,
-        contact_phone: data.contact_phone || null,
-        company_size: data.company_size || null,
-        updated_at: new Date().toISOString(),
-      });
+      const { error: profileError } = await supabase
+        .from("client_profiles")
+        .upsert(
+          {
+            user_id: user.id,
+            company_name: data.company_name,
+            industry: data.industry || null,
+            website: data.website || null,
+            contact_name: data.contact_name || null,
+            contact_email: data.contact_email,
+            contact_phone: data.contact_phone || null,
+            company_size: data.company_size || null,
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: 'user_id', // Specify unique constraint
+            ignoreDuplicates: false, // Update on conflict
+          }
+        );
 
       if (profileError) {
-        throw new Error(`Profile update failed: ${profileError.message}`);
+        console.error("Supabase update error details:", {
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint,
+          code: profileError.code,
+        });
+        throw new Error(
+          profileError.message || 
+          profileError.details || 
+          profileError.hint || 
+          "Profile update failed"
+        );
       }
 
       // Update display_name in profiles table
@@ -136,7 +155,25 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       router.push("/client/dashboard");
     } catch (err) {
       console.error("Error updating profile:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      
+      // Extract error message from various error types
+      let errorMessage = "An unexpected error occurred";
+      
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (err && typeof err === 'object') {
+        // Handle Supabase error objects
+        const supabaseError = err as any;
+        errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
+      }
+      
+      setError(errorMessage);
+      
+      toast({
+        title: "Error updating profile",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

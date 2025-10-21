@@ -143,22 +143,42 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       // Prepare data for update
       const updateData = {
         ...data,
-        languages: data.languages ? data.languages.split(",").map((lang) => lang.trim()) : [],
+        languages: data.languages ? data.languages.split(",").map((lang) => lang.trim()).filter(Boolean) : [],
         age: data.age ? parseInt(data.age) : null,
       };
 
-      // Update talent profile
-      const { error: updateError } = await supabase
+      // Clean the data - remove empty strings and convert to null for optional fields
+      const cleanedData: Record<string, any> = { ...updateData };
+      Object.keys(cleanedData).forEach(key => {
+        if (cleanedData[key] === '') {
+          cleanedData[key] = null;
+        }
+      });
+
+      // Update talent profile using upsert with the user_id as the conflict target
+      const { data: profileData, error: updateError } = await supabase
         .from("talent_profiles")
-        .upsert({
-          user_id: user.id,
-          ...updateData,
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            ...cleanedData,
+          },
+          {
+            onConflict: 'user_id', // Specify the unique constraint column
+            ignoreDuplicates: false, // Update on conflict
+          }
+        )
         .select()
-        .single();
+        .maybeSingle(); // Use maybeSingle instead of single to handle no rows
 
       if (updateError) {
-        throw updateError;
+        console.error("Supabase update error details:", {
+          message: updateError.message,
+          details: updateError.details,
+          hint: updateError.hint,
+          code: updateError.code,
+        });
+        throw new Error(updateError.message || updateError.details || updateError.hint || "Failed to update profile");
       }
 
       // Update display name in profiles table
@@ -184,9 +204,25 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       router.push("/talent/dashboard");
     } catch (error) {
       console.error("Error updating profile:", error);
-      setServerError(
-        error instanceof Error ? error.message : "An unexpected error occurred. Please try again."
-      );
+      
+      // Extract error message from various error types
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object') {
+        // Handle Supabase error objects
+        const supabaseError = error as any;
+        errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
+      }
+      
+      setServerError(errorMessage);
+      
+      toast({
+        title: "Error updating profile",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }

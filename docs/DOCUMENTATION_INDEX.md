@@ -36,6 +36,8 @@ All other documentation has been organized into the `docs/` folder.
 ### **🗄️ Database & Backend**
 - `DATABASE_REPORT.md` - Database structure and analysis
 - `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - Performance optimization guide
+- `DATABASE_LINTER_FIX_OCT_2025.md` - Database linter performance fixes (Oct 2025)
+- `APPLY_LINTER_FIXES.md` - **NEW** - Step-by-step guide to apply linter fixes
 
 ### **🎨 Features & Implementation**
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
@@ -62,6 +64,7 @@ All other documentation has been organized into the `docs/` folder.
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (8 error patterns)
 - `SENTRY_ERROR_FIXES_SUMMARY.md` - **NEW** - Complete Sentry error fix summary
 - `AVATAR_UPLOAD_FIX.md` - **NEW** - Avatar upload RLS policy fix guide
+- `TALENT_PROFILE_UPDATE_FIX.md` - **NEW** - Profile update error fix (Oct 2025)
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error patterns
 
 ### **📖 Project Documentation & Organization**
