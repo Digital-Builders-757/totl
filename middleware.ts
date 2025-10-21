@@ -29,10 +29,50 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // Define auth routes early for environment variable fallback handling
+  const authRoutes = [
+    "/login",
+    "/talent/signup",
+    "/client/signup",
+    "/reset-password",
+    "/update-password",
+    "/verification-pending",
+  ];
+  const isAuthRoute = authRoutes.includes(path);
+
+  // Validate required environment variables
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Missing Supabase environment variables in middleware", {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+      path,
+      env: process.env.NODE_ENV,
+    });
+    
+    // For auth routes, allow through without session check
+    // User will see the login/signup page and proper error handling there
+    if (isAuthRoute) {
+      return res;
+    }
+    
+    // For protected routes, redirect to login
+    if (!publicRoutes.includes(path)) {
+      const redirectUrl = new URL("/login", req.url);
+      redirectUrl.searchParams.set("returnUrl", encodeURIComponent(path));
+      return NextResponse.redirect(redirectUrl);
+    }
+    
+    // For public routes, just continue
+    return res;
+  }
+
   // Create Supabase client with proper cookie handling
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll: () => req.cookies.getAll(),
@@ -49,17 +89,6 @@ export async function middleware(req: NextRequest) {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-
-  // Auth routes that should redirect if the user is already logged in
-  const authRoutes = [
-    "/login",
-    "/talent/signup",
-    "/client/signup",
-    "/reset-password",
-    "/update-password",
-    "/verification-pending",
-  ];
-  const isAuthRoute = authRoutes.includes(path);
 
   if (isAuthRoute && session) {
     // If the user is logged in and tries to access an auth page, redirect to their dashboard based on role.
