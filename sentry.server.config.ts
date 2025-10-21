@@ -47,6 +47,8 @@ Sentry.init({
     "write EPIPE", // Ignore write errors from dev server logging
     /Cannot read properties of undefined \(reading 'call'\)/, // Webpack HMR issues in dev
     /Cannot find module '\.\/\d+\.js'/, // Webpack chunk loading errors in dev
+    /ENOENT.*\.next.*cache.*webpack/, // Webpack cache file errors in dev
+    /no such file or directory.*\.next/, // .next folder missing file errors in dev
   ],
 
   // Filter out non-critical system errors before sending to Sentry
@@ -74,6 +76,15 @@ Sentry.init({
                  frame.filename?.includes('console-dev.js')
       )) {
         return null; // Don't send to Sentry - dev server logging issue
+      }
+
+      // Filter out webpack cache file errors (ENOENT) in development
+      // These occur when .next folder is deleted while dev server is running
+      if (errorObj.code === 'ENOENT' && errorObj.message?.includes('.next')) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn("Webpack cache file missing - restart dev server to rebuild cache");
+          return null; // Don't send to Sentry in development
+        }
       }
 
       // Filter out webpack HMR/Fast Refresh errors in development

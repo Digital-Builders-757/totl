@@ -19,7 +19,7 @@ export async function createSupabaseServer() {
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set({ name, value, ...options });
             });
-          } catch (error) {
+          } catch {
             // Cookies can only be modified in Server Actions or Route Handlers
             // In Server Components (pages), this will silently fail which is expected
             // The session will still work correctly with the cookies that are already set

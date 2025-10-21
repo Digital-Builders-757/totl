@@ -9,9 +9,9 @@ import {
   Clock,
   Filter,
 } from "lucide-react";
-import Link from "next/link";
-
 import { useState, useEffect } from "react";
+
+import { AdminHeader } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,13 +30,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
-import { AdminHeader } from "@/components/admin/admin-header";
 
 // Type for the joined application data
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {

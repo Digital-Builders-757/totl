@@ -5,8 +5,6 @@ import {
   Search,
   Plus,
   MoreVertical,
-  Edit,
-  Trash2,
   Eye,
   Clock,
   CheckCircle,
@@ -15,35 +13,22 @@ import {
   Briefcase,
   BarChart,
   Activity,
-  TrendingUp,
-  Target,
-  Award,
-  Globe,
   Calendar,
   DollarSign,
   MapPin,
-  Star,
   Shield,
   Zap,
-  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { AdminHeader } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
-import { AdminHeader } from "@/components/admin/admin-header";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type Application = Database["public"]["Tables"]["applications"]["Row"];

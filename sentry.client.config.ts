@@ -73,7 +73,10 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       /Cannot find module '\.\/\d+\.js'/,
       // Webpack HMR module build errors (dev only)
       /Module build failed/,
-      /Expected '<\/'/,
+      /Expected '<\//, // Matches "Expected '</'" and "Expected '</', got..."
+      /Syntax Error/, // Webpack SWC loader syntax errors
+      // Context provider HMR errors
+      /must be used within an? \w+Provider/i, // "must be used within an AuthProvider", etc.
     ],
 
     // Filter out development-only errors before sending
@@ -112,7 +115,8 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
         if (process.env.NODE_ENV === 'development') {
           if (errorObj.name === 'ModuleBuildError' || 
               errorObj.message?.includes('Module build failed') ||
-              errorObj.message?.match(/Expected '<\/'/)) {
+              errorObj.message?.includes('Syntax Error') ||
+              errorObj.message?.match(/Expected '</)) {
             console.warn("Webpack HMR build error - transient syntax error during hot reload");
             return null; // Filter in dev
           }

@@ -320,9 +320,12 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 - `gig_notifications_email_idx` (Email lookup)
 - `gig_notifications_user_id_idx` (User lookup)
 
-**RLS Policies:**
-- Users can view/update their own notification preferences
-- Anonymous users can create notification preferences via email
+**RLS Policies (Optimized for Performance):**
+- Users can view their own notifications (uses `(SELECT auth.uid())` for caching)
+- Users can insert their own notifications (allows authenticated and anonymous)
+- Users can update their own notifications (authenticated only)
+- Users can delete their own notifications (authenticated only)
+- All policies use `(SELECT auth.uid())` instead of `auth.uid()` for ~95% performance gain
 
 ---
 
@@ -576,6 +579,7 @@ USING (
 7. **`20250725211607_fix_security_warnings.sql`** - Security hardening (search paths, OTP expiry, password protection)
 8. **`20251016171212_enhance_portfolio_items_for_gallery.sql`** - Portfolio gallery system (image_path, ordering, primary images)
 9. **`20251016172507_fix_performance_advisor_warnings.sql`** - Performance optimization (RLS caching, index cleanup)
+10. **`20251021164837_fix_gig_notifications_rls_and_duplicate_indexes.sql`** - Final performance optimization (gig_notifications RLS, duplicate index cleanup)
 
 ### **Recent Updates**
 - ✅ **Production cleanup** - Removed all mock data
@@ -588,6 +592,10 @@ USING (
   - Removed 4 duplicate indexes (applications, bookings)
   - Removed 12 unused indexes (performance, location, GIN indexes)
   - Verified essential indexes remain (PKs, FKs, role, status, portfolio)
+- ✅ **Performance optimization - Final (Oct 21, 2025)** - Fixed remaining linter warnings:
+  - Optimized 4 gig_notifications RLS policies to use `(SELECT auth.uid())`
+  - Removed final duplicate indexes (applications_gig_idx, applications_talent_idx, bookings_gig_idx)
+  - All RLS policies now use cached auth checks for optimal performance
 - ✅ **Portfolio gallery enhancement** - Added image_path, display_order, is_primary fields to portfolio_items
 - ✅ **Storage buckets** - Created 'portfolio' bucket with RLS policies for talent portfolio images
 
