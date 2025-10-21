@@ -9,17 +9,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-seamless-primary text-white pt-20">
       {/* Hero Section */}
       <section className="relative py-32 lg:py-40 overflow-hidden">
+        {/* Animated Floating Paths Background - Premium Back-Lit Effect */}
+        <FloatingPathsBackground opacity={0.12} color="var(--oklch-brand-3)" />
+        
         {/* Apple-Inspired Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]"></div>
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"></div>
         <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float"
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
           style={{ animationDelay: "1s" }}
         ></div>
 
