@@ -4,6 +4,52 @@
 
 @layer base {
   :root {
+    /* ============================================ */
+    /* 🌈 OKLCH COLOR SYSTEM - Premium Back-Lit UI */
+    /* ============================================ */
+    /* Modern, perceptually uniform colors with wide-gamut support */
+    /* Resource: https://web.dev/blog/color-spaces-and-functions */
+    
+    /* Base Neutrals - Deep Charcoal Foundation */
+    --oklch-bg: oklch(12% 0.02 258);           /* Deep charcoal with cool undertone */
+    --oklch-panel: oklch(18% 0.02 258);        /* Elevated panels */
+    --oklch-panel-alpha: oklch(18% 0.02 258 / 0.6); /* Semi-transparent panels */
+    --oklch-surface: oklch(22% 0.02 258);      /* Interactive surfaces */
+    
+    /* Text Colors - High Contrast Hierarchy */
+    --oklch-text-primary: oklch(98% 0 0);      /* Pure white */
+    --oklch-text-secondary: oklch(75% 0.01 258); /* Muted white */
+    --oklch-text-tertiary: oklch(55% 0.02 258);  /* Subtle gray */
+    --oklch-text-muted: oklch(40% 0.02 258);   /* Very subtle */
+    
+    /* Brand "Back-Light" Ramp - Soft Neon Accents */
+    --oklch-brand-1: oklch(70% 0.20 250);      /* Soft purple-blue */
+    --oklch-brand-2: oklch(72% 0.24 260);      /* Vivid blue */
+    --oklch-brand-3: oklch(78% 0.29 270);      /* Bright glow (primary accent) */
+    --oklch-brand-4: oklch(65% 0.18 240);      /* Deep blue (hover) */
+    
+    /* Semantic Status Colors - Consistent Lightness */
+    --oklch-success: oklch(70% 0.22 145);      /* Success green */
+    --oklch-warning: oklch(75% 0.20 75);       /* Warning amber */
+    --oklch-error: oklch(68% 0.25 25);         /* Error red */
+    --oklch-info: oklch(72% 0.20 220);         /* Info blue */
+    
+    /* Application Status Colors (for badges) */
+    --oklch-status-new: oklch(72% 0.24 260);         /* Blue - New */
+    --oklch-status-review: oklch(75% 0.20 75);       /* Amber - Under Review */
+    --oklch-status-shortlist: oklch(68% 0.22 280);   /* Purple - Shortlisted */
+    --oklch-status-accepted: oklch(70% 0.22 145);    /* Green - Accepted */
+    --oklch-status-rejected: oklch(68% 0.25 25);     /* Red - Rejected */
+    
+    /* Borders & Rings - Subtle Definition */
+    --oklch-border: oklch(22% 0.01 258);       /* Subtle borders */
+    --oklch-border-alpha: oklch(98% 0 0 / 0.08); /* Semi-transparent white border */
+    --oklch-ring: oklch(78% 0.29 270);         /* Focus ring with glow */
+    
+    /* ============================================ */
+    /* 🎨 HSL TOKENS (Legacy - Backward Compatible) */
+    /* ============================================ */
+    
     /* Ultra-Deep Black Aesthetic - Apple Inspired */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
@@ -647,3 +693,156 @@ h1 {
 .stagger-8 { animation-delay: 0.8s; }
 .stagger-9 { animation-delay: 0.9s; }
 .stagger-10 { animation-delay: 1.0s; }
+
+/* ============================================ */
+/* 🎨 OKLCH UTILITY CLASSES - Premium Components */
+/* ============================================ */
+
+/* Frosted Glass Panel - Premium Elevated Surface */
+.panel-frosted {
+  background: var(--oklch-panel-alpha);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--oklch-border-alpha);
+  border-radius: 1.5rem;
+  box-shadow: 
+    0 0 0 1px oklch(98% 0 0 / 0.04) inset,
+    0 10px 30px oklch(0% 0 0 / 0.35);
+}
+
+/* Back-Lit Card - Inner Glow + Outer Bloom */
+.card-backlit {
+  background: var(--oklch-panel);
+  border-radius: 1.5rem;
+  border: 1px solid var(--oklch-border);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 0 1px var(--oklch-brand-3) inset,
+    0 0 24px oklch(78% 0.29 270 / 0.15);
+}
+
+.card-backlit:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 2px var(--oklch-brand-3) inset,
+    0 0 36px oklch(78% 0.29 270 / 0.25),
+    0 10px 30px oklch(0% 0 0 / 0.4);
+}
+
+/* Premium CTA Button - Glow Effect */
+.button-glow {
+  background: var(--oklch-brand-3);
+  color: var(--oklch-bg);
+  font-weight: 600;
+  border-radius: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 0 0 1px oklch(90% 0.20 270) inset,
+    0 8px 24px oklch(78% 0.29 270 / 0.25);
+}
+
+.button-glow:hover {
+  background: oklch(82% 0.31 270);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 0 0 1px oklch(92% 0.22 270) inset,
+    0 12px 32px oklch(78% 0.29 270 / 0.35);
+}
+
+.button-glow:active {
+  transform: translateY(0);
+}
+
+/* Status Badge with OKLCH */
+.badge-status-new {
+  background: var(--oklch-status-new);
+  color: var(--oklch-bg);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 0 12px oklch(72% 0.24 260 / 0.3);
+}
+
+.badge-status-review {
+  background: var(--oklch-status-review);
+  color: var(--oklch-bg);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-shortlist {
+  background: var(--oklch-status-shortlist);
+  color: var(--oklch-text-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-accepted {
+  background: var(--oklch-status-accepted);
+  color: var(--oklch-bg);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-status-rejected {
+  background: var(--oklch-status-rejected);
+  color: var(--oklch-text-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Input Focus with OKLCH Glow */
+.input-glow:focus {
+  outline: none;
+  border-color: var(--oklch-brand-3);
+  box-shadow: 
+    0 0 0 3px oklch(78% 0.29 270 / 0.2),
+    0 0 20px oklch(78% 0.29 270 / 0.15);
+}
+
+/* Text Gradient with OKLCH */
+.text-gradient-glow {
+  background: linear-gradient(135deg, var(--oklch-brand-2), var(--oklch-brand-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grain Texture Overlay (for premium feel) */
+.grain-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================ */
+/* 🎯 OKLCH BROWSER SUPPORT FALLBACKS */
+/* ============================================ */
+/* For browsers that don't support OKLCH yet */
+
+@supports not (color: oklch(0% 0 0)) {
+  :root {
+    /* Fallback to HSL for older browsers */
+    --oklch-bg: hsl(0 0% 12%);
+    --oklch-panel: hsl(0 0% 18%);
+    --oklch-panel-alpha: hsla(0, 0%, 18%, 0.6);
+    --oklch-brand-3: hsl(260, 80%, 75%);
+    --oklch-text-primary: hsl(0 0% 98%);
+  }
+}

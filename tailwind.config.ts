@@ -61,12 +61,42 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Custom brand colors
+        // Custom brand colors (HSL - legacy)
         brand: {
           primary: "hsl(var(--brand-primary))",
           secondary: "hsl(var(--brand-secondary))",
           accent: "hsl(var(--brand-accent))",
           muted: "hsl(var(--brand-muted))",
+        },
+        // ✨ OKLCH Modern Colors - Premium Back-Lit UI
+        oklch: {
+          bg: "var(--oklch-bg)",
+          panel: "var(--oklch-panel)",
+          "panel-alpha": "var(--oklch-panel-alpha)",
+          surface: "var(--oklch-surface)",
+          text: {
+            primary: "var(--oklch-text-primary)",
+            secondary: "var(--oklch-text-secondary)",
+            tertiary: "var(--oklch-text-tertiary)",
+            muted: "var(--oklch-text-muted)",
+          },
+          brand: {
+            1: "var(--oklch-brand-1)",
+            2: "var(--oklch-brand-2)",
+            3: "var(--oklch-brand-3)",
+            4: "var(--oklch-brand-4)",
+          },
+          success: "var(--oklch-success)",
+          warning: "var(--oklch-warning)",
+          error: "var(--oklch-error)",
+          info: "var(--oklch-info)",
+          status: {
+            new: "var(--oklch-status-new)",
+            review: "var(--oklch-status-review)",
+            shortlist: "var(--oklch-status-shortlist)",
+            accepted: "var(--oklch-status-accepted)",
+            rejected: "var(--oklch-status-rejected)",
+          },
         },
       },
       borderRadius: {
