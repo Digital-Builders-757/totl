@@ -62,12 +62,18 @@ Sentry.init({
         return null; // Don't send to Sentry
       }
 
-      // Check for Next.js dev server logging errors
-      if (errorObj.message?.includes('EPIPE') && 
-          (errorObj.syscall === 'write' || event.exception?.values?.[0]?.stacktrace?.frames?.some(
-            frame => frame.filename?.includes('log-requests.js')
-          ))) {
+      // Check for EPIPE in error message
+      if (errorObj.message && typeof errorObj.message === 'string' && errorObj.message.includes('EPIPE')) {
         return null; // Don't send to Sentry
+      }
+
+      // Check for Next.js dev server logging errors (broader check)
+      if (event.exception?.values?.[0]?.stacktrace?.frames?.some(
+        frame => frame.filename?.includes('log-requests.js') ||
+                 frame.filename?.includes('build/output/log.js') ||
+                 frame.filename?.includes('console-dev.js')
+      )) {
+        return null; // Don't send to Sentry - dev server logging issue
       }
 
       // Filter out webpack HMR/Fast Refresh errors in development
