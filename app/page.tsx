@@ -47,7 +47,7 @@ export default function HomePage() {
                 <Link href="/choose-role">
                   <Button
                     size="lg"
-                    className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer"
+                    className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
                   >
                     Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
@@ -289,7 +289,7 @@ export default function HomePage() {
               <Link href="/choose-role">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto apple-button px-10 py-5 text-xl font-semibold animate-apple-shimmer"
+                  className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
                 >
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>

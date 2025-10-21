@@ -283,7 +283,7 @@ export default function PostGigPage() {
               </div>
 
               <div className="flex gap-4 pt-6">
-                <Button type="submit" disabled={isSubmitting} className="flex-1">
+                <Button type="submit" disabled={isSubmitting} className="flex-1 button-glow border-0">
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

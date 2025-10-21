@@ -225,7 +225,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   <p className="text-sm text-gray-600">
                     Ready to apply? Click below to submit your application.
                   </p>
-                  <Button asChild className="w-full">
+                  <Button asChild className="w-full button-glow border-0">
                     <Link href={`/gigs/${id}/apply`} className="flex items-center gap-2">
                       <Send className="h-4 w-4" />
                       Apply Now
