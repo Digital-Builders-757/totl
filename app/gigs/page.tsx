@@ -1,7 +1,7 @@
 ﻿export const dynamic = "force-dynamic";
 
 import * as Sentry from "@sentry/nextjs";
-import { Search, MapPin, DollarSign, ArrowRight, Calendar } from "lucide-react";
+import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -147,10 +147,60 @@ export default async function GigsPage({
     return `/gigs?${params.toString()}`;
   };
 
+  // Get user role for breadcrumb
+  const { data: { user } } = await supabase.auth.getUser();
+  let userRole: string | null = null;
+  
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    userRole = profile?.role || null;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb Navigation */}
+          <div className="mb-8 flex items-center gap-3 text-sm">
+            <Link 
+              href="/" 
+              className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+            >
+              <Home className="h-4 w-4" />
+              Home
+            </Link>
+            <span className="text-[var(--oklch-text-muted)]">/</span>
+            {userRole === "talent" && (
+              <>
+                <Link 
+                  href="/talent/dashboard" 
+                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                <span className="text-[var(--oklch-text-muted)]">/</span>
+              </>
+            )}
+            {userRole === "client" && (
+              <>
+                <Link 
+                  href="/client/dashboard" 
+                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Link>
+                <span className="text-[var(--oklch-text-muted)]">/</span>
+              </>
+            )}
+            <span className="text-white font-medium">Find Gigs</span>
+          </div>
+
           <div className="mb-16 text-center">
             <div className="panel-frosted w-fit mx-auto mb-6 px-6 py-3">
               <span className="text-white font-medium text-sm">Active Opportunities</span>
