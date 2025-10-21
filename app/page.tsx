@@ -17,7 +17,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative py-32 lg:py-40 overflow-hidden">
         {/* Animated Floating Paths Background - Premium Back-Lit Effect */}
-        <FloatingPathsBackground opacity={0.12} color="var(--oklch-brand-3)" />
+        <FloatingPathsBackground opacity={0.08} color="white" />
         
         {/* Apple-Inspired Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]"></div>

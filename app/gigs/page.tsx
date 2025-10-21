@@ -148,14 +148,17 @@ export default async function GigsPage({
   };
 
   return (
-    <div className="min-h-screen bg-black pt-40">
+    <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="mb-16 text-center">
-            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
+            <div className="panel-frosted w-fit mx-auto mb-6 px-6 py-3">
+              <span className="text-white font-medium text-sm">Active Opportunities</span>
+            </div>
+            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-gradient-glow animate-apple-fade-in">
               Find Gigs
             </h1>
-            <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
+            <p className="text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
               Browse through available casting opportunities and gigs. Filter by category, location,
               and more to find the perfect match for your talents.
             </p>
@@ -163,21 +166,22 @@ export default async function GigsPage({
 
           {/* Search and Filter */}
           <div className="max-w-4xl mx-auto mb-16">
-            <div className="apple-glass rounded-2xl p-8 shadow-lg">
-              <form className="flex flex-col md:flex-row gap-6" method="get">
+            <div className="panel-frosted grain-texture relative p-8 shadow-lg">
+              <form className="flex flex-col md:flex-row gap-6 relative z-10" method="get">
                 <div className="relative flex-grow">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input
                     name="q"
                     defaultValue={keyword}
-                    placeholder="Search keywords"
-                    className="apple-input py-6 text-xl h-16"
+                    placeholder="Search keywords..."
+                    className="input-glow pl-12 py-6 text-xl h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3 w-full md:w-auto">
                   <select
                     name="category"
                     defaultValue={category}
-                    className="apple-input h-16 bg-transparent text-white border-white/30 rounded-md px-3"
+                    className="h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20"
                   >
                     <option value="">All categories</option>
                     <option value="editorial">Editorial</option>
@@ -192,20 +196,20 @@ export default async function GigsPage({
                     name="location"
                     defaultValue={location}
                     placeholder="Location"
-                    className="apple-input h-16"
+                    className="h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
                   />
                   <Input
                     name="compensation"
                     defaultValue={compensation}
                     placeholder="Compensation"
-                    className="apple-input h-16"
+                    className="h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
                   />
                   <input type="hidden" name="page" value={String(page)} />
                 </div>
                 <div className="flex gap-4">
                   <Button
                     type="submit"
-                    className="apple-button px-8 py-6 text-lg"
+                    className="button-glow px-8 py-6 text-lg border-0"
                   >
                     Search
                   </Button>
@@ -233,55 +237,57 @@ export default async function GigsPage({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {gigsList.map((gig) => (
                 <div
                   key={gig.id}
-                  className="bg-gray-900 rounded-xl shadow-sm overflow-hidden group border border-gray-700"
+                  className="card-backlit overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all duration-300"
                 >
-                  <div className="relative aspect-[4/3]">
+                  <div className="relative aspect-[4/3] overflow-hidden">
                     <SafeImage
                       src={gig.image_url}
                       alt={gig.title}
                       fill
-                      className="transition-transform duration-500 group-hover:scale-105"
+                      className="transition-transform duration-500 group-hover:scale-110 object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                      <Button className="w-full bg-white text-black hover:bg-gray-200" asChild>
-                        <Link href={`/gigs/${gig.id}`}>
-                          View Details <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="text-lg font-semibold text-white group-hover:text-gray-300 transition-colors">
-                        {gig.title}
-                      </h3>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                    <div className="absolute top-4 right-4">
                       <Badge
                         variant="secondary"
-                        className="text-xs bg-white/10 text-white border-white/20"
+                        className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
                       >
                         {gig.category}
                       </Badge>
                     </div>
-                    <p className="text-gray-300 text-sm mb-4 line-clamp-2">{gig.description}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-white/90 transition-colors">
+                        {gig.title}
+                      </h3>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <p className="text-[var(--oklch-text-secondary)] text-sm line-clamp-2 leading-relaxed">
+                      {gig.description}
+                    </p>
                     <div className="space-y-2">
-                      <div className="flex items-center text-sm text-gray-400">
+                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
                         <MapPin className="h-4 w-4 mr-2" />
                         {gig.location}
                       </div>
-                      <div className="flex items-center text-sm text-gray-400">
-                        <DollarSign className="h-4 w-4 mr-2" />
-                        {gig.compensation}
+                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
+                        <DollarSign className="h-4 w-4 mr-2 text-white" />
+                        <span className="text-white font-semibold">{gig.compensation}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-400">
+                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
                         <Calendar className="h-4 w-4 mr-2" />
                         {gig.date}
                       </div>
                     </div>
+                    <Button className="w-full button-glow border-0 mt-4" asChild>
+                      <Link href={`/gigs/${gig.id}`}>
+                        View Details <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}

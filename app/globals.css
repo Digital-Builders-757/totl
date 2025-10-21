@@ -22,11 +22,11 @@
     --oklch-text-tertiary: oklch(55% 0.02 258);  /* Subtle gray */
     --oklch-text-muted: oklch(40% 0.02 258);   /* Very subtle */
     
-    /* Brand "Back-Light" Ramp - Soft Neon Accents */
-    --oklch-brand-1: oklch(70% 0.20 250);      /* Soft purple-blue */
-    --oklch-brand-2: oklch(72% 0.24 260);      /* Vivid blue */
-    --oklch-brand-3: oklch(78% 0.29 270);      /* Bright glow (primary accent) */
-    --oklch-brand-4: oklch(65% 0.18 240);      /* Deep blue (hover) */
+    /* Brand "Back-Light" Ramp - Pure White Glow (Apple-Inspired) */
+    --oklch-brand-1: oklch(85% 0.02 258);      /* Soft white with cool undertone */
+    --oklch-brand-2: oklch(92% 0.01 258);      /* Bright white */
+    --oklch-brand-3: oklch(98% 0 0);           /* Pure white glow (primary accent) */
+    --oklch-brand-4: oklch(75% 0.03 258);      /* Muted white (hover) */
     
     /* Semantic Status Colors - Consistent Lightness */
     --oklch-success: oklch(70% 0.22 145);      /* Success green */
@@ -710,27 +710,28 @@ h1 {
     0 10px 30px oklch(0% 0 0 / 0.35);
 }
 
-/* Back-Lit Card - Inner Glow + Outer Bloom */
+/* Back-Lit Card - Inner Glow + Outer Bloom (Pure White) */
 .card-backlit {
   background: var(--oklch-panel);
   border-radius: 1.5rem;
-  border: 1px solid var(--oklch-border);
+  border: 1px solid var(--oklch-border-alpha);
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 0 1px var(--oklch-brand-3) inset,
-    0 0 24px oklch(78% 0.29 270 / 0.15);
+    0 0 0 1px oklch(98% 0 0 / 0.05) inset,
+    0 4px 20px oklch(0% 0 0 / 0.3);
 }
 
 .card-backlit:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  border-color: oklch(98% 0 0 / 0.12);
   box-shadow: 
-    0 0 2px var(--oklch-brand-3) inset,
-    0 0 36px oklch(78% 0.29 270 / 0.25),
-    0 10px 30px oklch(0% 0 0 / 0.4);
+    0 0 0 1px oklch(98% 0 0 / 0.1) inset,
+    0 0 40px oklch(98% 0 0 / 0.15),
+    0 20px 40px oklch(0% 0 0 / 0.4);
 }
 
-/* Premium CTA Button - Glow Effect */
+/* Premium CTA Button - Pure White Glow (Apple-Style) */
 .button-glow {
   background: var(--oklch-brand-3);
   color: var(--oklch-bg);
@@ -741,20 +742,28 @@ h1 {
   position: relative;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 0 0 1px oklch(90% 0.20 270) inset,
-    0 8px 24px oklch(78% 0.29 270 / 0.25);
+    0 0 0 1px oklch(100% 0 0 / 0.1) inset,
+    0 8px 24px oklch(98% 0 0 / 0.25),
+    0 0 60px oklch(98% 0 0 / 0.15);
 }
 
 .button-glow:hover {
-  background: oklch(82% 0.31 270);
+  background: oklch(100% 0 0);
   transform: translateY(-1px);
   box-shadow: 
-    0 0 0 1px oklch(92% 0.22 270) inset,
-    0 12px 32px oklch(78% 0.29 270 / 0.35);
+    0 0 0 1px oklch(100% 0 0 / 0.15) inset,
+    0 12px 32px oklch(98% 0 0 / 0.35),
+    0 0 80px oklch(98% 0 0 / 0.25);
 }
 
 .button-glow:active {
   transform: translateY(0);
+}
+
+.button-glow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Status Badge with OKLCH */
