@@ -15,58 +15,58 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-seamless-primary text-white pt-20">
       {/* Hero Section */}
-      <section className="relative py-32 lg:py-40 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-32 lg:py-40 overflow-hidden">
         {/* Animated Floating Paths Background - Premium Back-Lit Effect */}
         <FloatingPathsBackground opacity={0.08} color="white" />
         
         {/* Apple-Inspired Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]"></div>
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"></div>
+        <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"></div>
         <div
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
+          className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
           style={{ animationDelay: "1s" }}
         ></div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-20 items-start">
-            <div className="space-y-6 pt-4">
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
+            <div className="space-y-6 pt-4 text-center lg:text-left">
               <div className="space-y-6">
-                <div className="apple-glass rounded-2xl px-6 py-3 w-fit">
+                <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto lg:mx-0">
                   <span className="text-white font-medium text-sm">
                     The Future of Talent Booking
                   </span>
                 </div>
-                <h1 className="text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
                   Connect with
                   <span className="apple-text-gradient"> Top Talent</span>
                   <br />
                   <span className="text-gray-200">Instantly</span>
                 </h1>
-                <p className="text-2xl text-gray-300 leading-relaxed max-w-lg">
+                <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg mx-auto lg:mx-0">
                   TOTL Agency is the fastest way to discover, book, and work with exceptional
                   talent. From models to influencers, find the perfect match for your next project.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-6">
-                <Link href="/choose-role">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
+                <Link href="/choose-role" className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
+                    className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
                   >
-                    Start Booking <ArrowRight className="ml-3 h-6 w-6" />
+                    Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </Link>
-                <Link href="/talent">
+                <Link href="/talent" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
                     size="lg"
-                    className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold"
+                    className="w-full border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold min-h-[56px]"
                   >
                     Browse Talent
                   </Button>
                 </Link>
               </div>
-              <div className="flex items-center space-x-12 text-sm text-gray-400">
+              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-8 md:gap-12 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-apple-glow"></div>
                   <span className="font-medium">500+ Verified Talent</span>
@@ -80,8 +80,8 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="relative">
-              <div className="relative z-10 apple-card p-8">
+            <div className="relative mt-8 lg:mt-0">
+              <div className="relative z-10 apple-card p-4 sm:p-6 md:p-8">
                 <video
                   autoPlay
                   loop
@@ -94,7 +94,7 @@ export default function HomePage() {
                 </video>
               </div>
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-white/5 rounded-3xl transform rotate-2"></div>
-              <div className="absolute -inset-4 bg-gradient-to-tr from-white/5 to-white/2 rounded-3xl transform -rotate-2"></div>
+              <div className="absolute -inset-4 bg-gradient-to-tr from-white/5 to-white/2 rounded-3xl transform -rotate-2 hidden sm:block"></div>
             </div>
           </div>
         </div>

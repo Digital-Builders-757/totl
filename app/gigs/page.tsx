@@ -165,23 +165,23 @@ export default async function GigsPage({
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb Navigation */}
-          <div className="mb-8 flex items-center gap-3 text-sm">
+          <div className="mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm px-2 sm:px-0">
             <Link 
               href="/" 
-              className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+              className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
             >
               <Home className="h-4 w-4" />
-              Home
+              <span className="hidden sm:inline">Home</span>
             </Link>
             <span className="text-[var(--oklch-text-muted)]">/</span>
             {userRole === "talent" && (
               <>
                 <Link 
                   href="/talent/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  <span className="hidden sm:inline">Dashboard</span>
                 </Link>
                 <span className="text-[var(--oklch-text-muted)]">/</span>
               </>
@@ -190,10 +190,10 @@ export default async function GigsPage({
               <>
                 <Link 
                   href="/client/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1"
+                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  <span className="hidden sm:inline">Dashboard</span>
                 </Link>
                 <span className="text-[var(--oklch-text-muted)]">/</span>
               </>
@@ -201,37 +201,37 @@ export default async function GigsPage({
             <span className="text-white font-medium">Find Gigs</span>
           </div>
 
-          <div className="mb-16 text-center">
-            <div className="panel-frosted w-fit mx-auto mb-6 px-6 py-3">
-              <span className="text-white font-medium text-sm">Active Opportunities</span>
+          <div className="mb-12 sm:mb-16 text-center px-4 sm:px-0">
+            <div className="panel-frosted w-fit mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
+              <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
-            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-gradient-glow animate-apple-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-gradient-glow animate-apple-fade-in">
               Find Gigs
             </h1>
-            <p className="text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
+            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
               Browse through available casting opportunities and gigs. Filter by category, location,
               and more to find the perfect match for your talents.
             </p>
           </div>
 
           {/* Search and Filter */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <div className="panel-frosted grain-texture relative p-8 shadow-lg">
-              <form className="flex flex-col md:flex-row gap-6 relative z-10" method="get">
+          <div className="max-w-4xl mx-auto mb-12 sm:mb-16">
+            <div className="panel-frosted grain-texture relative p-4 sm:p-6 md:p-8 shadow-lg">
+              <form className="flex flex-col gap-4 sm:gap-5 md:gap-6 relative z-10" method="get">
                 <div className="relative flex-grow">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                   <Input
                     name="q"
                     defaultValue={keyword}
                     placeholder="Search keywords..."
-                    className="input-glow pl-12 py-6 text-xl h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+                    className="input-glow pl-10 sm:pl-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-3 w-full md:w-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full">
                   <select
                     name="category"
                     defaultValue={category}
-                    className="h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20"
+                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
                   >
                     <option value="">All categories</option>
                     <option value="editorial">Editorial</option>
@@ -246,24 +246,22 @@ export default async function GigsPage({
                     name="location"
                     defaultValue={location}
                     placeholder="Location"
-                    className="h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
                   />
                   <Input
                     name="compensation"
                     defaultValue={compensation}
                     placeholder="Compensation"
-                    className="h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base sm:col-span-2 md:col-span-1"
                   />
                   <input type="hidden" name="page" value={String(page)} />
                 </div>
-                <div className="flex gap-4">
-                  <Button
-                    type="submit"
-                    className="button-glow px-8 py-6 text-lg border-0"
-                  >
-                    Search
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  className="button-glow px-6 sm:px-8 py-4 sm:py-5 md:py-6 text-base sm:text-lg border-0 min-h-[52px] w-full sm:w-auto sm:self-start"
+                >
+                  Search
+                </Button>
               </form>
             </div>
           </div>
@@ -287,11 +285,11 @@ export default async function GigsPage({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {gigsList.map((gig) => (
                 <div
                   key={gig.id}
-                  className="card-backlit overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all duration-300"
+                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <SafeImage
@@ -303,7 +301,7 @@ export default async function GigsPage({
                       fallbackSrc="https://picsum.photos/800/600?random"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
                       <Badge
                         variant="secondary"
                         className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
@@ -311,31 +309,31 @@ export default async function GigsPage({
                         {gig.category}
                       </Badge>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-white/90 transition-colors">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-white/90 transition-colors line-clamp-2">
                         {gig.title}
                       </h3>
                     </div>
                   </div>
-                  <div className="p-6 space-y-4">
+                  <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                     <p className="text-[var(--oklch-text-secondary)] text-sm line-clamp-2 leading-relaxed">
                       {gig.description}
                     </p>
                     <div className="space-y-2">
-                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
-                        <MapPin className="h-4 w-4 mr-2" />
-                        {gig.location}
+                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
+                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{gig.location}</span>
                       </div>
-                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
-                        <DollarSign className="h-4 w-4 mr-2 text-white" />
+                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
+                        <DollarSign className="h-4 w-4 mr-2 text-white flex-shrink-0" />
                         <span className="text-white font-semibold">{gig.compensation}</span>
                       </div>
-                      <div className="flex items-center text-sm text-[var(--oklch-text-tertiary)]">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        {gig.date}
+                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
+                        <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{gig.date}</span>
                       </div>
                     </div>
-                    <Button className="w-full button-glow border-0 mt-4" asChild>
+                    <Button className="w-full button-glow border-0 mt-3 sm:mt-4 min-h-[48px]" asChild>
                       <Link href={`/gigs/${gig.id}`}>
                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -347,18 +345,35 @@ export default async function GigsPage({
           )}
 
           {/* Pagination */}
-          <div className="max-w-4xl mx-auto mt-10">
-            <div className="flex items-center justify-between text-white/80">
-              <div className="text-sm">
+          <div className="max-w-4xl mx-auto mt-8 sm:mt-10 px-4 sm:px-0">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 text-white/80">
+              <div className="text-xs sm:text-sm order-2 sm:order-1">
                 Showing {Math.min(total, from + 1)}–{Math.min(total, to + 1)} of {total}
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="apple-glass border-white/30"
-                  asChild disabled={page <= 1}>
-                  <Link href={buildPageHref(page - 1)}>Previous</Link>
+              <div className="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
+                <Button 
+                  variant="outline" 
+                  className="apple-glass border-white/30 flex-1 sm:flex-none min-h-[48px]"
+                  asChild 
+                  disabled={page <= 1}
+                >
+                  <Link href={buildPageHref(page - 1)}>
+                    <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
+                  </Link>
                 </Button>
-                <Button variant="outline" className="apple-glass border-white/30" asChild disabled={page >= totalPages}>
-                  <Link href={buildPageHref(page + 1)}>Next</Link>
+                <Button 
+                  variant="outline" 
+                  className="apple-glass border-white/30 flex-1 sm:flex-none min-h-[48px]" 
+                  asChild 
+                  disabled={page >= totalPages}
+                >
+                  <Link href={buildPageHref(page + 1)}>
+                    <span className="hidden sm:inline">Next</span>
+                    <span className="sm:hidden">Next</span>
+                    <ArrowRight className="h-4 w-4 ml-1 sm:ml-2" />
+                  </Link>
                 </Button>
               </div>
             </div>
