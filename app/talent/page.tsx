@@ -1,8 +1,8 @@
 ﻿import { createClient } from "@supabase/supabase-js";
 import { Users } from "lucide-react";
 
-import TalentClient from "./talent-client";
 import { ErrorState } from "./error-state";
+import TalentClient from "./talent-client";
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";

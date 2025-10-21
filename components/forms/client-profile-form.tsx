@@ -163,7 +163,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
         errorMessage = err.message;
       } else if (err && typeof err === 'object') {
         // Handle Supabase error objects
-        const supabaseError = err as any;
+        const supabaseError = err as { message?: string; details?: string; hint?: string };
         errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
       }
       

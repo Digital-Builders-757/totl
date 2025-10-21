@@ -8,8 +8,8 @@ import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { SafeImage } from "@/components/ui/safe-image";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
+import { SafeImage } from "@/components/ui/safe-image";
 
 export default function HomePage() {
   return (

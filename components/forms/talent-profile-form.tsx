@@ -148,7 +148,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       };
 
       // Clean the data - remove empty strings and convert to null for optional fields
-      const cleanedData: Record<string, any> = { ...updateData };
+      const cleanedData: Record<string, string | number | string[] | null> = { ...updateData };
       Object.keys(cleanedData).forEach(key => {
         if (cleanedData[key] === '') {
           cleanedData[key] = null;
@@ -156,7 +156,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       });
 
       // Update talent profile using upsert with the user_id as the conflict target
-      const { data: profileData, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from("talent_profiles")
         .upsert(
           {
@@ -212,7 +212,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         errorMessage = error.message;
       } else if (error && typeof error === 'object') {
         // Handle Supabase error objects
-        const supabaseError = error as any;
+        const supabaseError = error as { message?: string; details?: string; hint?: string };
         errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
       }
       
