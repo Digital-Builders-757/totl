@@ -57,6 +57,7 @@ All other documentation has been organized into the `docs/` folder.
 - `ONBOARDING.md` - New developer onboarding guide
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error troubleshooting
 - `TECH_STACK_BREAKDOWN.md` - **NEW** - Complete technical stack overview
+- `POWERSHELL_GIT_COMMIT_GUIDELINES.md` - **NEW** - PowerShell-safe git commit guidelines
 
 ### **📧 Services & Integrations**
 - `email-service.md` - Email service implementation
