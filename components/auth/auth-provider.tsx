@@ -261,13 +261,48 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async (): Promise<{ error: AuthError | null }> => {
     if (!supabase) return { error: null };
     
-    const { error } = await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setUserRole(null);
-    setIsEmailVerified(false);
-    router.push("/login");
-    return { error };
+    try {
+      // Clear all local state first
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      setIsEmailVerified(false);
+      setHasHandledInitialSession(false);
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      // Clear any cached data
+      if (typeof window !== "undefined") {
+        // Clear localStorage
+        localStorage.removeItem("sb-" + supabase.supabaseUrl.split("//")[1].split(".")[0] + "-auth-token");
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        
+        // Clear any other auth-related storage
+        Object.keys(localStorage).forEach(key => {
+          if (key.includes("supabase") || key.includes("auth")) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+      
+      // Force redirect to login
+      router.push("/login");
+      router.refresh(); // Force a refresh to clear any cached data
+      
+      return { error };
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      // Even if there's an error, clear local state and redirect
+      setUser(null);
+      setSession(null);
+      setUserRole(null);
+      setIsEmailVerified(false);
+      router.push("/login");
+      return { error: error as AuthError };
+    }
   };
 
   const sendVerificationEmail = async (): Promise<{ error: Error | null }> => {

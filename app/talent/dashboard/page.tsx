@@ -104,6 +104,7 @@ function TalentDashboardContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [userProfile, setUserProfile] = useState<{
     avatar_url?: string | null;
     display_name?: string | null;
@@ -273,6 +274,37 @@ function TalentDashboardContent() {
     }
   };
 
+  const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent multiple clicks
+    
+    try {
+      setIsSigningOut(true);
+      console.log("Signing out...");
+      
+      const { error } = await signOut();
+      
+      if (error) {
+        console.error("Sign out error:", error);
+        toast({
+          title: "Sign out error",
+          description: "There was an issue signing out. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        console.log("Successfully signed out");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+      toast({
+        title: "Sign out error",
+        description: "There was an unexpected error. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
+
   // Show error state if Supabase is not configured
   if (error) {
     return (
@@ -303,16 +335,34 @@ function TalentDashboardContent() {
   // Show login prompt if no user
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Please Log In</h2>
-          <p className="text-gray-600 mb-4">
-            You need to be logged in to access your talent dashboard.
-          </p>
-          <Button asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
+      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+        {/* Subtle gradient background effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
+        
+        <div className="text-center max-w-md mx-auto p-8 relative z-10">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 p-8 backdrop-blur-sm">
+            {/* Top accent bar */}
+            <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600 mb-6" />
+            
+            <User className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
+            <p className="text-gray-400 mb-6 text-lg">
+              You need to be logged in to access your talent dashboard.
+            </p>
+            <Button asChild className="bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+              <Link href="/login">Sign In to Continue</Link>
+            </Button>
+            
+            <div className="mt-6 pt-6 border-t border-gray-800">
+              <p className="text-sm text-gray-500 mb-3">New to TOTL?</p>
+              <Link 
+                href="/talent/signup" 
+                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
+              >
+                Create a talent account →
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -357,7 +407,7 @@ function TalentDashboardContent() {
                 asChild
                 className="border-gray-700 text-white hover:bg-gray-800"
               >
-                <Link href="/talent/profile">
+                <Link href="/settings">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
@@ -365,11 +415,12 @@ function TalentDashboardContent() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={signOut}
-                className="border-gray-700 text-white hover:bg-gray-800"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
               </Button>
             </div>
           </div>
@@ -582,16 +633,28 @@ function TalentDashboardContent() {
                       </Badge>
                     </div>
                   </div>
-                  <Button
-                    className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800"
-                    variant="outline"
-                    asChild
-                  >
-                    <Link href="/talent/profile" className="flex items-center gap-2">
-                      <Plus className="h-4 w-4" />
-                      Update Profile
-                    </Link>
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                      variant="outline"
+                      asChild
+                    >
+                      <Link href="/talent/profile" className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Complete Profile
+                      </Link>
+                    </Button>
+                    <Button
+                      className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                      variant="outline"
+                      asChild
+                    >
+                      <Link href="/settings" className="flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Settings
+                      </Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 

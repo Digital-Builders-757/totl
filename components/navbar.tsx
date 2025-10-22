@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
 
@@ -32,7 +33,30 @@ export default function Navbar() {
 
   // Handle sign out
   const handleSignOut = async () => {
-    await signOut();
+    if (isSigningOut) return; // Prevent multiple clicks
+    
+    try {
+      setIsSigningOut(true);
+      // Close mobile menu if open
+      setIsMenuOpen(false);
+      
+      // Show loading state (optional - could add a toast here)
+      console.log("Signing out...");
+      
+      // Call sign out
+      const { error } = await signOut();
+      
+      if (error) {
+        console.error("Sign out error:", error);
+        // Could show error toast here if needed
+      } else {
+        console.log("Successfully signed out");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   // Determine if the current page is the homepage
@@ -134,9 +158,10 @@ export default function Navbar() {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                    disabled={isSigningOut}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Sign Out
+                    {isSigningOut ? "Signing Out..." : "Sign Out"}
                   </button>
                 </div>
               </div>
@@ -226,9 +251,10 @@ export default function Navbar() {
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                      disabled={isSigningOut}
+                      className="block py-2 text-white hover:text-gray-300 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Sign Out
+                      {isSigningOut ? "Signing Out..." : "Sign Out"}
                     </button>
                   </>
                 ) : (

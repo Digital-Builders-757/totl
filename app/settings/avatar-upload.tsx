@@ -34,11 +34,11 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
       return;
     }
 
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validate file size (1MB for Next.js Server Actions)
+    if (file.size > 1 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please select a file smaller than 5MB.",
+        description: "Please select a file smaller than 1MB. Try compressing your image or using a smaller file.",
         variant: "destructive",
       });
       return;
@@ -161,7 +161,7 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
             <p className="text-sm text-gray-300">
               {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
             </p>
-            <p className="text-xs text-gray-400 mt-1">JPG, PNG or GIF. Max 5MB.</p>
+            <p className="text-xs text-gray-400 mt-1">JPG, PNG or GIF. Max 1MB.</p>
           </div>
         </button>
 
