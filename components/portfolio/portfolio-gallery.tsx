@@ -206,8 +206,10 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
           onDragOver={(e) => handleDragOver(e, index)}
           onDragEnd={handleDragEnd}
           className={`
+            portfolio-tile
             relative overflow-hidden bg-zinc-900 border-zinc-800 cursor-move
-            transition-all duration-200
+            transition-all duration-300 ease-out
+            hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]
             ${draggedIndex === index ? "opacity-50 scale-95" : "opacity-100 scale-100"}
             ${item.is_primary ? "ring-2 ring-yellow-500" : ""}
           `}
@@ -225,14 +227,14 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
             </div>
           )}
 
-          {/* Image */}
-          <div className="relative w-full h-64 bg-zinc-800">
+          {/* Image with Hover Effects */}
+          <div className="portfolio-image-container relative w-full h-64 bg-zinc-800 overflow-hidden group">
             {item.imageUrl ? (
               <Image
                 src={item.imageUrl}
                 alt={item.title}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             ) : (
@@ -252,10 +254,19 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
                 </svg>
               </div>
             )}
+            
+            {/* Caption Overlay - Slides up on hover */}
+            {item.caption && (
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
+                <p className="text-sm text-white font-medium line-clamp-2">
+                  {item.caption}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Content */}
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 transition-transform duration-300 ease-out group-hover:-translate-y-1">
             {editingId === item.id ? (
               // Edit Mode
               <div className="space-y-3">

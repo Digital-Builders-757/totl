@@ -43,17 +43,24 @@ All other documentation has been organized into the `docs/` folder.
 ### **🎨 Features & Implementation**
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
 - `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery feature (complete guide)
+- `PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md` - **NEW** - Premium hover effects on portfolio tiles (Oct 2025)
+- `IMAGE_LOADING_EXPERIENCE_IMPLEMENTATION.md` - **NEW** - Skeleton loaders & enhanced image loading (Oct 2025)
+- `COMMAND_PALETTE_IMPLEMENTATION.md` - **NEW** - Global command palette (⌘K) implementation (Oct 2025)
+- `FORM_INPUT_POLISH_IMPLEMENTATION.md` - **NEW** - Form input polish with floating labels & animations (Oct 2025)
+- `BUTTON_STATES_IMPLEMENTATION.md` - **NEW** - Enhanced button states (loading, success) (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 - `GIGS_PAGINATION_416_ERROR_FIX.md` - Gigs page pagination 416 error fix
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system
 - `SIGN_OUT_FIX_SUMMARY.md` - Sign-out functionality fix
 - `LOGIN_PAGE_MOBILE_FIX.md` - **NEW** - Login page mobile responsiveness fix (Oct 2025)
+- `OKLCH_IMPLEMENTATION_GUIDE.md` - OKLCH color system implementation
 
 ### **🛠️ Development & Setup**
 - `DEVELOPER_QUICK_REFERENCE.md` - Quick reference for developers
 - `ENVIRONMENT_SETUP.md` - Environment setup instructions
 - `CODING_STANDARDS.md` - Project coding standards and best practices
+- `COST_OPTIMIZATION_STRATEGY.md` - **NEW** ⚠️ **CRITICAL** - Zero-cost vs paid features strategy (Oct 2025)
 - `ONBOARDING.md` - New developer onboarding guide
 - `TYPESCRIPT_ERRORS_EXPLANATION.md` - TypeScript error troubleshooting
 - `TECH_STACK_BREAKDOWN.md` - **NEW** - Complete technical stack overview

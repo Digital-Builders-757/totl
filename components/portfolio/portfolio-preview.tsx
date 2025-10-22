@@ -62,7 +62,7 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
         {previewItems.map((item) => (
           <Card
             key={item.id}
-            className="relative overflow-hidden bg-zinc-900 border-zinc-800 group"
+            className="portfolio-preview-tile relative overflow-hidden bg-zinc-900 border-zinc-800 group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]"
           >
             {/* Primary Badge */}
             {item.is_primary && (
@@ -73,13 +73,13 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
             )}
 
             {/* Image */}
-            <div className="relative w-full aspect-square bg-zinc-800">
+            <div className="relative w-full aspect-square bg-zinc-800 overflow-hidden">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               ) : (
@@ -100,8 +100,8 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
                 </div>
               )}
 
-              {/* Overlay on Hover */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 text-center">
+              {/* Overlay on Hover - Slides up from bottom */}
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
                 <h4 className="text-white font-semibold text-sm mb-1 line-clamp-2">
                   {item.title}
                 </h4>

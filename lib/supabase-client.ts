@@ -14,6 +14,8 @@ import type { Database } from "../types/supabase";
 /**
  * Creates a Supabase server client for Server Components
  * Uses the function pattern for Next.js 15+ compatibility
+ * NOTE: Server Components can only READ cookies, not modify them
+ * The setAll callback is a no-op to prevent cookie modification errors
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -24,10 +26,9 @@ export async function createSupabaseServerClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
+        setAll: () => {
+          // No-op: Server Components cannot modify cookies in Next.js 15+
+          // Cookie modifications must happen in Server Actions or Route Handlers
         },
       },
     }
@@ -61,6 +62,8 @@ export async function createSupabaseRouteHandlerClient() {
 /**
  * Creates a Supabase server component client for Server Components
  * Uses the function pattern for Next.js 15+ compatibility
+ * NOTE: Server Components can only READ cookies, not modify them
+ * The setAll callback is a no-op to prevent cookie modification errors
  */
 export async function createSupabaseServerComponentClient() {
   const cookieStore = await cookies();
@@ -71,10 +74,9 @@ export async function createSupabaseServerComponentClient() {
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            cookieStore.set(name, value, options);
-          });
+        setAll: () => {
+          // No-op: Server Components cannot modify cookies in Next.js 15+
+          // Cookie modifications must happen in Server Actions or Route Handlers
         },
       },
     }
