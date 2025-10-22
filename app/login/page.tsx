@@ -111,46 +111,52 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-4 sm:pt-12 md:pt-20 lg:pt-40">
-      <div className="container mx-auto px-4 py-4 sm:py-8 md:py-12">
-        <Link href="/" className="inline-flex items-center text-gray-300 hover:text-white mb-4 sm:mb-6 md:mb-8">
+    <div className="min-h-screen bg-black pt-4 sm:pt-12 md:pt-20 lg:pt-40 relative overflow-hidden">
+      {/* Subtle gradient background effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
+      
+      <div className="container mx-auto px-4 py-4 sm:py-8 md:py-12 relative z-10">
+        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-8 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
 
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="max-w-md mx-auto bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 overflow-hidden backdrop-blur-sm">
+          {/* Top accent bar */}
+          <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600" />
+          
           <div className="p-4 sm:p-6 md:p-8">
             <div className="text-center mb-6 sm:mb-8">
               <Image
-                src="/images/totl_logo_black.png"
+                src="/images/totl-logo-transparent.png"
                 alt="TOTL Agency"
                 width={140}
                 height={58}
-                className="mx-auto mb-4 sm:mb-6 sm:w-[180px] sm:h-[75px]"
+                className="mx-auto mb-4 sm:mb-6 sm:w-[180px] sm:h-[75px] filter brightness-0 invert"
               />
-              <h1 className="text-xl sm:text-2xl font-bold mb-2 text-black">Sign In</h1>
-              <p className="text-sm sm:text-base text-gray-600">Sign in to access your TOTL Agency account</p>
+              <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">Welcome Back</h1>
+              <p className="text-sm sm:text-base text-gray-400">Sign in to access your TOTL Agency account</p>
             </div>
 
             {verified && (
-              <Alert className="bg-green-50 border-green-200 mb-6">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <AlertTitle className="text-green-800">Email verified successfully!</AlertTitle>
-                <AlertDescription className="text-green-700">
+              <Alert className="bg-green-900/30 border-green-700 mb-6">
+                <CheckCircle2 className="h-4 w-4 text-green-400" />
+                <AlertTitle className="text-green-300">Email verified successfully!</AlertTitle>
+                <AlertDescription className="text-green-400">
                   You can now log in to your account.
                 </AlertDescription>
               </Alert>
             )}
 
             {formErrors.auth && (
-              <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              <div className="mb-6 p-3 bg-red-900/30 border border-red-700 text-red-300 rounded-md text-sm">
                 {formErrors.auth}
               </div>
             )}
 
             <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-1.5 sm:space-y-2">
-                <Label htmlFor="email" className={`text-black text-sm sm:text-base ${formErrors.email ? "text-red-500" : ""}`}>
+                <Label htmlFor="email" className={`text-white text-sm sm:text-base ${formErrors.email ? "text-red-400" : ""}`}>
                   Email
                 </Label>
                 <Input
@@ -176,19 +182,19 @@ export default function Login() {
                     }
                   }}
                   required
-                  className={`bg-white text-black border-gray-300 focus:border-black focus:ring-black text-base ${formErrors.email ? "border-red-500" : ""}`}
+                  className={`bg-gray-800 text-white border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-base placeholder:text-gray-500 ${formErrors.email ? "border-red-500" : ""}`}
                 />
                 {formErrors.email && (
-                  <p className="text-sm text-red-500 mt-1">{formErrors.email}</p>
+                  <p className="text-sm text-red-400 mt-1">{formErrors.email}</p>
                 )}
               </div>
 
               <div className="space-y-1.5 sm:space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className={`text-black text-sm sm:text-base ${formErrors.password ? "text-red-500" : ""}`}>
+                  <Label htmlFor="password" className={`text-white text-sm sm:text-base ${formErrors.password ? "text-red-400" : ""}`}>
                     Password
                   </Label>
-                  <Link href="/reset-password" className="text-xs sm:text-sm text-gray-500 hover:text-black">
+                  <Link href="/reset-password" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors">
                     Forgot password?
                   </Link>
                 </div>
@@ -216,51 +222,70 @@ export default function Login() {
                       }
                     }}
                     required
-                    className={`bg-white text-black border-gray-300 focus:border-black focus:ring-black text-base ${formErrors.password ? "border-red-500" : ""}`}
+                    className={`bg-gray-800 text-white border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-base placeholder:text-gray-500 ${formErrors.password ? "border-red-500" : ""}`}
                   />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
                 {formErrors.password && (
-                  <p className="text-sm text-red-500 mt-1">{formErrors.password}</p>
+                  <p className="text-sm text-red-400 mt-1">{formErrors.password}</p>
                 )}
               </div>
 
               <Button
                 type="submit"
-                className="w-full button-glow border-0"
+                className="w-full bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 border-0 shadow-lg hover:shadow-xl"
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    Signing in...
+                  </span>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
 
-            <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
+            {/* Divider */}
+            <div className="mt-6 sm:mt-8 mb-6 sm:mb-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-800"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-gray-900 px-2 text-gray-500">New to TOTL?</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3 sm:space-y-4">
               <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-sm sm:text-base text-gray-400">
                   Are you a model or talent?{" "}
                   <Link
                     href={returnUrl ? `/talent/signup?returnUrl=${returnUrl}` : "/talent/signup"}
-                    className="text-black font-medium hover:underline inline-block"
+                    className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
                   >
-                    Create a talent account
+                    Create a talent account →
                   </Link>
                 </p>
               </div>
 
               <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-sm sm:text-base text-gray-400">
                   Looking to hire talent?{" "}
                   <Link
                     href={returnUrl ? `/client/apply?returnUrl=${returnUrl}` : "/client/apply"}
-                    className="text-black font-medium hover:underline inline-block"
+                    className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
                   >
-                    Apply to become a client
+                    Apply to become a client →
                   </Link>
                 </p>
               </div>

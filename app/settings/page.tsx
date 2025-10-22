@@ -1,4 +1,5 @@
 ﻿import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ProfileEditor } from "./profile-editor";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import {
@@ -101,8 +102,56 @@ export default async function SettingsPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-            <p className="text-gray-300">Manage your account and profile information</p>
+            {/* Breadcrumb Navigation */}
+            <nav className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+              {profile?.role === "talent" && (
+                <>
+                  <Link href="/talent/dashboard" className="hover:text-white transition-colors">
+                    Dashboard
+                  </Link>
+                  <span>→</span>
+                  <span className="text-white">Settings</span>
+                </>
+              )}
+              {profile?.role === "client" && (
+                <>
+                  <Link href="/client/dashboard" className="hover:text-white transition-colors">
+                    Dashboard
+                  </Link>
+                  <span>→</span>
+                  <span className="text-white">Settings</span>
+                </>
+              )}
+            </nav>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
+                <p className="text-gray-300">Manage your account and profile information</p>
+              </div>
+              {profile?.role === "talent" && (
+                <Link
+                  href="/talent/dashboard"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Dashboard
+                </Link>
+              )}
+              {profile?.role === "client" && (
+                <Link
+                  href="/client/dashboard"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Dashboard
+                </Link>
+              )}
+            </div>
           </div>
 
           <ProfileEditor

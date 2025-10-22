@@ -324,16 +324,34 @@ export default function ClientDashboard() {
   // Show login prompt if no user
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Please Log In</h2>
-          <p className="text-gray-600 mb-4">
-            You need to be logged in to access your client dashboard.
-          </p>
-          <Button asChild>
-            <Link href="/login">Log In</Link>
-          </Button>
+      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
+        {/* Subtle gradient background effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
+        
+        <div className="text-center max-w-md mx-auto p-8 relative z-10">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 p-8 backdrop-blur-sm">
+            {/* Top accent bar */}
+            <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600 mb-6" />
+            
+            <User className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
+            <p className="text-gray-400 mb-6 text-lg">
+              You need to be logged in to access your client dashboard.
+            </p>
+            <Button asChild className="bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+              <Link href="/login">Sign In to Continue</Link>
+            </Button>
+            
+            <div className="mt-6 pt-6 border-t border-gray-800">
+              <p className="text-sm text-gray-500 mb-3">New to TOTL?</p>
+              <Link 
+                href="/client/apply" 
+                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
+              >
+                Apply to become a client →
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
