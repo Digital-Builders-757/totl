@@ -920,3 +920,405 @@ h1 {
     --oklch-text-primary: hsl(0 0% 98%);
   }
 }
+
+/* ============================================ */
+/* 🎯 COMMAND PALETTE STYLES */
+/* ============================================ */
+
+/* Command Palette (cmdk) custom styles */
+[cmdk-root] {
+  background: rgb(9, 9, 11);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+[cmdk-input] {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 0.875rem;
+  caret-color: white;
+}
+
+[cmdk-input]::placeholder {
+  color: rgb(113, 113, 122);
+}
+
+[cmdk-item] {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 150ms ease;
+}
+
+[cmdk-item]:hover {
+  background: rgb(39, 39, 42, 0.5);
+}
+
+[cmdk-item][data-selected='true'] {
+  background: rgb(39, 39, 42);
+}
+
+[cmdk-item][data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+[cmdk-group-heading] {
+  color: rgb(161, 161, 170);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem;
+}
+
+[cmdk-separator] {
+  height: 1px;
+  background: rgb(39, 39, 42);
+  margin: 0.5rem 0;
+}
+
+[cmdk-empty] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: rgb(161, 161, 170);
+}
+
+[cmdk-list] {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(63, 63, 70) transparent;
+}
+
+[cmdk-list]::-webkit-scrollbar {
+  width: 8px;
+}
+
+[cmdk-list]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[cmdk-list]::-webkit-scrollbar-thumb {
+  background: rgb(63, 63, 70);
+  border-radius: 4px;
+}
+
+[cmdk-list]::-webkit-scrollbar-thumb:hover {
+  background: rgb(82, 82, 91);
+}
+
+/* Command Palette animation */
+@keyframes command-palette-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes command-palette-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-10px);
+  }
+}
+
+[data-state='open'] [cmdk-root] {
+  animation: command-palette-in 200ms ease-out;
+}
+
+[data-state='closed'] [cmdk-root] {
+  animation: command-palette-out 150ms ease-in;
+}
+
+/* ============================================ */
+/* 📝 FORM INPUT ANIMATIONS */
+/* ============================================ */
+
+/* Shake animation for validation errors */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Scale in animation for validation icons */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slide down animation for error messages */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success checkmark animation */
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  50% {
+    transform: scale(1.1) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Utility classes for form animations */
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.animate-checkmark {
+  animation: checkmark 0.4s ease-out;
+}
+
+/* Enhanced input focus glow */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  transition: all 200ms ease-out;
+}
+
+/* Floating label transition */
+label {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================ */
+/* 🎨 STANDARDIZED HOVER EFFECTS */
+/* ============================================ */
+
+/* Universal hover transition timing */
+.hover-transition {
+  transition: all 200ms ease-out;
+}
+
+/* Subtle scale on hover (for cards, buttons) */
+.hover-scale {
+  transition: transform 200ms ease-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Scale for smaller elements (badges, chips) */
+.hover-scale-sm {
+  transition: transform 200ms ease-out;
+}
+
+.hover-scale-sm:hover {
+  transform: scale(1.05);
+}
+
+/* Lift effect (for cards) */
+.hover-lift {
+  transition: all 300ms ease-out;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.12);
+}
+
+/* Glow effect on hover */
+.hover-glow {
+  transition: all 200ms ease-out;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* Interactive element pointer */
+.interactive {
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.interactive:hover {
+  opacity: 0.9;
+}
+
+.interactive:active {
+  transform: scale(0.98);
+}
+
+/* Link hover with underline */
+.link-hover {
+  position: relative;
+  transition: color 200ms ease-out;
+}
+
+.link-hover::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 200ms ease-out;
+}
+
+.link-hover:hover::after {
+  width: 100%;
+}
+
+/* Icon hover rotate */
+.hover-rotate {
+  transition: transform 200ms ease-out;
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg);
+}
+
+/* Text color transition */
+.hover-text {
+  transition: color 200ms ease-out;
+}
+
+/* Background fade transition */
+.hover-bg {
+  transition: background-color 200ms ease-out;
+}
+
+/* Opacity transition */
+.hover-opacity {
+  transition: opacity 200ms ease-out;
+}
+
+.hover-opacity:hover {
+  opacity: 0.8;
+}
+
+/* Border glow on hover */
+.hover-border-glow {
+  transition: all 200ms ease-out;
+}
+
+.hover-border-glow:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Cursor styles for interactive elements */
+.cursor-interactive {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .hover-scale:hover,
+  .hover-scale-sm:hover,
+  .hover-lift:hover {
+    transform: none;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: none;
+  }
+}
+
+/* ============================================ */
+/* ♿ ACCESSIBILITY - REDUCED MOTION SUPPORT */
+/* ============================================ */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable all custom animations */
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce,
+  .animate-fade-in-up,
+  .animate-fade-in-scale,
+  .animate-shimmer,
+  .animate-apple-fade-in,
+  .animate-apple-scale-in,
+  .animate-apple-slide-up,
+  .animate-apple-glow,
+  .animate-apple-shimmer,
+  .animate-apple-float,
+  .animate-float,
+  .animate-pulse-glow,
+  .animate-shake,
+  .animate-scale-in,
+  .animate-slide-down,
+  .animate-checkmark {
+    animation: none !important;
+  }
+  
+  /* Keep functional transitions only */
+  .hover-transition,
+  .hover-scale,
+  .hover-scale-sm,
+  .hover-lift,
+  .hover-glow {
+    transition: none !important;
+    transform: none !important;
+  }
+  
+  /* Disable image zoom effects */
+  .group:hover .group-hover\:scale-110,
+  .group:hover .group-hover\:scale-105 {
+    transform: none !important;
+  }
+  
+  /* Keep opacity transitions for usability */
+  .transition-opacity {
+    transition: opacity 0.01ms !important;
+  }
+}
