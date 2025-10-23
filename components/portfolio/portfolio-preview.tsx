@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {
   imageUrl?: string;
@@ -73,7 +73,7 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
             )}
 
             {/* Image */}
-            <div className="relative w-full aspect-square bg-zinc-800 overflow-hidden">
+            <div className="relative w-full aspect-[4/3] md:aspect-square bg-zinc-800 overflow-hidden">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}

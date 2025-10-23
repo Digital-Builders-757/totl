@@ -326,7 +326,7 @@ function TalentDashboardContent() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your dashboard...</p>
+          <p className="mt-4 text-gray-300">Loading your dashboard...</p>
         </div>
       </div>
     );
@@ -744,15 +744,15 @@ function TalentDashboardContent() {
                           </div>
                           <div className="flex-grow space-y-2">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <h4 className="font-semibold text-lg text-gray-900">
+                              <h4 className="font-semibold text-lg text-white">
                                 {app.gigs?.title}
                               </h4>
                               <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                             </div>
-                            <p className="text-gray-600 font-medium">
+                            <p className="text-gray-300 font-medium">
                               {app.gigs?.client_profiles?.company_name || "Private Client"}
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 <SafeDate date={app.created_at} />
@@ -920,15 +920,15 @@ function TalentDashboardContent() {
                         </div>
                         <div className="flex-grow space-y-2">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                            <h4 className="font-semibold text-lg text-gray-900">
+                            <h4 className="font-semibold text-lg text-white">
                               {app.gigs?.title}
                             </h4>
                             <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
                           </div>
-                          <p className="text-gray-600 font-medium">
+                          <p className="text-gray-300 font-medium">
                             {app.gigs?.client_profiles?.company_name || "Private Client"}
                           </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
                             <div className="flex items-center gap-1">
                               <Calendar className="h-4 w-4" />
                               <SafeDate date={app.created_at} />
@@ -999,7 +999,7 @@ function TalentDashboardContent() {
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading available gigs...</p>
+                    <p className="mt-4 text-gray-300">Loading available gigs...</p>
                   </div>
                 ) : error ? (
                   <EmptyState
@@ -1024,7 +1024,7 @@ function TalentDashboardContent() {
                         key={gig.id}
                         className="overflow-hidden hover:shadow-lg transition-shadow group"
                       >
-                        <div className="h-48 relative">
+                        <div className="h-32 md:h-48 relative">
                           <SafeImage
                             src={gig.image_url}
                             alt={gig.title}
@@ -1048,10 +1048,10 @@ function TalentDashboardContent() {
                         </div>
                         <CardContent className="p-4 space-y-3">
                           <div>
-                            <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                            <h4 className="font-semibold text-lg text-white line-clamp-1">
                               {gig.title}
                             </h4>
-                            <p className="text-gray-600 text-sm">{gig.description}</p>
+                            <p className="text-gray-300 text-sm">{gig.description}</p>
                           </div>
                           <div className="space-y-2">
                             <Badge
@@ -1060,11 +1060,11 @@ function TalentDashboardContent() {
                             >
                               {gig.category || "General"}
                             </Badge>
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-gray-300">
                               <MapPin className="h-4 w-4 mr-1" />
                               {gig.location}
                             </div>
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-gray-300">
                               <Calendar className="h-4 w-4 mr-1" />
                               Deadline:{" "}
                               {gig.application_deadline ? (
@@ -1073,7 +1073,7 @@ function TalentDashboardContent() {
                                 "No deadline"
                               )}
                             </div>
-                            <div className="flex items-center text-sm font-medium text-gray-900">
+                            <div className="flex items-center text-sm font-medium text-white">
                               <DollarSign className="h-4 w-4 mr-1" />
                               {gig.compensation}
                             </div>

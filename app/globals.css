@@ -52,6 +52,26 @@
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
 
+  /* Improve card spacing on mobile */
+  .card-backlit,
+  .apple-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Better text sizing for mobile */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  /* Improve button spacing */
+  .flex.gap-2 > * {
+    margin-right: 0.5rem;
+  }
+  
+  .flex.gap-2 > *:last-child {
+    margin-right: 0;
+  }
+
   /* Prevent text selection on interactive elements */
   button,
   .card-backlit,
@@ -83,9 +103,9 @@
     
     /* Text Colors - High Contrast Hierarchy */
     --oklch-text-primary: oklch(98% 0 0);      /* Pure white */
-    --oklch-text-secondary: oklch(75% 0.01 258); /* Muted white */
-    --oklch-text-tertiary: oklch(55% 0.02 258);  /* Subtle gray */
-    --oklch-text-muted: oklch(40% 0.02 258);   /* Very subtle */
+    --oklch-text-secondary: oklch(90% 0.01 258); /* Light gray - improved contrast */
+    --oklch-text-tertiary: oklch(80% 0.02 258);  /* Medium gray - improved contrast */
+    --oklch-text-muted: oklch(65% 0.02 258);   /* Darker gray - improved contrast */
     
     /* Brand "Back-Light" Ramp - Pure White Glow (Apple-Inspired) */
     --oklch-brand-1: oklch(85% 0.02 258);      /* Soft white with cool undertone */

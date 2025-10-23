@@ -10,7 +10,7 @@ import { PortfolioSection } from "./sections/portfolio-section";
 import { TalentDetailsSection } from "./sections/talent-details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -71,30 +71,30 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid w-full ${isTalent ? 'grid-cols-1 md:grid-cols-4' : 'grid-cols-1 md:grid-cols-3'} bg-gray-800 border-gray-700`}>
+            <TabsList className={`grid w-full ${isTalent ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} bg-gray-800 border-gray-700`}>
               <TabsTrigger
                 value="basic"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
               >
                 Basic Info
               </TabsTrigger>
               <TabsTrigger
                 value="details"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
               >
                 Details
               </TabsTrigger>
               {isTalent && (
                 <TabsTrigger
                   value="portfolio"
-                  className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                  className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
                 >
                   Portfolio
                 </TabsTrigger>
               )}
               <TabsTrigger
                 value="account"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400"
+                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
               >
                 Account
               </TabsTrigger>

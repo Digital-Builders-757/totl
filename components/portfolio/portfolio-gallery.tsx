@@ -14,7 +14,7 @@ import {
   setPrimaryPortfolioItem,
   updatePortfolioItem,
 } from "@/lib/actions/portfolio-actions";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {
   imageUrl?: string;
@@ -228,7 +228,7 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
           )}
 
           {/* Image with Hover Effects */}
-          <div className="portfolio-image-container relative w-full h-64 bg-zinc-800 overflow-hidden group">
+          <div className="portfolio-image-container relative w-full h-48 md:h-64 bg-zinc-800 overflow-hidden group">
             {item.imageUrl ? (
               <Image
                 src={item.imageUrl}
