@@ -26,6 +26,7 @@ All other documentation has been organized into the `docs/` folder.
 ## 📚 Documentation Categories
 
 ### **🔐 Authentication & Security**
+- `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
 - `AUTH_STRATEGY.md` - Authentication strategy and implementation
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 
@@ -71,7 +72,8 @@ All other documentation has been organized into the `docs/` folder.
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 
 ### **🐛 Troubleshooting**
-- `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (8 error patterns)
+- `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (9 error patterns including signup fix)
+- `SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md` - **NEW** 🔴 **CRITICAL** - Database trigger signup error (Oct 23, 2025)
 - `SENTRY_ERROR_FIXES_SUMMARY.md` - Complete Sentry error fix summary
 - `SENTRY_ERROR_FIX_EVENT_HANDLERS.md` - **NEW** - Event handler cache error fix (Oct 21, 2025)
 - `USESEARCHPARAMS_SSR_GUIDE.md` - **NEW** - useSearchParams SSR best practices & fixes (Oct 23, 2025)

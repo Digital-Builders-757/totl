@@ -60,10 +60,12 @@ Before generating any code, ensure:
 - Pass data as props to client components
 
 ### Authentication & Authorization
+- **🚨 BEFORE ANY AUTH CHANGES:** Read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
 - Use `@supabase/auth-helpers-nextjs` for session management
 - Check user roles before allowing actions
 - Use middleware for route protection
 - Implement proper error handling for auth failures
+- **CRITICAL:** Verify database triggers match `database_schema_audit.md` schema
 
 ### Security Best Practices
 - Never expose service keys in client code
@@ -86,11 +88,12 @@ Before generating any code, ensure:
 
 - `TOTL_PROJECT_CONTEXT_PROMPT.md` - Complete project context
 - **🚨 `database_schema_audit.md` - SINGLE SOURCE OF TRUTH for database schema**
+- **🚨 `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - MANDATORY before auth changes**
 - `types/database.ts` - Generated Supabase types
 - `supabase/migrations/` - Database schema history
 - `lib/supabase-client.ts` - Client configuration
 - `middleware.ts` - Route protection logic
-- `components/auth-provider.tsx` - Authentication context
+- `components/auth/auth-provider.tsx` - Authentication context (correct path)
 
 ## 🔄 WHEN TO APPLY
 
