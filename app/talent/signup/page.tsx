@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 
 export default function TalentSignupPage() {
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl");
+  const returnUrl = searchParams?.get("returnUrl") ?? null;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24">

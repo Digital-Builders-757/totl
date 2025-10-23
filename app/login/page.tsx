@@ -19,21 +19,29 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [verified, setVerified] = useState(false);
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const { signIn } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl");
-  const verified = searchParams.get("verified") === "true";
 
+  // Safely extract search params in useEffect to avoid SSR issues
   useEffect(() => {
-    if (verified) {
-      toast({
-        title: "Email verified successfully!",
-        description: "You can now log in to your account.",
-        variant: "default",
-      });
+    if (searchParams) {
+      const returnUrlParam = searchParams.get("returnUrl");
+      const verifiedParam = searchParams.get("verified") === "true";
+      setReturnUrl(returnUrlParam);
+      setVerified(verifiedParam);
+      
+      if (verifiedParam) {
+        toast({
+          title: "Email verified successfully!",
+          description: "You can now log in to your account.",
+          variant: "default",
+        });
+      }
     }
-  }, [verified, toast]);
+  }, [searchParams, toast]);
 
   const validateForm = () => {
     const errors: Record<string, string> = {};

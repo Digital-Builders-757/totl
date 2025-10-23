@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** October 21, 2025
+**Last Updated:** October 23, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -74,6 +74,7 @@ All other documentation has been organized into the `docs/` folder.
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (8 error patterns)
 - `SENTRY_ERROR_FIXES_SUMMARY.md` - Complete Sentry error fix summary
 - `SENTRY_ERROR_FIX_EVENT_HANDLERS.md` - **NEW** - Event handler cache error fix (Oct 21, 2025)
+- `USESEARCHPARAMS_SSR_GUIDE.md` - **NEW** - useSearchParams SSR best practices & fixes (Oct 23, 2025)
 - `QUICK_FIX_CACHE_CLEAR.md` - **NEW** - Quick commands to clear Next.js cache
 - `AVATAR_UPLOAD_FIX.md` - Avatar upload RLS policy fix guide
 - `TALENT_PROFILE_UPDATE_FIX.md` - Profile update error fix (Oct 2025)
@@ -106,8 +107,9 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **When Troubleshooting**
 1. Check `TROUBLESHOOTING_GUIDE.md` first
-2. Review specific feature docs if relevant
-3. Check error-specific documentation
+2. For SSR errors with useSearchParams, see `USESEARCHPARAMS_SSR_GUIDE.md`
+3. Review specific feature docs if relevant
+4. Check error-specific documentation
 
 ---
 

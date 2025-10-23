@@ -38,7 +38,7 @@ export default function ClientSignup() {
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl");
+  const returnUrl = searchParams?.get("returnUrl") ?? null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;

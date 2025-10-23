@@ -19,7 +19,7 @@ import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export default function VerificationPendingPage() {
   const searchParams = useSearchParams();
-  const email = searchParams.get("email") || "";
+  const email = searchParams?.get("email") ?? "";
   const [isSending, setIsSending] = useState(false);
   const [justSent, setJustSent] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"unknown" | "sent" | "error">("unknown");
@@ -28,7 +28,7 @@ export default function VerificationPendingPage() {
 
   useEffect(() => {
     // Check if we just created the account
-    const justCreated = searchParams.get("new") === "true";
+    const justCreated = searchParams?.get("new") === "true";
     if (justCreated) {
       setEmailStatus("sent");
     }

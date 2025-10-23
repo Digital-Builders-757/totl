@@ -13,7 +13,7 @@ export default function GigSuccessPage() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
-  const gigId = searchParams.get("gigId");
+  const gigId = searchParams?.get("gigId") ?? null;
 
   useEffect(() => {
     // Show success toast
