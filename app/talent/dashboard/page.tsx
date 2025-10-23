@@ -1048,10 +1048,10 @@ function TalentDashboardContent() {
                         </div>
                         <CardContent className="p-4 space-y-3">
                           <div>
-                            <h4 className="font-semibold text-lg text-gray-900 line-clamp-1">
+                            <h4 className="font-semibold text-lg text-white line-clamp-1">
                               {gig.title}
                             </h4>
-                            <p className="text-gray-600 text-sm">{gig.description}</p>
+                            <p className="text-gray-300 text-sm">{gig.description}</p>
                           </div>
                           <div className="space-y-2">
                             <Badge
@@ -1060,11 +1060,11 @@ function TalentDashboardContent() {
                             >
                               {gig.category || "General"}
                             </Badge>
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-gray-300">
                               <MapPin className="h-4 w-4 mr-1" />
                               {gig.location}
                             </div>
-                            <div className="flex items-center text-sm text-gray-500">
+                            <div className="flex items-center text-sm text-gray-300">
                               <Calendar className="h-4 w-4 mr-1" />
                               Deadline:{" "}
                               {gig.application_deadline ? (
@@ -1073,7 +1073,7 @@ function TalentDashboardContent() {
                                 "No deadline"
                               )}
                             </div>
-                            <div className="flex items-center text-sm font-medium text-gray-900">
+                            <div className="flex items-center text-sm font-medium text-white">
                               <DollarSign className="h-4 w-4 mr-1" />
                               {gig.compensation}
                             </div>
