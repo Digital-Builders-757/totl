@@ -407,7 +407,7 @@ function TalentDashboardContent() {
                 asChild
                 className="border-gray-700 text-white hover:bg-gray-800"
               >
-                <Link href="/settings">
+                <Link href="/settings" className="flex items-center">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>

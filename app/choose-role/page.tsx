@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 export default function ChooseRolePage() {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
-  const returnUrl = searchParams.get("returnUrl");
+  const returnUrl = searchParams?.get("returnUrl") ?? null;
 
   useEffect(() => {
     setMounted(true);

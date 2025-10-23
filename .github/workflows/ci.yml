@@ -43,7 +43,7 @@ jobs:
         
       - name: Verify AuthProvider is client-only
         run: |
-          if ! head -1 components/auth-provider.tsx | grep -q "use client"; then
+          if ! head -1 components/auth/auth-provider.tsx | grep -q "use client"; then
             echo "❌ AuthProvider missing 'use client' directive!"
             exit 1
           fi

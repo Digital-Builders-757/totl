@@ -17,6 +17,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, userRole, signOut } = useAuth();
 
+  // Determine if the current page is the homepage - safe for SSR
+  const isHomepage = pathname === "/" || pathname === null;
+
   // Handle scroll event to change navbar appearance
   useEffect(() => {
     const handleScroll = () => {
@@ -58,9 +61,6 @@ export default function Navbar() {
       setIsSigningOut(false);
     }
   };
-
-  // Determine if the current page is the homepage
-  const isHomepage = pathname === "/";
 
   // Determine navbar background color based on scroll position and current page
   const navbarBg = isScrolled
