@@ -1,8 +1,21 @@
 # TOTL Agency Authentication Strategy
 
-**Last Updated:** July 25, 2025  
-**Version:** 2.0  
+**Last Updated:** October 23, 2025  
+**Version:** 2.1  
 **Status:** Production Ready
+
+## ⚠️ CRITICAL: Read This First
+
+**BEFORE making ANY changes to authentication, signup, or database triggers:**
+
+1. ✅ **Read** `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - Pre-flight checklist
+2. ✅ **Verify** `database_schema_audit.md` - Schema single source of truth  
+3. ✅ **Check** current `handle_new_user()` function matches schema
+4. ✅ **Test** signup flow after ANY auth changes
+
+**October 23, 2025 Production Incident:** A mismatch between the `handle_new_user()` trigger function and the actual schema caused signup failures. The function was trying to insert an `email` column that doesn't exist in the `profiles` table.
+
+---
 
 ## Table of Contents
 - [Overview](#overview)
@@ -16,6 +29,11 @@
 ## 🎯 Overview
 
 This document outlines the complete authentication and profile creation strategy for TOTL Agency. The system uses Supabase Auth with automatic profile creation via database triggers.
+
+**Related Documentation:**
+- `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **MANDATORY** pre-flight checklist
+- `database_schema_audit.md` - Database schema single source of truth
+- `docs/SECURITY_CONFIGURATION.md` - Security and RLS policies
 
 ## 🏗️ Architecture
 
@@ -35,11 +53,14 @@ talent_profiles OR client_profiles (Role-specific data)
 id              UUID NOT NULL PRIMARY KEY REFERENCES auth.users(id)
 role            user_role NOT NULL DEFAULT 'talent'
 display_name    TEXT
+avatar_url      TEXT               -- Legacy profile picture URL
+avatar_path     TEXT               -- Storage path for avatar
 email_verified  BOOLEAN DEFAULT false
-avatar_url      TEXT
 created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 ```
+
+**⚠️ CRITICAL NOTE:** There is **NO `email` column** in the `profiles` table! Email addresses are stored in `auth.users.email` only. The `handle_new_user()` trigger function must NOT try to insert an email column.
 
 #### **talent_profiles Table**
 ```sql

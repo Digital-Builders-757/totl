@@ -1,11 +1,70 @@
 # 🔧 TOTL Troubleshooting Guide
 
-**Last Updated:** October 20, 2025  
+**Last Updated:** October 23, 2025  
 **Status:** Production Ready
 
 This guide covers common issues encountered during development and deployment, with step-by-step solutions based on real debugging sessions.
 
 ## 🚨 Critical Issues & Solutions
+
+### 0. Database Trigger Error - Column Does Not Exist in Profiles
+
+**Error Message:**
+```
+ERROR: column "email" of relation "profiles" does not exist (SQLSTATE 42703)
+500: Database error saving new user
+```
+
+**Symptoms:**
+- ❌ All new user signups fail (talent and client)
+- ❌ Error occurs during account creation
+- ✅ Existing users can still log in
+
+**Root Cause:** The `handle_new_user()` database trigger function is trying to insert into a non-existent column. This typically happens when:
+1. Schema was changed but trigger function wasn't updated
+2. Multiple migration files have conflicting versions of the function
+3. Production database has stale function definition
+
+**Solution:**
+
+1. **Verify the actual schema:**
+   ```sql
+   SELECT column_name, data_type 
+   FROM information_schema.columns 
+   WHERE table_name = 'profiles' 
+   ORDER BY ordinal_position;
+   ```
+
+2. **Check current trigger function:**
+   ```sql
+   SELECT pg_get_functiondef(oid) 
+   FROM pg_proc 
+   WHERE proname = 'handle_new_user';
+   ```
+
+3. **Run the emergency fix:**
+   - Use `EMERGENCY_FIX_SIGNUP.sql` in the project root
+   - Or manually run the corrected function in Supabase SQL Editor
+
+4. **Correct version (as of Oct 2025):**
+   ```sql
+   INSERT INTO public.profiles (id, role, display_name, email_verified)
+   VALUES (new.id, user_role::user_role, display_name, new.email_confirmed_at IS NOT NULL);
+   ```
+
+**Prevention:**
+- ✅ **ALWAYS** check `database_schema_audit.md` before modifying triggers
+- ✅ **ALWAYS** read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` before auth changes
+- ✅ Search all migration files for conflicting function definitions
+- ✅ Test signup flow after ANY database trigger changes
+
+**Related Documentation:**
+- `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **MANDATORY** pre-flight checklist
+- `docs/SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md` - Complete incident report
+- `database_schema_audit.md` - Schema single source of truth
+- `EMERGENCY_FIX_SIGNUP.sql` - Emergency fix script
+
+---
 
 ### 1. Server Component Render Error - Event Handlers in Server Components
 
