@@ -10,7 +10,7 @@ import { PortfolioSection } from "./sections/portfolio-section";
 import { TalentDetailsSection } from "./sections/talent-details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];

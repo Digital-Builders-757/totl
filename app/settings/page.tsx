@@ -51,7 +51,7 @@ export default async function SettingsPage() {
     supabase
       .from("talent_profiles")
       .select(
-        "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, created_at, updated_at"
+        "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, experience_years, specialties, weight, created_at, updated_at"
       )
       .eq("user_id", user.id)
       .maybeSingle(),

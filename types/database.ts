@@ -1,6 +1,6 @@
-﻿// AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+// AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
 // Generated from Supabase database schema on 2025-10-23
-// Run: npx supabase@2.34.3 gen types typescript --project-id "utvircuwknqzpnmvxidp" --schema public
+// Run: npx supabase@2.33.4 gen types typescript --linked --schema public
 
 export type Json =
   | string

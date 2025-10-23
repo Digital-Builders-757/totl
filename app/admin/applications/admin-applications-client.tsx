@@ -34,7 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 // Type for the joined application data
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {

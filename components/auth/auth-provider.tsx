@@ -7,7 +7,7 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type UserRole = "talent" | "client" | "admin" | null;
 

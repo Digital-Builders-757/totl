@@ -14,7 +14,7 @@ import {
   setPrimaryPortfolioItem,
   updatePortfolioItem,
 } from "@/lib/actions/portfolio-actions";
-import type { Database } from "@/types/supabase";
+import type { Database } from "@/types/database";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {
   imageUrl?: string;
