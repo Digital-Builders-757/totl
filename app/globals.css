@@ -52,6 +52,26 @@
     font-size: 16px; /* Prevents iOS zoom on focus */
   }
 
+  /* Improve card spacing on mobile */
+  .card-backlit,
+  .apple-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Better text sizing for mobile */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  /* Improve button spacing */
+  .flex.gap-2 > * {
+    margin-right: 0.5rem;
+  }
+  
+  .flex.gap-2 > *:last-child {
+    margin-right: 0;
+  }
+
   /* Prevent text selection on interactive elements */
   button,
   .card-backlit,

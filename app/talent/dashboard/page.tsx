@@ -1024,7 +1024,7 @@ function TalentDashboardContent() {
                         key={gig.id}
                         className="overflow-hidden hover:shadow-lg transition-shadow group"
                       >
-                        <div className="h-48 relative">
+                        <div className="h-32 md:h-48 relative">
                           <SafeImage
                             src={gig.image_url}
                             alt={gig.title}

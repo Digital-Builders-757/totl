@@ -21,6 +21,7 @@
 - ✅ **UI/UX IMPROVEMENTS** - Fixed text contrast on gig cards for better readability
 - ✅ **TALENT DASHBOARD FIXES** - Improved text contrast in Available Gigs section
 - ✅ **BOOKINGS TAB FIXES** - Fixed text contrast in My Bookings section
+- ✅ **MOBILE UI/UX FIXES** - Fixed settings page text overlap and mobile photo cutoff issues
 
 ---
 

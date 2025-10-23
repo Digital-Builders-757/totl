@@ -734,7 +734,7 @@ export default function ClientDashboard() {
                       alt={gig.title}
                       width={300}
                       height={200}
-                      className="w-full h-48 object-cover rounded-lg"
+                      className="w-full h-32 md:h-48 object-cover rounded-lg"
                       fallbackSrc="/images/totl-logo-transparent.png"
                     />
 

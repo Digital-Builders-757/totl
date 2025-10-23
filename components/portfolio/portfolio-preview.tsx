@@ -73,7 +73,7 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
             )}
 
             {/* Image */}
-            <div className="relative w-full aspect-square bg-zinc-800 overflow-hidden">
+            <div className="relative w-full aspect-[4/3] md:aspect-square bg-zinc-800 overflow-hidden">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}

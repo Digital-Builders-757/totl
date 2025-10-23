@@ -228,7 +228,7 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
           )}
 
           {/* Image with Hover Effects */}
-          <div className="portfolio-image-container relative w-full h-64 bg-zinc-800 overflow-hidden group">
+          <div className="portfolio-image-container relative w-full h-48 md:h-64 bg-zinc-800 overflow-hidden group">
             {item.imageUrl ? (
               <Image
                 src={item.imageUrl}
