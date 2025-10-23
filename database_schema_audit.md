@@ -22,20 +22,23 @@
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
 **Key Highlights:**
-- ✅ **9 tables** with proper relationships
+- ✅ **11 tables** with proper relationships
 - ✅ **RLS enabled** on all tables for security
 - ✅ **Custom enums** for status management
 - ✅ **Automatic triggers** for profile creation
 - ✅ **Production ready** with clean data
+- ✅ **Performance optimized** with comprehensive indexing
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 9
-- **Total Columns:** 75+
+- **Total Tables:** 11
+- **Total Columns:** 85+
 - **Custom Types (Enums):** 4
-- **Foreign Key Relationships:** 8
-- **Indexes:** 16 (including primary keys)
-- **RLS Policies:** 15+ active policies
+- **Foreign Key Relationships:** 10
+- **Indexes:** 50+ (including primary keys and performance indexes)
+- **RLS Policies:** 25+ active policies
+- **Views:** 5 (including admin dashboards and performance monitoring)
+- **Functions:** 15+ (including triggers and utilities)
 
 ## 🔒 Custom Types (Enums)
 
@@ -118,6 +121,9 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `eye_color` | `text` | YES | - | Eye color |
 | `shoe_size` | `text` | YES | - | Shoe size |
 | `languages` | `text[]` | YES | - | Languages spoken |
+| `experience_years` | `integer` | YES | - | Years of experience |
+| `specialties` | `text[]` | YES | - | Specialties/skills |
+| `weight` | `integer` | YES | - | Weight |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
@@ -173,7 +179,7 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `location` | `text` | NO | - | Job location |
 | `compensation` | `text` | NO | - | Payment amount |
 | `duration` | `text` | NO | - | Job duration |
-| `date` | `text` | NO | - | Job date |
+| `date` | `date` | NO | - | Job date |
 | `application_deadline` | `timestamp with time zone` | YES | - | Application deadline |
 | `requirements` | `text[]` | YES | - | Array of requirements |
 | `status` | `text` | NO | `'draft'` | Current status |
@@ -232,6 +238,7 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `status` | `booking_status` | NO | `'pending'` | Booking status |
 | `compensation` | `numeric` | YES | - | Agreed compensation |
 | `notes` | `text` | YES | - | Booking notes |
+| `date` | `timestamp with time zone` | NO | - | Booking date |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
@@ -258,9 +265,6 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `description` | `text` | YES | - | Item description |
 | `caption` | `text` | YES | - | Short caption for the image |
 | `image_url` | `text` | YES | - | External image URL (legacy) |
-| `image_path` | `text` | YES | - | Supabase Storage path for image |
-| `display_order` | `integer` | YES | `0` | Order for displaying portfolio items |
-| `is_primary` | `boolean` | YES | `false` | Whether this is the featured/primary image |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
@@ -329,6 +333,109 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 
 ---
 
+### 10. `client_applications` - Client Signup Applications
+**Purpose:** Store client applications from the website before account creation
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `first_name` | `text` | NO | - | First name |
+| `last_name` | `text` | NO | - | Last name |
+| `email` | `text` | NO | - | Email address (unique) |
+| `phone` | `text` | YES | - | Phone number |
+| `company_name` | `text` | NO | - | Company name |
+| `industry` | `text` | YES | - | Industry |
+| `website` | `text` | YES | - | Company website |
+| `business_description` | `text` | NO | - | Business description |
+| `needs_description` | `text` | NO | - | Needs description |
+| `status` | `text` | NO | `'pending'` | Application status |
+| `admin_notes` | `text` | YES | - | Admin notes |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Unique: `email` (one application per email)
+
+**Indexes:**
+- `client_applications_pkey` (Primary Key)
+- `client_applications_email_key` (Unique email)
+
+---
+
+### 11. `gig_notifications` - Email Notification Preferences
+**Purpose:** Store user preferences for gig notification emails
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | Primary key |
+| `email` | `varchar(255)` | NO | - | Email address for notifications |
+| `user_id` | `uuid` | YES | - | Optional foreign key to auth.users |
+| `categories` | `text[]` | YES | `'{}'` | Array of gig categories to notify about |
+| `locations` | `text[]` | YES | `'{}'` | Array of locations to notify about |
+| `frequency` | `varchar(20)` | YES | `'immediate'` | Notification frequency |
+| `is_active` | `boolean` | YES | `true` | Whether notifications are enabled |
+| `created_at` | `timestamp with time zone` | YES | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | YES | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `user_id` → `auth.users.id` (CASCADE DELETE)
+- Check: `frequency IN ('immediate', 'daily', 'weekly')`
+
+**Indexes:**
+- `gig_notifications_pkey` (Primary Key)
+- `idx_gig_notifications_email` (Email lookup)
+- `idx_gig_notifications_user_id` (User lookup)
+- `idx_gig_notifications_active` (Active notifications)
+
+---
+
+## 📊 Views & Materialized Views
+
+### 1. `admin_bookings_dashboard` - Admin Booking Overview
+**Purpose:** Comprehensive view of all bookings with related data
+
+**Columns:**
+- `booking_id`, `booking_date`, `booking_compensation`
+- `gig_id`, `gig_title`, `gig_status`, `gig_location`
+- `talent_display_name`, `talent_avatar_url`
+- `client_company_name`
+
+### 2. `admin_talent_dashboard` - Admin Talent Management
+**Purpose:** View of all applications with talent and gig information
+
+**Columns:**
+- `application_id`, `talent_id`, `application_status`, `application_created_at`
+- `gig_id`, `gig_title`, `gig_status`, `gig_location`
+- `talent_display_name`, `talent_avatar_url`
+- `client_company_name`
+
+### 3. `admin_dashboard_cache` - Performance Statistics
+**Purpose:** Materialized view for admin dashboard statistics
+
+**Columns:**
+- `total_users`, `total_talent`, `total_clients`
+- `total_gigs`, `active_gigs`
+- `total_applications`, `total_bookings`
+- `last_updated`
+
+### 4. `performance_metrics` - Database Statistics
+**Purpose:** Performance monitoring view for database statistics
+
+**Columns:**
+- `schemaname`, `tablename`, `attname`
+- `n_distinct`, `correlation`
+
+### 5. `query_stats` - Query Performance
+**Purpose:** Query statistics for performance monitoring
+
+**Columns:**
+- `query`, `calls`, `total_exec_time`
+- `mean_exec_time`, `max_exec_time`, `min_exec_time`
+
+---
+
 ## 🔗 Relationships & Constraints
 
 ### **Entity Relationship Diagram**
@@ -356,6 +463,7 @@ gigs (1) ←→ (many) gig_requirements
 8. `bookings.talent_id` → `profiles.id` (CASCADE DELETE)
 9. `portfolio_items.talent_id` → `profiles.id` (CASCADE DELETE)
 10. `gig_requirements.gig_id` → `gigs.id` (CASCADE DELETE)
+11. `gig_notifications.user_id` → `auth.users.id` (CASCADE DELETE)
 
 ## 🔒 Row-Level Security (RLS)
 
@@ -451,6 +559,75 @@ USING (
 );
 ```
 
+#### **bookings Table**
+```sql
+-- Public can view bookings
+CREATE POLICY "Bookings view policy" ON bookings FOR SELECT USING (true);
+
+-- Talent can insert their own bookings
+CREATE POLICY "Insert own bookings" ON bookings FOR INSERT TO authenticated 
+WITH CHECK (talent_id = auth.uid());
+
+-- Users can update their own bookings
+CREATE POLICY "Update own bookings" ON bookings FOR UPDATE TO authenticated 
+USING ((talent_id = auth.uid()) OR (gig_id IN (SELECT gigs.id FROM gigs WHERE gigs.client_id = auth.uid())));
+```
+
+#### **portfolio_items Table**
+```sql
+-- Public can view portfolio items
+CREATE POLICY "Portfolio items view policy" ON portfolio_items FOR SELECT USING (true);
+
+-- Talent can insert their own portfolio items
+CREATE POLICY "Insert own portfolio items" ON portfolio_items FOR INSERT TO authenticated 
+WITH CHECK (talent_id = auth.uid());
+
+-- Talent can update their own portfolio items
+CREATE POLICY "Update own portfolio items" ON portfolio_items FOR UPDATE TO authenticated 
+USING (talent_id = auth.uid());
+```
+
+#### **gig_requirements Table**
+```sql
+-- Clients can manage requirements for their gigs
+CREATE POLICY "Clients can manage requirements for their gigs" ON gig_requirements 
+USING ((EXISTS (SELECT 1 FROM gigs WHERE (gigs.id = gig_requirements.gig_id) AND (gigs.client_id = (SELECT auth.uid())))));
+```
+
+#### **gig_notifications Table**
+```sql
+-- Users can view their own notifications (optimized with cached auth check)
+CREATE POLICY "Users can view their own notifications" ON gig_notifications FOR SELECT 
+USING (((SELECT auth.uid()) = user_id) OR ((SELECT auth.uid()) IS NULL));
+
+-- Users can insert their own notifications (allows authenticated and anonymous)
+CREATE POLICY "Users can insert their own notifications" ON gig_notifications FOR INSERT 
+WITH CHECK (((SELECT auth.uid()) = user_id) OR ((SELECT auth.uid()) IS NULL));
+
+-- Users can update their own notifications (authenticated only)
+CREATE POLICY "Users can update their own notifications" ON gig_notifications FOR UPDATE TO authenticated 
+USING (((SELECT auth.uid()) = user_id));
+
+-- Users can delete their own notifications (authenticated only)
+CREATE POLICY "Users can delete their own notifications" ON gig_notifications FOR DELETE TO authenticated 
+USING (((SELECT auth.uid()) = user_id));
+```
+
+#### **client_applications Table**
+```sql
+-- Anonymous users can insert applications
+CREATE POLICY "Allow anonymous users to insert applications" ON client_applications FOR INSERT TO anon 
+WITH CHECK (true);
+
+-- Admins can view all applications
+CREATE POLICY "Allow admins to view applications" ON client_applications FOR SELECT 
+USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid())) AND (profiles.role = 'admin'))));
+
+-- Admins can update applications
+CREATE POLICY "Allow admins to update applications" ON client_applications FOR UPDATE 
+USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid())) AND (profiles.role = 'admin'))));
+```
+
 ## 📊 Indexes & Performance
 
 ### **Primary Key Indexes**
@@ -531,6 +708,8 @@ USING (
 | `bookings` | 0 | ✅ Clean (ready for real bookings) |
 | `portfolio_items` | 0 | ✅ Clean (ready for real portfolios) |
 | `gig_requirements` | 0 | ✅ Clean (ready for real requirements) |
+| `client_applications` | 0 | ✅ Clean (ready for client signups) |
+| `gig_notifications` | 0 | ✅ Clean (ready for email subscriptions) |
 
 ### **Test Account**
 - **Email:** `testclient@example.com`
@@ -598,6 +777,13 @@ USING (
   - All RLS policies now use cached auth checks for optimal performance
 - ✅ **Portfolio gallery enhancement** - Added image_path, display_order, is_primary fields to portfolio_items
 - ✅ **Storage buckets** - Created 'portfolio' bucket with RLS policies for talent portfolio images
+- ✅ **Schema audit update (Oct 23, 2025)** - Comprehensive documentation sync:
+  - Added missing tables: `client_applications`, `gig_notifications`
+  - Updated column types: `gigs.date` (date), `bookings.date` (timestamp)
+  - Added missing columns: `talent_profiles.experience_years`, `specialties`, `weight`
+  - Added missing views: `performance_metrics`, `query_stats`
+  - Updated RLS policies for all tables
+  - Verified 50+ indexes and 25+ RLS policies
 
 ---
 

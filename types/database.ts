@@ -1,3 +1,7 @@
+﻿// AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+// Generated from Supabase database schema on 2025-10-23
+// Run: npx supabase@2.34.3 gen types typescript --project-id "utvircuwknqzpnmvxidp" --schema public
+
 export type Json =
   | string
   | number
@@ -331,7 +335,7 @@ export type Database = {
           id: string
           image_url: string | null
           location: string
-          search_vector: unknown | null
+          search_vector: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
           updated_at: string
@@ -348,7 +352,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           location: string
-          search_vector?: unknown | null
+          search_vector?: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
           updated_at?: string
@@ -365,7 +369,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string
-          search_vector?: unknown | null
+          search_vector?: unknown
           status?: Database["public"]["Enums"]["gig_status"]
           title?: string
           updated_at?: string
@@ -598,11 +602,11 @@ export type Database = {
       }
       performance_metrics: {
         Row: {
-          attname: unknown | null
+          attname: unknown
           correlation: number | null
           n_distinct: number | null
-          schemaname: unknown | null
-          tablename: unknown | null
+          schemaname: unknown
+          tablename: unknown
         }
         Relationships: []
       }
@@ -619,28 +623,19 @@ export type Database = {
       }
     }
     Functions: {
-      analyze_tables: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      analyze_tables: { Args: never; Returns: undefined }
       backfill_missing_profiles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created: boolean
           profile_type: string
           profile_user_id: string
         }[]
       }
-      check_auth_schema: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
-      check_auth_schema_optimized: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      check_auth_schema: { Args: never; Returns: Json }
+      check_auth_schema_optimized: { Args: never; Returns: Json }
       get_admin_dashboard_stats: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_gigs: number
           last_updated: string
@@ -653,7 +648,7 @@ export type Database = {
         }[]
       }
       get_query_hints: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           hint_description: string
           hint_type: string
@@ -661,7 +656,7 @@ export type Database = {
         }[]
       }
       get_slow_queries: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           calls: number
           mean_time: number
@@ -670,28 +665,16 @@ export type Database = {
         }[]
       }
       get_user_profile: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           id: string
         }[]
       }
-      maintenance_cleanup: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      refresh_admin_dashboard_cache: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      test_enum_casting: {
-        Args: { test_role: string }
-        Returns: string
-      }
-      test_trigger_function_exists: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      maintenance_cleanup: { Args: never; Returns: undefined }
+      refresh_admin_dashboard_cache: { Args: never; Returns: undefined }
+      test_enum_casting: { Args: { test_role: string }; Returns: string }
+      test_trigger_function_exists: { Args: never; Returns: boolean }
     }
     Enums: {
       application_status:
