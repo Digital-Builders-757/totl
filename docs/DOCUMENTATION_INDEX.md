@@ -48,6 +48,11 @@ All other documentation has been organized into the `docs/` folder.
 - `FORM_INPUT_POLISH_IMPLEMENTATION.md` - Form input polish with floating labels & animations (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
+
+### **🔧 Development & Code Quality**
+- `IMPORT_PATH_BEST_PRACTICES.md` - **NEW** ✅ - Import path best practices and error prevention (Oct 23, 2025)
+- `CODING_STANDARDS.md` - Coding standards and best practices
+- `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system
 - `SIGN_OUT_IMPROVEMENTS.md` - Sign-out functionality improvements
 - `LOGIN_PAGE_STYLING_IMPROVEMENTS.md` - Login page styling improvements (Oct 2025)
