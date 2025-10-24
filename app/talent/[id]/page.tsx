@@ -46,7 +46,28 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
   try {
     const { data, error: dbError } = await supabase
       .from("talent_profiles")
-      .select("*")
+      .select(`
+        id,
+        user_id,
+        first_name,
+        last_name,
+        phone,
+        age,
+        location,
+        experience,
+        portfolio_url,
+        height,
+        measurements,
+        hair_color,
+        eye_color,
+        shoe_size,
+        languages,
+        experience_years,
+        specialties,
+        weight,
+        created_at,
+        updated_at
+      `)
       .eq("id", id)
       .single();
 

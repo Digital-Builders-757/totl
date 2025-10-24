@@ -46,7 +46,16 @@ async function getTalentProfiles(): Promise<TalentProfile[]> {
   const { data, error } = await supabase
     .from("talent_profiles")
     .select(`
-      *,
+      id,
+      user_id,
+      first_name,
+      last_name,
+      location,
+      experience_years,
+      specialties,
+      portfolio_url,
+      created_at,
+      updated_at,
       profiles!inner(
         avatar_url,
         avatar_path,

@@ -164,7 +164,19 @@ export default function ClientDashboard() {
       // Fetch client profile
       const { data: clientProfileData, error: clientProfileError } = await supabase
         .from("client_profiles")
-        .select("*")
+        .select(`
+          id,
+          user_id,
+          company_name,
+          industry,
+          website,
+          contact_name,
+          contact_email,
+          contact_phone,
+          company_size,
+          created_at,
+          updated_at
+        `)
         .eq("user_id", user.id)
         .single();
 
@@ -177,7 +189,19 @@ export default function ClientDashboard() {
       // Fetch client's gigs
       const { data: gigsData, error: gigsError } = await supabase
         .from("gigs")
-        .select("*")
+        .select(`
+          id,
+          client_id,
+          title,
+          description,
+          category,
+          location,
+          compensation,
+          status,
+          application_deadline,
+          created_at,
+          updated_at
+        `)
         .eq("client_id", user.id)
         .order("created_at", { ascending: false });
 
