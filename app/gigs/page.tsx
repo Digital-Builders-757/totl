@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { SignInGate } from "@/components/auth/sign-in-gate";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/database";
 
@@ -147,7 +148,7 @@ export default async function GigsPage({
     return `/gigs?${params.toString()}`;
   };
 
-  // Get user role for breadcrumb
+  // Get user session and role
   const { data: { user } } = await supabase.auth.getUser();
   let userRole: string | null = null;
   
@@ -158,6 +159,11 @@ export default async function GigsPage({
       .eq("id", user.id)
       .single();
     userRole = profile?.role || null;
+  }
+
+  // If no user session, show sign-in gate
+  if (!user) {
+    return <SignInGate variant="gigs" />;
   }
 
   return (

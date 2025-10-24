@@ -46,6 +46,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🎨 Features & Implementation**
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
+- `UI_VISUAL_LANGUAGE.md` - 🎨 **NEW** - Visual design system and component guidelines (Jan 2025)
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
 - `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery feature (complete guide)
 - `PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md` - Premium hover effects on portfolio tiles (Oct 2025)
