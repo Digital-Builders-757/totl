@@ -54,50 +54,82 @@ export default function AboutPage() {
       {/* Our Story Section */}
       <section className="py-32 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-6 animate-apple-fade-in">
-              <div className="apple-glass rounded-2xl px-6 py-3 w-fit">
-                <span className="text-white font-medium text-sm flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Our Story
-                </span>
+          <div className="max-w-4xl mx-auto text-center space-y-12 animate-apple-fade-in">
+            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto">
+              <span className="text-white font-medium text-sm flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Our Story
+              </span>
+            </div>
+            
+            <h2 className="text-5xl lg:text-6xl font-bold text-white">
+              Building the Future of Talent
+            </h2>
+            
+            <div className="space-y-8 text-lg text-gray-300 leading-relaxed">
+              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">2020</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-white mb-2">The Vision</h3>
+                    <p>
+                      Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
+                      industry. We recognized a gap between exceptional talent and quality
+                      opportunities, and set out to bridge that divide with integrity and innovation.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-5xl lg:text-6xl font-bold text-white">
-                Building the Future of Talent
-              </h2>
-              <div className="space-y-4 text-lg text-gray-300 leading-relaxed">
-                <p>
-                  Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
-                  industry. We recognized a gap between exceptional talent and quality
-                  opportunities, and set out to bridge that divide with integrity and innovation.
-                </p>
-                <p>
-                  Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
-                  aspect of our business. We believe in fostering genuine relationships with both
-                  our talent and clients, creating a supportive community rather than just a
-                  transactional agency.
-                </p>
-                <p>
-                  Today, we&apos;re proud to represent diverse talent across various modeling
-                  specialties, connecting them with brands that value authenticity and creativity as
-                  much as we do.
-                </p>
+
+              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">TOTL</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-white mb-2">Our Commitment</h3>
+                    <p>
+                      Our name, TOTL (Top Of The Line), represents our commitment to excellence in every
+                      aspect of our business. We believe in fostering genuine relationships with both
+                      our talent and clients, creating a supportive community rather than just a
+                      transactional agency.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">∞</span>
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-xl font-bold text-white mb-2">Today & Beyond</h3>
+                    <p>
+                      Today, we&apos;re proud to represent diverse talent across various modeling
+                      specialties, connecting them with brands that value authenticity and creativity as
+                      much as we do. Our journey continues as we shape the future of talent representation.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="relative animate-apple-slide-up">
-              <div className="relative z-10 apple-card p-8">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-auto object-contain rounded-lg"
-                >
-                  <source src="/videos/slowmo_woman.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+
+            {/* Visual Elements */}
+            <div className="flex justify-center items-center gap-8 pt-8">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <Users className="w-8 h-8 text-blue-400" />
               </div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-white/5 rounded-3xl transform rotate-2"></div>
+              <div className="w-1 h-16 bg-gradient-to-b from-blue-500/50 to-purple-500/50 rounded-full"></div>
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <Target className="w-8 h-8 text-purple-400" />
+              </div>
+              <div className="w-1 h-16 bg-gradient-to-b from-purple-500/50 to-pink-500/50 rounded-full"></div>
+              <div className="w-16 h-16 bg-gradient-to-br from-pink-500/20 to-orange-500/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                <Award className="w-8 h-8 text-pink-400" />
+              </div>
             </div>
           </div>
         </div>
