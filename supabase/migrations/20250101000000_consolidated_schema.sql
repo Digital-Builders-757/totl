@@ -14,9 +14,9 @@ BEGIN;
 -- Drop triggers first (only if tables exist)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
--- Drop functions
+-- Drop functions (with CASCADE to handle dependencies)
 DROP FUNCTION IF EXISTS public.handle_new_user();
-DROP FUNCTION IF EXISTS public.update_updated_at_column();
+DROP FUNCTION IF EXISTS public.update_updated_at_column() CASCADE;
 DROP FUNCTION IF EXISTS public.get_current_user_id();
 DROP FUNCTION IF EXISTS public.get_talent_applications();
 DROP FUNCTION IF EXISTS public.test_trigger_function_exists();

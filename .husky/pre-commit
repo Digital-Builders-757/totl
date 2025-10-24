@@ -1,9 +1,50 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Block commit if code changes are staged but MVP_STATUS_NOTION.md is not
+echo "🚨 Running pre-commit checks..."
 
+# 1. CRITICAL ERROR PREVENTION CHECKS
+echo "🔍 Checking for common errors..."
+
+# Check for incorrect import paths (exclude docs and examples)
+if grep -r "@/lib/supabase/supabase-admin-client" app/ components/ lib/ types/ --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next > /dev/null 2>&1; then
+  echo "❌ ERROR: Found incorrect import path '@/lib/supabase/supabase-admin-client'"
+  echo "   Fix: Use '@/lib/supabase-admin-client' instead"
+  echo "   Run: grep -r '@/lib/supabase/supabase-admin-client' app/ components/ lib/ types/"
+  exit 1
+fi
+
+# Temporarily disabled - many files still use @/types/database
+# if grep -r "@/types/database" app/ components/ lib/ types/ --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next > /dev/null 2>&1; then
+#   echo "❌ ERROR: Found incorrect import path '@/types/database'"
+#   echo "   Fix: Use '@/types/supabase' instead"
+#   echo "   Run: grep -r '@/types/database' app/ components/ lib/ types/"
+#   exit 1
+# fi
+
+# Check if build passes
+echo "🔨 Testing build..."
+if ! npm run build > /dev/null 2>&1; then
+  echo "❌ ERROR: Build failed!"
+  echo "   Fix: Run 'npm run build' and fix all errors before committing"
+  echo "   Never commit code that doesn't build locally!"
+  exit 1
+fi
+
+# Check schema sync (only if types/database.ts is being committed)
 changed_files=$(git diff --cached --name-only)
+if echo "$changed_files" | grep -q "^types/database.ts$"; then
+  echo "🔍 Checking schema sync..."
+  if ! npm run schema:verify:comprehensive > /dev/null 2>&1; then
+    echo "❌ ERROR: Schema sync check failed!"
+    echo "   Fix: Run 'npm run schema:verify:comprehensive' and resolve issues"
+    echo "   Or regenerate types with 'npm run types:regen'"
+    exit 1
+  fi
+fi
+
+# 2. MVP STATUS DOCUMENTATION CHECK
+echo "📝 Checking MVP status documentation..."
 
 needs_doc=false
 for f in $changed_files; do
@@ -17,9 +58,20 @@ doc_staged=false
 echo "$changed_files" | grep -q "^MVP_STATUS_NOTION.md$" && doc_staged=true || true
 
 if [ "$needs_doc" = true ] && [ "$doc_staged" = false ]; then
-  echo "\n✋ MVP status doc not updated. Please update MVP_STATUS_NOTION.md or run: npm run status:auto\n"
+  echo "❌ ERROR: MVP status doc not updated"
+  echo "   Fix: Update MVP_STATUS_NOTION.md or run: npm run status:auto"
   exit 1
 fi
 
-exit 0
-npx lint-staged 
+# 3. LINTING CHECK
+echo "🧹 Running linting..."
+if ! npm run lint > /dev/null 2>&1; then
+  echo "❌ ERROR: Linting failed!"
+  echo "   Fix: Run 'npm run lint' and fix all errors before committing"
+  exit 1
+fi
+
+echo "✅ All pre-commit checks passed!"
+echo "🚀 Ready to commit!"
+
+exit 0 

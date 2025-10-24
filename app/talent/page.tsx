@@ -1,6 +1,7 @@
-﻿import { createClient } from "@supabase/supabase-js";
-import { Users } from "lucide-react";
+﻿import { Users } from "lucide-react";
 
+import { SignInGate } from "@/components/auth/sign-in-gate";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { ErrorState } from "./error-state";
 import TalentClient from "./talent-client";
 import type { Database } from "@/types/database";
@@ -20,10 +21,7 @@ type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
 async function getTalentProfiles(): Promise<TalentProfile[]> {
   console.log("Server-side: Fetching talent profiles...");
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const supabase = await createSupabaseServer();
 
   const { data, error } = await supabase
     .from("talent_profiles")
@@ -56,6 +54,15 @@ async function getTalentProfiles(): Promise<TalentProfile[]> {
 }
 
 export default async function TalentPage() {
+  // Check user session first
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // If no user session, show sign-in gate
+  if (!user) {
+    return <SignInGate variant="talent" />;
+  }
+
   let talent: TalentProfile[] = [];
   let error: string | null = null;
 
