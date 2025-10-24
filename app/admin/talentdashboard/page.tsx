@@ -465,7 +465,7 @@ export default async function TalentDashboard() {
                     width={300}
                     height={400}
                     placeholderQuery="portfolio image"
-                    className="object-cover w-full h-full aspect-[3/4] transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover w-full h-full aspect-3-4 transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <p className="text-white font-medium text-sm">{item.caption}</p>

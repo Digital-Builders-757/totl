@@ -33,6 +33,14 @@
     .apple-card:hover {
       transform: none;
     }
+    
+    .image-sophisticated:hover img {
+      transform: none;
+    }
+    
+    .image-sophisticated:hover::after {
+      opacity: 0;
+    }
   }
 
   /* Improve tap feedback */
@@ -84,6 +92,32 @@
   /* Allow text selection in content */
   p, h1, h2, h3, h4, h5, h6 {
     user-select: auto;
+  }
+
+  /* Mobile image optimizations */
+  .image-sophisticated {
+    border-radius: 0.5rem; /* Smaller radius on mobile */
+  }
+  
+  /* Better aspect ratio handling on mobile */
+  .aspect-4-5 {
+    aspect-ratio: 4/5;
+  }
+  
+  .aspect-3-4 {
+    aspect-ratio: 3/4;
+  }
+  
+  .aspect-3-2 {
+    aspect-ratio: 3/2;
+  }
+  
+  .aspect-4-3 {
+    aspect-ratio: 4/3;
+  }
+  
+  .aspect-16-9 {
+    aspect-ratio: 16/9;
   }
 }
 
@@ -748,6 +782,28 @@ h1 {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
   border-color: hsl(var(--ring));
+}
+
+/* Text Clamping Utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 /* Animation Delay Classes */

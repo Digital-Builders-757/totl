@@ -291,7 +291,7 @@ export default async function GigsPage({
                   key={gig.id}
                   className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className="relative aspect-4-3 overflow-hidden">
                     <SafeImage
                       src={gig.image_url}
                       alt={gig.title}

@@ -162,8 +162,33 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             </CardContent>
           </Card>
 
-          {/* Client Information */}
-          {gig.profiles && (
+          {/* Client Information - Only visible to authenticated users */}
+          {session?.user ? (
+            gig.profiles && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    Client Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-medium">Company</p>
+                      <p className="text-gray-600">{gig.profiles.display_name}</p>
+                    </div>
+                    {gig.profiles.role && (
+                      <div>
+                        <p className="font-medium">Role</p>
+                        <p className="text-gray-600">{gig.profiles.role}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          ) : (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -172,17 +197,11 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div>
-                    <p className="font-medium">Company</p>
-                    <p className="text-gray-600">{gig.profiles.display_name}</p>
-                  </div>
-                  {gig.profiles.role && (
-                    <div>
-                      <p className="font-medium">Role</p>
-                      <p className="text-gray-600">{gig.profiles.role}</p>
-                    </div>
-                  )}
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-4">Client details are only visible to registered users</p>
+                  <Button asChild className="apple-button">
+                    <Link href="/login">Sign In to View Client Info</Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -471,8 +471,8 @@ gigs (1) ←→ (many) gig_requirements
 
 #### **profiles Table**
 ```sql
--- Public can view profiles
-CREATE POLICY "Profiles view policy" ON profiles FOR SELECT TO public USING (true);
+-- Public can view basic profile info (application-level controls restrict sensitive data)
+CREATE POLICY "Public profiles view" ON profiles FOR SELECT TO anon, authenticated USING (true);
 
 -- Users can update their own profile
 CREATE POLICY "Update own profile" ON profiles FOR UPDATE TO authenticated 
@@ -485,8 +485,8 @@ WITH CHECK (id = auth.uid());
 
 #### **talent_profiles Table**
 ```sql
--- Public can view talent profiles
-CREATE POLICY "Talent profiles view policy" ON talent_profiles FOR SELECT TO public USING (true);
+-- Public can view talent profiles (application-level controls restrict sensitive data)
+CREATE POLICY "Public talent profiles view" ON talent_profiles FOR SELECT TO anon, authenticated USING (true);
 
 -- Talent can update their own profile
 CREATE POLICY "Update own talent profile" ON talent_profiles FOR UPDATE TO authenticated 
@@ -499,8 +499,8 @@ WITH CHECK (user_id = auth.uid());
 
 #### **client_profiles Table**
 ```sql
--- Public can view client profiles
-CREATE POLICY "Client profiles view policy" ON client_profiles FOR SELECT TO public USING (true);
+-- Only authenticated users can view client profiles (NO public access)
+CREATE POLICY "Client profiles view" ON client_profiles FOR SELECT TO authenticated USING (true);
 
 -- Clients can update their own profile
 CREATE POLICY "Update own client profile" ON client_profiles FOR UPDATE TO authenticated 
@@ -775,6 +775,11 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
   - Optimized 4 gig_notifications RLS policies to use `(SELECT auth.uid())`
   - Removed final duplicate indexes (applications_gig_idx, applications_talent_idx, bookings_gig_idx)
   - All RLS policies now use cached auth checks for optimal performance
+- ✅ **CRITICAL SECURITY FIX (Oct 24, 2025)** - Fixed overly permissive RLS policies:
+  - Restricted client_profiles to authenticated users only (no public access)
+  - Updated talent_profiles and profiles policies with better security comments
+  - Application-level controls now provide the actual data protection
+  - Migration: `20251024170927_fix_overly_permissive_rls_policies.sql`
 - ✅ **Portfolio gallery enhancement** - Added image_path, display_order, is_primary fields to portfolio_items
 - ✅ **Storage buckets** - Created 'portfolio' bucket with RLS policies for talent portfolio images
 - ✅ **Schema audit update (Oct 23, 2025)** - Comprehensive documentation sync:

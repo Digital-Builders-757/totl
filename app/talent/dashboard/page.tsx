@@ -44,27 +44,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import type { Database } from "@/types/database";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
 
-interface TalentProfile {
-  id?: string;
-  user_id?: string;
-  first_name: string;
-  last_name: string;
-  phone?: string | null;
-  age?: number | null;
-  location?: string | null;
-  experience?: string | null;
-  portfolio_url?: string | null;
-  height?: string | null;
-  measurements?: string | null;
-  hair_color?: string | null;
-  eye_color?: string | null;
-  shoe_size?: string | null;
-  languages?: string[] | null;
-}
+// Use proper database types
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 interface Application {
   id: string;

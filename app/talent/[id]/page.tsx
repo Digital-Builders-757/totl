@@ -6,29 +6,10 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
+import type { Database } from "@/types/database";
 
-interface TalentProfile {
-  id: string;
-  user_id: string;
-  first_name: string; // Required in database
-  last_name: string; // Required in database
-  phone: string | null;
-  age: number | null;
-  location: string | null;
-  experience: string | null;
-  portfolio_url: string | null;
-  height: string | null;
-  measurements: string | null;
-  hair_color: string | null;
-  eye_color: string | null;
-  shoe_size: string | null;
-  languages: string[] | null;
-  created_at: string;
-  updated_at: string;
-  experience_years: number | null;
-  specialties: string[] | null;
-  weight: number | null;
-}
+// Use proper database types instead of custom interface
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 interface TalentProfilePageProps {
   params: Promise<{
@@ -54,13 +35,39 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
     }
   );
 
+  // Check if user is authenticated
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   let talent: TalentProfile | null = null;
   let error: string | null = null;
 
   try {
     const { data, error: dbError } = await supabase
       .from("talent_profiles")
-      .select("*")
+      .select(`
+        id,
+        user_id,
+        first_name,
+        last_name,
+        phone,
+        age,
+        location,
+        experience,
+        portfolio_url,
+        height,
+        measurements,
+        hair_color,
+        eye_color,
+        shoe_size,
+        languages,
+        experience_years,
+        specialties,
+        weight,
+        created_at,
+        updated_at
+      `)
       .eq("id", id)
       .single();
 
@@ -78,6 +85,25 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
   if (error || !talent) {
     notFound();
   }
+
+  // Check user role from profiles table (following project patterns)
+  let userRole: Database["public"]["Enums"]["user_role"] | null = null;
+  if (user) {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    userRole = profileData?.role || null;
+  }
+
+  // Determine if user can see sensitive information
+  // Only talent themselves, clients, or admins can see sensitive details
+  const canViewSensitiveInfo = user && (
+    user.id === talent.user_id || 
+    userRole === 'client' || 
+    userRole === 'admin'
+  );
 
   // For now, we'll use a placeholder contact method since we can't access auth.users directly
   // In a real app, you might want to add an email field to the profiles table or use a contact form
@@ -101,7 +127,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         <div className="max-w-4xl mx-auto">
           <div className="bg-black rounded-xl shadow-lg overflow-hidden border border-gray-600">
             {/* Header Section */}
-            <div className="relative h-96">
+            <div className="relative aspect-16-9 sm:aspect-3-4 md:aspect-16-9 lg:h-96">
               <SafeImage
                 src={
                   talent.portfolio_url &&
@@ -114,24 +140,25 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                 fill
                 className="object-cover"
                 context="talent-profile-header"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 896px"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <h1 className="text-white text-4xl font-bold mb-2">
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+                <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-2 line-clamp-2">
                   {talent.first_name} {talent.last_name}
                 </h1>
                 {talent.location && (
-                  <div className="flex items-center text-gray-300">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    {talent.location}
+                  <div className="flex items-center text-gray-300 text-sm sm:text-base">
+                    <MapPin className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{talent.location}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-8 bg-black">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="p-4 sm:p-6 md:p-8 bg-black">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Main Content */}
                 <div className="lg:col-span-2">
                   {/* About Section */}
@@ -179,65 +206,89 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
 
                 {/* Sidebar */}
                 <div className="space-y-6">
-                  {/* Contact Information */}
-                  <div className="bg-white rounded-lg p-6 border border-gray-300">
-                    <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
-                    <div className="space-y-3">
-                      {talent.phone && (
+                  {/* Contact Information - Only visible to authenticated users */}
+                  {canViewSensitiveInfo ? (
+                    <div className="bg-white rounded-lg p-6 border border-gray-300">
+                      <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+                      <div className="space-y-3">
+                        {talent.phone && (
+                          <div className="flex items-center text-black">
+                            <Phone className="mr-3 h-4 w-4 text-black" />
+                            {talent.phone}
+                          </div>
+                        )}
                         <div className="flex items-center text-black">
-                          <Phone className="mr-3 h-4 w-4 text-black" />
-                          {talent.phone}
+                          <Mail className="mr-3 h-4 w-4 text-black" />
+                          Contact through agency
                         </div>
-                      )}
-                      <div className="flex items-center text-black">
-                        <Mail className="mr-3 h-4 w-4 text-black" />
-                        Contact through agency
                       </div>
                     </div>
-                  </div>
-
-                  {/* Physical Stats */}
-                  <div className="bg-white rounded-lg p-6 border border-gray-300">
-                    <h3 className="text-lg font-semibold text-black mb-4">Physical Stats</h3>
-                    <div className="space-y-2 text-sm text-black">
-                      {talent.age && (
-                        <div className="flex justify-between">
-                          <span>Age:</span>
-                          <span className="font-medium text-black">{talent.age}</span>
-                        </div>
-                      )}
-                      {talent.height && (
-                        <div className="flex justify-between">
-                          <span>Height:</span>
-                          <span className="font-medium text-black">{talent.height}</span>
-                        </div>
-                      )}
-                      {talent.weight && (
-                        <div className="flex justify-between">
-                          <span>Weight:</span>
-                          <span className="font-medium text-black">{talent.weight} lbs</span>
-                        </div>
-                      )}
-                      {talent.hair_color && (
-                        <div className="flex justify-between">
-                          <span>Hair:</span>
-                          <span className="font-medium text-black">{talent.hair_color}</span>
-                        </div>
-                      )}
-                      {talent.eye_color && (
-                        <div className="flex justify-between">
-                          <span>Eyes:</span>
-                          <span className="font-medium text-black">{talent.eye_color}</span>
-                        </div>
-                      )}
-                      {talent.shoe_size && (
-                        <div className="flex justify-between">
-                          <span>Shoe Size:</span>
-                          <span className="font-medium text-black">{talent.shoe_size}</span>
-                        </div>
-                      )}
+                  ) : (
+                    <div className="bg-white rounded-lg p-6 border border-gray-300">
+                      <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 mb-4">Contact details are only visible to registered clients</p>
+                        <Button asChild className="apple-button">
+                          <Link href="/login">Sign In to View Contact Info</Link>
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Physical Stats - Only visible to authenticated users */}
+                  {canViewSensitiveInfo ? (
+                    <div className="bg-white rounded-lg p-6 border border-gray-300">
+                      <h3 className="text-lg font-semibold text-black mb-4">Physical Stats</h3>
+                      <div className="space-y-2 text-sm text-black">
+                        {talent.age && (
+                          <div className="flex justify-between">
+                            <span>Age:</span>
+                            <span className="font-medium text-black">{talent.age}</span>
+                          </div>
+                        )}
+                        {talent.height && (
+                          <div className="flex justify-between">
+                            <span>Height:</span>
+                            <span className="font-medium text-black">{talent.height}</span>
+                          </div>
+                        )}
+                        {talent.weight && (
+                          <div className="flex justify-between">
+                            <span>Weight:</span>
+                            <span className="font-medium text-black">{talent.weight} lbs</span>
+                          </div>
+                        )}
+                        {talent.hair_color && (
+                          <div className="flex justify-between">
+                            <span>Hair:</span>
+                            <span className="font-medium text-black">{talent.hair_color}</span>
+                          </div>
+                        )}
+                        {talent.eye_color && (
+                          <div className="flex justify-between">
+                            <span>Eyes:</span>
+                            <span className="font-medium text-black">{talent.eye_color}</span>
+                          </div>
+                        )}
+                        {talent.shoe_size && (
+                          <div className="flex justify-between">
+                            <span>Shoe Size:</span>
+                            <span className="font-medium text-black">{talent.shoe_size}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-lg p-6 border border-gray-300">
+                      <h3 className="text-lg font-semibold text-black mb-4">Physical Stats</h3>
+                      <div className="text-center py-8">
+                        <p className="text-gray-500 mb-4">Physical details are only visible to registered clients</p>
+                        <Button asChild className="apple-button">
+                          <Link href="/login">Sign In to View Details</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Experience */}
                   {talent.experience_years && (
