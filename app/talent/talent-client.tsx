@@ -6,34 +6,16 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import type { Database } from "@/types/database";
 
-interface TalentProfile {
-  id: string;
-  user_id: string;
-  first_name: string; // Required in database
-  last_name: string; // Required in database
-  phone: string | null;
-  age: number | null;
-  location: string | null;
-  experience: string | null;
-  portfolio_url: string | null;
-  height: string | null;
-  measurements: string | null;
-  hair_color: string | null;
-  eye_color: string | null;
-  shoe_size: string | null;
-  languages: string[] | null;
-  created_at: string;
-  updated_at: string;
-  experience_years: number | null;
-  specialties: string[] | null;
-  weight: number | null;
+// Use proper database types with joined profiles data
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
   profiles: {
     avatar_url: string | null;
     avatar_path: string | null;
     display_name: string | null;
   };
-}
+};
 
 interface TalentClientProps {
   initialTalent: TalentProfile[];
@@ -105,7 +87,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
           {filteredTalent.map((person) => (
             <div
               key={person.id}
@@ -120,7 +102,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
               role="button"
               tabIndex={0}
             >
-              <div className="relative h-80 image-sophisticated">
+              <div className="relative aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] image-sophisticated">
                 <SafeImage
                   src={
                     person.profiles?.avatar_url ||
@@ -136,26 +118,27 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
                   className="object-cover"
                   context="talent-profile"
                   fallbackSrc="/images/solo_logo.png"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                <div className="absolute bottom-6 left-6 right-6">
-                  <h3 className="text-white text-2xl font-bold mb-2">
+                <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+                  <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 line-clamp-2">
                     {person.first_name} {person.last_name}
                   </h3>
-                  <p className="text-gray-300 text-sm font-medium">{person.location}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm font-medium line-clamp-1">{person.location}</p>
                 </div>
               </div>
-              <div className="p-8 space-y-6">
-                <div className="space-y-4">
+              <div className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Only show public-safe information */}
                   {person.specialties && person.specialties.length > 0 && (
                     <div className="space-y-2">
-                      <span className="text-sm font-medium text-gray-400">Specialties</span>
-                      <div className="flex flex-wrap gap-2">
+                      <span className="text-xs sm:text-sm font-medium text-gray-400">Specialties</span>
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {person.specialties.slice(0, 3).map((specialty, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                            className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full line-clamp-1"
                           >
                             {specialty}
                           </span>
@@ -170,19 +153,19 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
                   )}
                   {person.experience_years && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-400">Experience</span>
-                      <span className="text-sm font-semibold text-white">{person.experience_years} years</span>
+                      <span className="text-xs sm:text-sm font-medium text-gray-400">Experience</span>
+                      <span className="text-xs sm:text-sm font-semibold text-white">{person.experience_years} years</span>
                     </div>
                   )}
                 </div>
                 <Button
-                  className="w-full apple-button hover-lift focus-ring"
+                  className="w-full apple-button hover-lift focus-ring text-sm sm:text-base py-2 sm:py-3"
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push(`/talent/${person.id}`);
                   }}
                 >
-                  View Profile <ArrowRight className="ml-2 h-4 w-4" />
+                  View Profile <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>

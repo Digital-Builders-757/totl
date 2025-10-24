@@ -127,7 +127,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         <div className="max-w-4xl mx-auto">
           <div className="bg-black rounded-xl shadow-lg overflow-hidden border border-gray-600">
             {/* Header Section */}
-            <div className="relative h-96">
+            <div className="relative aspect-[16/9] sm:aspect-[3/2] md:aspect-[16/9] lg:h-96">
               <SafeImage
                 src={
                   talent.portfolio_url &&
@@ -140,24 +140,25 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                 fill
                 className="object-cover"
                 context="talent-profile-header"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 896px"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-6 left-6">
-                <h1 className="text-white text-4xl font-bold mb-2">
+              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
+                <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-2 line-clamp-2">
                   {talent.first_name} {talent.last_name}
                 </h1>
                 {talent.location && (
-                  <div className="flex items-center text-gray-300">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    {talent.location}
+                  <div className="flex items-center text-gray-300 text-sm sm:text-base">
+                    <MapPin className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{talent.location}</span>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Content Section */}
-            <div className="p-8 bg-black">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="p-4 sm:p-6 md:p-8 bg-black">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                 {/* Main Content */}
                 <div className="lg:col-span-2">
                   {/* About Section */}

@@ -110,9 +110,23 @@ FOR SELECT TO anon USING (true);
 
 ### **IMMEDIATE (Critical)**
 1. ✅ **Update RLS Policies** - Migration created: `20251024170927_fix_overly_permissive_rls_policies.sql`
-2. **Apply Migration** - Run `supabase db push` to apply the RLS policy fixes
+2. ✅ **Apply Migration** - Successfully applied via Supabase Dashboard SQL Editor
 3. **Test All Public Pages** - Ensure no sensitive data leaks after migration
 4. **Audit Remaining `select("*")` Usage** - Fix any remaining instances
+
+### **MANUAL MIGRATION APPLICATION REQUIRED**
+Due to CLI authentication issues, the RLS policy migration needs to be applied manually:
+
+**Option 1: Supabase Dashboard**
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard/project/utvircuwknqzpnmvxidp/sql)
+2. Navigate to SQL Editor
+3. Copy and paste the contents of `supabase/migrations/20251024170927_fix_overly_permissive_rls_policies.sql`
+4. Execute the SQL
+
+**Option 2: Fix CLI Authentication**
+1. Reset database password in Supabase Dashboard
+2. Update local environment variables
+3. Retry `supabase db push --include-all`
 
 ### **SHORT TERM (High Priority)**
 1. **Add Privacy Controls to Admin Pages** - Ensure admin access is properly gated

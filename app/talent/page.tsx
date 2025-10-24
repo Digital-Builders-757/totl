@@ -3,37 +3,19 @@ import { Users } from "lucide-react";
 
 import { ErrorState } from "./error-state";
 import TalentClient from "./talent-client";
+import type { Database } from "@/types/database";
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";
 
-interface TalentProfile {
-  id: string;
-  user_id: string;
-  first_name: string; // Required in database
-  last_name: string; // Required in database
-  phone: string | null;
-  age: number | null;
-  location: string | null;
-  experience: string | null;
-  portfolio_url: string | null;
-  height: string | null;
-  measurements: string | null;
-  hair_color: string | null;
-  eye_color: string | null;
-  shoe_size: string | null;
-  languages: string[] | null;
-  created_at: string;
-  updated_at: string;
-  experience_years: number | null;
-  specialties: string[] | null;
-  weight: number | null;
+// Use proper database types with joined profiles data
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
   profiles: {
     avatar_url: string | null;
     avatar_path: string | null;
     display_name: string | null;
   };
-}
+};
 
 async function getTalentProfiles(): Promise<TalentProfile[]> {
   console.log("Server-side: Fetching talent profiles...");
