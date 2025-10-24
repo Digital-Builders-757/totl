@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { UserPlus } from "lucide-react";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import TalentSignupForm from "@/components/forms/talent-signup-form";
 import { Button, type ButtonProps } from "@/components/ui/button";
@@ -37,7 +37,7 @@ export function ApplyAsTalentButton({
         className={`${className || ""}`}
         {...props}
       >
-        {showIcon && <UserPlus className="mr-2 h-4 w-4" />}
+        {showIcon && <Users className="mr-2 h-4 w-4" />}
         Apply as Talent
       </Button>
 

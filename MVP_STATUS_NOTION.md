@@ -26,6 +26,7 @@
 - ✅ **CI/CD SCHEMA SYNC FIX** - Resolved production deployment schema synchronization error
 - ✅ **SENTRY EPIPE ERROR FIX** - Enhanced development error filtering for Next.js dev server logging
 - ✅ **SENTRY PARTICLES ERROR FIX** - Added filtering for external script/browser extension ReferenceErrors
+- ✅ **SENTRY USERPLUS ERROR FIX** - Fixed missing Lucide React icon import and added error filtering
 
 ---
 
@@ -72,6 +73,16 @@
    - Added Electron-specific error filtering for undefined global variables
    - Added ignoreErrors patterns and beforeSend filters
    - **Impact:** Clean Sentry dashboard, focus on real application errors
+
+### **Sentry UserPlus ReferenceError Fix - October 23, 2025:**
+4. ✅ **Lucide React Icon Import Fix** - Fixed missing icon import in ApplyAsTalentButton
+   - Problem: "UserPlus is not defined" ReferenceError in apply-as-talent-button.tsx
+   - Error: UserPlus icon not available in current lucide-react version (0.454.0)
+   - Location: components/apply-as-talent-button.tsx line 43
+   - Solution: Replaced UserPlus with Users icon (which is available)
+   - Added Sentry filtering for UserPlus ReferenceError as backup
+   - Added ignoreErrors patterns and beforeSend filters
+   - **Impact:** Apply as Talent button now works correctly, no more icon import errors
 
 ### **Database Schema Synchronization & Documentation Cleanup - October 23, 2025:**
 1. ✅ **Complete Database Schema Audit** - Single source of truth established

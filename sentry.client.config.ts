@@ -85,6 +85,10 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       "Particles is not defined",
       /Particles is not defined/,
       /ReferenceError.*Particles/,
+      // Lucide React icon import errors
+      "UserPlus is not defined",
+      /UserPlus is not defined/,
+      /ReferenceError.*UserPlus/,
     ],
 
     // Filter out development-only errors before sending
@@ -111,6 +115,14 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
             errorObj.message?.includes('Particles is not defined') ||
             (errorObj.name === 'ReferenceError' && errorObj.message?.includes('Particles'))) {
           console.warn("Particles ReferenceError filtered - likely from browser extension, Electron environment, or external script");
+          return null; // Filter this error
+        }
+
+        // Filter UserPlus ReferenceError (Lucide React icon import issue)
+        if (errorObj.message === 'UserPlus is not defined' ||
+            errorObj.message?.includes('UserPlus is not defined') ||
+            (errorObj.name === 'ReferenceError' && errorObj.message?.includes('UserPlus'))) {
+          console.warn("UserPlus ReferenceError filtered - Lucide React icon import issue");
           return null; // Filter this error
         }
 
