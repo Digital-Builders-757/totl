@@ -32,6 +32,7 @@
 - ✅ **DUPLICATE FILE CLEANUP** - Removed duplicate apply-as-talent-button component
 - ✅ **PREVENTION DOCUMENTATION** - Created comprehensive import best practices guide
 - ✅ **BUILD WARNINGS FIX** - Fixed Next.js 15 config and Sentry deprecation warnings
+- ✅ **SENTRY AUTH TOKEN FIX** - Configured Sentry auth token for source map uploads
 
 ---
 
@@ -141,6 +142,18 @@
     - Solution: Added environment variable checks in Supabase clients
     - Updated: lib/supabase-client.ts and lib/supabase/supabase-browser.ts
     - **Impact:** Graceful handling of missing environment variables during build
+
+### **Sentry Auth Token & Edge Runtime Fixes - October 23, 2025:**
+11. ✅ **Sentry Auth Token Configuration** - Fixed source map upload authentication
+    - Problem: "No auth token provided. Will not upload source maps" during build
+    - Solution: Added authToken configuration to next.config.mjs Sentry config
+    - Created: sentry.properties file as alternative configuration method
+    - **Impact:** Source maps will now be uploaded to Sentry during build
+
+12. ✅ **Edge Runtime Warnings Suppression** - Reduced Node.js API warnings
+    - Problem: "A Node.js API is used (process.version) which is not supported in the Edge Runtime"
+    - Solution: Added webpack fallback configuration for client-side builds
+    - **Impact:** Cleaner build logs, warnings are expected and don't affect functionality
 
 ### **Database Schema Synchronization & Documentation Cleanup - October 23, 2025:**
 1. ✅ **Complete Database Schema Audit** - Single source of truth established
