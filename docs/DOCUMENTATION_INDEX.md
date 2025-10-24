@@ -52,6 +52,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🔧 Development & Code Quality**
 - `COMPREHENSIVE_QA_CHECKLIST.md` - 🚨 **MANDATORY** - Complete QA checklist for all features (Oct 24, 2025)
+- `CSS_BEST_PRACTICES.md` - 🚨 **CRITICAL** - CSS best practices to prevent build failures (Oct 24, 2025)
 - `IMPORT_PATH_BEST_PRACTICES.md` - **NEW** ✅ - Import path best practices and error prevention (Oct 23, 2025)
 - `CODING_STANDARDS.md` - Coding standards and best practices
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions

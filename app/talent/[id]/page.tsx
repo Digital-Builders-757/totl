@@ -127,7 +127,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         <div className="max-w-4xl mx-auto">
           <div className="bg-black rounded-xl shadow-lg overflow-hidden border border-gray-600">
             {/* Header Section */}
-            <div className="relative aspect-[16/9] sm:aspect-[3/2] md:aspect-[16/9] lg:h-96">
+            <div className="relative aspect-16-9 sm:aspect-3-4 md:aspect-16-9 lg:h-96">
               <SafeImage
                 src={
                   talent.portfolio_url &&

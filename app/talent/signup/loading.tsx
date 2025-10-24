@@ -11,7 +11,7 @@ export default function TalentSignupLoading() {
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="grid md:grid-cols-5">
             <div className="md:col-span-2 relative hidden md:block">
-              <div className="aspect-[3/4] bg-gray-200" />
+              <div className="aspect-3-4 bg-gray-200" />
             </div>
 
             <div className="md:col-span-3 p-8">

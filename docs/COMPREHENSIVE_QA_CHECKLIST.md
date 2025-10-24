@@ -25,6 +25,7 @@
 
 ### **3. MOBILE RESPONSIVENESS** ✅
 - [ ] **Aspect Ratios**: Use proper aspect ratios instead of fixed heights
+- [ ] **CSS Aspect Ratio Classes**: Use custom CSS classes (e.g., `aspect-4-5`) instead of Tailwind arbitrary values (e.g., `aspect-[4/5]`)
 - [ ] **Responsive Grids**: Grid layouts work on all screen sizes
 - [ ] **Touch Targets**: Minimum 44px touch targets (Apple guidelines)
 - [ ] **Text Sizing**: Responsive text sizes with proper breakpoints
@@ -145,6 +146,12 @@ find . -name "*safe-image*" -type f
 - ❌ Using `any` types instead of proper typing
 - ❌ Inconsistent import paths
 - ❌ Missing type imports
+
+### **CSS & Build Issues**
+- ❌ **Tailwind arbitrary values in CSS**: Using `aspect-[4/5]` in CSS files causes PostCSS parser errors
+- ❌ **Escaped characters in CSS selectors**: `aspect-\\[4\\/5\\]` syntax is invalid
+- ❌ **Missing CSS classes**: Referencing classes that don't exist in CSS
+- ❌ **Invalid CSS syntax**: Malformed selectors or properties
 
 ### **Mobile Issues**
 - ❌ Fixed heights instead of aspect ratios

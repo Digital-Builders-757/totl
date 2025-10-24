@@ -100,15 +100,23 @@
   }
   
   /* Better aspect ratio handling on mobile */
-  .aspect-\\[4\\/5\\] {
+  .aspect-4-5 {
     aspect-ratio: 4/5;
   }
   
-  .aspect-\\[3\\/4\\] {
+  .aspect-3-4 {
     aspect-ratio: 3/4;
   }
   
-  .aspect-\\[16\\/9\\] {
+  .aspect-3-2 {
+    aspect-ratio: 3/2;
+  }
+  
+  .aspect-4-3 {
+    aspect-ratio: 4/3;
+  }
+  
+  .aspect-16-9 {
     aspect-ratio: 16/9;
   }
 }

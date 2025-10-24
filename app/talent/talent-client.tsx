@@ -102,7 +102,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
               role="button"
               tabIndex={0}
             >
-              <div className="relative aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] image-sophisticated">
+              <div className="relative aspect-4-5 sm:aspect-3-4 md:aspect-4-5 image-sophisticated">
                 <SafeImage
                   src={
                     person.profiles?.avatar_url ||
