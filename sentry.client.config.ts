@@ -77,6 +77,10 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       /Syntax Error/, // Webpack SWC loader syntax errors
       // Context provider HMR errors
       /must be used within an? \w+Provider/i, // "must be used within an AuthProvider", etc.
+      // EPIPE errors from dev server (should be caught server-side, but just in case)
+      "EPIPE",
+      "write EPIPE",
+      /write EPIPE/,
     ],
 
     // Filter out development-only errors before sending
@@ -86,6 +90,17 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       // Filter React Server Component errors in development
       if (error && typeof error === 'object') {
         const errorObj = error as any;
+        
+        // Filter EPIPE errors (should be caught server-side, but just in case)
+        if (errorObj.message === 'write EPIPE' || 
+            errorObj.message?.includes('EPIPE') ||
+            errorObj.code === 'EPIPE' ||
+            errorObj.errno === -32) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn("EPIPE error filtered - development server logging issue");
+            return null; // Filter in dev
+          }
+        }
         
         // Server Component prop serialization errors
         if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {

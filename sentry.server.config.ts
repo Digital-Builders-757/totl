@@ -45,6 +45,8 @@ Sentry.init({
     "NEXT_REDIRECT",
     "EPIPE", // Ignore broken pipe errors from stdout/dev server
     "write EPIPE", // Ignore write errors from dev server logging
+    /write EPIPE/, // Regex pattern for write EPIPE errors
+    /EPIPE.*write/, // Pattern for EPIPE write errors
     /Cannot read properties of undefined \(reading 'call'\)/, // Webpack HMR issues in dev
     /Cannot find module '\.\/\d+\.js'/, // Webpack chunk loading errors in dev
     /ENOENT.*\.next.*cache.*webpack/, // Webpack cache file errors in dev
@@ -73,9 +75,44 @@ Sentry.init({
       if (event.exception?.values?.[0]?.stacktrace?.frames?.some(
         frame => frame.filename?.includes('log-requests.js') ||
                  frame.filename?.includes('build/output/log.js') ||
-                 frame.filename?.includes('console-dev.js')
+                 frame.filename?.includes('console-dev.js') ||
+                 frame.filename?.includes('next-dev-server.js') ||
+                 frame.filename?.includes('dev/log-requests.js')
       )) {
         return null; // Don't send to Sentry - dev server logging issue
+      }
+
+      // Enhanced EPIPE filtering for development server logging
+      if (process.env.NODE_ENV === 'development') {
+        // Check if this is a write EPIPE error from Next.js dev server
+        if (errorObj.message === 'write EPIPE' || 
+            (errorObj.message && errorObj.message.includes('write EPIPE'))) {
+          
+          // Check if it's from Next.js dev server logging
+          const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
+          const isNextDevServerError = frames.some(
+            frame => frame.filename?.includes('log-requests.js') ||
+                     frame.filename?.includes('next-dev-server.js') ||
+                     frame.filename?.includes('dev/log-requests.js') ||
+                     frame.filename?.includes('next/dist/server/dev')
+          );
+          
+          if (isNextDevServerError) {
+            console.warn("Next.js dev server EPIPE error filtered - client disconnected during logging");
+            return null; // Don't send to Sentry
+          }
+        }
+
+        // Additional check for the specific error pattern from your Sentry report
+        // This catches the exact error: "write EPIPE" from log-requests.js
+        if (errorObj.message === 'write EPIPE' && 
+            event.exception?.values?.[0]?.stacktrace?.frames?.some(
+              frame => frame.filename?.includes('log-requests.js') && 
+                       frame.function === 'writeLine'
+            )) {
+          console.warn("Next.js dev server writeLine EPIPE error filtered - client disconnected during request logging");
+          return null; // Don't send to Sentry
+        }
       }
 
       // Filter out webpack cache file errors (ENOENT) in development

@@ -24,6 +24,7 @@
 - ✅ **MOBILE UI/UX FIXES** - Fixed settings page text overlap and mobile photo cutoff issues
 - ✅ **MOBILE RESPONSIVENESS** - Comprehensive mobile improvements across all components
 - ✅ **CI/CD SCHEMA SYNC FIX** - Resolved production deployment schema synchronization error
+- ✅ **SENTRY EPIPE ERROR FIX** - Enhanced development error filtering for Next.js dev server logging
 
 ---
 
@@ -51,6 +52,15 @@
    - Solution: Regenerated types using `npx supabase@v2.33.4 gen types typescript --linked --schema public`
    - Added auto-generated banner to prevent manual edits
    - **Impact:** CI/CD pipeline now passes, production deployment unblocked
+
+### **Sentry EPIPE Error Fix - October 23, 2025:**
+2. ✅ **Enhanced Development Error Filtering** - Fixed Next.js dev server logging noise
+   - Problem: "write EPIPE" errors from Next.js dev server logging cluttering Sentry
+   - Error: EPIPE errors when client disconnects during request logging
+   - Solution: Enhanced Sentry filtering in both client and server configs
+   - Added specific filters for log-requests.js writeLine function
+   - Added regex patterns for EPIPE error variations
+   - **Impact:** Clean Sentry dashboard, reduced development noise
 
 ### **Database Schema Synchronization & Documentation Cleanup - October 23, 2025:**
 1. ✅ **Complete Database Schema Audit** - Single source of truth established
