@@ -147,22 +147,32 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
               </div>
               <div className="p-8 space-y-6">
                 <div className="space-y-4">
-                  {person.age && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-400">Age</span>
-                      <span className="text-sm font-semibold text-white">{person.age}</span>
+                  {/* Only show public-safe information */}
+                  {person.specialties && person.specialties.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-sm font-medium text-gray-400">Specialties</span>
+                      <div className="flex flex-wrap gap-2">
+                        {person.specialties.slice(0, 3).map((specialty, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
+                        {person.specialties.length > 3 && (
+                          <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full">
+                            +{person.specialties.length - 3} more
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
-                  {person.height && (
+                  {person.experience_years && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-400">Height</span>
-                      <span className="text-sm font-semibold text-white">{person.height}</span>
+                      <span className="text-sm font-medium text-gray-400">Experience</span>
+                      <span className="text-sm font-semibold text-white">{person.experience_years} years</span>
                     </div>
-                  )}
-                  {person.experience && (
-                    <p className="text-sm text-gray-300 leading-relaxed line-clamp-2">
-                      {person.experience}
-                    </p>
                   )}
                 </div>
                 <Button
