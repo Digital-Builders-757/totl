@@ -10,8 +10,8 @@ import { SafeImage } from "@/components/ui/safe-image";
 interface TalentProfile {
   id: string;
   user_id: string;
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string; // Required in database
+  last_name: string; // Required in database
   phone: string | null;
   age: number | null;
   location: string | null;
@@ -28,6 +28,11 @@ interface TalentProfile {
   experience_years: number | null;
   specialties: string[] | null;
   weight: number | null;
+  profiles: {
+    avatar_url: string | null;
+    avatar_path: string | null;
+    display_name: string | null;
+  };
 }
 
 interface TalentClientProps {
@@ -64,7 +69,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
 
   const filteredTalent = initialTalent.filter(
     (person) =>
-      `${person.first_name || ""} ${person.last_name || ""}`
+      `${person.first_name} ${person.last_name}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       person.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -118,16 +123,19 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
               <div className="relative h-80 image-sophisticated">
                 <SafeImage
                   src={
-                    person.portfolio_url &&
+                    person.profiles?.avatar_url ||
+                    person.profiles?.avatar_path ||
+                    (person.portfolio_url &&
                     !person.portfolio_url.includes("youtube.com") &&
                     !person.portfolio_url.includes("youtu.be")
                       ? person.portfolio_url
-                      : "https://picsum.photos/400/600"
+                      : null)
                   }
                   alt={`${person.first_name} ${person.last_name}`}
                   fill
                   className="object-cover"
                   context="talent-profile"
+                  fallbackSrc="/images/solo_logo.png"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
