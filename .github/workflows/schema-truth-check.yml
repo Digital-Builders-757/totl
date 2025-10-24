@@ -44,12 +44,12 @@ jobs:
       - name: Login to Supabase (npx)
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx -y supabase@v2.33.4 login --token "$SUPABASE_ACCESS_TOKEN"
+        run: npx -y supabase@2.34.3 login --token "$SUPABASE_ACCESS_TOKEN"
 
       - name: Generate types from remote schema (npx)
         env:
           SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-        run: npx -y supabase@v2.33.4 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
+        run: npx -y supabase@2.34.3 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
 
       - name: Normalize both files (strip BOM & normalize line endings)
         shell: bash
@@ -80,7 +80,7 @@ jobs:
             echo "❌ ERROR: types/database.ts is out of sync with remote schema"
             echo ""
             echo "🔧 To fix locally:"
-            echo "   npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts"
+            echo "   npx -y supabase@2.34.3 gen types typescript --linked --schema public > types/database.ts"
             echo ""
             echo "📋 Changes detected:"
             echo "   - Lines starting with '-' are in your local file but not in remote"

@@ -1,12 +1,29 @@
-# Ensure generated types file uses LF line endings (what CI expects)
-types/database.ts text eol=lf
-
-# Other common files
+# Normalize line endings to prevent "Binary files differ" errors
 *.ts text eol=lf
 *.tsx text eol=lf
 *.js text eol=lf
 *.jsx text eol=lf
 *.json text eol=lf
 *.md text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
+*.sql text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+
+# Specifically ensure types file uses LF
+types/database.ts text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text eol=lf
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# Package files
+package-lock.json text eol=lf
+yarn.lock text eol=lf
