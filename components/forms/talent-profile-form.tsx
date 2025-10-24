@@ -14,27 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import type { Database } from "@/types/database";
 
-// Define the talent profile interface based on database schema
-interface TalentProfile {
-  id?: string;
-  user_id?: string;
-  first_name: string;
-  last_name: string;
-  phone?: string | null;
-  age?: number | null;
-  location?: string | null;
-  experience?: string | null;
-  portfolio_url?: string | null;
-  height?: string | null;
-  measurements?: string | null;
-  hair_color?: string | null;
-  eye_color?: string | null;
-  shoe_size?: string | null;
-  languages?: string[] | null;
-  created_at?: string;
-  updated_at?: string;
-}
+// Use proper database types instead of custom interface
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 // Define the form schema
 const profileSchema = z.object({

@@ -51,6 +51,8 @@ Sentry.init({
     /Cannot find module '\.\/\d+\.js'/, // Webpack chunk loading errors in dev
     /ENOENT.*\.next.*cache.*webpack/, // Webpack cache file errors in dev
     /no such file or directory.*\.next/, // .next folder missing file errors in dev
+    "Cookies can only be modified in a Server Action or Route Handler", // Next.js 15 App Router cookies error
+    /Cookies can only be modified in a Server Action or Route Handler/, // Regex pattern for cookies error
   ],
 
   // Filter out non-critical system errors before sending to Sentry
@@ -151,6 +153,14 @@ Sentry.init({
           return null; // Filter in dev to reduce noise, but fix the code!
         }
         // In production, let it through so we know there's a problem
+      }
+
+      // Filter out Next.js 15 App Router cookies modification errors
+      // This error occurs when trying to modify cookies in Server Components
+      // instead of Server Actions or Route Handlers
+      if (errorObj.message?.includes('Cookies can only be modified in a Server Action or Route Handler')) {
+        console.warn("Next.js 15 App Router cookies error filtered - cookies should only be modified in Server Actions or Route Handlers");
+        return null; // Don't send to Sentry - this is a code architecture issue
       }
 
       // Note: We intentionally DO let Server Component errors through in production

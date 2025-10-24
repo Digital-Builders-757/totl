@@ -17,8 +17,8 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const PINNED_CLI_VERSION = '2.34.3';
-const DEV_PROJECT_REF = 'utvircuwknqzpnmvxidp';
-const PROD_PROJECT_REF = process.env.SUPABASE_PROJECT_ID || '<PROD_REF>';
+const DEV_PROJECT_ID = 'utvircuwknqzpnmvxidp';
+const PROD_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || '<PROD_ID>';
 
 console.log('🔍 Comprehensive Schema Sync Verification');
 console.log('==========================================');
@@ -100,15 +100,26 @@ try {
   // Compare with existing types
   const existingTypes = readFileSync(typesPath, 'utf8');
   
-  // Normalize both for comparison
-  const normalizedFresh = freshTypes.replace(/\r\n/g, '\n').trim();
-  const normalizedExisting = existingTypes.replace(/\r\n/g, '\n').trim();
+  // Function to clean types by removing volatile __InternalSupabase block
+  const cleanTypes = (text) => {
+    return text
+      .replace(/\r\n/g, '\n')  // Normalize line endings
+      .replace(/\r/g, '\n')
+      .replace(/__InternalSupabase: \{[^}]*\}/gs, '')  // Remove __InternalSupabase block
+      .replace(/\n\s*\n\s*\n/g, '\n\n')  // Clean up extra blank lines
+      .trim();
+  };
+  
+  // Clean both for comparison (removing noise)
+  const normalizedFresh = cleanTypes(freshTypes);
+  const normalizedExisting = cleanTypes(existingTypes);
   
   if (normalizedFresh === normalizedExisting) {
     console.log('✅ Types are in sync with current linked project');
   } else {
     console.log('⚠️  Types are out of sync with current linked project');
     console.log('   Run: npm run types:regen to fix');
+    console.log('   Note: Comparison excludes __InternalSupabase noise');
     
     // Show diff summary
     const freshLines = normalizedFresh.split('\n');
