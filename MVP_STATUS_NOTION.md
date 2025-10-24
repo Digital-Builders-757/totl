@@ -66,6 +66,7 @@
 - ✅ **SIGN-IN GATE IMPLEMENTATION** - Premium authentication gate with frosted glass styling (Jan 2025)
 - ✅ **MOBILE SIGN-IN GATE OPTIMIZATION** - Enhanced mobile experience with better positioning and engaging copy (Jan 2025)
 - ✅ **ABOUT PAGE REDESIGN** - Removed duplicate video and created visually appealing story section with brand-consistent styling (Jan 2025)
+- ✅ **CHOOSE-ROLE PAGE REDESIGN** - Replaced generic logos with professional images and implemented brand-consistent glass morphism design (Jan 2025)
 
 ---
 
