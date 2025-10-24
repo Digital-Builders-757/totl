@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { SafeImage } from "@/components/ui/safe-image";
 
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-seamless-primary text-white pt-20">

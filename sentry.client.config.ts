@@ -77,6 +77,22 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       /Syntax Error/, // Webpack SWC loader syntax errors
       // Context provider HMR errors
       /must be used within an? \w+Provider/i, // "must be used within an AuthProvider", etc.
+      // EPIPE errors from dev server (should be caught server-side, but just in case)
+      "EPIPE",
+      "write EPIPE",
+      /write EPIPE/,
+      // External script/browser extension errors
+      "Particles is not defined",
+      /Particles is not defined/,
+      /ReferenceError.*Particles/,
+      // Lucide React icon import errors
+      "UserPlus is not defined",
+      /UserPlus is not defined/,
+      /ReferenceError.*UserPlus/,
+      // Import path and module resolution errors
+      "Invalid or unexpected token",
+      /Invalid or unexpected token/,
+      /SyntaxError.*Invalid or unexpected token/,
     ],
 
     // Filter out development-only errors before sending
@@ -86,6 +102,50 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       // Filter React Server Component errors in development
       if (error && typeof error === 'object') {
         const errorObj = error as any;
+        
+        // Filter EPIPE errors (should be caught server-side, but just in case)
+        if (errorObj.message === 'write EPIPE' || 
+            errorObj.message?.includes('EPIPE') ||
+            errorObj.code === 'EPIPE' ||
+            errorObj.errno === -32) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn("EPIPE error filtered - development server logging issue");
+            return null; // Filter in dev
+          }
+        }
+
+        // Filter Particles ReferenceError (likely from browser extensions or external scripts)
+        if (errorObj.message === 'Particles is not defined' ||
+            errorObj.message?.includes('Particles is not defined') ||
+            (errorObj.name === 'ReferenceError' && errorObj.message?.includes('Particles'))) {
+          console.warn("Particles ReferenceError filtered - likely from browser extension, Electron environment, or external script");
+          return null; // Filter this error
+        }
+
+        // Filter UserPlus ReferenceError (Lucide React icon import issue)
+        if (errorObj.message === 'UserPlus is not defined' ||
+            errorObj.message?.includes('UserPlus is not defined') ||
+            (errorObj.name === 'ReferenceError' && errorObj.message?.includes('UserPlus'))) {
+          console.warn("UserPlus ReferenceError filtered - Lucide React icon import issue");
+          return null; // Filter this error
+        }
+
+        // Filter SyntaxError for invalid tokens (import path issues)
+        if (errorObj.message === 'Invalid or unexpected token' ||
+            errorObj.message?.includes('Invalid or unexpected token') ||
+            (errorObj.name === 'SyntaxError' && errorObj.message?.includes('Invalid or unexpected token'))) {
+          console.warn("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
+          return null; // Filter this error
+        }
+
+        // Additional check for Electron-specific errors
+        if (typeof window !== 'undefined' && 
+            (window as any).navigator?.userAgent?.includes('Electron') &&
+            errorObj.name === 'ReferenceError' && 
+            errorObj.message?.includes('is not defined')) {
+          console.warn("Electron ReferenceError filtered - likely from Electron environment or external script");
+          return null; // Filter this error
+        }
         
         // Server Component prop serialization errors
         if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {

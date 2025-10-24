@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { ApplyAsTalentButton } from "@/components/ui/apply-as-talent-button";
+import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
