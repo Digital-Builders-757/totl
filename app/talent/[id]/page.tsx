@@ -10,8 +10,8 @@ import { SafeImage } from "@/components/ui/safe-image";
 interface TalentProfile {
   id: string;
   user_id: string;
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string; // Required in database
+  last_name: string; // Required in database
   phone: string | null;
   age: number | null;
   location: string | null;

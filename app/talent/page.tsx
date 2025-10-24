@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 interface TalentProfile {
   id: string;
   user_id: string;
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string; // Required in database
+  last_name: string; // Required in database
   phone: string | null;
   age: number | null;
   location: string | null;
@@ -28,6 +28,11 @@ interface TalentProfile {
   experience_years: number | null;
   specialties: string[] | null;
   weight: number | null;
+  profiles: {
+    avatar_url: string | null;
+    avatar_path: string | null;
+    display_name: string | null;
+  };
 }
 
 async function getTalentProfiles(): Promise<TalentProfile[]> {
@@ -40,7 +45,14 @@ async function getTalentProfiles(): Promise<TalentProfile[]> {
 
   const { data, error } = await supabase
     .from("talent_profiles")
-    .select("*")
+    .select(`
+      *,
+      profiles!inner(
+        avatar_url,
+        avatar_path,
+        display_name
+      )
+    `)
     .order("created_at", { ascending: false });
 
   if (error) {

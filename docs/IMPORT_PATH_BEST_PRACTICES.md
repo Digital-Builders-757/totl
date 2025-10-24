@@ -163,3 +163,4 @@ These filters help reduce noise in Sentry while still catching real application 
 - `components/navbar.tsx`
 - `app/choose-role/page.tsx`
 - `sentry.client.config.ts`
+

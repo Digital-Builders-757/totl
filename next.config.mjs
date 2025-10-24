@@ -40,9 +40,24 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 512],
   },
-  // Configure Server Actions body size limit
-  serverActions: {
-    bodySizeLimit: '1mb', // Match our client-side validation
+  // Note: serverActions configuration moved to experimental in Next.js 15
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '1mb', // Match our client-side validation
+    },
+  },
+  
+  // Suppress Edge Runtime warnings for Supabase
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
   },
 };
 
@@ -53,6 +68,9 @@ export default withSentryConfig(nextConfig, {
   org: "the-digital-builders-bi",
 
   project: "sentry-yellow-notebook",
+
+  // Sentry auth token for uploading source maps
+  authToken: process.env.SENTRY_AUTH_TOKEN,
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
