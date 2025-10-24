@@ -6,29 +6,10 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
+import type { Database } from "@/types/database";
 
-interface TalentProfile {
-  id: string;
-  user_id: string;
-  first_name: string; // Required in database
-  last_name: string; // Required in database
-  phone: string | null;
-  age: number | null;
-  location: string | null;
-  experience: string | null;
-  portfolio_url: string | null;
-  height: string | null;
-  measurements: string | null;
-  hair_color: string | null;
-  eye_color: string | null;
-  shoe_size: string | null;
-  languages: string[] | null;
-  created_at: string;
-  updated_at: string;
-  experience_years: number | null;
-  specialties: string[] | null;
-  weight: number | null;
-}
+// Use proper database types instead of custom interface
+type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 interface TalentProfilePageProps {
   params: Promise<{
@@ -85,7 +66,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
   }
 
   // Check user role from profiles table (following project patterns)
-  let userRole: string | null = null;
+  let userRole: Database["public"]["Enums"]["user_role"] | null = null;
   if (user) {
     const { data: profileData } = await supabase
       .from("profiles")
