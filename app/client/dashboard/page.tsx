@@ -38,21 +38,13 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
+import type { Database } from "@/types/database";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
 
-interface ClientProfile {
-  id?: string;
-  user_id?: string;
-  company_name: string;
-  industry?: string | null;
-  website?: string | null;
-  contact_name: string | null;
-  contact_email: string | null;
-  contact_phone?: string | null;
-  company_size?: string | null;
-}
+// Use proper database types instead of custom interface
+type ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 interface Application {
   id: string;

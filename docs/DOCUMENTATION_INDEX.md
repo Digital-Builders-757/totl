@@ -41,7 +41,7 @@ All other documentation has been organized into the `docs/` folder.
 - `SCHEMA_SYNC_COMPLETE_OCT_23_2025.md` - **NEW** ✅ - Complete schema synchronization summary (Oct 23, 2025)
 
 ### **🎨 Features & Implementation**
-- `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Oct 2025)
+- `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
 - `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery feature (complete guide)
 - `PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md` - Premium hover effects on portfolio tiles (Oct 2025)
@@ -51,8 +51,10 @@ All other documentation has been organized into the `docs/` folder.
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 
 ### **🔧 Development & Code Quality**
+- `TYPES_SYNC_PREVENTION_SYSTEM.md` - 🚨 **CRITICAL** - Complete types synchronization prevention system (Oct 24, 2025)
 - `COMPREHENSIVE_QA_CHECKLIST.md` - 🚨 **MANDATORY** - Complete QA checklist for all features (Oct 24, 2025)
 - `CSS_BEST_PRACTICES.md` - 🚨 **CRITICAL** - CSS best practices to prevent build failures (Oct 24, 2025)
+- `NEXTJS_15_COOKIES_ERROR_FIX.md` - 🚨 **CRITICAL** - Next.js 15 App Router cookies error fix (Oct 24, 2025)
 - `IMPORT_PATH_BEST_PRACTICES.md` - **NEW** ✅ - Import path best practices and error prevention (Oct 23, 2025)
 - `CODING_STANDARDS.md` - Coding standards and best practices
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions

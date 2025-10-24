@@ -44,6 +44,217 @@
 - ✅ **COMPREHENSIVE QA CHECKLIST** - Created mandatory QA checklist to prevent future Sentry errors
 - ✅ **CSS BUILD ERROR FIX** - Fixed PostCSS parser error caused by Tailwind arbitrary values in CSS files
 - ✅ **CSS BEST PRACTICES DOCUMENTATION** - Created comprehensive CSS guidelines to prevent build failures
+- ✅ **COMPREHENSIVE TYPES SYNC PREVENTION** - Implemented complete system to prevent recurring types synchronization issues
+- ✅ **NEXT.JS 15 COOKIES ERROR FIX** - Fixed "Cookies can only be modified in a Server Action or Route Handler" error in talent profile page
+- ✅ **BULLETPROOF TYPES SYNC PREVENTION** - Implemented comprehensive system to eliminate types drift issues permanently
+- ✅ **STRATEGIC BLUEPRINT ANALYSIS** - Analyzed CTO-grade system design for TOTL marketplace evolution
+- ✅ **SAFEIMAGE URL VALIDATION FIX** - Fixed "Failed to construct 'URL': Invalid URL" error in talent discovery page
+- ✅ **ENHANCED IMAGE COMPONENT** - Added robust URL validation and fallback handling to SafeImage component
+- ✅ **TROUBLESHOOTING DOCUMENTATION** - Documented SafeImage URL validation fix in troubleshooting guide
+- ✅ **SCHEMA SYNC FIX** - Fixed schema synchronization error by regenerating types from remote schema
+- ✅ **STRATEGIC BLUEPRINT ANALYSIS** - Analyzed comprehensive CTO-grade system design for TOTL marketplace evolution
+- ✅ **ENHANCEMENT IMPLEMENTATION PLAN** - Created detailed 90-day roadmap for "sellable for millions" transformation
+- ✅ **MIGRATION FIX** - Fixed missing booking_status type in migration and added .gitattributes for line ending normalization
+- ✅ **BUILD FIX** - Fixed critical import path issues causing build failures and type resolution problems
+- ✅ **SUPABASE CLIENT FIX** - Corrected Database type imports in all Supabase client files
+- ✅ **LINT ERRORS FIX** - Fixed critical import path errors causing lint failures
+- ✅ **CI/CD IMPORT FIX** - Fixed remaining import path issues in API routes causing build failures
+
+---
+
+# 🚀 TOTL STRATEGIC BLUEPRINT - CTO-GRADE SYSTEM DESIGN
+
+## 🎯 **Executive Summary**
+
+**Goal**: Transform TOTL from solid MVP into robust, sellable marketplace without fighting the stack.
+
+**Key Principles**:
+1. **Database as Product Backbone** - Keep logic at data layer (RLS, RPC, materialized views, triggers)
+2. **Stabilize Money & Messaging** - Bulletproof booking/contract/payment pipeline + durable messaging
+3. **Codify Cache & Consistency** - Tag-based revalidation, per-user caches, materialized views
+4. **Own Observability & Cost** - SLOs, alerts, slow-query budgets, storage controls
+5. **Make Future Plans Cheap** - Organizations/seats, event schema, feature flags
+
+## 🏗️ **Target Architecture**
+
+```
+[ Browser / PWA ]
+   |    \
+   |     \ push/email
+   v
+[ Next.js 15 on Vercel ]
+ - App Router (RSC)
+ - Route Handlers (webhooks, public API)
+ - Server Actions (mutations)
+ - Edge Middleware (auth guard, rate limit)
+   |
+   v
+[ Supabase ]
+ - Postgres (+ RLS, Policies, Triggers)
+ - Auth (JWT)
+ - Storage (images)
+ - RPC (SQL functions)
+ - Realtime (NOTIFY/WS)
+   |
+   +--> Outbox/Event tables  ------>  Workers (Vercel Cron / Edge Function)
+   |                                  - digests
+   |                                  - webhooks reconcile
+   |
+   +--> Materialized Views -----> Dashboards/BI
+   |
+   +--> Stripe Connect Webhooks (via Route Handler)
+```
+
+**Principle**: reads in RSC, writes via Server Actions, truth in Postgres
+
+## 📊 **Data Model Upgrades (Surgical, High-Leverage)**
+
+### 1) Bookings & Contracts (Money-Ready)
+```sql
+-- Precise times, audit, and indexing
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS start_at timestamptz,
+  ADD COLUMN IF NOT EXISTS end_at   timestamptz,
+  ADD COLUMN IF NOT EXISTS client_id uuid,
+  ADD COLUMN IF NOT EXISTS currency text DEFAULT 'USD',
+  ADD COLUMN IF NOT EXISTS updated_by uuid;
+
+-- Ledger-friendly contract
+CREATE TABLE IF NOT EXISTS public.contracts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_id uuid NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+  pdf_path text NOT NULL,
+  sha256_hash text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+### 2) Messaging (Retention Engine)
+```sql
+CREATE TABLE IF NOT EXISTS public.message_threads (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  gig_id uuid NULL REFERENCES public.gigs(id),
+  client_id uuid NOT NULL REFERENCES public.profiles(id),
+  talent_id uuid NOT NULL REFERENCES public.profiles(id),
+  last_message_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (gig_id, client_id, talent_id)
+);
+
+CREATE TABLE IF NOT EXISTS public.messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  thread_id uuid NOT NULL REFERENCES public.message_threads(id) ON DELETE CASCADE,
+  sender_id uuid NOT NULL REFERENCES public.profiles(id),
+  body text NOT NULL,
+  attachments jsonb DEFAULT '[]',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  read_at timestamptz
+);
+```
+
+### 3) Events & Notifications (One Pattern to Rule Them All)
+```sql
+-- Outbox: normalized app events (append-only)
+CREATE TABLE IF NOT EXISTS public.user_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  event text NOT NULL,              -- e.g., 'application_submitted'
+  properties jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Notifications: fan out from events, track delivery
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  kind text NOT NULL,               -- 'digest', 'realtime', 'system'
+  title text NOT NULL,
+  body text NOT NULL,
+  meta jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  read_at timestamptz
+);
+```
+
+### 4) Organizations & Seats (Unlock Agency Plan)
+```sql
+CREATE TABLE IF NOT EXISTS public.organizations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.org_memberships (
+  org_id uuid NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  role text NOT NULL CHECK (role IN ('owner','admin','member','billing')),
+  created_at timestamptz DEFAULT now(),
+  PRIMARY KEY (org_id, user_id)
+);
+```
+
+## 🛡️ **Security Model: Simple, Testable, Fast**
+
+- **Deny by default** on all new tables
+- **RLS policies** for each table with concise allow rules
+- **JWT claims** include `{ role, org_ids[] }` for organizations
+- **File RLS** on storage paths with prefix comparisons
+- **pgTAP/SQL test pack** for each policy
+
+## ⚡ **Caching, Consistency & Performance**
+
+- **Public pages**: ISR (long TTL) + tagged revalidation on write
+- **Personalized dashboards**: server render with per-user query tags
+- **Materialized views** for admin KPIs with scheduled refresh
+- **Pagination**: keyset pagination for large lists
+- **DB budgets**: keep p95 query < 150 ms
+
+## 💰 **Payments (Stripe Connect)**
+
+- **Entities**: `stripe_accounts`, `payment_intents`, `payouts`, `fees_ledger`
+- **Flow**: SetupIntent → PaymentIntent → capture on completion
+- **Webhooks**: Route Handler with idempotency keys in DB
+- **Trust**: fee breakdown, escrow status, contract PDFs with Stripe IDs
+
+## 📱 **Notifications & Digests (Resilient)**
+
+- **Real-time**: Supabase Realtime → in-app bell + toast
+- **Digests**: Vercel Cron → RPC → notifications + Resend email
+- **All outbound comms originate from DB** (events/outbox)
+
+## 📈 **Observability, Reliability & Ops**
+
+### SLOs:
+- API success rate ≥ 99.9% rolling 30d
+- p95 API < 300 ms; p95 DB < 150 ms
+- Background jobs success ≥ 99%
+
+### Alerts:
+- Sentry: error rate spikes; 5xx > baseline +3σ
+- DB: slow query p95 > 150 ms; bloat > threshold
+- Storage egress/day > budget
+
+## 💸 **Cost Control Guardrails**
+
+- **Images**: compress client-side; store AVIF/WebP; generate thumbnails
+- **Storage egress**: signed URLs + caching headers
+- **DB**: avoid N+1; batch reads; explicit column lists
+- **Serverless**: keep handlers < 1s; precompute aggregates
+
+## 🚀 **Concrete Next PRs (Copy to Backlog)**
+
+### Phase 1: Money & Messaging (4-6 weeks)
+1. **Messaging MVP** - Threaded conversations, Server Actions, Realtime
+2. **Bookings v2** - Time zones, contracts, payments
+3. **Event backbone** - Notifications system, digests
+
+### Phase 2: Scale & Trust (2-4 weeks)
+4. **Search polish** - Trigram indexes, ranking functions
+5. **Organizations** - Multi-seat teams, Agency pricing
+6. **Observability** - SLOs, alerts, monitoring
+
+### Phase 3: Growth & Optimization (ongoing)
+7. **Cost controls** - Image optimization, caching
+8. **Feature flags** - Dark launches, A/B testing
 
 ---
 

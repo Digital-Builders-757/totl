@@ -1,12 +1,37 @@
-# Ensure generated types file uses LF line endings (what CI expects)
-types/database.ts text eol=lf
+# Normalize line endings
+* text=auto eol=lf
 
-# Other common files
+# TypeScript files
 *.ts text eol=lf
 *.tsx text eol=lf
-*.js text eol=lf
-*.jsx text eol=lf
+
+# Database types file (critical for CI)
+types/database.ts text eol=lf
+
+# JSON files
 *.json text eol=lf
+
+# Markdown files
 *.md text eol=lf
+
+# SQL files
+*.sql text eol=lf
+
+# Configuration files
+*.toml text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.ps1 text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary

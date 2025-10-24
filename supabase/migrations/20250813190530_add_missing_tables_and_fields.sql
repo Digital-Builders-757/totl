@@ -7,7 +7,18 @@
 BEGIN;
 
 -- =====================================================
--- 1. ADD MISSING FIELDS TO EXISTING TABLES
+-- 1. CREATE MISSING TYPES
+-- =====================================================
+
+-- Create booking_status type if it doesn't exist
+DO $$ BEGIN
+    CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- =====================================================
+-- 2. ADD MISSING FIELDS TO EXISTING TABLES
 -- =====================================================
 
 -- Add missing fields to profiles table
@@ -23,7 +34,7 @@ ADD COLUMN IF NOT EXISTS specialties TEXT[],
 ADD COLUMN IF NOT EXISTS weight INTEGER;
 
 -- =====================================================
--- 2. CREATE MISSING TABLES
+-- 3. CREATE MISSING TABLES
 -- =====================================================
 
 -- Create bookings table
@@ -52,7 +63,7 @@ CREATE TABLE IF NOT EXISTS public.portfolio_items (
 );
 
 -- =====================================================
--- 3. CREATE INDEXES FOR NEW TABLES
+-- 4. CREATE INDEXES FOR NEW TABLES
 -- =====================================================
 
 -- Bookings indexes
@@ -64,14 +75,14 @@ CREATE INDEX IF NOT EXISTS bookings_status_idx ON bookings(status);
 CREATE INDEX IF NOT EXISTS portfolio_items_talent_id_idx ON portfolio_items(talent_id);
 
 -- =====================================================
--- 4. ENABLE ROW LEVEL SECURITY
+-- 5. ENABLE ROW LEVEL SECURITY
 -- =====================================================
 
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE portfolio_items ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
--- 5. CREATE RLS POLICIES
+-- 6. CREATE RLS POLICIES
 -- =====================================================
 
 -- Bookings policies
@@ -91,7 +102,7 @@ CREATE POLICY "Insert own portfolio items" ON portfolio_items FOR INSERT TO auth
 WITH CHECK (talent_id = auth.uid());
 
 -- =====================================================
--- 6. CREATE TRIGGERS FOR UPDATED_AT
+-- 7. CREATE TRIGGERS FOR UPDATED_AT
 -- =====================================================
 
 -- Bookings updated_at trigger

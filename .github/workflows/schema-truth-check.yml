@@ -7,18 +7,21 @@ on:
       - "types/database.ts"
       - "database_schema_audit.md"
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
     paths:
       - "supabase/migrations/**"
       - "types/database.ts"
       - "database_schema_audit.md"
+
+env:
+  SUPABASE_PROJECT_REF_DEV: utvircuwknqzpnmvxidp
 
 jobs:
   verify-schema:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,8 +32,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Choose project ref by branch
+        id: ref
+        run: |
+          if [ "${GITHUB_REF##*/}" = "main" ]; then
+            echo "ref=${{ secrets.SUPABASE_PROJECT_ID }}" >> $GITHUB_OUTPUT
+            echo "env=production" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${SUPABASE_PROJECT_REF_DEV}" >> $GITHUB_OUTPUT
+            echo "env=development" >> $GITHUB_OUTPUT
+          fi
+
       - name: Verify environment variables
-        run: node -e "console.log('SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
+        run: |
+          echo "Branch: ${GITHUB_REF##*/}"
+          echo "Environment: ${{ steps.ref.outputs.env }}"
+          echo "Project Ref: ${{ steps.ref.outputs.ref }}"
+          node -e "console.log('SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL, 'ANON_KEY:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)"
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -44,12 +62,10 @@ jobs:
       - name: Login to Supabase (npx)
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-        run: npx -y supabase@v2.33.4 login --token "$SUPABASE_ACCESS_TOKEN"
+        run: npx -y supabase@2.34.3 login --token "$SUPABASE_ACCESS_TOKEN"
 
-      - name: Generate types from remote schema (npx)
-        env:
-          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-        run: npx -y supabase@v2.33.4 gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/temp_schema_types.ts
+      - name: Generate types from remote schema (branch-aware)
+        run: npx -y supabase@2.34.3 gen types typescript --project-id ${{ steps.ref.outputs.ref }} --schema public > types/temp_schema_types.ts
 
       - name: Normalize both files (strip BOM & normalize line endings)
         shell: bash
@@ -71,22 +87,40 @@ jobs:
           normalize("types/database.ts",          "types/_local.normalized.ts")
           PY
 
-      - name: Compare generated types with committed types
+      - name: Compare generated types with committed types (filtering noise)
         shell: bash
         run: |
           set -euo pipefail
-          if ! diff -u types/_remote.normalized.ts types/_local.normalized.ts; then
+          
+          # Function to clean files by removing volatile __InternalSupabase block
+          clean() {
+            sed -E '/__InternalSupabase: \{/,/^\s*\}/d' "$1" | sed 's/\r$//'
+          }
+          
+          # Create cleaned versions for comparison
+          clean types/_remote.normalized.ts > types/_remote.clean.ts
+          clean types/_local.normalized.ts > types/_local.clean.ts
+          
+          if ! diff -u types/_remote.clean.ts types/_local.clean.ts; then
             echo ""
             echo "❌ ERROR: types/database.ts is out of sync with remote schema"
             echo ""
             echo "🔧 To fix locally:"
-            echo "   npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts"
+            echo "   # For development (current branch):"
+            echo "   npm run types:regen:dev"
+            echo "   # For production:"
+            echo "   npm run types:regen:prod"
             echo ""
-            echo "📋 Changes detected:"
+            echo "📋 Changes detected (excluding __InternalSupabase noise):"
             echo "   - Lines starting with '-' are in your local file but not in remote"
             echo "   - Lines starting with '+' are in remote but missing from your local file"
             echo ""
+            echo "🌍 Environment: ${{ steps.ref.outputs.env }}"
+            echo "🔗 Project Ref: ${{ steps.ref.outputs.ref }}"
+            echo ""
             exit 1
+          else
+            echo "✅ Types are in sync with remote schema (${{ steps.ref.outputs.env }})"
           fi
 
       - name: Verify schema & type hygiene (fast)
@@ -95,4 +129,4 @@ jobs:
 
       - name: Cleanup temp files
         if: always()
-        run: rm -f types/_remote.normalized.ts types/_local.normalized.ts types/temp_schema_types.ts 
+        run: rm -f types/_remote.normalized.ts types/_local.normalized.ts types/_remote.clean.ts types/_local.clean.ts types/temp_schema_types.ts 

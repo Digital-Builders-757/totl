@@ -66,7 +66,74 @@ ERROR: column "email" of relation "profiles" does not exist (SQLSTATE 42703)
 
 ---
 
-### 1. Server Component Render Error - Event Handlers in Server Components
+### 1. SafeImage URL Validation Error - Invalid URL Constructor
+
+**Error Message:**
+```
+Failed to construct 'URL': Invalid URL
+    at SafeImage (components\ui\safe-image.tsx:72:9)
+```
+
+**Symptoms:**
+- ❌ Talent discovery page crashes when loading
+- ❌ Error occurs in SafeImage component when rendering talent profiles
+- ❌ Next.js Image component receives invalid URL format
+
+**Root Cause:** The SafeImage component was not validating URLs before passing them to the Next.js Image component. Invalid URLs (malformed, empty, or with invalid protocols) cause the URL constructor to throw an error.
+
+**Common Invalid URL Scenarios:**
+- Empty strings or null values in `avatar_url`, `avatar_path`, or `portfolio_url`
+- Malformed URLs in database (missing protocol, invalid characters)
+- URLs that don't start with `/`, `http`, or `data:`
+
+**Solution:**
+
+1. **Enhanced URL validation in SafeImage component:**
+   ```tsx
+   // Validate URL format before using it
+   const isValidUrl = (url: string): boolean => {
+     try {
+       new URL(url);
+       return true;
+     } catch {
+       return false;
+     }
+   };
+
+   // Handle empty strings, null values, and invalid URLs
+   const shouldUseFallback = !src || 
+     src.trim() === "" || 
+     (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ||
+     (src.startsWith('http') && !isValidUrl(src));
+   ```
+
+2. **Debug logging for invalid URLs:**
+   ```tsx
+   if (src && shouldUseFallback && src !== fallbackSrc) {
+     console.warn(`SafeImage: Invalid URL detected in ${context}:`, {
+       src,
+       reason: !src ? 'null/undefined' : 
+               src.trim() === "" ? 'empty string' :
+               (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ? 'invalid protocol' :
+               'invalid URL format'
+     });
+   }
+   ```
+
+**Prevention:**
+- ✅ Always validate URLs before passing to Next.js Image component
+- ✅ Use fallback images for invalid or missing URLs
+- ✅ Add debug logging to identify data quality issues
+- ✅ Check database for malformed URLs in `avatar_url`, `avatar_path`, `portfolio_url` fields
+
+**Related Files:**
+- `components/ui/safe-image.tsx` - Enhanced with URL validation
+- `app/talent/talent-client.tsx` - Uses SafeImage for talent profile images
+- `app/talent/page.tsx` - Fetches talent data with image URLs
+
+---
+
+### 2. Server Component Render Error - Event Handlers in Server Components
 
 **Error Messages (two related errors):**
 ```

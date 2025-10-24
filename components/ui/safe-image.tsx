@@ -36,10 +36,36 @@ export function SafeImage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
-  // Handle empty strings and null values by using fallback immediately
-  const initialSrc = src && src.trim() !== "" ? src : fallbackSrc;
+  // Validate URL format before using it
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Handle empty strings, null values, and invalid URLs by using fallback immediately
+  const shouldUseFallback = !src || 
+    src.trim() === "" || 
+    (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ||
+    (src.startsWith('http') && !isValidUrl(src));
+  
+  // Debug logging for invalid URLs
+  if (src && shouldUseFallback && src !== fallbackSrc) {
+    console.warn(`SafeImage: Invalid URL detected in ${context}:`, {
+      src,
+      reason: !src ? 'null/undefined' : 
+              src.trim() === "" ? 'empty string' :
+              (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ? 'invalid protocol' :
+              'invalid URL format'
+    });
+  }
+  
+  const initialSrc = shouldUseFallback ? fallbackSrc : src;
   const [imgSrc, setImgSrc] = useState(initialSrc);
-  const [hasError, setHasError] = useState(src === "" || !src || src.trim() === "");
+  const [hasError, setHasError] = useState(shouldUseFallback);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleError = () => {
@@ -47,7 +73,7 @@ export function SafeImage({
       setHasError(true);
       setImgSrc(fallbackSrc);
       setIsLoading(false);
-      if (src) {
+      if (src && src !== fallbackSrc) {
         logImageFallback(src, context);
       }
     }

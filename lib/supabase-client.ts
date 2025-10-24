@@ -9,7 +9,7 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "../types/database";
+import type { Database } from "@/types/supabase";
 
 /**
  * Creates a Supabase server client for Server Components
@@ -93,4 +93,4 @@ export async function createSupabaseServerComponentClient() {
 }
 
 // Re-export the browser client for convenience
-export { createSupabaseBrowser } from "./supabase-browser";
+export { createSupabaseBrowser } from "./supabase/supabase-browser";
