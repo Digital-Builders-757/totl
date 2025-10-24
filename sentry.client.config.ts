@@ -81,6 +81,10 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       "EPIPE",
       "write EPIPE",
       /write EPIPE/,
+      // External script/browser extension errors
+      "Particles is not defined",
+      /Particles is not defined/,
+      /ReferenceError.*Particles/,
     ],
 
     // Filter out development-only errors before sending
@@ -100,6 +104,23 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
             console.warn("EPIPE error filtered - development server logging issue");
             return null; // Filter in dev
           }
+        }
+
+        // Filter Particles ReferenceError (likely from browser extensions or external scripts)
+        if (errorObj.message === 'Particles is not defined' ||
+            errorObj.message?.includes('Particles is not defined') ||
+            (errorObj.name === 'ReferenceError' && errorObj.message?.includes('Particles'))) {
+          console.warn("Particles ReferenceError filtered - likely from browser extension, Electron environment, or external script");
+          return null; // Filter this error
+        }
+
+        // Additional check for Electron-specific errors
+        if (typeof window !== 'undefined' && 
+            (window as any).navigator?.userAgent?.includes('Electron') &&
+            errorObj.name === 'ReferenceError' && 
+            errorObj.message?.includes('is not defined')) {
+          console.warn("Electron ReferenceError filtered - likely from Electron environment or external script");
+          return null; // Filter this error
         }
         
         // Server Component prop serialization errors
