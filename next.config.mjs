@@ -40,9 +40,11 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 512],
   },
-  // Configure Server Actions body size limit
-  serverActions: {
-    bodySizeLimit: '1mb', // Match our client-side validation
+  // Note: serverActions configuration moved to experimental in Next.js 15
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '1mb', // Match our client-side validation
+    },
   },
 };
 

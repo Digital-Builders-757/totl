@@ -31,6 +31,7 @@
 - ✅ **COMPREHENSIVE IMPORT FIX** - Fixed all import path issues across the project
 - ✅ **DUPLICATE FILE CLEANUP** - Removed duplicate apply-as-talent-button component
 - ✅ **PREVENTION DOCUMENTATION** - Created comprehensive import best practices guide
+- ✅ **BUILD WARNINGS FIX** - Fixed Next.js 15 config and Sentry deprecation warnings
 
 ---
 
@@ -121,6 +122,25 @@
    - Includes: Project structure guidelines, debugging tips, pre-commit checklist
    - Updated: `docs/DOCUMENTATION_INDEX.md` with new guide
    - **Impact:** Future developers can avoid these common import issues
+
+### **Build Warnings & Configuration Fixes - October 23, 2025:**
+8. ✅ **Next.js 15 Configuration Fix** - Fixed deprecated serverActions configuration
+   - Problem: "Invalid next.config.mjs options detected: Unrecognized key(s) in object: 'serverActions'"
+   - Solution: Moved serverActions configuration to experimental section
+   - Updated: next.config.mjs with proper Next.js 15 syntax
+   - **Impact:** Clean build without configuration warnings
+
+9. ✅ **Sentry Deprecation Warning Fix** - Created instrumentation-client.ts
+   - Problem: "DEPRECATION WARNING: It is recommended renaming your sentry.client.config.ts file"
+   - Solution: Created instrumentation-client.ts with all Sentry client configuration
+   - Moved: All client-side Sentry config from sentry.client.config.ts
+   - **Impact:** Future-proof Sentry configuration, no deprecation warnings
+
+10. ✅ **Supabase Environment Variable Handling** - Added proper fallback handling
+    - Problem: "Supabase not configured, using fallback auth provider" during build
+    - Solution: Added environment variable checks in Supabase clients
+    - Updated: lib/supabase-client.ts and lib/supabase/supabase-browser.ts
+    - **Impact:** Graceful handling of missing environment variables during build
 
 ### **Database Schema Synchronization & Documentation Cleanup - October 23, 2025:**
 1. ✅ **Complete Database Schema Audit** - Single source of truth established
