@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail, logEmailSent } from "@/lib/services/email-service";
 import { generateVerificationEmail } from "@/lib/services/email-templates";
-import { createSupabaseAdminClient } from "@/lib/supabase/supabase-admin-client";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 export const runtime = "nodejs"; // Needed for email operations
 
