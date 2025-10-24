@@ -30,6 +30,10 @@ All other documentation has been organized into the `docs/` folder.
 - `AUTH_STRATEGY.md` - Authentication strategy and implementation
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 
+### **🚨 Critical Error Prevention**
+- `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ EMERGENCY** - Quick copy/paste fixes for common errors (Jan 2025)
+
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
 - `TOTL_AGENCY_USER_GUIDE.md` - User guide for talent and clients
