@@ -1,16 +1,30 @@
-# Normalize line endings to prevent "Binary files differ" errors
+# Normalize line endings
+* text=auto eol=lf
+
+# TypeScript files
 *.ts text eol=lf
 *.tsx text eol=lf
-*.js text eol=lf
-*.jsx text eol=lf
-*.json text eol=lf
-*.md text eol=lf
-*.sql text eol=lf
-*.css text eol=lf
-*.html text eol=lf
 
-# Specifically ensure types file uses LF
+# Database types file (critical for CI)
 types/database.ts text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# SQL files
+*.sql text eol=lf
+
+# Configuration files
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.ps1 text eol=lf
 
 # Binary files
 *.png binary
@@ -18,12 +32,6 @@ types/database.ts text eol=lf
 *.jpeg binary
 *.gif binary
 *.ico binary
-*.svg text eol=lf
-*.woff binary
-*.woff2 binary
-*.ttf binary
-*.eot binary
-
-# Package files
-package-lock.json text eol=lf
-yarn.lock text eol=lf
+*.pdf binary
+*.zip binary
+*.tar.gz binary
