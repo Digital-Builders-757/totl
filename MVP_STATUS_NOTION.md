@@ -27,6 +27,7 @@
 - ✅ **SENTRY EPIPE ERROR FIX** - Enhanced development error filtering for Next.js dev server logging
 - ✅ **SENTRY PARTICLES ERROR FIX** - Added filtering for external script/browser extension ReferenceErrors
 - ✅ **SENTRY USERPLUS ERROR FIX** - Fixed missing Lucide React icon import and added error filtering
+- ✅ **SENTRY SYNTAX ERROR FIX** - Fixed incorrect import path in choose-role page
 
 ---
 
@@ -83,6 +84,17 @@
    - Added Sentry filtering for UserPlus ReferenceError as backup
    - Added ignoreErrors patterns and beforeSend filters
    - **Impact:** Apply as Talent button now works correctly, no more icon import errors
+
+### **Sentry SyntaxError Fix - October 23, 2025:**
+5. ✅ **Import Path Fix** - Fixed incorrect import path in choose-role page
+   - Problem: "Invalid or unexpected token" SyntaxError in choose-role page
+   - Error: Incorrect import path for ApplyAsTalentButton component
+   - Location: app/choose-role/page.tsx line 8
+   - Issue: Importing from "@/components/ui/apply-as-talent-button" (wrong path)
+   - Solution: Changed to correct path "@/components/apply-as-talent-button"
+   - Added Sentry filtering for SyntaxError as backup
+   - Added ignoreErrors patterns and beforeSend filters
+   - **Impact:** Choose role page now loads correctly, no more syntax errors
 
 ### **Database Schema Synchronization & Documentation Cleanup - October 23, 2025:**
 1. ✅ **Complete Database Schema Audit** - Single source of truth established

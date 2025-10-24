@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ApplyAsTalentButton } from "@/components/ui/apply-as-talent-button";
+import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
 import { Button } from "@/components/ui/button";
 
 export default function ChooseRolePage() {

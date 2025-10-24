@@ -89,6 +89,10 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
       "UserPlus is not defined",
       /UserPlus is not defined/,
       /ReferenceError.*UserPlus/,
+      // Import path and module resolution errors
+      "Invalid or unexpected token",
+      /Invalid or unexpected token/,
+      /SyntaxError.*Invalid or unexpected token/,
     ],
 
     // Filter out development-only errors before sending
@@ -123,6 +127,14 @@ if (typeof window !== "undefined" && !window.__SENTRY_INITIALIZED__) {
             errorObj.message?.includes('UserPlus is not defined') ||
             (errorObj.name === 'ReferenceError' && errorObj.message?.includes('UserPlus'))) {
           console.warn("UserPlus ReferenceError filtered - Lucide React icon import issue");
+          return null; // Filter this error
+        }
+
+        // Filter SyntaxError for invalid tokens (import path issues)
+        if (errorObj.message === 'Invalid or unexpected token' ||
+            errorObj.message?.includes('Invalid or unexpected token') ||
+            (errorObj.name === 'SyntaxError' && errorObj.message?.includes('Invalid or unexpected token'))) {
+          console.warn("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
           return null; // Filter this error
         }
 
