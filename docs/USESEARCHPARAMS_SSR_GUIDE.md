@@ -206,7 +206,7 @@ return <Link href={returnUrl || "/"}>Back</Link>;
 The following files were updated to use safe patterns:
 
 1. ✅ `app/login/page.tsx` - useState + useEffect for verified + toast
-2. ✅ `app/talent/signup/page.tsx` - Optional chaining for returnUrl
+2. ✅ `app/talent/signup/page.tsx` - Now redirects to /choose-role
 3. ✅ `app/client/signup/page.tsx` - Optional chaining for returnUrl
 4. ✅ `app/choose-role/page.tsx` - Optional chaining for returnUrl
 5. ✅ `app/client/apply/page.tsx` - Optional chaining for returnUrl

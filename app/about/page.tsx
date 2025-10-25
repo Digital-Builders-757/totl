@@ -399,9 +399,9 @@ export default function AboutPage() {
               we&apos;re here to help you succeed.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
-              <Link href="/talent/signup">
+              <Link href="/choose-role">
                 <Button size="lg" className="apple-button px-10 py-6 text-xl font-semibold">
-                  Apply as Talent
+                  Create Account
                 </Button>
               </Link>
               <Link href="/client/apply">

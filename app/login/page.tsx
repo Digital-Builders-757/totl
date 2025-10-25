@@ -276,24 +276,12 @@ export default function Login() {
             <div className="space-y-3 sm:space-y-4">
               <div className="text-center">
                 <p className="text-sm sm:text-base text-gray-400">
-                  Are you a model or talent?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link
-                    href={returnUrl ? `/talent/signup?returnUrl=${returnUrl}` : "/talent/signup"}
+                    href={returnUrl ? `/choose-role?returnUrl=${returnUrl}` : "/choose-role"}
                     className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
                   >
-                    Create a talent account →
-                  </Link>
-                </p>
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-400">
-                  Looking to hire talent?{" "}
-                  <Link
-                    href={returnUrl ? `/client/apply?returnUrl=${returnUrl}` : "/client/apply"}
-                    className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
-                  >
-                    Apply to become a client →
+                    Create an account →
                   </Link>
                 </p>
               </div>

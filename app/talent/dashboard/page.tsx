@@ -342,10 +342,10 @@ function TalentDashboardContent() {
             <div className="mt-6 pt-6 border-t border-gray-800">
               <p className="text-sm text-gray-500 mb-3">New to TOTL?</p>
               <Link 
-                href="/talent/signup" 
+                href="/choose-role" 
                 className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
               >
-                Create a talent account →
+                Create an account →
               </Link>
             </div>
           </div>
