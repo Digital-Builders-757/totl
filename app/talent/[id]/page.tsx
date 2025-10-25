@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import { ArrowLeft, MapPin } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { TalentProfileClient } from "./talent-profile-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/database";
 
 // Use proper database types instead of custom interface
@@ -20,12 +20,9 @@ interface TalentProfilePageProps {
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { id } = await params;
   
-  // Use createClient for server components that don't need cookie modification
-  // This avoids the "Cookies can only be modified in a Server Action or Route Handler" error
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  // Use createSupabaseServer for proper server-side authentication
+  // This handles cookies correctly in server components
+  const supabase = await createSupabaseServer();
 
   // For public talent profiles, we don't need authentication
   // The page will show public information and prompt for login to see sensitive details
