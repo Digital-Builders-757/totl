@@ -1,9 +1,10 @@
 "use client";
 
-import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Star } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/database";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -13,15 +14,63 @@ interface TalentProfileClientProps {
 }
 
 export function TalentProfileClient({ talent }: TalentProfileClientProps) {
-  const { user } = useAuth();
+  const [user, setUser] = useState<Database["public"]["Tables"]["profiles"]["Row"] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status safely without modifying cookies
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const supabase = createSupabaseBrowser();
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Get user profile to check role
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
+          
+          setUser(profile);
+        }
+      } catch (error) {
+        console.error("Error checking auth:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   // Check if user can see sensitive information
   // Only talent themselves, clients, or admins can see sensitive details
   const canViewSensitiveInfo = user && (
     user.id === talent.user_id || 
-    user.user_metadata?.role === 'client' || 
-    user.user_metadata?.role === 'admin'
+    user.role === 'client' || 
+    user.role === 'admin'
   );
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg p-6 border border-gray-300">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg p-6 border border-gray-300">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
