@@ -147,11 +147,11 @@ export default function ClientSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
-      <div className="container mx-auto px-4 py-12">
+    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24">
+      <div className="container mx-auto px-4 py-4 sm:py-12">
         <Link
           href={returnUrl ? `/choose-role?returnUrl=${returnUrl}` : "/"}
-          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-4 sm:mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back

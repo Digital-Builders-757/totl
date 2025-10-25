@@ -66,6 +66,31 @@ if (!user) {
 - Uses existing shadcn/ui Button component
 - Lucide React icons (Lock, Users, Sparkles)
 
+## Mobile UX Guidelines
+
+### App-Like Experience
+- **Snap to Top**: Use `pt-20 sm:pt-24` for mobile-first header spacing
+- **Tight Spacing**: Use `py-4 sm:py-12` for container padding
+- **Reduced Margins**: Use `mb-4 sm:mb-8` for mobile-optimized spacing
+- **Responsive Text**: Use `text-3xl sm:text-5xl` for mobile-first typography
+
+### Mobile-First Patterns
+```tsx
+// Container spacing
+<div className="min-h-screen bg-black pt-20 sm:pt-24">
+  <div className="container mx-auto px-4 py-4 sm:py-12">
+    <Link className="mb-4 sm:mb-8">Back</Link>
+    <h1 className="text-3xl sm:text-5xl">Title</h1>
+  </div>
+</div>
+```
+
+### Touch Optimization
+- **Minimum Touch Targets**: 44px minimum (handled in globals.css)
+- **Tap Feedback**: Active states with `opacity: 0.8` and `scale(0.98)`
+- **No Hover on Touch**: Disabled hover effects for touch devices
+- **Safe Area Support**: iOS safe area insets for notched devices
+
 ## Utility Classes
 
 ### Panel Effects
