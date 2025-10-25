@@ -50,7 +50,7 @@ export default function ChooseRolePage() {
             {/* Talent Card */}
             <div className="apple-glass rounded-2xl overflow-hidden flex flex-col hover:bg-white/10 transition-all duration-300 group animate-apple-scale-in">
               <div className="relative h-64">
-                <Image src="/images/talent-portrait.jpg" alt="Professional model portrait" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                <Image src="/images/talent-professional.png" alt="Professional model portrait" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h2 className="text-white text-2xl font-bold mb-2">Join as Talent</h2>
@@ -85,7 +85,7 @@ export default function ChooseRolePage() {
             {/* Client Card */}
             <div className="apple-glass rounded-2xl overflow-hidden flex flex-col hover:bg-white/10 transition-all duration-300 group animate-apple-scale-in" style={{ animationDelay: "0.1s" }}>
               <div className="relative h-64">
-                <Image src="/images/client-professional.jpg" alt="Professional woman working on laptop" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                <Image src="/images/client-professional.png" alt="Professional woman working on laptop" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
                   <h2 className="text-white text-2xl font-bold mb-2">Join as Client</h2>
