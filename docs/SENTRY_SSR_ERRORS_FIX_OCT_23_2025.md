@@ -110,7 +110,7 @@ const returnUrl = searchParams?.get("returnUrl") ?? null;
 ```
 
 **Files Changed:**
-1. ✏️ `app/talent/signup/page.tsx`
+1. ✏️ `app/talent/signup/page.tsx` (now redirects to /choose-role)
 2. ✏️ `app/client/signup/page.tsx`
 3. ✏️ `app/choose-role/page.tsx`
 4. ✏️ `app/client/apply/page.tsx`

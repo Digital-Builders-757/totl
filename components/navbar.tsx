@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
-import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
@@ -175,10 +174,14 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <ApplyAsTalentButton
-                  variant="default"
-                  className="bg-white text-black hover:bg-gray-200 font-semibold"
-                />
+                <Link href="/choose-role">
+                  <Button
+                    variant="default"
+                    className="bg-white text-black hover:bg-gray-200 font-semibold"
+                  >
+                    Create Account
+                  </Button>
+                </Link>
               </>
             )}
           </div>
@@ -266,7 +269,11 @@ export default function Navbar() {
                       Sign In
                     </Link>
                     <div className="mt-4">
-                      <ApplyAsTalentButton className="w-full bg-white text-black hover:bg-gray-200" />
+                      <Link href="/choose-role">
+                        <Button className="w-full bg-white text-black hover:bg-gray-200">
+                          Create Account
+                        </Button>
+                      </Link>
                     </div>
                   </>
                 )}

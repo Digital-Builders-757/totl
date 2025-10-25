@@ -25,14 +25,14 @@ export async function middleware(req: NextRequest) {
   }
 
   // Allow public access to individual talent profiles
-  if (path.startsWith("/talent/") && path !== "/talent/signup" && path !== "/talent/dashboard") {
+  if (path.startsWith("/talent/") && path !== "/talent/dashboard") {
     return res;
   }
 
   // Define auth routes early for environment variable fallback handling
   const authRoutes = [
     "/login",
-    "/talent/signup",
+    "/choose-role",
     "/client/signup",
     "/reset-password",
     "/update-password",

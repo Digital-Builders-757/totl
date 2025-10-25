@@ -30,12 +30,34 @@
 
 This document outlines the complete authentication and profile creation strategy for TOTL Agency. The system uses Supabase Auth with automatic profile creation via database triggers.
 
+**Current Auth Flow (Updated):**
+1. User clicks "Create Account" in navbar → redirects to `/choose-role`
+2. User selects "Join as Talent" or "Join as Client" → proceeds to role-specific signup
+3. After signup → email verification → role-based dashboard redirect
+
 **Related Documentation:**
 - `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **MANDATORY** pre-flight checklist
 - `database_schema_audit.md` - Database schema single source of truth
 - `docs/SECURITY_CONFIGURATION.md` - Security and RLS policies
 
 ## 🏗️ Architecture
+
+### **User Signup Flow (Updated)**
+```
+1. User clicks "Create Account" (navbar)
+   ↓
+2. Redirects to /choose-role (role selection page)
+   ↓
+3. User selects "Join as Talent" or "Join as Client"
+   ↓
+4. Proceeds to role-specific signup form
+   ↓
+5. Supabase Auth creates user + trigger creates profile
+   ↓
+6. Email verification required
+   ↓
+7. Redirect to role-based dashboard
+```
 
 ### **Database Schema**
 ```

@@ -101,7 +101,7 @@ export default function ProjectOverview() {
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/talent/signup">Talent Signup</Link>
+                  <Link href="/choose-role">Create Account</Link>
                 </Button>
               </CardContent>
             </Card>
