@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Client = Database["public"]["Tables"]["client_profiles"]["Row"];
 

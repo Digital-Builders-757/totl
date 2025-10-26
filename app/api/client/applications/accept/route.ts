@@ -1,7 +1,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
 

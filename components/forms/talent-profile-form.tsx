@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];

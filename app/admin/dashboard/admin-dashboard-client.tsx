@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type Application = Database["public"]["Tables"]["applications"]["Row"];

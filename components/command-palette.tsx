@@ -28,7 +28,7 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const router = useRouter();
-  const { user, profile, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const [search, setSearch] = React.useState("");
 
   const runCommand = React.useCallback(
@@ -58,8 +58,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
       },
     ];
 
-    if (user && profile) {
-      if (profile.role === "talent") {
+    if (user && userRole) {
+      if (userRole === "talent") {
         commands.push(
           {
             icon: LayoutDashboard,
@@ -83,7 +83,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             shortcut: "A",
           }
         );
-      } else if (profile.role === "client") {
+      } else if (userRole === "client") {
         commands.push(
           {
             icon: LayoutDashboard,
@@ -114,7 +114,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             shortcut: "B",
           }
         );
-      } else if (profile.role === "admin") {
+      } else if (userRole === "admin") {
         commands.push(
           {
             icon: LayoutDashboard,
@@ -160,7 +160,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     }
 
     return commands;
-  }, [user, profile, router, signOut]);
+  }, [user, userRole, router, signOut]);
 
   // Help & Info commands
   const helpCommands = [

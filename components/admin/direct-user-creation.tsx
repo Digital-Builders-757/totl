@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
 

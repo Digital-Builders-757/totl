@@ -1,7 +1,7 @@
 "use server";
 
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type ApplicationStatus = Database["public"]["Enums"]["application_status"];
 type BookingStatus = Database["public"]["Enums"]["booking_status"];

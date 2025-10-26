@@ -5,7 +5,7 @@ import { Mail, Phone, Star } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 

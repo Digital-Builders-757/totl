@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Use proper database types with joined profiles data
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {

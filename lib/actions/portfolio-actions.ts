@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"];
 

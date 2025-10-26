@@ -44,7 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
