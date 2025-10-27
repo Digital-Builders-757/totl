@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { SignInGate } from "@/components/auth/sign-in-gate";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type GigRow = Pick<
   Database["public"]["Tables"]["gigs"]["Row"],

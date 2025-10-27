@@ -16,7 +16,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Import the generated type instead of defining our own
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 

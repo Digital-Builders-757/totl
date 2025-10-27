@@ -38,7 +38,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";

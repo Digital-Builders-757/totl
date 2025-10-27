@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
 

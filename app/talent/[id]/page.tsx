@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { TalentProfileClient } from "./talent-profile-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];

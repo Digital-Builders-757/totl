@@ -15,7 +15,8 @@ These files remain in the project root for easy access:
 |------|---------|
 | `README.md` | Project overview and setup instructions |
 | `database_schema_audit.md` | **SINGLE SOURCE OF TRUTH** for database schema |
-| `MVP_STATUS_NOTION.md` | MVP status tracking (update before every commit) |
+| `MVP_STATUS_NOTION.md` | Current MVP status and next priorities |
+| `PAST_PROGRESS_HISTORY.md` | **NEW** 📚 - Complete history of all accomplishments and milestones |
 | `notion_update.md` | Notion update tracking |
 
 ### **docs/ Directory** (All Other Documentation)

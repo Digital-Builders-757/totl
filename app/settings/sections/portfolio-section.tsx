@@ -6,7 +6,7 @@ import { PortfolioGallery } from "@/components/portfolio/portfolio-gallery";
 import { PortfolioUpload } from "@/components/portfolio/portfolio-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & { imageUrl?: string };
 

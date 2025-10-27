@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientBookings, cancelBooking, updateBookingStatus } from "@/lib/actions/booking-actions";
-import type { Database } from "@/types/database";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
