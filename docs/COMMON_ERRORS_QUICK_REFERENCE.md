@@ -24,6 +24,8 @@ npm run build
   - **Fix:** Run `npm run types:regen` for correct environment
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
+- **Import Order Errors:** `import/order` warnings in linting
+  - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
 - **Build Failures:** Any build that doesn't pass locally

@@ -42,7 +42,31 @@ if ($WrongAdminImports) {
     Write-Host "✅ All Supabase admin client imports are correct" -ForegroundColor Green
 }
 
-# 3. Check for explicit 'any' types
+# 3. Check for import order issues
+Write-Host "`n📋 Checking import order..." -ForegroundColor Yellow
+try {
+    $LintCheck = & npm run lint 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✅ All imports are properly ordered" -ForegroundColor Green
+    } else {
+        $ImportOrderWarnings = $LintCheck | Select-String "import/order"
+        if ($ImportOrderWarnings) {
+            Write-Host "⚠️  WARNING: Found import order issues:" -ForegroundColor Yellow
+            $ImportOrderWarnings | Select-Object -First 5 | ForEach-Object {
+                Write-Host "  $_" -ForegroundColor Yellow
+            }
+            $WarningCount++
+        } else {
+            Write-Host "✅ No import order issues found" -ForegroundColor Green
+        }
+    }
+} catch {
+    Write-Host "⚠️  WARNING: Could not run lint check for import order" -ForegroundColor Yellow
+    Write-Host "Error: $_" -ForegroundColor Yellow
+    $WarningCount++
+}
+
+# 4. Check for explicit 'any' types
 Write-Host "`n🚫 Checking for explicit 'any' types..." -ForegroundColor Yellow
 $AnyTypes = Get-ChildItem -Recurse -Include "*.ts","*.tsx" | Select-String ": any" | Where-Object { $_.Path -notlike "*docs*" -and $_.Path -notlike "*node_modules*" -and $_.Line -notlike "*eslint-disable*" }
 
@@ -60,7 +84,7 @@ if ($AnyTypes) {
     Write-Host "✅ No explicit 'any' types found" -ForegroundColor Green
 }
 
-# 4. Check for npm run commands in code (excluding config files)
+# 5. Check for npm run commands in code (excluding config files)
 Write-Host "`n🔍 Checking for erroneous npm run commands..." -ForegroundColor Yellow
 $NpmRunCommands = Get-ChildItem -Recurse -Include "*.ts","*.tsx" | Select-String "npm run" | Where-Object { $_.Path -notlike "*docs*" -and $_.Path -notlike "*node_modules*" -and $_.Path -notlike "*playwright.config*" -and $_.Path -notlike "*package.json*" }
 
@@ -78,7 +102,7 @@ if ($NpmRunCommands) {
     Write-Host "✅ No erroneous npm run commands found" -ForegroundColor Green
 }
 
-# 5. TypeScript compilation check
+# 6. TypeScript compilation check
 Write-Host "`n🔧 Running TypeScript compilation check..." -ForegroundColor Yellow
 try {
     $TsCheck = & npx tsc --noEmit 2>&1
@@ -98,7 +122,7 @@ try {
     $ErrorCount++
 }
 
-# 6. Build check
+# 7. Build check
 Write-Host "`n🏗️ Running build check..." -ForegroundColor Yellow
 try {
     $BuildCheck = & npm run build 2>&1
@@ -124,14 +148,14 @@ Write-Host "  Errors: $ErrorCount" -ForegroundColor $(if ($ErrorCount -eq 0) { "
 Write-Host "  Warnings: $WarningCount" -ForegroundColor $(if ($WarningCount -eq 0) { "Green" } else { "Yellow" })
 
 if ($ErrorCount -gt 0) {
-    Write-Host "`n❌ COMMIT BLOCKED: Critical errors found!" -ForegroundColor Red
+    Write-Host "ERROR: COMMIT BLOCKED - Critical errors found!" -ForegroundColor Red
     Write-Host "Please fix the errors above before committing." -ForegroundColor Red
     exit 1
 } elseif ($WarningCount -gt 0) {
-    Write-Host "`n⚠️  WARNING: Non-critical issues found. Consider fixing them." -ForegroundColor Yellow
-    Write-Host "You can still commit, but it's recommended to fix these issues." -ForegroundColor Yellow
+    Write-Host "WARNING: Non-critical issues found. Consider fixing them." -ForegroundColor Yellow
+    Write-Host "You can still commit, but it is recommended to fix these issues." -ForegroundColor Yellow
     exit 0
 } else {
-    Write-Host "`n✅ All checks passed! Ready to commit." -ForegroundColor Green
+    Write-Host "SUCCESS: All checks passed! Ready to commit." -ForegroundColor Green
     exit 0
 }

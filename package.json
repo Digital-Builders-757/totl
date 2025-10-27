@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "import-order:fix": "powershell -ExecutionPolicy Bypass -File scripts/fix-import-order.ps1",
     "format": "prettier --write .",
     "prepare": "husky install",
     "verify-schema": "bash scripts/verify-schema-truth.sh",
