@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAuth } from "@/components/auth/auth-provider";
 import { RequireAuth } from "./require-auth";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import type { ButtonProps } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";

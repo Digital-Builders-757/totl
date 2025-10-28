@@ -11,14 +11,14 @@ export const POST = async (request: Request) => {
 
   const supabase = await createSupabaseRouteHandlerClient();
 
-  // First, get the current session to ensure the user making the request
+  // First, get the current user to ensure the user making the request
   // is authenticated. You could add more checks here, e.g., only an admin
   // or the user themselves can trigger this.
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 

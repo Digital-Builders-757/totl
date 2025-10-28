@@ -87,15 +87,15 @@ export async function middleware(req: NextRequest) {
 
   // Only check auth for routes that actually need it
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (isAuthRoute && session) {
+  if (isAuthRoute && user) {
     // If the user is logged in and tries to access an auth page, redirect to their dashboard based on role.
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     if (profile?.role === "talent") {
@@ -111,21 +111,21 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/choose-role", req.url));
   }
 
-  // If there's no session, and the route is not public or auth-related, redirect to login
+  // If there's no user, and the route is not public or auth-related, redirect to login
   const isProtectedRoute = !isAuthRoute && !publicRoutes.includes(path) && path !== "/choose-role";
 
-  if (!session && isProtectedRoute) {
+  if (!user && isProtectedRoute) {
     const redirectUrl = new URL("/login", req.url);
     redirectUrl.searchParams.set("returnUrl", encodeURIComponent(path));
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If we have a session, we can proceed with role checks
-  if (session) {
+  // If we have a user, we can proceed with role checks
+  if (user) {
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .single();
 
     // Handle case where user exists in auth but not in profiles table

@@ -4,11 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
+import { SignInGate } from "@/components/auth/sign-in-gate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import { SignInGate } from "@/components/auth/sign-in-gate";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 

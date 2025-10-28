@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Lock, Users, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -128,6 +129,3 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
     </div>
   );
 }
-
-// Add React import for useEffect
-import React from "react";

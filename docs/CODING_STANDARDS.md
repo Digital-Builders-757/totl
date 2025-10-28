@@ -4,11 +4,133 @@
 **Status:** Production Ready
 
 ## Table of Contents
+- [Supabase Authentication Security](#-supabase-authentication-security)
 - [TypeScript Standards](#typescript-standards)
 - [React Patterns](#react-patterns)
 - [Database Patterns](#database-patterns)
 - [File Organization](#file-organization)
 - [Error Handling](#error-handling)
+
+## 🔐 Supabase Authentication Security
+
+### **Critical Security Rule: Always Use `getUser()` Instead of `getSession()`**
+
+**❌ NEVER DO THIS - Security Risk:**
+```typescript
+// ❌ WRONG - Insecure! Uses cached session data
+const { data: { session } } = await supabase.auth.getSession();
+if (session?.user) {
+  // This user data comes from cookies/storage and may not be authentic!
+  const userId = session.user.id;
+}
+```
+
+**✅ ALWAYS DO THIS - Secure:**
+```typescript
+// ✅ CORRECT - Authenticates with Supabase Auth server
+const { data: { user } } = await supabase.auth.getUser();
+if (user) {
+  // This user data is verified by contacting Supabase Auth server
+  const userId = user.id;
+}
+```
+
+### **Why This Matters**
+- `getSession()` returns cached data from cookies/storage (potentially tampered)
+- `getUser()` authenticates with Supabase Auth server (verified)
+- Using `getSession()` can lead to security vulnerabilities
+- Next.js will show warnings when `getSession()` is used in server components
+
+### **When to Use Each Method**
+
+#### **Server Components & Server Actions**
+```typescript
+// ✅ Use getUser() for server-side authentication
+export default async function ProtectedPage() {
+  const supabase = await createSupabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect('/login');
+  }
+  
+  // Safe to use user.id
+  const userId = user.id;
+}
+```
+
+#### **Client Components**
+```typescript
+// ✅ Use getUser() for client-side authentication too
+"use client";
+
+export function ClientComponent() {
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+  }, []);
+}
+```
+
+### **Migration Checklist**
+When updating existing code:
+- [ ] Replace `getSession()` with `getUser()`
+- [ ] Update `session?.user` references to `user`
+- [ ] Update `session.user.id` to `user.id`
+- [ ] Test authentication still works
+- [ ] Verify no security warnings in console
+
+### **Common Patterns**
+
+#### **Server Action Authentication**
+```typescript
+"use server";
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createSupabaseActionClient();
+  
+  // ✅ Always use getUser() in server actions
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return { error: "Not authenticated" };
+  }
+  
+  // Safe to use user.id
+  const { error } = await supabase
+    .from("profiles")
+    .update({ display_name: formData.get("name") })
+    .eq("id", user.id);
+}
+```
+
+#### **Page Component Authentication**
+```typescript
+export default async function ProtectedPage() {
+  const supabase = await createSupabaseServer();
+  
+  // ✅ Always use getUser() in server components
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    redirect("/login");
+  }
+  
+  // Fetch user-specific data
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+}
+```
+
+---
 
 ## 🔷 TypeScript Standards
 

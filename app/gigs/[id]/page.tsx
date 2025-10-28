@@ -21,8 +21,8 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
 
   // Get current user session
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   // Fetch gig by ID with client details - FIXED: join to profiles, not client_profiles
   const { data: gig, error } = await supabase

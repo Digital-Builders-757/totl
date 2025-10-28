@@ -8,10 +8,10 @@ export async function updateProfile(formData: FormData) {
 
   // Get the current session to verify the user
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return { error: "Not authenticated" };
   }
 
@@ -21,7 +21,7 @@ export async function updateProfile(formData: FormData) {
   const { error } = await supabase
     .from("profiles")
     .update({ display_name: displayName })
-    .eq("id", session.user.id);
+    .eq("id", user.id);
 
   if (error) {
     console.error("Error updating profile:", error);
@@ -39,10 +39,10 @@ export async function createTalentProfile(formData: FormData) {
 
   // Get the current session to verify the user
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return { error: "Not authenticated" };
   }
 
@@ -56,7 +56,7 @@ export async function createTalentProfile(formData: FormData) {
   const { data: existingProfile } = await supabase
     .from("talent_profiles")
     .select("id")
-    .eq("user_id", session.user.id)
+    .eq("user_id", user.id)
     .maybeSingle();
 
   let error;
@@ -71,7 +71,7 @@ export async function createTalentProfile(formData: FormData) {
         age,
         portfolio_url: portfolioUrl,
       })
-      .eq("user_id", session.user.id);
+      .eq("user_id", user.id);
 
     error = updateError;
   } else {
