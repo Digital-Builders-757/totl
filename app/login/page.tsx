@@ -119,12 +119,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-4 sm:pt-12 md:pt-20 lg:pt-40 relative overflow-hidden">
+    <div className="min-h-screen bg-black pt-4 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-24 relative overflow-hidden">
       {/* Subtle gradient background effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
       
-      <div className="container mx-auto px-4 py-4 sm:py-8 md:py-12 relative z-10">
-        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-8 transition-colors">
+      <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8 relative z-10">
+        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
