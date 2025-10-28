@@ -1,4 +1,6 @@
-﻿// Force dynamic rendering to prevent build-time Supabase access
+﻿"use client";
+
+// Force dynamic rendering to prevent build-time Supabase access
 export const dynamic = "force-dynamic";
 
 import { ArrowRight, Star, MapPin, Search, Handshake, Sparkles } from "lucide-react";

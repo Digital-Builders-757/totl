@@ -30,6 +30,7 @@ All other documentation has been organized into the `docs/` folder.
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
 - `AUTH_STRATEGY.md` - Authentication strategy and implementation
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
+- `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
