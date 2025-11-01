@@ -1,19 +1,17 @@
 ﻿import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Database } from "@/types/supabase";
 
-type TalentProfile = {
-  id: string;
-  bio: string | null;
-  skills: string[] | null;
-  experience_years: number | null;
-  portfolio_url: string | null;
-};
+// Use generated database types instead of custom interfaces
+type TalentProfile = Pick<
+  Database["public"]["Tables"]["talent_profiles"]["Row"],
+  "id" | "bio" | "skills" | "experience_years" | "portfolio_url"
+>;
 
-type Application = {
-  id: string;
-  status: string;
-  created_at: string;
+type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
+
+type Application = Pick<ApplicationRow, "id" | "status" | "created_at"> & {
   gigs: {
     id: string;
     title: string;

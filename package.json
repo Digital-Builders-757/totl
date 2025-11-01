@@ -27,6 +27,8 @@
     "schema:verify:comprehensive": "node scripts/verify-schema-sync-comprehensive.mjs",
     "async-cookies:check": "powershell -ExecutionPolicy Bypass -File scripts/fix-async-cookies.ps1",
     "security:check": "powershell -ExecutionPolicy Bypass -File scripts/security-standards-check.ps1",
+    "type-safety:check": "powershell -ExecutionPolicy Bypass -File scripts/check-type-safety-comprehensive.ps1",
+    "type-safety:check:verbose": "powershell -ExecutionPolicy Bypass -File scripts/check-type-safety-comprehensive.ps1 -Verbose",
     "pre-commit": "powershell -ExecutionPolicy Bypass -File scripts/pre-commit-checks.ps1",
     "pre-commit:legacy": "npm run schema:verify:comprehensive && npm run lint && tsc --noEmit",
     "typecheck": "tsc --noEmit",

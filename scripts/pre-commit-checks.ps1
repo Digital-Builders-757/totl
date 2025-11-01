@@ -6,7 +6,22 @@ Write-Host "🔍 Running pre-commit checks..." -ForegroundColor Cyan
 $ErrorCount = 0
 $WarningCount = 0
 
-# 0. Security standards check
+# 0. Type Safety Check (NEW - CRITICAL)
+Write-Host "`n🎯 Running type safety check..." -ForegroundColor Yellow
+try {
+    & powershell -ExecutionPolicy Bypass -File scripts/check-type-safety-comprehensive.ps1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "❌ CRITICAL: Type safety violations found!" -ForegroundColor Red
+        Write-Host "📖 See: docs/TYPE_SAFETY_RULES.md for guidance" -ForegroundColor Yellow
+        $ErrorCount++
+    }
+} catch {
+    Write-Host "❌ CRITICAL: Could not run type safety check" -ForegroundColor Red
+    Write-Host "Error: $_" -ForegroundColor Red
+    $ErrorCount++
+}
+
+# 1. Security standards check
 Write-Host "`n🔐 Running security standards check..." -ForegroundColor Yellow
 try {
     & powershell -ExecutionPolicy Bypass -File scripts/security-standards-check.ps1
@@ -19,7 +34,7 @@ try {
     $ErrorCount++
 }
 
-# 1. Check for wrong import paths
+# 2. Check for wrong import paths
 $WrongImports = Get-ChildItem -Recurse -Include "*.ts","*.tsx" | Select-String "@/types/database" | Where-Object { $_.Path -notlike "*docs*" -and $_.Path -notlike "*node_modules*" -and $_.Line -notlike "*database-helpers*" }
 
 if ($WrongImports) {

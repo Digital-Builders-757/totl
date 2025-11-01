@@ -1,7 +1,12 @@
 # TOTL Agency - Coding Standards
 
-**Last Updated:** July 25, 2025  
-**Status:** Production Ready
+**🚨 CRITICAL: Before writing any code, read these in order:**
+1. **[`TYPE_SAFETY_RULES.md`](./TYPE_SAFETY_RULES.md)** - Database type safety rules (MANDATORY)
+2. **[`TYPE_SAFETY_PREVENTION_SYSTEM.md`](./TYPE_SAFETY_PREVENTION_SYSTEM.md)** - How the prevention system works
+3. This document - General coding standards
+
+**Last Updated:** November 1, 2025  
+**Status:** Production Ready + Type Safety Enforced
 
 ## Table of Contents
 - [Supabase Authentication Security](#-supabase-authentication-security)

@@ -1,0 +1,40 @@
+{
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSInterfaceDeclaration[id.name='Application']",
+        "message": "❌ FORBIDDEN: Custom 'Application' interface. Use Database['public']['Tables']['applications']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSInterfaceDeclaration[id.name='Gig']",
+        "message": "❌ FORBIDDEN: Custom 'Gig' interface. Use Database['public']['Tables']['gigs']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSInterfaceDeclaration[id.name='Profile']",
+        "message": "❌ FORBIDDEN: Custom 'Profile' interface. Use Database['public']['Tables']['profiles']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSInterfaceDeclaration[id.name='TalentProfile']",
+        "message": "❌ FORBIDDEN: Custom 'TalentProfile' interface. Use Database['public']['Tables']['talent_profiles']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSInterfaceDeclaration[id.name='ClientProfile']",
+        "message": "❌ FORBIDDEN: Custom 'ClientProfile' interface. Use Database['public']['Tables']['client_profiles']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSInterfaceDeclaration[id.name='Booking']",
+        "message": "❌ FORBIDDEN: Custom 'Booking' interface. Use Database['public']['Tables']['bookings']['Row'] from @/types/supabase instead. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "BinaryExpression[left.property.name='status'][operator='==='][right.value='pending']",
+        "message": "❌ INCORRECT ENUM: 'pending' is not a valid application_status. Use 'new', 'under_review', 'shortlisted', 'accepted', or 'rejected'. See docs/TYPE_SAFETY_RULES.md"
+      },
+      {
+        "selector": "TSTypeAnnotation[typeAnnotation.type='TSStringKeyword'] > Identifier[name='status']",
+        "message": "⚠️  WARNING: Untyped 'status' field. Use proper enum type: Database['public']['Enums']['application_status']. See docs/TYPE_SAFETY_RULES.md"
+      }
+    ]
+  }
+}
+
