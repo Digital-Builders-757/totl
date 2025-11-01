@@ -6,26 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SafeImage } from "@/components/ui/safe-image";
+import { Database } from "@/types/supabase";
 
-interface Application {
-  id: string;
-  gig_id: string;
-  talent_id: string;
-  status: string;
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  gigs?: {
-    title: string;
-    description?: string;
-    category?: string;
-    location: string;
-    compensation: string;
-    date?: string;
-    image_url?: string | null;
-    client_profiles?: {
-      company_name: string;
-    };
+// Use generated database types
+type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
+type GigRow = Database["public"]["Tables"]["gigs"]["Row"];
+type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
+
+// Type for the application with joined gig and client data
+interface Application extends ApplicationRow {
+  gigs?: GigRow & {
+    client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
   };
 }
 
@@ -42,14 +33,18 @@ export function ApplicationDetailsModal({
 }: ApplicationDetailsModalProps) {
   if (!application) return null;
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status: Database["public"]["Enums"]["application_status"]) => {
+    switch (status) {
       case "accepted":
         return "bg-green-900/30 text-green-400 border-green-700";
       case "rejected":
         return "bg-red-900/30 text-red-400 border-red-700";
-      case "pending":
+      case "new":
         return "bg-yellow-900/30 text-yellow-400 border-yellow-700";
+      case "under_review":
+        return "bg-blue-900/30 text-blue-400 border-blue-700";
+      case "shortlisted":
+        return "bg-purple-900/30 text-purple-400 border-purple-700";
       default:
         return "bg-gray-900/30 text-gray-400 border-gray-700";
     }
@@ -211,14 +206,27 @@ export function ApplicationDetailsModal({
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {application.status === "pending" && (
+                {(application.status === "new" || application.status === "under_review") && (
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
                     <div>
-                      <p className="text-gray-300 text-sm font-medium">Waiting for Review</p>
+                      <p className="text-gray-300 text-sm font-medium">
+                        {application.status === "new" ? "Submitted" : "Under Review"}
+                      </p>
                       <p className="text-gray-400 text-sm">
                         The client is reviewing your application. You&apos;ll be notified when they
                         make a decision.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {application.status === "shortlisted" && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <div>
+                      <p className="text-gray-300 text-sm font-medium">Shortlisted!</p>
+                      <p className="text-gray-400 text-sm">
+                        Great news! You&apos;ve been shortlisted. The client will reach out soon with next steps.
                       </p>
                     </div>
                   </div>

@@ -3,12 +3,10 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Database } from "@/types/supabase";
 
-// Define a type for the gig
-interface Gig {
-  id: string;
-  title: string;
-}
+// Use generated database types instead of custom interface
+type Gig = Pick<Database["public"]["Tables"]["gigs"]["Row"], "id" | "title">;
 
 interface GigsClientProps {
   gigs: Gig[];
