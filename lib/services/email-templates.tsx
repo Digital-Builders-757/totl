@@ -18,6 +18,13 @@ export interface EmailTemplateData {
   applicationDate?: string;
   rejectionReason?: string;
   bookingId?: string;
+  // Client onboarding specific fields
+  companyName?: string;
+  industry?: string;
+  businessDescription?: string;
+  needsDescription?: string;
+  applicationId?: string;
+  adminNotes?: string;
 }
 
 export interface EmailTemplate {
@@ -500,9 +507,226 @@ export function generateNewApplicationClientEmail(data: EmailTemplateData): Emai
   };
 }
 
+/**
+ * Email Template: Client Application Submitted - To Admin
+ * Sent to admin team when a new client application is submitted
+ */
+export function generateClientApplicationAdminNotificationEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>🎉 New Client Application Received</h1>
+    <p>A new business has applied to become a client on the TOTL Agency platform!</p>
+    
+    <div class="highlight">
+      <p><strong>📋 Application Details:</strong></p>
+      <p><strong>Company Name:</strong> ${escapeHtml(data.companyName || "Not provided")}</p>
+      <p><strong>Contact Name:</strong> ${escapeHtml(data.name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(data.clientName || "")}</p>
+      <p><strong>Industry:</strong> ${escapeHtml(data.industry || "Not specified")}</p>
+      <p><strong>Application ID:</strong> <code>${escapeHtml(data.applicationId || "N/A")}</code></p>
+    </div>
+
+    <div class="highlight">
+      <p><strong>📝 Business Description:</strong></p>
+      <p>${escapeHtml(data.businessDescription || "Not provided")}</p>
+    </div>
+
+    <div class="highlight">
+      <p><strong>🎯 Client Needs:</strong></p>
+      <p>${escapeHtml(data.needsDescription || "Not provided")}</p>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/admin/client-applications" class="button">Review Application in Admin Panel</a>
+    </div>
+
+    <p><strong>⏰ Action Required:</strong> Please review and respond within 2-3 business days to maintain service standards.</p>
+    
+    <p>
+      Best regards,<br>
+      <strong>TOTL Agency Automated System</strong>
+    </p>
+  `;
+  
+  return {
+    subject: `🎉 New Client Application - ${data.companyName || "TOTL Agency"}`,
+    html: createBaseTemplate(
+      "New Client Application",
+      content,
+      "A new business has applied to become a client"
+    ),
+  };
+}
+
+/**
+ * Email Template: Client Application Received - To Applicant
+ * Confirmation email sent to the applicant immediately after submission
+ */
+export function generateClientApplicationConfirmationEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>✅ Application Received!</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Thank you for your interest in partnering with <strong>TOTL Agency</strong>!</p>
+    
+    <p>We've successfully received your client application for <strong>${escapeHtml(data.companyName || "your company")}</strong>.</p>
+
+    <div class="highlight">
+      <p><strong>📋 What Happens Next:</strong></p>
+      <ul>
+        <li><strong>Review Process:</strong> Our team will carefully review your application</li>
+        <li><strong>Timeline:</strong> You'll hear from us within 2-3 business days</li>
+        <li><strong>Decision:</strong> We'll email you with our decision and next steps</li>
+      </ul>
+    </div>
+
+    <div class="highlight">
+      <p><strong>🔍 Your Application Summary:</strong></p>
+      <p><strong>Company:</strong> ${escapeHtml(data.companyName || "")}</p>
+      <p><strong>Industry:</strong> ${escapeHtml(data.industry || "Not specified")}</p>
+      <p><strong>Application ID:</strong> <code>${escapeHtml(data.applicationId || "")}</code></p>
+      <p><strong>Submitted:</strong> ${escapeHtml(data.applicationDate || new Date().toLocaleDateString())}</p>
+    </div>
+
+    <p><strong>💡 In the Meantime:</strong></p>
+    <ul>
+      <li>Explore our platform and browse featured talent</li>
+      <li>Review our terms of service and pricing</li>
+      <li>Prepare your first gig posting details</li>
+    </ul>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/talent" class="button">Browse Our Talent</a>
+    </div>
+
+    <p>We're excited about the possibility of working with you!</p>
+    
+    <p>
+      Best regards,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  
+  return {
+    subject: `✅ Application Received - TOTL Agency Client Onboarding`,
+    html: createBaseTemplate(
+      "Application Received",
+      content,
+      "Your client application has been received and is under review"
+    ),
+  };
+}
+
+/**
+ * Email Template: Client Application Approved
+ * Sent when admin approves a client application
+ */
+export function generateClientApplicationApprovedEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>🎉 Congratulations! Your Application is Approved!</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Fantastic news! Your application to become a client with <strong>TOTL Agency</strong> has been <strong>approved</strong>!</p>
+    
+    <p>Welcome to our exclusive network of premium brands and casting directors. You now have access to our exceptional talent roster.</p>
+
+    <div class="highlight">
+      <p><strong>🚀 Get Started - Your Next Steps:</strong></p>
+      <ul>
+        <li><strong>Step 1:</strong> Set up your password and complete your profile</li>
+        <li><strong>Step 2:</strong> Browse our talent roster and save favorites</li>
+        <li><strong>Step 3:</strong> Post your first gig to start receiving applications</li>
+        <li><strong>Step 4:</strong> Review applications and book your ideal talent</li>
+      </ul>
+    </div>
+
+    ${data.adminNotes ? `
+    <div class="highlight">
+      <p><strong>📝 Note from Our Team:</strong></p>
+      <p><em>${escapeHtml(data.adminNotes)}</em></p>
+    </div>
+    ` : ""}
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${escapeHtml(data.loginUrl || process.env.NEXT_PUBLIC_SITE_URL + "/login")}" class="button">Access Your Dashboard</a>
+    </div>
+
+    <p><strong>💼 What You Can Do Now:</strong></p>
+    <ul>
+      <li>Post unlimited gigs for your casting needs</li>
+      <li>Access detailed talent profiles and portfolios</li>
+      <li>Manage applications and bookings in one place</li>
+      <li>Direct messaging with talent (coming soon)</li>
+    </ul>
+
+    <p>Need help getting started? Check out our <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/docs" style="color: #000000; text-decoration: underline;">Client Guide</a> or reach out to our support team.</p>
+    
+    <p>
+      Welcome aboard!<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  
+  return {
+    subject: `🎉 Welcome to TOTL Agency - Application Approved!`,
+    html: createBaseTemplate(
+      "Application Approved",
+      content,
+      "Your client application has been approved - welcome to TOTL Agency!"
+    ),
+  };
+}
+
+/**
+ * Email Template: Client Application Rejected
+ * Sent when admin rejects a client application
+ */
+export function generateClientApplicationRejectedEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>Application Status Update</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Thank you for your interest in partnering with <strong>TOTL Agency</strong>.</p>
+    
+    <p>After careful review, we're unable to approve your client application at this time.</p>
+
+    ${data.adminNotes ? `
+    <div class="highlight">
+      <p><strong>📝 Feedback:</strong></p>
+      <p>${escapeHtml(data.adminNotes)}</p>
+    </div>
+    ` : ""}
+
+    <div class="highlight">
+      <p><strong>🔄 What You Can Do:</strong></p>
+      <ul>
+        <li>You're welcome to reapply in the future if your needs change</li>
+        <li>Consider exploring our public talent directory</li>
+        <li>Reach out if you have questions about the decision</li>
+      </ul>
+    </div>
+
+    <p>We appreciate your interest in TOTL Agency and wish you the best in finding the right talent for your projects.</p>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/contact" class="button">Contact Our Team</a>
+    </div>
+    
+    <p>
+      Best regards,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+  
+  return {
+    subject: `Application Status Update - TOTL Agency`,
+    html: createBaseTemplate(
+      "Application Status Update",
+      content,
+      "Update regarding your TOTL Agency client application"
+    ),
+  };
+}
+
 export function generateEmailBatch(
   templates: Array<{
-    type: "welcome" | "verification" | "passwordReset" | "applicationReceived" | "applicationAccepted" | "applicationRejected" | "bookingConfirmed" | "bookingReminder" | "newApplicationClient";
+    type: "welcome" | "verification" | "passwordReset" | "applicationReceived" | "applicationAccepted" | "applicationRejected" | "bookingConfirmed" | "bookingReminder" | "newApplicationClient" | "clientApplicationAdmin" | "clientApplicationConfirmation" | "clientApplicationApproved" | "clientApplicationRejected";
     data: EmailTemplateData;
   }>
 ): EmailTemplate[] {
@@ -526,6 +750,14 @@ export function generateEmailBatch(
         return generateBookingReminderEmail(data);
       case "newApplicationClient":
         return generateNewApplicationClientEmail(data);
+      case "clientApplicationAdmin":
+        return generateClientApplicationAdminNotificationEmail(data);
+      case "clientApplicationConfirmation":
+        return generateClientApplicationConfirmationEmail(data);
+      case "clientApplicationApproved":
+        return generateClientApplicationApprovedEmail(data);
+      case "clientApplicationRejected":
+        return generateClientApplicationRejectedEmail(data);
       default:
         throw new Error(`Unknown email template type: ${type}`);
     }

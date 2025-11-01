@@ -19,7 +19,12 @@ export type EmailTemplate =
   | "booking-confirmed"
   | "booking-reminder"
   | "new-application-client"
-  | "gig-invitation";
+  | "gig-invitation"
+  // Client onboarding email templates
+  | "client-application-admin"
+  | "client-application-confirmation"
+  | "client-application-approved"
+  | "client-application-rejected";
 
 /**
  * Send an email using Resend
