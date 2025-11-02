@@ -8,17 +8,18 @@ import type { Database } from "@/types/supabase";
 /**
  * Custom hook to get a properly typed Supabase client in client components
  * 
- * @throws {Error} If Supabase client cannot be created (missing env vars or not in browser)
- * @returns {SupabaseClient<Database>} Fully typed Supabase client
+ * @returns {SupabaseClient<Database> | null} Fully typed Supabase client or null if not available
+ * @note Returns null instead of throwing to prevent render errors. Components should handle null case.
  */
-export function useSupabase(): SupabaseClient<Database> {
+export function useSupabase(): SupabaseClient<Database> | null {
   const client = useMemo(() => {
     const supabase = createSupabaseBrowser();
     
+    // Return null instead of throwing to avoid React render errors
+    // Components should check for null before using
     if (!supabase) {
-      throw new Error(
-        "Supabase client not available. This component must be used in a browser environment with valid Supabase credentials."
-      );
+      console.warn("Supabase client not available - missing env vars or not in browser");
+      return null;
     }
     
     return supabase;

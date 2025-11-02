@@ -36,6 +36,12 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
     setSubmitting(true);
     setError("");
 
+    if (!supabase) {
+      setError("Database connection not available. Please refresh the page.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       // Get current user
       const {

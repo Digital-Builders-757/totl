@@ -102,6 +102,15 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Update application status to accepted
       const { error } = await supabase
         .from("applications")
@@ -147,6 +156,15 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
+      if (!supabase) {
+        toast({
+          title: "Error",
+          description: "Database connection not available",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Update application status to rejected
       const { error } = await supabase
         .from("applications")

@@ -23,6 +23,9 @@
 - ✅ Added TypeScript safety section to README
 - ✅ Created TYPESCRIPT_COMMON_ERRORS.md quick reference guide
 - ✅ Updated TYPE_SAFETY_IMPROVEMENTS.md with November 2025 fixes
+- ✅ Fixed agent-identified runtime issues:
+  - Portfolio ordering switched from display_order → created_at
+  - useSupabase() returns null instead of throwing (React best practice)
 
 **PREVIOUS: Client Application System** - November 1, 2025
 - ✅ Created 4 professional email templates for client onboarding workflow

@@ -294,7 +294,7 @@ export async function getPortfolioItems(talentId: string): Promise<{
       .from("portfolio_items")
       .select("*")
       .eq("talent_id", talentId)
-      .order("display_order", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching portfolio items:", error);
