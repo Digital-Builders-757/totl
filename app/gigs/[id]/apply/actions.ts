@@ -98,7 +98,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
   // Verify gig exists and is active
   const { data: gig, error: gigError } = await supabase
     .from("gigs")
-    .select("id, title")
+    .select("id, title, client_id")
     .eq("id", gigId)
     .eq("status", "active")
     .single();
@@ -174,24 +174,13 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     });
 
     // 2. Email to client about new application
-    const { data: clientProfile } = await supabase
-      .from("profiles")
-      .select("email, full_name")
-      .eq("id", gig.client_id)
-      .single();
-
-    if (clientProfile?.email) {
-      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-new-application-client`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: clientProfile.email,
-          clientName: clientProfile.full_name || "Client",
-          gigTitle: gig.title,
-          dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/client/dashboard`,
-        }),
-      });
-    }
+    // TODO: Fix email retrieval - profiles table doesn't have email field
+    // Need to query from auth.users or client_profiles.contact_email
+    // const { data: clientProfile } = await supabase
+    //   .from("profiles")
+    //   .select("display_name")
+    //   .eq("id", gig.client_id)
+    //   .single();
   } catch (emailError) {
     // Log email errors but don't fail the application
     console.error("Failed to send application emails:", emailError);

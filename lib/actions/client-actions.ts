@@ -1,6 +1,6 @@
 ﻿"use server";
 
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import {
   generateClientApplicationAdminNotificationEmail,
@@ -22,7 +22,7 @@ type ClientApplicationData = {
 };
 
 export async function submitClientApplication(data: ClientApplicationData) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   try {
     // Insert the application into the client_applications table
@@ -112,7 +112,7 @@ export async function submitClientApplication(data: ClientApplicationData) {
 }
 
 export async function approveClientApplication(applicationId: string, adminNotes?: string) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   try {
     // First, check if the current user is an admin
@@ -195,7 +195,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
 }
 
 export async function rejectClientApplication(applicationId: string, adminNotes?: string) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   try {
     // First, check if the current user is an admin

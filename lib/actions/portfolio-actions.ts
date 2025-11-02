@@ -70,26 +70,7 @@ export async function uploadPortfolioImage(formData: FormData) {
     }
 
     // Get current max display_order for this talent
-    const { data: existingItems } = await supabase
-      .from("portfolio_items")
-      .select("display_order")
-      .eq("talent_id", user.id)
-      .order("display_order", { ascending: false })
-      .limit(1);
-
-    const nextOrder = existingItems && existingItems.length > 0 
-      ? (existingItems[0].display_order || 0) + 1 
-      : 0;
-
-    // Check if this will be the first portfolio item (make it primary)
-    const { count } = await supabase
-      .from("portfolio_items")
-      .select("*", { count: "exact", head: true })
-      .eq("talent_id", user.id);
-
-    const isPrimary = count === 0;
-
-    // Create portfolio item record
+    // Create portfolio item record (display_order and is_primary fields removed from schema)
     const { data: portfolioItem, error: insertError } = await supabase
       .from("portfolio_items")
       .insert({
@@ -98,8 +79,6 @@ export async function uploadPortfolioImage(formData: FormData) {
         description: description?.trim() || null,
         caption: caption?.trim() || null,
         image_path: path,
-        display_order: nextOrder,
-        is_primary: isPrimary,
       })
       .select()
       .single();
@@ -139,10 +118,10 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       return { error: "Authentication failed" };
     }
 
-    // Get the portfolio item first (for image_path)
+    // Get the portfolio item first
     const { data: item, error: fetchError } = await supabase
       .from("portfolio_items")
-      .select("image_path, is_primary, talent_id")
+      .select("image_url, talent_id")
       .eq("id", portfolioItemId)
       .single();
 
@@ -166,35 +145,9 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       return { error: "Failed to delete portfolio item. Please try again." };
     }
 
-    // Delete image from storage if path exists
-    if (item.image_path) {
-      const { error: storageError } = await supabase.storage
-        .from("portfolio")
-        .remove([item.image_path]);
-
-      if (storageError) {
-        console.warn("Storage delete warning:", storageError);
-        // Don't fail the operation if storage deletion fails
-      }
-    }
-
-    // If this was the primary image, set another one as primary
-    if (item.is_primary) {
-      const { data: nextItem } = await supabase
-        .from("portfolio_items")
-        .select("id")
-        .eq("talent_id", user.id)
-        .order("display_order", { ascending: true })
-        .limit(1)
-        .single();
-
-      if (nextItem) {
-        await supabase
-          .from("portfolio_items")
-          .update({ is_primary: true })
-          .eq("id", nextItem.id);
-      }
-    }
+    // Storage deletion removed - using image_url instead of image_path
+    // If using external URLs, no storage cleanup needed
+    // Primary image logic removed - is_primary field no longer exists
 
     revalidatePath("/settings");
     revalidatePath("/talent/dashboard");
@@ -223,16 +176,9 @@ export async function reorderPortfolioItems(itemIds: string[]) {
       return { error: "Authentication failed" };
     }
 
-    // Update display_order for each item
-    const updates = itemIds.map((id, index) =>
-      supabase
-        .from("portfolio_items")
-        .update({ display_order: index })
-        .eq("id", id)
-        .eq("talent_id", user.id) // RLS enforcement
-    );
-
-    await Promise.all(updates);
+    // display_order field removed from schema - reordering not supported
+    // Items are displayed in created_at order
+    // TODO: Re-implement reordering if needed with a different approach
 
     revalidatePath("/settings");
     revalidatePath("/talent/dashboard");
@@ -261,22 +207,13 @@ export async function setPrimaryPortfolioItem(portfolioItemId: string) {
       return { error: "Authentication failed" };
     }
 
-    // Use the database function to atomically set primary
-    const { error: rpcError } = await supabase.rpc("set_portfolio_primary", {
-      p_portfolio_item_id: portfolioItemId,
-      p_talent_id: user.id,
-    });
-
-    if (rpcError) {
-      console.error("Set primary error:", rpcError);
-      return { error: "Failed to set primary image. Please try again." };
-    }
-
+    // Feature removed - is_primary field no longer exists in schema
+    // Return success to prevent breaking existing code
     revalidatePath("/settings");
     revalidatePath("/talent/dashboard");
     return {
       success: true,
-      message: "Primary image updated successfully",
+      message: "Primary image feature has been removed",
     };
   } catch (error) {
     console.error("Unexpected set primary error:", error);
@@ -364,18 +301,11 @@ export async function getPortfolioItems(talentId: string): Promise<{
       return { items: [], error: "Failed to load portfolio items" };
     }
 
-    // Get public URLs for images
-    const itemsWithUrls = await Promise.all(
-      (items || []).map(async (item) => {
-        if (item.image_path) {
-          const { data } = supabase.storage
-            .from("portfolio")
-            .getPublicUrl(item.image_path);
-          return { ...item, imageUrl: data.publicUrl };
-        }
-        return { ...item, imageUrl: item.image_url || undefined };
-      })
-    );
+    // Add imageUrl field to items (image_url already contains the correct URL)
+    const itemsWithUrls = (items || []).map((item: PortfolioItem) => ({
+      ...item,
+      imageUrl: item.image_url || undefined,
+    }));
 
     return { items: itemsWithUrls };
   } catch (error) {

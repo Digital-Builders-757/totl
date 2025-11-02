@@ -1,10 +1,10 @@
 ﻿"use server";
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export async function updateProfile(formData: FormData) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   // Get the current session to verify the user
   const {
@@ -35,7 +35,7 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function createTalentProfile(formData: FormData) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   // Get the current session to verify the user
   const {
@@ -77,7 +77,7 @@ export async function createTalentProfile(formData: FormData) {
   } else {
     // Create new profile
     const { error: insertError } = await supabase.from("talent_profiles").insert({
-      user_id: session.user.id,
+      user_id: user.id,
       first_name: "", // Required field
       last_name: "", // Required field
       experience,

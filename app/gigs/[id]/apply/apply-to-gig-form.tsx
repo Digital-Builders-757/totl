@@ -7,7 +7,7 @@ import { applyToGig } from "./actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 
 interface ApplyToGigFormProps {
   gig: {
@@ -25,7 +25,7 @@ interface ApplyToGigFormProps {
 
 export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
   const router = useRouter();
-  const supabase = createSupabaseBrowser();
+  const supabase = useSupabase();
 
   const [coverLetter, setCoverLetter] = useState("");
   const [submitting, setSubmitting] = useState(false);

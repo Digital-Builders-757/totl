@@ -40,7 +40,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Application not found" }, { status: 404 });
     }
 
-    // @ts-expect-error - joined column path
     const clientId = app.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -52,17 +51,14 @@ export async function POST(req: Request) {
     // Create booking
     const { data: booking, error: bookErr } = await supabase
       .from("bookings")
-      .insert(
-        [{
-          gig_id: app.gig_id,
-          talent_id: app.talent_id,
-          date: bookingDate as unknown as Database["public"]["Tables"]["bookings"]["Insert"]["date"],
-          compensation: numericComp as unknown as Database["public"]["Tables"]["bookings"]["Insert"]["compensation"],
-          notes: (notes || null) as Database["public"]["Tables"]["bookings"]["Insert"]["notes"],
-          status: "confirmed",
-        } satisfies Database["public"]["Tables"]["bookings"]["Insert"]],
-        { returning: "representation" }
-      )
+      .insert([{
+        gig_id: app.gig_id,
+        talent_id: app.talent_id,
+        date: bookingDate as unknown as Database["public"]["Tables"]["bookings"]["Insert"]["date"],
+        compensation: numericComp as unknown as Database["public"]["Tables"]["bookings"]["Insert"]["compensation"],
+        notes: (notes || null) as Database["public"]["Tables"]["bookings"]["Insert"]["notes"],
+        status: "confirmed",
+      } satisfies Database["public"]["Tables"]["bookings"]["Insert"]])
       .select("id")
       .single();
 
@@ -92,7 +88,7 @@ export async function POST(req: Request) {
 
       const { data: clientProfile } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("display_name")
         .eq("id", userId)
         .single();
 
@@ -115,7 +111,7 @@ export async function POST(req: Request) {
             email: talentUser.user.email,
             talentName: talentName || "Talent",
             gigTitle: gig.title,
-            clientName: clientProfile?.full_name || "Client",
+            clientName: clientProfile?.display_name || "Client",
             dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
           }),
         });

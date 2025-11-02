@@ -1,11 +1,12 @@
 // lib/supabase-server.ts
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/types/supabase";
 
-export async function createSupabaseServer() {
+export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {
   const cookieStore = await cookies();
 
   // Prefer secure, non-public env vars on the server; fall back to NEXT_PUBLIC only if necessary
@@ -57,5 +58,5 @@ export async function createSupabaseServer() {
         },
       },
     }
-  );
+  ) as unknown as SupabaseClient<Database>;
 }

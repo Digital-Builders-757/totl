@@ -9,8 +9,19 @@ import type { Database } from "@/types/supabase";
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";
 
-// Use proper database types with joined profiles data
-type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
+// Custom type matching the actual selected fields
+type TalentProfile = {
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  location: string | null;
+  experience: string | null;
+  experience_years: number | null;
+  specialties: string[] | null;
+  portfolio_url: string | null;
+  created_at: string;
+  updated_at: string;
   profiles: {
     avatar_url: string | null;
     avatar_path: string | null;
@@ -31,6 +42,7 @@ async function getTalentProfiles(): Promise<TalentProfile[]> {
       first_name,
       last_name,
       location,
+      experience,
       experience_years,
       specialties,
       portfolio_url,

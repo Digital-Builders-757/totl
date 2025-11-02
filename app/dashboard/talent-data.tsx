@@ -6,7 +6,7 @@ import { Database } from "@/types/supabase";
 // Use generated database types instead of custom interfaces
 type TalentProfile = Pick<
   Database["public"]["Tables"]["talent_profiles"]["Row"],
-  "id" | "bio" | "skills" | "experience_years" | "portfolio_url"
+  "id" | "experience" | "specialties" | "experience_years" | "portfolio_url"
 >;
 
 type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
@@ -47,22 +47,22 @@ export function TalentData({
           ) : (
             <div className="space-y-4">
               <div>
-                <h3 className="font-medium mb-1">Bio</h3>
-                <p className="text-gray-600">{talentProfile.bio || "No bio provided"}</p>
+                <h3 className="font-medium mb-1">Experience</h3>
+                <p className="text-gray-600">{talentProfile.experience || "No experience provided"}</p>
               </div>
 
               <div>
-                <h3 className="font-medium mb-1">Skills</h3>
-                {talentProfile.skills && talentProfile.skills.length > 0 ? (
+                <h3 className="font-medium mb-1">Specialties</h3>
+                {talentProfile.specialties && talentProfile.specialties.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
-                    {talentProfile.skills.map((skill, index) => (
+                    {talentProfile.specialties.map((specialty, index) => (
                       <Badge key={index} variant="outline">
-                        {skill}
+                        {specialty}
                       </Badge>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No skills listed</p>
+                  <p className="text-gray-500">No specialties listed</p>
                 )}
               </div>
 

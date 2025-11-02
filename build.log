@@ -1,0 +1,111 @@
+﻿
+> my-v0-project@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.5.5
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ┬╖ serverActions
+     ┬╖ clientTraceMetadata
+
+   Creating an optimized production build ...
+npm : [@sentry/nextjs] DEPRECATION WARNING: It is recommended renaming your `sentry.client.config.ts` file, or moving 
+its content to `instrumentation-client.ts`. When using Turbopack `sentry.client.config.ts` will no longer work. Read 
+more about the `instrumentation-client.ts` file: 
+https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
+At C:\Users\young\AppData\Local\Temp\ps-script-9b268147-5ab1-4886-b7ce-0f3b6acba55f.ps1:88 char:49
++ ... :\Users\young\Desktop\Project Files\totl"; npm run build 2>&1 | Out-F ...
++                                                ~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([@sentry/nextjs...entation-client:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+ Γ£ô Compiled successfully in 47s
+   Linting and checking validity of types ...
+
+./app/admin/client-applications/admin-client-applications-client.tsx
+24:29  Warning: 'CardDescription' is defined but never used.  @typescript-eslint/no-unused-vars
+24:46  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+24:58  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+578:74  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/admin/client-applications/page.tsx
+9:6  Warning: 'ClientApplication' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/admin/test-connection/route.ts
+3:10  Warning: 'createSupabaseServer' is defined but never used.  @typescript-eslint/no-unused-vars
+6:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/client/gigs/page.tsx
+21:1  Warning: `@/types/supabase` type import should occur after import of `@/lib/supabase/supabase-browser`  import/order
+
+./app/privacy/page.tsx
+24:33  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:37  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:39  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:44  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:49  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:52  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+165:66  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+208:90  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+208:116  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+221:41  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+221:63  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+237:247  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+237:260  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+262:39  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+262:52  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+282:114  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+282:140  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/settings/page.tsx
+6:1  Warning: `@/types/database-helpers` import should occur before type import of `@/types/supabase`  import/order
+
+./app/terms/page.tsx
+24:41  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:45  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:47  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:52  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:57  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:60  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:88  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:94  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:214  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+24:223  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+198:45  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+198:51  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+198:57  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+198:70  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+278:186  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/ui-showcase/page.tsx
+125:62  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+125:73  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/auth/sign-in-gate.tsx
+3:1  Warning: `react` import should occur after import of `next/link`  import/order
+
+./lib/actions/client-actions.ts
+3:1  Warning: `@/lib/supabase/supabase-server` import should occur after import of `@/lib/services/email-templates`  import/order
+
+./lib/hooks/use-supabase.ts
+5:1  Warning: `@supabase/supabase-js` type import should occur before import of `react`  import/order
+
+./lib/supabase/supabase-server.ts
+5:1  Warning: `@sentry/nextjs` import should occur before import of `@supabase/ssr`  import/order
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./components/auth/auth-provider.tsx:134:49
+Type error: Parameter 'event' implicitly has an 'any' type.
+
+[0m [90m 132 |[39m     [36mconst[39m {
+ [90m 133 |[39m       data[33m:[39m { subscription }[33m,[39m
+[31m[1m>[22m[39m[90m 134 |[39m     } [33m=[39m 
+supabase[33m![39m[33m.[39mauth[33m.[39monAuthStateChange([36masync[39m (event[33m,[39m session) [33m=>[39m 
+{
+ [90m     |[39m                                                 [31m[1m^[22m[39m
+ [90m 135 |[39m       [36mif[39m ([33m![39mmounted) [36mreturn[39m[33m;[39m
+ [90m 136 |[39m
+ [90m 137 |[39m       setIsLoading([36mtrue[39m)[33m;[39m[0m
+Next.js build worker exited with code: 1 and signal: null

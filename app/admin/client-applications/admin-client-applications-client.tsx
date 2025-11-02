@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react/prop-types */
 
 import type { User } from "@supabase/supabase-js";
 import {

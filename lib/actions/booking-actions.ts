@@ -44,7 +44,6 @@ export async function acceptApplication(params: {
       return { error: "Application not found" };
     }
 
-    // @ts-expect-error - joined column path
     const clientId = application.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return { error: "Forbidden" };
@@ -61,7 +60,6 @@ export async function acceptApplication(params: {
       : new Date(Date.now() + 7 * 864e5).toISOString(); // Default: 7 days from now
 
     const compensation = params.compensation || 
-      // @ts-expect-error - joined column path
       parseFloat(String(application.gigs?.compensation).replace(/[^0-9.-]/g, "")) || 
       null;
 
@@ -136,7 +134,6 @@ export async function rejectApplication(params: {
       return { error: "Application not found" };
     }
 
-    // @ts-expect-error - joined column path
     const clientId = application.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return { error: "Forbidden" };
@@ -168,19 +165,22 @@ export async function rejectApplication(params: {
         .from("applications")
         .select(`
           talent_id,
-          gigs!inner(title),
-          talent_profiles!inner(first_name, last_name)
+          gigs!inner(title)
         `)
         .eq("id", params.applicationId)
         .single();
 
       if (fullApplication) {
+        // Query talent profile separately since there's no direct relation
+        const { data: talentProfile } = await supabase
+          .from("talent_profiles")
+          .select("first_name, last_name")
+          .eq("user_id", fullApplication.talent_id)
+          .single();
+
         const { data: talentUser } = await supabase.auth.admin.getUserById(fullApplication.talent_id);
         
         if (talentUser?.user?.email) {
-          // @ts-expect-error - joined column path
-          const talentProfile = fullApplication.talent_profiles;
-          // @ts-expect-error - joined column path
           const gig = fullApplication.gigs;
           
           const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
@@ -241,7 +241,6 @@ export async function updateApplicationStatus(params: {
       return { error: "Application not found" };
     }
 
-    // @ts-expect-error - joined column path
     const clientId = application.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return { error: "Forbidden" };
@@ -338,14 +337,16 @@ export async function updateBookingStatus(params: {
       return { error: "Booking not found" };
     }
 
-    // @ts-expect-error - joined column path
     const clientId = booking.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return { error: "Forbidden" };
     }
 
-    // Update booking
-    const updateData: { status: string; notes?: string } = { status: params.status };
+    // Update booking with proper enum type
+    type BookingUpdate = Database["public"]["Tables"]["bookings"]["Update"];
+    const updateData: BookingUpdate = { 
+      status: params.status as Database["public"]["Enums"]["booking_status"]
+    };
     if (params.notes) {
       updateData.notes = params.notes;
     }
@@ -391,6 +392,7 @@ export async function cancelBooking(params: {
         `
         id,
         status,
+        notes,
         gigs!inner(id, client_id)
       `
       )
@@ -401,7 +403,6 @@ export async function cancelBooking(params: {
       return { error: "Booking not found" };
     }
 
-    // @ts-expect-error - joined column path
     const clientId = booking.gigs?.client_id as string | undefined;
     if (clientId !== userId) {
       return { error: "Forbidden" };

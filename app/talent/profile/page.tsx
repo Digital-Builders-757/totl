@@ -1,13 +1,13 @@
 ﻿import { redirect } from "next/navigation";
 
 import TalentProfileForm from "@/components/forms/talent-profile-form";
-import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
 export default async function TalentProfilePage() {
-  const supabase = await createSupabaseServerComponentClient();
+  const supabase = await createSupabaseServer();
 
   // Get the current user
   const {

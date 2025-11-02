@@ -38,10 +38,10 @@ const profileFormSchema = z.object({
   full_name: z.string().min(2, {
     message: "Full name must be at least 2 characters.",
   }),
-  bio: z
+  experience: z
     .string()
     .max(500, {
-      message: "Bio must not be longer than 500 characters.",
+      message: "Experience must not be longer than 500 characters.",
     })
     .optional(),
   role: z.enum(["talent", "client"], {
@@ -55,7 +55,7 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 // Default values for the form
 const defaultValues: Partial<ProfileFormValues> = {
-  bio: "",
+  experience: "",
   role: "talent",
   location: "",
   website: "",
@@ -172,7 +172,7 @@ export function OnboardingForm() {
 
             <FormField
               control={form.control}
-              name="bio"
+              name="experience"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bio</FormLabel>

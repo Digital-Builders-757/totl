@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import type { Database } from "@/types/supabase";
 
 export async function createGig(formData: FormData) {
   const supabase = await createSupabaseServer();
@@ -21,7 +22,7 @@ export async function createGig(formData: FormData) {
     .from("profiles")
     .select("role")
     .eq("id", user.id)
-    .single();
+    .single<{ role: Database["public"]["Tables"]["profiles"]["Row"]["role"] }>();
 
   if (profile?.role !== "admin") {
     return { error: "Only admins can create gigs" };

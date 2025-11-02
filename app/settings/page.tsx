@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import type { Database } from "@/types/supabase";
 import {
   type ProfileRow,
   type TalentProfileRow,
@@ -64,9 +65,9 @@ export default async function SettingsPage() {
       .maybeSingle(),
     supabase
       .from("portfolio_items")
-      .select("id, talent_id, title, description, caption, image_url, image_path, display_order, is_primary, created_at, updated_at")
+      .select("id, talent_id, title, description, caption, image_url, created_at, updated_at")
       .eq("talent_id", user.id)
-      .order("display_order", { ascending: true }),
+      .order("created_at", { ascending: true }),
   ]);
 
   // Generate signed URL with image transformations for avatar if path exists
@@ -84,18 +85,11 @@ export default async function SettingsPage() {
     avatarSrc = signed?.signedUrl ?? null;
   }
 
-  // Get public URLs for portfolio images
-  const portfolioItemsWithUrls = await Promise.all(
-    (portfolioItems || []).map(async (item) => {
-      if (item.image_path) {
-        const { data } = supabase.storage
-          .from("portfolio")
-          .getPublicUrl(item.image_path);
-        return { ...item, imageUrl: data.publicUrl };
-      }
-      return { ...item, imageUrl: item.image_url || undefined };
-    })
-  );
+  // Portfolio items already have image_url from the database
+  const portfolioItemsWithUrls = (portfolioItems || []).map((item: Database["public"]["Tables"]["portfolio_items"]["Row"]) => ({
+    ...item,
+    imageUrl: item.image_url || undefined,
+  }));
 
   return (
     <div className="min-h-screen bg-black">

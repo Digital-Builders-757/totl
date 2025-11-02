@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;
@@ -14,7 +14,7 @@ interface ApplyToGigPageProps {
 
 export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   const { id } = await params;
-  const supabase = await createSupabaseServerComponentClient();
+  const supabase = await createSupabaseServer();
 
   // Get current user session
   const {
@@ -29,7 +29,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
-    .eq("id", session.user.id)
+    .eq("id", user.id)
     .single();
 
   if (profileError || !profile || profile.role !== "talent") {
@@ -53,7 +53,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     .from("applications")
     .select("id, status")
     .eq("gig_id", id)
-    .eq("talent_id", session.user.id)
+    .eq("talent_id", user.id)
     .single();
 
   const alreadyApplied = !!existingApplication;

@@ -33,7 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
 // Type for the joined application data
@@ -64,7 +64,7 @@ export function AdminApplicationsClient({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { toast } = useToast();
-  const supabase = createSupabaseBrowser();
+  const supabase = useSupabase();
 
   // Filter applications based on search query and active tab
   useEffect(() => {
@@ -98,7 +98,7 @@ export function AdminApplicationsClient({
   }, [applications, searchQuery, activeTab]);
 
   const handleApprove = async () => {
-    if (!selectedApplication || !supabase) return;
+    if (!selectedApplication) return;
 
     setIsProcessing(true);
     try {
@@ -143,7 +143,7 @@ export function AdminApplicationsClient({
   };
 
   const handleReject = async () => {
-    if (!selectedApplication || !supabase) return;
+    if (!selectedApplication) return;
 
     setIsProcessing(true);
     try {

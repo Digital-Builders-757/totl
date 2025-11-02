@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { Database } from "@/types/supabase";
@@ -83,7 +84,7 @@ export async function middleware(req: NextRequest) {
         },
       },
     }
-  );
+  ) as unknown as SupabaseClient<Database>;
 
   // Only check auth for routes that actually need it
   const {

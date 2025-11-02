@@ -19,7 +19,7 @@ interface Application {
   id: string;
   gig_id: string;
   talent_id: string;
-  status: string;
+  status: "new" | "under_review" | "shortlisted" | "rejected" | "accepted";
   message: string | null;
   created_at: string;
   updated_at: string;
@@ -162,8 +162,8 @@ export default function ClientApplicationsPage() {
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "new" && application.status === "new") ||
-      (activeTab === "interview" && application.status === "Interview Scheduled") ||
-      (activeTab === "hired" && application.status === "Hired");
+      (activeTab === "interview" && application.status === "shortlisted") ||
+      (activeTab === "hired" && application.status === "accepted");
 
     return matchesSearch && matchesStatus && matchesGig && matchesTab;
   });
@@ -241,7 +241,7 @@ export default function ClientApplicationsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-300">Under Review</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "Under Review").length}
+                    {applications.filter((app) => app.status === "under_review").length}
                   </p>
                 </div>
                 <div className="bg-yellow-500/20 p-2 rounded-full">
@@ -257,7 +257,7 @@ export default function ClientApplicationsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-300">Interviews</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "Interview Scheduled").length}
+                    {applications.filter((app) => app.status === "shortlisted").length}
                   </p>
                 </div>
                 <div className="bg-purple-500/20 p-2 rounded-full">
@@ -273,7 +273,7 @@ export default function ClientApplicationsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-300">Hired</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "Hired").length}
+                    {applications.filter((app) => app.status === "accepted").length}
                   </p>
                 </div>
                 <div className="bg-green-500/20 p-2 rounded-full">
@@ -334,10 +334,10 @@ export default function ClientApplicationsPage() {
             </TabsTrigger>
             <TabsTrigger value="interview">
               Interviews (
-              {applications.filter((app) => app.status === "Interview Scheduled").length})
+              {applications.filter((app) => app.status === "shortlisted").length})
             </TabsTrigger>
             <TabsTrigger value="hired">
-              Hired ({applications.filter((app) => app.status === "Hired").length})
+              Hired ({applications.filter((app) => app.status === "accepted").length})
             </TabsTrigger>
           </TabsList>
 
@@ -413,7 +413,6 @@ export default function ClientApplicationsPage() {
                                   data-test="accept-application"
                                   onClick={() => handleAcceptClick(application)}
                                   className="bg-green-600 hover:bg-green-700 text-white"
-                                  disabled={application.status === "accepted"}
                                 >
                                   <CheckCircle2 className="h-4 w-4 mr-2" />
                                   Accept
@@ -423,7 +422,6 @@ export default function ClientApplicationsPage() {
                                   size="sm"
                                   onClick={() => handleRejectClick(application)}
                                   className="border-red-500/30 text-red-400 hover:bg-red-500/10"
-                                  disabled={application.status === "rejected"}
                                 >
                                   <XCircle className="h-4 w-4 mr-2" />
                                   Reject

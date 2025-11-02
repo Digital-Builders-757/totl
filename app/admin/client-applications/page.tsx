@@ -26,7 +26,7 @@ export default async function AdminClientApplicationsPage() {
     .from("profiles")
     .select("role")
     .eq("id", user.id)
-    .single();
+    .single<{ role: Database["public"]["Tables"]["profiles"]["Row"]["role"] }>();
 
   if (userError || userData?.role !== "admin") {
     redirect("/login?returnUrl=/admin/client-applications");
@@ -45,4 +45,9 @@ export default async function AdminClientApplicationsPage() {
 
   return <AdminClientApplicationsClient applications={applications || []} user={user} />;
 }
+
+
+
+
+
 

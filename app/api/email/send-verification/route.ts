@@ -1,7 +1,7 @@
 ﻿import "server-only";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { sendEmail, logEmailSent } from "@/lib/services/email-service";
+import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { generateVerificationEmail } from "@/lib/services/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 

@@ -266,3 +266,9 @@ Install "DotENV" extension for syntax highlighting in `.env` files!
 
 **Once your `.env.local` is set up, the client application emails will work automatically with Resend!** 🎉
 
+
+
+
+
+
+

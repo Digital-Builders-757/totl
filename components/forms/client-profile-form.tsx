@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/components/ui/use-toast";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 
 // Import the generated type instead of defining our own
 import type { Database } from "@/types/supabase";
@@ -59,7 +59,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createSupabaseBrowser();
+  const supabase = useSupabase();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),

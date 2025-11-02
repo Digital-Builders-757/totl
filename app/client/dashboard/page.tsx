@@ -65,7 +65,7 @@ interface Application {
     last_name: string;
     location: string | null;
     experience: string | null;
-  };
+  } | null;
   profiles?: {
     display_name: string | null;
     email_verified: boolean;
@@ -210,7 +210,6 @@ export default function ClientDashboard() {
           `
           *,
           gigs!inner(title, category, location, compensation),
-          talent_profiles!talent_id(first_name, last_name, location, experience),
           profiles!talent_id(display_name, email_verified, role, avatar_url)
         `
         )

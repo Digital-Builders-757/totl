@@ -112,7 +112,6 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                 fill
                 className="object-cover"
                 context="talent-profile-header"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, (max-width: 1024px) 100vw, 896px"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
               <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">

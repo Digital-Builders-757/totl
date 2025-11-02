@@ -116,13 +116,9 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
         title: "Primary image set",
         description: "Featured image updated successfully",
       });
-      // Update local state
-      setItems(
-        items.map((item) => ({
-          ...item,
-          is_primary: item.id === itemId,
-        }))
-      );
+      // Update local state - is_primary field removed from schema
+      // Items are already in the correct order
+      setItems([...items]);
       onUpdate?.();
     }
   };
@@ -211,21 +207,12 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
             transition-all duration-300 ease-out
             hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]
             ${draggedIndex === index ? "opacity-50 scale-95" : "opacity-100 scale-100"}
-            ${item.is_primary ? "ring-2 ring-yellow-500" : ""}
           `}
         >
           {/* Drag Handle */}
           <div className="absolute top-2 left-2 z-10 bg-black/50 rounded p-1 cursor-grab active:cursor-grabbing">
             <GripVertical className="w-5 h-5 text-white" />
           </div>
-
-          {/* Primary Badge */}
-          {item.is_primary && (
-            <div className="absolute top-2 right-2 z-10 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-              <Star className="w-3 h-3" fill="currentColor" />
-              Primary
-            </div>
-          )}
 
           {/* Image with Hover Effects */}
           <div className="portfolio-image-container relative w-full h-48 md:h-64 bg-zinc-800 overflow-hidden group">
@@ -333,17 +320,6 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
                     <Edit2 className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
-                  {!item.is_primary && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleSetPrimary(item.id)}
-                      className="bg-zinc-800 border-zinc-700 text-yellow-500 hover:bg-zinc-700"
-                      title="Set as primary/featured image"
-                    >
-                      <Star className="w-4 h-4" />
-                    </Button>
-                  )}
                   <Button
                     size="sm"
                     variant="outline"
