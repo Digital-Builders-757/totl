@@ -78,7 +78,7 @@ export async function uploadPortfolioImage(formData: FormData) {
         title: title.trim(),
         description: description?.trim() || null,
         caption: caption?.trim() || null,
-        image_path: path,
+        image_url: path,
       })
       .select()
       .single();
