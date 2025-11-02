@@ -174,13 +174,25 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     });
 
     // 2. Email to client about new application
-    // TODO: Fix email retrieval - profiles table doesn't have email field
-    // Need to query from auth.users or client_profiles.contact_email
-    // const { data: clientProfile } = await supabase
-    //   .from("profiles")
-    //   .select("display_name")
-    //   .eq("id", gig.client_id)
-    //   .single();
+    const { data: clientProfile } = await supabase
+      .from("client_profiles")
+      .select("contact_email, contact_name")
+      .eq("user_id", gig.client_id)
+      .single();
+
+    if (clientProfile?.contact_email) {
+      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-new-application-client`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: clientProfile.contact_email,
+          clientName: clientProfile.contact_name || "Client",
+          gigTitle: gig.title,
+          talentName: `${talentProfile.first_name} ${talentProfile.last_name}`,
+          dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/client/dashboard`,
+        }),
+      });
+    }
   } catch (emailError) {
     // Log email errors but don't fail the application
     console.error("Failed to send application emails:", emailError);

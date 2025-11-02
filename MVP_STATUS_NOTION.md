@@ -27,6 +27,7 @@
   - Portfolio ordering switched from display_order → created_at
   - useSupabase() returns null instead of throwing (React best practice)
   - Portfolio image upload: image_path → image_url (critical fix)
+  - Restored client email notifications (was accidentally disabled)
 
 **PREVIOUS: Client Application System** - November 1, 2025
 - ✅ Created 4 professional email templates for client onboarding workflow
