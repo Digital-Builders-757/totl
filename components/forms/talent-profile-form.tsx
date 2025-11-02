@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
@@ -73,7 +73,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = createSupabaseBrowser();
+  const supabase = useSupabase();
 
   const {
     register,
@@ -123,29 +123,31 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         throw new Error("Authentication error");
       }
 
-      // Prepare data for update
-      const updateData = {
-        ...data,
-        languages: data.languages ? data.languages.split(",").map((lang) => lang.trim()).filter(Boolean) : [],
+      // Prepare data for upsert with proper typing
+      type TalentProfileInsert = Database["public"]["Tables"]["talent_profiles"]["Insert"];
+      
+      const upsertData: TalentProfileInsert = {
+        user_id: user.id,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone || null,
+        location: data.location || null,
         age: data.age ? parseInt(data.age) : null,
+        experience: data.experience || null,
+        portfolio_url: data.portfolio_url || null,
+        height: data.height || null,
+        measurements: data.measurements || null,
+        hair_color: data.hair_color || null,
+        eye_color: data.eye_color || null,
+        shoe_size: data.shoe_size || null,
+        languages: data.languages ? data.languages.split(",").map((lang) => lang.trim()).filter(Boolean) : null,
       };
-
-      // Clean the data - remove empty strings and convert to null for optional fields
-      const cleanedData: Record<string, string | number | string[] | null> = { ...updateData };
-      Object.keys(cleanedData).forEach(key => {
-        if (cleanedData[key] === '') {
-          cleanedData[key] = null;
-        }
-      });
 
       // Update talent profile using upsert with the user_id as the conflict target
       const { error: updateError } = await supabase
         .from("talent_profiles")
         .upsert(
-          {
-            user_id: user.id,
-            ...cleanedData,
-          },
+          upsertData,
           {
             onConflict: 'user_id', // Specify the unique constraint column
             ignoreDuplicates: false, // Update on conflict

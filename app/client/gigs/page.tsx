@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import type { Database } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -80,8 +81,12 @@ export default function ClientGigsPage() {
         setError("Failed to load gigs");
       } else {
         // Transform the data to flatten the applications_count
+        // Type assertion needed for aggregated query
+        type GigWithCount = Database["public"]["Tables"]["gigs"]["Row"] & {
+          applications_count: Array<{ count: number }>;
+        };
         const transformedData =
-          data?.map((gig) => ({
+          (data as unknown as GigWithCount[])?.map((gig) => ({
             ...gig,
             applications_count: gig.applications_count?.[0]?.count || 0,
           })) || [];

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import type { SupabaseClient, User, Session, AuthError } from "@supabase/supabase-js";
+import type { User, Session, AuthError, AuthChangeEvent, SupabaseClient } from "@supabase/supabase-js";
 import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 
@@ -41,7 +41,7 @@ function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        supabase: null as unknown as SupabaseClient<Database>,
+        supabase: null,
         user: null,
         session: null,
         userRole: null,
@@ -80,6 +80,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Check if supabase is available
+    if (!supabase) {
+      setIsLoading(false);
+      setHasHandledInitialSession(true);
+      return;
+    }
+
     let mounted = true;
 
     // Initial session check - only once on mount
@@ -104,15 +111,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         setSession(session);
 
-        const { data: profileData } = await supabase!
+        const { data: profileData } = (await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
-          .single();
+          .single()) as { data: { role: string } | null; error: unknown };
 
         if (!mounted) return;
 
-        const role = profileData?.role as UserRole;
+        const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
         setIsLoading(false);
@@ -131,7 +138,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener - this is the main way to handle auth changes
     const {
       data: { subscription },
-    } = supabase!.auth.onAuthStateChange(async (event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (!mounted) return;
 
       setIsLoading(true);
@@ -140,15 +147,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === "SIGNED_IN" && session) {
         try {
-          const { data: profileData } = await supabase!
+          const { data: profileData } = (await supabase
             .from("profiles")
             .select("role")
             .eq("id", session.user.id)
-            .single();
+            .single()) as { data: { role: string } | null; error: unknown };
 
           if (!mounted) return;
 
-          const role = profileData?.role as UserRole;
+          const role = (profileData?.role ?? null) as UserRole;
           setUserRole(role);
           setIsEmailVerified(session.user.email_confirmed_at !== null);
 
@@ -215,13 +222,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       // Fetch user role
       try {
-        const { data: profileData } = await supabase
+        const { data: profileData } = (await supabase
           .from("profiles")
           .select("role")
           .eq("id", data.session.user.id)
-          .single();
+          .single()) as { data: { role: string } | null; error: unknown };
 
-        const role = profileData?.role as UserRole;
+        const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
 
         // Redirect based on role
@@ -274,8 +281,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       
       // Clear any cached data
       if (typeof window !== "undefined") {
-        // Clear localStorage
-        localStorage.removeItem("sb-" + supabase.supabaseUrl.split("//")[1].split(".")[0] + "-auth-token");
+        // Clear localStorage using environment variable
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (supabaseUrl) {
+          localStorage.removeItem("sb-" + supabaseUrl.split("//")[1].split(".")[0] + "-auth-token");
+        }
         
         // Clear sessionStorage
         sessionStorage.clear();

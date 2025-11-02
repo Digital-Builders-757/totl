@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface AdminHeaderProps {
-  user: User;
+  user?: User;
   notificationCount?: number;
 }
 
@@ -38,6 +38,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   const navigationItems = [
     { href: "/admin/dashboard", label: "Overview", icon: "📊" },
     { href: "/admin/applications", label: "Applications", icon: "📝" },
+    { href: "/admin/client-applications", label: "Client Apps", icon: "🏢" },
     { href: "/admin/talent", label: "Talent", icon: "👥" },
     { href: "/admin/gigs", label: "Gigs", icon: "💼" },
     { href: "/admin/users", label: "Users", icon: "👤" },
@@ -127,14 +128,14 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                 >
                   <Avatar className="h-6 w-6 mr-2">
                     <AvatarImage
-                      src={user.user_metadata?.avatar_url}
-                      alt={user.email || "Admin"}
+                      src={user?.user_metadata?.avatar_url}
+                      alt={user?.email || "Admin"}
                     />
                     <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-white text-xs">
-                      {user.email?.charAt(0).toUpperCase() || "A"}
+                      {user?.email?.charAt(0).toUpperCase() || "A"}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:inline">{user.email || "Admin"}</span>
+                  <span className="hidden md:inline">{user?.email || "Admin"}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">

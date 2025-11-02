@@ -252,7 +252,7 @@ export async function uploadAvatar(formData: FormData) {
     try {
       const { data: list } = await supabase.storage.from("avatars").list(user.id);
       if (list && list.length > 1) {
-        const filesToDelete = list.map((f) => `${user.id}/${f.name}`).filter((p) => p !== path); // Keep only the new file
+        const filesToDelete = list.map((f: { name: string }) => `${user.id}/${f.name}`).filter((p: string) => p !== path); // Keep only the new file
 
         if (filesToDelete.length > 0) {
           await supabase.storage.from("avatars").remove(filesToDelete);

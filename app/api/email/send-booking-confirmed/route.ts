@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { sendEmail, logEmailSent } from "@/lib/services/email-service";
+import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { generateBookingConfirmedEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {

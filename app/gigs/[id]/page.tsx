@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
-import { createSupabaseServerComponentClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ interface GigDetailsPageProps {
 
 export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
   const { id } = await params;
-  const supabase = await createSupabaseServerComponentClient();
+  const supabase = await createSupabaseServer();
 
   // Get current user session
   const {
@@ -48,12 +48,12 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
 
   // Check if user has already applied
   let hasApplied = false;
-  if (session?.user) {
+  if (user) {
     const { data: existingApplication } = await supabase
       .from("applications")
       .select("id")
       .eq("gig_id", id)
-      .eq("talent_id", session.user.id)
+      .eq("talent_id", user.id)
       .single();
 
     hasApplied = !!existingApplication;
@@ -163,7 +163,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
           </Card>
 
           {/* Client Information - Only visible to authenticated users */}
-          {session?.user ? (
+          {user ? (
             gig.profiles && (
               <Card>
                 <CardHeader>
@@ -218,7 +218,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {!session ? (
+              {!user ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">
                     You need to be logged in to apply for gigs.

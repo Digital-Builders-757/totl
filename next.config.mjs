@@ -4,12 +4,12 @@ const nextConfig = {
   // Fix workspace root warning
   outputFileTracingRoot: process.cwd(),
   
-  // Temporarily keep ignores - will fix type issues in separate PR
+  // Type checking enabled - ensuring production-ready code
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: {
     unoptimized: false, // Enable optimization for better performance

@@ -1,16 +1,16 @@
 ﻿"use server";
 
 import { redirect } from "next/navigation";
-import { createSupabaseActionClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export async function createProfile(formData: {
   full_name: string;
-  bio?: string;
+  experience?: string;
   role: "talent" | "client";
   location?: string;
   website?: string;
 }) {
-  const supabase = await createSupabaseActionClient();
+  const supabase = await createSupabaseServer();
 
   // Get the current user
   const {
@@ -41,7 +41,7 @@ export async function createProfile(formData: {
       user_id: userId,
       first_name: formData.full_name.split(" ")[0] || "",
       last_name: formData.full_name.split(" ").slice(1).join(" ") || "",
-      bio: formData.bio || null,
+      experience: formData.experience || null,
       location: formData.location || null,
       portfolio_url: formData.website || null,
     });

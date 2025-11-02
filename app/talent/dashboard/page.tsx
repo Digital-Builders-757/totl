@@ -51,24 +51,14 @@ export const dynamic = "force-dynamic";
 
 // Use proper database types
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
+type GigRow = Database["public"]["Tables"]["gigs"]["Row"];
+type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
-interface Application {
-  id: string;
-  gig_id: string;
-  talent_id: string;
-  status: string;
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  gigs?: {
-    title: string;
-    category?: string;
-    location: string;
-    compensation: string;
-    image_url?: string | null;
-    client_profiles?: {
-      company_name: string;
-    };
+// Type for application with joined gig and client data (matching modal type)
+interface TalentApplication extends ApplicationRow {
+  gigs?: GigRow & {
+    client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
   };
 }
 
@@ -95,11 +85,11 @@ function TalentDashboardContent() {
     avatar_url?: string | null;
     display_name?: string | null;
   } | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<TalentApplication[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [selectedTalentApplication, setSelectedTalentApplication] = useState<TalentApplication | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Check if Supabase is configured
@@ -116,8 +106,7 @@ function TalentDashboardContent() {
     newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
-    acceptedApplications: applications.filter((app) => app.status === "accepted").length,
-    completedGigs: applications.filter((app) => app.status === "completed").length,
+    acceptedTalentApplications: applications.filter((app) => app.status === "accepted").length,
     activeGigs: gigs.filter((gig) => gig.status === "active").length,
     totalGigs: gigs.length,
   };
@@ -163,7 +152,7 @@ function TalentDashboardContent() {
       if (applicationsError) {
         console.error("Error fetching applications:", applicationsError);
       } else {
-        setApplications((applicationsData as Application[]) || []);
+        setApplications((applicationsData as TalentApplication[]) || []);
       }
 
       // Fetch active gigs for discovery
@@ -204,7 +193,7 @@ function TalentDashboardContent() {
     const applied = searchParams.get("applied");
     if (applied === "success") {
       toast({
-        title: "Application Submitted Successfully! 🎉",
+        title: "TalentApplication Submitted Successfully! 🎉",
         description:
           "Your application has been sent to the client. You'll be notified when they respond.",
         duration: 5000,
@@ -217,14 +206,14 @@ function TalentDashboardContent() {
     }
   }, [searchParams, toast]);
 
-  const handleViewDetails = (application: Application) => {
-    setSelectedApplication(application);
+  const handleViewDetails = (application: TalentApplication) => {
+    setSelectedTalentApplication(application);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setSelectedApplication(null);
+    setSelectedTalentApplication(null);
   };
 
   const getStatusColor = (status: string) => {
@@ -454,7 +443,7 @@ function TalentDashboardContent() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white">Applications</p>
+                  <p className="text-sm font-medium text-white">Total Applications</p>
                   <p className="text-2xl font-bold text-white">
                     {dashboardStats.totalApplications}
                   </p>
@@ -470,8 +459,8 @@ function TalentDashboardContent() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white">Bookings</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</p>
+                  <p className="text-sm font-medium text-white">Accepted</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</p>
                 </div>
                 <div className="bg-purple-900/30 p-2 rounded-full">
                   <Calendar className="h-4 w-4 text-purple-400" />
@@ -538,7 +527,7 @@ function TalentDashboardContent() {
               className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Target className="h-4 w-4" />
-              Applications
+              TalentApplications
             </TabsTrigger>
             <TabsTrigger
               value="bookings"
@@ -684,11 +673,11 @@ function TalentDashboardContent() {
                       <div className="text-2xl font-bold text-blue-400">
                         {dashboardStats.totalApplications}
                       </div>
-                      <p className="text-xs text-white">Applications</p>
+                      <p className="text-xs text-white">Total Applications</p>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-400">
-                        {dashboardStats.acceptedApplications}
+                        {dashboardStats.acceptedTalentApplications}
                       </div>
                       <p className="text-xs text-white">Accepted</p>
                     </div>
@@ -790,7 +779,7 @@ function TalentDashboardContent() {
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
-                    <CardTitle className="text-white">My Applications</CardTitle>
+                    <CardTitle className="text-white">My TalentApplications</CardTitle>
                     <CardDescription className="text-gray-300">
                       Track all your gig applications and their status
                     </CardDescription>
@@ -1087,7 +1076,7 @@ function TalentDashboardContent() {
 
       {/* Application Details Modal */}
       <ApplicationDetailsModal
-        application={selectedApplication}
+        application={selectedTalentApplication}
         isOpen={isModalOpen}
         onClose={closeModal}
       />

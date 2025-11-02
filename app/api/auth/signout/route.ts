@@ -1,8 +1,8 @@
 ﻿import { NextResponse } from "next/server";
-import { createSupabaseRouteHandlerClient } from "@/lib/supabase-client";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export async function POST() {
-  const supabase = await createSupabaseRouteHandlerClient();
+  const supabase = await createSupabaseServer();
   await supabase.auth.signOut();
   // Optionally clear any custom cookies here
   return NextResponse.json({ success: true });

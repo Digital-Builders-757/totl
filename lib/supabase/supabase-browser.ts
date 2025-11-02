@@ -2,11 +2,12 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
-let client: ReturnType<typeof createBrowserClient<Database>> | null = null;
+let client: SupabaseClient<Database> | null = null;
 
-export function createSupabaseBrowser() {
+export function createSupabaseBrowser(): SupabaseClient<Database> | null {
   // Only create client on client-side
   if (typeof window === 'undefined') {
     return null;
@@ -50,7 +51,7 @@ export function createSupabaseBrowser() {
         },
       },
     }
-  );
+  ) as unknown as SupabaseClient<Database>;
 
   return client;
 }

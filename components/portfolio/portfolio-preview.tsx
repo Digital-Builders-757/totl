@@ -64,13 +64,6 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
             key={item.id}
             className="portfolio-preview-tile relative overflow-hidden bg-zinc-900 border-zinc-800 group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]"
           >
-            {/* Primary Badge */}
-            {item.is_primary && (
-              <div className="absolute top-2 right-2 z-10 bg-yellow-500 text-black px-2 py-1 rounded text-xs font-semibold flex items-center gap-1">
-                <Star className="w-3 h-3" fill="currentColor" />
-                Primary
-              </div>
-            )}
 
             {/* Image */}
             <div className="relative w-full aspect-[4/3] md:aspect-square bg-zinc-800 overflow-hidden">

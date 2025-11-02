@@ -22,6 +22,8 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
     const checkAuth = async () => {
       try {
         const supabase = createSupabaseBrowser();
+        if (!supabase) return;
+        
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {

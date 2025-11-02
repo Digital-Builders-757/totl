@@ -14,7 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 export function Toaster() {
   const { toasts } = useToast();
 
-  const getIcon = (variant?: string) => {
+  const getIcon = (variant?: string | null) => {
     switch (variant) {
       case "success":
         return <CheckCircle2 className="h-5 w-5 text-green-400 animate-scale-in flex-shrink-0" />;

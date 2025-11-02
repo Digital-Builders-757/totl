@@ -8,8 +8,19 @@ import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import type { Database } from "@/types/supabase";
 
-// Use proper database types with joined profiles data
-type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
+// Custom type matching the actual selected fields from server query
+type TalentProfile = {
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  location: string | null;
+  experience: string | null;
+  experience_years: number | null;
+  specialties: string[] | null;
+  portfolio_url: string | null;
+  created_at: string;
+  updated_at: string;
   profiles: {
     avatar_url: string | null;
     avatar_path: string | null;
@@ -118,7 +129,6 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
                   className="object-cover"
                   context="talent-profile"
                   fallbackSrc="/images/solo_logo.png"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
