@@ -1,9 +1,9 @@
 // lib/supabase-server.ts
 import "server-only";
+import * as Sentry from "@sentry/nextjs";
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/types/supabase";
 
 export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {

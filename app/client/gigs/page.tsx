@@ -18,14 +18,15 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
-import type { Database } from "@/types/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { GigStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -111,20 +112,7 @@ export default function ClientGigsPage() {
     }
   }, [user, supabase, isSupabaseConfigured, fetchGigs]);
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "expired":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  // Removed getStatusColor - now using GigStatusBadge component
 
   const getCategoryColor = (category: string) => {
     switch (category?.toLowerCase()) {
@@ -163,20 +151,7 @@ export default function ClientGigsPage() {
     return matchesSearch && matchesStatus && matchesTab;
   });
 
-  const getStatusIcon = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "completed":
-        return <CheckCircle className="h-4 w-4 text-blue-600" />;
-      case "draft":
-        return <Clock className="h-4 w-4 text-gray-600" />;
-      case "expired":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-600" />;
-    }
-  };
+  // Removed getStatusIcon - now using GigStatusBadge component
 
   // Show error state if Supabase is not configured
   if (error) {
@@ -390,12 +365,7 @@ export default function ClientGigsPage() {
                         <Badge variant="outline" className={getCategoryColor(gig.category || "")}>
                           {gig.category}
                         </Badge>
-                        <Badge variant="outline" className={getStatusColor(gig.status || "")}>
-                          <div className="flex items-center gap-1">
-                            {getStatusIcon(gig.status || "")}
-                            {gig.status}
-                          </div>
-                        </Badge>
+                        <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
                       </div>
 
                       <div className="space-y-2">

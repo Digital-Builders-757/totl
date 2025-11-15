@@ -2,12 +2,12 @@
 import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/supabase";
 import {
   type ProfileRow,
   type TalentProfileRow,
   type ClientProfileRow,
 } from "@/types/database-helpers";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";

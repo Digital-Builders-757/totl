@@ -47,6 +47,7 @@ All other documentation has been organized into the `docs/` folder.
 - `SCHEMA_SYNC_COMPLETE_OCT_23_2025.md` - **NEW** ✅ - Complete schema synchronization summary (Oct 23, 2025)
 
 ### **🎨 Features & Implementation**
+- `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
 - `UI_VISUAL_LANGUAGE.md` - 🎨 **NEW** - Visual design system and component guidelines (Jan 2025)
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
