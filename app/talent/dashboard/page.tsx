@@ -40,6 +40,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
+import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
@@ -216,21 +217,7 @@ function TalentDashboardContent() {
     setSelectedTalentApplication(null);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "accepted":
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "new":
-      case "under_review":
-      case "interview_scheduled":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "rejected":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  // Removed getStatusColor - now using ApplicationStatusBadge component
 
   const getCategoryColor = (category: string) => {
     switch (category.toLowerCase()) {
@@ -722,7 +709,7 @@ function TalentDashboardContent() {
                               <h4 className="font-semibold text-lg text-white">
                                 {app.gigs?.title}
                               </h4>
-                              <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
+                              <ApplicationStatusBadge status={app.status} showIcon={true} />
                             </div>
                             <p className="text-gray-300 font-medium">
                               {app.gigs?.client_profiles?.company_name || "Private Client"}
@@ -823,7 +810,7 @@ function TalentDashboardContent() {
                       <div className="flex-grow space-y-2">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                           <h4 className="font-semibold text-lg text-white">{app.gigs?.title}</h4>
-                          <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
+                          <ApplicationStatusBadge status={app.status} showIcon={true} />
                         </div>
                         <p className="text-gray-300 font-medium">
                           {app.gigs?.client_profiles?.company_name || "Private Client"}
@@ -898,7 +885,7 @@ function TalentDashboardContent() {
                             <h4 className="font-semibold text-lg text-white">
                               {app.gigs?.title}
                             </h4>
-                            <Badge className={getStatusColor(app.status)}>{app.status}</Badge>
+                            <ApplicationStatusBadge status={app.status} showIcon={true} />
                           </div>
                           <p className="text-gray-300 font-medium">
                             {app.gigs?.client_profiles?.company_name || "Private Client"}

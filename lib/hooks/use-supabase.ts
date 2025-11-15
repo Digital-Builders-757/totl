@@ -1,8 +1,8 @@
 "use client";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { useMemo } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
 
 /**

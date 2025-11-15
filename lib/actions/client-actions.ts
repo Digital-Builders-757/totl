@@ -1,6 +1,5 @@
 ﻿"use server";
 
-import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import {
   generateClientApplicationAdminNotificationEmail,
@@ -8,6 +7,7 @@ import {
   generateClientApplicationApprovedEmail,
   generateClientApplicationRejectedEmail,
 } from "@/lib/services/email-templates";
+import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 type ClientApplicationData = {
   firstName: string;

@@ -35,6 +35,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { SafeImage } from "@/components/ui/safe-image";
+import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
@@ -635,9 +636,7 @@ export default function ClientDashboard() {
                             {application.gigs?.title}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className={getStatusColor(application.status)}>
-                              {application.status}
-                            </Badge>
+                            <ApplicationStatusBadge status={application.status} showIcon={true} />
                             <span className="text-sm text-gray-400">
                               {application.talent_profiles?.location}
                             </span>
@@ -757,9 +756,7 @@ export default function ClientDashboard() {
                       <Badge variant="outline" className={getCategoryColor(gig.category)}>
                         {gig.category}
                       </Badge>
-                      <Badge variant="outline" className={getStatusColor(gig.status)}>
-                        {gig.status}
-                      </Badge>
+                      <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
                     </div>
 
                     <div className="space-y-2">

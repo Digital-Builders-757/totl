@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -332,18 +333,7 @@ export function AdminApplicationsClient({
                             {new Date(application.created_at).toLocaleDateString()}
                           </td>
                           <td className="py-4 px-6">
-                            <Badge
-                              className={`${
-                                application.status === "new"
-                                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white"
-                                  : application.status === "accepted"
-                                    ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
-                                    : "bg-gradient-to-r from-red-500 to-pink-500 text-white"
-                              }`}
-                            >
-                              {application.status.charAt(0).toUpperCase() +
-                                application.status.slice(1)}
-                            </Badge>
+                            <ApplicationStatusBadge status={application.status} showIcon={true} />
                           </td>
                           <td className="py-4 px-6">
                             <DropdownMenu>

@@ -27,6 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { GigStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
 
@@ -331,17 +332,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                       <div className="flex-grow space-y-2">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                           <h4 className="font-semibold text-lg text-white">{gig.title}</h4>
-                          <Badge
-                            className={`${
-                              gig.status === "active"
-                                ? "bg-green-900/30 text-green-400 border-green-700"
-                                : gig.status === "draft"
-                                  ? "bg-gray-900/30 text-gray-400 border-gray-700"
-                                  : "bg-red-900/30 text-red-400 border-red-700"
-                            }`}
-                          >
-                            {gig.status.charAt(0).toUpperCase() + gig.status.slice(1)}
-                          </Badge>
+                          <GigStatusBadge status={gig.status} showIcon={true} />
                         </div>
                         <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                           <span className="flex items-center gap-1">

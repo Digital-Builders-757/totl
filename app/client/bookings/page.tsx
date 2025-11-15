@@ -14,9 +14,9 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookingStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientBookings, cancelBooking, updateBookingStatus } from "@/lib/actions/booking-actions";
 import type { Database } from "@/types/supabase";
@@ -90,35 +90,7 @@ export default function ClientBookingsPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "confirmed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "confirmed":
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-      case "pending":
-        return <Clock className="h-4 w-4 text-yellow-600" />;
-      case "completed":
-        return <CheckCircle2 className="h-4 w-4 text-blue-600" />;
-      case "cancelled":
-        return <XCircle className="h-4 w-4 text-red-600" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-600" />;
-    }
-  };
+  // Removed getStatusColor and getStatusIcon - now using BookingStatusBadge component
 
   const filteredBookings = bookings.filter((booking) => {
     if (activeTab === "all") return true;
@@ -306,12 +278,7 @@ export default function ClientBookingsPage() {
                             )}
                           </div>
                         </div>
-                        <Badge variant="outline" className={getStatusColor(booking.status)}>
-                          <div className="flex items-center gap-1">
-                            {getStatusIcon(booking.status)}
-                            {booking.status}
-                          </div>
-                        </Badge>
+                        <BookingStatusBadge status={booking.status} showIcon={true} />
                       </div>
                     </CardHeader>
                     <CardContent>
