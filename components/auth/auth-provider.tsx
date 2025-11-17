@@ -161,13 +161,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
           // Check if this is a fresh sign-in (not an initial session load)
-          if (hasHandledInitialSession) {
+          // Also check if we're not on the login page (where server action handles redirect)
+          if (hasHandledInitialSession && !pathname.startsWith("/login")) {
             // Also check if user is not already on an allowed page
-            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role"];
+            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role", "/verification-pending"];
             const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
 
             if (!isOnAllowedPage) {
               // Redirect based on role - only for actual sign-ins
+              // Use router.refresh() to clear cache before redirect
+              router.refresh();
               if (role === "talent") {
                 router.push("/talent/dashboard");
               } else if (role === "client") {
@@ -220,7 +223,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session);
       setIsEmailVerified(data.session.user.email_confirmed_at !== null);
 
-      // Fetch user role
+      // Fetch user role with a fresh query
       try {
         const { data: profileData } = (await supabase
           .from("profiles")
@@ -231,19 +234,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
 
-        // Redirect based on role
-        if (role === "talent") {
-          router.push("/talent/dashboard");
-        } else if (role === "client") {
-          router.push("/client/dashboard");
-        } else if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/choose-role");
-        }
+        // Note: The login page uses handleLoginRedirect() server action for redirect
+        // This ensures fresh session data and proper cache clearing
+        // We don't redirect here to avoid conflicts with server-side redirect
       } catch (profileError) {
         console.error("Error fetching profile on sign in:", profileError);
-        router.push("/choose-role");
+        // Don't redirect here - let the server action handle it
       }
     }
 

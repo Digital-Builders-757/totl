@@ -22,7 +22,7 @@ export default function Login() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [verified, setVerified] = useState(false);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
-  const { signIn } = useAuth();
+  const { signIn, userRole } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
@@ -112,7 +112,16 @@ export default function Login() {
         // If server redirect fails, fall back to client-side redirect
         console.error("Server redirect failed, using client redirect:", error);
         // Force a hard refresh to clear any cached state
-        window.location.href = "/talent/dashboard";
+        // Use userRole from auth provider to redirect correctly
+        const redirectPath =
+          userRole === "talent"
+            ? "/talent/dashboard"
+            : userRole === "client"
+              ? "/client/dashboard"
+              : userRole === "admin"
+                ? "/admin/dashboard"
+                : "/choose-role";
+        window.location.href = redirectPath;
       }
     } catch (error) {
       console.error("Login error:", error);

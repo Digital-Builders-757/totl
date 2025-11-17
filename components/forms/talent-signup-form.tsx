@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ensureProfilesAfterSignup } from "@/lib/actions/auth-actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -102,6 +103,19 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         }
         setIsSubmitting(false);
         return;
+      }
+
+      // Ensure profiles are created after signup (backup to database trigger)
+      // This ensures profiles exist even if the trigger fails or has timing issues
+      try {
+        const profileResult = await ensureProfilesAfterSignup();
+        if (profileResult.error) {
+          console.error("Error ensuring profiles after signup:", profileResult.error);
+          // Don't fail signup - user was created, profiles might be created by trigger
+        }
+      } catch (profileError) {
+        console.error("Unexpected error ensuring profiles after signup:", profileError);
+        // Don't fail signup - user was created
       }
 
       toast({
