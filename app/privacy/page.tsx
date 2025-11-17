@@ -21,7 +21,7 @@ export default function PrivacyPolicyPage() {
             {/* Introduction */}
             <section>
               <p className="text-gray-300 leading-relaxed">
-                At TOTL Agency ("we," "our," or "us"), we are committed to protecting your privacy and personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our platform and services.
+                At TOTL Agency (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we are committed to protecting your privacy and personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our platform and services.
               </p>
               <p className="text-gray-300 leading-relaxed mt-4">
                 By using TOTL Agency, you consent to the practices described in this Privacy Policy.
@@ -162,7 +162,7 @@ export default function PrivacyPolicyPage() {
 
             {/* 7. Children's Privacy */}
             <section>
-              <h2 className="text-3xl font-bold mb-4">7. Children's Privacy</h2>
+              <h2 className="text-3xl font-bold mb-4">7. Children&apos;s Privacy</h2>
               <p className="text-gray-300 leading-relaxed">
                 Our Services are not intended for individuals under 18 years of age. We do not knowingly collect personal information from children. If we become aware that a child has provided us with personal information, we will take steps to delete such information.
               </p>
@@ -205,7 +205,7 @@ export default function PrivacyPolicyPage() {
                   <li>Right to non-discrimination for exercising your privacy rights</li>
                 </ul>
                 <p className="mt-4">
-                  To exercise these rights, contact us at privacy@thetotlagency.com with "California Privacy Rights" in the subject line.
+                  To exercise these rights, contact us at privacy@thetotlagency.com with &quot;California Privacy Rights&quot; in the subject line.
                 </p>
               </div>
             </section>
@@ -218,7 +218,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Right of access to your personal data</li>
                   <li>Right to rectification of inaccurate data</li>
-                  <li>Right to erasure ("right to be forgotten")</li>
+                  <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
                   <li>Right to restrict processing</li>
                   <li>Right to data portability</li>
                   <li>Right to object to processing</li>
@@ -234,7 +234,7 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-3xl font-bold mb-4">12. Changes to This Privacy Policy</h2>
               <p className="text-gray-300 leading-relaxed">
-                We may update this Privacy Policy from time to time to reflect changes in our practices or for legal, regulatory, or operational reasons. We will notify you of material changes by email or by posting a notice on our platform. The "Last Updated" date at the top indicates when this policy was last revised.
+                  We may update this Privacy Policy from time to time to reflect changes in our practices or for legal, regulatory, or operational reasons. We will notify you of material changes by email or by posting a notice on our platform. The &quot;Last Updated&quot; date at the top indicates when this policy was last revised.
               </p>
             </section>
 
@@ -259,7 +259,7 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-3xl font-bold mb-4">14. Do Not Track Signals</h2>
               <p className="text-gray-300 leading-relaxed">
-                Some browsers support "Do Not Track" signals. Currently, we do not respond to Do Not Track signals, as there is no industry standard for compliance. We will continue to monitor developments in this area.
+                Some browsers support &quot;Do Not Track&quot; signals. Currently, we do not respond to Do Not Track signals, as there is no industry standard for compliance. We will continue to monitor developments in this area.
               </p>
             </section>
 
@@ -279,7 +279,7 @@ export default function PrivacyPolicyPage() {
                   For GDPR-related inquiries (European users), please contact our Data Protection Officer at dpo@thetotlagency.com.
                 </p>
                 <p>
-                  For CCPA-related inquiries (California residents), please email privacy@thetotlagency.com with "California Privacy Rights" in the subject line.
+                  For CCPA-related inquiries (California residents), please email privacy@thetotlagency.com with &quot;California Privacy Rights&quot; in the subject line.
                 </p>
               </div>
             </section>

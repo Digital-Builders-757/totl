@@ -122,7 +122,7 @@ export default function UIShowcasePage() {
 
           {/* 6. Brand Accent Ramp */}
           <section>
-            <h2 className="text-3xl font-bold mb-6">6. Brand "Back-Light" Ramp</h2>
+            <h2 className="text-3xl font-bold mb-6">6. Brand &quot;Back-Light&quot; Ramp</h2>
             <div className="grid grid-cols-4 gap-4">
               <div className="bg-[var(--oklch-brand-1)] p-6 rounded-xl text-center">
                 <p className="text-sm font-semibold text-black">Brand 1</p>

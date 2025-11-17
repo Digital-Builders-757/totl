@@ -4,7 +4,6 @@ import { ErrorState } from "./error-state";
 import TalentClient from "./talent-client";
 import { SignInGate } from "@/components/auth/sign-in-gate";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent static generation issues
 export const dynamic = "force-dynamic";

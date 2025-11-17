@@ -21,7 +21,7 @@ export default function TermsOfServicePage() {
             {/* Introduction */}
             <section>
               <p className="text-gray-300 leading-relaxed">
-                Welcome to TOTL Agency ("we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of our platform, services, and website located at thetotlagency.com (collectively, the "Services"). By accessing or using our Services, you agree to be bound by these Terms.
+                Welcome to TOTL Agency (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). These Terms of Service (&quot;Terms&quot;) govern your access to and use of our platform, services, and website located at thetotlagency.com (collectively, the &quot;Services&quot;). By accessing or using our Services, you agree to be bound by these Terms.
               </p>
               <p className="text-gray-300 leading-relaxed mt-4">
                 If you do not agree to these Terms, please do not use our Services.
@@ -195,7 +195,7 @@ export default function TermsOfServicePage() {
               <h2 className="text-3xl font-bold mb-4">10. Disclaimer of Warranties</h2>
               <div className="text-gray-300 leading-relaxed space-y-4">
                 <p className="font-semibold text-white">
-                  THE SERVICES ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+                  THE SERVICES ARE PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
                 </p>
                 <p>
                   We do not warrant that:
@@ -275,7 +275,7 @@ export default function TermsOfServicePage() {
 
                 <h3 className="text-xl font-semibold text-white mt-6">Arbitration</h3>
                 <p>
-                  Any disputes arising from these Terms or your use of the Services shall be resolved through binding arbitration in accordance with the American Arbitration Association's rules, rather than in court, except that you may assert claims in small claims court if your claims qualify.
+                  Any disputes arising from these Terms or your use of the Services shall be resolved through binding arbitration in accordance with the American Arbitration Association&apos;s rules, rather than in court, except that you may assert claims in small claims court if your claims qualify.
                 </p>
               </div>
             </section>

@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { createServerClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
@@ -93,11 +94,37 @@ export async function middleware(req: NextRequest) {
 
   if (isAuthRoute && user) {
     // If the user is logged in and tries to access an auth page, redirect to their dashboard based on role.
-    const { data: profile } = await supabase
+    // Force a fresh profile check to avoid stale data
+    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
+
+    // If profile doesn't exist, ensure it's created (fallback if trigger failed)
+    if (profileError && profileError.code === "PGRST116") {
+      // Extract name from user metadata
+      const firstName = (user.user_metadata?.first_name as string) || "";
+      const lastName = (user.user_metadata?.last_name as string) || "";
+      const role = (user.user_metadata?.role as string) || "talent";
+
+      // Create display name
+      let displayName = "";
+      if (firstName && lastName) {
+        displayName = `${firstName} ${lastName}`;
+      } else if (firstName) {
+        displayName = firstName;
+      } else if (lastName) {
+        displayName = lastName;
+      } else {
+        displayName = user.email?.split("@")[0] || "User";
+      }
+
+      // Create profile (using admin client would be better, but middleware can't use it)
+      // For now, redirect to choose-role and let the app handle profile creation
+      return NextResponse.redirect(new URL("/choose-role", req.url));
+    }
 
     if (profile?.role === "talent") {
       return NextResponse.redirect(new URL("/talent/dashboard", req.url));
@@ -123,11 +150,34 @@ export async function middleware(req: NextRequest) {
 
   // If we have a user, we can proceed with role checks
   if (user) {
+    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
+
+    // Log profile query errors to Sentry (except PGRST116 which is expected when profile doesn't exist)
+    if (profileError && profileError.code !== "PGRST116") {
+      Sentry.captureException(new Error(`Middleware profile query error: ${profileError.message}`), {
+        tags: {
+          feature: "middleware",
+          error_type: "profile_query_error",
+          error_code: profileError.code || "unknown",
+          path: path,
+        },
+        extra: {
+          userId: user.id,
+          userEmail: user.email,
+          path: path,
+          errorCode: profileError.code,
+          errorDetails: profileError.details,
+          errorMessage: profileError.message,
+          timestamp: new Date().toISOString(),
+        },
+        level: "error",
+      });
+    }
 
     // Handle case where user exists in auth but not in profiles table
     if (profileError && profileError.code === "PGRST116") {
@@ -138,22 +188,189 @@ export async function middleware(req: NextRequest) {
       return res;
     }
 
-    // If the user has a profile but no role, and is not already on the choose-role page, redirect them there.
+    // If the user has a profile but no role, try to determine it before redirecting
     if (!profile?.role && path !== "/choose-role") {
+      // Try to determine role from talent_profiles or client_profiles
+      const { data: talentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (talentProfile) {
+        // Update profile with talent role
+        await supabase
+          .from("profiles")
+          .update({ role: "talent" })
+          .eq("id", user.id);
+        // Redirect to talent dashboard
+        return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+      }
+
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (clientProfile) {
+        // Update profile with client role
+        await supabase
+          .from("profiles")
+          .update({ role: "client" })
+          .eq("id", user.id);
+        // Redirect to client dashboard
+        return NextResponse.redirect(new URL("/client/dashboard", req.url));
+      }
+
+      // If we can't determine role, check user metadata
+      const roleFromMetadata = (user.user_metadata?.role as string) || null;
+      if (roleFromMetadata) {
+        // Update profile with metadata role
+        await supabase
+          .from("profiles")
+          .update({ role: roleFromMetadata as "talent" | "client" | "admin" })
+          .eq("id", user.id);
+        
+        // Redirect based on metadata role
+        if (roleFromMetadata === "talent") {
+          return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+        } else if (roleFromMetadata === "client") {
+          return NextResponse.redirect(new URL("/client/dashboard", req.url));
+        } else if (roleFromMetadata === "admin") {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
+      }
+
+      // Only redirect to choose-role if we truly can't determine the role
       return NextResponse.redirect(new URL("/choose-role", req.url));
     }
 
     // If the user has a role, redirect them from the choose-role page to their dashboard.
-    if (profile?.role && path === "/choose-role") {
-      if (profile.role === "talent") {
-        return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+    // But first, re-fetch the profile to ensure we have the latest data (in case it was just updated)
+    if (path === "/choose-role") {
+      // Re-fetch profile to get the latest role (in case it was just updated above)
+      // Add a small delay to ensure any pending updates have completed
+      // Use maybeSingle() to prevent 406 errors
+      const { data: latestProfile, error: latestError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      // If we got a profile with a role, redirect immediately
+      if (latestProfile?.role) {
+        if (latestProfile.role === "talent") {
+          return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+        }
+        if (latestProfile.role === "client") {
+          return NextResponse.redirect(new URL("/client/dashboard", req.url));
+        }
+        if (latestProfile.role === "admin") {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
       }
-      if (profile.role === "client") {
-        return NextResponse.redirect(new URL("/client/dashboard", req.url));
+      
+      // If no role found, try one more time to determine it from talent_profiles/client_profiles
+      // This handles the case where the profile update above hasn't propagated yet
+      if (!latestProfile?.role && !latestError) {
+        const { data: talentProfile } = await supabase
+          .from("talent_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (talentProfile) {
+          // Update profile with talent role
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ role: "talent" })
+            .eq("id", user.id);
+          
+          if (!updateError) {
+            // Small delay to ensure update propagates
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            // Verify the update before redirecting
+            const { data: verifyProfile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", user.id)
+              .maybeSingle();
+            
+            if (verifyProfile?.role === "talent") {
+              return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+            }
+          }
+        }
+
+        const { data: clientProfile } = await supabase
+          .from("client_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (clientProfile) {
+          // Update profile with client role
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ role: "client" })
+            .eq("id", user.id);
+          
+          if (!updateError) {
+            // Small delay to ensure update propagates
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            // Verify the update before redirecting
+            const { data: verifyProfile } = await supabase
+              .from("profiles")
+              .select("role")
+              .eq("id", user.id)
+              .maybeSingle();
+            
+            if (verifyProfile?.role === "client") {
+              return NextResponse.redirect(new URL("/client/dashboard", req.url));
+            }
+          }
+        }
       }
-      if (profile.role === "admin") {
-        return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      
+      // If no role, allow user to stay on choose-role page to select one
+      // But log if we've been redirecting in a loop (check for redirect count)
+      const redirectCount = parseInt(req.headers.get("x-redirect-count") || "0");
+      if (redirectCount > 3) {
+        // Check for talent/client profiles to include in the error report
+        const { data: checkTalentProfile } = await supabase
+          .from("talent_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        const { data: checkClientProfile } = await supabase
+          .from("client_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        Sentry.captureMessage("Potential redirect loop detected on /choose-role", {
+          tags: {
+            feature: "middleware",
+            error_type: "redirect_loop",
+            path: path,
+          },
+          extra: {
+            userId: user.id,
+            userEmail: user.email,
+            path: path,
+            redirectCount: redirectCount,
+            profileData: latestProfile,
+            hasTalentProfile: !!checkTalentProfile,
+            hasClientProfile: !!checkClientProfile,
+            timestamp: new Date().toISOString(),
+          },
+          level: "warning",
+        });
       }
+      
+      return res;
     }
 
     // If the user has a role and is on the root, redirect to their dashboard

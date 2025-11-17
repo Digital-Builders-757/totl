@@ -111,11 +111,34 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         setSession(session);
 
-        const { data: profileData } = (await supabase
+        // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
-          .single()) as { data: { role: string } | null; error: unknown };
+          .maybeSingle();
+
+        // Log profile query errors to Sentry for debugging
+        if (profileError && profileError.code !== "PGRST116") {
+          // Import Sentry dynamically to avoid SSR issues
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.captureException(new Error(`Auth provider profile query error: ${profileError.message}`), {
+            tags: {
+              feature: "auth",
+              error_type: "auth_provider_profile_error",
+              error_code: profileError.code || "unknown",
+            },
+            extra: {
+              userId: session.user.id,
+              userEmail: session.user.email,
+              errorCode: profileError.code,
+              errorDetails: profileError.details,
+              errorMessage: profileError.message,
+              timestamp: new Date().toISOString(),
+            },
+            level: "error",
+          });
+        }
 
         if (!mounted) return;
 
@@ -147,11 +170,34 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === "SIGNED_IN" && session) {
         try {
-          const { data: profileData } = (await supabase
+          // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+          const { data: profileData, error: profileError } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", session.user.id)
-            .single()) as { data: { role: string } | null; error: unknown };
+            .maybeSingle();
+
+          // Log profile query errors to Sentry for debugging
+          if (profileError && profileError.code !== "PGRST116") {
+            const Sentry = await import("@sentry/nextjs");
+            Sentry.captureException(new Error(`Auth state change profile query error: ${profileError.message}`), {
+              tags: {
+                feature: "auth",
+                error_type: "auth_state_change_profile_error",
+                error_code: profileError.code || "unknown",
+              },
+              extra: {
+                userId: session.user.id,
+                userEmail: session.user.email,
+                pathname: pathname,
+                errorCode: profileError.code,
+                errorDetails: profileError.details,
+                errorMessage: profileError.message,
+                timestamp: new Date().toISOString(),
+              },
+              level: "error",
+            });
+          }
 
           if (!mounted) return;
 
@@ -161,13 +207,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
           // Check if this is a fresh sign-in (not an initial session load)
-          if (hasHandledInitialSession) {
+          // Also check if we're not on the login page (where server action handles redirect)
+          if (hasHandledInitialSession && !pathname.startsWith("/login")) {
             // Also check if user is not already on an allowed page
-            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role"];
+            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role", "/verification-pending"];
             const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
 
             if (!isOnAllowedPage) {
               // Redirect based on role - only for actual sign-ins
+              // Use router.refresh() to clear cache before redirect
+              router.refresh();
               if (role === "talent") {
                 router.push("/talent/dashboard");
               } else if (role === "client") {
@@ -220,7 +269,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session);
       setIsEmailVerified(data.session.user.email_confirmed_at !== null);
 
-      // Fetch user role
+      // Fetch user role with a fresh query
       try {
         const { data: profileData } = (await supabase
           .from("profiles")
@@ -231,19 +280,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
 
-        // Redirect based on role
-        if (role === "talent") {
-          router.push("/talent/dashboard");
-        } else if (role === "client") {
-          router.push("/client/dashboard");
-        } else if (role === "admin") {
-          router.push("/admin/dashboard");
-        } else {
-          router.push("/choose-role");
-        }
+        // Note: The login page uses handleLoginRedirect() server action for redirect
+        // This ensures fresh session data and proper cache clearing
+        // We don't redirect here to avoid conflicts with server-side redirect
       } catch (profileError) {
         console.error("Error fetching profile on sign in:", profileError);
-        router.push("/choose-role");
+        // Don't redirect here - let the server action handle it
       }
     }
 
@@ -276,41 +318,92 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
       
-      // Sign out from Supabase
+      // Sign out from Supabase - this clears server-side session and cookies
       const { error } = await supabase.auth.signOut();
       
-      // Clear any cached data
+      // Clear all client-side storage and cache
       if (typeof window !== "undefined") {
-        // Clear localStorage using environment variable
+        // Clear localStorage - remove auth-related items
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
         if (supabaseUrl) {
-          localStorage.removeItem("sb-" + supabaseUrl.split("//")[1].split(".")[0] + "-auth-token");
+          // Clear Supabase-specific localStorage keys
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
         }
         
-        // Clear sessionStorage
-        sessionStorage.clear();
-        
-        // Clear any other auth-related storage
-        Object.keys(localStorage).forEach(key => {
-          if (key.includes("supabase") || key.includes("auth")) {
+        // Clear any other auth-related localStorage items
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
             localStorage.removeItem(key);
           }
         });
+        
+        // Clear all sessionStorage
+        sessionStorage.clear();
+        
+        // Clear Supabase auth cookies specifically
+        // Supabase SSR stores session in cookies with names like:
+        // - sb-<project-ref>-auth-token
+        // - sb-<project-ref>-auth-token.0, sb-<project-ref>-auth-token.1, etc.
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          const cookieBaseName = `sb-${projectRef}-auth-token`;
+          
+          // Clear base cookie and chunked cookies (0-9)
+          for (let i = 0; i < 10; i++) {
+            const cookieName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
+            // Clear with different path and domain combinations
+            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+            if (window.location.hostname.includes(".")) {
+              document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+            }
+          }
+        }
       }
       
-      // Force redirect to login
-      router.push("/login");
-      router.refresh(); // Force a refresh to clear any cached data
+      // Use hard redirect to ensure complete session clear and page reload
+      // This bypasses Next.js router cache and forces a full page reload
+      if (typeof window !== "undefined") {
+        // Small delay to ensure state is cleared before redirect
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.location.href = "/login";
+      } else {
+        // Fallback for server-side (shouldn't happen, but just in case)
+        router.push("/login");
+        router.refresh();
+      }
       
       return { error };
     } catch (error) {
       console.error("Error during sign out:", error);
-      // Even if there's an error, clear local state and redirect
+      // Even if there's an error, clear local state and force redirect
       setUser(null);
       setSession(null);
       setUserRole(null);
       setIsEmailVerified(false);
-      router.push("/login");
+      setHasHandledInitialSession(false);
+      
+      // Force hard redirect even on error
+      if (typeof window !== "undefined") {
+        // Clear storage on error too
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
+        }
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
+            localStorage.removeItem(key);
+          }
+        });
+        sessionStorage.clear();
+        window.location.href = "/login";
+      } else {
+        router.push("/login");
+        router.refresh();
+      }
+      
       return { error: error as AuthError };
     }
   };

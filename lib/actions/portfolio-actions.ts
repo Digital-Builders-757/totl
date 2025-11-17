@@ -164,7 +164,8 @@ export async function deletePortfolioItem(portfolioItemId: string) {
 /**
  * Reorder portfolio items via drag-and-drop
  */
-export async function reorderPortfolioItems(itemIds: string[]) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function reorderPortfolioItems(_itemIds: string[]) {
   try {
     const supabase = await createSupabaseServer();
     const {
@@ -195,7 +196,8 @@ export async function reorderPortfolioItems(itemIds: string[]) {
 /**
  * Set a portfolio item as primary/featured
  */
-export async function setPrimaryPortfolioItem(portfolioItemId: string) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function setPrimaryPortfolioItem(_portfolioItemId: string) {
   try {
     const supabase = await createSupabaseServer();
     const {

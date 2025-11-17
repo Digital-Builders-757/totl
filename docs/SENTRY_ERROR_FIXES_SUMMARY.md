@@ -102,7 +102,7 @@ beforeSend(event, hint) {
 }
 ```
 
-**Client-Side (`sentry.client.config.ts`):**
+**Client-Side (`instrumentation-client.ts` - Next.js 15.3+ convention):**
 ```typescript
 ignoreErrors: [
   "top.GLOBALS",
@@ -130,7 +130,7 @@ ignoreErrors: [
 
 **Files Changed:**
 - ✅ `sentry.server.config.ts`
-- ✅ `sentry.client.config.ts`
+- ✅ `instrumentation-client.ts` (migrated from deprecated `sentry.client.config.ts`)
 - ✅ `sentry.edge.config.ts`
 
 **Errors Fixed:** NEXTJS-A, H, K (3 dev-only errors)
@@ -324,7 +324,7 @@ ignoreErrors: [
 2. ✅ `app/talent/page.tsx` - Removed event handlers from Server Component
 3. ✅ `app/talent/error-state.tsx` - **NEW** Client Component for errors
 4. ✅ `sentry.server.config.ts` - Smart dev error filtering
-5. ✅ `sentry.client.config.ts` - Client-side error filtering  
+5. ✅ `instrumentation-client.ts` - Client-side error filtering (Next.js 15.3+)  
 6. ✅ `sentry.edge.config.ts` - Edge runtime filtering
 7. ✅ `docs/TROUBLESHOOTING_GUIDE.md` - Comprehensive documentation
 8. ✅ `tests/verification/sentry-fixes-verification.spec.ts` - **NEW** Test suite

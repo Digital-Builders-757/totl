@@ -3,6 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+// import { SupabaseIntegration } from "@supabase/sentry-js-integration"; // Disabled - requires client instance at init
 
 // Determine which Sentry DSN to use based on environment
 const isProduction = process.env.VERCEL_ENV === "production";
@@ -11,14 +12,55 @@ const isProduction = process.env.VERCEL_ENV === "production";
 const PRODUCTION_DSN = process.env.SENTRY_DSN_PROD;
 
 // Development DSN (fallback for local development)
+// Using sentry-yellow-notebook DSN for all environments
 const DEVELOPMENT_DSN = 
   process.env.SENTRY_DSN_DEV ||
-  "https://3b65d7c0706cdd0196906fa0d45c0731@o4510190992424960.ingest.us.sentry.io/4510191032926215";
+  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
 
 // Select the appropriate DSN
 const SENTRY_DSN = isProduction && PRODUCTION_DSN 
   ? PRODUCTION_DSN 
   : DEVELOPMENT_DSN;
+
+// Log DSN status for debugging (only in development)
+if (process.env.NODE_ENV === "development") {
+  // Extract project ID from DSN for verification
+  const extractProjectId = (dsn: string | undefined): string | null => {
+    if (!dsn) return null;
+    const match = dsn.match(/\/(\d+)$/);
+    return match ? match[1] : null;
+  };
+  
+  const currentProjectId = extractProjectId(SENTRY_DSN);
+  const expectedProjectId = "4510191108292609";
+  const projectMatch = currentProjectId === expectedProjectId;
+  
+  console.log("[Sentry Server] Initializing with:", {
+    isProduction,
+    hasProductionDSN: !!PRODUCTION_DSN,
+    hasDevelopmentDSN: !!DEVELOPMENT_DSN,
+    usingDSN: SENTRY_DSN ? "✅ Configured" : "❌ Missing",
+    environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
+    dsnPrefix: SENTRY_DSN ? SENTRY_DSN.substring(0, 30) + "..." : "N/A",
+    projectId: currentProjectId || "Unknown",
+    projectMatch: projectMatch ? "✅ Correct" : "❌ Wrong Project",
+    expectedProjectId: expectedProjectId,
+  });
+  
+  // Test Sentry connection in development
+  if (SENTRY_DSN) {
+    if (projectMatch) {
+      console.log("[Sentry Server] ✅ Sentry is configured correctly for sentry-yellow-notebook");
+    } else {
+      console.warn(`[Sentry Server] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`);
+      console.warn("[Sentry Server] ⚠️ Update your .env.local DSNs to point to the correct project");
+    }
+    console.log("[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+    console.log("[Sentry Server] Diagnostic endpoint: http://localhost:3000/api/sentry-diagnostic");
+  } else {
+    console.warn("[Sentry Server] ⚠️ Sentry DSN is missing - errors will not be tracked!");
+  }
+}
 
 Sentry.init({
   dsn: SENTRY_DSN,
@@ -26,18 +68,30 @@ Sentry.init({
   // Adjust sample rate based on environment
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-  // Set environment
-  environment: process.env.VERCEL_ENV || "development",
+  // Set environment (matches guide pattern)
+  environment:
+    process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
+    process.env.VERCEL_ENV ??
+    process.env.NODE_ENV ??
+    "development",
 
   // Enable logs to be sent to Sentry (enabled in development for better debugging)
   enableLogs: true,
   
-  // Set debug mode to see what's happening
-  debug: process.env.NODE_ENV === "development",
+  // Note: debug option requires debug bundle which isn't available in Next.js
+  // Use console.log statements instead for debugging in development
+  // debug: false, // Disabled to avoid "Cannot initialize SDK with debug option using a non-debug bundle" warning
 
   // Enable sending user PII (Personally Identifiable Information)
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false, // Set to false for privacy in production
+
+  // Integrations: Supabase - automatically instruments Supabase queries
+  integrations: [
+    // Note: SupabaseIntegration requires a client instance, which isn't available at init time
+    // We'll instrument Supabase queries manually where needed
+    // new SupabaseIntegration(), // Disabled - requires client instance
+  ],
 
   // Ignore common errors
   ignoreErrors: [

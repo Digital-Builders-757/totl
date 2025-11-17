@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, Star, GripVertical, Edit2, Check, X } from "lucide-react";
+import { Trash2, GripVertical, Edit2, Check, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   deletePortfolioItem,
   reorderPortfolioItems,
-  setPrimaryPortfolioItem,
   updatePortfolioItem,
 } from "@/lib/actions/portfolio-actions";
 import type { Database } from "@/types/supabase";
@@ -102,26 +101,6 @@ export function PortfolioGallery({ initialItems, onUpdate }: PortfolioGalleryPro
     }
   };
 
-  const handleSetPrimary = async (itemId: string) => {
-    const result = await setPrimaryPortfolioItem(itemId);
-
-    if (result.error) {
-      toast({
-        title: "Update failed",
-        description: result.error,
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Primary image set",
-        description: "Featured image updated successfully",
-      });
-      // Update local state - is_primary field removed from schema
-      // Items are already in the correct order
-      setItems([...items]);
-      onUpdate?.();
-    }
-  };
 
   const handleStartEdit = (item: PortfolioItem) => {
     setEditingId(item.id);

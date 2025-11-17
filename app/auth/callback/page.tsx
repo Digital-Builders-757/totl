@@ -97,44 +97,127 @@ export default async function AuthCallbackPage({
 
       // Success! Check if profile exists and update email verification status
       if (data.session?.user) {
+        const user = data.session.user;
+        
         // Check if profile exists
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
-          .select("role,email_verified")
-          .eq("id", data.session.user.id)
+          .select("role,email_verified,display_name")
+          .eq("id", user.id)
           .single();
 
+        // If profile doesn't exist, create it with name from user metadata
         if (profileError && profileError.code === "PGRST116") {
-          // Profile doesn't exist - this shouldn't happen with our trigger, but handle it
-          console.error("Profile not found for user:", data.session.user.id);
-          return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-              <Card className="w-full max-w-md">
-                <CardHeader>
-                  <CardTitle className="text-center">Profile Not Found</CardTitle>
-                  <CardDescription className="text-center">
-                    Your account was created but profile setup failed
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                      <XCircle className="h-8 w-8 text-red-600" />
+          // Extract name from user metadata
+          const firstName = (user.user_metadata?.first_name as string) || "";
+          const lastName = (user.user_metadata?.last_name as string) || "";
+          const role = (user.user_metadata?.role as string) || "talent";
+
+          // Create display name
+          let displayName = "";
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (lastName) {
+            displayName = lastName;
+          } else {
+            displayName = user.email?.split("@")[0] || "User";
+          }
+
+          // Create profile
+          const { error: insertError } = await supabase.from("profiles").insert({
+            id: user.id,
+            role: role as "talent" | "client" | "admin",
+            display_name: displayName,
+            email_verified: user.email_confirmed_at !== null,
+          });
+
+          if (insertError) {
+            console.error("Error creating profile:", insertError);
+            return (
+              <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+                <Card className="w-full max-w-md">
+                  <CardHeader>
+                    <CardTitle className="text-center">Profile Setup Error</CardTitle>
+                    <CardDescription className="text-center">
+                      Your account was created but profile setup failed
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col items-center justify-center py-8">
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                        <XCircle className="h-8 w-8 text-red-600" />
+                      </div>
+                      <h3 className="text-xl font-medium text-red-800 mb-2">Setup Error</h3>
+                      <p className="text-gray-600 text-center mb-4">
+                        Please contact support to complete your account setup.
+                      </p>
                     </div>
-                    <h3 className="text-xl font-medium text-red-800 mb-2">Setup Error</h3>
-                    <p className="text-gray-600 text-center mb-4">
-                      Please contact support to complete your account setup.
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                  <Button asChild>
-                    <a href="/login">Return to Login</a>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          );
+                  </CardContent>
+                  <CardFooter className="flex justify-center">
+                    <Button asChild>
+                      <a href="/login">Return to Login</a>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            );
+          }
+
+          // Create role-specific profile if talent
+          if (role === "talent") {
+            const { error: talentError } = await supabase.from("talent_profiles").insert({
+              user_id: user.id,
+              first_name: firstName,
+              last_name: lastName,
+            });
+
+            if (talentError) {
+              console.error("Error creating talent profile:", talentError);
+              // Don't fail - profile was created
+            }
+          }
+
+          // Re-fetch profile after creation
+          const { data: newProfile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          // Redirect based on role
+          if (newProfile?.role === "talent") {
+            redirect("/talent/dashboard");
+          } else if (newProfile?.role === "client") {
+            redirect("/client/dashboard");
+          } else if (newProfile?.role === "admin") {
+            redirect("/admin/dashboard");
+          } else {
+            redirect("/choose-role");
+          }
+        }
+
+        // If profile exists but display_name is missing/empty, update it
+        if (profile && (!profile.display_name || profile.display_name.trim() === "")) {
+          const firstName = (user.user_metadata?.first_name as string) || "";
+          const lastName = (user.user_metadata?.last_name as string) || "";
+
+          let displayName = "";
+          if (firstName && lastName) {
+            displayName = `${firstName} ${lastName}`;
+          } else if (firstName) {
+            displayName = firstName;
+          } else if (lastName) {
+            displayName = lastName;
+          } else {
+            displayName = user.email?.split("@")[0] || "User";
+          }
+
+          await supabase
+            .from("profiles")
+            .update({ display_name: displayName })
+            .eq("id", user.id);
         }
 
         // Update email verification status if not already verified
@@ -142,7 +225,7 @@ export default async function AuthCallbackPage({
           await supabase
             .from("profiles")
             .update({ email_verified: true })
-            .eq("id", data.session.user.id);
+            .eq("id", user.id);
         }
 
         // Redirect based on role

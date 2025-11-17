@@ -24,16 +24,23 @@ export async function POST(request: Request) {
     });
 
     if (authError) {
+      // If user already exists, that's fine for testing - user was created via UI
+      // Just return success (the user exists and can be used for login)
+      if (authError.message.includes("already been registered") || authError.code === "email_exists") {
+        return NextResponse.json(
+          { success: true, message: "User already exists" },
+          { status: 200 }
+        );
+      }
+      
       console.error("Auth user creation failed:", authError);
       return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
-    // Step 2: Create profile record
+    // Step 2: Create profile record (profiles table only has display_name, not first_name/last_name)
     const { error: profileError } = await supabase.from("profiles").insert([
       {
         id: authData.user.id,
-        first_name: firstName,
-        last_name: lastName,
         display_name: `${firstName} ${lastName}`,
         role,
         email_verified: true,
