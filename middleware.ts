@@ -163,22 +163,87 @@ export async function middleware(req: NextRequest) {
       return res;
     }
 
-    // If the user has a profile but no role, and is not already on the choose-role page, redirect them there.
+    // If the user has a profile but no role, try to determine it before redirecting
     if (!profile?.role && path !== "/choose-role") {
+      // Try to determine role from talent_profiles or client_profiles
+      const { data: talentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (talentProfile) {
+        // Update profile with talent role
+        await supabase
+          .from("profiles")
+          .update({ role: "talent" })
+          .eq("id", user.id);
+        // Redirect to talent dashboard
+        return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+      }
+
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (clientProfile) {
+        // Update profile with client role
+        await supabase
+          .from("profiles")
+          .update({ role: "client" })
+          .eq("id", user.id);
+        // Redirect to client dashboard
+        return NextResponse.redirect(new URL("/client/dashboard", req.url));
+      }
+
+      // If we can't determine role, check user metadata
+      const roleFromMetadata = (user.user_metadata?.role as string) || null;
+      if (roleFromMetadata) {
+        // Update profile with metadata role
+        await supabase
+          .from("profiles")
+          .update({ role: roleFromMetadata as "talent" | "client" | "admin" })
+          .eq("id", user.id);
+        
+        // Redirect based on metadata role
+        if (roleFromMetadata === "talent") {
+          return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+        } else if (roleFromMetadata === "client") {
+          return NextResponse.redirect(new URL("/client/dashboard", req.url));
+        } else if (roleFromMetadata === "admin") {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
+      }
+
+      // Only redirect to choose-role if we truly can't determine the role
       return NextResponse.redirect(new URL("/choose-role", req.url));
     }
 
     // If the user has a role, redirect them from the choose-role page to their dashboard.
-    if (profile?.role && path === "/choose-role") {
-      if (profile.role === "talent") {
-        return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+    // But first, re-fetch the profile to ensure we have the latest data (in case it was just updated)
+    if (path === "/choose-role") {
+      // Re-fetch profile to get the latest role (in case it was just updated above)
+      const { data: latestProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (latestProfile?.role) {
+        if (latestProfile.role === "talent") {
+          return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+        }
+        if (latestProfile.role === "client") {
+          return NextResponse.redirect(new URL("/client/dashboard", req.url));
+        }
+        if (latestProfile.role === "admin") {
+          return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+        }
       }
-      if (profile.role === "client") {
-        return NextResponse.redirect(new URL("/client/dashboard", req.url));
-      }
-      if (profile.role === "admin") {
-        return NextResponse.redirect(new URL("/admin/dashboard", req.url));
-      }
+      // If no role, allow user to stay on choose-role page to select one
+      return res;
     }
 
     // If the user has a role and is on the root, redirect to their dashboard

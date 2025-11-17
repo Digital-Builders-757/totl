@@ -8,7 +8,28 @@
 
 # 🎉 CURRENT STATUS: 99.9% MVP COMPLETE
 
-## 🚀 **Latest Achievement: Sentry Connection Fixed & Logout Improvements!**
+## 🚀 **Latest Achievement: Migrated Sentry to Next.js 15.3+ Instrumentation & Fixed Login Redirect Loop!**
+
+**SENTRY MIGRATION TO INSTRUMENTATION-CLIENT** - January 2025
+- ✅ Migrated Sentry client config from deprecated `sentry.client.config.ts` to `instrumentation-client.ts` (Next.js 15.3+ convention)
+- ✅ Removed deprecated `sentry.client.config.ts` file
+- ✅ Updated all documentation to reflect new instrumentation-client.ts approach
+- ✅ Enhanced error filtering with hydration and network error detection
+- ✅ Fixed Sentry connection - now properly using Next.js 15.3+ instrumentation-client convention
+- ✅ All Sentry configs now follow Next.js best practices per official documentation
+
+**PREVIOUS: Fixed Login Redirect Loop for Talent Accounts!**
+
+**LOGIN REDIRECT LOOP FIX** - January 2025
+- ✅ Fixed redirect loop where talent accounts were stuck on `/choose-role` page
+- ✅ Enhanced `ensureProfileExists()` to detect and set missing roles from user metadata or role-specific profiles
+- ✅ Updated `handleLoginRedirect()` with multiple fallbacks to determine role (metadata → talent_profiles → client_profiles)
+- ✅ Added database consistency delays after role updates to prevent cache issues
+- ✅ Updated middleware to also try to determine role before redirecting to `/choose-role`
+- ✅ Added re-fetch of profile when on `/choose-role` to get latest role data
+- ✅ All redirects now properly wait for role updates to complete before redirecting
+
+**PREVIOUS: Sentry Connection Fixed & Logout Improvements!**
 
 **SENTRY FIXES & LOGOUT IMPROVEMENTS** - January 2025
 - ✅ Created missing `sentry.client.config.ts` file - client-side errors now being captured

@@ -123,7 +123,7 @@ npm run dev
 ### Environment Detection:
 
 ```typescript
-// In sentry.client.config.ts and sentry.server.config.ts
+// In instrumentation-client.ts and sentry.server.config.ts
 
 const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === "production";
 

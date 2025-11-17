@@ -11,7 +11,7 @@
 
 - [x] `@sentry/nextjs` installed (v10.19.0)
 - [x] `@supabase/sentry-js-integration` installed
-- [x] `sentry.client.config.ts` configured with Supabase integration
+- [x] `instrumentation-client.ts` configured with Sentry (Next.js 15.3+ convention, replaces deprecated `sentry.client.config.ts`)
 - [x] `sentry.server.config.ts` configured with Supabase integration
 - [x] `sentry.edge.config.ts` configured
 - [x] `next.config.mjs` wrapped with `withSentryConfig`
@@ -85,7 +85,7 @@
 ### **4. Supabase Integration** ✅
 
 - [x] `@supabase/sentry-js-integration` installed
-- [x] Added to `sentry.client.config.ts`
+- [x] Added to `instrumentation-client.ts`
 - [x] Added to `sentry.server.config.ts`
 - [x] Automatically instruments all Supabase queries
 

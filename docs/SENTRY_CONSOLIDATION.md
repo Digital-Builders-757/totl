@@ -23,11 +23,13 @@
 
 ### **1. Updated Sentry Configuration Files**
 
-All three Sentry config files now use the `sentry-yellow-notebook` DSN:
+All Sentry config files now use the `sentry-yellow-notebook` DSN:
 
 - ✅ `sentry.server.config.ts` - Server-side errors
-- ✅ `sentry.client.config.ts` - Client-side errors  
+- ✅ `instrumentation-client.ts` - Client-side errors (Next.js 15.3+ convention, replaces deprecated `sentry.client.config.ts`)
 - ✅ `sentry.edge.config.ts` - Edge runtime errors
+
+**Note:** As of Next.js 15.3+, client-side Sentry configuration has been migrated to `instrumentation-client.ts` following the [Next.js instrumentation-client convention](https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client). The deprecated `sentry.client.config.ts` file has been removed.
 
 **DSN Used:**
 ```
@@ -134,7 +136,8 @@ The old `javascript-nextjs` project can be:
 ## ✅ Verification Checklist
 
 - [x] Updated `sentry.server.config.ts` to use `sentry-yellow-notebook` DSN
-- [x] Updated `sentry.client.config.ts` to use `sentry-yellow-notebook` DSN
+- [x] Migrated client-side config to `instrumentation-client.ts` (Next.js 15.3+)
+- [x] Removed deprecated `sentry.client.config.ts` file
 - [x] Updated `sentry.edge.config.ts` to use `sentry-yellow-notebook` DSN
 - [x] Updated test page references
 - [ ] Tested locally - errors appear in `sentry-yellow-notebook`

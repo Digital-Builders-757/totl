@@ -230,7 +230,7 @@
 ### **Sentry 10.19.0+**
 
 **Configuration Files:**
-- `sentry.client.config.ts` - Browser error tracking
+- `instrumentation-client.ts` - Browser error tracking (Next.js 15.3+ convention, replaces deprecated `sentry.client.config.ts`)
 - `sentry.server.config.ts` - Server-side error tracking
 - `sentry.edge.config.ts` - Edge runtime errors
 - `instrumentation.ts` - Sentry initialization

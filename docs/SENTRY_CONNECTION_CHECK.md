@@ -10,7 +10,7 @@
 ### **1. Client-Side Sentry Not Initializing**
 
 **Problem:**
-- `sentry.client.config.ts` was using `process.env.NEXT_PUBLIC_SENTRY_DSN` which was likely undefined
+- `instrumentation-client.ts` (formerly `sentry.client.config.ts`) was using `process.env.NEXT_PUBLIC_SENTRY_DSN` which was likely undefined
 - If DSN is undefined, Sentry silently fails to initialize on the client side
 - This meant client-side errors were not being reported to Sentry
 
@@ -25,7 +25,7 @@
 
 ### **1. Fixed Client-Side Configuration**
 
-**File:** `sentry.client.config.ts`
+**File:** `instrumentation-client.ts` (migrated from deprecated `sentry.client.config.ts`)
 
 **Changes:**
 - Added environment-based DSN selection (matching server/edge pattern)
@@ -217,7 +217,7 @@ SENTRY_PROJECT=sentry-yellow-notebook
 **Solution:**
 - This is expected - development has 100% sampling
 - Errors are filtered by `beforeSend` and `ignoreErrors` configs
-- Check `sentry.client.config.ts` and `sentry.server.config.ts` for filter rules
+- Check `instrumentation-client.ts` and `sentry.server.config.ts` for filter rules
 
 ---
 

@@ -162,5 +162,5 @@ These filters help reduce noise in Sentry while still catching real application 
 - `components/apply-as-talent-button.tsx`
 - `components/navbar.tsx`
 - `app/choose-role/page.tsx`
-- `sentry.client.config.ts`
+- `instrumentation-client.ts` (replaces deprecated `sentry.client.config.ts`)
 

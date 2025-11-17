@@ -1,6 +1,7 @@
 // instrumentation-client.ts
-// This file is used to configure Sentry for the client-side
+// This file configures Sentry for the client-side using Next.js 15.3+ instrumentation-client convention
 // It replaces the deprecated sentry.client.config.ts approach
+// Reference: https://nextjs.org/docs/app/api-reference/file-conventions/instrumentation-client
 
 import * as Sentry from "@sentry/nextjs";
 // import { SupabaseIntegration } from "@supabase/sentry-js-integration"; // Disabled - requires client instance at init
@@ -80,15 +81,28 @@ Sentry.init({
 
   // Ignore common errors
   ignoreErrors: [
+    "NEXT_NOT_FOUND", 
+    "NEXT_REDIRECT",
     // Browser extensions
     "top.GLOBALS",
-    // Random network errors
+    "originalCreateNotification",
+    "canvas.contentDocument",
+    "MyApp_RemoveAllHighlights",
+    "atomicFindClose",
+    "fb_xd_fragment",
+    "bmi_SafeAddOnload",
+    "EBCallBackMessageReceived",
+    "conduitPage",
+    // Network errors that are often not actionable
     "Network request failed",
     "NetworkError",
+    "Failed to fetch",
+    "Load failed",
     // Development-only React Server Component errors
     /Event handlers cannot be passed to Client Component props/,
     // Webpack chunk loading errors in dev
     /Cannot find module '\.\/\d+\.js'/,
+    /Cannot read properties of undefined \(reading 'call'\)/,
     // Webpack HMR module build errors (dev only)
     /Module build failed/,
     /Expected '<\//, // Matches "Expected '</'" and "Expected '</', got..."
@@ -117,20 +131,26 @@ Sentry.init({
   beforeSend(event, hint) {
     const error = hint.originalException;
 
-    // Filter React Server Component errors in development
-    if (error && typeof error === 'object') {
-      const errorObj = error as any;
-      
-      // Filter EPIPE errors (should be caught server-side, but just in case)
-      if (errorObj.message === 'write EPIPE' || 
-          errorObj.message?.includes('EPIPE') ||
-          errorObj.code === 'EPIPE' ||
-          errorObj.errno === -32) {
-        if (process.env.NODE_ENV === 'development') {
-          console.warn("EPIPE error filtered - development server logging issue");
-          return null; // Filter in dev
+      // Filter out hydration errors (often caused by browser extensions)
+      if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        
+        // Check for hydration errors
+        if (errorObj.message?.includes("hydrat") || errorObj.message?.includes("hydration")) {
+          console.warn("Hydration error filtered - often caused by browser extensions");
+          return null; // Don't send to Sentry
         }
-      }
+        
+        // Filter EPIPE errors (should be caught server-side, but just in case)
+        if (errorObj.message === 'write EPIPE' || 
+            errorObj.message?.includes('EPIPE') ||
+            errorObj.code === 'EPIPE' ||
+            errorObj.errno === -32) {
+          if (process.env.NODE_ENV === 'development') {
+            console.warn("EPIPE error filtered - development server logging issue");
+            return null; // Filter in dev
+          }
+        }
 
       // Filter Particles ReferenceError (likely from browser extensions or external scripts)
       if (errorObj.message === 'Particles is not defined' ||
@@ -168,10 +188,28 @@ Sentry.init({
       // Server Component prop serialization errors
       if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {
         if (process.env.NODE_ENV === 'development') {
-          console.error("Client-side Server Component error - this should be fixed!");
-          return null; // Filter in dev
+          console.error("Server Component error in development - this should be fixed!");
+          return null; // Filter in dev to reduce noise, but fix the code!
         }
         // In production, let it through so we know there's a problem
+      }
+      
+      // Filter out network errors that are often not actionable
+      if (errorObj.message?.includes("Network request failed") ||
+          errorObj.message?.includes("NetworkError") ||
+          errorObj.message?.includes("Failed to fetch")) {
+        // Check if it's a real network error or just a browser extension issue
+        const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
+        const isBrowserExtensionError = frames.some(
+          frame => frame.filename?.includes('extension://') ||
+                   frame.filename?.includes('moz-extension://') ||
+                   frame.filename?.includes('safari-extension://')
+        );
+        
+        if (isBrowserExtensionError) {
+          console.warn("Network error from browser extension filtered");
+          return null; // Don't send to Sentry
+        }
       }
 
       // Webpack chunk loading errors

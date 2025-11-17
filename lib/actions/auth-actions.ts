@@ -109,6 +109,53 @@ export async function ensureProfileExists() {
     return { success: true, updated: true };
   }
 
+  // If profile exists but role is missing/null, try to determine it
+  if (profile && !profile.role) {
+    // First, try to get role from user metadata
+    let role = (user.user_metadata?.role as string) || null;
+    
+    // If not in metadata, check if talent_profile exists (user is talent)
+    if (!role) {
+      const { data: talentProfile, error: talentError } = await supabase
+        .from("talent_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (talentProfile && !talentError) {
+        role = "talent";
+      } else {
+        // Check if client_profile exists
+        const { data: clientProfile, error: clientError } = await supabase
+          .from("client_profiles")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (clientProfile && !clientError) {
+          role = "client";
+        } else {
+          // Default to talent if we can't determine
+          role = "talent";
+        }
+      }
+    }
+    
+    // Update profile with determined role
+    const { error: updateRoleError } = await supabase
+      .from("profiles")
+      .update({ role: role as "talent" | "client" | "admin" })
+      .eq("id", user.id);
+
+    if (updateRoleError) {
+      console.error("Error updating profile role:", updateRoleError);
+      return { error: "Failed to update profile role" };
+    }
+
+    revalidatePath("/", "layout");
+    return { success: true, roleUpdated: true };
+  }
+
   return { success: true, exists: true };
 }
 
@@ -273,20 +320,79 @@ export async function handleLoginRedirect() {
   }
 
   // Ensure profile exists and is up to date
-  await ensureProfileExists();
+  const profileResult = await ensureProfileExists();
+  
+  // If profile was just created or role was updated, we need to wait a moment
+  // for the database to be consistent before querying again
+  if (profileResult.created || profileResult.roleUpdated) {
+    // Small delay to ensure database consistency
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 
   // Revalidate paths to clear any cached data
   revalidatePath("/", "layout");
   revalidatePath("/talent/dashboard");
   revalidatePath("/client/dashboard");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/choose-role");
 
-  // Get profile with role - use a fresh query
-  const { data: profile } = await supabase
+  // Get profile with role - use a fresh query with cache busting
+  // Force a fresh query by using a timestamp or by clearing cache first
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
+
+  // If we still don't have a role after ensureProfileExists, try one more time
+  // to determine it from talent_profiles or client_profiles
+  if (!profile?.role && !profileError) {
+    // Check talent_profiles first
+    const { data: talentProfile } = await supabase
+      .from("talent_profiles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (talentProfile) {
+      // Update profile with talent role and wait for it to complete
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ role: "talent" })
+        .eq("id", user.id);
+      
+      if (!updateError) {
+        // Small delay to ensure database consistency
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        // Revalidate to clear cache
+        revalidatePath("/", "layout");
+        redirect("/talent/dashboard");
+      }
+    } else {
+      // Check client_profiles
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (clientProfile) {
+        // Update profile with client role and wait for it to complete
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ role: "client" })
+          .eq("id", user.id);
+        
+        if (!updateError) {
+          // Small delay to ensure database consistency
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          // Revalidate to clear cache
+          revalidatePath("/", "layout");
+          redirect("/client/dashboard");
+        }
+      }
+    }
+  }
 
   // Redirect based on role
   if (profile?.role === "talent") {
@@ -296,6 +402,32 @@ export async function handleLoginRedirect() {
   } else if (profile?.role === "admin") {
     redirect("/admin/dashboard");
   } else {
+    // Last resort - if we still don't have a role, check user metadata
+    const roleFromMetadata = (user.user_metadata?.role as string) || "talent";
+    
+    // Try to update profile one more time with metadata role
+    const { error: metadataUpdateError } = await supabase
+      .from("profiles")
+      .update({ role: roleFromMetadata as "talent" | "client" | "admin" })
+      .eq("id", user.id);
+    
+    if (!metadataUpdateError) {
+      // Small delay to ensure database consistency
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Revalidate to clear cache
+      revalidatePath("/", "layout");
+      
+      // Redirect based on metadata role
+      if (roleFromMetadata === "talent") {
+        redirect("/talent/dashboard");
+      } else if (roleFromMetadata === "client") {
+        redirect("/client/dashboard");
+      } else if (roleFromMetadata === "admin") {
+        redirect("/admin/dashboard");
+      }
+    }
+    
+    // Only redirect to choose-role if we truly can't determine or set the role
     redirect("/choose-role");
   }
 }
