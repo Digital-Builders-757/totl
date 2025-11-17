@@ -76,6 +76,7 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
     "@sentry/nextjs": "^10.19.0",
+    "@supabase/sentry-js-integration": "^0.3.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.47.10",
     "autoprefixer": "^10.4.20",
@@ -104,7 +105,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.0",
+    "@playwright/mcp": "^0.0.47",
+    "@playwright/test": "^1.56.1",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -120,7 +122,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
-    "playwright": "^1.56.0",
+    "playwright": "^1.56.1",
     "postcss": "^8",
     "prettier": "^3.6.0",
     "supabase": "2.33.4",

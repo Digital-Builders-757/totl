@@ -42,8 +42,8 @@ export default function TestSentryPage() {
             <CardTitle>🔍 Sentry Integration Test</CardTitle>
             <CardDescription>
               Test your Sentry setup and MCP integration. Errors will go to the{" "}
-              <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">javascript-nextjs</code>{" "}
-              project in development.
+              <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">sentry-yellow-notebook</code>{" "}
+              project.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -85,18 +85,7 @@ export default function TestSentryPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
-              <p className="text-sm font-medium">Local Development:</p>
-              <a
-                href="https://sentry.io/organizations/the-digital-builders-bi/projects/javascript-nextjs/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm"
-              >
-                View javascript-nextjs project →
-              </a>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Production (Vercel):</p>
+              <p className="text-sm font-medium">Sentry Dashboard:</p>
               <a
                 href="https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/"
                 target="_blank"
@@ -118,7 +107,7 @@ export default function TestSentryPage() {
               After generating test errors, ask your AI assistant:
             </p>
             <div className="bg-gray-100 p-3 rounded text-sm font-mono space-y-1">
-              <p>&quot;Show me the latest errors from javascript-nextjs&quot;</p>
+              <p>&quot;Show me the latest errors from sentry-yellow-notebook&quot;</p>
               <p>&quot;What errors happened in the last hour?&quot;</p>
               <p>&quot;Get details for the most recent error&quot;</p>
             </div>

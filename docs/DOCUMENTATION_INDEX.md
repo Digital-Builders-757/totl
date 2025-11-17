@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** November 2, 2025
+**Last Updated:** November 16, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -81,6 +81,8 @@ All other documentation has been organized into the `docs/` folder.
 - `ONBOARDING.md` - New developer onboarding guide
 - `TECH_STACK_BREAKDOWN.md` - Complete technical stack overview
 - `POWERSHELL_GIT_COMMIT_GUIDELINES.md` - PowerShell-safe git commit guidelines
+- `MCP_PLAYWRIGHT_TROUBLESHOOTING.md` - 🔧 **NEW** - Complete Playwright MCP troubleshooting guide (Nov 2025)
+- `MCP_QUICK_FIX.md` - ⚡ **NEW** - Quick 2-step fix for Playwright MCP connection issues (Nov 2025)
 
 ### **📧 Services & Integrations**
 - `email-service.md` - Email service implementation

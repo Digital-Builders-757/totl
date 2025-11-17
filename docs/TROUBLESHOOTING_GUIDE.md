@@ -1,6 +1,6 @@
 # 🔧 TOTL Troubleshooting Guide
 
-**Last Updated:** October 23, 2025  
+**Last Updated:** November 16, 2025  
 **Status:** Production Ready
 
 This guide covers common issues encountered during development and deployment, with step-by-step solutions based on real debugging sessions.
@@ -484,6 +484,80 @@ if (count > 0) {
 - Handle edge cases (0 results, invalid pages)
 
 **Reference:** See `docs/GIGS_PAGINATION_416_ERROR_FIX.md` for detailed implementation
+
+### 9. Playwright MCP "Cannot find module './console'" Error
+
+**Error Message:**
+```
+Error: Cannot find module './console'
+Require stack:
+  ...\node_modules\playwright-core\lib\server\page.js
+  ...\node_modules\@playwright\mcp\cli.js
+```
+
+**Symptoms:**
+- ❌ Playwright MCP server fails to connect in Cursor
+- ❌ "No server info found" error in Cursor
+- ❌ Test timeouts during `beforeEach` hooks
+- ❌ MCP tools don't appear in Cursor chat
+
+**Root Cause:** The Playwright MCP process crashes because the local `playwright-core` install in the **npx cache is broken/incomplete**. When `page.js` tries to `require('./console')`, the file is missing from the temp cache folder.
+
+**Why This Happens:** `npx @playwright/mcp@latest` downloads a fresh copy into a temp folder (`C:\Users\...\AppData\Local\npm-cache\_npx\...`) every time. If that download gets corrupted or partially completes, files like `console.js` are missing, and MCP dies before Cursor can list any tools.
+
+**Solution:**
+
+1. **Install packages locally:**
+   ```powershell
+   npm install --save-dev playwright @playwright/test @playwright/mcp --legacy-peer-deps
+   npx playwright install --with-deps chromium
+   ```
+
+2. **Update Cursor MCP config** (`c:\Users\young\.cursor\mcp.json`):
+   ```json
+   {
+     "mcpServers": {
+       "playwright": {
+         "command": "npx",
+         "args": [
+           "--no-install",
+           "@playwright/mcp",
+           "--browser=chromium",
+           "--headless",
+           "--allowed-hosts=localhost,totl-agency.vercel.app",
+           "--test-id-attribute=data-testid"
+         ],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+3. **Verify the command works:**
+   ```powershell
+   npx --no-install @playwright/mcp --browser=chromium --headless --allowed-hosts=localhost,totl-agency.vercel.app --test-id-attribute=data-testid --help
+   ```
+   Should output help text, not errors.
+
+4. **Restart Cursor completely:**
+   - Close ALL Cursor windows
+   - Wait 5 seconds
+   - Reopen Cursor
+   - Playwright MCP should now connect
+
+**Key Change:** The `--no-install` flag tells `npx` to **only use node_modules in this repo, don't download anything**. This dodges the temp-cache corruption entirely.
+
+**Prevention:**
+- Always install MCP packages locally in `package.json`
+- Use `--no-install` flag in MCP config to bypass npx cache
+- Verify installation with manual command before restarting Cursor
+- Keep server name lowercase for consistency
+
+**Related Documentation:**
+- `docs/MCP_PLAYWRIGHT_TROUBLESHOOTING.md` - Complete troubleshooting guide
+- `docs/MCP_QUICK_FIX.md` - Quick 2-step fix guide
+
+**Status:** ✅ **RESOLVED** (November 16, 2025)
 
 ---
 

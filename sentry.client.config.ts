@@ -3,15 +3,56 @@
 // It replaces the deprecated sentry.client.config.ts approach
 
 import * as Sentry from "@sentry/nextjs";
+// import { SupabaseIntegration } from "@supabase/sentry-js-integration"; // Disabled - requires client instance at init
+
+// Determine which Sentry DSN to use based on environment
+// Note: In client-side code, we can only access NEXT_PUBLIC_* env vars
+const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === "production" || 
+                     process.env.NODE_ENV === "production";
+
+// Production DSN (from environment variable)
+const PRODUCTION_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN_PROD || 
+                       process.env.NEXT_PUBLIC_SENTRY_DSN;
+
+// Development DSN (fallback for local development)
+// Using sentry-yellow-notebook DSN for all environments
+const DEVELOPMENT_DSN = 
+  process.env.NEXT_PUBLIC_SENTRY_DSN_DEV ||
+  process.env.NEXT_PUBLIC_SENTRY_DSN ||
+  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
+
+// Select the appropriate DSN
+const SENTRY_DSN = isProduction && PRODUCTION_DSN 
+  ? PRODUCTION_DSN 
+  : DEVELOPMENT_DSN;
+
+// Log DSN status for debugging (only in development)
+if (process.env.NODE_ENV === "development") {
+  console.log("[Sentry Client] Initializing with:", {
+    isProduction,
+    hasProductionDSN: !!PRODUCTION_DSN,
+    hasDevelopmentDSN: !!DEVELOPMENT_DSN,
+    usingDSN: SENTRY_DSN ? "✅ Configured" : "❌ Missing",
+    environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
+  });
+}
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: SENTRY_DSN,
   
   // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: 1,
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
 
-  // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  // Note: debug option requires debug bundle which isn't available in Next.js
+  // Use console.log statements instead for debugging in development
+  // debug: false, // Disabled to avoid "Cannot initialize SDK with debug option using a non-debug bundle" warning
+  
+  // Set environment (matches guide pattern)
+  environment:
+    process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
+    process.env.VERCEL_ENV ??
+    process.env.NODE_ENV ??
+    "development",
 
   replaysOnErrorSampleRate: 1.0,
 
@@ -19,8 +60,13 @@ Sentry.init({
   // in development and sample at a lower rate in production
   replaysSessionSampleRate: 0.1,
 
-  // You can remove this option if you're not planning to use the Sentry Session Replay feature:
+  // Integrations: Supabase + Session Replay
   integrations: [
+    // Supabase integration - automatically instruments Supabase queries
+    // Note: SupabaseIntegration requires a client instance, which isn't available at init time
+    // We'll instrument Supabase queries manually where needed
+    // new SupabaseIntegration(), // Disabled - requires client instance
+    // Session Replay for debugging user sessions
     Sentry.replayIntegration({
       // Additional Replay configuration goes in here, for example:
       maskAllText: true,

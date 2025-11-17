@@ -275,6 +275,38 @@ npm run type-safety:check:verbose
 
 ---
 
-**Last Updated:** November 2, 2025  
+## 🔴 **Error: MCP Server Connection Failures**
+
+### Cause:
+Playwright MCP server fails to connect due to corrupted npx cache or missing local installation.
+
+### Solution:
+```powershell
+# 1. Install packages locally
+npm install --save-dev playwright @playwright/test @playwright/mcp --legacy-peer-deps
+npx playwright install --with-deps chromium
+
+# 2. Update Cursor MCP config to use --no-install flag
+# File: c:\Users\young\.cursor\mcp.json
+{
+  "playwright": {
+    "command": "npx",
+    "args": ["--no-install", "@playwright/mcp", "--browser=chromium", "--headless"]
+  }
+}
+
+# 3. Verify command works
+npx --no-install @playwright/mcp --help
+
+# 4. Restart Cursor completely
+```
+
+**Key:** `--no-install` forces npx to use local `node_modules` instead of corrupted temp cache.
+
+**Related:** See `docs/MCP_PLAYWRIGHT_TROUBLESHOOTING.md` for complete guide.
+
+---
+
+**Last Updated:** November 16, 2025  
 **Quick Reference:** Keep this open while coding!
 
