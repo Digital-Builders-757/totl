@@ -219,3 +219,7 @@ Sentry.init({
   },
 });
 
+// Export onRouterTransitionStart hook for Sentry navigation instrumentation
+// This is required by @sentry/nextjs to instrument Next.js router transitions
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+

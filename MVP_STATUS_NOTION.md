@@ -8,7 +8,17 @@
 
 # 🎉 CURRENT STATUS: 99.9% MVP COMPLETE
 
-## 🚀 **Latest Achievement: Auth Flow Fixed - Profile Creation & Login Redirect!**
+## 🚀 **Latest Achievement: Sentry Connection Fixed & Logout Improvements!**
+
+**SENTRY FIXES & LOGOUT IMPROVEMENTS** - January 2025
+- ✅ Created missing `sentry.client.config.ts` file - client-side errors now being captured
+- ✅ Added missing `onRouterTransitionStart` export to `instrumentation-client.ts` for router instrumentation
+- ✅ Fixed Sentry connection - errors from develop branch now properly sent to `sentry-yellow-notebook` project
+- ✅ Improved logout function to properly clear all session data (cookies, localStorage, sessionStorage)
+- ✅ Changed logout redirect to use hard redirect (`window.location.href`) to bypass Next.js cache
+- ✅ All Sentry configs now properly initialized and connected
+
+**PREVIOUS: Auth Flow Fixed - Profile Creation & Login Redirect!**
 
 **AUTH FLOW FIXES** - January 2025
 - ✅ Created ensureProfilesAfterSignup() server action to guarantee profiles are created after signup (backup to database trigger)

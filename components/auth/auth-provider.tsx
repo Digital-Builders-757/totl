@@ -272,41 +272,92 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
       
-      // Sign out from Supabase
+      // Sign out from Supabase - this clears server-side session and cookies
       const { error } = await supabase.auth.signOut();
       
-      // Clear any cached data
+      // Clear all client-side storage and cache
       if (typeof window !== "undefined") {
-        // Clear localStorage using environment variable
+        // Clear localStorage - remove auth-related items
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
         if (supabaseUrl) {
-          localStorage.removeItem("sb-" + supabaseUrl.split("//")[1].split(".")[0] + "-auth-token");
+          // Clear Supabase-specific localStorage keys
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
         }
         
-        // Clear sessionStorage
-        sessionStorage.clear();
-        
-        // Clear any other auth-related storage
-        Object.keys(localStorage).forEach(key => {
-          if (key.includes("supabase") || key.includes("auth")) {
+        // Clear any other auth-related localStorage items
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
             localStorage.removeItem(key);
           }
         });
+        
+        // Clear all sessionStorage
+        sessionStorage.clear();
+        
+        // Clear Supabase auth cookies specifically
+        // Supabase SSR stores session in cookies with names like:
+        // - sb-<project-ref>-auth-token
+        // - sb-<project-ref>-auth-token.0, sb-<project-ref>-auth-token.1, etc.
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          const cookieBaseName = `sb-${projectRef}-auth-token`;
+          
+          // Clear base cookie and chunked cookies (0-9)
+          for (let i = 0; i < 10; i++) {
+            const cookieName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
+            // Clear with different path and domain combinations
+            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+            if (window.location.hostname.includes(".")) {
+              document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+            }
+          }
+        }
       }
       
-      // Force redirect to login
-      router.push("/login");
-      router.refresh(); // Force a refresh to clear any cached data
+      // Use hard redirect to ensure complete session clear and page reload
+      // This bypasses Next.js router cache and forces a full page reload
+      if (typeof window !== "undefined") {
+        // Small delay to ensure state is cleared before redirect
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        window.location.href = "/login";
+      } else {
+        // Fallback for server-side (shouldn't happen, but just in case)
+        router.push("/login");
+        router.refresh();
+      }
       
       return { error };
     } catch (error) {
       console.error("Error during sign out:", error);
-      // Even if there's an error, clear local state and redirect
+      // Even if there's an error, clear local state and force redirect
       setUser(null);
       setSession(null);
       setUserRole(null);
       setIsEmailVerified(false);
-      router.push("/login");
+      setHasHandledInitialSession(false);
+      
+      // Force hard redirect even on error
+      if (typeof window !== "undefined") {
+        // Clear storage on error too
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          localStorage.removeItem(`sb-${projectRef}-auth-token`);
+        }
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
+            localStorage.removeItem(key);
+          }
+        });
+        sessionStorage.clear();
+        window.location.href = "/login";
+      } else {
+        router.push("/login");
+        router.refresh();
+      }
+      
       return { error: error as AuthError };
     }
   };
