@@ -227,6 +227,49 @@ SENTRY_PROJECT=sentry-yellow-notebook
 - `docs/SENTRY_PRODUCTION_SETUP.md` - Production configuration details
 - `app/test-sentry/page.tsx` - Client-side test page
 - `app/api/test-sentry/route.ts` - Server-side test endpoint
+- `app/api/sentry-diagnostic/route.ts` - **NEW** Diagnostic endpoint for Sentry configuration verification
+
+## 🔧 New Diagnostic Tools
+
+### **Sentry Diagnostic Endpoint**
+
+**URL:** `http://localhost:3000/api/sentry-diagnostic`
+
+**Purpose:** Verify Sentry configuration, check DSNs, test error capture
+
+**Returns:**
+- Current DSN configuration
+- Project ID verification
+- Environment variables status
+- Test error capture result
+- Recommendations for fixes
+
+**Usage:**
+```bash
+# Check Sentry configuration
+curl http://localhost:3000/api/sentry-diagnostic
+
+# Or visit in browser
+open http://localhost:3000/api/sentry-diagnostic
+```
+
+### **Enhanced Test Endpoint**
+
+**URL:** `http://localhost:3000/api/test-sentry?type=error|exception|message`
+
+**New Features:**
+- Returns event ID after capturing error
+- Flushes errors immediately to Sentry
+- Provides direct link to Sentry dashboard
+- Better logging in console
+
+**Example:**
+```bash
+# Test error capture
+curl http://localhost:3000/api/test-sentry?type=error
+
+# Response includes eventId and Sentry dashboard URL
+```
 
 ---
 

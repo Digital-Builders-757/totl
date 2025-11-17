@@ -88,6 +88,8 @@ All other documentation has been organized into the `docs/` folder.
 - `email-service.md` - Email service implementation
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 - `SENTRY_PRODUCTION_SETUP.md` - Sentry production configuration
+- `SENTRY_ERROR_TRACKING_ENHANCEMENT.md` - **NEW** ✅ - Sentry error tracking enhancements and 406 error fixes (Jan 2025)
+- `SENTRY_CONNECTION_CHECK.md` - Sentry connection troubleshooting and diagnostic tools
 
 ### **🐛 Troubleshooting**
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (9 error patterns including signup fix)

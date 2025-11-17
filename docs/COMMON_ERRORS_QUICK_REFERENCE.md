@@ -121,6 +121,47 @@ npx --no-install @playwright/mcp --help
 
 **See:** `docs/MCP_QUICK_FIX.md` for detailed steps
 
+### **6. Sentry 406 Not Acceptable Errors**
+```bash
+# Error: profiles?select=role&id=eq.xxx returned 406 Not Acceptable
+# Root Cause: Using .single() when profile might not exist
+# Fix: Replace .single() with .maybeSingle() in all profile queries
+
+# Files to check:
+# - lib/actions/auth-actions.ts
+# - middleware.ts
+# - components/auth/auth-provider.tsx
+
+# Pattern to find:
+grep -r "\.single()" lib/actions/auth-actions.ts middleware.ts components/auth/
+
+# Replace with:
+.single() → .maybeSingle()
+```
+
+### **7. Sentry Not Receiving Errors**
+```bash
+# Error: Errors not appearing in Sentry dashboard
+# 1. Check diagnostic endpoint
+curl http://localhost:3000/api/sentry-diagnostic
+
+# 2. Verify DSN in .env.local matches project ID 4510191108292609
+# 3. Check console for Sentry initialization logs
+# 4. Test with: http://localhost:3000/api/test-sentry?type=error
+
+# Common issues:
+# - Wrong project ID in DSN (should end in 4510191108292609)
+# - DSN not set in .env.local
+# - Errors being filtered by beforeSend hooks
+```
+
+### **8. Build Error: Cannot find name 'talentProfile'**
+```bash
+# Error: Type error in middleware.ts - variable out of scope
+# Fix: Ensure variables are defined in the same scope where used
+# Pattern: Wrap case blocks in braces, check variable scope
+```
+
 ---
 
 ## 🔍 **QUICK DIAGNOSIS**
@@ -134,6 +175,9 @@ npx --no-install @playwright/mcp --help
 | `Failed to construct 'URL': Invalid URL` | SafeImage component | Check image src validation |
 | `Cannot find module './console'` (Playwright MCP) | Corrupted npx cache | Use `--no-install` flag in MCP config |
 | `No server info found` (Playwright MCP) | MCP server not connecting | Install locally + restart Cursor |
+| `406 Not Acceptable` (Supabase) | Using `.single()` when row might not exist | Replace with `.maybeSingle()` |
+| `Cannot find name 'talentProfile'` (TypeScript) | Variable out of scope | Check variable scope, wrap case blocks in braces |
+| Errors not in Sentry | Wrong DSN or project ID | Check `/api/sentry-diagnostic`, verify DSN ends in `4510191108292609` |
 
 ---
 

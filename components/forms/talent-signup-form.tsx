@@ -7,13 +7,13 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAuth } from "@/components/auth/auth-provider";
-import { ensureProfilesAfterSignup } from "@/lib/actions/auth-actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { ensureProfilesAfterSignup } from "@/lib/actions/auth-actions";
 
 // Define the form schema with validation rules
 const signupSchema = z

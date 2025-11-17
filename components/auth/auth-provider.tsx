@@ -111,11 +111,34 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         setSession(session);
 
-        const { data: profileData } = (await supabase
+        // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", session.user.id)
-          .single()) as { data: { role: string } | null; error: unknown };
+          .maybeSingle();
+
+        // Log profile query errors to Sentry for debugging
+        if (profileError && profileError.code !== "PGRST116") {
+          // Import Sentry dynamically to avoid SSR issues
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.captureException(new Error(`Auth provider profile query error: ${profileError.message}`), {
+            tags: {
+              feature: "auth",
+              error_type: "auth_provider_profile_error",
+              error_code: profileError.code || "unknown",
+            },
+            extra: {
+              userId: session.user.id,
+              userEmail: session.user.email,
+              errorCode: profileError.code,
+              errorDetails: profileError.details,
+              errorMessage: profileError.message,
+              timestamp: new Date().toISOString(),
+            },
+            level: "error",
+          });
+        }
 
         if (!mounted) return;
 
@@ -147,11 +170,34 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === "SIGNED_IN" && session) {
         try {
-          const { data: profileData } = (await supabase
+          // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+          const { data: profileData, error: profileError } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", session.user.id)
-            .single()) as { data: { role: string } | null; error: unknown };
+            .maybeSingle();
+
+          // Log profile query errors to Sentry for debugging
+          if (profileError && profileError.code !== "PGRST116") {
+            const Sentry = await import("@sentry/nextjs");
+            Sentry.captureException(new Error(`Auth state change profile query error: ${profileError.message}`), {
+              tags: {
+                feature: "auth",
+                error_type: "auth_state_change_profile_error",
+                error_code: profileError.code || "unknown",
+              },
+              extra: {
+                userId: session.user.id,
+                userEmail: session.user.email,
+                pathname: pathname,
+                errorCode: profileError.code,
+                errorDetails: profileError.details,
+                errorMessage: profileError.message,
+                timestamp: new Date().toISOString(),
+              },
+              level: "error",
+            });
+          }
 
           if (!mounted) return;
 

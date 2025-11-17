@@ -29,13 +29,41 @@ const SENTRY_DSN = isProduction && PRODUCTION_DSN
 
 // Log DSN status for debugging (only in development)
 if (process.env.NODE_ENV === "development") {
+  // Extract project ID from DSN for verification
+  const extractProjectId = (dsn: string | undefined): string | null => {
+    if (!dsn) return null;
+    const match = dsn.match(/\/(\d+)$/);
+    return match ? match[1] : null;
+  };
+  
+  const currentProjectId = extractProjectId(SENTRY_DSN);
+  const expectedProjectId = "4510191108292609";
+  const projectMatch = currentProjectId === expectedProjectId;
+  
   console.log("[Sentry Client] Initializing with:", {
     isProduction,
     hasProductionDSN: !!PRODUCTION_DSN,
     hasDevelopmentDSN: !!DEVELOPMENT_DSN,
     usingDSN: SENTRY_DSN ? "✅ Configured" : "❌ Missing",
     environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
+    dsnPrefix: SENTRY_DSN ? SENTRY_DSN.substring(0, 30) + "..." : "N/A",
+    projectId: currentProjectId || "Unknown",
+    projectMatch: projectMatch ? "✅ Correct" : "❌ Wrong Project",
+    expectedProjectId: expectedProjectId,
   });
+  
+  // Test Sentry connection in development
+  if (SENTRY_DSN) {
+    if (projectMatch) {
+      console.log("[Sentry Client] ✅ Sentry is configured correctly for sentry-yellow-notebook");
+    } else {
+      console.warn(`[Sentry Client] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`);
+      console.warn("[Sentry Client] ⚠️ Update your .env.local DSNs to point to the correct project");
+    }
+    console.log("[Sentry Client] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+  } else {
+    console.warn("[Sentry Client] ⚠️ Sentry DSN is missing - errors will not be tracked!");
+  }
 }
 
 Sentry.init({

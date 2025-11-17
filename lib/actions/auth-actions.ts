@@ -1,5 +1,6 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -21,12 +22,33 @@ export async function ensureProfileExists() {
     return { error: "Not authenticated" };
   }
 
-  // Check if profile exists
+  // Check if profile exists - use maybeSingle() to prevent 406 errors
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, role, display_name")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Log 406 or other profile query errors to Sentry for debugging
+  if (profileError && profileError.code !== "PGRST116") {
+    Sentry.captureException(new Error(`Profile query error: ${profileError.message}`), {
+      tags: {
+        feature: "auth",
+        error_type: "profile_query_error",
+        error_code: profileError.code || "unknown",
+      },
+      extra: {
+        userId: user.id,
+        userEmail: user.email,
+        errorCode: profileError.code,
+        errorDetails: profileError.details,
+        errorMessage: profileError.message,
+        errorHint: profileError.hint,
+        timestamp: new Date().toISOString(),
+      },
+      level: "error",
+    });
+  }
 
   // If profile doesn't exist, create it
   if (profileError && profileError.code === "PGRST116") {
@@ -324,9 +346,12 @@ export async function handleLoginRedirect() {
   
   // If profile was just created or role was updated, we need to wait a moment
   // for the database to be consistent before querying again
-  if (profileResult.created || profileResult.roleUpdated) {
-    // Small delay to ensure database consistency
+  // Use longer delay for role updates to ensure they propagate
+  if (profileResult.created) {
     await new Promise((resolve) => setTimeout(resolve, 100));
+  } else if (profileResult.roleUpdated) {
+    // Longer delay for role updates to ensure database consistency
+    await new Promise((resolve) => setTimeout(resolve, 300));
   }
 
   // Revalidate paths to clear any cached data
@@ -336,13 +361,35 @@ export async function handleLoginRedirect() {
   revalidatePath("/admin/dashboard");
   revalidatePath("/choose-role");
 
-  // Get profile with role - use a fresh query with cache busting
-  // Force a fresh query by using a timestamp or by clearing cache first
+  // Get profile with role - use a fresh query
+  // Query immediately after ensureProfileExists (delays already handled above)
+  // Use maybeSingle() to handle case where profile doesn't exist yet (prevents 406 error)
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Log profile query errors to Sentry for debugging redirect loops
+  if (profileError && profileError.code !== "PGRST116") {
+    Sentry.captureException(new Error(`Login redirect profile query error: ${profileError.message}`), {
+      tags: {
+        feature: "auth",
+        error_type: "login_redirect_profile_error",
+        error_code: profileError.code || "unknown",
+      },
+      extra: {
+        userId: user.id,
+        userEmail: user.email,
+        errorCode: profileError.code,
+        errorDetails: profileError.details,
+        errorMessage: profileError.message,
+        profileResult: profileResult,
+        timestamp: new Date().toISOString(),
+      },
+      level: "error",
+    });
+  }
 
   // If we still don't have a role after ensureProfileExists, try one more time
   // to determine it from talent_profiles or client_profiles
@@ -362,11 +409,22 @@ export async function handleLoginRedirect() {
         .eq("id", user.id);
       
       if (!updateError) {
-        // Small delay to ensure database consistency
-        await new Promise((resolve) => setTimeout(resolve, 50));
+        // Longer delay to ensure database consistency and prevent middleware redirect loop
+        await new Promise((resolve) => setTimeout(resolve, 200));
         // Revalidate to clear cache
         revalidatePath("/", "layout");
-        redirect("/talent/dashboard");
+        revalidatePath("/choose-role");
+        // Verify the update was successful before redirecting
+        const { data: verifyProfile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+        
+        if (verifyProfile?.role === "talent") {
+          redirect("/talent/dashboard");
+        }
+        // If verification failed, fall through to next check
       }
     } else {
       // Check client_profiles
@@ -384,11 +442,22 @@ export async function handleLoginRedirect() {
           .eq("id", user.id);
         
         if (!updateError) {
-          // Small delay to ensure database consistency
-          await new Promise((resolve) => setTimeout(resolve, 50));
+          // Longer delay to ensure database consistency and prevent middleware redirect loop
+          await new Promise((resolve) => setTimeout(resolve, 200));
           // Revalidate to clear cache
           revalidatePath("/", "layout");
-          redirect("/client/dashboard");
+          revalidatePath("/choose-role");
+          // Verify the update was successful before redirecting
+          const { data: verifyProfile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+          
+          if (verifyProfile?.role === "client") {
+            redirect("/client/dashboard");
+          }
+          // If verification failed, fall through to next check
         }
       }
     }
@@ -412,13 +481,28 @@ export async function handleLoginRedirect() {
       .eq("id", user.id);
     
     if (!metadataUpdateError) {
-      // Small delay to ensure database consistency
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      // Longer delay to ensure database consistency and prevent middleware redirect loop
+      await new Promise((resolve) => setTimeout(resolve, 200));
       // Revalidate to clear cache
       revalidatePath("/", "layout");
+      revalidatePath("/choose-role");
       
-      // Redirect based on metadata role
-      if (roleFromMetadata === "talent") {
+      // Verify the update was successful before redirecting
+      const { data: verifyProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+      
+      // Redirect based on verified role
+      if (verifyProfile?.role === "talent") {
+        redirect("/talent/dashboard");
+      } else if (verifyProfile?.role === "client") {
+        redirect("/client/dashboard");
+      } else if (verifyProfile?.role === "admin") {
+        redirect("/admin/dashboard");
+      } else if (roleFromMetadata === "talent") {
+        // Fallback to metadata if verification didn't work but update succeeded
         redirect("/talent/dashboard");
       } else if (roleFromMetadata === "client") {
         redirect("/client/dashboard");
@@ -428,6 +512,23 @@ export async function handleLoginRedirect() {
     }
     
     // Only redirect to choose-role if we truly can't determine or set the role
+    // Log this to Sentry as it indicates a problem
+    Sentry.captureMessage("Unable to determine user role during login redirect", {
+      tags: {
+        feature: "auth",
+        error_type: "role_undetermined",
+      },
+      extra: {
+        userId: user.id,
+        userEmail: user.email,
+        userMetadata: user.user_metadata,
+        profileData: profile,
+        profileError: profileError,
+        timestamp: new Date().toISOString(),
+      },
+      level: "warning",
+    });
+    
     redirect("/choose-role");
   }
 }

@@ -8,7 +8,18 @@
 
 # 🎉 CURRENT STATUS: 99.9% MVP COMPLETE
 
-## 🚀 **Latest Achievement: Migrated Sentry to Next.js 15.3+ Instrumentation & Fixed Login Redirect Loop!**
+## 🚀 **Latest Achievement: Sentry Error Tracking Enhanced & 406 Errors Fixed!**
+
+**SENTRY ERROR TRACKING ENHANCEMENT** - January 2025
+- ✅ Fixed 406 Not Acceptable errors by replacing `.single()` with `.maybeSingle()` in all profile queries
+- ✅ Added comprehensive Sentry error tracking to auth flow (profile queries, redirect loops, role determination)
+- ✅ Created diagnostic endpoint (`/api/sentry-diagnostic`) to verify Sentry configuration
+- ✅ Enhanced test endpoint with event IDs and immediate error flushing
+- ✅ Added project ID verification in console logs to catch DSN mismatches
+- ✅ Fixed client-side profile queries in auth-provider to prevent 406 errors
+- ✅ All auth errors now properly tracked in Sentry with full context
+
+**PREVIOUS: Migrated Sentry to Next.js 15.3+ Instrumentation & Fixed Login Redirect Loop!**
 
 **SENTRY MIGRATION TO INSTRUMENTATION-CLIENT** - January 2025
 - ✅ Migrated Sentry client config from deprecated `sentry.client.config.ts` to `instrumentation-client.ts` (Next.js 15.3+ convention)

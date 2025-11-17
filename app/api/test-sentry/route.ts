@@ -13,59 +13,92 @@ export async function GET(request: Request) {
     switch (testType) {
       case "error": {
         // Throw an unhandled error (will be caught by Sentry's error handler)
-        const testError = new Error("🧪 Server-side test error from TOTL Agency API");
+        const testError = new Error("🧪 Server-side test error from TOTL Agency API - This should appear in Sentry!");
         // Explicitly capture it to ensure it's sent
-        Sentry.captureException(testError, {
+        const eventId = Sentry.captureException(testError, {
           tags: {
             feature: "api-test",
             test: true,
             endpoint: "/api/test-sentry",
+            testType: "forced-error",
           },
           extra: {
             context: "Testing server-side Sentry error reporting",
             timestamp: new Date().toISOString(),
+            testPurpose: "Verify Sentry connection is working",
           },
           level: "error",
         });
-        console.log("[Sentry Test] Error captured and sent to Sentry");
-        throw testError;
+        console.log("[Sentry Test] Error captured and sent to Sentry. Event ID:", eventId);
+        console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+        
+        // Also flush to ensure it's sent immediately
+        await Sentry.flush(2000);
+        
+        return NextResponse.json({
+          success: true,
+          message: "Test error thrown and captured",
+          eventId: eventId,
+          testType: "error",
+          note: "Error should appear in Sentry dashboard within 5-10 seconds",
+          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+        });
       }
 
       case "exception":
         // Capture a handled exception
         try {
-          throw new Error("Simulated server error: Database connection failed");
+          throw new Error("Simulated server error: Database connection failed - This should appear in Sentry!");
         } catch (error) {
-          Sentry.captureException(error, {
+          const exceptionId = Sentry.captureException(error, {
             tags: {
               feature: "api-test",
               test: true,
               endpoint: "/api/test-sentry",
+              testType: "handled-exception",
             },
             extra: {
               context: "Testing server-side Sentry integration",
               timestamp: new Date().toISOString(),
+              testPurpose: "Verify handled exceptions are captured",
             },
             level: "error",
           });
-          console.log("[Sentry Test] Exception captured and sent to Sentry");
+          console.log("[Sentry Test] Exception captured and sent to Sentry. Event ID:", exceptionId);
+          console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+          
+          // Flush to ensure it's sent immediately
+          await Sentry.flush(2000);
+          
+          return NextResponse.json({
+            success: true,
+            message: "Exception captured and sent to Sentry",
+            eventId: exceptionId,
+            testType: "exception",
+            note: "Exception should appear in Sentry dashboard within 5-10 seconds",
+            sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+          });
         }
-        return NextResponse.json({
-          success: true,
-          message: "Exception captured and sent to Sentry",
-          testType: "exception",
-        });
 
       case "message":
-      default:
+      default: {
         // Send an info message
-        Sentry.captureMessage("✅ Server-side test message: Sentry API integration working!", "info");
-        console.log("[Sentry Test] Message sent to Sentry");
+        const messageId = Sentry.captureMessage("✅ Server-side test message: Sentry API integration working!", "info");
+        console.log("[Sentry Test] Message sent to Sentry. Event ID:", messageId);
+        console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+        
+        // Flush to ensure it's sent immediately
+        await Sentry.flush(2000);
+        
         return NextResponse.json({
           success: true,
           message: "Message sent to Sentry",
+          eventId: messageId,
           testType: "message",
+          note: "Message should appear in Sentry dashboard within 5-10 seconds",
+          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
         });
+      }
     }
   } catch (error) {
     // Ensure error is captured by Sentry (in case automatic handler didn't catch it)
