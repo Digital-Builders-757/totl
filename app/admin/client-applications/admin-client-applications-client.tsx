@@ -21,7 +21,7 @@ import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -575,7 +575,7 @@ export function AdminClientApplicationsClient({
               Reject Client Application
             </DialogTitle>
             <DialogDescription>
-              Reject <strong>{selectedApplication?.company_name}</strong>'s application. They will
+              Reject <strong>{selectedApplication?.company_name}</strong>&apos;s application. They will
               receive a professional decline email.
             </DialogDescription>
           </DialogHeader>

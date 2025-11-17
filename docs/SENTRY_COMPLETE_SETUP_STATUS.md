@@ -278,3 +278,5 @@ Make any Supabase query in your app, then check Sentry:
 
 
 
+
+

@@ -93,11 +93,36 @@ export async function middleware(req: NextRequest) {
 
   if (isAuthRoute && user) {
     // If the user is logged in and tries to access an auth page, redirect to their dashboard based on role.
-    const { data: profile } = await supabase
+    // Force a fresh profile check to avoid stale data
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
+
+    // If profile doesn't exist, ensure it's created (fallback if trigger failed)
+    if (profileError && profileError.code === "PGRST116") {
+      // Extract name from user metadata
+      const firstName = (user.user_metadata?.first_name as string) || "";
+      const lastName = (user.user_metadata?.last_name as string) || "";
+      const role = (user.user_metadata?.role as string) || "talent";
+
+      // Create display name
+      let displayName = "";
+      if (firstName && lastName) {
+        displayName = `${firstName} ${lastName}`;
+      } else if (firstName) {
+        displayName = firstName;
+      } else if (lastName) {
+        displayName = lastName;
+      } else {
+        displayName = user.email?.split("@")[0] || "User";
+      }
+
+      // Create profile (using admin client would be better, but middleware can't use it)
+      // For now, redirect to choose-role and let the app handle profile creation
+      return NextResponse.redirect(new URL("/choose-role", req.url));
+    }
 
     if (profile?.role === "talent") {
       return NextResponse.redirect(new URL("/talent/dashboard", req.url));

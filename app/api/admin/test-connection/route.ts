@@ -1,9 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { NextResponse } from "next/server";
 import type { Database } from "@/types/supabase";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check environment variables
     const publicVars = !!(

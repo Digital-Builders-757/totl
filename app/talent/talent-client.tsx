@@ -6,7 +6,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import type { Database } from "@/types/supabase";
 
 // Custom type matching the actual selected fields from server query
 type TalentProfile = {

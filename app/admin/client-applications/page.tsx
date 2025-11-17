@@ -1,12 +1,10 @@
 import { redirect } from "next/navigation";
 import { AdminClientApplicationsClient } from "./admin-client-applications-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import { Database } from "@/types/supabase";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
-
-type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"];
 
 export default async function AdminClientApplicationsPage() {
   const supabase = await createSupabaseServer();

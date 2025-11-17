@@ -8,7 +8,6 @@ import {
   User,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   FileText,
 } from "lucide-react";
 import Link from "next/link";

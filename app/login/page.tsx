@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { handleLoginRedirect } from "@/lib/actions/auth-actions";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -98,15 +99,21 @@ export default function Login() {
         return;
       }
 
-      // The AuthProvider will handle the redirect after it processes the new session.
-      // We can optionally push a default route here if needed, but it's better to let the provider handle it.
-      // For now, we just wait for the provider to do its work.
       toast({
         title: "Signed in successfully!",
         description: "Redirecting to your dashboard...",
       });
 
-      // The redirect is now handled by the AuthProvider's onAuthStateChange listener
+      // Use server-side redirect to ensure fresh session and profile check
+      // This prevents stale cookie/cache issues
+      try {
+        await handleLoginRedirect();
+      } catch (error) {
+        // If server redirect fails, fall back to client-side redirect
+        console.error("Server redirect failed, using client redirect:", error);
+        // Force a hard refresh to clear any cached state
+        window.location.href = "/talent/dashboard";
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
