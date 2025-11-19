@@ -90,13 +90,9 @@ interface Gig {
 }
 
 export default function ClientDashboard() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
-  const [userProfile, setUserProfile] = useState<{
-    avatar_url?: string | null;
-    display_name?: string | null;
-  } | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -138,21 +134,8 @@ export default function ClientDashboard() {
     if (!supabase || !user) return;
 
     try {
-      // Fetch user profile with avatar
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("avatar_url, avatar_path, display_name")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError) {
-        console.error("Error fetching profile:", profileError);
-        return;
-      }
-
-      if (profileData) {
-        setUserProfile(profileData);
-      }
+      // Profile data is already available from auth context (avatar_url, display_name, etc.)
+      // No need to fetch it again - this eliminates N+1 query issue
 
       // Fetch client profile
       const { data: clientProfileData, error: clientProfileError } = await supabase
@@ -382,7 +365,7 @@ export default function ClientDashboard() {
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={userProfile?.avatar_url || "/images/totl-logo.png"}
+                  src={profile?.avatar_url || "/images/totl-logo.png"}
                   alt="Company"
                 />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>

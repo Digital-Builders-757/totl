@@ -639,6 +639,84 @@ Require stack:
 - Minimize client-side JavaScript
 - Leverage Next.js static generation where possible
 
+## 📊 Performance Issues
+
+### 8. N+1 Query Issue - Multiple Profile Queries
+
+**Error Message:**
+```
+Sentry: "N+1 API Call"
+Repeating Spans: /rest/v1/profiles?id=*&select=*
+5+ duplicate profile queries per page load
+```
+
+**Symptoms:**
+- ⚠️ Sentry shows "N+1 API Call" warnings
+- 🐌 Slow page loads on dashboard pages
+- 📊 Network tab shows 5+ identical profile queries
+- 💾 Excessive database load
+
+**Root Cause:** Multiple components fetching the same profile data separately instead of using cached data from auth provider.
+
+**Solution:**
+
+#### **Step 1: Use Profile from Auth Context**
+
+```typescript
+// ✅ CORRECT - Use profile from auth provider (single query)
+import { useAuth } from "@/components/auth/auth-provider";
+
+function Dashboard() {
+  const { user, profile } = useAuth();
+  
+  // Profile data is already available:
+  // - profile.role
+  // - profile.avatar_url
+  // - profile.avatar_path
+  // - profile.display_name
+  
+  return <Avatar src={profile?.avatar_url} />;
+}
+```
+
+#### **Step 2: Remove Duplicate Profile Queries**
+
+```typescript
+// ❌ WRONG - Don't fetch profile separately
+const [userProfile, setUserProfile] = useState(null);
+useEffect(() => {
+  supabase
+    .from("profiles")
+    .select("avatar_url, display_name")
+    .eq("id", user.id)
+    .single()
+    .then(({ data }) => setUserProfile(data));
+}, [user]);
+```
+
+#### **Step 3: Verify Fix**
+
+1. Check Sentry - should show 0 or 1 profile query per page load
+2. Network tab - verify single profile query in requests
+3. Performance - page load should be faster
+
+**Prevention:**
+- ✅ Always use `profile` from `useAuth()` in client components
+- ✅ Only query profiles separately in server components (routing decisions)
+- ✅ Check Sentry for N+1 query warnings after changes
+- ✅ Review network tab for duplicate queries
+
+**Files Fixed (January 2025):**
+- ✅ `app/talent/dashboard/page.tsx`
+- ✅ `app/client/dashboard/page.tsx`
+- ✅ `app/talent/[slug]/talent-profile-client.tsx`
+
+**Impact:** Reduced 5+ profile queries to 1 query per session (cached in auth context).
+
+**See:** `docs/AUTH_STRATEGY.md` for complete auth provider documentation.
+
+---
+
 ## 📞 Getting Help
 
 ### Error Investigation Checklist
@@ -647,17 +725,21 @@ Require stack:
 3. Confirm Supabase CLI version consistency
 4. Test in both development and production modes
 5. Check for recent schema or dependency changes
+6. Review Sentry for N+1 query warnings
+7. Check network tab for duplicate API calls
 
 ### Common False Positives
 - Type imports from `@supabase/supabase-js` (allowed)
 - Auth helper usage from `@supabase/auth-helpers-nextjs` (allowed)
 - Manual interfaces in UI components (warning, not error)
+- Server component profile queries (OK - needed for routing)
 
 ### When to Escalate
 - Persistent build failures after following guides
 - Schema verification loops despite correct setup
 - Production errors with unclear digest messages
 - Performance issues in CI/CD pipeline
+- N+1 query issues after using auth provider profile
 
 ---
 

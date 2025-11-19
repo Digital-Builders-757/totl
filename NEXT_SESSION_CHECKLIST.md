@@ -1,307 +1,161 @@
-# 🎯 Next Coding Session Checklist
+# 📋 Next Session Checklist - TOTL Agency
 
-**Created:** November 2, 2025  
-**Session Type:** TypeScript Refactor Completion & Verification  
-**Estimated Time:** 30-60 minutes
-
----
-
-## 📋 **CRITICAL - Complete These First**
-
-### **1. Verify TypeScript Build Success** ⏱️ ~10 min
-```bash
-# Kill any running Node processes
-Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
-
-# Clean .next folder
-Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue
-
-# Run fresh build
-npm run build
-```
-
-**Expected Result:** ✅ Build succeeds with 0 TypeScript errors
-
-**If Build Fails:**
-- Read error message carefully
-- Check `build.log` file for details
-- Fix remaining type errors using patterns from `docs/TYPE_SAFETY_IMPROVEMENTS.md`
-- Repeat until successful
+**Last Updated:** November 18, 2025  
+**Session Focus:** Admin Portal Completion & Talent Profile URL Improvements
 
 ---
 
-### **2. Verify Database Schema Alignment** ⏱️ ~15 min
+## ✅ **COMPLETED THIS SESSION**
 
-**Check that removed fields are actually removed from database:**
-```bash
-# Run schema verification
-npm run schema:verify:comprehensive
+### **1. Admin Portal UI Consistency**
+- ✅ Updated Career Builder Applications page to match Talent Applications dark theme
+- ✅ Converted from card grid to table layout for consistency
+- ✅ Applied matching gradient headers, status badges, and styling
+- ✅ All admin pages now have unified look and feel
 
-# Check for fields we removed from code
-grep -r "bio" types/database.ts
-grep -r "skills" types/database.ts  
-grep -r "image_path" types/database.ts
-grep -r "is_primary" types/database.ts
-grep -r "display_order" types/database.ts
-```
+### **2. Missing Admin Pages Created**
+- ✅ **`/admin/talent`** - View all talent who have signed up
+  - Shows: name, location, experience, specialties, verification status
+  - Search functionality by name, location, or specialty
+  - Links to view talent profiles
+  
+- ✅ **`/admin/gigs`** - View all gigs posted by Career Builders
+  - Shows: title, Career Builder company, location, compensation, date, status
+  - Tabs: All, Active, Draft, Closed
+  - Search by title, location, category, or company
+  - "Create Gig" button linking to existing create page
+  
+- ✅ **`/admin/users`** - View all users (talent, Career Builders, admins)
+  - Shows: name, role, email verification, join date, user ID
+  - Tabs: All, Talent, Career Builders, Admins
+  - Search by name, ID, or role
+  - "Create User" button linking to existing create page
 
-**Action Required:**
-- [ ] If fields exist in DB but not in code → Update code OR
-- [ ] If fields don't exist in DB → ✅ Already correct
-- [ ] If schema mismatch → Regenerate types: `npm run types:regen:dev`
+### **3. Talent Profile URL Improvements**
+- ✅ Created slug utility (`lib/utils/slug.ts`) for name-based URLs
+- ✅ Changed route from `/talent/[id]` to `/talent/[slug]`
+- ✅ URLs now use names: `/talent/john-doe` instead of UUIDs
+- ✅ Backward compatible: still accepts UUIDs if slug doesn't match
+- ✅ Updated all links throughout the app:
+  - Talent listing page
+  - Admin Talent page
+  - Admin Users page
+  - Client Applications page
+  - Client Bookings page
+- ✅ Updated queries to include `talent_profiles` data where needed
 
-**Important Database Field Changes Made:**
-- ❌ `talent_profiles.bio` → ✅ `talent_profiles.experience`
-- ❌ `talent_profiles.skills` → ✅ `talent_profiles.specialties`
-- ❌ `portfolio_items.image_path` → ✅ `portfolio_items.image_url`
-- ❌ `portfolio_items.is_primary` → ✅ Field doesn't exist (removed from code)
-- ❌ `portfolio_items.display_order` → ✅ Field doesn't exist (removed from code)
-
----
-
-### **3. Run Full Pre-Push Checklist** ⏱️ ~10 min
-
-```bash
-# Environment check
-npm run env:verify
-
-# Type checking
-npm run typecheck
-
-# Schema verification  
-npm run schema:verify:comprehensive
-
-# Linting
-npm run lint
-
-# Final build
-npm run build
-```
-
-**All Must Pass:** ✅✅✅✅✅
-
----
-
-## 📝 **Documentation Tasks**
-
-### **4. Update README.md** ⏱️ ~5 min
-
-Add TypeScript safety section:
-
-```markdown
-## 🛡️ TypeScript Type Safety
-
-TOTL Agency enforces **strict TypeScript type safety** across the entire codebase:
-
-- ✅ **0 TypeScript errors** policy
-- ✅ **Full database type inference** with Supabase
-- ✅ **Production builds enforce type checking**
-- ✅ **Pre-commit hooks** prevent type errors
-
-### Key Patterns:
-- Client components: Use `useSupabase()` hook
-- Server components: Use `await createSupabaseServer()`
-- Always run `npm run typecheck` before committing
-
-📖 See [Type Safety Guide](./docs/TYPE_SAFETY_IMPROVEMENTS.md) for complete documentation.
-```
+### **4. Documentation Updates**
+- ✅ Updated terminology from "Client" to "Career Builder" in:
+  - `ADMIN_ACCOUNT_GUIDE.md`
+  - `TOTL_AGENCY_USER_GUIDE.md`
+  - `DATABASE_REPORT.md`
+  - `DOCUMENTATION_INDEX.md`
+- ✅ Created cleanup planning documents:
+  - `TERMINOLOGY_UPDATE_PLAN.md`
+  - `DOCUMENTATION_CLEANUP_PLAN.md`
+  - `DOCUMENTATION_CLEANUP_SUMMARY.md`
 
 ---
 
-### **5. Update ENV_SETUP_GUIDE.md** ⏱️ ~3 min
+## 🎯 **NEXT SESSION PRIORITIES**
 
-Add reference to new `.env.example` and `npm run env:verify`:
+### **High Priority**
 
-```markdown
-## ✅ Quick Setup
+1. **Test Talent Profile Slugs**
+   - [ ] Verify all talent profile links work with new slug-based URLs
+   - [ ] Test backward compatibility with old UUID-based URLs
+   - [ ] Check for any broken links in production
+   - [ ] Verify slug generation handles special characters correctly
 
-1. Copy `.env.example` to `.env.local`
-2. Fill in all values
-3. Verify: `npm run env:verify`
-```
+2. **Admin Portal Testing**
+   - [ ] Test all three new admin pages (`/admin/talent`, `/admin/gigs`, `/admin/users`)
+   - [ ] Verify data loads correctly
+   - [ ] Test search functionality on all pages
+   - [ ] Test filtering/tabs on Gigs and Users pages
+   - [ ] Verify "View Profile" links work correctly
 
----
+3. **Documentation Cleanup (Medium Priority)**
+   - [ ] Continue updating remaining docs with "Career Builder" terminology:
+     - `AUTH_STRATEGY.md`
+     - `DEVELOPER_QUICK_REFERENCE.md`
+     - `CODING_STANDARDS.md`
+     - `TROUBLESHOOTING_GUIDE.md`
+   - [ ] Consolidate redundant documentation:
+     - Sentry docs (10+ files → consolidate to 3)
+     - Environment setup (2 files → merge into 1)
+     - Supabase MCP (5 files → keep 2, archive 3)
 
-## 🧹 **Cleanup Tasks**
+### **Medium Priority**
 
-### **6. Remove Duplicate Files** ⏱️ ~2 min
+4. **Potential Slug Collisions**
+   - [ ] Consider adding unique identifier for duplicate names (e.g., `john-doe-2`)
+   - [ ] Or add database `slug` column for explicit slug management
+   - [ ] Current implementation may have issues if two talent have same name
 
-Verify these are deleted:
-- [x] `lib/services/email-service.ts` ← Already deleted ✅
-- [ ] Check for other duplicates in `lib/services/` vs `lib/`:
-  ```bash
-  Get-ChildItem lib/services/ -Filter *.ts | ForEach-Object { 
-    if (Test-Path "lib/$($_.Name)") { 
-      echo "Duplicate found: $($_.Name)" 
-    } 
-  }
-  ```
+5. **Admin Portal Enhancements**
+   - [ ] Add pagination to Talent, Gigs, and Users pages (if large datasets)
+   - [ ] Add export functionality to Talent and Users pages (like Career Builder Applications)
+   - [ ] Consider adding bulk actions (approve/reject multiple items)
 
----
+### **Low Priority / Future**
 
-### **7. Consolidate Type Safety Docs** ⏱️ ~2 min
+6. **Performance Optimization**
+   - [ ] Review query performance on new admin pages
+   - [ ] Consider adding indexes if queries are slow
+   - [ ] Add loading states if data fetching takes time
 
-**Already Done:**
-- ✅ Deleted 6 redundant docs
-- ✅ Updated DOCUMENTATION_INDEX.md
-- ✅ Created TYPE_SAFETY_IMPROVEMENTS.md (canonical)
-- ✅ Created TYPESCRIPT_REFACTOR_NOVEMBER_2025.md (summary)
-
-**Verify:**
-```bash
-Get-ChildItem docs/ -Filter "TYPE_SAFETY*.md"
-# Should only show 2 files:
-# - TYPE_SAFETY_IMPROVEMENTS.md
-# - TYPESCRIPT_REFACTOR_NOVEMBER_2025.md (can be archived later)
-```
-
----
-
-## 🧪 **Testing & Verification**
-
-### **8. Test Critical Flows** ⏱️ ~10 min
-
-**Manually test these flows:**
-- [ ] Login as talent
-- [ ] View talent dashboard (check applications load)
-- [ ] Login as client  
-- [ ] View client applications (check status labels are correct)
-- [ ] Create a gig (admin or client)
-- [ ] Apply to a gig (talent)
-
-**Watch for:**
-- Console errors about types
-- Null reference errors
-- Database query failures
-- Missing fields
+7. **User Experience**
+   - [ ] Add tooltips or help text on admin pages
+   - [ ] Consider adding filters beyond search (date ranges, status, etc.)
+   - [ ] Add sorting options to tables
 
 ---
 
-## 📊 **Final Verification**
+## 🐛 **KNOWN ISSUES TO ADDRESS**
 
-### **9. Git Status Check** ⏱️ ~5 min
+1. **Slug Collision Handling**
+   - Current implementation may fail if two talent have identical names
+   - Consider: adding unique suffix or database slug column
 
-```bash
-# Check what files changed
-git status
-
-# Review critical changes
-git diff lib/hooks/use-supabase.ts
-git diff lib/supabase/supabase-server.ts
-git diff lib/supabase/supabase-browser.ts
-git diff next.config.mjs
-```
-
-**Expected Changes:** ~45 files modified
+2. **Old Route Cleanup**
+   - `/talent/[id]` route still exists but is replaced by `/talent/[slug]`
+   - Consider removing old route after verifying all links updated
 
 ---
 
-### **10. Create Commit** ⏱️ ~5 min
+## 📝 **NOTES FOR NEXT SESSION**
 
-**Commit Message:**
-```
-refactor: complete TypeScript type safety overhaul
-
-- Created useSupabase() hook for guaranteed non-null clients
-- Added explicit return types to all Supabase client functions
-- Fixed 200+ type 'never' errors across 40+ files
-- Enabled TypeScript checking in production builds
-- Consolidated email service (deleted duplicate)
-- Fixed database enum values (under_review, shortlisted, accepted)
-- Removed non-existent schema fields (bio, skills, image_path, etc)
-- Created env validation: npm run env:verify
-- Added .env.example template
-
-Breaking Changes:
-- next.config.mjs now enforces TypeScript checking
-- All builds will fail on type errors (prevents broken deployments)
-- Client components must use useSupabase() hook for type safety
-
-Documentation:
-- Created docs/TYPE_SAFETY_IMPROVEMENTS.md (canonical guide)
-- Created docs/TYPESCRIPT_REFACTOR_NOVEMBER_2025.md (summary)
-- Consolidated 7 type safety docs into 2
-- Updated DOCUMENTATION_INDEX.md
-
-Files Modified: 40+
-Files Created: 4
-Files Deleted: 7
-```
+- All admin portal navigation links now work (no more 404s)
+- Talent profile URLs are now user-friendly and SEO-friendly
+- Career Builder terminology is being rolled out across documentation
+- Admin portal has consistent dark theme throughout
 
 ---
 
-## 🚨 **Known Issues to Address**
+## 🔗 **KEY FILES MODIFIED THIS SESSION**
 
-### **From This Session:**
+### **New Files Created:**
+- `app/admin/talent/page.tsx` & `admin-talent-client.tsx`
+- `app/admin/gigs/page.tsx` & `admin-gigs-client.tsx`
+- `app/admin/users/page.tsx` & `admin-users-client.tsx`
+- `app/talent/[slug]/page.tsx` & `talent-profile-client.tsx`
+- `lib/utils/slug.ts`
+- `lib/utils/talent-slug.ts`
+- `docs/TERMINOLOGY_UPDATE_PLAN.md`
+- `docs/DOCUMENTATION_CLEANUP_PLAN.md`
+- `docs/DOCUMENTATION_CLEANUP_SUMMARY.md`
 
-1. **Portfolio Fields Missing in Database**
-   - Code expects: `is_primary`, `display_order`, `image_path`
-   - Database has: Only `image_url`
-   - **Action:** Verify if these fields should be added to DB OR code is correct as-is
-
-2. **Application Status Enum Alignment**
-   - Verified we're using correct enum values now
-   - **Action:** Test that all status transitions work correctly
-
-3. **Email Service Verification**
-   - ✅ All using same Resend API
-   - ✅ Same sender email
-   - **Action:** Test that all email flows still work
-
----
-
-## ⚠️ **BEFORE YOU PUSH TO DEVELOP**
-
-```bash
-# MANDATORY CHECKS:
-npm run env:verify                      # ✅ Environment configured
-npm run types:check                     # ✅ Types fresh
-npm run typecheck                       # ✅ 0 errors
-npm run schema:verify:comprehensive     # ✅ Schema in sync
-npm run lint                            # ✅ Code quality
-npm run build                           # ✅ Production build succeeds
-```
-
-**ALL MUST PASS** ✅✅✅✅✅✅
+### **Files Updated:**
+- `app/admin/client-applications/admin-client-applications-client.tsx` (UI redesign)
+- `app/talent/talent-client.tsx` (slug-based links)
+- `app/admin/talent/admin-talent-client.tsx` (slug-based links)
+- `app/admin/users/admin-users-client.tsx` (slug-based links)
+- `app/client/applications/page.tsx` (slug-based links + query update)
+- `app/client/bookings/page.tsx` (slug-based links)
+- `lib/actions/booking-actions.ts` (added talent_profiles to query)
+- `app/admin/users/page.tsx` (added talent_profiles to query)
+- Multiple documentation files (terminology updates)
 
 ---
 
-## 📚 **Reference Documents for Next Session**
-
-- `docs/TYPE_SAFETY_IMPROVEMENTS.md` - How to maintain type safety
-- `docs/TYPESCRIPT_REFACTOR_NOVEMBER_2025.md` - What we changed today
-- `database_schema_audit.md` - Database schema truth
-- `docs/PRE_PUSH_CHECKLIST.md` - Pre-push requirements
-
----
-
-## 🎯 **Success Criteria**
-
-Session is complete when:
-- ✅ `npm run build` succeeds with 0 errors
-- ✅ All pre-push checks pass
-- ✅ Manual testing confirms features work
-- ✅ Database schema verified
-- ✅ Changes committed to branch
-- ✅ Documentation updated
-
----
-
-## 💡 **Quick Wins for Future**
-
-If you have extra time:
-- Implement advanced patterns from the TypeScript plan
-- Add pre-commit hooks for type checking
-- Create type safety tests with Playwright
-- Add branded types for IDs
-- Implement query builder pattern
-
----
-
-**Estimated Total Time:** 45-75 minutes  
-**Priority:** 🔥 HIGH - Complete before merging to develop  
-**Blockers:** None - all dependencies resolved
-
-**Last Updated:** November 2, 2025  
-**Status:** Ready for next session
-
+**Ready for next session! 🚀**

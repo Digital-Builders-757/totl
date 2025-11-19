@@ -98,6 +98,8 @@ In the above example, `gigs` will be strongly-typed (an array of Gig objects) be
 
 ## 🔐 Working with RLS (Row-Level Security)
 
+**🚨 CRITICAL:** When creating RLS policies, PostgreSQL does NOT support `IF NOT EXISTS` with `CREATE POLICY`. Always use `DO $$` blocks with conditional checks. See `SQL_RLS_POLICY_CREATION_GUIDE.md` for complete templates and examples.
+
 Our database tables are protected by RLS policies, meaning the database will restrict which rows a query can see or modify based on the user's role and other factors.
 
 * **Always use the correct client:**

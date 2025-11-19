@@ -99,15 +99,17 @@ export default async function AuthCallbackPage({
       if (data.session?.user) {
         const user = data.session.user;
         
-        // Check if profile exists
+        // Check if profile exists - use maybeSingle() to prevent 406 errors
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role,email_verified,display_name")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
         // If profile doesn't exist, create it with name from user metadata
-        if (profileError && profileError.code === "PGRST116") {
+        // With maybeSingle(), no rows returns null data (not an error), so check !profile
+        const isNotFoundError = profileError && typeof profileError === 'object' && 'code' in profileError && (profileError as { code: string }).code === "PGRST116";
+        if (!profile || isNotFoundError) {
           // Extract name from user metadata
           const firstName = (user.user_metadata?.first_name as string) || "";
           const lastName = (user.user_metadata?.last_name as string) || "";
@@ -179,12 +181,12 @@ export default async function AuthCallbackPage({
             }
           }
 
-          // Re-fetch profile after creation
+          // Re-fetch profile after creation - use maybeSingle() to prevent 406 errors
           const { data: newProfile } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", user.id)
-            .single();
+            .maybeSingle();
 
           // Redirect based on role
           if (newProfile?.role === "talent") {

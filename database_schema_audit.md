@@ -535,26 +535,50 @@ USING (client_id = auth.uid());
 -- Talent can see their applications, clients can see for their gigs
 CREATE POLICY "Applications access policy" ON applications FOR SELECT TO authenticated 
 USING (
-  talent_id = auth.uid() OR 
+  talent_id = (SELECT auth.uid()) OR 
   EXISTS (
     SELECT 1 FROM gigs 
     WHERE gigs.id = applications.gig_id 
-    AND gigs.client_id = auth.uid()
+    AND gigs.client_id = (SELECT auth.uid())
   )
 );
 
 -- Talent can apply to gigs
 CREATE POLICY "Talent can apply to gigs" ON applications FOR INSERT TO authenticated 
-WITH CHECK (talent_id = auth.uid());
+WITH CHECK (talent_id = (SELECT auth.uid()));
 
 -- Update application status
 CREATE POLICY "Update application status" ON applications FOR UPDATE TO authenticated 
 USING (
-  talent_id = auth.uid() OR 
+  talent_id = (SELECT auth.uid()) OR 
   EXISTS (
     SELECT 1 FROM gigs 
     WHERE gigs.id = applications.gig_id 
-    AND gigs.client_id = auth.uid()
+    AND gigs.client_id = (SELECT auth.uid())
+  )
+);
+
+-- Admins can view all applications
+CREATE POLICY "Admins can view all applications" ON applications FOR SELECT TO authenticated 
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE id = (SELECT auth.uid()) AND role = 'admin'
+  )
+);
+
+-- Admins can manage all applications (INSERT, UPDATE, DELETE)
+CREATE POLICY "Admins can manage all applications" ON applications FOR ALL TO authenticated 
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE id = (SELECT auth.uid()) AND role = 'admin'
+  )
+)
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM profiles 
+    WHERE id = (SELECT auth.uid()) AND role = 'admin'
   )
 );
 ```

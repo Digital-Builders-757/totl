@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const supabase = await createSupabaseServer();
 
-  // Get user profile data directly - no need for getSession since middleware handles auth
-  const { data: profile, error } = await supabase.from("profiles").select("*").single();
+  // Get user profile data directly - use maybeSingle() to prevent 406 errors
+  const { data: profile, error } = await supabase.from("profiles").select("*").maybeSingle();
 
   // âœ… Fixed: Proper type guards
   if (error) {

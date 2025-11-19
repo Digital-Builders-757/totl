@@ -224,6 +224,49 @@ USING (user_id = (SELECT auth.uid()))
 
 ---
 
+## 🔄 Application-Level Performance (January 2025)
+
+### **N+1 Query Fix - Profile Data Caching**
+
+**Issue:** Multiple components were fetching the same profile data, causing 5+ duplicate queries per page load.
+
+**Solution:** Extended auth provider to fetch and cache full profile data in React context.
+
+#### **Before Fix:**
+- ❌ 5+ profile queries per dashboard page load
+- ❌ Each component fetching profile separately
+- ❌ Slow page loads
+- ❌ Excessive database load
+
+#### **After Fix:**
+- ✅ 1 profile query per session (cached in auth context)
+- ✅ All components use cached profile data
+- ✅ Faster page loads
+- ✅ Reduced database load
+
+#### **Implementation:**
+
+```typescript
+// Auth provider now fetches and caches full profile:
+const { user, profile } = useAuth();
+
+// Available fields:
+// - profile.role
+// - profile.avatar_url
+// - profile.avatar_path
+// - profile.display_name
+```
+
+#### **Files Fixed:**
+- ✅ `components/auth/auth-provider.tsx` - Fetches full profile once
+- ✅ `app/talent/dashboard/page.tsx` - Uses cached profile
+- ✅ `app/client/dashboard/page.tsx` - Uses cached profile
+- ✅ `app/talent/[slug]/talent-profile-client.tsx` - Uses cached profile
+
+**See:** `docs/AUTH_STRATEGY.md` for complete documentation on using auth provider profile.
+
+---
+
 ## Summary
 
 This migration is **safe, tested, and production-ready**. It:
@@ -234,11 +277,17 @@ This migration is **safe, tested, and production-ready**. It:
 - ✅ Maintains all critical indexes
 - ✅ Preserves all functionality (no breaking changes)
 
+**Combined with N+1 query fix:**
+- ✅ Eliminates duplicate profile queries
+- ✅ Reduces application-level database load
+- ✅ Improves page load performance
+
 **Apply it with confidence!** 🚀
 
 ---
 
-*Last Updated: October 16, 2025*  
-*Migration File: `20251016172507_fix_performance_advisor_warnings.sql`*
+*Last Updated: January 2025*  
+*Migration File: `20251016172507_fix_performance_advisor_warnings.sql`*  
+*Application Fix: January 2025 - N+1 Query Prevention*
 
 

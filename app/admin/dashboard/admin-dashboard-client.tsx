@@ -27,7 +27,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { GigStatusBadge } from "@/components/ui/status-badge";
+import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
 
@@ -383,7 +383,7 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                   <div>
                     <CardTitle className="text-white">Application Management</CardTitle>
                     <CardDescription className="text-gray-300">
-                      Review and manage talent applications
+                      Review and manage talent applications ({applications.length} total)
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -400,12 +400,62 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-300 mb-4">Application management interface coming soon.</p>
-                  <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
-                    <Link href="/admin/applications">Go to Applications</Link>
-                  </Button>
+                <div className="space-y-4">
+                  {applications.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-300 mb-4">No applications found.</p>
+                    </div>
+                  ) : (
+                    applications.map((application) => (
+                      <div
+                        key={application.id}
+                        className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
+                      >
+                        <div className="flex-grow space-y-2">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                            <div className="flex items-center gap-3">
+                              <div>
+                                <h4 className="font-semibold text-white">Application #{application.id.slice(0, 8)}</h4>
+                                <p className="text-sm text-gray-400">Gig: {application.gig_id.slice(0, 8)}...</p>
+                              </div>
+                            </div>
+                            <ApplicationStatusBadge status={application.status} showIcon={true} />
+                          </div>
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-4 w-4" />
+                              Talent: {application.talent_id.slice(0, 8)}...
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(application.created_at).toLocaleDateString()}
+                            </span>
+                            {application.message && (
+                              <span className="text-gray-500 italic truncate max-w-md">
+                                {application.message.length > 50 
+                                  ? `${application.message.substring(0, 50)}...` 
+                                  : application.message}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex md:flex-col gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                            asChild
+                          >
+                            <Link href={`/admin/applications/${application.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

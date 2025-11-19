@@ -6,6 +6,7 @@ import { TalentProfileClient } from "./talent-profile-client";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { createNameSlug } from "@/lib/utils/slug";
 import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
@@ -13,25 +14,24 @@ type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
 interface TalentProfilePageProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
-  const { id } = await params;
+  const { slug } = await params;
   
   // Use createSupabaseServer for proper server-side authentication
   // This handles cookies correctly in server components
   const supabase = await createSupabaseServer();
 
-  // For public talent profiles, we don't need authentication
-  // The page will show public information and prompt for login to see sensitive details
-
   let talent: TalentProfile | null = null;
   let error: string | null = null;
 
   try {
-    const { data, error: dbError } = await supabase
+    // First, try to find by slug (name-based)
+    // Fetch all talent profiles and match by generated slug
+    const { data: allTalent, error: fetchError } = await supabase
       .from("talent_profiles")
       .select(`
         id,
@@ -55,14 +55,27 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         created_at,
         updated_at
       `)
-      .eq("id", id)
-      .single();
+      .order("created_at", { ascending: false });
 
-    if (dbError) {
-      console.error("Supabase error fetching talent profile:", dbError);
-      error = `Database error: ${dbError.message}`;
-    } else {
-      talent = data as TalentProfile;
+    if (fetchError) {
+      console.error("Supabase error fetching talent profiles:", fetchError);
+      error = `Database error: ${fetchError.message}`;
+    } else if (allTalent) {
+      // Find talent by matching slug
+      talent =
+        allTalent.find((t) => {
+          const talentSlug = createNameSlug(t.first_name, t.last_name);
+          return talentSlug === slug;
+        }) ?? null;
+
+      // If not found by slug, try to find by ID (for backward compatibility)
+      if (!talent) {
+        // Check if slug is a valid UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidRegex.test(slug)) {
+          talent = allTalent.find((t) => t.id === slug || t.user_id === slug) ?? null;
+        }
+      }
     }
   } catch (err: unknown) {
     console.error("Unexpected error fetching talent profile:", err);
@@ -72,13 +85,6 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
   if (error || !talent) {
     notFound();
   }
-
-  // Since we're not using server-side authentication, we'll show public information
-  // and use client-side authentication gates for sensitive data
-  // This approach is more secure and follows Next.js 15 App Router best practices
-
-  // For now, we'll use a placeholder contact method since we can't access auth.users directly
-  // In a real app, you might want to add an email field to the profiles table or use a contact form
 
   return (
     <div className="min-h-screen bg-seamless-primary">
@@ -185,3 +191,4 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
     </div>
   );
 }
+

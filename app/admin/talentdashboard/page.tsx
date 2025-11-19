@@ -28,6 +28,7 @@ import {
 import { EmailVerificationReminder } from "@/components/ui/email-verification-reminder";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { createNameSlug } from "@/lib/utils/slug";
 import {
   type TalentProfileRow,
   type ProfileRow,
@@ -348,7 +349,15 @@ export default async function TalentDashboard() {
                         <Link href="/admin/talentdashboard/profile">Edit Profile</Link>
                       </Button>
                       <Button asChild className="bg-black text-white hover:bg-black/90">
-                        <Link href={`/talent/${profileData?.id || 0}`}>
+                        <Link
+                          href={
+                            profileData?.first_name && profileData?.last_name
+                              ? `/talent/${createNameSlug(profileData.first_name, profileData.last_name)}`
+                              : profileData?.id
+                                ? `/talent/${profileData.id}`
+                                : "/talent"
+                          }
+                        >
                           <Eye className="mr-2 h-4 w-4" /> View Public Profile
                         </Link>
                       </Button>

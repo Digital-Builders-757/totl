@@ -9,6 +9,7 @@ import {
   Clock,
   Filter,
 } from "lucide-react";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { AdminHeader } from "@/components/admin/admin-header";
@@ -364,15 +365,13 @@ export function AdminApplicationsClient({
                                   <span>Reject</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => {
-                                    // View application details
-                                    setSelectedApplication(application);
-                                    // In a real app, you might navigate to a details page or show a modal
-                                  }}
+                                  asChild
                                   className="text-gray-300 hover:bg-gray-700"
                                 >
-                                  <Search className="mr-2 h-4 w-4" />
-                                  <span>View Details</span>
+                                  <Link href={`/admin/applications/${application.id}`}>
+                                    <Search className="mr-2 h-4 w-4" />
+                                    <span>View Details</span>
+                                  </Link>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
