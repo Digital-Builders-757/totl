@@ -80,17 +80,19 @@ export async function safeUpdate<T>(
 export const safeQuery = {
   /**
    * Safely get a profile by user ID
+   * Uses maybeSingle() to prevent 406 errors when profile doesn't exist
    */
   getProfileByUserId: async (supabase: SupabaseClient<Database>, userId: string) => {
     return await supabase
       .from("profiles")
       .select("id, first_name, last_name, email, role, created_at")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
   },
 
   /**
    * Safely get talent profile by user ID
+   * Uses maybeSingle() to prevent 406 errors when profile doesn't exist
    */
   getTalentProfileByUserId: async (supabase: SupabaseClient<Database>, userId: string) => {
     return await supabase
@@ -110,11 +112,12 @@ export const safeQuery = {
       `
       )
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
   },
 
   /**
    * Safely get client profile by user ID
+   * Uses maybeSingle() to prevent 406 errors when profile doesn't exist
    */
   getClientProfileByUserId: async (supabase: SupabaseClient<Database>, userId: string) => {
     return await supabase
@@ -131,7 +134,7 @@ export const safeQuery = {
       `
       )
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
   },
 
   /**

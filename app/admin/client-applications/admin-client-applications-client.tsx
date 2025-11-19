@@ -13,15 +13,11 @@ import {
   Eye,
   Building2,
   Mail,
-  Phone,
-  Globe,
-  Briefcase,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -57,6 +53,7 @@ export function AdminClientApplicationsClient({
 }: AdminClientApplicationsClientProps) {
   const [applications, setApplications] = useState(initialApplications);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("pending");
   const [selectedApplication, setSelectedApplication] = useState<ClientApplication | null>(null);
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
@@ -67,33 +64,59 @@ export function AdminClientApplicationsClient({
 
   // Filter applications by status and search
   const filteredApplications = useMemo(() => {
-    return applications.filter((app) => {
-      const matchesSearch =
-        searchQuery === "" ||
-        app.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.last_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (app.industry && app.industry.toLowerCase().includes(searchQuery.toLowerCase()));
+    let filtered = applications;
 
-      return matchesSearch;
-    });
-  }, [applications, searchQuery]);
+    // Filter by status based on active tab
+    if (activeTab === "pending") {
+      filtered = filtered.filter((app) => app.status === "pending");
+    } else if (activeTab === "approved") {
+      filtered = filtered.filter((app) => app.status === "approved");
+    } else if (activeTab === "rejected") {
+      filtered = filtered.filter((app) => app.status === "rejected");
+    }
 
-  // Group by status
-  const pendingApplications = filteredApplications.filter((app) => app.status === "pending");
-  const approvedApplications = filteredApplications.filter((app) => app.status === "approved");
-  const rejectedApplications = filteredApplications.filter((app) => app.status === "rejected");
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (app) =>
+          app.company_name.toLowerCase().includes(query) ||
+          app.first_name.toLowerCase().includes(query) ||
+          app.last_name.toLowerCase().includes(query) ||
+          app.email.toLowerCase().includes(query) ||
+          (app.industry && app.industry.toLowerCase().includes(query))
+      );
+    }
+
+    return filtered;
+  }, [applications, searchQuery, activeTab]);
+
+  // Group by status for stats
+  const pendingApplications = applications.filter((app) => app.status === "pending");
+  const approvedApplications = applications.filter((app) => app.status === "approved");
+  const rejectedApplications = applications.filter((app) => app.status === "rejected");
 
   // Status badge styling
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
-        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">Pending</Badge>;
+        return (
+          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/50">
+            Pending
+          </Badge>
+        );
       case "approved":
-        return <Badge className="bg-green-100 text-green-800 border-green-300">Approved</Badge>;
+        return (
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/50">
+            Approved
+          </Badge>
+        );
       case "rejected":
-        return <Badge className="bg-red-100 text-red-800 border-red-300">Rejected</Badge>;
+        return (
+          <Badge className="bg-red-500/20 text-red-400 border-red-500/50">
+            Rejected
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -227,7 +250,7 @@ export function AdminClientApplicationsClient({
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `client-applications-${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `career-builder-applications-${new Date().toISOString().split("T")[0]}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
@@ -239,300 +262,439 @@ export function AdminClientApplicationsClient({
     });
   };
 
-  // Application card component
-  const ApplicationCard = ({ application }: { application: ClientApplication }) => (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Building2 className="h-5 w-5 text-gray-600" />
-              <h3 className="text-lg font-semibold">{application.company_name}</h3>
-            </div>
-            <p className="text-gray-600 text-sm">
-              {application.first_name} {application.last_name}
+  return (
+    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
+      <AdminHeader user={user} notificationCount={3} />
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Dashboard Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+              Career Builder Applications
+            </h1>
+            <p className="text-gray-400 text-lg">
+              Manage companies applying to become Career Builders on the platform
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            {getStatusBadge(application.status)}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedApplication(application);
-                    setIsDetailsDialogOpen(true);
-                  }}
-                >
-                  <Eye className="mr-2 h-4 w-4" />
-                  View Details
-                </DropdownMenuItem>
-                {application.status === "pending" && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedApplication(application);
-                        setAdminNotes("");
-                        setIsApproveDialogOpen(true);
-                      }}
-                    >
-                      <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                      Approve
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        setSelectedApplication(application);
-                        setAdminNotes("");
-                        setIsRejectDialogOpen(true);
-                      }}
-                    >
-                      <XCircle className="mr-2 h-4 w-4 text-red-600" />
-                      Reject
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        <div className="space-y-2 text-sm">
-          <div className="flex items-center text-gray-600">
-            <Mail className="h-4 w-4 mr-2" />
-            {application.email}
-          </div>
-          {application.phone && (
-            <div className="flex items-center text-gray-600">
-              <Phone className="h-4 w-4 mr-2" />
-              {application.phone}
+          <div className="mt-4 md:mt-0 flex items-center space-x-4">
+            <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 py-2 rounded-lg font-medium">
+              {pendingApplications.length} Pending
             </div>
-          )}
-          {application.industry && (
-            <div className="flex items-center text-gray-600">
-              <Briefcase className="h-4 w-4 mr-2" />
-              {application.industry}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium">
+              {approvedApplications.length} Approved
             </div>
-          )}
-          {application.website && (
-            <div className="flex items-center text-gray-600">
-              <Globe className="h-4 w-4 mr-2" />
-              <a
-                href={application.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                {application.website}
-              </a>
+            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
+              {rejectedApplications.length} Rejected
             </div>
-          )}
-        </div>
-
-        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-gray-500">
-          <span>Applied {new Date(application.created_at).toLocaleDateString()}</span>
-          <span>ID: {application.id.slice(0, 8)}...</span>
-        </div>
-
-        {application.admin_notes && (
-          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded text-xs">
-            <p className="font-semibold text-blue-800 mb-1">Admin Notes:</p>
-            <p className="text-blue-700">{application.admin_notes}</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader user={user} />
-
-      <div className="container mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Client Applications</h1>
-              <p className="text-gray-600 mt-1">
-                Manage businesses applying to become clients on the platform
-              </p>
-            </div>
-            <Button onClick={handleExport} variant="outline" className="gap-2">
+            <Button
+              onClick={handleExport}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+            >
               <Download className="h-4 w-4" />
               Export CSV
             </Button>
           </div>
+        </div>
 
-          {/* Search and Stats */}
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input
-                type="text"
-                placeholder="Search by company, name, email, or industry..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-yellow-600" />
-                <span className="text-gray-600">
-                  Pending: <strong>{pendingApplications.length}</strong>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-gray-600">
-                  Approved: <strong>{approvedApplications.length}</strong>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <XCircle className="h-4 w-4 text-red-600" />
-                <span className="text-gray-600">
-                  Rejected: <strong>{rejectedApplications.length}</strong>
-                </span>
+        {/* Applications Section */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden mb-8">
+          <div className="p-6 border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80">
+            <div className="flex flex-col md:flex-row md:items-center justify-between">
+              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={16}
+                  />
+                  <Input
+                    placeholder="Search by company, name, email, or industry..."
+                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <Button variant="outline" size="icon" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                  <Filter size={16} />
+                </Button>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="pending" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-md">
-            <TabsTrigger value="all">All ({filteredApplications.length})</TabsTrigger>
-            <TabsTrigger value="pending">
-              Pending ({pendingApplications.length})
-            </TabsTrigger>
-            <TabsTrigger value="approved">
-              Approved ({approvedApplications.length})
-            </TabsTrigger>
-            <TabsTrigger value="rejected">
-              Rejected ({rejectedApplications.length})
-            </TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
+            <div className="px-6 border-b border-gray-700">
+              <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
+                <TabsTrigger
+                  value="pending"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                >
+                  Pending ({pendingApplications.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="approved"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                >
+                  Approved ({approvedApplications.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="rejected"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                >
+                  Rejected ({rejectedApplications.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          {/* All Applications */}
-          <TabsContent value="all" className="mt-6">
-            {filteredApplications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Filter className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Applications Found
-                  </h3>
-                  <p className="text-gray-600">
+            <TabsContent value="pending" className="p-0">
+              {filteredApplications.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
+                    <Clock className="h-10 w-10 text-yellow-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-white">No Pending Applications</h3>
+                  <p className="text-gray-400 text-lg">
                     {searchQuery
                       ? "Try adjusting your search query"
-                      : "No client applications have been submitted yet"}
+                      : "All Career Builder applications have been reviewed."}
                   </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {filteredApplications.map((application) => (
-                  <ApplicationCard key={application.id} application={application} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Company Name
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Contact
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Email
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Industry
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Applied Date
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Status
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredApplications.map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-gray-400" />
+                              <div className="font-medium text-white text-sm">{application.company_name}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="text-white text-sm">
+                              {application.first_name} {application.last_name}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 text-gray-400 text-sm">
+                              <Mail className="h-3 w-3" />
+                              {application.email}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {application.industry || "—"}
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {new Date(application.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-4 px-6">
+                            {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+                                  <MoreVertical size={16} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedApplication(application);
+                                    setIsDetailsDialogOpen(true);
+                                  }}
+                                  className="text-gray-300 hover:bg-gray-700"
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                                {application.status === "pending" && (
+                                  <>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedApplication(application);
+                                        setAdminNotes("");
+                                        setIsApproveDialogOpen(true);
+                                      }}
+                                      className="text-gray-300 hover:bg-gray-700"
+                                    >
+                                      <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
+                                      Approve
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setSelectedApplication(application);
+                                        setAdminNotes("");
+                                        setIsRejectDialogOpen(true);
+                                      }}
+                                      className="text-gray-300 hover:bg-gray-700"
+                                    >
+                                      <XCircle className="mr-2 h-4 w-4 text-red-400" />
+                                      Reject
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </TabsContent>
 
-          {/* Pending Applications */}
-          <TabsContent value="pending" className="mt-6">
-            {pendingApplications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Pending Applications
-                  </h3>
-                  <p className="text-gray-600">All applications have been reviewed</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {pendingApplications.map((application) => (
-                  <ApplicationCard key={application.id} application={application} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
+            <TabsContent value="approved" className="p-0">
+              {filteredApplications.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
+                    <CheckCircle className="h-10 w-10 text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-white">No Approved Applications</h3>
+                  <p className="text-gray-400 text-lg">
+                    There are currently no approved Career Builder applications.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Company Name
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Contact
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Email
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Industry
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Applied Date
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Status
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredApplications.map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-gray-400" />
+                              <div className="font-medium text-white text-sm">{application.company_name}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="text-white text-sm">
+                              {application.first_name} {application.last_name}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 text-gray-400 text-sm">
+                              <Mail className="h-3 w-3" />
+                              {application.email}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {application.industry || "—"}
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {new Date(application.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-4 px-6">
+                            {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+                                  <MoreVertical size={16} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedApplication(application);
+                                    setIsDetailsDialogOpen(true);
+                                  }}
+                                  className="text-gray-300 hover:bg-gray-700"
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </TabsContent>
 
-          {/* Approved Applications */}
-          <TabsContent value="approved" className="mt-6">
-            {approvedApplications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Approved Applications
-                  </h3>
-                  <p className="text-gray-600">No applications have been approved yet</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {approvedApplications.map((application) => (
-                  <ApplicationCard key={application.id} application={application} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Rejected Applications */}
-          <TabsContent value="rejected" className="mt-6">
-            {rejectedApplications.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center">
-                  <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Rejected Applications
-                  </h3>
-                  <p className="text-gray-600">No applications have been rejected</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {rejectedApplications.map((application) => (
-                  <ApplicationCard key={application.id} application={application} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="rejected" className="p-0">
+              {filteredApplications.length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-20 h-20 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
+                    <XCircle className="h-10 w-10 text-red-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3 text-white">No Rejected Applications</h3>
+                  <p className="text-gray-400 text-lg">
+                    There are currently no rejected Career Builder applications.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Company Name
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Contact
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Email
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Industry
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Applied Date
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Status
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {filteredApplications.map((application) => (
+                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="h-4 w-4 text-gray-400" />
+                              <div className="font-medium text-white text-sm">{application.company_name}</div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="text-white text-sm">
+                              {application.first_name} {application.last_name}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6">
+                            <div className="flex items-center gap-2 text-gray-400 text-sm">
+                              <Mail className="h-3 w-3" />
+                              {application.email}
+                            </div>
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {application.industry || "—"}
+                          </td>
+                          <td className="py-4 px-6 text-gray-400 text-sm">
+                            {new Date(application.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="py-4 px-6">
+                            {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+                                  <MoreVertical size={16} />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedApplication(application);
+                                    setIsDetailsDialogOpen(true);
+                                  }}
+                                  className="text-gray-300 hover:bg-gray-700"
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* Approve Dialog */}
       <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              Approve Client Application
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <CheckCircle className="h-5 w-5 text-green-400" />
+              Approve Career Builder Application
             </DialogTitle>
-            <DialogDescription>
-              Approve <strong>{selectedApplication?.company_name}</strong> as a client. They will
+            <DialogDescription className="text-gray-400">
+              Approve <strong className="text-white">{selectedApplication?.company_name}</strong> as a Career Builder. They will
               receive an email with instructions to access the platform.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="approve-notes">Welcome Message (Optional)</Label>
+              <Label htmlFor="approve-notes" className="text-gray-300">Welcome Message (Optional)</Label>
               <Textarea
                 id="approve-notes"
-                placeholder="Add a personalized welcome message for the client..."
+                placeholder="Add a personalized welcome message for the Career Builder..."
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
-                className="resize-none"
+                className="resize-none bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-400">
                 This message will be included in the approval email
               </p>
             </div>
@@ -546,10 +708,15 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
               }}
               disabled={isProcessing}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
             >
               Cancel
             </Button>
-            <Button onClick={handleApprove} disabled={isProcessing} className="gap-2">
+            <Button
+              onClick={handleApprove}
+              disabled={isProcessing}
+              className="bg-green-600 hover:bg-green-700 text-white gap-2"
+            >
               {isProcessing ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -568,36 +735,36 @@ export function AdminClientApplicationsClient({
 
       {/* Reject Dialog */}
       <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-red-600" />
-              Reject Client Application
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <XCircle className="h-5 w-5 text-red-400" />
+              Reject Career Builder Application
             </DialogTitle>
-            <DialogDescription>
-              Reject <strong>{selectedApplication?.company_name}</strong>&apos;s application. They will
+            <DialogDescription className="text-gray-400">
+              Reject <strong className="text-white">{selectedApplication?.company_name}</strong>&apos;s application. They will
               receive a professional decline email.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="reject-notes">Feedback (Optional)</Label>
+              <Label htmlFor="reject-notes" className="text-gray-300">Feedback (Optional)</Label>
               <Textarea
                 id="reject-notes"
                 placeholder="Optionally provide feedback for internal tracking or to share with the applicant..."
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
-                className="resize-none"
+                className="resize-none bg-gray-700 border-gray-600 text-white placeholder-gray-400"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-400">
                 If provided, this will be included in the rejection email
               </p>
             </div>
 
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-sm text-yellow-800">
+            <div className="p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-md">
+              <p className="text-sm text-yellow-300">
                 ⚠️ This will send a rejection email to the applicant. This action can be reversed
                 later if needed.
               </p>
@@ -612,6 +779,7 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
               }}
               disabled={isProcessing}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
             >
               Cancel
             </Button>
@@ -639,13 +807,13 @@ export function AdminClientApplicationsClient({
 
       {/* Details Dialog */}
       <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-white">
               <Building2 className="h-5 w-5" />
-              Client Application Details
+              Career Builder Application Details
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-400">
               Submitted {selectedApplication && new Date(selectedApplication.created_at).toLocaleDateString()}
             </DialogDescription>
           </DialogHeader>
@@ -654,29 +822,29 @@ export function AdminClientApplicationsClient({
             <div className="space-y-6 py-4">
               {/* Company Information */}
               <div>
-                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <h3 className="font-semibold text-lg mb-3 flex items-center gap-2 text-white">
                   <Building2 className="h-5 w-5" />
                   Company Information
                 </h3>
-                <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+                <div className="space-y-2 bg-gray-700/50 p-4 rounded-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Company Name</p>
-                      <p className="font-medium">{selectedApplication.company_name}</p>
+                      <p className="text-sm text-gray-400">Company Name</p>
+                      <p className="font-medium text-white">{selectedApplication.company_name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Industry</p>
-                      <p className="font-medium">{selectedApplication.industry || "Not specified"}</p>
+                      <p className="text-sm text-gray-400">Industry</p>
+                      <p className="font-medium text-white">{selectedApplication.industry || "Not specified"}</p>
                     </div>
                   </div>
                   {selectedApplication.website && (
                     <div>
-                      <p className="text-sm text-gray-600">Website</p>
+                      <p className="text-sm text-gray-400">Website</p>
                       <a
                         href={selectedApplication.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-blue-600 hover:underline"
+                        className="font-medium text-blue-400 hover:underline"
                       >
                         {selectedApplication.website}
                       </a>
@@ -687,24 +855,24 @@ export function AdminClientApplicationsClient({
 
               {/* Contact Information */}
               <div>
-                <h3 className="font-semibold text-lg mb-3">Contact Information</h3>
-                <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-semibold text-lg mb-3 text-white">Contact Information</h3>
+                <div className="space-y-2 bg-gray-700/50 p-4 rounded-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Name</p>
-                      <p className="font-medium">
+                      <p className="text-sm text-gray-400">Name</p>
+                      <p className="font-medium text-white">
                         {selectedApplication.first_name} {selectedApplication.last_name}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Email</p>
-                      <p className="font-medium">{selectedApplication.email}</p>
+                      <p className="text-sm text-gray-400">Email</p>
+                      <p className="font-medium text-white">{selectedApplication.email}</p>
                     </div>
                   </div>
                   {selectedApplication.phone && (
                     <div>
-                      <p className="text-sm text-gray-600">Phone</p>
-                      <p className="font-medium">{selectedApplication.phone}</p>
+                      <p className="text-sm text-gray-400">Phone</p>
+                      <p className="font-medium text-white">{selectedApplication.phone}</p>
                     </div>
                   )}
                 </div>
@@ -712,19 +880,19 @@ export function AdminClientApplicationsClient({
 
               {/* Business Description */}
               <div>
-                <h3 className="font-semibold text-lg mb-3">Business Description</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-700 whitespace-pre-wrap">
+                <h3 className="font-semibold text-lg mb-3 text-white">Business Description</h3>
+                <div className="bg-gray-700/50 p-4 rounded-lg">
+                  <p className="text-gray-300 whitespace-pre-wrap">
                     {selectedApplication.business_description}
                   </p>
                 </div>
               </div>
 
-              {/* Client Needs */}
+              {/* Talent Needs */}
               <div>
-                <h3 className="font-semibold text-lg mb-3">Talent Needs</h3>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="text-gray-700 whitespace-pre-wrap">
+                <h3 className="font-semibold text-lg mb-3 text-white">Talent Needs</h3>
+                <div className="bg-gray-700/50 p-4 rounded-lg">
+                  <p className="text-gray-300 whitespace-pre-wrap">
                     {selectedApplication.needs_description}
                   </p>
                 </div>
@@ -732,23 +900,23 @@ export function AdminClientApplicationsClient({
 
               {/* Application Metadata */}
               <div>
-                <h3 className="font-semibold text-lg mb-3">Application Metadata</h3>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-2 text-sm">
+                <h3 className="font-semibold text-lg mb-3 text-white">Application Metadata</h3>
+                <div className="bg-gray-700/50 p-4 rounded-lg space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Application ID</span>
-                    <span className="font-mono text-xs">{selectedApplication.id}</span>
+                    <span className="text-gray-400">Application ID</span>
+                    <span className="font-mono text-xs text-gray-300">{selectedApplication.id}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Status</span>
+                    <span className="text-gray-400">Status</span>
                     {getStatusBadge(selectedApplication.status)}
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Submitted</span>
-                    <span>{new Date(selectedApplication.created_at).toLocaleString()}</span>
+                    <span className="text-gray-400">Submitted</span>
+                    <span className="text-gray-300">{new Date(selectedApplication.created_at).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Last Updated</span>
-                    <span>{new Date(selectedApplication.updated_at).toLocaleString()}</span>
+                    <span className="text-gray-400">Last Updated</span>
+                    <span className="text-gray-300">{new Date(selectedApplication.updated_at).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -756,9 +924,9 @@ export function AdminClientApplicationsClient({
               {/* Admin Notes */}
               {selectedApplication.admin_notes && (
                 <div>
-                  <h3 className="font-semibold text-lg mb-3">Admin Notes</h3>
-                  <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                    <p className="text-gray-700 whitespace-pre-wrap">
+                  <h3 className="font-semibold text-lg mb-3 text-white">Admin Notes</h3>
+                  <div className="bg-blue-500/20 border border-blue-500/50 p-4 rounded-lg">
+                    <p className="text-gray-300 whitespace-pre-wrap">
                       {selectedApplication.admin_notes}
                     </p>
                   </div>
@@ -767,13 +935,13 @@ export function AdminClientApplicationsClient({
 
               {/* Quick Actions */}
               {selectedApplication.status === "pending" && (
-                <div className="flex gap-3 pt-4 border-t">
+                <div className="flex gap-3 pt-4 border-t border-gray-700">
                   <Button
                     onClick={() => {
                       setIsDetailsDialogOpen(false);
                       setIsApproveDialogOpen(true);
                     }}
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-2 bg-green-600 hover:bg-green-700"
                   >
                     <CheckCircle className="h-4 w-4" />
                     Approve Application
@@ -798,4 +966,3 @@ export function AdminClientApplicationsClient({
     </div>
   );
 }
-

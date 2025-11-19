@@ -4,7 +4,7 @@
 1. [Overview](#overview)
 2. [Platform Architecture](#platform-architecture)
 3. [Talent User Experience](#talent-user-experience)
-4. [Client User Experience](#client-user-experience)
+4. [Career Builder User Experience](#career-builder-user-experience)
 5. [Admin User Experience](#admin-user-experience)
 6. [Key Features & Workflows](#key-features--workflows)
 7. [Technical Implementation](#technical-implementation)
@@ -22,7 +22,7 @@ TOTL Agency is a **premium talent booking platform** that connects models, actor
 
 ### Core Value Proposition
 - **For Talent**: Discover opportunities, showcase portfolios, apply to gigs, and manage bookings in one place
-- **For Clients**: Post gigs, review applications, book talent, and manage projects seamlessly
+- **For Career Builders**: Post gigs, review applications, book talent, and manage projects seamlessly
 - **For Admins**: Oversee platform operations, manage users, monitor applications, and ensure quality
 
 ---
@@ -34,8 +34,8 @@ TOTL Agency is a **premium talent booking platform** that connects models, actor
 The platform supports three distinct user roles, each with specific capabilities:
 
 1. **Talent** - Models, actors, influencers seeking opportunities
-2. **Client** - Brands, casting directors, creative professionals hiring talent
-3. **Admin** - Platform administrators managing operations
+2. **Career Builder** - Companies, casting directors, creative professionals who post gigs and hire talent
+3. **Admin** - TOTL Agency staff who oversee platform operations
 
 ### Technology Stack
 
@@ -90,7 +90,7 @@ As a **Talent user**, the platform helps you:
 - 📝 **Applications**: Total applications submitted
 - 📅 **Bookings**: Confirmed gigs
 - 💰 **Earnings**: Total compensation from completed gigs
-- ⭐ **Rating**: Your average client rating
+- ⭐ **Rating**: Your average Career Builder rating
 - 📈 **Success Rate**: Application acceptance rate
 
 **Main Tabs:**
@@ -111,7 +111,7 @@ As a **Talent user**, the platform helps you:
 - All confirmed gigs you're booked for
 - Upcoming and past bookings
 - Gig details: date, location, compensation
-- Client contact information
+- Career Builder contact information
 - Booking status tracking
 
 **Discover Tab:**
@@ -142,9 +142,9 @@ As a **Talent user**, the platform helps you:
      - Compensation range
      - Date/time
      - Posted date
-   - Client information:
+   - Career Builder information:
      - Company name
-     - Role (client/admin)
+     - Role (Career Builder/admin)
    - **"Apply Now"** button (if not already applied)
    - Or **"Application Submitted"** badge (if already applied)
 
@@ -162,7 +162,7 @@ As a **Talent user**, the platform helps you:
    - Go to Dashboard → Applications tab
    - See your application with status:
      - 🟡 **New**: Under review
-     - 🟢 **Accepted**: Client wants to book you!
+     - 🟢 **Accepted**: Career Builder wants to book you!
      - 🔴 **Rejected**: Not selected this time
    - View application details and cover letter
    - Withdraw application if needed (before review)
@@ -249,16 +249,16 @@ As a **Talent user**, the platform helps you:
 **Success Metrics:**
 - Profile completion: 85%+
 - Application acceptance rate: Track in dashboard
-- Client ratings: Maintain 4.5+ stars
+- Career Builder ratings: Maintain 4.5+ stars
 - Booking consistency: Regular gig bookings
 
 ---
 
-## Client User Experience
+## Career Builder User Experience
 
 ### 🎯 Purpose & Goals
 
-As a **Client user**, the platform helps you:
+As a **Career Builder**, the platform helps you:
 - **Post Gigs**: Create detailed casting calls and opportunities
 - **Review Applications**: See who's interested and qualified
 - **Book Talent**: Accept applications and create bookings
@@ -270,15 +270,15 @@ As a **Client user**, the platform helps you:
 #### 1. Sign Up & Company Profile
 
 **What You'll Do:**
-1. Visit `/choose-role` and select "Join as Client"
+1. Visit `/choose-role` and select "Join as Career Builder"
 2. Complete email verification
-3. Fill out your client profile:
+3. Fill out your Career Builder profile:
    - **Company Info**: Company name, industry, website
    - **Contact Details**: Phone, email, location
    - **Bio**: Company description and casting focus
    - **Verification**: Business credentials (for premium features)
 
-#### 2. Client Dashboard
+#### 2. Career Builder Dashboard
 
 **URL**: `/client/dashboard`
 
@@ -682,7 +682,7 @@ As an **Admin user**, you:
 - Booking reminder (24 hours before)
 - Client messages
 
-**For Clients:**
+**For Career Builders:**
 - New application received
 - Booking confirmed by talent
 - Booking reminder

@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** November 16, 2025
+**Last Updated:** November 18, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -28,9 +28,11 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🔐 Authentication & Security**
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
-- `AUTH_STRATEGY.md` - Authentication strategy and implementation
+- `AUTH_STRATEGY.md` - **✅ UPDATED** - Authentication strategy and implementation (includes N+1 query fix, Jan 2025)
+- `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
+- `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
@@ -38,13 +40,14 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
-- `TOTL_AGENCY_USER_GUIDE.md` - User guide for talent and clients
+- `TOTL_AGENCY_USER_GUIDE.md` - User guide for talent and Career Builders
 
 ### **🗄️ Database & Backend**
 - `DATABASE_REPORT.md` - Database structure and analysis
-- `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - Performance optimization guide
+- `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - **✅ UPDATED** - Performance optimization guide (database + application-level fixes, Jan 2025)
 - `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
 - `SCHEMA_SYNC_COMPLETE_OCT_23_2025.md` - **NEW** ✅ - Complete schema synchronization summary (Oct 23, 2025)
+- `SQL_RLS_POLICY_CREATION_GUIDE.md` - **🚨 CRITICAL** - PostgreSQL RLS policy creation guide (Nov 2025)
 
 ### **🎨 Features & Implementation**
 - `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
@@ -158,9 +161,9 @@ All other documentation has been organized into the `docs/` folder.
 
 ## 📊 Documentation Statistics
 
-**Total Documentation Files:** 25 files
+**Total Documentation Files:** 80+ files
 - Root Directory: 4 critical files
-- docs/ Directory: 21 organized files
+- docs/ Directory: 76+ organized files
 
 **Categories:**
 - Authentication & Security: 3 docs

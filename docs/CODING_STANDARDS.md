@@ -323,6 +323,51 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
 ## 🗄️ Database Patterns
 
+### **⚠️ CRITICAL: Query Pattern Guidelines**
+
+#### **Use `.maybeSingle()` for Profile Queries**
+
+**Problem:** Using `.single()` on profile queries causes 406 "Not Acceptable" errors when profiles don't exist, breaking error handling and preventing proper Sentry tracking.
+
+**Solution:** Always use `.maybeSingle()` when querying profiles, talent_profiles, or client_profiles that might not exist.
+
+**✅ Use `.maybeSingle()` for:**
+- Profile queries (profiles, talent_profiles, client_profiles)
+- Any query where the record might not exist
+- Authentication/authorization checks
+- User data that may be missing
+
+**✅ Use `.single()` for:**
+- Queries where the record MUST exist (e.g., after a successful insert)
+- Internal operations where missing data indicates a bug
+- Admin operations with guaranteed data
+
+**Example:**
+```typescript
+// ✅ CORRECT - Use maybeSingle() for profile queries
+const { data: profile, error: profileError } = await supabase
+  .from("profiles")
+  .select("role, display_name")
+  .eq("id", user.id)
+  .maybeSingle();
+
+// Handle missing profile gracefully
+// With maybeSingle(), no rows returns null data (not an error)
+if (!profile || profileError) {
+  // Profile doesn't exist - create it or redirect
+  return { error: "Profile not found" };
+}
+
+// ❌ WRONG - Using .single() causes 406 errors
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
+  .single(); // This throws 406 if profile doesn't exist!
+```
+
+**See:** `docs/AUTH_STRATEGY.md` for complete query pattern best practices.
+
 ### **Supabase Client Usage**
 
 #### **Client-Side**

@@ -1,5 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { CreateGigForm } from "./create-gig-form";
+import { AdminHeader } from "@/components/admin/admin-header";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { type ProfileRow } from "@/types/database-helpers";
 
@@ -30,5 +31,10 @@ export default async function CreateGigPage() {
     redirect("/login?returnUrl=/admin/gigs/create");
   }
 
-  return <CreateGigForm />;
+  return (
+    <>
+      <AdminHeader user={user} notificationCount={0} />
+      <CreateGigForm />
+    </>
+  );
 }

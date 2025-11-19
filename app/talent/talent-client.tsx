@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { createNameSlug } from "@/lib/utils/slug";
 
 // Custom type matching the actual selected fields from server query
 type TalentProfile = {
@@ -102,11 +103,15 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
             <div
               key={person.id}
               className="group apple-card hover-lift cursor-pointer overflow-hidden scroll-fade-in scroll-stagger-1"
-              onClick={() => router.push(`/talent/${person.id}`)}
+              onClick={() => {
+                const slug = createNameSlug(person.first_name, person.last_name);
+                router.push(`/talent/${slug}`);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
-                  router.push(`/talent/${person.id}`);
+                  const slug = `${person.first_name}-${person.last_name}`.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]/g, "");
+                  router.push(`/talent/${slug}`);
                 }
               }}
               role="button"
@@ -171,7 +176,8 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
                   className="w-full apple-button hover-lift focus-ring text-sm sm:text-base py-2 sm:py-3"
                   onClick={(e) => {
                     e.stopPropagation();
-                    router.push(`/talent/${person.id}`);
+                    const slug = createNameSlug(person.first_name, person.last_name);
+                    router.push(`/talent/${slug}`);
                   }}
                 >
                   View Profile <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />

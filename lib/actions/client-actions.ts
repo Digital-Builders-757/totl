@@ -124,11 +124,12 @@ export async function approveClientApplication(applicationId: string, adminNotes
       return { error: "Not authenticated" };
     }
 
+    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || profile?.role !== "admin") {
       return { error: "Not authorized" };
@@ -139,7 +140,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
       .from("client_applications")
       .select("first_name, last_name, email, company_name, industry")
       .eq("id", applicationId)
-      .single();
+      .maybeSingle();
 
     if (fetchError || !applicationData) {
       return { error: "Application not found" };
@@ -207,11 +208,12 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
       return { error: "Not authenticated" };
     }
 
+    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     if (profileError || profile?.role !== "admin") {
       return { error: "Not authorized" };
@@ -222,7 +224,7 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
       .from("client_applications")
       .select("first_name, last_name, email, company_name")
       .eq("id", applicationId)
-      .single();
+      .maybeSingle();
 
     if (fetchError || !applicationData) {
       return { error: "Application not found" };

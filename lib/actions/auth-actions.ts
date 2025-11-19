@@ -29,8 +29,9 @@ export async function ensureProfileExists() {
     .eq("id", user.id)
     .maybeSingle();
 
-  // Log 406 or other profile query errors to Sentry for debugging
-  if (profileError && profileError.code !== "PGRST116") {
+  // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
+  if (profileError) {
+    console.error("Error checking profile:", profileError);
     Sentry.captureException(new Error(`Profile query error: ${profileError.message}`), {
       tags: {
         feature: "auth",
@@ -48,10 +49,12 @@ export async function ensureProfileExists() {
       },
       level: "error",
     });
+    return { error: "Failed to check existing profile" };
   }
 
   // If profile doesn't exist, create it
-  if (profileError && profileError.code === "PGRST116") {
+  // With maybeSingle(), no rows returns null data (not an error), so check !profile
+  if (!profile) {
     // Extract name from user metadata
     const firstName = (user.user_metadata?.first_name as string) || "";
     const lastName = (user.user_metadata?.last_name as string) || "";
@@ -214,15 +217,38 @@ export async function ensureProfilesAfterSignup() {
     displayName = user.email?.split("@")[0] || "User";
   }
 
-  // Check if profile exists
+  // Check if profile exists - use maybeSingle() to prevent 406 errors
   const { data: existingProfile, error: profileCheckError } = await supabase
     .from("profiles")
     .select("id, role, display_name")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
+
+  // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
+  if (profileCheckError) {
+    console.error("Error checking profile:", profileCheckError);
+    Sentry.captureException(new Error(`Profile check error: ${profileCheckError.message}`), {
+      tags: {
+        feature: "auth",
+        error_type: "profile_check_error",
+        error_code: profileCheckError.code || "unknown",
+      },
+      extra: {
+        userId: user.id,
+        userEmail: user.email,
+        errorCode: profileCheckError.code,
+        errorDetails: profileCheckError.details,
+        errorMessage: profileCheckError.message,
+        timestamp: new Date().toISOString(),
+      },
+      level: "error",
+    });
+    return { error: "Failed to check existing profile" };
+  }
 
   // If profile doesn't exist, create it
-  if (profileCheckError && profileCheckError.code === "PGRST116") {
+  // With maybeSingle(), no rows returns null data (not an error), so check !existingProfile
+  if (!existingProfile) {
     const { error: insertError } = await supabase.from("profiles").insert({
       id: user.id,
       role: role as "talent" | "client" | "admin",
@@ -237,12 +263,12 @@ export async function ensureProfilesAfterSignup() {
 
     // Create role-specific profile if talent
     if (role === "talent") {
-      // Check if talent profile already exists
+      // Check if talent profile already exists - use maybeSingle() to prevent 406 errors
       const { data: existingTalentProfile } = await supabase
         .from("talent_profiles")
         .select("user_id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (!existingTalentProfile) {
         const { error: talentError } = await supabase.from("talent_profiles").insert({
@@ -284,7 +310,7 @@ export async function ensureProfilesAfterSignup() {
       .from("talent_profiles")
       .select("user_id, first_name, last_name")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (!existingTalentProfile) {
       const { error: talentError } = await supabase.from("talent_profiles").insert({
@@ -370,8 +396,9 @@ export async function handleLoginRedirect() {
     .eq("id", user.id)
     .maybeSingle();
 
-  // Log profile query errors to Sentry for debugging redirect loops
-  if (profileError && profileError.code !== "PGRST116") {
+  // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
+  if (profileError) {
+    console.error("Error checking profile:", profileError);
     Sentry.captureException(new Error(`Login redirect profile query error: ${profileError.message}`), {
       tags: {
         feature: "auth",
@@ -389,6 +416,8 @@ export async function handleLoginRedirect() {
       },
       level: "error",
     });
+    // Don't redirect if there's an actual error - let the error handler deal with it
+    return { error: "Failed to check profile" };
   }
 
   // If we still don't have a role after ensureProfileExists, try one more time
@@ -447,12 +476,12 @@ export async function handleLoginRedirect() {
           // Revalidate to clear cache
           revalidatePath("/", "layout");
           revalidatePath("/choose-role");
-          // Verify the update was successful before redirecting
+          // Verify the update was successful before redirecting - use maybeSingle() to prevent 406 errors
           const { data: verifyProfile } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", user.id)
-            .single();
+            .maybeSingle();
           
           if (verifyProfile?.role === "client") {
             redirect("/client/dashboard");
@@ -487,12 +516,12 @@ export async function handleLoginRedirect() {
       revalidatePath("/", "layout");
       revalidatePath("/choose-role");
       
-      // Verify the update was successful before redirecting
+      // Verify the update was successful before redirecting - use maybeSingle() to prevent 406 errors
       const { data: verifyProfile } = await supabase
         .from("profiles")
         .select("role")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       
       // Redirect based on verified role
       if (verifyProfile?.role === "talent") {

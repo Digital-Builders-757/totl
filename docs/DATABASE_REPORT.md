@@ -64,7 +64,7 @@ The TOTL Agency database is a well-architected PostgreSQL system hosted on Supab
 |---|------------|---------|-----------|-------------|--------------|
 | 1 | `profiles` | Base user accounts | ~5-10 | ✅ Yes | 2025-10-16 |
 | 2 | `talent_profiles` | Talent-specific data | ~5-10 | ✅ Yes | 2025-10-16 |
-| 3 | `client_profiles` | Client-specific data | ~2-5 | ✅ Yes | 2025-10-16 |
+| 3 | `client_profiles` | Career Builder-specific data | ~2-5 | ✅ Yes | 2025-10-16 |
 | 4 | `gigs` | Job postings | ~15-20 | ✅ Yes | 2025-10-16 |
 | 5 | `applications` | Talent applications | ~10-20 | ✅ Yes | 2025-10-16 |
 | 6 | `bookings` | Confirmed engagements | ~5-10 | ✅ Yes | 2025-10-16 |

@@ -278,7 +278,7 @@ export async function getClientBookings() {
       return { error: "Unauthorized" };
     }
 
-    // Get bookings for client's gigs
+    // Get bookings for client's gigs (no direct FK to talent_profiles, so fetch separately)
     const { data: bookings, error: bookingsError } = await supabase
       .from("bookings")
       .select(
@@ -296,7 +296,23 @@ export async function getClientBookings() {
       return { error: "Failed to load bookings" };
     }
 
-    return { success: true, bookings };
+    // Fetch talent_profiles separately for each booking since there's no direct FK
+    const bookingsWithTalent = await Promise.all(
+      (bookings || []).map(async (booking) => {
+        const { data: talentProfile } = await supabase
+          .from("talent_profiles")
+          .select("first_name, last_name")
+          .eq("user_id", booking.talent_id)
+          .maybeSingle();
+        
+        return {
+          ...booking,
+          talent_profiles: talentProfile || null,
+        };
+      })
+    );
+
+    return { success: true, bookings: bookingsWithTalent };
   } catch (error) {
     console.error("Get bookings error:", error);
     return { error: "An unexpected error occurred" };

@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { createNameSlug } from "@/lib/utils/slug";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -34,6 +35,10 @@ interface Application {
     email_verified: boolean;
     role: string;
   };
+  talent_profiles?: {
+    first_name: string;
+    last_name: string;
+  } | null;
 }
 
 export default function ClientApplicationsPage() {
@@ -94,7 +99,22 @@ export default function ClientApplicationsPage() {
         console.error("Error fetching applications:", fetchError);
         setError("Failed to load applications");
       } else {
-        setApplications((data as Application[]) || []);
+        // Fetch talent_profiles separately for each application since there's no direct FK
+        const applicationsWithTalent = await Promise.all(
+          (data || []).map(async (app) => {
+            const { data: talentProfile } = await supabase
+              .from("talent_profiles")
+              .select("first_name, last_name")
+              .eq("user_id", app.talent_id)
+              .maybeSingle();
+            
+            return {
+              ...app,
+              talent_profiles: talentProfile || null,
+            };
+          })
+        );
+        setApplications(applicationsWithTalent as Application[]);
       }
     } catch (err) {
       console.error("Error in fetchApplications:", err);
@@ -362,7 +382,9 @@ export default function ClientApplicationsPage() {
 
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
-                              <Link href={`/talent/${application.talent_id}`}>
+                              <Link href={application.talent_profiles 
+                                ? `/talent/${createNameSlug(application.talent_profiles.first_name, application.talent_profiles.last_name)}`
+                                : `/talent/${application.talent_id}`}>
                                 <FileText className="h-4 w-4 mr-2" />
                                 View Profile
                               </Link>

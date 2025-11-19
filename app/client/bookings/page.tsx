@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientBookings, cancelBooking, updateBookingStatus } from "@/lib/actions/booking-actions";
+import { createNameSlug } from "@/lib/utils/slug";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering
@@ -36,6 +37,10 @@ type Booking = Database["public"]["Tables"]["bookings"]["Row"] & {
     avatar_path: string | null;
     role: string;
   };
+  talent_profiles?: {
+    first_name: string;
+    last_name: string;
+  } | null;
 };
 
 export default function ClientBookingsPage() {
@@ -292,7 +297,11 @@ export default function ClientBookingsPage() {
 
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/talent/${booking.talent_id}`}>View Talent Profile</Link>
+                          <Link href={booking.talent_profiles 
+                            ? `/talent/${createNameSlug(booking.talent_profiles.first_name, booking.talent_profiles.last_name)}`
+                            : `/talent/${booking.talent_id}`}>
+                            View Talent Profile
+                          </Link>
                         </Button>
 
                         {booking.status === "confirmed" && (

@@ -11,6 +11,18 @@
       "env": {
         "SENTRY_ACCESS_TOKEN": "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"
       }
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "--no-install",
+        "@supabase/mcp-server-supabase",
+        "--read-only",
+        "--project-ref=utvircuwknqzpnmvxidp"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_04a259512af23fc5e17d8cadb5583b4dc7aa55a9"
+      }
     }
   }
 }

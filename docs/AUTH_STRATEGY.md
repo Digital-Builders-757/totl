@@ -350,14 +350,225 @@ supabase db push
 3. Test trigger with various metadata scenarios
 4. Document any schema changes
 
+## 🔍 Query Pattern Best Practices
+
+### **⚠️ CRITICAL: Avoid N+1 Query Issues - Use Auth Provider Profile**
+
+**Problem:** Fetching profile data in multiple components causes N+1 query issues, making 5+ duplicate profile queries per page load.
+
+**Solution:** Use profile data from `useAuth()` hook instead of fetching it separately. The auth provider fetches ALL profile fields once and caches them in context.
+
+#### **✅ CORRECT: Use Profile from Auth Context**
+
+```typescript
+// ✅ CORRECT - Use profile from auth provider (no duplicate queries)
+import { useAuth } from "@/components/auth/auth-provider";
+
+function Dashboard() {
+  const { user, profile } = useAuth();
+  
+  // Profile data is already available:
+  // - profile.role
+  // - profile.avatar_url
+  // - profile.avatar_path
+  // - profile.display_name
+  
+  return (
+    <Avatar>
+      <AvatarImage src={profile?.avatar_url || "/default.png"} />
+    </Avatar>
+  );
+}
+```
+
+#### **❌ WRONG: Fetching Profile Separately**
+
+```typescript
+// ❌ WRONG - Causes N+1 query issue
+function Dashboard() {
+  const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState(null);
+  
+  useEffect(() => {
+    // This duplicates the query already done in auth provider!
+    supabase
+      .from("profiles")
+      .select("avatar_url, display_name")
+      .eq("id", user.id)
+      .single()
+      .then(({ data }) => setUserProfile(data));
+  }, [user]);
+}
+```
+
+#### **When to Use Auth Provider Profile vs Separate Query**
+
+**✅ Always use auth provider profile for:**
+- Avatar images (`profile.avatar_url`)
+- Display names (`profile.display_name`)
+- User role (`profile.role` or `userRole`)
+- Any profile data needed in client components
+
+**✅ Only query separately for:**
+- Server components (initial page load/routing)
+- Profile data that changes frequently and needs fresh fetch
+- Admin operations viewing other users' profiles
+- Role-specific profiles (talent_profiles, client_profiles)
+
+#### **Files Updated (January 2025)**
+- ✅ `components/auth/auth-provider.tsx` - Now fetches full profile (role, avatar_url, avatar_path, display_name)
+- ✅ `app/talent/dashboard/page.tsx` - Uses profile from auth context
+- ✅ `app/client/dashboard/page.tsx` - Uses profile from auth context
+- ✅ `app/talent/[slug]/talent-profile-client.tsx` - Uses profile from auth context
+
+**Impact:** Reduced 5+ profile queries per page load to 1 query (cached in auth context).
+
+---
+
+### **⚠️ CRITICAL: Use `.maybeSingle()` for Profile Queries**
+
+**Problem:** Using `.single()` on profile queries causes 406 "Not Acceptable" errors when profiles don't exist, breaking error handling and preventing proper Sentry tracking.
+
+**Solution:** Always use `.maybeSingle()` when querying profiles, talent_profiles, or client_profiles that might not exist.
+
+#### **When to Use `.maybeSingle()` vs `.single()`**
+
+**✅ Use `.maybeSingle()` for:**
+- Profile queries (profiles, talent_profiles, client_profiles)
+- Any query where the record might not exist
+- Authentication/authorization checks
+- User data that may be missing
+
+**✅ Use `.single()` for:**
+- Queries where the record MUST exist (e.g., after a successful insert)
+- Internal operations where missing data indicates a bug
+- Admin operations with guaranteed data
+
+#### **Example: Correct Profile Query Pattern (Server Components Only)**
+
+```typescript
+// ✅ CORRECT - Server component query (only when not available from auth)
+// Use maybeSingle() to prevent 406 errors
+const { data: profile, error: profileError } = await supabase
+  .from("profiles")
+  .select("role, avatar_url, avatar_path, display_name")
+  .eq("id", user.id)
+  .maybeSingle();
+
+// Handle missing profile gracefully
+if (!profile || profileError) {
+  // Profile doesn't exist - create it or redirect
+  return { error: "Profile not found" };
+}
+
+// ✅ CORRECT - Check for null data (maybeSingle returns null, not error)
+if (!profile) {
+  // Handle missing profile
+}
+
+// ❌ WRONG - Using .single() causes 406 errors
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("role")
+  .eq("id", user.id)
+  .single(); // This throws 406 if profile doesn't exist!
+```
+
+#### **Updated Logic Pattern**
+
+When switching from `.single()` to `.maybeSingle()`, update your error handling:
+
+```typescript
+// ❌ OLD (with .single()) - Don't use this pattern anymore
+if (profileError && profileError.code === "PGRST116") {
+  // Profile doesn't exist
+}
+
+// ✅ NEW (with .maybeSingle()) - Correct pattern
+// Handle actual errors first (not PGRST116 - that doesn't occur with maybeSingle())
+if (profileError) {
+  console.error("Error checking profile:", profileError);
+  // Log to Sentry, return error, etc.
+  return { error: "Failed to check existing profile" };
+}
+
+// With maybeSingle(), no rows returns null data (not an error)
+if (!profile) {
+  // Profile doesn't exist - create it
+}
+```
+
+**Key Points:**
+- PGRST116 error code only occurs with `.single()`, NOT with `.maybeSingle()`
+- With `.maybeSingle()`, no rows found returns `null` data (not an error)
+- Always handle actual errors first, then check `!data`
+- Never check for PGRST116 when using `.maybeSingle()`
+
+#### **Files Updated (November 2025 - January 2025)**
+- ✅ `lib/actions/auth-actions.ts` - All profile queries
+- ✅ `components/auth/auth-provider.tsx` - Client-side profile queries (now fetches full profile)
+- ✅ `middleware.ts` - All profile queries
+- ✅ `app/auth/callback/page.tsx` - Profile verification queries
+- ✅ `lib/actions/client-actions.ts` - Admin profile checks
+- ✅ `lib/utils/safe-query.ts` - All utility profile queries
+- ✅ `app/onboarding/page.tsx` - Profile fetch (server component - OK)
+- ✅ `app/dashboard/page.tsx` - Profile fetch (server component - OK)
+- ✅ `app/talent/dashboard/page.tsx` - Now uses auth provider profile
+- ✅ `app/client/dashboard/page.tsx` - Now uses auth provider profile
+- ✅ `app/talent/[slug]/talent-profile-client.tsx` - Now uses auth provider profile
+
+**See:** `docs/SENTRY_ERROR_TRACKING_ENHANCEMENT.md` for complete details on the 406 error fix.
+
+## 🚀 Performance Optimizations (January 2025)
+
+### **N+1 Query Prevention**
+
+**Issue:** Multiple components were fetching the same profile data, causing 5+ duplicate queries per page load.
+
+**Solution:** Extended auth provider to fetch and cache full profile data, eliminating duplicate queries.
+
+#### **Auth Provider Profile Caching**
+
+The `useAuth()` hook now provides full profile data:
+
+```typescript
+const { user, profile, userRole } = useAuth();
+
+// Available profile fields:
+// - profile.role
+// - profile.avatar_url
+// - profile.avatar_path
+// - profile.display_name
+```
+
+**Benefits:**
+- ✅ Single profile query per session (cached in context)
+- ✅ No duplicate queries across components
+- ✅ Faster page loads
+- ✅ Reduced database load
+
+**Before Fix:** 5+ profile queries per dashboard page load  
+**After Fix:** 1 profile query (cached in auth context)
+
+**Files Fixed:**
+- ✅ `components/auth/auth-provider.tsx` - Fetches full profile once
+- ✅ `app/talent/dashboard/page.tsx` - Uses cached profile
+- ✅ `app/client/dashboard/page.tsx` - Uses cached profile
+- ✅ `app/talent/[slug]/talent-profile-client.tsx` - Uses cached profile
+
+**See:** `docs/SUPABASE_PERFORMANCE_FIX_GUIDE.md` for database-level performance optimizations.
+
+---
+
 ## 🔗 Related Documentation
 - [Database Schema Audit](../database_schema_audit.md)
 - [Developer Quick Reference](./DEVELOPER_QUICK_REFERENCE.md)
 - [Coding Standards](./CODING_STANDARDS.md)
 - [Security Fixes Summary](../SECURITY_FIXES_SUMMARY.md)
+- [Supabase Performance Fix Guide](./SUPABASE_PERFORMANCE_FIX_GUIDE.md) - Database performance optimizations
 
 ---
 
 **Maintainer:** TOTL Agency Development Team  
-**Last Review:** July 25, 2025  
-**Next Review:** August 25, 2025 
+**Last Review:** January 2025  
+**Next Review:** February 2025 

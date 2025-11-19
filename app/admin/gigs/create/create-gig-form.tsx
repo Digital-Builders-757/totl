@@ -63,21 +63,21 @@ export function CreateGigForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-12">
         <Link
           href="/admin/dashboard"
-          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+          className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to dashboard
         </Link>
 
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-gray-900 border border-gray-800 rounded-xl shadow-sm overflow-hidden">
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">Create a New Gig</h1>
-              <p className="text-gray-600">
+              <h1 className="text-2xl font-bold mb-2 text-white">Create a New Gig</h1>
+              <p className="text-gray-300">
                 Fill out the form below to create a new casting call or gig. Be as detailed as
                 possible to attract the right talent.
               </p>
@@ -85,52 +85,57 @@ export function CreateGigForm() {
 
             <form action={formAction} className="space-y-6">
               {state?.error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+                <div className="p-4 bg-red-900/20 border border-red-800 rounded-md text-red-400">
                   {state.error}
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="title">Gig Title</Label>
+                <Label htmlFor="title" className="text-white">Gig Title</Label>
                 <Input
                   id="title"
                   name="title"
                   placeholder="e.g., Luxury Jewelry Campaign"
+                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company">Company/Brand Name</Label>
+                <Label htmlFor="company" className="text-white">Company/Brand Name</Label>
                 <Input
                   id="company"
                   name="company"
                   placeholder="Your company or brand name"
                   defaultValue="Admin Company"
+                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category" className="text-white">Category</Label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger id="category">
+                    <SelectTrigger 
+                      id="category"
+                      className="bg-gray-800 border-gray-700 text-white data-[placeholder]:text-gray-500"
+                    >
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="editorial">Editorial</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                      <SelectItem value="runway">Runway</SelectItem>
-                      <SelectItem value="print">Print</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="beauty">Beauty</SelectItem>
-                      <SelectItem value="promotional">Promotional</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                      <SelectItem value="editorial" className="text-white focus:bg-gray-700 focus:text-white">Editorial</SelectItem>
+                      <SelectItem value="commercial" className="text-white focus:bg-gray-700 focus:text-white">Commercial</SelectItem>
+                      <SelectItem value="runway" className="text-white focus:bg-gray-700 focus:text-white">Runway</SelectItem>
+                      <SelectItem value="print" className="text-white focus:bg-gray-700 focus:text-white">Print</SelectItem>
+                      <SelectItem value="fitness" className="text-white focus:bg-gray-700 focus:text-white">Fitness</SelectItem>
+                      <SelectItem value="beauty" className="text-white focus:bg-gray-700 focus:text-white">Beauty</SelectItem>
+                      <SelectItem value="promotional" className="text-white focus:bg-gray-700 focus:text-white">Promotional</SelectItem>
+                      <SelectItem value="other" className="text-white focus:bg-gray-700 focus:text-white">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <input type="hidden" name="category" value={category} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="location" className="text-white">Location</Label>
                   <div className="relative">
                     <MapPin
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -140,7 +145,7 @@ export function CreateGigForm() {
                       id="location"
                       name="location"
                       placeholder="e.g., New York, NY"
-                      className="pl-9"
+                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                       required
                     />
                   </div>
@@ -148,29 +153,35 @@ export function CreateGigForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-white">Description</Label>
                 <Textarea
                   id="description"
                   name="description"
                   placeholder="Describe the gig, requirements, and what you're looking for..."
                   rows={4}
+                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="start_date">Start Date</Label>
+                  <Label htmlFor="start_date" className="text-white">Start Date</Label>
                   <div className="relative">
                     <Calendar
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                       size={16}
                     />
-                    <Input id="start_date" name="start_date" type="date" className="pl-9" />
+                    <Input 
+                      id="start_date" 
+                      name="start_date" 
+                      type="date" 
+                      className="pl-9 bg-gray-800 border-gray-700 text-white" 
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compensation_min">Min Compensation</Label>
+                  <Label htmlFor="compensation_min" className="text-white">Min Compensation</Label>
                   <div className="relative">
                     <DollarSign
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -181,12 +192,12 @@ export function CreateGigForm() {
                       name="compensation_min"
                       type="number"
                       placeholder="0"
-                      className="pl-9"
+                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compensation_max">Max Compensation</Label>
+                  <Label htmlFor="compensation_max" className="text-white">Max Compensation</Label>
                   <div className="relative">
                     <DollarSign
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -197,14 +208,14 @@ export function CreateGigForm() {
                       name="compensation_max"
                       type="number"
                       placeholder="1000"
-                      className="pl-9"
+                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <Label>Requirements</Label>
+                <Label className="text-white">Requirements</Label>
                 {requirements.map((requirement, index) => (
                   <div key={index} className="flex space-x-2">
                     <Input
@@ -212,6 +223,7 @@ export function CreateGigForm() {
                       placeholder="e.g., Female, 18-25, athletic build"
                       value={requirement}
                       onChange={(e) => updateRequirement(index, e.target.value)}
+                      className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                     />
                     {requirements.length > 1 && (
                       <Button
@@ -219,30 +231,49 @@ export function CreateGigForm() {
                         variant="outline"
                         size="icon"
                         onClick={() => removeRequirement(index)}
+                        className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
                       >
                         <Minus size={16} />
                       </Button>
                     )}
                   </div>
                 ))}
-                <Button type="button" variant="outline" onClick={addRequirement} className="w-full">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={addRequirement} 
+                  className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Requirement
                 </Button>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch id="urgent" name="urgent" />
-                <Label htmlFor="urgent">Mark as urgent</Label>
+                <Switch 
+                  id="urgent" 
+                  name="urgent"
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-700"
+                />
+                <Label htmlFor="urgent" className="text-white">Mark as urgent</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch id="featured" name="featured" />
-                <Label htmlFor="featured">Feature this gig</Label>
+                <Switch 
+                  id="featured" 
+                  name="featured"
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-700"
+                />
+                <Label htmlFor="featured" className="text-white">Feature this gig</Label>
               </div>
 
               <div className="flex justify-end space-x-4">
-                <Button type="button" variant="outline" asChild>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  asChild
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                >
                   <Link href="/admin/dashboard">Cancel</Link>
                 </Button>
                 <SubmitButton />

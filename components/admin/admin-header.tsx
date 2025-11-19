@@ -37,8 +37,8 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
 
   const navigationItems = [
     { href: "/admin/dashboard", label: "Overview", icon: "📊" },
-    { href: "/admin/applications", label: "Applications", icon: "📝" },
-    { href: "/admin/client-applications", label: "Client Apps", icon: "🏢" },
+    { href: "/admin/applications", label: "Talent Applications", icon: "📝" },
+    { href: "/admin/client-applications", label: "Career Builder Applications", icon: "🏢" },
     { href: "/admin/talent", label: "Talent", icon: "👥" },
     { href: "/admin/gigs", label: "Gigs", icon: "💼" },
     { href: "/admin/users", label: "Users", icon: "👤" },

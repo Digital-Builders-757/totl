@@ -16,11 +16,19 @@ type SignUpOptions = {
   emailRedirectTo?: string;
 };
 
+type ProfileData = {
+  role: UserRole;
+  avatar_url: string | null;
+  avatar_path: string | null;
+  display_name: string | null;
+} | null;
+
 type AuthContextType = {
   supabase: SupabaseClient<Database> | null;
   user: User | null;
   session: Session | null;
   userRole: UserRole;
+  profile: ProfileData;
   isLoading: boolean;
   isEmailVerified: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
@@ -45,6 +53,7 @@ function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
         user: null,
         session: null,
         userRole: null,
+        profile: null,
         isLoading: false,
         isEmailVerified: false,
         signIn: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
@@ -64,6 +73,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [userRole, setUserRole] = useState<UserRole>(null);
+  const [profile, setProfile] = useState<ProfileData>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
@@ -112,9 +122,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setSession(session);
 
         // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+        // Fetch ALL profile fields once to avoid N+1 queries
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("role")
+          .select("role, avatar_url, avatar_path, display_name")
           .eq("id", session.user.id)
           .maybeSingle();
 
@@ -144,6 +155,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
         const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
+        // Store full profile data to avoid duplicate queries
+        setProfile(profileData ? {
+          role: role,
+          avatar_url: profileData.avatar_url,
+          avatar_path: profileData.avatar_path,
+          display_name: profileData.display_name,
+        } : null);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
         setIsLoading(false);
         setHasHandledInitialSession(true);
@@ -171,9 +189,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       if (event === "SIGNED_IN" && session) {
         try {
           // Use maybeSingle() to prevent 406 errors when profile doesn't exist
+          // Fetch ALL profile fields once to avoid N+1 queries
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
-            .select("role")
+            .select("role, avatar_url, avatar_path, display_name")
             .eq("id", session.user.id)
             .maybeSingle();
 
@@ -203,6 +222,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           const role = (profileData?.role ?? null) as UserRole;
           setUserRole(role);
+          // Store full profile data to avoid duplicate queries
+          setProfile(profileData ? {
+            role: role,
+            avatar_url: profileData.avatar_url,
+            avatar_path: profileData.avatar_path,
+            display_name: profileData.display_name,
+          } : null);
           setIsEmailVerified(session.user.email_confirmed_at !== null);
 
           // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
@@ -235,6 +261,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setSession(null);
         setUserRole(null);
+        setProfile(null);
         setIsEmailVerified(false);
         setHasHandledInitialSession(false);
         router.push("/login");
@@ -269,16 +296,32 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setSession(data.session);
       setIsEmailVerified(data.session.user.email_confirmed_at !== null);
 
-      // Fetch user role with a fresh query
+      // Fetch user role with a fresh query - use maybeSingle() to prevent 406 errors
+      // Fetch ALL profile fields once to avoid N+1 queries
       try {
         const { data: profileData } = (await supabase
           .from("profiles")
-          .select("role")
+          .select("role, avatar_url, avatar_path, display_name")
           .eq("id", data.session.user.id)
-          .single()) as { data: { role: string } | null; error: unknown };
+          .maybeSingle()) as { 
+            data: { 
+              role: string;
+              avatar_url: string | null;
+              avatar_path: string | null;
+              display_name: string | null;
+            } | null; 
+            error: unknown 
+          };
 
         const role = (profileData?.role ?? null) as UserRole;
         setUserRole(role);
+        // Store full profile data to avoid duplicate queries
+        setProfile(profileData ? {
+          role: role,
+          avatar_url: profileData.avatar_url,
+          avatar_path: profileData.avatar_path,
+          display_name: profileData.display_name,
+        } : null);
 
         // Note: The login page uses handleLoginRedirect() server action for redirect
         // This ensures fresh session data and proper cache clearing
@@ -315,6 +358,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       setUserRole(null);
+      setProfile(null);
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
       
@@ -381,6 +425,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       setUserRole(null);
+      setProfile(null);
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
       
@@ -458,6 +503,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         user,
         session,
         userRole,
+        profile,
         isLoading,
         isEmailVerified,
         signIn,

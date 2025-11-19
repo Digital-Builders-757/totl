@@ -1,6 +1,6 @@
 # 🔐 Admin Account & Dashboard Guide
 
-**Last Updated:** October 11, 2025  
+**Last Updated:** January 2025  
 **Purpose:** Complete guide to understanding and managing admin accounts in TOTL Agency
 
 ---
@@ -20,13 +20,13 @@
 
 The TOTL Agency platform has three user roles:
 - **Talent** - Models, actors, performers
-- **Client** - Companies, casting directors, agencies
-- **Admin** - Platform administrators (you!)
+- **Career Builder** - Companies, casting directors, agencies who post gigs and hire talent
+- **Admin** - TOTL Agency staff who oversee the platform (you!)
 
 ### Admin Capabilities:
 ✅ View all gigs (including drafts)  
 ✅ View all applications  
-✅ View all users (talent and clients)  
+✅ View all users (talent and Career Builders)  
 ✅ Create new users with any role  
 ✅ Manage platform content  
 ✅ Access diagnostic tools  
@@ -208,6 +208,17 @@ The script will:
 
 Once you're logged in as admin, you have access to:
 
+### **Application Management** (January 2025)
+- **View All Applications:** `/admin/applications` - Complete list of all talent applications
+- **Application Detail Page:** `/admin/applications/[id]` - Detailed view of individual applications
+  - Full application message and metadata
+  - Associated gig details (title, description, category, location, compensation)
+  - Talent profile information (name, age, location, experience, specialties, portfolio)
+  - Client profile information (company name, contact details)
+  - Quick actions: Approve or Reject application
+  - Links to view full gig and talent profile pages
+- **Dashboard Overview:** Applications tab in `/admin/dashboard` shows quick overview with links to details
+
 ### **Main Dashboard** (`/admin/dashboard`)
 - Overview statistics (active gigs, applications, revenue)
 - Recent gigs table with search/filter
@@ -237,7 +248,7 @@ Once you're logged in as admin, you have access to:
 - Quality assurance tool
 
 ### **User Management** (`/admin/users/create`)
-- Create new users (talent, client, or admin)
+- Create new users (talent, Career Builder, or admin)
 - Set roles directly
 - Skip email verification
 - Bulk user creation (future feature)
@@ -256,7 +267,7 @@ Once you're logged in as admin, you have access to:
 
 **Database Tables:**
 - ✅ Full read access to all tables
-- ✅ Can create gigs for any client
+- ✅ Can create gigs for any Career Builder
 - ✅ Can view all applications
 - ✅ Can view all user profiles
 - ✅ Can create users with service role (via API)
@@ -264,7 +275,7 @@ Once you're logged in as admin, you have access to:
 **Routes:**
 - ✅ `/admin/*` - All admin routes
 - ✅ `/talent/*` - Can view talent routes
-- ✅ `/client/*` - Can view client routes
+- ✅ `/client/*` - Can view Career Builder routes
 - ✅ All public routes
 
 **RLS Policies:**
