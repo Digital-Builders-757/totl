@@ -22,15 +22,29 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     return { error: "You must be logged in to apply for gigs" };
   }
 
-  // Check if user has talent role
+  // Check if user has talent role and active subscription
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, subscription_status")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError || !profile || profile.role !== "talent") {
     return { error: "Only talent users can apply for gigs" };
+  }
+
+  // Check subscription status - only active subscribers can apply
+  if (profile.subscription_status !== 'active') {
+    const subscriptionMessages = {
+      'none': 'You need an active subscription to apply to gigs. Subscribe now to unlock this feature.',
+      'canceled': 'Your subscription has ended. Reactivate your subscription to apply to gigs.',
+      'past_due': 'Your payment is overdue. Please update your payment method to continue applying to gigs.',
+    };
+    
+    const subscriptionErrorMessage = subscriptionMessages[profile.subscription_status as keyof typeof subscriptionMessages] || 
+                   'An active subscription is required to apply to gigs.';
+    
+    return { error: subscriptionErrorMessage };
   }
 
   // Check if user has a complete talent profile
