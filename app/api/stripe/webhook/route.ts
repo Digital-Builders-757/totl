@@ -6,6 +6,31 @@ import { stripe } from "@/lib/stripe";
 import { mapStripeStatusToLocal } from "@/lib/subscription";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
+type SubscriptionPlan = 'monthly' | 'annual';
+
+function determinePlanFromSubscription(subscription: Stripe.Subscription): SubscriptionPlan | null {
+  const monthlyPriceId = process.env.STRIPE_PRICE_TALENT_MONTHLY;
+  const annualPriceId = process.env.STRIPE_PRICE_TALENT_ANNUAL;
+
+  for (const item of subscription.items?.data ?? []) {
+    const priceId = item.price?.id;
+    if (!priceId) continue;
+    if (monthlyPriceId && priceId === monthlyPriceId) {
+      return 'monthly';
+    }
+    if (annualPriceId && priceId === annualPriceId) {
+      return 'annual';
+    }
+  }
+
+  const metadataPlan = subscription.metadata?.plan;
+  if (metadataPlan === 'monthly' || metadataPlan === 'annual') {
+    return metadataPlan;
+  }
+
+  return null;
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const headersList = await headers();
@@ -152,11 +177,13 @@ async function handleSubscriptionUpdate(
   // Map Stripe status to our enum
   const subscriptionStatus = mapStripeStatusToLocal(subscription.status);
 
-  // Determine plan from price ID
-  const priceId = subscription.items.data[0]?.price.id;
-  let plan = 'monthly';
-  if (priceId === process.env.STRIPE_PRICE_TALENT_ANNUAL) {
-    plan = 'annual';
+  // Determine plan from price ID or metadata
+  const plan = determinePlanFromSubscription(subscription);
+  if (!plan) {
+    console.warn("Unable to determine subscription plan for subscription:", subscription.id, {
+      priceIds: subscription.items?.data.map(item => item.price?.id),
+      metadataPlan: subscription.metadata?.plan,
+    });
   }
 
   // Update profile
@@ -168,7 +195,7 @@ async function handleSubscriptionUpdate(
     .update({
       subscription_status: subscriptionStatus,
       stripe_subscription_id: subscription.id,
-      subscription_plan: plan,
+      subscription_plan: plan ?? null,
       subscription_current_period_end: currentPeriodEnd 
         ? new Date(currentPeriodEnd * 1000).toISOString()
         : null,

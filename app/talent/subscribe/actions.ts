@@ -76,6 +76,12 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
       supabase_user_id: user.id,
       plan: plan,
     },
+    subscription_data: {
+      metadata: {
+        supabase_user_id: user.id,
+        plan,
+      },
+    },
     allow_promotion_codes: true,
     billing_address_collection: 'required',
   });

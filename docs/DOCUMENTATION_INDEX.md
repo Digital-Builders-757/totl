@@ -34,9 +34,13 @@ All other documentation has been organized into the `docs/` folder.
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 
+### **💳 Payment & Subscription System**
+- `STRIPE_SUBSCRIPTION_PRD.md` - **💳 NEW** - Complete product requirements document for Stripe subscription system (Nov 2025)
+- `STRIPE_IMPLEMENTATION_PLAN.md` - **💳 NEW** - Detailed implementation plan and Stripe dashboard setup guide (Nov 2025)
+
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ EMERGENCY** - Quick copy/paste fixes for common errors (Jan 2025)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors)
 
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management

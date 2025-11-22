@@ -7,6 +7,7 @@ import { createTalentCheckoutSession } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { isRedirectError } from "@/lib/is-redirect-error";
 
 export function SubscriptionPlans() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -16,6 +17,9 @@ export function SubscriptionPlans() {
     try {
       await createTalentCheckoutSession(plan);
     } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
       console.error('Subscription error:', error);
       setLoadingPlan(null);
       // You could add toast notification here

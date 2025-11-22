@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { isRedirectError } from "@/lib/is-redirect-error";
 import { 
   getSubscriptionStatusText, 
   getSubscriptionStatusColor, 
@@ -33,6 +34,9 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
     try {
       await createBillingPortalSession();
     } catch (error) {
+      if (isRedirectError(error)) {
+        throw error;
+      }
       console.error('Billing portal error:', error);
       setIsLoading(false);
       // You could add toast notification here

@@ -89,6 +89,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 - [ ] Create `app/api/stripe/webhook/route.ts` - Process Stripe events
 - [ ] Handle subscription status updates
 - [ ] Update profile subscription data
+- [ ] Determine plan from every subscription item, fall back to `subscription.metadata.plan`, and log when plan cannot be resolved (never silently default)
 
 #### **Step 3.4: Access Control**
 - [ ] Create `lib/gig-access.ts` - Gig visibility helpers
@@ -108,7 +109,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 #### **Step 4.2: Billing Management**
 - [ ] Create `app/talent/settings/billing/page.tsx` - Billing settings
-- [ ] Create billing settings component with portal access
+- [ ] Create billing settings component with portal access (use shared `isRedirectError` helper so redirects aren't swallowed in client components)
 
 #### **Step 4.3: Access Control Integration**
 - [ ] Update gig listing components for obfuscation
