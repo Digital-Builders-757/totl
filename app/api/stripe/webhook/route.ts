@@ -92,36 +92,39 @@ export async function POST(req: Request) {
           ? subscription.customer 
           : subscription.customer?.id;
 
-        if (customerId) {
-          const { data: profile, error: findError } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("stripe_customer_id", customerId)
-            .maybeSingle();
+        if (!customerId) {
+          console.error("No customer ID found for subscription deletion:", subscription.id);
+          return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
+        }
 
-          if (findError) {
-            console.error("Error finding profile for deleted subscription:", findError);
+        const { data: profile, error: findError } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("stripe_customer_id", customerId)
+          .maybeSingle();
+
+        if (findError) {
+          console.error("Error finding profile for deleted subscription:", findError);
+          return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
+        }
+
+        if (profile) {
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({
+              subscription_status: 'canceled',
+              stripe_subscription_id: null,
+              subscription_plan: null,
+              subscription_current_period_end: null,
+            })
+            .eq("id", profile.id);
+
+          if (updateError) {
+            console.error("Error updating profile for deleted subscription:", updateError);
             return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
           }
 
-          if (profile) {
-            const { error: updateError } = await supabase
-              .from("profiles")
-              .update({
-                subscription_status: 'canceled',
-                stripe_subscription_id: null,
-                subscription_plan: null,
-                subscription_current_period_end: null,
-              })
-              .eq("id", profile.id);
-
-            if (updateError) {
-              console.error("Error updating profile for deleted subscription:", updateError);
-              return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
-            }
-
-            console.log("Successfully canceled subscription for profile:", profile.id);
-          }
+          console.log("Successfully canceled subscription for profile:", profile.id);
         }
         break;
       }
