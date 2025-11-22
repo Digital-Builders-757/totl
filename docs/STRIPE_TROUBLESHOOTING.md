@@ -50,7 +50,12 @@ Practical fixes for Stripe-related issues that recently surfaced in the subscrip
 ## 5. Subscription Plan Detection
 
 - **Symptom:** Profiles revert to the incorrect plan (defaulting to “monthly”).
-- **Fix:** Inspect every subscription item and fall back to `subscription.metadata.plan` before updating the database. Log a warning if the plan cannot be determined.
+- **Fix:** Inspect every subscription item and fall back to `subscription.metadata.plan`. If no plan can be determined, preserve the existing `profiles.subscription_plan` value instead of overwriting it with `null`. Log a warning so we know to investigate.
+
+## 6. Webhook Acknowledges Failure
+
+- **Symptom:** Stripe receives `{ received: true }` even when Supabase queries fail, so it stops retrying and data drifts.
+- **Fix:** Have `handleSubscriptionUpdate()` return a boolean result (or throw) and respond with HTTP 500 when database lookups or updates fail. Stripe will then retry the webhook automatically.
 
 ---
 

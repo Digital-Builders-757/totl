@@ -65,7 +65,10 @@ export async function POST(req: Request) {
             
           // Get the subscription details
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          await handleSubscriptionUpdate(supabase, subscription);
+          const success = await handleSubscriptionUpdate(supabase, subscription);
+          if (!success) {
+            return NextResponse.json({ error: "Failed to process subscription update" }, { status: 500 });
+          }
         }
         break;
       }
@@ -74,7 +77,10 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
-        await handleSubscriptionUpdate(supabase, subscription);
+        const success = await handleSubscriptionUpdate(supabase, subscription);
+        if (!success) {
+          return NextResponse.json({ error: "Failed to process subscription update" }, { status: 500 });
+        }
         break;
       }
 
@@ -144,31 +150,31 @@ export async function POST(req: Request) {
 async function handleSubscriptionUpdate(
   supabase: ReturnType<typeof createSupabaseAdminClient>, 
   subscription: Stripe.Subscription
-) {
+): Promise<boolean> {
   const customerId = typeof subscription.customer === 'string' 
     ? subscription.customer 
     : subscription.customer?.id;
 
   if (!customerId) {
     console.error("No customer ID found in subscription:", subscription.id);
-    return;
+    return false;
   }
 
   // Find user by customer ID
   const { data: profile, error: findError } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, subscription_plan")
     .eq("stripe_customer_id", customerId)
     .maybeSingle();
 
   if (findError) {
     console.error("Error finding profile for subscription update:", findError);
-    return;
+    return false;
   }
 
   if (!profile) {
     console.error("No profile found for customer:", customerId);
-    return;
+    return false;
   }
 
   // Map Stripe status to our enum
@@ -186,21 +192,25 @@ async function handleSubscriptionUpdate(
   // Update profile
   const currentPeriodEnd = getCurrentPeriodEnd(subscription);
 
+  const planToPersist = plan ?? profile.subscription_plan ?? null;
+
   const { error: updateError } = await supabase
     .from("profiles")
     .update({
       subscription_status: subscriptionStatus,
       stripe_subscription_id: subscription.id,
-      subscription_plan: plan ?? null,
+      subscription_plan: planToPersist,
       subscription_current_period_end: currentPeriodEnd,
     })
     .eq("id", profile.id);
 
   if (updateError) {
     console.error("Error updating profile subscription:", updateError);
-  } else {
-    console.log(`Successfully updated subscription for profile ${profile.id}: ${subscriptionStatus}`);
+    return false;
   }
+
+  console.log(`Successfully updated subscription for profile ${profile.id}: ${subscriptionStatus}`);
+  return true;
 }
 
 function getCurrentPeriodEnd(subscription: Stripe.Subscription): string | null {

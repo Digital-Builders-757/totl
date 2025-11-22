@@ -39,11 +39,13 @@ npm run build
 - **Profile Type Mismatch Errors:** `Type 'Partial<Profile>' is missing required properties`
   - **Fix:** Select all columns with `select("*")` instead of specific columns when passing to components expecting full Profile type
 - **Subscription Plan Detection Errors:** Silent fallback to `'monthly'` when `subscription.items` missing or price IDs not matched
-  - **Fix:** Check every subscription item and fall back to `subscription.metadata.plan` before updating DB; log when plan can't be determined
+  - **Fix:** Check every subscription item, fall back to `subscription.metadata.plan`, and if still unknown retain the existing `profiles.subscription_plan` value to avoid data loss.
 - **Redirect Errors Intercepted in Client Components:** `redirect()` throws special error that gets swallowed by `try/catch`
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
 - **Billing Portal Session URL Missing:** `redirect(undefined)` when session URL is absent
   - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
+- **Webhook Acknowledges Failure:** Stripe receives `{ received: true }` even when Supabase updates fail
+  - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
 
