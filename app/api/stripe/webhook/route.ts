@@ -108,6 +108,7 @@ export async function POST(req: Request) {
               .update({
                 subscription_status: 'canceled',
                 stripe_subscription_id: null,
+                subscription_plan: null,
                 subscription_current_period_end: null,
               })
               .eq("id", profile.id);
