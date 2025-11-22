@@ -101,7 +101,7 @@ export async function POST(req: Request) {
 
           if (findError) {
             console.error("Error finding profile for deleted subscription:", findError);
-            break;
+            return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
           }
 
           if (profile) {
@@ -117,9 +117,10 @@ export async function POST(req: Request) {
 
             if (updateError) {
               console.error("Error updating profile for deleted subscription:", updateError);
-            } else {
-              console.log("Successfully canceled subscription for profile:", profile.id);
+              return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
             }
+
+            console.log("Successfully canceled subscription for profile:", profile.id);
           }
         }
         break;
