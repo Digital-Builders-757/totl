@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { stripe } from "@/lib/stripe";
+import { STRIPE_WEBHOOK_SECRET, stripe } from "@/lib/stripe";
 import { mapStripeStatusToLocal } from "@/lib/subscription";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
@@ -43,11 +43,7 @@ export async function POST(req: Request) {
 
   let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -188,18 +184,15 @@ async function handleSubscriptionUpdate(
   }
 
   // Update profile
-  // Access current_period_end safely - Stripe subscription has this property
-  const currentPeriodEnd = (subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end;
-  
+  const currentPeriodEnd = getCurrentPeriodEnd(subscription);
+
   const { error: updateError } = await supabase
     .from("profiles")
     .update({
       subscription_status: subscriptionStatus,
       stripe_subscription_id: subscription.id,
       subscription_plan: plan ?? null,
-      subscription_current_period_end: currentPeriodEnd 
-        ? new Date(currentPeriodEnd * 1000).toISOString()
-        : null,
+      subscription_current_period_end: currentPeriodEnd,
     })
     .eq("id", profile.id);
 
@@ -208,4 +201,23 @@ async function handleSubscriptionUpdate(
   } else {
     console.log(`Successfully updated subscription for profile ${profile.id}: ${subscriptionStatus}`);
   }
+}
+
+function getCurrentPeriodEnd(subscription: Stripe.Subscription): string | null {
+  const itemWithPeriodEnd = subscription.items?.data?.find((item) => {
+    const candidate = item as Stripe.SubscriptionItem & { current_period_end?: number };
+    return typeof candidate.current_period_end === "number";
+  }) as (Stripe.SubscriptionItem & { current_period_end?: number }) | undefined;
+
+  const periodEndFromItem = itemWithPeriodEnd?.current_period_end;
+  if (typeof periodEndFromItem === "number") {
+    return new Date(periodEndFromItem * 1000).toISOString();
+  }
+
+  const legacyPeriodEnd = (subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end;
+  if (typeof legacyPeriodEnd === "number") {
+    return new Date(legacyPeriodEnd * 1000).toISOString();
+  }
+
+  return null;
 }

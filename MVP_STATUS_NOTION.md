@@ -8,7 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Complete Stripe Subscription System Implementation!**
+## 🚀 **Latest Achievement: Stripe Stability & Subscription Hardening!**
+
+**STRIPE STABILITY & ERROR-HANDLING HARDENING** - November 23, 2025
+- ✅ Enforced env validation for both `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`
+- ✅ Standardized Stripe API versioning (uses official `2024-06-20` release string and documents the rule)
+- ✅ Webhook now reads `current_period_end` from subscription items (forward-compatible with latest API)
+- ✅ Billing portal session checks mirror checkout safeguards (no redirect to `undefined`)
+- ✅ Subscribe & billing pages no longer ignore Supabase errors; follow `.maybeSingle()` best practice
+- ✅ Subscription prompts now have accurate messaging even if helpers are reused
+- ✅ Added `docs/STRIPE_TROUBLESHOOTING.md` plus new entries in `COMMON_ERRORS_QUICK_REFERENCE.md`
+- ✅ Full `npm run build` regression passing after every fix
+
+## 🎯 **Complete Stripe Subscription System Implementation!**
 
 **STRIPE SUBSCRIPTION SYSTEM** - November 22, 2025
 - ✅ **Complete Stripe Integration**: Checkout, Billing Portal, Webhooks

@@ -92,8 +92,10 @@ export function shouldShowSubscriptionPrompt(profile: Profile | null): boolean {
  * Get subscription prompt message for talent users
  */
 export function getSubscriptionPromptMessage(profile: Profile | null): string {
-  if (!profile || profile.role !== 'talent') return '';
-  
+  if (!profile || profile.role !== 'talent') {
+    return '';
+  }
+
   switch (profile.subscription_status) {
     case 'none':
       return 'Subscribe to apply to gigs and see full client details';
@@ -101,6 +103,8 @@ export function getSubscriptionPromptMessage(profile: Profile | null): string {
       return 'Reactivate your subscription to apply to gigs';
     case 'past_due':
       return 'Update your payment method to continue applying to gigs';
+    case 'active':
+      return 'You already have full access to premium features.';
     default:
       return 'Subscribe to unlock premium features';
   }

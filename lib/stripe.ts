@@ -4,10 +4,18 @@ if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is required');
 }
 
+if (!process.env.STRIPE_WEBHOOK_SECRET) {
+  throw new Error('STRIPE_WEBHOOK_SECRET is required');
+}
+
+const STRIPE_API_VERSION = '2024-06-20';
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2025-11-17.clover',
+  apiVersion: STRIPE_API_VERSION as Stripe.LatestApiVersion,
   typescript: true,
 });
+
+export const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Stripe price IDs from environment
 export const STRIPE_PRICES = {

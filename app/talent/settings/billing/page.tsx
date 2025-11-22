@@ -9,11 +9,16 @@ export default async function BillingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
+
+  if (profileError) {
+    console.error('Error loading profile for billing page:', profileError);
+    redirect('/talent/dashboard');
+  }
 
   if (!profile || profile.role !== 'talent') {
     redirect('/talent/dashboard');

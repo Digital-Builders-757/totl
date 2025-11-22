@@ -42,5 +42,9 @@ export async function createBillingPortalSession() {
     return_url: `${appUrl}/talent/settings/billing`,
   });
 
+  if (!session.url) {
+    throw new Error('Failed to create billing portal session');
+  }
+
   redirect(session.url);
 }

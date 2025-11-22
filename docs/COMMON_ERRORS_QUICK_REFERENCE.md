@@ -32,16 +32,18 @@ npm run build
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
-- **Stripe API Version Errors:** `Type '"2024-06-20"' is not assignable to type '"2025-11-17.clover"'`
-  - **Fix:** Update `lib/stripe.ts` to use latest API version: `apiVersion: '2025-11-17.clover'`
+- **Stripe API Version Errors:** `Invalid Stripe API version format with unsupported '.clover' suffix`
+  - **Fix:** Stripe API versions must be plain `YYYY-MM-DD` strings. Use the latest stable release without suffix (currently `apiVersion: '2024-06-20'`).
 - **Stripe Property Access Errors:** `Property 'current_period_end' does not exist on type 'Subscription'`
-  - **Fix:** Use proper type assertion: `(subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end`
+  - **Fix:** Use subscription items: read `current_period_end` from `subscription.items.data[n]` and fall back to legacy property only if available.
 - **Profile Type Mismatch Errors:** `Type 'Partial<Profile>' is missing required properties`
   - **Fix:** Select all columns with `select("*")` instead of specific columns when passing to components expecting full Profile type
 - **Subscription Plan Detection Errors:** Silent fallback to `'monthly'` when `subscription.items` missing or price IDs not matched
   - **Fix:** Check every subscription item and fall back to `subscription.metadata.plan` before updating DB; log when plan can't be determined
 - **Redirect Errors Intercepted in Client Components:** `redirect()` throws special error that gets swallowed by `try/catch`
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
+- **Billing Portal Session URL Missing:** `redirect(undefined)` when session URL is absent
+  - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
 
