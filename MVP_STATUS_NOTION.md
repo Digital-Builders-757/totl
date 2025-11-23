@@ -8,7 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: UI/UX Playwright Stability Fix!**
+## 🚀 **Latest Achievement: CI Stripe Secrets + Context Prompt Guardrails!**
+
+**CI STRIPE ENV + CONTEXT PROMPT ENFORCEMENT** - November 23, 2025
+- ✅ Created `TOTL_PROJECT_CONTEXT_PROMPT.md` and linked it from the docs index so every contributor reads the mandatory checklist before coding
+- ✅ Updated CI + schema-truth GitHub workflows to attach to the `develop` environment and expose all four Stripe secrets during `npm run build`
+- ✅ Ensured Supabase + Stripe env vars are applied consistently, eliminating the “STRIPE_SECRET_KEY is required” build failures
+- ✅ Documented the change here so future runs know to keep workflow env wiring + context prompt in sync with repo rules
+
+## 🚀 **Previous Achievement: UI/UX Playwright Stability Fix!**
 
 **UI/UX PLAYWRIGHT TEST STABILITY** - November 23, 2025
 - ✅ Replaced deprecated `page.emulate` usage with a typed Playwright mobile context
