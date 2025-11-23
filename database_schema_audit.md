@@ -28,6 +28,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 - ✅ **Automatic triggers** for profile creation
 - ✅ **Production ready** with clean data
 - ✅ **Performance optimized** with comprehensive indexing
+- ✅ **Cascading deletes enforced** across auth.users → profiles → dependent tables to keep data consistent during account removal
 
 ## 🗂️ Database Overview
 
@@ -105,7 +106,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `id` → `auth.users.id`
+- Foreign Key: `id` → `auth.users.id` **ON DELETE CASCADE**
 - Check: `role IN ('talent', 'client', 'admin')`
 
 **Indexes:**
@@ -142,7 +143,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `profiles.id`
+- Foreign Key: `user_id` → `profiles.id` **ON DELETE CASCADE**
 - NOT NULL: `first_name`, `last_name` (protected by trigger)
 
 **Indexes:**
@@ -170,7 +171,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `user_id` → `profiles.id`
+- Foreign Key: `user_id` → `profiles.id` **ON DELETE CASCADE**
 - NOT NULL: `company_name` (protected by trigger)
 
 **Indexes:**
@@ -202,7 +203,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `client_id` → `profiles.id`
+- Foreign Key: `client_id` → `profiles.id` **ON DELETE CASCADE**
 - Check: `status IN ('draft', 'active', 'closed', 'featured', 'urgent')`
 
 **Indexes:**
@@ -228,7 +229,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `gig_id` → `gigs.id`
-- Foreign Key: `talent_id` → `profiles.id`
+- Foreign Key: `talent_id` → `profiles.id` **ON DELETE CASCADE**
 - Unique: `(gig_id, talent_id)` (one application per talent per gig)
 - Check: `status IN ('new', 'under_review', 'shortlisted', 'rejected', 'accepted')`
 
@@ -258,7 +259,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 **Constraints:**
 - Primary Key: `id`
 - Foreign Key: `gig_id` → `gigs.id`
-- Foreign Key: `talent_id` → `profiles.id`
+- Foreign Key: `talent_id` → `profiles.id` **ON DELETE CASCADE**
 
 **Indexes:**
 - `bookings_pkey` (Primary Key)
@@ -283,7 +284,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 
 **Constraints:**
 - Primary Key: `id`
-- Foreign Key: `talent_id` → `profiles.id` (CASCADE DELETE)
+- Foreign Key: `talent_id` → `profiles.id` **ON DELETE CASCADE**
 
 **Indexes:**
 - `portfolio_items_pkey` (Primary Key)
@@ -331,6 +332,7 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 **Constraints:**
 - Primary Key: `id`
 - Unique: `email` (one subscription per email)
+- Foreign Key: `user_id` → `auth.users.id` **ON DELETE CASCADE** (optional linkage for authenticated subscribers)
 
 **Indexes:**
 - `gig_notifications_pkey` (Primary Key)
@@ -798,6 +800,11 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 10. **`20251021164837_fix_gig_notifications_rls_and_duplicate_indexes.sql`** - Final performance optimization (gig_notifications RLS, duplicate index cleanup)
 
 ### **Recent Updates**
+- ✅ **Cascading delete alignment (Nov 23, 2025)** — All user-centric foreign keys now use `ON DELETE CASCADE` with supporting indexes:
+  - `profiles.id` → `auth.users.id`
+  - `talent_profiles.user_id`, `client_profiles.user_id`, `gigs.client_id`, `applications.talent_id`, `bookings.talent_id`, `portfolio_items.talent_id` → `profiles.id`
+  - `gig_notifications.user_id` → `auth.users.id`
+- ✅ **Production cleanup** - Removed all mock data
 - ✅ **Production cleanup** - Removed all mock data
 - ✅ **RLS enhancement** - Added secure policies
 - ✅ **Trigger optimization** - Fixed NULL handling
