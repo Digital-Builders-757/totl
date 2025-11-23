@@ -8,13 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: CI Stripe Secrets + Context Prompt Guardrails!**
+## 🚀 **Latest Achievement: Production Schema Guardrails!**
 
-**CI STRIPE ENV + CONTEXT PROMPT ENFORCEMENT** - November 23, 2025
-- ✅ Created `TOTL_PROJECT_CONTEXT_PROMPT.md` and linked it from the docs index so every contributor reads the mandatory checklist before coding
-- ✅ Updated CI + schema-truth GitHub workflows to attach to the `develop` environment and expose all four Stripe secrets during `npm run build`
-- ✅ Ensured Supabase + Stripe env vars are applied consistently, eliminating the “STRIPE_SECRET_KEY is required” build failures
-- ✅ Documented the change here so future runs know to keep workflow env wiring + context prompt in sync with repo rules
+**PRODUCTION SCHEMA GUARDRAILS** - November 23, 2025
+- ✅ Locked `types:regen:prod` + `link:prod` behind `SUPABASE_PROJECT_ID` (no more accidental dev regen when preparing `main`)
+- ✅ Added explicit Supabase CLI instructions (`SUPABASE_INTERNAL_NO_DOTENV=1`, prod `db push`) to the context prompt + common errors guide
+- ✅ Expanded the Types Sync Prevention doc with the exact commands + env vars to use before merging to production
+- ✅ Captured this workflow in the MVP status doc so future releases know the “set env → push migrations → regen prod types” ritual
 
 ## 🚀 **Previous Achievement: UI/UX Playwright Stability Fix!**
 

@@ -51,9 +51,9 @@ types/database.ts text eol=lf
   "scripts": {
     "types:regen": "npx -y supabase@2.34.3 gen types typescript --linked --schema public > types/database.ts",
     "types:regen:dev": "npx -y supabase@2.34.3 gen types typescript --project-ref utvircuwknqzpnmvxidp --schema public > types/database.ts",
-    "types:regen:prod": "npx -y supabase@2.34.3 gen types typescript --project-ref <PROD_REF> --schema public > types/database.ts",
+    "types:regen:prod": "if not defined SUPABASE_PROJECT_ID (echo SUPABASE_PROJECT_ID env var is required for prod regen && exit /b 1) else cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id %SUPABASE_PROJECT_ID% --schema public > types\\database.ts\"",
     "link:dev": "npx -y supabase@2.34.3 link --project-ref utvircuwknqzpnmvxidp",
-    "link:prod": "npx -y supabase@2.34.3 link --project-ref <PROD_REF>",
+    "link:prod": "if not defined SUPABASE_PROJECT_ID (echo SUPABASE_PROJECT_ID env var is required for prod linking && exit /b 1) else npx -y supabase@2.34.3 link --project-id %SUPABASE_PROJECT_ID%",
     "schema:verify:comprehensive": "node scripts/verify-schema-sync-comprehensive.mjs",
     "pre-commit": "npm run schema:verify:comprehensive && npm run lint && tsc --noEmit"
   }
@@ -167,8 +167,12 @@ npm run pre-commit
 
 #### **Production Deployment**
 ```bash
-# Switch to production project
+# Switch to production project (set SUPABASE_PROJECT_ID first)
+$env:SUPABASE_PROJECT_ID="<prod_project_ref>"
 npm run link:prod
+
+# Apply migrations to production before regenerating types
+npx -y supabase@2.34.3 db push --db-url "postgresql://postgres:<DB_PASSWORD>@db.<prod_project_ref>.supabase.co:5432/postgres"
 
 # Regenerate types from prod schema
 npm run types:regen:prod
