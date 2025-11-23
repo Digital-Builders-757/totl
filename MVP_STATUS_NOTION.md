@@ -6,9 +6,52 @@
 
 ---
 
-# 🎉 CURRENT STATUS: 99.9% MVP COMPLETE
+# 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: TypeScript Error Fixes & maybeSingle() Pattern Refinement!**
+## 🚀 **Latest Achievement: CI Stripe Secrets + Context Prompt Guardrails!**
+
+**CI STRIPE ENV + CONTEXT PROMPT ENFORCEMENT** - November 23, 2025
+- ✅ Created `TOTL_PROJECT_CONTEXT_PROMPT.md` and linked it from the docs index so every contributor reads the mandatory checklist before coding
+- ✅ Updated CI + schema-truth GitHub workflows to attach to the `develop` environment and expose all four Stripe secrets during `npm run build`
+- ✅ Ensured Supabase + Stripe env vars are applied consistently, eliminating the “STRIPE_SECRET_KEY is required” build failures
+- ✅ Documented the change here so future runs know to keep workflow env wiring + context prompt in sync with repo rules
+
+## 🚀 **Previous Achievement: UI/UX Playwright Stability Fix!**
+
+**UI/UX PLAYWRIGHT TEST STABILITY** - November 23, 2025
+- ✅ Replaced deprecated `page.emulate` usage with a typed Playwright mobile context
+- ✅ Ensures hover disablement test correctly simulates touch hardware without TS errors
+- ✅ Keeps reduced-hover media query validation intact across browsers
+- ✅ `npm run build` + full Playwright suite now pass without blocking type issues
+- ✅ Documentation + status audit updated to reflect the stabilization work
+
+## 🚀 **Previous Achievement: Stripe Stability & Subscription Hardening!**
+
+**STRIPE STABILITY & ERROR-HANDLING HARDENING** - November 23, 2025
+- ✅ Enforced env validation for both `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET`
+- ✅ Standardized Stripe API versioning (uses official `2024-06-20` release string and documents the rule)
+- ✅ Webhook now reads `current_period_end` from subscription items (forward-compatible with latest API)
+- ✅ Billing portal session checks mirror checkout safeguards (no redirect to `undefined`)
+- ✅ Subscribe & billing pages no longer ignore Supabase errors; follow `.maybeSingle()` best practice
+- ✅ Subscription prompts now have accurate messaging even if helpers are reused
+- ✅ Added `docs/STRIPE_TROUBLESHOOTING.md` plus new entries in `COMMON_ERRORS_QUICK_REFERENCE.md`
+- ✅ Full `npm run build` regression passing after every fix
+
+## 🎯 **Complete Stripe Subscription System Implementation!**
+
+**STRIPE SUBSCRIPTION SYSTEM** - November 22, 2025
+- ✅ **Complete Stripe Integration**: Checkout, Billing Portal, Webhooks
+- ✅ **Subscription Plans**: Monthly ($20) & Annual ($200) for talent users
+- ✅ **Access Control**: Obfuscated gig details for non-subscribers, application blocking
+- ✅ **Database Schema**: Added subscription_status enum & fields to profiles table
+- ✅ **Webhook Handler**: Automatic subscription status updates (active/past_due/canceled)
+- ✅ **Frontend Pages**: Subscription selection, billing management, success/cancel pages
+- ✅ **Type Safety**: Full TypeScript integration with generated database types
+- ✅ **Build Passing**: All TypeScript errors resolved, import order fixed
+- ✅ **Documentation**: Complete PRD, implementation plan, and integration guide
+- ✅ **Production Ready**: Tested build, committed to develop branch
+
+**PREVIOUS: TypeScript Error Fixes & maybeSingle() Pattern Refinement!**
 
 **TYPESCRIPT & ERROR HANDLING IMPROVEMENTS** - January 2025
 - ✅ Fixed TypeScript type mismatch errors (`undefined` vs `null`) in talent profile lookup
@@ -325,6 +368,6 @@
 
 ---
 
-*Last Updated: January 17, 2025*
+*Last Updated: November 23, 2025*
 *Current Status: 99.9% Complete - Build Passing, TypeScript Errors Fixed, Error Handling Refined*
 *Next Review: After final testing and polish*

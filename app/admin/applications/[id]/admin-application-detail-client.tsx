@@ -428,7 +428,7 @@ export function AdminApplicationDetailClient({
                     <div className="pt-4 border-t border-gray-700">
                       <Label className="text-gray-400 mb-2 block">Specialties</Label>
                       <div className="flex flex-wrap gap-2">
-                        {talentProfile.specialties.map((specialty, index) => (
+                        {talentProfile.specialties.map((specialty: string, index: number) => (
                           <span
                             key={index}
                             className="px-3 py-1 bg-purple-900/30 text-purple-300 rounded-full text-sm border border-purple-700"

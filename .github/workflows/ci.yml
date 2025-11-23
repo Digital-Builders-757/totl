@@ -9,6 +9,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: develop
+    env:
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      STRIPE_PRICE_TALENT_MONTHLY: ${{ secrets.STRIPE_PRICE_TALENT_MONTHLY }}
+      STRIPE_PRICE_TALENT_ANNUAL: ${{ secrets.STRIPE_PRICE_TALENT_ANNUAL }}
     
     steps:
       - name: Checkout code

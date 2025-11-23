@@ -33,7 +33,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 - **Total Tables:** 11
 - **Total Columns:** 85+
-- **Custom Types (Enums):** 4
+- **Custom Types (Enums):** 5
 - **Foreign Key Relationships:** 10
 - **Indexes:** 50+ (including primary keys and performance indexes)
 - **RLS Policies:** 25+ active policies
@@ -74,6 +74,14 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 - **Default:** `'pending'`
 - **Usage:** `bookings.status` column
 
+### 5. `subscription_status`
+```sql
+CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'canceled');
+```
+- **Purpose:** Tracks talent subscription status for premium features
+- **Default:** `'none'`
+- **Usage:** `profiles.subscription_status` column
+
 ## 🗃️ Table Details
 
 ### 1. `profiles` - Core User Accounts
@@ -87,6 +95,11 @@ CREATE TYPE public.booking_status AS ENUM ('pending', 'confirmed', 'completed', 
 | `avatar_url` | `text` | YES | - | Profile picture URL (legacy) |
 | `avatar_path` | `text` | YES | - | Storage path for avatar |
 | `email_verified` | `boolean` | NO | `false` | Email verification status |
+| `subscription_status` | `subscription_status` | NO | `'none'` | Talent subscription status |
+| `stripe_customer_id` | `text` | YES | - | Stripe customer ID for billing |
+| `stripe_subscription_id` | `text` | YES | - | Stripe subscription ID |
+| `subscription_plan` | `text` | YES | - | Subscription plan (monthly/annual) |
+| `subscription_current_period_end` | `timestamp with time zone` | YES | - | Current subscription period end date |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 

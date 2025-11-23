@@ -14,6 +14,7 @@ These files remain in the project root for easy access:
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview and setup instructions |
+| `TOTL_PROJECT_CONTEXT_PROMPT.md` | **Mandatory** project rules, pitfalls, and pre-change checklist |
 | `database_schema_audit.md` | **SINGLE SOURCE OF TRUTH** for database schema |
 | `MVP_STATUS_NOTION.md` | Current MVP status and next priorities |
 | `PAST_PROGRESS_HISTORY.md` | **NEW** 📚 - Complete history of all accomplishments and milestones |
@@ -34,9 +35,14 @@ All other documentation has been organized into the `docs/` folder.
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 
+### **💳 Payment & Subscription System**
+- `STRIPE_SUBSCRIPTION_PRD.md` - **💳 NEW** - Complete product requirements document for Stripe subscription system (Nov 2025)
+- `STRIPE_IMPLEMENTATION_PLAN.md` - **💳 NEW** - Detailed implementation plan and Stripe dashboard setup guide (Nov 2025)
+- `STRIPE_TROUBLESHOOTING.md` - **💳 UPDATED** - Living log of common Stripe integration issues and fixes (Nov 2025)
+
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ EMERGENCY** - Quick copy/paste fixes for common errors (Jan 2025)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors)
 
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
