@@ -21,6 +21,9 @@ type ProfileData = {
   avatar_url: string | null;
   avatar_path: string | null;
   display_name: string | null;
+  subscription_status: Database['public']['Enums']['subscription_status'];
+  subscription_plan: string | null;
+  subscription_current_period_end: string | null;
 } | null;
 
 type AuthContextType = {
@@ -125,7 +128,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Fetch ALL profile fields once to avoid N+1 queries
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("role, avatar_url, avatar_path, display_name")
+          .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
           .eq("id", session.user.id)
           .maybeSingle();
 
@@ -161,6 +164,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           avatar_url: profileData.avatar_url,
           avatar_path: profileData.avatar_path,
           display_name: profileData.display_name,
+          subscription_status: profileData.subscription_status ?? 'none',
+          subscription_plan: profileData.subscription_plan ?? null,
+          subscription_current_period_end: profileData.subscription_current_period_end ?? null,
         } : null);
         setIsEmailVerified(session.user.email_confirmed_at !== null);
         setIsLoading(false);
@@ -192,7 +198,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Fetch ALL profile fields once to avoid N+1 queries
           const { data: profileData, error: profileError } = await supabase
             .from("profiles")
-            .select("role, avatar_url, avatar_path, display_name")
+            .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
             .eq("id", session.user.id)
             .maybeSingle();
 
@@ -228,6 +234,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             avatar_url: profileData.avatar_url,
             avatar_path: profileData.avatar_path,
             display_name: profileData.display_name,
+            subscription_status: profileData.subscription_status ?? 'none',
+            subscription_plan: profileData.subscription_plan ?? null,
+            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
           } : null);
           setIsEmailVerified(session.user.email_confirmed_at !== null);
 
@@ -301,16 +310,19 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: profileData } = (await supabase
           .from("profiles")
-          .select("role, avatar_url, avatar_path, display_name")
+          .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
           .eq("id", data.session.user.id)
-          .maybeSingle()) as { 
-            data: { 
+          .maybeSingle()) as {
+            data: {
               role: string;
               avatar_url: string | null;
               avatar_path: string | null;
               display_name: string | null;
-            } | null; 
-            error: unknown 
+              subscription_status: Database["public"]["Enums"]["subscription_status"] | null;
+              subscription_plan: string | null;
+              subscription_current_period_end: string | null;
+            } | null;
+            error: unknown;
           };
 
         const role = (profileData?.role ?? null) as UserRole;
@@ -321,6 +333,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           avatar_url: profileData.avatar_url,
           avatar_path: profileData.avatar_path,
           display_name: profileData.display_name,
+          subscription_status: profileData.subscription_status ?? 'none',
+          subscription_plan: profileData.subscription_plan ?? null,
+          subscription_current_period_end: profileData.subscription_current_period_end ?? null,
         } : null);
 
         // Note: The login page uses handleLoginRedirect() server action for redirect

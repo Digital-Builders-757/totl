@@ -2,13 +2,22 @@ import { isActiveSubscriber } from "@/lib/subscription";
 import type { Database } from "@/types/supabase";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type MinimalProfile = Pick<Profile, 'role' | 'subscription_status'>;
 type Gig = Database['public']['Tables']['gigs']['Row'];
 
 /**
  * Get display title for a gig based on user's subscription status
  * Non-subscribers see obfuscated titles to protect client privacy
  */
-export function getGigDisplayTitle(gig: Gig, profile: Profile | null): string {
+export function getGigDisplayTitle(
+  gig: Gig,
+  profile: Profile | MinimalProfile | null
+): string {
+  const isTalent = profile?.role === 'talent';
+  if (!isTalent) {
+    return gig.title;
+  }
+
   // Show full title to active subscribers
   if (isActiveSubscriber(profile)) {
     return gig.title;
@@ -33,7 +42,15 @@ export function getGigDisplayTitle(gig: Gig, profile: Profile | null): string {
 /**
  * Get display description for a gig based on user's subscription status
  */
-export function getGigDisplayDescription(gig: Gig, profile: Profile | null): string {
+export function getGigDisplayDescription(
+  gig: Gig,
+  profile: Profile | MinimalProfile | null
+): string {
+  const isTalent = profile?.role === 'talent';
+  if (!isTalent) {
+    return gig.description;
+  }
+
   // Show full description to active subscribers
   if (isActiveSubscriber(profile)) {
     return gig.description;
@@ -58,22 +75,27 @@ export function getGigDisplayDescription(gig: Gig, profile: Profile | null): str
 /**
  * Check if user can apply to gigs (requires active subscription)
  */
-export function canApplyToGig(profile: Profile | null): boolean {
-  return isActiveSubscriber(profile);
+export function canApplyToGig(profile: Profile | MinimalProfile | null): boolean {
+  return profile?.role === 'talent' && isActiveSubscriber(profile);
 }
 
 /**
  * Check if user can see full client details
  */
-export function canSeeClientDetails(profile: Profile | null): boolean {
+export function canSeeClientDetails(profile: Profile | MinimalProfile | null): boolean {
+  if (!profile) return false;
+  if (profile.role !== 'talent') return true;
   return isActiveSubscriber(profile);
 }
 
 /**
  * Get client display name based on subscription status
  */
-export function getClientDisplayName(clientName: string | null, profile: Profile | null): string {
-  if (isActiveSubscriber(profile)) {
+export function getClientDisplayName(
+  clientName: string | null,
+  profile: Profile | MinimalProfile | null
+): string {
+  if (!profile || profile.role !== 'talent' || isActiveSubscriber(profile)) {
     return clientName || 'Client';
   }
   
@@ -83,7 +105,7 @@ export function getClientDisplayName(clientName: string | null, profile: Profile
 /**
  * Check if user should see subscription prompt
  */
-export function shouldShowSubscriptionPrompt(profile: Profile | null): boolean {
+export function shouldShowSubscriptionPrompt(profile: Profile | MinimalProfile | null): boolean {
   if (!profile) return false; // Guests see different prompts
   return profile.role === 'talent' && !isActiveSubscriber(profile);
 }
@@ -91,7 +113,7 @@ export function shouldShowSubscriptionPrompt(profile: Profile | null): boolean {
 /**
  * Get subscription prompt message for talent users
  */
-export function getSubscriptionPromptMessage(profile: Profile | null): string {
+export function getSubscriptionPromptMessage(profile: Profile | MinimalProfile | null): string {
   if (!profile || profile.role !== 'talent') {
     return '';
   }
