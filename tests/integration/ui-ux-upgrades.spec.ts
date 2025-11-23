@@ -437,26 +437,29 @@ test.describe('UI/UX Upgrades - Hover Effects', () => {
     }
   });
 
-  test('should disable hover on touch devices', async ({ page, browserName }) => {
-    // Simulate touch device
-    await page.emulate({
+  test('should disable hover on touch devices', async ({ browser }) => {
+    const mobileContext = await browser.newContext({
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15',
       viewport: { width: 375, height: 667 },
       deviceScaleFactor: 2,
       isMobile: true,
       hasTouch: true,
     });
+
+    const mobilePage = await mobileContext.newPage();
     
-    await page.goto('/gigs');
+    await mobilePage.goto('/gigs');
     
     // Touch devices should not have hover effects
     // Check if has-hover media query is respected
-    const hasHoverSupport = await page.evaluate(() => 
+    const hasHoverSupport = await mobilePage.evaluate(() => 
       window.matchMedia('(hover: hover)').matches
     );
     
     // On touch devices, this should be false
     expect(hasHoverSupport).toBe(false);
+
+    await mobileContext.close();
   });
 });
 
