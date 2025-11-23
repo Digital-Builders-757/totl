@@ -22,6 +22,11 @@
    - `docs/PRE_PUSH_CHECKLIST.md` (schema + build + lint requirements)  
    - Feature-specific docs (e.g., `docs/STATUS_BADGE_SYSTEM.md`, `docs/STRIPE_SUBSCRIPTION_PRD.md`)
 5. **Clarify scope.** Define what documents need updating once work is finished (MVP status, feature guides, troubleshooting notes).
+6. **Before touching `main` / production:**  
+   - Set `SUPABASE_PROJECT_ID=<production_project_ref>` in your shell (run `npx supabase projects list` to double-check).  
+   - Set `SUPABASE_INTERNAL_NO_DOTENV=1` so Supabase CLI doesn’t try to parse `.env.local`.  
+   - Apply pending migrations to production (`npx supabase@2.34.3 db push --db-url "postgresql://postgres:<DB_PASSWORD>@db.<prod_ref>.supabase.co:5432/postgres"`).  
+   - Run `npm run types:regen:prod` (which now requires `SUPABASE_PROJECT_ID`) so `types/database.ts` matches the live schema before merging.
 
 ---
 
@@ -46,6 +51,7 @@
 - All schema changes go through new timestamped files in `supabase/migrations/`. No edits to applied migrations.  
 - After migrations: run the pinned Supabase CLI (`npx supabase@2.34.3 gen types ...`) and re-run `scripts/prepend-autogen-banner.mjs` if needed.  
 - Ensure `types/database.ts`, `types/supabase.ts`, and the schema audit are in sync (use `npm run schema:verify:comprehensive`).  
+- Production sync: each time you regenerate types or link via CLI for production, set `SUPABASE_PROJECT_ID` (and `SUPABASE_INTERNAL_NO_DOTENV=1`) so Supabase CLI targets the correct project without parsing `.env.local`; otherwise schema drift will block merges to `main`.  
 - Treat enums and views as code: update audit + docs whenever they change.
 
 ---

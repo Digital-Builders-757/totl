@@ -48,6 +48,10 @@ npm run build
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
+- **Schema Truth Failure (merging to `main`):** `types/database.ts is out of sync with remote schema (Environment: production)`
+  - **Root Cause:** `types/database.ts` was regenerated from the dev project while `main` CI compares against the production Supabase project.
+  - **Fix:** Before merging to `main`, set `SUPABASE_PROJECT_ID=<prod_project_ref>`, apply pending migrations to production (`npx supabase@2.34.3 db push --db-url ...`), then run `npm run types:regen:prod`. Commit the regenerated file only after prod schema matches.
+  - **Prevention:** Never run `npm run types:regen` right before a production merge unless you are targeting the production project ref. Keep a checklist item for "regen types from prod + run schema truth" in every release PR.
 
 ## **4. BRANCH-SPECIFIC REQUIREMENTS**
 - **DEVELOP Branch:** Use `npm run types:regen:dev` if needed
@@ -96,6 +100,22 @@ git add types/database.ts
 git commit -m "Fix schema sync: regenerate types"
 ```
 
+### **1b. Schema Truth Error on `main` (Production)**
+```bash
+# 1. Export your production project ref
+set SUPABASE_PROJECT_ID=<prod_project_ref>   # PowerShell: $env:SUPABASE_PROJECT_ID="<prod>"
+set SUPABASE_INTERNAL_NO_DOTENV=1            # prevent CLI from parsing .env.local
+
+# 2. Apply migrations to production (required before regen)
+npx -y supabase@2.34.3 db push --db-url "postgresql://postgres:<DB_PASSWORD>@db.<prod_project_ref>.supabase.co:5432/postgres"
+
+# 3. Regenerate types from production
+npm run types:regen:prod
+
+# 4. Commit regenerated types
+git add types/database.ts
+git commit -m "Sync prod types"
+```
 ### **2. Import Path Error**
 ```bash
 # Error: Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'
