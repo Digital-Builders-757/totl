@@ -8,7 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Talent Subscription Experience Upgrade!**
+## 🚀 **Latest Achievement: Supabase Encoding + Single-Project Guardrails**
+
+**SCHEMA & ENCODING HARDENING** - November 24, 2025 (PM)
+- ✅ Fixed `.env.local` encoding (UTF-8 w/out BOM) so Supabase CLI no longer throws `unexpected character '»'`
+- ✅ Updated `types:regen*` scripts to always run through `cmd /d /c` with `SUPABASE_INTERNAL_NO_DOTENV=1` for consistent UTF-8 output
+- ✅ Re-linked the Supabase CLI to the production project (`utvircuwknqzpnmvxidp`) using the correct `--project-ref` flag; both `develop` and `main` target the same project now
+- ✅ Added the AUTO-GENERATED banner back to `types/database.ts` and verified schema truth guardrail passes locally
+- ✅ Documented the single-project reality + encoding pitfall in `TOTL_PROJECT_CONTEXT_PROMPT.md` and `docs/COMMON_ERRORS_QUICK_REFERENCE.md` so future sessions don’t regress
+
+## 🚀 **Previous Achievement: Talent Subscription Experience Upgrade!**
 
 **TALENT SUBSCRIPTION UX + ENFORCEMENT** - November 24, 2025
 - ✅ Added a dedicated “Subscription” entry (with live status pill) in the talent navigation so the upgrade path is always visible

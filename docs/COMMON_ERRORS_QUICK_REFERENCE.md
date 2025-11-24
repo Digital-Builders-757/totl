@@ -52,6 +52,10 @@ npm run build
   - **Root Cause:** `types/database.ts` was regenerated from the dev project while `main` CI compares against the production Supabase project.
   - **Fix:** Before merging to `main`, set `SUPABASE_PROJECT_ID=<prod_project_ref>`, apply pending migrations to production (`npx supabase@2.34.3 db push --db-url ...`), then run `npm run types:regen:prod`. Commit the regenerated file only after prod schema matches.
   - **Prevention:** Never run `npm run types:regen` right before a production merge unless you are targeting the production project ref. Keep a checklist item for "regen types from prod + run schema truth" in every release PR.
+- **.env Encoding Errors:** `unexpected character '»' in variable name` when running Supabase CLI
+  - **Root Cause:** `.env.local` saved as UTF-8 **with BOM**; the hidden BOM bytes (`ï»¿`) confuse the CLI dotenv parser.
+  - **Fix:** In VS Code choose “File → Save with Encoding → UTF-8” (no BOM) for `.env.local`. Before running CLI commands also set `SUPABASE_INTERNAL_NO_DOTENV=1` or temporarily rename `.env.local` to keep smart quotes/BOM characters from breaking the parser.
+  - **Prevention:** Keep `.env.local` plain UTF-8, avoid smart quotes, and always pass through the `cmd /d /c "set SUPABASE_INTERNAL_NO_DOTENV=1 && …"` wrapper already baked into the npm scripts.
 
 ## **4. BRANCH-SPECIFIC REQUIREMENTS**
 - **DEVELOP Branch:** Use `npm run types:regen:dev` if needed

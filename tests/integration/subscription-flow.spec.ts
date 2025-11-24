@@ -7,6 +7,7 @@ const testGigId = process.env.PLAYWRIGHT_TEST_GIG_ID;
 async function loginAsTalent(page: import("@playwright/test").Page) {
   if (!talentEmail || !talentPassword) {
     test.skip(true, "PLAYWRIGHT_TALENT_EMAIL and PLAYWRIGHT_TALENT_PASSWORD must be set");
+    return;
   }
 
   await page.goto("/login");
