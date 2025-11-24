@@ -1,7 +1,6 @@
 /**
  * AUTO-GENERATED FILE – DO NOT EDIT.
  * Source of truth: Supabase schema.
- * Generated: 2025-11-24T03:35:29.448Z
  */
 
 export type Json =

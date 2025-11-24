@@ -15,6 +15,7 @@
 - ✅ Updated `types:regen*` scripts to always run through `cmd /d /c` with `SUPABASE_INTERNAL_NO_DOTENV=1` for consistent UTF-8 output
 - ✅ Re-linked the Supabase CLI to the production project (`utvircuwknqzpnmvxidp`) using the correct `--project-ref` flag; both `develop` and `main` target the same project now
 - ✅ Added the AUTO-GENERATED banner back to `types/database.ts` and verified schema truth guardrail passes locally
+- ✅ Standardized banner injection (local scripts + CI workflow) so schema-truth diffs stay clean when comparing production types
 - ✅ Documented the single-project reality + encoding pitfall in `TOTL_PROJECT_CONTEXT_PROMPT.md` and `docs/COMMON_ERRORS_QUICK_REFERENCE.md` so future sessions don’t regress
 
 ## 🚀 **Previous Achievement: Talent Subscription Experience Upgrade!**
