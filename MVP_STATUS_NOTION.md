@@ -8,7 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Production Schema Guardrails!**
+## 🚀 **Latest Achievement: Supabase Encoding + Single-Project Guardrails**
+
+**SCHEMA & ENCODING HARDENING** - November 24, 2025 (PM)
+- ✅ Fixed `.env.local` encoding (UTF-8 w/out BOM) so Supabase CLI no longer throws `unexpected character '»'`
+- ✅ Updated `types:regen*` scripts to always run through `cmd /d /c` with `SUPABASE_INTERNAL_NO_DOTENV=1` for consistent UTF-8 output
+- ✅ Re-linked the Supabase CLI to the production project (`utvircuwknqzpnmvxidp`) using the correct `--project-ref` flag; both `develop` and `main` target the same project now
+- ✅ Added the AUTO-GENERATED banner back to `types/database.ts` and verified schema truth guardrail passes locally
+- ✅ Documented the single-project reality + encoding pitfall in `TOTL_PROJECT_CONTEXT_PROMPT.md` and `docs/COMMON_ERRORS_QUICK_REFERENCE.md` so future sessions don’t regress
+
+## 🚀 **Previous Achievement: Talent Subscription Experience Upgrade!**
+
+**TALENT SUBSCRIPTION UX + ENFORCEMENT** - November 24, 2025
+- ✅ Added a dedicated “Subscription” entry (with live status pill) in the talent navigation so the upgrade path is always visible
+- ✅ Banner + inline prompts now show on the dashboard, gigs list, gig details, and apply flows whenever a talent account is not active
+- ✅ Gig cards/titles/descriptions now obfuscate client intel for free users while active subscribers still see full data
+- ✅ Apply/Client-detail sections enforce gating with branded CTAs that jump straight to `/talent/subscribe`
+- ✅ Auth context now keeps subscription status/plan/current period end in memory so the UI can react instantly post-webhook
+- ✅ Added `tests/integration/subscription-flow.spec.ts` to verify banners, gig gating, and apply blocking for unsubscribed talent
+- ✅ Post-release hardening: talent-only banners/prompts, accurate `past_due` badges, and safer gig gating defaults
+
+## 🚀 **Previous Achievement: Production Schema Guardrails!**
 
 **PRODUCTION SCHEMA GUARDRAILS** - November 23, 2025
 - ✅ Locked `types:regen:prod` + `link:prod` behind `SUPABASE_PROJECT_ID` (no more accidental dev regen when preparing `main`)
@@ -252,6 +272,11 @@
 
 # 🎯 **Immediate Next Steps**
 
+### **0. Schema Guardrail Alignment (NOW)**
+- [ ] Update all `types:regen*` scripts to call `supabase gen types ... --project-id utvircuwknqzpnmvxidp --schema public` so local output matches CI byte-for-byte (header comment diff disappears)
+- [ ] Regenerate `types/database.ts`, rerun `npm run schema:verify:comprehensive`, and commit the synced file before the next push to `develop`
+- [ ] Document this ritual in the Supabase context prompt/common errors once complete (prevents future schema-truth noise)
+
 ## **Priority 1: Client Application System Enhancement**
 
 ### **1. Email Notifications Implementation**
@@ -368,6 +393,6 @@
 
 ---
 
-*Last Updated: November 23, 2025*
+*Last Updated: November 24, 2025*
 *Current Status: 99.9% Complete - Build Passing, TypeScript Errors Fixed, Error Handling Refined*
 *Next Review: After final testing and polish*

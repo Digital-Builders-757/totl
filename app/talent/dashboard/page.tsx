@@ -33,6 +33,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SafeDate } from "@/components/safe-date";
+import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,16 @@ interface Gig {
 
 function TalentDashboardContent() {
   const { user, signOut, profile } = useAuth();
+  const subscriptionProfile =
+    profile && profile.role === "talent"
+      ? {
+          role: "talent" as const,
+          subscription_status: profile.subscription_status ?? "none",
+        }
+      : null;
+  const showSubscriptionBanner = subscriptionProfile
+    ? subscriptionProfile.subscription_status !== "active"
+    : false;
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
@@ -378,6 +389,9 @@ function TalentDashboardContent() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {showSubscriptionBanner && (
+          <SubscriptionPrompt profile={subscriptionProfile} variant="banner" context="general" />
+        )}
         {/* Profile Completion Alert */}
         {needsProfileCompletion && (
           <div className="mb-6 bg-amber-900/20 border border-amber-700 rounded-lg p-4">

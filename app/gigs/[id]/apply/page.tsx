@@ -2,6 +2,7 @@ import { ArrowLeft, Send, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ApplyToGigForm } from "./apply-to-gig-form";
+import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,13 +29,19 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   // Check if user has talent role
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, subscription_status")
     .eq("id", user.id)
     .single();
 
   if (profileError || !profile || profile.role !== "talent") {
     redirect("/login?error=talent-only");
   }
+
+  const hasActiveSubscription = profile.subscription_status === "active";
+  const promptProfile = {
+    role: profile.role,
+    subscription_status: profile.subscription_status,
+  };
 
   // Fetch gig details
   const { data: gig, error: gigError } = await supabase
@@ -140,8 +147,21 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
                       your application status.
                     </AlertDescription>
                   </Alert>
-                ) : (
+                ) : hasActiveSubscription ? (
                   <ApplyToGigForm gig={gig} />
+                ) : (
+                  <div className="space-y-4" data-testid="subscription-apply-form-gate">
+                    <Alert className="bg-amber-500/10 border-amber-500/20">
+                      <AlertDescription className="text-amber-100">
+                        Subscribe to unlock applications. You can still browse gigs, but applying
+                        requires an active plan.
+                      </AlertDescription>
+                    </Alert>
+                    <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-apply" />
+                    <Button asChild className="w-full button-glow border-0">
+                      <Link href="/talent/subscribe">View Plans</Link>
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

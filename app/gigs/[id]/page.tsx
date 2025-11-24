@@ -2,11 +2,15 @@ import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SubscriptionPrompt } from "@/components/subscription-prompt";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering
 export const dynamic = "force-dynamic";
@@ -48,6 +52,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
 
   // Check if user has already applied
   let hasApplied = false;
+  let profile: Pick<Database["public"]["Tables"]["profiles"]["Row"], "role" | "subscription_status"> | null = null;
   if (user) {
     const { data: existingApplication } = await supabase
       .from("applications")
@@ -57,7 +62,29 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
       .single();
 
     hasApplied = !!existingApplication;
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("role, subscription_status")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profileData) {
+      profile = {
+        role: profileData.role,
+        subscription_status: profileData.subscription_status,
+      };
+    }
   }
+
+  const displayTitle = getGigDisplayTitle(gig, profile);
+  const displayDescription = getGigDisplayDescription(gig, profile);
+  const allowClientDetails = canSeeClientDetails(profile);
+  const canApply =
+    profile?.role === "talent" && profile.subscription_status === "active";
+  const promptProfile =
+    profile && profile.role === "talent"
+      ? profile
+      : null;
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -91,8 +118,8 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             <CardHeader>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-3xl font-bold">{gig.title}</CardTitle>
-                  <CardDescription className="text-lg mt-2">{gig.description}</CardDescription>
+                  <CardTitle className="text-3xl font-bold">{displayTitle}</CardTitle>
+                  <CardDescription className="text-lg mt-2">{displayDescription}</CardDescription>
                 </div>
                 <Badge className={getCategoryColor(gig.category || "general")}>
                   {gig.category || "General"}
@@ -106,13 +133,13 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             <Card>
               <CardContent className="p-0">
                 <div className="h-64 md:h-96 relative">
-                  <SafeImage
-                    src={gig.image_url}
-                    alt={gig.title}
-                    fill
-                    className="object-cover rounded-t-lg"
-                    placeholderQuery={gig.category?.toLowerCase() || "general"}
-                  />
+                    <SafeImage
+                      src={gig.image_url}
+                      alt={gig.title}
+                      fill
+                      className="object-cover rounded-t-lg"
+                      placeholderQuery={gig.category?.toLowerCase() || "general"}
+                    />
                 </div>
               </CardContent>
             </Card>
@@ -164,7 +191,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
 
           {/* Client Information - Only visible to authenticated users */}
           {user ? (
-            gig.profiles && (
+            allowClientDetails && gig.profiles ? (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -185,6 +212,21 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card data-testid="client-details-locked">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    Client Information
+                  </CardTitle>
+                  <CardDescription>
+                    Subscribe to unlock company names, contact info, and direct messaging.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-details" />
                 </CardContent>
               </Card>
             )
@@ -237,6 +279,25 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   </p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/talent/dashboard">View Dashboard</Link>
+                  </Button>
+                </div>
+              ) : profile?.role !== "talent" ? (
+                <div className="space-y-3 text-sm text-gray-600">
+                  Only talent accounts can submit applications.
+                </div>
+              ) : !canApply ? (
+                <div className="space-y-4" data-testid="subscription-apply-gate">
+                  <Alert className="bg-amber-500/10 border-amber-500/30">
+                    <AlertDescription className="text-amber-100 text-sm">
+                      You need an active subscription to apply to this gig and see full client
+                      details.
+                    </AlertDescription>
+                  </Alert>
+                    <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-apply" />
+                  <Button asChild className="w-full button-glow border-0">
+                    <Link href="/talent/subscribe" className="flex items-center justify-center gap-2">
+                      View Plans
+                    </Link>
                   </Button>
                 </div>
               ) : (

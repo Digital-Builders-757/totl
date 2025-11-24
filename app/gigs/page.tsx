@@ -5,12 +5,19 @@ import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, La
 import Link from "next/link";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
+import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
+
+type SubscriptionAwareProfile = Pick<
+  Database["public"]["Tables"]["profiles"]["Row"],
+  "role" | "subscription_status"
+>;
 
 type GigRow = Pick<
   Database["public"]["Tables"]["gigs"]["Row"],
@@ -151,14 +158,21 @@ export default async function GigsPage({
   // Get user session and role
   const { data: { user } } = await supabase.auth.getUser();
   let userRole: string | null = null;
+  let profile: SubscriptionAwareProfile | null = null;
   
   if (user) {
-    const { data: profile } = await supabase
+    const { data: profileData } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, subscription_status")
       .eq("id", user.id)
-      .single();
-    userRole = profile?.role || null;
+      .maybeSingle();
+    if (profileData) {
+      profile = {
+        role: profileData.role,
+        subscription_status: profileData.subscription_status,
+      };
+      userRole = profileData.role;
+    }
   }
 
   // If no user session, show sign-in gate
@@ -219,6 +233,13 @@ export default async function GigsPage({
               and more to find the perfect match for your talents.
             </p>
           </div>
+
+          {/* Subscription Prompt for talent users */}
+          {shouldShowSubscriptionPrompt(profile) && (
+            <div className="max-w-4xl mx-auto mb-10">
+              <SubscriptionPrompt profile={profile} variant="banner" context="general" />
+            </div>
+          )}
 
           {/* Search and Filter */}
           <div className="max-w-4xl mx-auto mb-12 sm:mb-16">
@@ -292,7 +313,12 @@ export default async function GigsPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {gigsList.map((gig) => (
+              {gigsList.map((gig) => {
+                const typedGig = gig as Database["public"]["Tables"]["gigs"]["Row"];
+                const displayTitle = getGigDisplayTitle(typedGig, profile);
+                const displayDescription = getGigDisplayDescription(typedGig, profile);
+
+                return (
                 <div
                   key={gig.id}
                   className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
@@ -317,13 +343,13 @@ export default async function GigsPage({
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                       <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-white/90 transition-colors line-clamp-2">
-                        {gig.title}
+                        {displayTitle}
                       </h3>
                     </div>
                   </div>
                   <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
                     <p className="text-[var(--oklch-text-secondary)] text-sm line-clamp-2 leading-relaxed">
-                      {gig.description}
+                      {displayDescription}
                     </p>
                     <div className="space-y-2">
                       <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
@@ -346,7 +372,7 @@ export default async function GigsPage({
                     </Button>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
 

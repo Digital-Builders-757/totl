@@ -2,18 +2,19 @@ import type { Database } from "@/types/supabase";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type SubscriptionStatus = Database['public']['Enums']['subscription_status'];
+type SubscriptionAwareProfile = Pick<Profile, 'subscription_status' | 'role'> & Partial<Profile>;
 
 /**
  * Check if a user has an active subscription
  */
-export function isActiveSubscriber(profile: Profile | null): boolean {
+export function isActiveSubscriber(profile: SubscriptionAwareProfile | null): boolean {
   return profile?.subscription_status === 'active';
 }
 
 /**
  * Check if a user needs to subscribe (no subscription or canceled)
  */
-export function needsSubscription(profile: Profile | null): boolean {
+export function needsSubscription(profile: SubscriptionAwareProfile | null): boolean {
   if (!profile) return true;
   return profile.subscription_status === 'none' || profile.subscription_status === 'canceled';
 }
@@ -21,7 +22,7 @@ export function needsSubscription(profile: Profile | null): boolean {
 /**
  * Check if a user's subscription has payment issues
  */
-export function hasPaymentIssues(profile: Profile | null): boolean {
+export function hasPaymentIssues(profile: SubscriptionAwareProfile | null): boolean {
   return profile?.subscription_status === 'past_due';
 }
 

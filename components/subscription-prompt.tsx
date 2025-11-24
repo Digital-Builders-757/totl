@@ -10,9 +10,10 @@ import { getSubscriptionPromptMessage } from "@/lib/gig-access";
 import type { Database } from "@/types/supabase";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type MinimalProfile = Pick<Profile, "role" | "subscription_status"> & Partial<Profile>;
 
 interface SubscriptionPromptProps {
-  profile: Profile | null;
+  profile: MinimalProfile | null;
   variant?: 'banner' | 'card' | 'inline';
   context?: 'gig-apply' | 'gig-details' | 'general';
 }
@@ -39,7 +40,10 @@ export function SubscriptionPrompt({
 
   if (variant === 'banner') {
     return (
-      <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mb-6">
+      <div
+        className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mb-6"
+        data-testid="subscription-banner"
+      >
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -65,7 +69,10 @@ export function SubscriptionPrompt({
 
   if (variant === 'card') {
     return (
-      <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      <Card
+        className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent"
+        data-testid="subscription-card"
+      >
         <CardHeader>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
@@ -100,7 +107,10 @@ export function SubscriptionPrompt({
 
   // Inline variant
   return (
-    <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-primary/20">
+    <div
+      className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg border border-primary/20"
+      data-testid="subscription-inline"
+    >
       <Lock className="h-4 w-4 text-primary flex-shrink-0" />
       <p className="text-sm text-muted-foreground flex-1">{displayMessage}</p>
       <Button size="sm" asChild>
