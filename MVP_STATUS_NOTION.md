@@ -272,6 +272,11 @@
 
 # 🎯 **Immediate Next Steps**
 
+### **0. Schema Guardrail Alignment (NOW)**
+- [ ] Update all `types:regen*` scripts to call `supabase gen types ... --project-id utvircuwknqzpnmvxidp --schema public` so local output matches CI byte-for-byte (header comment diff disappears)
+- [ ] Regenerate `types/database.ts`, rerun `npm run schema:verify:comprehensive`, and commit the synced file before the next push to `develop`
+- [ ] Document this ritual in the Supabase context prompt/common errors once complete (prevents future schema-truth noise)
+
 ## **Priority 1: Client Application System Enhancement**
 
 ### **1. Email Notifications Implementation**
