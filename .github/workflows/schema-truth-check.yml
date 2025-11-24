@@ -77,6 +77,9 @@ jobs:
       - name: Generate types from remote schema (branch-aware)
         run: npx -y supabase@2.34.3 gen types typescript --project-id ${{ steps.ref.outputs.ref }} --schema public > types/temp_schema_types.ts
 
+      - name: Add banner to generated types
+        run: node scripts/prepend-autogen-banner.mjs types/temp_schema_types.ts
+
       - name: Normalize both files (strip BOM & normalize line endings)
         shell: bash
         run: |

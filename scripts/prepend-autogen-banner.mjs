@@ -1,33 +1,32 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
-const typesFile = 'types/database.ts';
+const targetPath = process.argv[2] ?? "types/database.ts";
+const resolvedPath = path.resolve(process.cwd(), targetPath);
 const banner = `/**
  * AUTO-GENERATED FILE – DO NOT EDIT.
  * Source of truth: Supabase schema.
- * Generated: ${new Date().toISOString()}
  */
 
 `;
 
 try {
-  // Read the current content
-  const content = fs.readFileSync(typesFile, 'utf8');
-  
-  // Check if banner already exists
-  if (content.includes('AUTO-GENERATED FILE')) {
-    console.log('AUTO-GENERATED banner already exists in types/database.ts');
+  if (!fs.existsSync(resolvedPath)) {
+    throw new Error(`Target file not found: ${resolvedPath}`);
+  }
+
+  const content = fs.readFileSync(resolvedPath, "utf8");
+
+  if (content.startsWith(banner)) {
+    console.log(`AUTO-GENERATED banner already exists in ${targetPath}`);
     process.exit(0);
   }
-  
-  // Prepend banner
-  const newContent = banner + content;
-  fs.writeFileSync(typesFile, newContent, 'utf8');
-  
-  console.log('✓ AUTO-GENERATED banner added to types/database.ts');
+
+  fs.writeFileSync(resolvedPath, banner + content, "utf8");
+  console.log(`✓ AUTO-GENERATED banner added to ${targetPath}`);
 } catch (error) {
-  console.error('Error adding AUTO-GENERATED banner:', error.message);
+  console.error("Error adding AUTO-GENERATED banner:", error.message);
   process.exit(1);
 }
