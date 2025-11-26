@@ -8,6 +8,7 @@ import {
   generateClientApplicationRejectedEmail,
 } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 type ClientApplicationData = {
   firstName: string;
@@ -275,5 +276,97 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
   } catch (error) {
     console.error("Unexpected error rejecting client application:", error);
     return { error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+type ClientApplicationStatusResponse =
+  | {
+      success: true;
+      application: {
+        id: string;
+        companyName: string;
+        contactName: string;
+        status: string;
+        businessDescription: string;
+        needsDescription: string;
+        adminNotes: string | null;
+        submittedAt: string;
+        updatedAt: string;
+      };
+    }
+  | { success: false; error: string };
+
+export async function checkClientApplicationStatus({
+  applicationId,
+  email,
+}: {
+  applicationId: string;
+  email: string;
+}): Promise<ClientApplicationStatusResponse> {
+  const normalizedId = applicationId?.trim();
+  const normalizedEmail = email?.trim().toLowerCase();
+
+  if (!normalizedId || !normalizedEmail) {
+    return { success: false, error: "Application ID and email are required." };
+  }
+
+  try {
+    const supabaseAdmin = createSupabaseAdminClient();
+
+    const { data, error } = await supabaseAdmin
+      .from("client_applications")
+      .select(
+        `
+          id,
+          company_name,
+          first_name,
+          last_name,
+          status,
+          admin_notes,
+          business_description,
+          needs_description,
+          created_at,
+          updated_at
+        `
+      )
+      .eq("id", normalizedId)
+      .ilike("email", normalizedEmail)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching client application status:", error);
+      return {
+        success: false,
+        error: "Unable to look up your application right now. Please try again soon.",
+      };
+    }
+
+    if (!data) {
+      return {
+        success: false,
+        error: "We couldn't find an application matching that ID and email.",
+      };
+    }
+
+    return {
+      success: true,
+      application: {
+        id: data.id,
+        companyName: data.company_name,
+        contactName: `${data.first_name} ${data.last_name}`.trim(),
+        status: data.status,
+        businessDescription: data.business_description,
+        needsDescription: data.needs_description,
+        adminNotes: data.admin_notes,
+        submittedAt: data.created_at,
+        updatedAt: data.updated_at,
+      },
+    };
+  } catch (error) {
+    console.error("Unexpected error checking client application status:", error);
+    return {
+      success: false,
+      error: "An unexpected error occurred. Please try again.",
+    };
   }
 }
