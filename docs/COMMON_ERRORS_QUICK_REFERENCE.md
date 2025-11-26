@@ -437,6 +437,31 @@ if (!profile) {
 # - lib/actions/auth-actions.ts ✅ Fixed (3 locations)
 ```
 
+### **15. Type Error: `Property 'is_suspended' does not exist on type ...`**
+```bash
+# Error: Property 'is_suspended' does not exist on type 'profiles'
+# Error: Property 'suspension_reason' does not exist on type 'profiles'
+# Root Cause: Migration adding suspension columns ran, but types/database.ts wasn't regenerated
+
+# ❌ WRONG - Stale types (no suspension columns)
+const { data: profile } = await supabase
+  .from("profiles")
+  .select("role, is_suspended")
+  .eq("id", user.id)
+  .maybeSingle();  # TS2339: Property 'is_suspended' does not exist
+
+# ✅ FIX - Keep schema, types, and docs in sync
+supabase db push --linked   # Applies migration locally (if needed)
+npm run types:regen         # Regenerates types/database.ts with AUTO-GENERATED banner
+npm run build               # Verifies middleware + server actions compile
+
+# Prevention checklist:
+# 1. Update database_schema_audit.md BEFORE adding migration
+# 2. Run the migration locally (db push/reset)
+# 3. Regenerate types via pinned CLI (npm run types:regen)
+# 4. Re-run build/lint so middleware sees the new columns
+```
+
 ---
 
 ## 🔍 **QUICK DIAGNOSIS**
@@ -462,6 +487,7 @@ if (!profile) {
 | `Type '... | undefined' is not assignable to type '... | null'` | `.find()` returns `undefined`, variable typed as `null` | Use `?? null` to convert: `array.find(...) ?? null` |
 | Syntax error: `profileError. ===` (missing property) | Incomplete error check with PGRST116 | Use `!profile` check with `.maybeSingle()`, don't check PGRST116 |
 | Logic error: Checking PGRST116 with `.maybeSingle()` | PGRST116 only occurs with `.single()`, not `.maybeSingle()` | Handle errors first, then check `!profile` - no PGRST116 check needed |
+| `Property 'is_suspended' does not exist on type 'profiles'` | Types out of sync after suspension migration | Run new migration locally, then `npm run types:regen` |
 | Errors not in Sentry | Wrong DSN or project ID | Check `/api/sentry-diagnostic`, verify DSN ends in `4510191108292609` |
 
 ---

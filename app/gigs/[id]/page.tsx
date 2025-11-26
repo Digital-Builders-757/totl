@@ -2,6 +2,7 @@ import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { FlagGigDialog } from "@/components/moderation/flag-gig-dialog";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -334,6 +335,24 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <span className="text-gray-600">Location</span>
                 <span className="font-medium">{gig.location}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">Safety & Moderation</CardTitle>
+              <CardDescription>
+                If something feels off about this opportunity, let our moderation team know.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {user ? (
+                <FlagGigDialog gigId={gig.id} />
+              ) : (
+                <Button asChild variant="outline" className="w-full">
+                  <Link href="/login">Sign in to report this gig</Link>
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

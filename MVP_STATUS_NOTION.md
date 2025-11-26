@@ -8,7 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Client Application Status Portal**
+## 🚀 **Latest Achievement: Moderation & Suspension Enforcement**
+
+**MODERATION TOOLKIT & ACCOUNT SAFEGUARDS** - November 26, 2025  
+- ✅ Created first-class moderation workflow (flag dialogs on gigs & talent profiles, dedicated `/admin/moderation` dashboard, automation controls)  
+- ✅ Added `content_flags` table plus suspension columns on `profiles` so admins can suspend or reinstate accounts with documented reasons  
+- ✅ Wired admin actions to close abusive gigs, suspend accounts, and reflect enforcement instantly through middleware + `/suspended` page UX  
+- ✅ Regenerated Supabase types and middleware guards so `is_suspended`/`suspension_reason` stay type-safe across server actions and route protection  
+- ✅ Updated schema docs + common-errors guide so future migrations stay in sync and TypeScript never drifts from the live schema
+
+## 🚀 **Previous Achievement: Client Application Status Portal**
 
 **CLIENT APPLICATION STATUS PORTAL** - November 26, 2025
 - ✅ Shipped public-facing `/client/application-status` with secure lookup (requires both application ID + email) powered by a new admin-server action
@@ -413,6 +422,6 @@
 
 ---
 
-*Last Updated: November 24, 2025*
+*Last Updated: November 26, 2025*
 *Current Status: 99.9% Complete - Build Passing, TypeScript Errors Fixed, Error Handling Refined*
 *Next Review: After final testing and polish*
