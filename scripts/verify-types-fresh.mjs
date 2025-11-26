@@ -23,7 +23,7 @@ try {
 
   // Generate fresh types
   console.log('Generating fresh types from Supabase schema...');
-  execSync(`npx supabase@v2.33.4 gen types typescript --project-id "${projectId}" --schema public > ${tempFile}`, { stdio: 'inherit' });
+  execSync(`npx supabase@v2.34.3 gen types typescript --project-id "${projectId}" --schema public > ${tempFile}`, { stdio: 'inherit' });
 
   // Read both files
   const existingContent = fs.readFileSync(typesFile, 'utf8');

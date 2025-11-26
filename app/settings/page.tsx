@@ -116,6 +116,15 @@ export default async function SettingsPage() {
                   <span className="text-white">Settings</span>
                 </>
               )}
+              {profile?.role === "admin" && (
+                <>
+                  <Link href="/admin/dashboard" className="hover:text-white transition-colors">
+                    Admin Dashboard
+                  </Link>
+                  <span>→</span>
+                  <span className="text-white">Settings</span>
+                </>
+              )}
             </nav>
             
             <div className="flex items-center justify-between">
@@ -143,6 +152,17 @@ export default async function SettingsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Dashboard
+                </Link>
+              )}
+              {profile?.role === "admin" && (
+                <Link
+                  href="/admin/dashboard"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Back to Admin
                 </Link>
               )}
             </div>

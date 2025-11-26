@@ -419,7 +419,7 @@ ERROR: types/database.ts is out of sync with remote schema
 npm run types:regen
 
 # Or manually:
-npx supabase@v2.33.4 gen types typescript --linked --schema public > types/database.ts
+npx supabase@v2.34.3 gen types typescript --linked --schema public > types/database.ts
 ```
 
 **Prevention:**
@@ -599,15 +599,15 @@ Require stack:
    ```
 
 3. **Manual comparison:**
-   ```bash
-   npx supabase@v2.33.4 gen types typescript --linked --schema public > temp_types.ts
-   diff temp_types.ts types/database.ts
-   ```
+```bash
+npx supabase@v2.34.3 gen types typescript --linked --schema public > temp_types.ts
+diff temp_types.ts types/database.ts
+```
 
 ## 📋 Best Practices
 
 ### Environment Setup
-- Use consistent Supabase CLI version (`v2.33.4`)
+- Use consistent Supabase CLI version (`v2.34.3`)
 - Set up `.env.local` with all required variables
 - Use `npx` to avoid global CLI version conflicts
 

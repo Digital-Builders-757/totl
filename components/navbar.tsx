@@ -125,6 +125,15 @@ export default function Navbar() {
               About
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
             </Link>
+            {userRole === "admin" && (
+              <Link
+                href="/admin/dashboard"
+                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
+              >
+                Admin
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            )}
             {isTalentUser && (
               <Link
                 href="/talent/subscribe"
@@ -179,7 +188,7 @@ export default function Navbar() {
                   )}
                   {userRole === "admin" && (
                     <Link
-                      href="/admin/applications"
+                      href="/admin/dashboard"
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Admin Dashboard
@@ -284,7 +293,7 @@ export default function Navbar() {
                     )}
                     {userRole === "admin" && (
                       <Link
-                        href="/admin/applications"
+                        href="/admin/dashboard"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Admin Dashboard
