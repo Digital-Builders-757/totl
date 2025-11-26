@@ -13,8 +13,8 @@ const tmp = join(tmpdir(), `supabase_types_${Date.now()}.ts`);
 try {
   // Prefer linked project; fall back to explicit project id
   const cmd = process.env.SUPABASE_PROJECT_ID
-    ? `npx supabase@v2.33.4 gen types typescript --project-id ${process.env.SUPABASE_PROJECT_ID} --schema public`
-    : `npx supabase@v2.33.4 gen types typescript --linked --schema public`;
+    ? `npx supabase@v2.34.3 gen types typescript --project-id ${process.env.SUPABASE_PROJECT_ID} --schema public`
+    : `npx supabase@v2.34.3 gen types typescript --linked --schema public`;
 
   // Capture stdout to avoid any shell redirection differences (Windows vs *nix)
   const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"], shell: true }).toString("utf8");
@@ -27,10 +27,10 @@ try {
   // Surface useful hint if CLI not logged in / project not linked
   const msg = String(e?.stderr || e?.message || e);
   if (msg.includes("not logged in") || msg.includes("401")) {
-    console.error("💡 Run: npx supabase@v2.33.4 login");
+    console.error("💡 Run: npx supabase@v2.34.3 login");
   }
   if (msg.includes("No linked project") || msg.includes("link this project")) {
-    console.error("💡 Run: npx supabase@v2.33.4 link --project-ref <YOUR_PROJECT_REF>");
+    console.error("💡 Run: npx supabase@v2.34.3 link --project-ref <YOUR_PROJECT_REF>");
   }
   process.exit(1);
 }

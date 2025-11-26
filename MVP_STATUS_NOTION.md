@@ -8,7 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Supabase Encoding + Single-Project Guardrails**
+## 🚀 **Latest Achievement: Stripe Live Launch Prep & MCP Hardening**
+
+**STRIPE LIVE-READY UPGRADE** - November 26, 2025
+- ✅ Bumped the entire toolchain to Supabase CLI **v2.34.3** (package scripts, verification utilities, docs) so local + CI stay in lockstep
+- ✅ Regenerated schema types, re-linked CLI to `utvircuwknqzpnmvxidp`, and re-ran schema/lint/build checks to keep `develop` green
+- ✅ Captured the production migration game plan in `docs/STRIPE_LIVE_SUBSCRIPTIONS_PRD.md` plus refreshed the docs index
+- ✅ Locked in the live Stripe price IDs (`price_1SXZFiL74RJvr6jHynEWFxaT` monthly, `price_1SXZFiL74RJvr6jH26OFzsvl` yearly) across env references + documentation so ops knows the exact values to deploy
+- ✅ Configured the live Stripe webhook destination at `https://www.thetotlagency.com/api/stripe/webhook` and documented the signing-secret rollout
+- ✅ Verified Sentry MCP connectivity in Cursor (added server block + token handling) so we can query real-time errors while rolling out billing
+
+## 🚀 **Previous Achievement: Supabase Encoding + Single-Project Guardrails**
 
 **SCHEMA & ENCODING HARDENING** - November 24, 2025 (PM)
 - ✅ Fixed `.env.local` encoding (UTF-8 w/out BOM) so Supabase CLI no longer throws `unexpected character '»'`

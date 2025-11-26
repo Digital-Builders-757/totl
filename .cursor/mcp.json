@@ -5,11 +5,11 @@
       "args": [
         "-y",
         "@sentry/mcp-server",
-        "--organization-slug=the-digital-builders",
-        "--project-slug=javascript-nextjs"
+        "--organization-slug=the-digital-builders-bi",
+        "--project-slug=sentry-yellow-notebook"
       ],
       "env": {
-        "SENTRY_ACCESS_TOKEN": "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"
+        "SENTRY_ACCESS_TOKEN": "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"
       }
     },
     "supabase": {
