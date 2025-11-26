@@ -1,8 +1,9 @@
 "use client";
 
-import { Mail, Phone } from "lucide-react";
+import { Flag, Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-provider";
+import { FlagProfileDialog } from "@/components/moderation/flag-profile-dialog";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/types/supabase";
 
@@ -51,6 +52,8 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
       </div>
     );
   }
+
+  const canReportProfile = !!user && user.id !== talent.user_id;
 
   return (
     <div className="space-y-6">
@@ -148,6 +151,25 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
           </a>
         </div>
       )}
+
+      {/* Moderation */}
+      <div className="bg-white rounded-lg p-6 border border-gray-300 space-y-3">
+        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+          <Flag className="h-4 w-4" />
+          Safety & Moderation
+        </div>
+        <p className="text-sm text-gray-600">
+          See something off about this profile? Let the TOTL moderation team know so we can keep the
+          marketplace safe.
+        </p>
+        {canReportProfile ? (
+          <FlagProfileDialog profileId={talent.user_id} profileType="talent_profile" />
+        ) : (
+          <Button variant="outline" disabled className="w-full justify-center">
+            {user ? "You cannot report your own profile" : "Sign in to report this profile"}
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

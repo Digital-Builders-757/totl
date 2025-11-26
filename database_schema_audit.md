@@ -83,6 +83,21 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 - **Default:** `'none'`
 - **Usage:** `profiles.subscription_status` column
 
+### 6. `flag_resource_type`
+```sql
+CREATE TYPE public.flag_resource_type AS ENUM ('gig', 'talent_profile', 'client_profile', 'application', 'booking');
+```
+- **Purpose:** Identifies which entity was reported to moderation
+- **Usage:** `content_flags.resource_type`
+
+### 7. `flag_status`
+```sql
+CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismissed');
+```
+- **Purpose:** Tracks lifecycle of a moderation flag
+- **Default:** `'open'`
+- **Usage:** `content_flags.status`
+
 ## 🗃️ Table Details
 
 ### 1. `profiles` - Core User Accounts
@@ -101,6 +116,8 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 | `stripe_subscription_id` | `text` | YES | - | Stripe subscription ID |
 | `subscription_plan` | `text` | YES | - | Subscription plan (monthly/annual) |
 | `subscription_current_period_end` | `timestamp with time zone` | YES | - | Current subscription period end date |
+| `is_suspended` | `boolean` | NO | `false` | Whether the account is suspended/banned |
+| `suspension_reason` | `text` | YES | - | Admin-provided reason for suspension |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
@@ -403,6 +420,43 @@ CREATE TYPE public.subscription_status AS ENUM ('none', 'active', 'past_due', 'c
 - `idx_gig_notifications_email` (Email lookup)
 - `idx_gig_notifications_user_id` (User lookup)
 - `idx_gig_notifications_active` (Active notifications)
+
+---
+
+### 12. `content_flags` - Moderation Reports
+**Purpose:** Stores user-reported content issues for the moderation team
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `resource_type` | `flag_resource_type` | NO | - | Type of entity that was flagged (`gig`, `talent_profile`, etc.) |
+| `resource_id` | `uuid` | NO | - | Identifier of the flagged resource |
+| `gig_id` | `uuid` | YES | - | Optional FK for gig reports |
+| `reporter_id` | `uuid` | NO | - | User who submitted the flag |
+| `reason` | `text` | NO | - | Short description of the issue |
+| `details` | `text` | YES | - | Additional context supplied by reporter |
+| `status` | `flag_status` | NO | `'open'` | Moderation workflow status |
+| `admin_notes` | `text` | YES | - | Internal notes from moderators |
+| `assigned_admin_id` | `uuid` | YES | - | Admin currently handling the flag |
+| `resolution_action` | `text` | YES | - | Summary of action taken (e.g., `close_gig`, `ban_user`) |
+| `resolved_at` | `timestamp with time zone` | YES | - | Timestamp when the flag was resolved/dismissed |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
+| `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
+
+**Constraints:**
+- Primary Key: `id`
+- Foreign Key: `gig_id` → `gigs.id` **ON DELETE SET NULL**
+- Foreign Key: `reporter_id` → `profiles.id` **ON DELETE CASCADE**
+- Foreign Key: `assigned_admin_id` → `profiles.id` **ON DELETE SET NULL**
+
+**Indexes:**
+- `content_flags_status_idx` (status filters)
+- `content_flags_resource_type_idx` (resource filters)
+- `content_flags_gig_idx` (gig lookups)
+
+**RLS Policies:**
+- Reporters can insert/select their own flags (`auth.uid() = reporter_id`)
+- Admins (profiles.role = 'admin') can select/update/delete all flags
 
 ---
 

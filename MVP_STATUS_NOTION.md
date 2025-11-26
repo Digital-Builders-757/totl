@@ -8,7 +8,25 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Stripe Live Launch Prep & MCP Hardening**
+## 🚀 **Latest Achievement: Moderation & Suspension Enforcement**
+
+**MODERATION TOOLKIT & ACCOUNT SAFEGUARDS** - November 26, 2025  
+- ✅ Created first-class moderation workflow (flag dialogs on gigs & talent profiles, dedicated `/admin/moderation` dashboard, automation controls)  
+- ✅ Added `content_flags` table plus suspension columns on `profiles` so admins can suspend or reinstate accounts with documented reasons  
+- ✅ Wired admin actions to close abusive gigs, suspend accounts, and reflect enforcement instantly through middleware + `/suspended` page UX  
+- ✅ Regenerated Supabase types and middleware guards so `is_suspended`/`suspension_reason` stay type-safe across server actions and route protection  
+- ✅ Updated schema docs + common-errors guide so future migrations stay in sync and TypeScript never drifts from the live schema
+
+## 🚀 **Previous Achievement: Client Application Status Portal**
+
+**CLIENT APPLICATION STATUS PORTAL** - November 26, 2025
+- ✅ Shipped public-facing `/client/application-status` with secure lookup (requires both application ID + email) powered by a new admin-server action
+- ✅ Added rich status UI: badges, timelines, admin notes, and company/talent-need context so Career Builders know exactly where they stand
+- ✅ Enhanced the client application confirmation flow to surface the generated application ID on the success page and deep-link into the status checker
+- ✅ Wired the checker through the new `checkClientApplicationStatus` service-role action so RLS remains locked down while applicants can self-serve
+- ✅ Pre-filled status checks via query params (confirmation page passes `applicationId`) to reduce support friction
+
+## 🚀 **Previous Achievement: Stripe Live Launch Prep & MCP Hardening**
 
 **STRIPE LIVE-READY UPGRADE** - November 26, 2025
 - ✅ Bumped the entire toolchain to Supabase CLI **v2.34.3** (package scripts, verification utilities, docs) so local + CI stay in lockstep
@@ -404,6 +422,6 @@
 
 ---
 
-*Last Updated: November 24, 2025*
+*Last Updated: November 26, 2025*
 *Current Status: 99.9% Complete - Build Passing, TypeScript Errors Fixed, Error Handling Refined*
 *Next Review: After final testing and polish*

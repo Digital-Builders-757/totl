@@ -5,6 +5,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import type { Database } from "@/types/supabase";
 
+type SuspensionProfile = {
+  role: Database["public"]["Tables"]["profiles"]["Row"]["role"];
+  is_suspended: boolean | null;
+};
+
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
   const path = req.nextUrl.pathname;
@@ -21,7 +26,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Public routes that do not require any auth handling
-  const publicRoutes = ["/", "/about", "/gigs", "/talent"];
+  const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended"];
   if (publicRoutes.includes(path)) {
     return res;
   }
@@ -98,9 +103,12 @@ export async function middleware(req: NextRequest) {
     // Use maybeSingle() to prevent 406 errors when profile doesn't exist
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_suspended")
       .eq("id", user.id)
-      .maybeSingle();
+      .maybeSingle<{
+        role: Database["public"]["Tables"]["profiles"]["Row"]["role"];
+        is_suspended: boolean | null;
+      }>();
 
     // If profile doesn't exist, ensure it's created (fallback if trigger failed)
     if (profileError && profileError.code === "PGRST116") {
@@ -124,6 +132,10 @@ export async function middleware(req: NextRequest) {
       // Create profile (using admin client would be better, but middleware can't use it)
       // For now, redirect to choose-role and let the app handle profile creation
       return NextResponse.redirect(new URL("/choose-role", req.url));
+    }
+
+    if (profile?.is_suspended && path !== "/suspended") {
+      return NextResponse.redirect(new URL("/suspended", req.url));
     }
 
     if (profile?.role === "talent") {
@@ -153,9 +165,12 @@ export async function middleware(req: NextRequest) {
     // Use maybeSingle() to prevent 406 errors when profile doesn't exist
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, is_suspended")
       .eq("id", user.id)
-      .maybeSingle();
+      .maybeSingle<{
+        role: Database["public"]["Tables"]["profiles"]["Row"]["role"];
+        is_suspended: boolean | null;
+      }>();
 
     // Log profile query errors to Sentry (except PGRST116 which is expected when profile doesn't exist)
     if (profileError && profileError.code !== "PGRST116") {
@@ -186,6 +201,10 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/choose-role", req.url));
       }
       return res;
+    }
+
+    if (profile?.is_suspended && path !== "/suspended") {
+      return NextResponse.redirect(new URL("/suspended", req.url));
     }
 
     // If the user has a profile but no role, try to determine it before redirecting
@@ -254,12 +273,15 @@ export async function middleware(req: NextRequest) {
       // Use maybeSingle() to prevent 406 errors
       const { data: latestProfile, error: latestError } = await supabase
         .from("profiles")
-        .select("role")
+        .select("role, is_suspended")
         .eq("id", user.id)
-        .maybeSingle();
+        .maybeSingle<SuspensionProfile>();
 
       // If we got a profile with a role, redirect immediately
       if (latestProfile?.role) {
+        if (latestProfile.is_suspended) {
+          return NextResponse.redirect(new URL("/suspended", req.url));
+        }
         if (latestProfile.role === "talent") {
           return NextResponse.redirect(new URL("/talent/dashboard", req.url));
         }
@@ -293,9 +315,9 @@ export async function middleware(req: NextRequest) {
             // Verify the update before redirecting
             const { data: verifyProfile } = await supabase
               .from("profiles")
-              .select("role")
+              .select("role, is_suspended")
               .eq("id", user.id)
-              .maybeSingle();
+              .maybeSingle<SuspensionProfile>();
             
             if (verifyProfile?.role === "talent") {
               return NextResponse.redirect(new URL("/talent/dashboard", req.url));
@@ -322,9 +344,9 @@ export async function middleware(req: NextRequest) {
             // Verify the update before redirecting
             const { data: verifyProfile } = await supabase
               .from("profiles")
-              .select("role")
+              .select("role, is_suspended")
               .eq("id", user.id)
-              .maybeSingle();
+              .maybeSingle<SuspensionProfile>();
             
             if (verifyProfile?.role === "client") {
               return NextResponse.redirect(new URL("/client/dashboard", req.url));

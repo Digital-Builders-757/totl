@@ -42,6 +42,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
     { href: "/admin/talent", label: "Talent", icon: "👥" },
     { href: "/admin/gigs", label: "Gigs", icon: "💼" },
     { href: "/admin/users", label: "Users", icon: "👤" },
+    { href: "/admin/moderation", label: "Moderation", icon: "🛡️" },
   ];
 
   const isActive = (href: string) => {

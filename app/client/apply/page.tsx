@@ -74,8 +74,13 @@ export default function ClientApplicationPage() {
         return;
       }
 
-      // Success - redirect to success page
-      router.push("/client/apply/success");
+      // Success - redirect to success page with the application ID for reference
+      if (result.applicationId) {
+        const search = new URLSearchParams({ applicationId: result.applicationId }).toString();
+        router.push(`/client/apply/success?${search}`);
+      } else {
+        router.push("/client/apply/success");
+      }
     } catch (error) {
       console.error("Application submission error:", error);
       toast({

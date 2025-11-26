@@ -436,12 +436,14 @@ export type Database = {
           email_verified: boolean | null
           id: string
           instagram_handle: string | null
+          is_suspended: boolean
           role: Database["public"]["Enums"]["user_role"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_current_period_end: string | null
           subscription_plan: string | null
           subscription_status: Database["public"]["Enums"]["subscription_status"]
+          suspension_reason: string | null
           updated_at: string
           website: string | null
         }
@@ -454,12 +456,14 @@ export type Database = {
           email_verified?: boolean | null
           id: string
           instagram_handle?: string | null
+          is_suspended?: boolean
           role: Database["public"]["Enums"]["user_role"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
           subscription_plan?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
+          suspension_reason?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -472,12 +476,14 @@ export type Database = {
           email_verified?: boolean | null
           id?: string
           instagram_handle?: string | null
+          is_suspended?: boolean
           role?: Database["public"]["Enums"]["user_role"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
           subscription_plan?: string | null
           subscription_status?: Database["public"]["Enums"]["subscription_status"]
+          suspension_reason?: string | null
           updated_at?: string
           website?: string | null
         }
