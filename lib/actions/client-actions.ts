@@ -6,9 +6,12 @@ import {
   generateClientApplicationConfirmationEmail,
   generateClientApplicationApprovedEmail,
   generateClientApplicationRejectedEmail,
+  generateClientApplicationFollowUpApplicantEmail,
+  generateClientApplicationFollowUpAdminEmail,
 } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import type { Database } from "@/types/supabase";
 
 type ClientApplicationData = {
   firstName: string;
@@ -277,6 +280,155 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
     console.error("Unexpected error rejecting client application:", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
+}
+
+type ClientApplicationRow = Database["public"]["Tables"]["client_applications"]["Row"] & {
+  follow_up_sent_at?: string | null;
+};
+type ClientApplicationUpdatePayload =
+  Database["public"]["Tables"]["client_applications"]["Update"] & {
+    follow_up_sent_at?: string | null;
+  };
+type ClientApplicationFollowUpFailure = { applicationId: string; stage: string; reason: string };
+type ClientApplicationFollowUpResult = {
+  success: boolean;
+  processed: number;
+  sentIds: string[];
+  failures: ClientApplicationFollowUpFailure[];
+  error?: string;
+};
+
+export async function sendClientApplicationFollowUpReminders(): Promise<ClientApplicationFollowUpResult> {
+  const supabaseAdmin = createSupabaseAdminClient();
+  const reminderCutoff = new Date();
+  reminderCutoff.setDate(reminderCutoff.getDate() - 3);
+  const reminderCutoffIso = reminderCutoff.toISOString();
+
+  const { data: pendingApplications, error: pendingError } = await supabaseAdmin
+    .from("client_applications")
+    .select(
+      "id, first_name, last_name, email, company_name, industry, business_description, needs_description, created_at, follow_up_sent_at"
+    )
+    .eq("status", "pending")
+    .is("follow_up_sent_at", null)
+    .lte("created_at", reminderCutoffIso)
+    .returns<
+      Pick<
+        ClientApplicationRow,
+        | "id"
+        | "first_name"
+        | "last_name"
+        | "email"
+        | "company_name"
+        | "industry"
+        | "business_description"
+        | "needs_description"
+        | "created_at"
+        | "follow_up_sent_at"
+      >[]
+    >();
+
+  if (pendingError) {
+    console.error("Error fetching pending client applications for follow-up:", pendingError);
+    return { success: false, error: "Failed to fetch pending applications.", processed: 0, sentIds: [], failures: [] };
+  }
+
+  if (!pendingApplications?.length) {
+    return { success: true, processed: 0, sentIds: [], failures: [] };
+  }
+
+  const adminEmailAddress = process.env.ADMIN_EMAIL || "admin@thetotlagency.com";
+  const processedIds: string[] = [];
+  const failures: ClientApplicationFollowUpFailure[] = [];
+
+  for (const application of pendingApplications) {
+    const applicantName = `${application.first_name} ${application.last_name}`.trim();
+    const applicationDate = new Date(application.created_at).toLocaleDateString();
+
+    const applicantEmail = generateClientApplicationFollowUpApplicantEmail({
+      name: applicantName,
+      companyName: application.company_name,
+      applicationId: application.id,
+      applicationDate,
+    });
+
+    try {
+      await sendEmail({
+        to: application.email,
+        subject: applicantEmail.subject,
+        html: applicantEmail.html,
+      });
+      await logEmailSent(application.email, "client-application-followup-applicant", true);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error sending applicant follow-up:", { applicationId: application.id, reason });
+      failures.push({ applicationId: application.id, stage: "applicant-email", reason });
+      await logEmailSent(application.email, "client-application-followup-applicant", false, reason);
+      continue;
+    }
+
+    const adminEmail = generateClientApplicationFollowUpAdminEmail({
+      name: applicantName,
+      companyName: application.company_name,
+      clientName: application.email,
+      industry: application.industry || undefined,
+      applicationId: application.id,
+      applicationDate,
+      businessDescription: application.business_description || undefined,
+      needsDescription: application.needs_description || undefined,
+    });
+
+    try {
+      await sendEmail({
+        to: adminEmailAddress,
+        subject: adminEmail.subject,
+        html: adminEmail.html,
+      });
+      await logEmailSent(adminEmailAddress, "client-application-followup-admin", true);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error sending admin follow-up reminder:", { applicationId: application.id, reason });
+      failures.push({ applicationId: application.id, stage: "admin-email", reason });
+      await logEmailSent(adminEmailAddress, "client-application-followup-admin", false, reason);
+      continue;
+    }
+
+    processedIds.push(application.id);
+  }
+
+  if (processedIds.length) {
+    const followUpUpdate: ClientApplicationUpdatePayload = {
+      follow_up_sent_at: new Date().toISOString(),
+    };
+
+    const { error: updateError } = await supabaseAdmin
+      .from("client_applications")
+      .update(followUpUpdate)
+      .in("id", processedIds);
+
+    if (updateError) {
+      console.error("Error updating follow_up_sent_at:", updateError);
+      failures.push({
+        applicationId: "batch",
+        stage: "update-follow-up",
+        reason: updateError.message,
+      });
+      return {
+        success: false,
+        processed: processedIds.length,
+        sentIds: [],
+        failures,
+        error: updateError.message,
+      };
+    }
+  }
+
+  return {
+    success: failures.length === 0,
+    processed: processedIds.length,
+    sentIds: processedIds,
+    failures,
+  };
 }
 
 type ClientApplicationStatusResponse =

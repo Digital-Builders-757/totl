@@ -20,6 +20,7 @@ Implemented a comprehensive email notification system for TOTL Agency that autom
 3. ✅ **Booking Confirmed** - Booking details and preparation checklist
 4. ✅ **Booking Reminder** - 24-hour reminder (template ready for CRON)
 5. ✅ **New Application (Client)** - Alert client about incoming applications
+6. ✅ **Client Application Follow-Up (Applicant/Admin)** - Automated reminders for pending client onboarding requests
 
 ### **API Routes** (4 New Routes)
 - ✅ `app/api/email/send-application-accepted/route.ts`
@@ -254,6 +255,16 @@ docs/email-service.md                   (Updated documentation with new types)
    - Monitor click-through rates on CTAs
    - A/B test subject lines
 
+## 🆕 November 26, 2025 Update – Client Application Follow-Ups
+
+- Added `follow_up_sent_at` column to `client_applications` so we can track reminder cadence
+- New server action `sendClientApplicationFollowUpReminders()` scans for pending apps older than 3 days and:
+  - Emails the applicant (`generateClientApplicationFollowUpApplicantEmail`) letting them know we’re still reviewing
+  - Emails the admin team (`generateClientApplicationFollowUpAdminEmail`) with a quick-access link to the admin panel
+- Admin dashboard now has a “Send follow-ups” button and shows whether a reminder has already gone out
+- All sends are logged via `logEmailSent`, and the action returns telemetry (`processed`, `failures`) for toasts / monitoring
+- Ready for automation via Vercel Cron or manual trigger in the admin UI
+
 4. **Additional Email Types**
    - Gig posted confirmation (to client)
    - Booking canceled notification
@@ -318,6 +329,7 @@ Track these metrics to measure email system effectiveness:
 - 5 new email templates designed and implemented
 - 4 new API routes for sending emails
 - 3 integration points in application/booking workflow
+- Client application follow-up automation (applicant reassurance + admin SLA reminder)
 - Professional, branded email designs
 - Error handling and logging
 - Comprehensive documentation

@@ -382,6 +382,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 | `needs_description` | `text` | NO | - | Needs description |
 | `status` | `text` | NO | `'pending'` | Application status |
 | `admin_notes` | `text` | YES | - | Admin notes |
+| `follow_up_sent_at` | `timestamp with time zone` | YES | - | Timestamp when reminder email was sent |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
