@@ -25,6 +25,8 @@
 - ✅ New `follow_up_sent_at` column keeps the workflow idempotent and exposed in the admin dashboard (badges + CSV export)  
 - ✅ “Send follow-ups” button and toast telemetry added to `/admin/client-applications` for manual or cron-triggered runs  
 - ✅ Documentation refreshed (`email-service.md`, `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md`) so the automation is fully discoverable
+- 🔧 **Nov 26 Hotfix:** Follow-up job now locks the admin reminder (and `follow_up_sent_at`) even if the applicant email transiently fails, preventing duplicate SLA nudges
+- 🔧 **Nov 26 UI/UX Tune-Up:** Admin dashboard only shows the “Follow-up emails sent” toast when every reminder succeeds, while partial failures now surface a single descriptive warning
 
 ## 🚀 **Previous Achievement: Client Application Status Portal**
 

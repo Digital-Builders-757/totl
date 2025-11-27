@@ -240,29 +240,27 @@ export function AdminClientApplicationsClient({
         );
       }
 
-      if (!result.success) {
-        toast({
-          title: "Follow-up emails partially failed",
-          description:
-            result.error ||
-            `${result.failures.length} reminder${result.failures.length === 1 ? "" : "s"} could not be sent. Check the logs for details.`,
-          variant: "destructive",
-        });
-        return;
-      }
-
       if (result.processed === 0) {
         toast({
           title: "No follow-ups needed",
           description: "All pending applications are still within the 3-day review window.",
         });
-        return;
+      } else if (result.success) {
+        toast({
+          title: "Follow-up emails sent",
+          description: `Sent reminder emails for ${result.processed} pending application${result.processed === 1 ? "" : "s"}.`,
+        });
       }
 
-      toast({
-        title: "Follow-up emails sent",
-        description: `Sent reminder emails for ${result.processed} pending application${result.processed === 1 ? "" : "s"}.`,
-      });
+      if (!result.success && result.failures.length) {
+        toast({
+          title: result.processed ? "Some follow-ups failed" : "Follow-up emails failed",
+          description:
+            result.error ||
+            `${result.failures.length} reminder${result.failures.length === 1 ? "" : "s"} could not be sent. Check logs for details.`,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error sending follow-up reminders:", error);
       toast({
@@ -306,7 +304,7 @@ export function AdminClientApplicationsClient({
       `"${app.needs_description.replace(/"/g, '""')}"`,
       app.website || "",
       app.admin_notes ? `"${app.admin_notes.replace(/"/g, '""')}"` : "",
-      app.follow_up_sent_at ? new Date(app.follow_up_sent_at).toISOString() : "",
+      app.follow_up_sent_at ? new Date(app.follow_up_sent_at).toLocaleDateString() : "",
     ]);
 
     const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");

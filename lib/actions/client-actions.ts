@@ -282,13 +282,8 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
   }
 }
 
-type ClientApplicationRow = Database["public"]["Tables"]["client_applications"]["Row"] & {
-  follow_up_sent_at?: string | null;
-};
-type ClientApplicationUpdatePayload =
-  Database["public"]["Tables"]["client_applications"]["Update"] & {
-    follow_up_sent_at?: string | null;
-  };
+type ClientApplicationRow = Database["public"]["Tables"]["client_applications"]["Row"];
+type ClientApplicationUpdatePayload = Database["public"]["Tables"]["client_applications"]["Update"];
 type ClientApplicationFollowUpFailure = { applicationId: string; stage: string; reason: string };
 type ClientApplicationFollowUpResult = {
   success: boolean;
@@ -345,6 +340,41 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
     const applicantName = `${application.first_name} ${application.last_name}`.trim();
     const applicationDate = new Date(application.created_at).toLocaleDateString();
 
+    const adminEmail = generateClientApplicationFollowUpAdminEmail({
+      name: applicantName,
+      companyName: application.company_name,
+      clientName: application.email,
+      industry: application.industry || undefined,
+      applicationId: application.id,
+      applicationDate,
+      businessDescription: application.business_description || undefined,
+      needsDescription: application.needs_description || undefined,
+    });
+
+    let adminEmailSuccess = false;
+    try {
+      await sendEmail({
+        to: adminEmailAddress,
+        subject: adminEmail.subject,
+        html: adminEmail.html,
+      });
+      await logEmailSent(adminEmailAddress, "client-application-followup-admin", true);
+      adminEmailSuccess = true;
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Unknown error";
+      console.error("Error sending admin follow-up reminder:", { applicationId: application.id, reason });
+      failures.push({ applicationId: application.id, stage: "admin-email", reason });
+      await logEmailSent(adminEmailAddress, "client-application-followup-admin", false, reason);
+    }
+
+    if (!adminEmailSuccess) {
+      continue;
+    }
+
+    if (!processedIds.includes(application.id)) {
+      processedIds.push(application.id);
+    }
+
     const applicantEmail = generateClientApplicationFollowUpApplicantEmail({
       name: applicantName,
       companyName: application.company_name,
@@ -366,34 +396,6 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
       await logEmailSent(application.email, "client-application-followup-applicant", false, reason);
       continue;
     }
-
-    const adminEmail = generateClientApplicationFollowUpAdminEmail({
-      name: applicantName,
-      companyName: application.company_name,
-      clientName: application.email,
-      industry: application.industry || undefined,
-      applicationId: application.id,
-      applicationDate,
-      businessDescription: application.business_description || undefined,
-      needsDescription: application.needs_description || undefined,
-    });
-
-    try {
-      await sendEmail({
-        to: adminEmailAddress,
-        subject: adminEmail.subject,
-        html: adminEmail.html,
-      });
-      await logEmailSent(adminEmailAddress, "client-application-followup-admin", true);
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "Unknown error";
-      console.error("Error sending admin follow-up reminder:", { applicationId: application.id, reason });
-      failures.push({ applicationId: application.id, stage: "admin-email", reason });
-      await logEmailSent(adminEmailAddress, "client-application-followup-admin", false, reason);
-      continue;
-    }
-
-    processedIds.push(application.id);
   }
 
   if (processedIds.length) {

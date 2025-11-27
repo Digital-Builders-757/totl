@@ -778,6 +778,7 @@ export function generateClientApplicationFollowUpApplicantEmail(data: EmailTempl
  * Email Template: Client Application Follow-Up (Admin Reminder)
  */
 export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateData): EmailTemplate {
+  const siteUrl = escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com");
   const content = `
     <h1>Pending Client Application Needs Attention</h1>
     <p>The following client application has been pending for several days and requires follow-up:</p>
@@ -814,9 +815,7 @@ export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateD
     }
 
     <div style="text-align: center; margin: 30px 0;">
-      <a href="${escapeHtml(
-        (process.env.NEXT_PUBLIC_SITE_URL || "") + "/admin/client-applications"
-      )}" class="button">Review in Admin Panel</a>
+      <a href="${siteUrl}/admin/client-applications" class="button">Review in Admin Panel</a>
     </div>
 
     <p>Please review and respond to maintain our promised 2-3 business day turnaround.</p>
