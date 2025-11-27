@@ -21,7 +21,7 @@ export function Ga4Analytics() {
     const stored = window.localStorage.getItem(consentStorageKey);
     setConsentGranted(stored === "granted");
     setIsMounted(true);
-  }, []);
+  }, [consentStorageKey]);
 
   if (!gaEnabled || !measurementId || !consentGranted) {
     return null;
