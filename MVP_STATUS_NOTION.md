@@ -370,8 +370,8 @@
   - [x] `lib/actions/moderation-actions.test.ts`: flag validation helpers (pure functions only)
 
 ### **5. Launch Preparation**
-- [ ] Google Analytics setup (30 mins)
-  - [ ] Add GA4 tag via Next.js Script in `app/layout.tsx`
+- [x] Google Analytics setup (30 mins)
+  - [x] Add GA4 tag via Next.js Script in `app/layout.tsx`
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)

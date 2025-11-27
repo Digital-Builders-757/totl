@@ -1,8 +1,8 @@
 /**
  * @vitest-environment happy-dom
  */
-import React from "react";
 import { render, screen } from "@testing-library/react";
+import React from "react";
 import { describe, expect, it } from "vitest";
 import {
   ApplicationStatusBadge,
@@ -35,7 +35,7 @@ describe("status badges", () => {
   });
 
   it("renders role badge using icon and label", () => {
-    render(<UserRoleBadge role="client" />);
+    render(<UserRoleBadge userRole="client" />);
     expect(screen.getByText("Client")).toBeDefined();
     expect(screen.getByText("💼")).toBeDefined();
   });

@@ -3,7 +3,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: "node",
+    environment: "happy-dom",
     globals: true,
     include: ["lib/**/*.test.ts", "lib/**/*.test.tsx"],
     coverage: {

@@ -63,7 +63,7 @@ Sentry.init({
   // Set environment (matches guide pattern)
   environment:
     process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
-    process.env.VERCEL_ENV ??
+    process.env.NEXT_PUBLIC_VERCEL_ENV ??
     process.env.NODE_ENV ??
     "development",
 

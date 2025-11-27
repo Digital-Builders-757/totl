@@ -42,6 +42,7 @@ export {
   productionDSN,
   developmentDSN,
   isProduction,
+  serverIsProduction,
   nodeEnv,
   projectIdMatches,
   parseProjectId,
