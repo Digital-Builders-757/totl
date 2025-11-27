@@ -260,6 +260,14 @@
   - Development: 100% (tracesSampleRate: 1.0)
   - Production: 10% (tracesSampleRate: 0.1)
 
+### **Google Analytics 4 (GA4)**
+
+- **GA Script Location:** `components/analytics/ga4-analytics.tsx` is mounted in `app/layout.tsx` so GA initializes across every route once consent is granted.
+- **Environment Switch:** GA only loads when `NEXT_PUBLIC_ENABLE_GA` is set to `1` *and* `NEXT_PUBLIC_GA_MEASUREMENT_ID` holds your GA4 measurement ID. Use the toggle to disable analytics in preview/local environments if you prefer not to send data.
+- **Consent Guardrail:** The client-side script checks `localStorage.getItem(consentKey)` before injecting gtag. The default storage key is `totl_ga_consent`, but you can override it with `NEXT_PUBLIC_GA_CONSENT_KEY`. The GA tag only fires when the stored value is `"granted"`, so any consent banner should call `window.localStorage.setItem("totl_ga_consent", "granted")` after the user agrees and remove/overwrite it to withdraw consent.
+- **Additional Context Metadata:** You can override GA’s `environment` dimension via `NEXT_PUBLIC_GA_ENVIRONMENT` (falls back to `NEXT_PUBLIC_VERCEL_ENV`, then `NODE_ENV`, then `development`). The snippet also enables `anonymize_ip` and a consistent site-speed sample rate.
+- **Next Steps:** If you need a visible consent experience, wire your banner/button to the storage key above and re-render or reload the page so GA can detect the change (the script runs on `afterInteractive` only once per load).
+
 ---
 
 ## 6. 📧 Email & Communication

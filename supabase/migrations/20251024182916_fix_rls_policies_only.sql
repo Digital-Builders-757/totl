@@ -20,6 +20,7 @@ DROP POLICY IF EXISTS "Profiles view policy" ON profiles;
 -- Create more restrictive policies for talent_profiles
 -- Allow public to view talent profiles but application-level controls will restrict sensitive data
 -- This maintains the public talent discovery functionality while protecting privacy
+DROP POLICY IF EXISTS "Public talent profiles view" ON talent_profiles;
 CREATE POLICY "Public talent profiles view" ON talent_profiles 
 FOR SELECT TO anon, authenticated 
 USING (true);
@@ -27,6 +28,7 @@ USING (true);
 -- Create restrictive policy for client_profiles
 -- Only authenticated users can view client profiles - NO public access
 -- This protects business information and contact details
+DROP POLICY IF EXISTS "Client profiles view" ON client_profiles;
 CREATE POLICY "Client profiles view" ON client_profiles 
 FOR SELECT TO authenticated 
 USING (true);
@@ -34,6 +36,7 @@ USING (true);
 -- Create restrictive policy for profiles
 -- Allow public to view basic profile information but application-level controls will restrict sensitive data
 -- This maintains public profile functionality while protecting privacy
+DROP POLICY IF EXISTS "Public profiles view" ON profiles;
 CREATE POLICY "Public profiles view" ON profiles 
 FOR SELECT TO anon, authenticated 
 USING (true);

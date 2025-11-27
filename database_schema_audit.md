@@ -41,6 +41,12 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 - **Views:** 5 (including admin dashboards and performance monitoring)
 - **Functions:** 15+ (including triggers and utilities)
 
+## 🧩 Extensions
+
+| Extension | Schema | Purpose | Added Via |
+|-----------|--------|---------|-----------|
+| `pg_trgm` | `extensions` | Enables trigram similarity searches for indexed text columns and satisfies security migrations that comment on the extension | `20251016160000_create_pg_trgm_extension.sql` |
+
 ## 🔒 Custom Types (Enums)
 
 ### 1. `user_role`
@@ -850,11 +856,17 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 5. **`20250722015600_fix_user_role_enum_reference_in_trigger.sql`** - Enum reference fixes
 6. **`add_missing_rls_policies_for_production.sql`** - Production RLS policies
 7. **`20250725211607_fix_security_warnings.sql`** - Security hardening (search paths, OTP expiry, password protection)
-8. **`20251016171212_enhance_portfolio_items_for_gallery.sql`** - Portfolio gallery system (image_path, ordering, primary images)
-9. **`20251016172507_fix_performance_advisor_warnings.sql`** - Performance optimization (RLS caching, index cleanup)
-10. **`20251021164837_fix_gig_notifications_rls_and_duplicate_indexes.sql`** - Final performance optimization (gig_notifications RLS, duplicate index cleanup)
+8. **`20251016160000_create_pg_trgm_extension.sql`** - Installs `pg_trgm` inside the extensions schema so later migrations that comment on the extension succeed
+9. **`20251016171212_enhance_portfolio_items_for_gallery.sql`** - Portfolio gallery system (image_path, ordering, primary images)
+10. **`20251016172507_fix_performance_advisor_warnings.sql`** - Performance optimization (RLS caching, index cleanup)
+11. **`20251021164837_fix_gig_notifications_rls_and_duplicate_indexes.sql`** - Final performance optimization (gig_notifications RLS, duplicate index cleanup)
+12. **`20251127162000_fix_admin_dashboard_comments.sql`** - Rewrites admin dashboard view/function comments without concatenation so migrations run in clean environments
+13. **`20251127173000_fix_query_stats_view.sql`** - Recreates `query_stats` using `relname`/`indexrelname` so it works against modern PostgreSQL catalog columns
 
 ### **Recent Updates**
+- ✅ **Extension alignment (Nov 27, 2025)** — Added migration `20251016160000_create_pg_trgm_extension.sql` so `pg_trgm` is always installed in the `extensions` schema before later security migrations run (prevents local resets from failing)
+- ✅ **Admin dashboard comment fix (Nov 27, 2025)** — Added migration `20251127162000_fix_admin_dashboard_comments.sql` to remove `'||'` concatenation from COMMENT statements that caused local resets to fail
+- ✅ **Query stats view fix (Nov 27, 2025)** — Added migration `20251127173000_fix_query_stats_view.sql` so the view aliases `relname`/`indexrelname` (Postgres 15 catalogs) and no longer references nonexistent `tablename` columns
 - ✅ **Cascading delete alignment (Nov 23, 2025)** — All user-centric foreign keys now use `ON DELETE CASCADE` with supporting indexes:
   - `profiles.id` → `auth.users.id`
   - `talent_profiles.user_id`, `client_profiles.user_id`, `gigs.client_id`, `applications.talent_id`, `bookings.talent_id`, `portfolio_items.talent_id` → `profiles.id`

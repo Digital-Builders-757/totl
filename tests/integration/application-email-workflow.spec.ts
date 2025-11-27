@@ -40,8 +40,7 @@ const TEST_GIG = {
 test.describe('Application Email Workflow', () => {
   
   test.beforeEach(async ({ page }) => {
-    // Set up test environment
-    await page.goto('/');
+    // Shared setup (clear cookies/storage) can happen here if needed.
   });
 
   test('End-to-End Application Email Flow', async ({ page, context }) => {

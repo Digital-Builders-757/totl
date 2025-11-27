@@ -238,8 +238,7 @@ ALTER MATERIALIZED VIEW public.admin_dashboard_cache OWNER TO postgres;
 
 -- Add a comment explaining the security model
 COMMENT ON MATERIALIZED VIEW public.admin_dashboard_cache IS 
-  'Admin dashboard statistics cache. Access restricted to service_role only. ' ||
-  'Client access should be through authenticated API routes with admin role verification.';
+  'Admin dashboard statistics cache. Access restricted to service_role only. Client access should be through authenticated API routes with admin role verification.';
 
 -- =====================================================
 -- 4. Create Helper Function for Safe Admin Dashboard Access
@@ -287,6 +286,5 @@ GRANT EXECUTE ON FUNCTION public.get_admin_dashboard_stats() TO authenticated;
 REVOKE EXECUTE ON FUNCTION public.get_admin_dashboard_stats() FROM anon;
 
 COMMENT ON FUNCTION public.get_admin_dashboard_stats() IS 
-  'Safely retrieves admin dashboard statistics with role verification. ' ||
-  'Only users with admin role can execute this function.';
+  'Safely retrieves admin dashboard statistics with role verification. Only users with admin role can execute this function.';
 

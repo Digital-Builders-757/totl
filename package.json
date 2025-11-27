@@ -44,6 +44,7 @@
     "env:check": "node scripts/check-env.mjs",
     "env:verify": "node scripts/verify-env.mjs",
     "env:test": "node scripts/test-env.js",
+    "test:unit": "vitest run --config vitest.config.ts",
     "status:auto": "git add MVP_STATUS_NOTION.md && git commit -m 'docs: update MVP status (auto)' || exit 0",
     "status:update": "powershell -ExecutionPolicy Bypass -File scripts/update-mvp-status.ps1"
   },
@@ -109,6 +110,7 @@
   "devDependencies": {
     "@playwright/mcp": "^0.0.47",
     "@playwright/test": "^1.56.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -122,14 +124,17 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "happy-dom": "^20.0.10",
     "husky": "^9.1.7",
+    "jsdom": "^27.2.0",
     "lint-staged": "^16.1.2",
     "playwright": "^1.56.1",
     "postcss": "^8",
     "prettier": "^3.6.0",
     "supabase": "^2.34.3",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.6.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

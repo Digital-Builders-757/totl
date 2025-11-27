@@ -44,48 +44,113 @@ CREATE INDEX IF NOT EXISTS content_flags_gig_idx ON public.content_flags(gig_id)
 
 ALTER TABLE public.content_flags ENABLE ROW LEVEL SECURITY;
 
--- RLS policies
-CREATE POLICY IF NOT EXISTS "Users can insert content flags"
-  ON public.content_flags
-  FOR INSERT
-  WITH CHECK (auth.uid() = reporter_id);
+-- RLS policies (Postgres does not support CREATE POLICY IF NOT EXISTS, so guard via metadata checks)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'content_flags'
+      AND policyname = 'Users can insert content flags'
+  ) THEN
+    EXECUTE $SQL$
+      CREATE POLICY "Users can insert content flags"
+        ON public.content_flags
+        FOR INSERT
+        WITH CHECK (auth.uid() = reporter_id);
+    $SQL$;
+  END IF;
+END;
+$$;
 
-CREATE POLICY IF NOT EXISTS "Reporters can view their own flags"
-  ON public.content_flags
-  FOR SELECT
-  USING (auth.uid() = reporter_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'content_flags'
+      AND policyname = 'Reporters can view their own flags'
+  ) THEN
+    EXECUTE $SQL$
+      CREATE POLICY "Reporters can view their own flags"
+        ON public.content_flags
+        FOR SELECT
+        USING (auth.uid() = reporter_id);
+    $SQL$;
+  END IF;
+END;
+$$;
 
-CREATE POLICY IF NOT EXISTS "Admins can view content flags"
-  ON public.content_flags
-  FOR SELECT
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-      AND role = 'admin'
-  ));
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'content_flags'
+      AND policyname = 'Admins can view content flags'
+  ) THEN
+    EXECUTE $SQL$
+      CREATE POLICY "Admins can view content flags"
+        ON public.content_flags
+        FOR SELECT
+        USING (EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE id = auth.uid()
+            AND role = 'admin'
+        ));
+    $SQL$;
+  END IF;
+END;
+$$;
 
-CREATE POLICY IF NOT EXISTS "Admins can update content flags"
-  ON public.content_flags
-  FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-      AND role = 'admin'
-  ))
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-      AND role = 'admin'
-  ));
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'content_flags'
+      AND policyname = 'Admins can update content flags'
+  ) THEN
+    EXECUTE $SQL$
+      CREATE POLICY "Admins can update content flags"
+        ON public.content_flags
+        FOR UPDATE
+        USING (EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE id = auth.uid()
+            AND role = 'admin'
+        ))
+        WITH CHECK (EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE id = auth.uid()
+            AND role = 'admin'
+        ));
+    $SQL$;
+  END IF;
+END;
+$$;
 
-CREATE POLICY IF NOT EXISTS "Admins can delete content flags"
-  ON public.content_flags
-  FOR DELETE
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-      AND role = 'admin'
-  ));
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'content_flags'
+      AND policyname = 'Admins can delete content flags'
+  ) THEN
+    EXECUTE $SQL$
+      CREATE POLICY "Admins can delete content flags"
+        ON public.content_flags
+        FOR DELETE
+        USING (EXISTS (
+          SELECT 1 FROM public.profiles
+          WHERE id = auth.uid()
+            AND role = 'admin'
+        ));
+    $SQL$;
+  END IF;
+END;
+$$;
 
 -- Trigger for updated_at
 CREATE TRIGGER update_content_flags_updated_at

@@ -4,58 +4,46 @@
 
 import * as Sentry from "@sentry/nextjs";
 // import { SupabaseIntegration } from "@supabase/sentry-js-integration"; // Disabled - requires client instance at init
+import {
+  currentDSN,
+  currentProjectId,
+  developmentDSN,
+  expectedProjectId,
+  projectIdMatches,
+  productionDSN,
+  nodeEnv,
+  serverIsProduction,
+} from "@/lib/sentry/env";
 
-// Determine which Sentry DSN to use based on environment
-const isProduction = process.env.VERCEL_ENV === "production";
-
-// Production DSN (from environment variable)
-const PRODUCTION_DSN = process.env.SENTRY_DSN_PROD;
-
-// Development DSN (fallback for local development)
-// Using sentry-yellow-notebook DSN for all environments
-const DEVELOPMENT_DSN = 
-  process.env.SENTRY_DSN_DEV ||
-  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
-
-// Select the appropriate DSN
-const SENTRY_DSN = isProduction && PRODUCTION_DSN 
-  ? PRODUCTION_DSN 
-  : DEVELOPMENT_DSN;
+const SENTRY_DSN = currentDSN;
 
 // Log DSN status for debugging (only in development)
-if (process.env.NODE_ENV === "development") {
-  // Extract project ID from DSN for verification
-  const extractProjectId = (dsn: string | undefined): string | null => {
-    if (!dsn) return null;
-    const match = dsn.match(/\/(\d+)$/);
-    return match ? match[1] : null;
-  };
-  
-  const currentProjectId = extractProjectId(SENTRY_DSN);
-  const expectedProjectId = "4510191108292609";
-  const projectMatch = currentProjectId === expectedProjectId;
-  
+if (nodeEnv === "development") {
   console.log("[Sentry Server] Initializing with:", {
-    isProduction,
-    hasProductionDSN: !!PRODUCTION_DSN,
-    hasDevelopmentDSN: !!DEVELOPMENT_DSN,
+    isProduction: serverIsProduction,
+    hasProductionDSN: !!productionDSN,
+    hasDevelopmentDSN: !!developmentDSN,
     usingDSN: SENTRY_DSN ? "✅ Configured" : "❌ Missing",
     environment: process.env.VERCEL_ENV || process.env.NODE_ENV,
     dsnPrefix: SENTRY_DSN ? SENTRY_DSN.substring(0, 30) + "..." : "N/A",
     projectId: currentProjectId || "Unknown",
-    projectMatch: projectMatch ? "✅ Correct" : "❌ Wrong Project",
-    expectedProjectId: expectedProjectId,
+    projectMatch: projectIdMatches ? "✅ Correct" : "❌ Wrong Project",
+    expectedProjectId,
+    nodeEnv,
   });
-  
-  // Test Sentry connection in development
+
   if (SENTRY_DSN) {
-    if (projectMatch) {
+    if (projectIdMatches) {
       console.log("[Sentry Server] ✅ Sentry is configured correctly for sentry-yellow-notebook");
     } else {
-      console.warn(`[Sentry Server] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`);
+      console.warn(
+        `[Sentry Server] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`
+      );
       console.warn("[Sentry Server] ⚠️ Update your .env.local DSNs to point to the correct project");
     }
-    console.log("[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+    console.log(
+      "[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/"
+    );
     console.log("[Sentry Server] Diagnostic endpoint: http://localhost:3000/api/sentry-diagnostic");
   } else {
     console.warn("[Sentry Server] ⚠️ Sentry DSN is missing - errors will not be tracked!");
