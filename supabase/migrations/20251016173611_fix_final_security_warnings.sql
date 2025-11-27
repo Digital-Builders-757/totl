@@ -22,8 +22,8 @@ DROP VIEW IF EXISTS public.query_stats CASCADE;
 CREATE OR REPLACE VIEW public.query_stats AS
 SELECT 
     schemaname,
-    tablename,
-    indexname,
+    relname AS tablename,
+    indexrelname AS indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch

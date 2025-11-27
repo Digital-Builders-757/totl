@@ -147,15 +147,15 @@ export function BookingStatusBadge({
 // ============================================================================
 
 interface UserRoleBadgeProps extends Omit<BadgeProps, "variant"> {
-  role: UserRole | string;
+  userRole: UserRole | string;
   showIcon?: boolean;
 }
 
-export function UserRoleBadge({ role, showIcon = true, ...props }: UserRoleBadgeProps) {
-  const normalizedRole = role.toLowerCase().replace(/\s+/g, "_");
+export function UserRoleBadge({ userRole, showIcon = true, ...props }: UserRoleBadgeProps) {
+  const normalizedRole = userRole.toLowerCase().replace(/\s+/g, "_");
   const variant = normalizedRole as BadgeProps["variant"];
   const icon = showIcon ? Icons[normalizedRole as keyof typeof Icons] : null;
-  const label = StatusLabels[normalizedRole as keyof typeof StatusLabels] || role;
+  const label = StatusLabels[normalizedRole as keyof typeof StatusLabels] || userRole;
 
   return (
     <Badge variant={variant} icon={icon} {...props}>
@@ -200,7 +200,7 @@ export function StatusBadge({
     }
     // User roles
     if (["talent", "client", "admin"].includes(normalizedStatus)) {
-      return <UserRoleBadge role={status} showIcon={showIcon} {...props} />;
+      return <UserRoleBadge userRole={status} showIcon={showIcon} {...props} />;
     }
   }
 
@@ -215,7 +215,7 @@ export function StatusBadge({
     return <BookingStatusBadge status={status} showIcon={showIcon} {...props} />;
   }
   if (type === "role") {
-    return <UserRoleBadge role={status} showIcon={showIcon} {...props} />;
+    return <UserRoleBadge userRole={status} showIcon={showIcon} {...props} />;
   }
 
   // Fallback to basic badge

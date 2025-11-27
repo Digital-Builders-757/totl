@@ -1,8 +1,11 @@
-﻿import type { Metadata } from "next";
+﻿import "./globals.css";
+
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type React from "react";
 import ClientLayout from "./client-layout";
 import Providers from "./providers";
+import { Ga4Analytics } from "@/components/analytics/ga4-analytics";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -38,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
+        <Ga4Analytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -53,4 +57,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 
-import "./globals.css";

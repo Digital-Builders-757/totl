@@ -357,20 +357,21 @@
 ## **Priority 2: Final MVP Polish**
 
 ### **4. Testing Expansion**
-- [ ] Portfolio E2E tests
-  - [ ] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
-  - [ ] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
+- ✅ Seeded QA personas/gigs/content flags via `supabase/seed.sql` (see `docs/TEST_DATA_REFERENCE.md`)
+- [x] Portfolio E2E tests
+  - [x] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
+  - [x] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
 - [ ] Application flow tests
   - [ ] `client-application-flow.spec.ts`: submit, approve/reject, follow-up reminders
   - [ ] `talent-gig-application.spec.ts`: gated apply CTA, subscription paywall, status badge updates
 - [ ] Unit tests for utilities
-  - [ ] `lib/services/email-templates.test.ts`: confirmation/approval/rejection/follow-up payloads
-  - [ ] `lib/utils/status-badges.test.ts`: variant mapping + color tokens
-  - [ ] `lib/actions/moderation-actions.test.ts`: flag validation helpers (pure functions only)
+  - [x] `lib/services/email-templates.test.ts`: confirmation/approval/rejection/follow-up payloads
+  - [x] `lib/utils/status-badges.test.ts`: variant mapping + color tokens
+  - [x] `lib/actions/moderation-actions.test.ts`: flag validation helpers (pure functions only)
 
 ### **5. Launch Preparation**
-- [ ] Google Analytics setup (30 mins)
-  - [ ] Add GA4 tag via Next.js Script in `app/layout.tsx`
+- [x] Google Analytics setup (30 mins)
+  - [x] Add GA4 tag via Next.js Script in `app/layout.tsx`
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)

@@ -20,23 +20,54 @@ DROP POLICY IF EXISTS "Profiles view policy" ON profiles;
 -- Create more restrictive policies for talent_profiles
 -- Allow public to view talent profiles but application-level controls will restrict sensitive data
 -- This maintains the public talent discovery functionality while protecting privacy
-CREATE POLICY "Public talent profiles view" ON talent_profiles 
-FOR SELECT TO anon, authenticated 
-USING (true);
+DROP POLICY IF EXISTS "Public talent profiles view" ON talent_profiles;
+DROP POLICY IF EXISTS "Client profiles view" ON client_profiles;
+DROP POLICY IF EXISTS "Public profiles view" ON profiles;
+
+DO $$
+BEGIN
+  BEGIN
+    CREATE POLICY "Public talent profiles view" ON talent_profiles 
+    FOR SELECT TO anon, authenticated 
+    USING (true);
+  EXCEPTION WHEN duplicate_object THEN
+    ALTER POLICY "Public talent profiles view" ON talent_profiles
+      USING (true);
+  END;
+END;
+$$;
 
 -- Create restrictive policy for client_profiles
 -- Only authenticated users can view client profiles - NO public access
 -- This protects business information and contact details
-CREATE POLICY "Client profiles view" ON client_profiles 
-FOR SELECT TO authenticated 
-USING (true);
+DO $$
+BEGIN
+  BEGIN
+    CREATE POLICY "Client profiles view" ON client_profiles 
+    FOR SELECT TO authenticated 
+    USING (true);
+  EXCEPTION WHEN duplicate_object THEN
+    ALTER POLICY "Client profiles view" ON client_profiles
+      USING (true);
+  END;
+END;
+$$;
 
 -- Create restrictive policy for profiles
 -- Allow public to view basic profile information but application-level controls will restrict sensitive data
 -- This maintains public profile functionality while protecting privacy
-CREATE POLICY "Public profiles view" ON profiles 
-FOR SELECT TO anon, authenticated 
-USING (true);
+DO $$
+BEGIN
+  BEGIN
+    CREATE POLICY "Public profiles view" ON profiles 
+    FOR SELECT TO anon, authenticated 
+    USING (true);
+  EXCEPTION WHEN duplicate_object THEN
+    ALTER POLICY "Public profiles view" ON profiles
+      USING (true);
+  END;
+END;
+$$;
 
 -- Add comments explaining the security rationale
 COMMENT ON POLICY "Public talent profiles view" ON talent_profiles IS 

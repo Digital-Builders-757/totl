@@ -2,6 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import { validateAdminAuth, validateFlagContent, validateUserAuth } from "./moderation-validation";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import type { FlagResourceType, FlagStatus, ModerationDatabase } from "@/lib/types/moderation";
@@ -22,12 +23,14 @@ async function flagContentAction({ resourceType, resourceId, gigId, reason, deta
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    return { error: "You need to be signed in to report gigs." };
+  const authValidation = validateUserAuth(user, authError);
+  if (authValidation.error || !user) {
+    return { error: authValidation.error || "You need to be signed in to report gigs." };
   }
 
-  if (!resourceId || !reason?.trim()) {
-    return { error: "Resource and reason are required." };
+  const contentValidation = validateFlagContent(resourceId, reason);
+  if (contentValidation.error) {
+    return { error: contentValidation.error };
   }
 
   const payload = {
@@ -117,8 +120,14 @@ export async function updateContentFlagAction({
     .eq("id", user.id)
     .maybeSingle();
 
-  if (profileError || profile?.role !== "admin") {
-    return { error: "Not authorized." };
+  if (profileError) {
+    console.error("Error fetching admin profile:", profileError);
+    return { error: "Failed to verify admin permissions." };
+  }
+
+  const adminValidation = validateAdminAuth(user, profile);
+  if (adminValidation.error) {
+    return { error: adminValidation.error };
   }
 
   const { data: flagRecord, error: flagError } = await typedSupabase
