@@ -37,10 +37,16 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { approveClientApplication, rejectClientApplication } from "@/lib/actions/client-actions";
+import {
+  approveClientApplication,
+  rejectClientApplication,
+  sendClientApplicationFollowUpReminders,
+} from "@/lib/actions/client-actions";
 import { Database } from "@/types/supabase";
 
-type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"];
+type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"] & {
+  follow_up_sent_at?: string | null;
+};
 
 interface AdminClientApplicationsClientProps {
   applications: ClientApplication[];
@@ -60,6 +66,7 @@ export function AdminClientApplicationsClient({
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [adminNotes, setAdminNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isSendingFollowUps, setIsSendingFollowUps] = useState(false);
   const { toast } = useToast();
 
   // Filter applications by status and search
@@ -95,6 +102,13 @@ export function AdminClientApplicationsClient({
   const pendingApplications = applications.filter((app) => app.status === "pending");
   const approvedApplications = applications.filter((app) => app.status === "approved");
   const rejectedApplications = applications.filter((app) => app.status === "rejected");
+
+  const formatFollowUpDate = (value: string | null) => {
+    if (!value) {
+      return null;
+    }
+    return new Date(value).toLocaleDateString();
+  };
 
   // Status badge styling
   const getStatusBadge = (status: string) => {
@@ -212,6 +226,53 @@ export function AdminClientApplicationsClient({
     }
   };
 
+  const handleSendFollowUps = async () => {
+    setIsSendingFollowUps(true);
+    try {
+      const result = await sendClientApplicationFollowUpReminders();
+
+      if (result.sentIds.length) {
+        const now = new Date().toISOString();
+        setApplications((prev) =>
+          prev.map((app) =>
+            result.sentIds.includes(app.id) ? { ...app, follow_up_sent_at: now } : app
+          )
+        );
+      }
+
+      if (result.processed === 0) {
+        toast({
+          title: "No follow-ups needed",
+          description: "All pending applications are still within the 3-day review window.",
+        });
+      } else if (result.success) {
+        toast({
+          title: "Follow-up emails sent",
+          description: `Sent reminder emails for ${result.processed} pending application${result.processed === 1 ? "" : "s"}.`,
+        });
+      }
+
+      if (!result.success && result.failures.length) {
+        toast({
+          title: result.processed ? "Some follow-ups failed" : "Follow-up emails failed",
+          description:
+            result.error ||
+            `${result.failures.length} reminder${result.failures.length === 1 ? "" : "s"} could not be sent. Check logs for details.`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error sending follow-up reminders:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred while sending follow-ups.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingFollowUps(false);
+    }
+  };
+
   // Export to CSV
   const handleExport = () => {
     const csvHeaders = [
@@ -227,6 +288,7 @@ export function AdminClientApplicationsClient({
       "Needs",
       "Website",
       "Admin Notes",
+      "Follow Up Sent",
     ];
 
     const csvRows = filteredApplications.map((app) => [
@@ -242,6 +304,7 @@ export function AdminClientApplicationsClient({
       `"${app.needs_description.replace(/"/g, '""')}"`,
       app.website || "",
       app.admin_notes ? `"${app.admin_notes.replace(/"/g, '""')}"` : "",
+      app.follow_up_sent_at ? new Date(app.follow_up_sent_at).toLocaleDateString() : "",
     ]);
 
     const csvContent = [csvHeaders.join(","), ...csvRows.map((row) => row.join(","))].join("\n");
@@ -287,6 +350,15 @@ export function AdminClientApplicationsClient({
             <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
               {rejectedApplications.length} Rejected
             </div>
+            <Button
+              onClick={handleSendFollowUps}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+              disabled={isSendingFollowUps}
+            >
+              <Mail className="h-4 w-4" />
+              {isSendingFollowUps ? "Sending..." : "Send follow-ups"}
+            </Button>
             <Button
               onClick={handleExport}
               variant="outline"
@@ -384,6 +456,9 @@ export function AdminClientApplicationsClient({
                           Status
                         </th>
                         <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Follow-Up
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
                           Actions
                         </th>
                       </tr>
@@ -416,6 +491,15 @@ export function AdminClientApplicationsClient({
                           </td>
                           <td className="py-4 px-6">
                             {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            {application.follow_up_sent_at ? (
+                              <span className="text-sm text-green-300">
+                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-gray-500">Not sent</span>
+                            )}
                           </td>
                           <td className="py-4 px-6">
                             <DropdownMenu>
@@ -507,6 +591,9 @@ export function AdminClientApplicationsClient({
                           Status
                         </th>
                         <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Follow-Up
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
                           Actions
                         </th>
                       </tr>
@@ -539,6 +626,15 @@ export function AdminClientApplicationsClient({
                           </td>
                           <td className="py-4 px-6">
                             {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            {application.follow_up_sent_at ? (
+                              <span className="text-sm text-green-300">
+                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-gray-500">Not sent</span>
+                            )}
                           </td>
                           <td className="py-4 px-6">
                             <DropdownMenu>
@@ -604,6 +700,9 @@ export function AdminClientApplicationsClient({
                           Status
                         </th>
                         <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                          Follow-Up
+                        </th>
+                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
                           Actions
                         </th>
                       </tr>
@@ -636,6 +735,15 @@ export function AdminClientApplicationsClient({
                           </td>
                           <td className="py-4 px-6">
                             {getStatusBadge(application.status)}
+                          </td>
+                          <td className="py-4 px-6">
+                            {application.follow_up_sent_at ? (
+                              <span className="text-sm text-green-300">
+                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-gray-500">Not sent</span>
+                            )}
                           </td>
                           <td className="py-4 px-6">
                             <DropdownMenu>

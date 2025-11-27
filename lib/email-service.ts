@@ -24,7 +24,9 @@ export type EmailTemplate =
   | "client-application-admin"
   | "client-application-confirmation"
   | "client-application-approved"
-  | "client-application-rejected";
+  | "client-application-rejected"
+  | "client-application-followup-applicant"
+  | "client-application-followup-admin";
 
 /**
  * Send an email using Resend

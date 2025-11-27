@@ -17,6 +17,17 @@
 - ✅ Regenerated Supabase types and middleware guards so `is_suspended`/`suspension_reason` stay type-safe across server actions and route protection  
 - ✅ Updated schema docs + common-errors guide so future migrations stay in sync and TypeScript never drifts from the live schema
 
+## 🚀 **Latest Achievement: Client Application Email Automations**
+
+**CLIENT APPLICATION FOLLOW-UP AUTOMATION** - November 26, 2025  
+- ✅ Added Resend templates + server action to automatically email applicants when their client application has been pending for 3+ days  
+- ✅ Sends paired admin reminders so operations can stay inside the 2–3 business day SLA  
+- ✅ New `follow_up_sent_at` column keeps the workflow idempotent and exposed in the admin dashboard (badges + CSV export)  
+- ✅ “Send follow-ups” button and toast telemetry added to `/admin/client-applications` for manual or cron-triggered runs  
+- ✅ Documentation refreshed (`email-service.md`, `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md`) so the automation is fully discoverable
+- 🔧 **Nov 26 Hotfix:** Follow-up job now locks the admin reminder (and `follow_up_sent_at`) even if the applicant email transiently fails, preventing duplicate SLA nudges
+- 🔧 **Nov 26 UI/UX Tune-Up:** Admin dashboard only shows the “Follow-up emails sent” toast when every reminder succeeds, while partial failures now surface a single descriptive warning
+
 ## 🚀 **Previous Achievement: Client Application Status Portal**
 
 **CLIENT APPLICATION STATUS PORTAL** - November 26, 2025
@@ -309,10 +320,10 @@
 ## **Priority 1: Client Application System Enhancement**
 
 ### **1. Email Notifications Implementation**
-- [ ] Create email templates for client applications
-- [ ] Integrate with existing Resend service
-- [ ] Send notifications on application submission
-- [ ] Add follow-up email sequences
+- [x] Create email templates for client applications (confirmation + follow-ups)
+- [x] Integrate with existing Resend service
+- [x] Send notifications on application submission (applicant + admin ops)
+- [x] Add follow-up email sequences (automatic reminders after 3 days)
 
 ### **2. Admin Interface Creation**
 - [ ] Create admin page for client applications

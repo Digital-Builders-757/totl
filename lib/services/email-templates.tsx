@@ -724,9 +724,135 @@ export function generateClientApplicationRejectedEmail(data: EmailTemplateData):
   };
 }
 
+/**
+ * Email Template: Client Application Follow-Up (Applicant)
+ * Sent automatically when an application has been pending for several days
+ */
+export function generateClientApplicationFollowUpApplicantEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>We're Still Reviewing Your Application</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>Thank you for your patience while we review your client application for <strong>${escapeHtml(
+      data.companyName || "your company"
+    )}</strong>.</p>
+
+    <div class="highlight">
+      <p><strong>📋 Current Status:</strong></p>
+      <ul>
+        <li>Application ID: <code>${escapeHtml(data.applicationId || "N/A")}</code></li>
+        <li>Submitted: ${escapeHtml(data.applicationDate || "Recently")}</li>
+        <li>Status: <strong>Still under review</strong></li>
+      </ul>
+    </div>
+
+    <p>Our partnerships team is carefully reviewing every detail to make sure TOTL Agency is the right fit. We'll reach out as soon as a decision is made.</p>
+
+    <div class="highlight">
+      <p><strong>In the meantime:</strong></p>
+      <ul>
+        <li>Feel free to reply to this email with any updates or questions</li>
+        <li>Prepare your first gig posting details so you're ready to launch</li>
+        <li>Explore our talent roster to get inspired</li>
+      </ul>
+    </div>
+
+    <p>We appreciate your interest in TOTL Agency and will be in touch shortly.</p>
+
+    <p>
+      Warmly,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+
+  return {
+    subject: "We’re still reviewing your TOTL Agency application",
+    html: createBaseTemplate(
+      "Application Update",
+      content,
+      "Quick update on your TOTL Agency client application"
+    ),
+  };
+}
+
+/**
+ * Email Template: Client Application Follow-Up (Admin Reminder)
+ */
+export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateData): EmailTemplate {
+  const siteUrl = escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com");
+  const content = `
+    <h1>Pending Client Application Needs Attention</h1>
+    <p>The following client application has been pending for several days and requires follow-up:</p>
+
+    <div class="highlight">
+      <p><strong>Company:</strong> ${escapeHtml(data.companyName || "Unknown")}</p>
+      <p><strong>Contact:</strong> ${escapeHtml(data.name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(data.clientName || "N/A")}</p>
+      <p><strong>Industry:</strong> ${escapeHtml(data.industry || "Not specified")}</p>
+      <p><strong>Application ID:</strong> <code>${escapeHtml(data.applicationId || "N/A")}</code></p>
+      <p><strong>Submitted:</strong> ${escapeHtml(data.applicationDate || "Unknown date")}</p>
+    </div>
+
+    ${
+      data.businessDescription
+        ? `
+      <div class="highlight">
+        <p><strong>Business Description:</strong></p>
+        <p>${escapeHtml(data.businessDescription)}</p>
+      </div>
+    `
+        : ""
+    }
+
+    ${
+      data.needsDescription
+        ? `
+      <div class="highlight">
+        <p><strong>Talent Needs:</strong></p>
+        <p>${escapeHtml(data.needsDescription)}</p>
+      </div>
+    `
+        : ""
+    }
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${siteUrl}/admin/client-applications" class="button">Review in Admin Panel</a>
+    </div>
+
+    <p>Please review and respond to maintain our promised 2-3 business day turnaround.</p>
+
+    <p>
+      — TOTL Agency Automations
+    </p>
+  `;
+
+  return {
+    subject: "Reminder: Pending client application awaiting review",
+    html: createBaseTemplate(
+      "Client Application Reminder",
+      content,
+      "Pending client application requires attention"
+    ),
+  };
+}
+
 export function generateEmailBatch(
   templates: Array<{
-    type: "welcome" | "verification" | "passwordReset" | "applicationReceived" | "applicationAccepted" | "applicationRejected" | "bookingConfirmed" | "bookingReminder" | "newApplicationClient" | "clientApplicationAdmin" | "clientApplicationConfirmation" | "clientApplicationApproved" | "clientApplicationRejected";
+    type:
+      | "welcome"
+      | "verification"
+      | "passwordReset"
+      | "applicationReceived"
+      | "applicationAccepted"
+      | "applicationRejected"
+      | "bookingConfirmed"
+      | "bookingReminder"
+      | "newApplicationClient"
+      | "clientApplicationAdmin"
+      | "clientApplicationConfirmation"
+      | "clientApplicationApproved"
+      | "clientApplicationRejected"
+      | "clientApplicationFollowUpApplicant"
+      | "clientApplicationFollowUpAdmin";
     data: EmailTemplateData;
   }>
 ): EmailTemplate[] {
@@ -758,6 +884,10 @@ export function generateEmailBatch(
         return generateClientApplicationApprovedEmail(data);
       case "clientApplicationRejected":
         return generateClientApplicationRejectedEmail(data);
+      case "clientApplicationFollowUpApplicant":
+        return generateClientApplicationFollowUpApplicantEmail(data);
+      case "clientApplicationFollowUpAdmin":
+        return generateClientApplicationFollowUpAdminEmail(data);
       default:
         throw new Error(`Unknown email template type: ${type}`);
     }

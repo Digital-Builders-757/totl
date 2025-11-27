@@ -27,6 +27,7 @@ TOTL Agency uses **Resend** for transactional emails, providing reliable email d
 - **New Application** (to client) - Alert client about new application
 - **Application Accepted** (to talent) - Congratulations on acceptance
 - **Application Rejected** (to talent) - Professional rejection notification
+- **Client Application Follow-Up** (to applicant + admin) - Automated reminder when review exceeds 3 days
 
 #### **Booking Workflow Emails** ✨ NEW
 - **Booking Confirmed** (to talent) - Booking details and preparation checklist
@@ -202,6 +203,17 @@ await fetch('/api/email/send-application-rejected', {
 });
 ```
 
+### **Client Application Follow-Up Automation** 🚀
+**File / Action:** `lib/actions/client-actions.ts` → `sendClientApplicationFollowUpReminders`  
+**Trigger:** Admin dashboard button (“Send follow-ups”) or scheduled cron hitting a small server action/route.
+
+1. Queries `client_applications` for records with `status = 'pending'`, no `follow_up_sent_at`, and `created_at <= now() - 3 days`
+2. Sends two emails per older application:
+   - ✅ Applicant follow-up (“we’re still reviewing”) generated via `generateClientApplicationFollowUpApplicantEmail`
+   - ✅ Admin reminder email (`generateClientApplicationFollowUpAdminEmail`) so ops stays on SLA
+3. Updates `client_applications.follow_up_sent_at` to track completion and prevent duplicates
+4. Returns structured telemetry so the admin UI can toast success/failure and mark rows locally
+
 ### **Email API Routes**
 
 All email routes are located in `app/api/email/`:
@@ -230,6 +242,12 @@ All email templates are generated in `lib/services/email-templates.tsx`:
 | `generateNewApplicationClientEmail()` | New Application (Client) |
 | `generateApplicationAcceptedEmail()` | Application Accepted |
 | `generateApplicationRejectedEmail()` | Application Rejected |
+| `generateClientApplicationConfirmationEmail()` | Client Application Confirmation |
+| `generateClientApplicationAdminNotificationEmail()` | Client Application Admin Alert |
+| `generateClientApplicationApprovedEmail()` | Client Application Approved |
+| `generateClientApplicationRejectedEmail()` | Client Application Rejected |
+| `generateClientApplicationFollowUpApplicantEmail()` | Client Application Follow-Up (Applicant) |
+| `generateClientApplicationFollowUpAdminEmail()` | Client Application Follow-Up (Admin Reminder) |
 | `generateBookingConfirmedEmail()` | Booking Confirmed |
 | `generateBookingReminderEmail()` | Booking Reminder (CRON) |
 
