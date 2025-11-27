@@ -11,10 +11,9 @@ console.log("🔐 Testing remote schema access...");
 const tmp = join(tmpdir(), `supabase_types_${Date.now()}.ts`);
 
 try {
-  // Prefer linked project; fall back to explicit project id
-  const cmd = process.env.SUPABASE_PROJECT_ID
-    ? `npx supabase@v2.34.3 gen types typescript --project-id ${process.env.SUPABASE_PROJECT_ID} --schema public`
-    : `npx supabase@v2.34.3 gen types typescript --linked --schema public`;
+const DEFAULT_PROJECT_ID = "utvircuwknqzpnmvxidp";
+const projectId = process.env.SUPABASE_PROJECT_ID || DEFAULT_PROJECT_ID;
+const cmd = `npx -y supabase@2.34.3 gen types typescript --project-id ${projectId} --schema public`;
 
   // Capture stdout to avoid any shell redirection differences (Windows vs *nix)
   const out = execSync(cmd, { stdio: ["ignore", "pipe", "pipe"], shell: true }).toString("utf8");

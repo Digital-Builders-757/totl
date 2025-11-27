@@ -28,6 +28,24 @@
 - 🔧 **Nov 26 Hotfix:** Follow-up job now locks the admin reminder (and `follow_up_sent_at`) even if the applicant email transiently fails, preventing duplicate SLA nudges
 - 🔧 **Nov 26 UI/UX Tune-Up:** Admin dashboard only shows the “Follow-up emails sent” toast when every reminder succeeds, while partial failures now surface a single descriptive warning
 
+## 🚀 **Latest Achievement: Client Application Admin Dashboard**
+
+**CLIENT APPLICATION ADMIN OPS** - November 27, 2025  
+- ✅ Shipped `/admin/client-applications` with auth-protected server loader plus rich UI (search, tabbed filters, status badges, detail dialog)  
+- ✅ Added approve/reject workflows with admin notes, instant UI updates, and Resend-powered applicant notifications  
+- ✅ Wired bulk “Send follow-ups” control to the automated reminder action so ops can nudge aging applications inline  
+- ✅ Delivered CSV export tooling (matching locale date formats) so ops can audit applications outside the app  
+- ✅ Surfaced follow-up badges/timestamps across the dashboard so admins know which Career Builders have already been pinged  
+
+## 🚀 **Latest Achievement: Supabase Types Guardrail Alignment**
+
+**TYPES & SCHEMA TRUTH LOCKDOWN** - November 27, 2025  
+- ✅ Updated every `types:regen*` script to call `npx supabase@2.34.3 gen types ... --project-id utvircuwknqzpnmvxidp --schema public`, removing the stale `--linked` behavior that caused header-only diffs  
+- ✅ Baked the same default project into `scripts/verify-schema-local.mjs`, `scripts/quick-schema-check.mjs`, and the comprehensive schema guardrail so even unlinked environments compare against the correct ref  
+- ✅ Hardened the verification script to strip the AUTO-GENERATED banner before diffing, eliminating the recurring “-6 lines removed” warnings  
+- ✅ Refreshed every doc that teaches type regeneration (`TYPES_SYNC_PREVENTION_SYSTEM.md`, `SCHEMA_SYNC_FIX_GUIDE.md`, `TECH_STACK_BREAKDOWN.md`, `TROUBLESHOOTING_GUIDE.md`) so future contributors run the exact command  
+- ✅ Ran `npm run types:regen`, `npm run schema:verify:comprehensive`, `npm run lint`, and `npm run build` to prove the guardrail is green before the next feature push  
+
 ## 🚀 **Previous Achievement: Client Application Status Portal**
 
 **CLIENT APPLICATION STATUS PORTAL** - November 26, 2025
@@ -313,9 +331,9 @@
 # 🎯 **Immediate Next Steps**
 
 ### **0. Schema Guardrail Alignment (NOW)**
-- [ ] Update all `types:regen*` scripts to call `supabase gen types ... --project-id utvircuwknqzpnmvxidp --schema public` so local output matches CI byte-for-byte (header comment diff disappears)
-- [ ] Regenerate `types/database.ts`, rerun `npm run schema:verify:comprehensive`, and commit the synced file before the next push to `develop`
-- [ ] Document this ritual in the Supabase context prompt/common errors once complete (prevents future schema-truth noise)
+- [x] Update all `types:regen*` scripts to call `supabase gen types ... --project-id utvircuwknqzpnmvxidp --schema public` so local output matches CI byte-for-byte (header comment diff disappears)
+- [x] Regenerate `types/database.ts`, rerun `npm run schema:verify:comprehensive`, and commit the synced file before the next push to `develop`
+- [x] Document this ritual in the Supabase context prompt/common errors once complete (prevents future schema-truth noise)
 
 ## **Priority 1: Client Application System Enhancement**
 
@@ -326,28 +344,43 @@
 - [x] Add follow-up email sequences (automatic reminders after 3 days)
 
 ### **2. Admin Interface Creation**
-- [ ] Create admin page for client applications
-- [ ] Add approve/reject functionality with notes
-- [ ] Email notifications for status changes
-- [ ] Export functionality for applications
+- [x] Create admin page for client applications
+- [x] Add approve/reject functionality with notes
+- [x] Email notifications for status changes
+- [x] Export functionality for applications
 
 ### **3. Status Tracking System**
-- [ ] Public status check page
-- [ ] Email notifications for status updates
-- [ ] Application ID generation and tracking
+- [x] Public status check page
+- [x] Email notifications for status updates
+- [x] Application ID generation and tracking
 
 ## **Priority 2: Final MVP Polish**
 
 ### **4. Testing Expansion**
 - [ ] Portfolio E2E tests
+  - [ ] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
+  - [ ] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
 - [ ] Application flow tests
+  - [ ] `client-application-flow.spec.ts`: submit, approve/reject, follow-up reminders
+  - [ ] `talent-gig-application.spec.ts`: gated apply CTA, subscription paywall, status badge updates
 - [ ] Unit tests for utilities
+  - [ ] `lib/services/email-templates.test.ts`: confirmation/approval/rejection/follow-up payloads
+  - [ ] `lib/utils/status-badges.test.ts`: variant mapping + color tokens
+  - [ ] `lib/actions/moderation-actions.test.ts`: flag validation helpers (pure functions only)
 
 ### **5. Launch Preparation**
 - [ ] Google Analytics setup (30 mins)
+  - [ ] Add GA4 tag via Next.js Script in `app/layout.tsx`
+  - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [ ] Final UI/UX polish
+  - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)
+  - [ ] Run color contrast pass on admin dashboard + public marketing pages
 - [ ] Security audit completion
+  - [ ] Re-run `security:check` script, capture output in `docs/SECURITY_CONFIGURATION.md`
+  - [ ] Verify middleware suspension + role gating for every protected route
 - [ ] Beta testing with real users
+  - [ ] Prepare smoke-test checklist (subscription, applications, moderation)
+  - [ ] Capture feedback + issues in `PAST_PROGRESS_HISTORY.md`
 
 ---
 

@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "prepare": "husky install",
     "verify-schema": "bash scripts/verify-schema-truth.sh",
-    "types:regen": "cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --linked --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
+    "types:regen": "cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
     "types:regen:dev": "cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
     "types:regen:prod": "if not defined SUPABASE_PROJECT_ID (echo SUPABASE_PROJECT_ID env var is required for prod regen && exit /b 1) else cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id %SUPABASE_PROJECT_ID% --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
     "types:check": "node scripts/verify-types-fresh.mjs",

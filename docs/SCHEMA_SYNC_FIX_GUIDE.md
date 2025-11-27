@@ -16,7 +16,7 @@ The main branch was failing CI checks with schema verification errors:
 
 1. **CLI Version Mismatch** - Different Supabase CLI versions generate slightly different output
 2. **Line Ending Issues** - CRLF vs LF causing binary file detection
-3. **Generation Method Mismatch** - CI uses `--project-id`, local uses `--linked`
+3. **Generation Method Mismatch** - (resolved) both local + CI now call `--project-id utvircuwknqzpnmvxidp` (historically dev machines used `--linked`)
 4. **Schema Drift** - Database schema evolved without types being regenerated
 
 ## âœ… Solution Implemented
@@ -150,7 +150,7 @@ npm run types:regen
 
 **Manual (if needed):**
 ```powershell
-npx supabase@v2.34.3 gen types typescript --linked --schema public > types/database.ts
+npx supabase@v2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public > types/database.ts
 ```
 
 **CI (automatic):**
