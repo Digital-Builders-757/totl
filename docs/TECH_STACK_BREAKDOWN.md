@@ -110,7 +110,7 @@
 - `lib/supabase/supabase-server.ts` - Alternative server client
 
 **Type Generation:**
-- Command: `npx supabase@v2.34.3 gen types typescript --linked`
+- Command: `npx supabase@v2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public`
 - Output: `types/database.ts`
 - Frequency: After every migration
 - Enforcement: Pre-commit hooks verify types are up-to-date

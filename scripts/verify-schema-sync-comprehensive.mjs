@@ -19,6 +19,7 @@ import { join } from 'path';
 const PINNED_CLI_VERSION = '2.34.3';
 const DEV_PROJECT_ID = 'utvircuwknqzpnmvxidp';
 const PROD_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || '<PROD_ID>';
+const TARGET_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || DEV_PROJECT_ID;
 
 console.log('🔍 Comprehensive Schema Sync Verification');
 console.log('==========================================');
@@ -91,9 +92,9 @@ try {
 // Step 4: Check for schema drift
 console.log('\n4. Checking for schema drift...');
 try {
-  // Generate fresh types from current linked project
+  // Generate fresh types directly from the target project
   const freshTypes = execSync(
-    `npx -y supabase@${PINNED_CLI_VERSION} gen types typescript --linked --schema public`,
+    `npx -y supabase@${PINNED_CLI_VERSION} gen types typescript --project-id ${TARGET_PROJECT_ID} --schema public`,
     { encoding: 'utf8' }
   );
   
@@ -105,6 +106,7 @@ try {
     return text
       .replace(/\r\n/g, '\n')  // Normalize line endings
       .replace(/\r/g, '\n')
+    .replace(/\/\*\*?[\s\S]*?AUTO-GENERATED[\s\S]*?\*\/\s*/i, '') // Remove auto-generated banner
       .replace(/__InternalSupabase: \{[^}]*\}/gs, '')  // Remove __InternalSupabase block
       .replace(/\n\s*\n\s*\n/g, '\n\n')  // Clean up extra blank lines
       .trim();
@@ -115,9 +117,9 @@ try {
   const normalizedExisting = cleanTypes(existingTypes);
   
   if (normalizedFresh === normalizedExisting) {
-    console.log('✅ Types are in sync with current linked project');
+    console.log(`✅ Types are in sync with project ${TARGET_PROJECT_ID}`);
   } else {
-    console.log('⚠️  Types are out of sync with current linked project');
+    console.log(`⚠️  Types are out of sync with project ${TARGET_PROJECT_ID}`);
     console.log('   Run: npm run types:regen to fix');
     console.log('   Note: Comparison excludes __InternalSupabase noise');
     
