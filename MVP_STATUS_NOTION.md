@@ -353,6 +353,7 @@
 - [x] Public status check page
 - [x] Email notifications for status updates
 - [x] Application ID generation and tracking
+- [x] Harden `/api/client-applications/status` so only the owning applicant can read their status/admin notes
 
 ## **Priority 2: Final MVP Polish**
 

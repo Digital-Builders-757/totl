@@ -159,7 +159,12 @@ export default function ClientApplicationPage() {
     checkStatus();
 
     return () => controller.abort();
-  }, [user?.email, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email]);
+
+  const showStatusPanel =
+    applicationStatus?.status && applicationStatus.status !== "approved" && user;
+  const shouldShowForm = !applicationStatus?.status;
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24">
@@ -209,149 +214,153 @@ export default function ClientApplicationPage() {
                 </p>
               </div>
 
-              {applicationStatus?.status === "pending" && user ? (
+              {showStatusPanel ? (
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
                   <p className="text-gray-700 font-semibold mb-2">Application Under Review</p>
                   <p className="text-gray-500 text-sm">
-                    We received your application and our admin team is reviewing it. You&apos;ll be notified when we have an update.
+                    {applicationStatus.status === 'pending'
+                      ? "We received your application and our admin team is reviewing it. You&apos;ll be notified when we have an update."
+                      : applicationStatus.status === 'rejected'
+                        ? 'Your application was rejected. Please reach out to hello@thetotlagency.com to reapply.'
+                        : 'We found an existing application. Check your email for the latest status.'}
                   </p>
                 </div>
-              ) : (
+              ) : shouldShowForm ? (
                 <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="Enter your first name"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Enter your last name"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="companyName">Company Name</Label>
                     <Input
-                      id="firstName"
-                      placeholder="Enter your first name"
-                      value={formData.firstName}
+                      id="companyName"
+                      placeholder="Enter your company name"
+                      value={formData.companyName}
                       onChange={handleChange}
                       required
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="email">Business Email</Label>
                     <Input
-                      id="lastName"
-                      placeholder="Enter your last name"
-                      value={formData.lastName}
+                      id="email"
+                      type="email"
+                      placeholder="Enter your business email"
+                      value={formData.email}
                       onChange={handleChange}
                       required
                     />
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input
-                    id="companyName"
-                    placeholder="Enter your company name"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      placeholder="Enter your phone number"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Business Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your business email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="industry">Industry</Label>
+                    <Select value={formData.industry} onValueChange={handleSelectChange}>
+                      <SelectTrigger id="industry">
+                        <SelectValue placeholder="Select your industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fashion">Fashion</SelectItem>
+                        <SelectItem value="advertising">Advertising</SelectItem>
+                        <SelectItem value="editorial">Editorial</SelectItem>
+                        <SelectItem value="commercial">Commercial</SelectItem>
+                        <SelectItem value="entertainment">Entertainment</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Enter your phone number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="businessDescription">Business Description</Label>
+                    <Textarea
+                      id="businessDescription"
+                      placeholder="Tell us about your business and what you do"
+                      rows={3}
+                      value={formData.businessDescription}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
-                  <Select value={formData.industry} onValueChange={handleSelectChange}>
-                    <SelectTrigger id="industry">
-                      <SelectValue placeholder="Select your industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fashion">Fashion</SelectItem>
-                      <SelectItem value="advertising">Advertising</SelectItem>
-                      <SelectItem value="editorial">Editorial</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                      <SelectItem value="entertainment">Entertainment</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="needsDescription">Talent Needs</Label>
+                    <Textarea
+                      id="needsDescription"
+                      placeholder="Describe the types of talent you&apos;re looking for and your typical projects"
+                      rows={4}
+                      value={formData.needsDescription}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="businessDescription">Business Description</Label>
-                  <Textarea
-                    id="businessDescription"
-                    placeholder="Tell us about your business and what you do"
-                    rows={3}
-                    value={formData.businessDescription}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Company Website (Optional)</Label>
+                    <Input
+                      id="website"
+                      placeholder="Enter your company website"
+                      value={formData.website}
+                      onChange={handleChange}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="needsDescription">Talent Needs</Label>
-                  <Textarea
-                    id="needsDescription"
-                    placeholder="Describe the types of talent you're looking for and your typical projects"
-                    rows={4}
-                    value={formData.needsDescription}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">Company Website (Optional)</Label>
-                  <Input
-                    id="website"
-                    placeholder="Enter your company website"
-                    value={formData.website}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    className="w-full bg-black text-white hover:bg-black/90"
-                    disabled={
-                      isSubmitting ||
-                      applicationStatus?.status === "pending" ||
-                      Boolean(statusLoading && user?.email)
-                    }
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Application"}
-                  </Button>
-                  <p className="text-sm text-gray-500 mt-4 text-center">
-                    By submitting this form, you agree to our{" "}
-                    <Link href="/terms" className="underline">
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link href="/privacy" className="underline">
-                      Privacy Policy
-                    </Link>
-                    .
-                  </p>
-                </div>
-              </form>
-            )}
+                  <div className="pt-4">
+                    <Button
+                      type="submit"
+                      className="w-full bg-black text-white hover:bg-black/90"
+                      disabled={
+                        isSubmitting ||
+                        applicationStatus?.status === "pending" ||
+                        Boolean(statusLoading && user?.email)
+                      }
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Application"}
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-4 text-center">
+                      By submitting this form, you agree to our{" "}
+                      <Link href="/terms" className="underline">
+                        Terms of Service
+                      </Link>{" "}
+                      and{" "}
+                      <Link href="/privacy" className="underline">
+                        Privacy Policy
+                      </Link>
+                      .
+                    </p>
+                  </div>
+                </form>
+              ) : null}
             </div>
           </div>
         </div>

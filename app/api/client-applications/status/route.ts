@@ -1,5 +1,3 @@
-"use server";
-
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -12,11 +10,26 @@ export async function GET(req: Request) {
   }
 
   const supabase = await createSupabaseServer();
+  const normalizedEmail = email.toLowerCase();
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError) {
+    console.error("Unable to resolve auth user for status check:", userError);
+    return NextResponse.json({ error: "Unable to determine authenticated user" }, { status: 500 });
+  }
+
+  if (!user || !user.email || user.email.toLowerCase() !== normalizedEmail) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  }
 
   const { data: application, error } = await supabase
     .from("client_applications")
     .select("id, status, admin_notes, created_at")
-    .eq("email", email)
+    .ilike("email", normalizedEmail)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
