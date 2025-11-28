@@ -373,6 +373,7 @@
 - [x] Google Analytics setup (30 mins)
   - [x] Add GA4 tag via Next.js Script in `app/layout.tsx`
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
+- [x] Surface subscribe CTA in the header/nav for logged-in talent so subscribing is clearer on mobile and desktop (`/talent/subscribe`)
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)
   - [ ] Run color contrast pass on admin dashboard + public marketing pages
