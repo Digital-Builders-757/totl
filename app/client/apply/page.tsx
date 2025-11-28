@@ -1,11 +1,13 @@
-﻿"use client";
+﻿ "use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +21,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
-
 export default function ClientApplicationPage() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -37,6 +38,14 @@ export default function ClientApplicationPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const returnUrl = searchParams?.get("returnUrl") ?? null;
+  const { user } = useAuth();
+  const [applicationStatus, setApplicationStatus] = useState<{
+    status: string | null;
+    applicationId?: string;
+    adminNotes?: string | null;
+  } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -92,6 +101,66 @@ export default function ClientApplicationPage() {
     }
   };
 
+  useEffect(() => {
+    const userEmail = user?.email;
+    if (!userEmail) {
+      setApplicationStatus(null);
+      setStatusMessage(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const checkStatus = async () => {
+      try {
+        setStatusLoading(true);
+        const response = await fetch(
+          `/api/client-applications/status?email=${encodeURIComponent(userEmail)}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error("Unable to check application status");
+        }
+
+        const payload = await response.json();
+
+        if (payload.status) {
+          setApplicationStatus(payload);
+
+          if (payload.status === "approved") {
+            setStatusMessage("Your application is approved — redirecting to the client dashboard.");
+            router.push("/client/dashboard");
+            return;
+          }
+
+          if (payload.status === "pending") {
+            setStatusMessage("Thanks for applying! Your application is still under review.");
+            return;
+          }
+
+          if (payload.status === "rejected") {
+            setStatusMessage("Your previous application has been rejected. Please reach out to hello@thetotlagency.com to reapply.");
+            return;
+          }
+        } else {
+          setApplicationStatus({ status: null });
+          setStatusMessage(null);
+        }
+      } catch (error) {
+        console.error("Failed to load application status", error);
+        setStatusMessage("Unable to load your application status right now.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setStatusLoading(false);
+        }
+      }
+    };
+
+    checkStatus();
+
+    return () => controller.abort();
+  }, [user?.email, router]);
+
   return (
     <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24">
       <div className="container mx-auto px-4 py-4 sm:py-12">
@@ -104,6 +173,14 @@ export default function ClientApplicationPage() {
         </Link>
 
         <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+          {statusMessage && (
+            <div className="p-4">
+              <Alert>
+                <AlertTitle>Client Application</AlertTitle>
+                <AlertDescription>{statusMessage}</AlertDescription>
+              </Alert>
+            </div>
+          )}
           <div className="grid md:grid-cols-5">
             <div className="md:col-span-2 relative hidden md:block">
               <div className="absolute inset-0 bg-black">
@@ -132,7 +209,15 @@ export default function ClientApplicationPage() {
                 </p>
               </div>
 
-              <form className="space-y-6" onSubmit={handleSubmit}>
+              {applicationStatus?.status === "pending" && user ? (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
+                  <p className="text-gray-700 font-semibold mb-2">Application Under Review</p>
+                  <p className="text-gray-500 text-sm">
+                    We received your application and our admin team is reviewing it. You&apos;ll be notified when we have an update.
+                  </p>
+                </div>
+              ) : (
+                <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
@@ -245,7 +330,11 @@ export default function ClientApplicationPage() {
                   <Button
                     type="submit"
                     className="w-full bg-black text-white hover:bg-black/90"
-                    disabled={isSubmitting}
+                    disabled={
+                      isSubmitting ||
+                      applicationStatus?.status === "pending" ||
+                      Boolean(statusLoading && user?.email)
+                    }
                   >
                     {isSubmitting ? "Submitting..." : "Submit Application"}
                   </Button>
@@ -262,6 +351,7 @@ export default function ClientApplicationPage() {
                   </p>
                 </div>
               </form>
+            )}
             </div>
           </div>
         </div>

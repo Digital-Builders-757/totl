@@ -374,6 +374,7 @@
   - [x] Add GA4 tag via Next.js Script in `app/layout.tsx`
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [x] Surface persistent subscribe CTA in the header/nav for logged-in talent (header button + mobile menu) so subscribing is clearer on every device (`/talent/subscribe`)
+- [x] Ensure “Create account as client” and contextual links route to `/client/apply` and show application-state messaging for logged-in visitors so the admin-approved flow actually lands in the documented process
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)
   - [ ] Run color contrast pass on admin dashboard + public marketing pages
