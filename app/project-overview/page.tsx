@@ -107,15 +107,15 @@ export default function ProjectOverview() {
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Client Signup</CardTitle>
-                <CardDescription>Register as a client</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href="/client/signup">Client Signup</Link>
-                </Button>
-              </CardContent>
+            <CardHeader>
+              <CardTitle>Client Application</CardTitle>
+              <CardDescription>Start the client onboarding flow</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/client/apply">Client Application</Link>
+              </Button>
+            </CardContent>
             </Card>
 
             <Card>

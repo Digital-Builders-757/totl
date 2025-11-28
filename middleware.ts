@@ -26,7 +26,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // Public routes that do not require any auth handling
-  const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended"];
+  const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended", "/client/apply"];
   if (publicRoutes.includes(path)) {
     return res;
   }
