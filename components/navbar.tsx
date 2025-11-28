@@ -37,6 +37,7 @@ export default function Navbar() {
         }
       : null;
   const shouldPromptSubscription = isTalentUser && needsSubscription(subscriptionAwareProfile);
+  const showPersistentSubscribeCta = shouldPromptSubscription;
 
   // Determine if the current page is the homepage - safe for SSR
   const isHomepage = pathname === "/" || pathname === null;
@@ -248,14 +249,23 @@ export default function Navbar() {
               </>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-gray-300 hover:text-white"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          {/* Mobile Subscribe CTA + Menu */}
+          <div className="flex items-center gap-3">
+            {showPersistentSubscribeCta && (
+              <Link
+                href="/talent/subscribe"
+                className="md:hidden rounded-full bg-amber-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-black shadow-lg shadow-amber-400/30 transition hover:bg-amber-300"
+              >
+                Subscribe
+              </Link>
+            )}
+            <button
+              className="md:hidden text-gray-300 hover:text-white"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -264,7 +274,7 @@ export default function Navbar() {
         <div className="md:hidden bg-black/95 shadow-lg shadow-white/10 backdrop-blur-sm border-t border-white/10">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
-                  {shouldPromptSubscription && (
+                  {showPersistentSubscribeCta && (
                     <Link
                       href="/talent/subscribe"
                       className="w-full inline-flex justify-center rounded-full bg-amber-400 text-black font-semibold py-3"
