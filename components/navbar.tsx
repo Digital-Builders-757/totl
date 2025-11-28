@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
-import { getSubscriptionStatusText } from "@/lib/subscription";
+import { getSubscriptionStatusText, needsSubscription } from "@/lib/subscription";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,6 +29,14 @@ export default function Navbar() {
     subscriptionStatus === "active"
       ? "bg-green-500/20 text-green-200 border-green-500/40"
       : "bg-yellow-500/20 text-yellow-100 border-yellow-500/40";
+  const subscriptionAwareProfile =
+    profile && profile.role
+      ? {
+          role: profile.role as "talent" | "client" | "admin",
+          subscription_status: profile.subscription_status ?? "none",
+        }
+      : null;
+  const shouldPromptSubscription = isTalentUser && needsSubscription(subscriptionAwareProfile);
 
   // Determine if the current page is the homepage - safe for SSR
   const isHomepage = pathname === "/" || pathname === null;
@@ -152,6 +160,16 @@ export default function Navbar() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            {shouldPromptSubscription && (
+              <Link href="/talent/subscribe">
+                <Button
+                  variant="default"
+                  className="rounded-full bg-amber-400 text-black shadow-lg shadow-amber-400/30 hover:bg-amber-300"
+                >
+                  Subscribe
+                </Button>
+              </Link>
+            )}
             {user ? (
               <div className="relative group">
                 <Button
@@ -242,10 +260,18 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
+          {isMenuOpen && (
         <div className="md:hidden bg-black/95 shadow-lg shadow-white/10 backdrop-blur-sm border-t border-white/10">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
+                  {shouldPromptSubscription && (
+                    <Link
+                      href="/talent/subscribe"
+                      className="w-full inline-flex justify-center rounded-full bg-amber-400 text-black font-semibold py-3"
+                    >
+                      Subscribe & Apply
+                    </Link>
+                  )}
               <Link
                 href="/gigs"
                 className="text-white hover:text-gray-300 font-medium transition-colors py-2"
