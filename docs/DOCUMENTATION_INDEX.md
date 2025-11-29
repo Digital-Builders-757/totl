@@ -67,6 +67,7 @@ All other documentation has been organized into the `docs/` folder.
 - `FORM_INPUT_POLISH_IMPLEMENTATION.md` - Form input polish with floating labels & animations (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
+- `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 
 ### **🔧 Development & Code Quality**
 - `TYPE_SAFETY_IMPROVEMENTS.md` - 🎯 **CRITICAL** - Complete TypeScript type safety guide (Nov 2, 2025)

@@ -107,7 +107,7 @@ export default function Login() {
       // Use server-side redirect to ensure fresh session and profile check
       // This prevents stale cookie/cache issues
       try {
-        await handleLoginRedirect();
+        await handleLoginRedirect(returnUrl ?? undefined);
       } catch (error) {
         // If server redirect fails, fall back to client-side redirect
         console.error("Server redirect failed, using client redirect:", error);

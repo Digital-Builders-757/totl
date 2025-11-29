@@ -10,6 +10,7 @@ import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
+type AccountType = "unassigned" | "talent" | "client";
 
 type SignUpOptions = {
   data?: Record<string, unknown>;
@@ -18,6 +19,7 @@ type SignUpOptions = {
 
 type ProfileData = {
   role: UserRole;
+  account_type: AccountType;
   avatar_url: string | null;
   avatar_path: string | null;
   display_name: string | null;
@@ -128,7 +130,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Fetch ALL profile fields once to avoid N+1 queries
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
           .eq("id", session.user.id)
           .maybeSingle();
 
@@ -156,18 +158,23 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
         if (!mounted) return;
 
-        const role = (profileData?.role ?? null) as UserRole;
-        setUserRole(role);
-        // Store full profile data to avoid duplicate queries
-        setProfile(profileData ? {
-          role: role,
-          avatar_url: profileData.avatar_url,
-          avatar_path: profileData.avatar_path,
-          display_name: profileData.display_name,
-          subscription_status: profileData.subscription_status ?? 'none',
-          subscription_plan: profileData.subscription_plan ?? null,
-          subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-        } : null);
+        if (profileData) {
+          const role = (profileData.role ?? null) as UserRole;
+          setUserRole(role);
+          setProfile({
+            role,
+            account_type: (profileData.account_type ?? "unassigned") as AccountType,
+            avatar_url: profileData.avatar_url,
+            avatar_path: profileData.avatar_path,
+            display_name: profileData.display_name,
+            subscription_status: profileData.subscription_status ?? "none",
+            subscription_plan: profileData.subscription_plan ?? null,
+            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
+          });
+        } else {
+          setUserRole(null);
+          setProfile(null);
+        }
         setIsEmailVerified(session.user.email_confirmed_at !== null);
         setIsLoading(false);
         setHasHandledInitialSession(true);
@@ -196,11 +203,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         try {
           // Use maybeSingle() to prevent 406 errors when profile doesn't exist
           // Fetch ALL profile fields once to avoid N+1 queries
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-            .eq("id", session.user.id)
-            .maybeSingle();
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+          .eq("id", session.user.id)
+          .maybeSingle();
 
           // Log profile query errors to Sentry for debugging
           if (profileError && profileError.code !== "PGRST116") {
@@ -231,6 +238,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Store full profile data to avoid duplicate queries
           setProfile(profileData ? {
             role: role,
+            account_type: (profileData.account_type ?? "unassigned") as AccountType,
             avatar_url: profileData.avatar_url,
             avatar_path: profileData.avatar_path,
             display_name: profileData.display_name,
@@ -310,11 +318,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: profileData } = (await supabase
           .from("profiles")
-          .select("role, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
           .eq("id", data.session.user.id)
           .maybeSingle()) as {
             data: {
               role: string;
+              account_type: Database["public"]["Enums"]["account_type_enum"] | null;
               avatar_url: string | null;
               avatar_path: string | null;
               display_name: string | null;
@@ -325,18 +334,23 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             error: unknown;
           };
 
-        const role = (profileData?.role ?? null) as UserRole;
-        setUserRole(role);
-        // Store full profile data to avoid duplicate queries
-        setProfile(profileData ? {
-          role: role,
-          avatar_url: profileData.avatar_url,
-          avatar_path: profileData.avatar_path,
-          display_name: profileData.display_name,
-          subscription_status: profileData.subscription_status ?? 'none',
-          subscription_plan: profileData.subscription_plan ?? null,
-          subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-        } : null);
+        if (profileData) {
+          const role = (profileData.role ?? null) as UserRole;
+          setUserRole(role);
+          setProfile({
+            role,
+            account_type: (profileData.account_type ?? "unassigned") as AccountType,
+            avatar_url: profileData.avatar_url,
+            avatar_path: profileData.avatar_path,
+            display_name: profileData.display_name,
+            subscription_status: profileData.subscription_status ?? "none",
+            subscription_plan: profileData.subscription_plan ?? null,
+            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
+          });
+        } else {
+          setUserRole(null);
+          setProfile(null);
+        }
 
         // Note: The login page uses handleLoginRedirect() server action for redirect
         // This ensures fresh session data and proper cache clearing

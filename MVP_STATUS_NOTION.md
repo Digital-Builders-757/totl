@@ -376,6 +376,8 @@
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [x] Surface persistent subscribe CTA in the header/nav for logged-in talent (header button + mobile menu) so subscribing is clearer on every device (`/talent/subscribe`)
 - [x] Ensure “Create account as client” and contextual links route to `/client/apply` and show application-state messaging for logged-in visitors so the admin-approved flow actually lands in the documented process
+- [ ] Document and implement the unified signup → role-selection flow (create `docs/CLIENT_ACCOUNT_FLOW_PRD.md`, gate `/client/apply`, add `/onboarding/select-account-type`, update middleware/redirects)
+- [ ] Backfill `profiles.account_type` for existing admins/talent/clients and surface “Apply to be a Client” for logged-in talent in the header
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)
   - [ ] Run color contrast pass on admin dashboard + public marketing pages

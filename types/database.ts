@@ -441,6 +441,7 @@ export type Database = {
           instagram_handle: string | null
           is_suspended: boolean
           role: Database["public"]["Enums"]["user_role"]
+          account_type: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_current_period_end: string | null
@@ -461,6 +462,7 @@ export type Database = {
           instagram_handle?: string | null
           is_suspended?: boolean
           role: Database["public"]["Enums"]["user_role"]
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           instagram_handle?: string | null
           is_suspended?: boolean
           role?: Database["public"]["Enums"]["user_role"]
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -712,6 +715,7 @@ export type Database = {
       gig_status: "draft" | "active" | "closed" | "featured" | "urgent"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
+      account_type_enum: "unassigned" | "talent" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -850,6 +854,7 @@ export const Constants = {
       gig_status: ["draft", "active", "closed", "featured", "urgent"],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],
+      account_type_enum: ["unassigned", "talent", "client"],
     },
   },
 } as const
