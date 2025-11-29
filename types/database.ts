@@ -431,6 +431,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: Database["public"]["Enums"]["account_type_enum"]
           avatar_path: string | null
           avatar_url: string | null
           bio: string | null
@@ -441,7 +442,6 @@ export type Database = {
           instagram_handle: string | null
           is_suspended: boolean
           role: Database["public"]["Enums"]["user_role"]
-          account_type: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           subscription_current_period_end: string | null
@@ -452,6 +452,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -462,7 +463,6 @@ export type Database = {
           instagram_handle?: string | null
           is_suspended?: boolean
           role: Database["public"]["Enums"]["user_role"]
-          account_type?: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -473,6 +473,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -483,7 +484,6 @@ export type Database = {
           instagram_handle?: string | null
           is_suspended?: boolean
           role?: Database["public"]["Enums"]["user_role"]
-          account_type?: Database["public"]["Enums"]["account_type_enum"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           subscription_current_period_end?: string | null
@@ -705,6 +705,7 @@ export type Database = {
       test_trigger_function_exists: { Args: never; Returns: boolean }
     }
     Enums: {
+      account_type_enum: "unassigned" | "talent" | "client"
       application_status:
         | "new"
         | "under_review"
@@ -715,7 +716,6 @@ export type Database = {
       gig_status: "draft" | "active" | "closed" | "featured" | "urgent"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
-      account_type_enum: "unassigned" | "talent" | "client"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -843,6 +843,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type_enum: ["unassigned", "talent", "client"],
       application_status: [
         "new",
         "under_review",
@@ -854,7 +855,6 @@ export const Constants = {
       gig_status: ["draft", "active", "closed", "featured", "urgent"],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],
-      account_type_enum: ["unassigned", "talent", "client"],
     },
   },
 } as const
