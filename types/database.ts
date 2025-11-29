@@ -431,6 +431,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: Database["public"]["Enums"]["account_type_enum"]
           avatar_path: string | null
           avatar_url: string | null
           bio: string | null
@@ -451,6 +452,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -471,6 +473,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          account_type?: Database["public"]["Enums"]["account_type_enum"]
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -702,6 +705,7 @@ export type Database = {
       test_trigger_function_exists: { Args: never; Returns: boolean }
     }
     Enums: {
+      account_type_enum: "unassigned" | "talent" | "client"
       application_status:
         | "new"
         | "under_review"
@@ -839,6 +843,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_type_enum: ["unassigned", "talent", "client"],
       application_status: [
         "new",
         "under_review",
