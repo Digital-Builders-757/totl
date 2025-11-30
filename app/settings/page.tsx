@@ -1,6 +1,6 @@
-﻿import Link from "next/link";
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
+import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import {
   type ProfileRow,
@@ -100,27 +100,27 @@ export default async function SettingsPage() {
             <nav className="flex items-center gap-2 text-sm text-gray-400 mb-4">
               {profile?.role === "talent" && (
                 <>
-                  <Link href="/talent/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href="/talent/dashboard" className="hover:text-white transition-colors">
                     Dashboard
-                  </Link>
+                  </PrefetchLink>
                   <span>→</span>
                   <span className="text-white">Settings</span>
                 </>
               )}
               {profile?.role === "client" && (
                 <>
-                  <Link href="/client/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href="/client/dashboard" className="hover:text-white transition-colors">
                     Dashboard
-                  </Link>
+                  </PrefetchLink>
                   <span>→</span>
                   <span className="text-white">Settings</span>
                 </>
               )}
               {profile?.role === "admin" && (
                 <>
-                  <Link href="/admin/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href="/admin/dashboard" className="hover:text-white transition-colors">
                     Admin Dashboard
-                  </Link>
+                  </PrefetchLink>
                   <span>→</span>
                   <span className="text-white">Settings</span>
                 </>
@@ -133,7 +133,7 @@ export default async function SettingsPage() {
                 <p className="text-gray-300">Manage your account and profile information</p>
               </div>
               {profile?.role === "talent" && (
-                <Link
+                <PrefetchLink
                   href="/talent/dashboard"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
@@ -141,10 +141,10 @@ export default async function SettingsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Dashboard
-                </Link>
+                </PrefetchLink>
               )}
               {profile?.role === "client" && (
-                <Link
+                <PrefetchLink
                   href="/client/dashboard"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
@@ -152,10 +152,10 @@ export default async function SettingsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Dashboard
-                </Link>
+                </PrefetchLink>
               )}
               {profile?.role === "admin" && (
-                <Link
+                <PrefetchLink
                   href="/admin/dashboard"
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
@@ -163,7 +163,7 @@ export default async function SettingsPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
                   Back to Admin
-                </Link>
+                </PrefetchLink>
               )}
             </div>
           </div>

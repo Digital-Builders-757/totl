@@ -37,7 +37,9 @@ export default function Navbar() {
         }
       : null;
   const shouldPromptSubscription = isTalentUser && needsSubscription(subscriptionAwareProfile);
-  const showPersistentSubscribeCta = shouldPromptSubscription;
+  const isOnTalentDashboard = pathname?.startsWith("/talent/dashboard");
+  const showPersistentSubscribeCta =
+    shouldPromptSubscription && !isOnTalentDashboard;
 
   // Determine if the current page is the homepage - safe for SSR
   const isHomepage = pathname === "/" || pathname === null;
@@ -169,7 +171,7 @@ export default function Navbar() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {shouldPromptSubscription && (
+            {showPersistentSubscribeCta && (
               <Link href="/talent/subscribe">
                 <Button
                   variant="default"
@@ -203,6 +205,14 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Subscription
+                    </Link>
+                  )}
+                  {isTalentUser && (
+                    <Link
+                      href="/client/apply"
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
+                    >
+                      Apply to be a Client
                     </Link>
                   )}
                   {userRole === "client" && (

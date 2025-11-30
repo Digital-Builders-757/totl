@@ -40,12 +40,14 @@ export async function selectAccountType(formData: FormData) {
     return;
   }
 
+  const updatePayload = {
+    account_type: "talent",
+    role: "talent",
+  };
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      account_type: type,
-      role: type as "talent" | "client",
-    } as Database["public"]["Tables"]["profiles"]["Update"])
+    .update(updatePayload as Database["public"]["Tables"]["profiles"]["Update"])
     .eq("id", user.id);
 
   if (error) {

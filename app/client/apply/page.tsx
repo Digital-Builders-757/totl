@@ -47,6 +47,22 @@ export default function ClientApplicationPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const firstName = typeof metadata.first_name === "string" ? metadata.first_name : "";
+    const lastName = typeof metadata.last_name === "string" ? metadata.last_name : "";
+    const email = user.email ?? "";
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName: prev.firstName || firstName,
+      lastName: prev.lastName || lastName,
+      email: prev.email || email,
+    }));
+  }, [user]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));

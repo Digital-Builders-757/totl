@@ -164,6 +164,72 @@ export async function approveClientApplication(applicationId: string, adminNotes
       return { error: error.message };
     }
 
+    // Promote applicant to client role/account type
+    const supabaseAdmin = createSupabaseAdminClient();
+    const normalizedEmail = applicationData.email.trim().toLowerCase();
+    const perPage = 100;
+    let page = 1;
+    let matchingUser:
+      | {
+          id: string;
+          email?: string | null;
+        }
+      | undefined;
+
+    while (!matchingUser) {
+      const { data: userList, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+
+      if (listError) {
+        console.error("Error listing users during client approval:", listError);
+        return { error: "Failed to promote profile to client" };
+      }
+
+      if (!userList) {
+        break;
+      }
+
+      matchingUser = userList.users.find(
+        (userItem) => userItem.email?.toLowerCase() === normalizedEmail
+      );
+
+      if (matchingUser) {
+        break;
+      }
+
+      if (!userList.nextPage || userList.nextPage === page) {
+        break;
+      }
+
+      page = userList.nextPage;
+    }
+
+    if (!matchingUser?.id) {
+      console.warn(
+        "Could not find profile to promote after approving client application",
+        applicationData.email
+      );
+      return { error: "Client profile not found during approval" };
+    }
+
+    const { error: profileUpdateError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        account_type: "client",
+        role: "client",
+      } as Pick<
+        Database["public"]["Tables"]["profiles"]["Update"],
+        "account_type" | "role"
+      >)
+      .eq("id", matchingUser.id);
+
+    if (profileUpdateError) {
+      console.error("Error updating profile during client approval:", profileUpdateError);
+      return { error: "Failed to promote profile to client" };
+    }
+
     // Send approval email to applicant
     try {
       const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
