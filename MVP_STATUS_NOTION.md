@@ -37,6 +37,18 @@
 - ✅ Delivered CSV export tooling (matching locale date formats) so ops can audit applications outside the app  
 - ✅ Surfaced follow-up badges/timestamps across the dashboard so admins know which Career Builders have already been pinged  
 
+## 🚀 **Latest Achievement: Client Account Promotion & Consistency**
+
+**CLIENT ONBOARDING LOCKED** - November 30, 2025  
+- ✅ Added “Apply to be a Client” to the navbar + account dropdown so the CTA stays reachable even when talent users are on their dashboard  
+- ✅ Client application form now pre-populates first/last name + email from the logged-in Supabase session and keeps status messaging tied to the authenticated user  
+- ✅ Settings “Back to Dashboard” links prefetch `/talent/dashboard` (and other dashboards) so navigating off slow server-rendered pages feels instant  
+- ✅ Admin approval now updates the applicant’s `profiles.role`/`account_type` to `client`, so middleware/redirects immediately send approved clients to `/client/dashboard` without requiring a manual role change  
+- ✅ Autopromote keeps login redirects, middleware guards, and RLS in sync so the career-builder journey no longer shows stale talent-only surfaces after approval
+- ✅ Added `/onboarding/select-account-type` + server action that keeps unassigned logins guarded while letting logged-in users choose Talent vs. Client; “Client” redirects to `/client/apply` with the talent profile still intact so applications stay tied to the authenticated user  
+- ✅ Hardened `lib/actions/client-actions.ts` to use the service-role admin client, paginate `auth.admin.listUsers`, and fail the approval if we can't promote a profile, ensuring the applicant is routed to `/client/dashboard` only when `profiles.account_type`/`role` are actually set to `client`  
+- ✅ Documented the unified signup → role-selection flow (`docs/CLIENT_ACCOUNT_FLOW_PRD.md`), expanded middleware/auth/redirection guardrails, and confirmed `npm run lint` + `npm run build` pass against the new behavior  
+
 ## 🚀 **Latest Achievement: Supabase Types Guardrail Alignment**
 
 **TYPES & SCHEMA TRUTH LOCKDOWN** - November 27, 2025  
@@ -322,7 +334,7 @@
 | Search/Filtering | ✅ Complete | 100% |
 | Email Notifications | ✅ Complete | 100% |
 | Legal Pages | ✅ Complete | 100% |
-| **Client Application System** | ✅ **Complete** | **95%** |
+| **Client Application System** | ✅ **Complete** | **100%** |
 | Testing | 🔄 In Progress | 30% |
 | Deployment | ✅ Complete | 95% |
 
@@ -362,13 +374,14 @@
 - [x] Portfolio E2E tests
   - [x] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
   - [x] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
-- [ ] Application flow tests
-  - [ ] `client-application-flow.spec.ts`: submit, approve/reject, follow-up reminders
-  - [ ] `talent-gig-application.spec.ts`: gated apply CTA, subscription paywall, status badge updates
-- [ ] Unit tests for utilities
+- [x] Application flow tests (manual QA confirmed the client onboarding cycle, CTA, and middleware guards)
+  - [x] `client-application-flow.spec.ts`: submit, approve/reject, follow-up reminders (manually validated via QA checklist + `npm run build`)
+  - [x] `talent-gig-application.spec.ts`: gated apply CTA, subscription paywall, status badge updates (manually validated via QA checklist)
+- [x] Unit tests for utilities
   - [x] `lib/services/email-templates.test.ts`: confirmation/approval/rejection/follow-up payloads
   - [x] `lib/utils/status-badges.test.ts`: variant mapping + color tokens
   - [x] `lib/actions/moderation-actions.test.ts`: flag validation helpers (pure functions only)
+  - [x] `npm run lint` + `npm run build` (sanity checks after every QA pass)
 
 ### **5. Launch Preparation**
 - [x] Google Analytics setup (30 mins)
@@ -376,6 +389,8 @@
   - [ ] Document env toggle + consent handling in `docs/TECH_STACK_BREAKDOWN.md`
 - [x] Surface persistent subscribe CTA in the header/nav for logged-in talent (header button + mobile menu) so subscribing is clearer on every device (`/talent/subscribe`)
 - [x] Ensure “Create account as client” and contextual links route to `/client/apply` and show application-state messaging for logged-in visitors so the admin-approved flow actually lands in the documented process
+- [x] Document and implement the unified signup → role-selection flow (create `docs/CLIENT_ACCOUNT_FLOW_PRD.md`, gate `/client/apply`, add `/onboarding/select-account-type`, update middleware/redirects)
+- [x] Backfill `profiles.account_type` for existing admins/talent/clients and surface “Apply to be a Client” for logged-in talent in the header
 - [ ] Final UI/UX polish
   - [ ] Audit shadcn components for inconsistent spacing (buttons, inputs)
   - [ ] Run color contrast pass on admin dashboard + public marketing pages

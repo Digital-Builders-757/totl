@@ -351,11 +351,23 @@ export async function ensureProfilesAfterSignup() {
   return { success: true, exists: true };
 }
 
+const isSafeReturnUrl = (returnUrl?: string) => {
+  if (!returnUrl) return null;
+  if (returnUrl.includes("://") || returnUrl.startsWith("//")) return null;
+  if (!returnUrl.startsWith("/")) return null;
+  return returnUrl;
+};
+
+const needsClientAccess = (path: string) =>
+  path.startsWith("/client/") && path !== "/client/apply";
+const needsTalentAccess = (path: string) =>
+  path.startsWith("/talent/") && path !== "/talent";
+
 /**
  * Server-side login handler that ensures profile exists and redirects appropriately
  * This function clears cache and ensures fresh session data
  */
-export async function handleLoginRedirect() {
+export async function handleLoginRedirect(returnUrl?: string) {
   const supabase = await createSupabaseServer();
 
   const {
@@ -392,9 +404,9 @@ export async function handleLoginRedirect() {
   // Use maybeSingle() to handle case where profile doesn't exist yet (prevents 406 error)
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, account_type")
     .eq("id", user.id)
-    .maybeSingle();
+    .maybeSingle<{ role: string | null; account_type: string | null }>();
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileError) {
@@ -411,155 +423,100 @@ export async function handleLoginRedirect() {
         errorCode: profileError.code,
         errorDetails: profileError.details,
         errorMessage: profileError.message,
-        profileResult: profileResult,
+        profileResult,
         timestamp: new Date().toISOString(),
       },
       level: "error",
     });
-    // Don't redirect if there's an actual error - let the error handler deal with it
-    return { error: "Failed to check profile" };
+    throw new Error("Failed to check profile");
   }
 
-  // If we still don't have a role after ensureProfileExists, try one more time
-  // to determine it from talent_profiles or client_profiles
-  if (!profile?.role && !profileError) {
-    // Check talent_profiles first
-    const { data: talentProfile } = await supabase
-      .from("talent_profiles")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .maybeSingle();
+  const accountType = (profile?.account_type ?? "unassigned") as "unassigned" | "talent" | "client";
+  const isAdmin = profile?.role === "admin";
+  const safeUrl = isSafeReturnUrl(returnUrl);
 
-    if (talentProfile) {
-      // Update profile with talent role and wait for it to complete
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ role: "talent" })
-        .eq("id", user.id);
-      
-      if (!updateError) {
-        // Longer delay to ensure database consistency and prevent middleware redirect loop
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        // Revalidate to clear cache
-        revalidatePath("/", "layout");
-        revalidatePath("/choose-role");
-        // Verify the update was successful before redirecting
-        const { data: verifyProfile } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .maybeSingle();
-        
-        if (verifyProfile?.role === "talent") {
-          redirect("/talent/dashboard");
-        }
-        // If verification failed, fall through to next check
-      }
-    } else {
-      // Check client_profiles
-      const { data: clientProfile } = await supabase
-        .from("client_profiles")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+  if (!isAdmin && accountType === "unassigned") {
+    redirect("/onboarding/select-account-type");
+    return;
+  }
 
-      if (clientProfile) {
-        // Update profile with client role and wait for it to complete
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ role: "client" })
-          .eq("id", user.id);
-        
-        if (!updateError) {
-          // Longer delay to ensure database consistency and prevent middleware redirect loop
-          await new Promise((resolve) => setTimeout(resolve, 200));
-          // Revalidate to clear cache
-          revalidatePath("/", "layout");
-          revalidatePath("/choose-role");
-          // Verify the update was successful before redirecting - use maybeSingle() to prevent 406 errors
-          const { data: verifyProfile } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", user.id)
-            .maybeSingle();
-          
-          if (verifyProfile?.role === "client") {
-            redirect("/client/dashboard");
-          }
-          // If verification failed, fall through to next check
-        }
-      }
+  if (safeUrl && (isAdmin || accountType !== "unassigned")) {
+    const returnPath = new URL(safeUrl, "http://localhost");
+    const target = returnPath.pathname;
+    const canAccessReturnUrl =
+      (!needsClientAccess(target) || accountType === "client") &&
+      (!needsTalentAccess(target) || accountType === "talent") &&
+      (!target.startsWith("/admin/") || isAdmin);
+
+    if (canAccessReturnUrl) {
+      redirect(safeUrl);
+      return;
     }
   }
 
-  // Redirect based on role
-  if (profile?.role === "talent") {
-    redirect("/talent/dashboard");
-  } else if (profile?.role === "client") {
-    redirect("/client/dashboard");
-  } else if (profile?.role === "admin") {
+  if (isAdmin) {
     redirect("/admin/dashboard");
-  } else {
-    // Last resort - if we still don't have a role, check user metadata
-    const roleFromMetadata = (user.user_metadata?.role as string) || "talent";
-    
-    // Try to update profile one more time with metadata role
-    const { error: metadataUpdateError } = await supabase
-      .from("profiles")
-      .update({ role: roleFromMetadata as "talent" | "client" | "admin" })
-      .eq("id", user.id);
-    
-    if (!metadataUpdateError) {
-      // Longer delay to ensure database consistency and prevent middleware redirect loop
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      // Revalidate to clear cache
-      revalidatePath("/", "layout");
-      revalidatePath("/choose-role");
-      
-      // Verify the update was successful before redirecting - use maybeSingle() to prevent 406 errors
-      const { data: verifyProfile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      
-      // Redirect based on verified role
-      if (verifyProfile?.role === "talent") {
-        redirect("/talent/dashboard");
-      } else if (verifyProfile?.role === "client") {
-        redirect("/client/dashboard");
-      } else if (verifyProfile?.role === "admin") {
-        redirect("/admin/dashboard");
-      } else if (roleFromMetadata === "talent") {
-        // Fallback to metadata if verification didn't work but update succeeded
-        redirect("/talent/dashboard");
-      } else if (roleFromMetadata === "client") {
-        redirect("/client/dashboard");
-      } else if (roleFromMetadata === "admin") {
-        redirect("/admin/dashboard");
-      }
-    }
-    
-    // Only redirect to choose-role if we truly can't determine or set the role
-    // Log this to Sentry as it indicates a problem
-    Sentry.captureMessage("Unable to determine user role during login redirect", {
-      tags: {
-        feature: "auth",
-        error_type: "role_undetermined",
-      },
-      extra: {
-        userId: user.id,
-        userEmail: user.email,
-        userMetadata: user.user_metadata,
-        profileData: profile,
-        profileError: profileError,
-        timestamp: new Date().toISOString(),
-      },
-      level: "warning",
-    });
-    
-    redirect("/choose-role");
+    return;
   }
+
+  if (accountType === "client") {
+    redirect("/client/dashboard");
+    return;
+  }
+
+  if (accountType === "talent") {
+    redirect("/talent/dashboard");
+    return;
+  }
+
+  const roleFromMetadata = (user.user_metadata?.role as string) || "talent";
+
+  const { error: metadataUpdateError } = await supabase
+    .from("profiles")
+    .update({ role: roleFromMetadata as "talent" | "client" | "admin" })
+    .eq("id", user.id);
+
+  if (!metadataUpdateError) {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    revalidatePath("/", "layout");
+    revalidatePath("/choose-role");
+    const { data: verifyProfile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle<{ role: string | null }>();
+
+    if (verifyProfile?.role === "talent") {
+      redirect("/talent/dashboard");
+      return;
+    }
+    if (verifyProfile?.role === "client") {
+      redirect("/client/dashboard");
+      return;
+    }
+    if (verifyProfile?.role === "admin") {
+      redirect("/admin/dashboard");
+      return;
+    }
+  }
+
+  Sentry.captureMessage("Unable to determine user role during login redirect", {
+    tags: {
+      feature: "auth",
+      error_type: "role_undetermined",
+    },
+    extra: {
+      userId: user.id,
+      userEmail: user.email,
+      userMetadata: user.user_metadata,
+      profileData: profile,
+      profileError,
+      timestamp: new Date().toISOString(),
+    },
+    level: "warning",
+  });
+
+  redirect("/choose-role");
 }
 
 

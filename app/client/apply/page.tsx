@@ -47,6 +47,22 @@ export default function ClientApplicationPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
+    const firstName = typeof metadata.first_name === "string" ? metadata.first_name : "";
+    const lastName = typeof metadata.last_name === "string" ? metadata.last_name : "";
+    const email = user.email ?? "";
+
+    setFormData((prev) => ({
+      ...prev,
+      firstName: prev.firstName || firstName,
+      lastName: prev.lastName || lastName,
+      email: prev.email || email,
+    }));
+  }, [user]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -165,36 +181,39 @@ export default function ClientApplicationPage() {
   const showStatusPanel =
     applicationStatus?.status && applicationStatus.status !== "approved" && user;
   const shouldShowForm = !applicationStatus?.status;
+  const labelClass = "text-sm font-semibold text-white/80";
+  const inputClass = "bg-slate-900 text-white border-white/10 focus-visible:border-amber-500";
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24">
+    <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24">
       <div className="container mx-auto px-4 py-4 sm:py-12">
         <Link
           href={returnUrl ? decodeURIComponent(returnUrl) : "/"}
-          className="inline-flex items-center text-gray-600 hover:text-black mb-4 sm:mb-8"
+          className="inline-flex items-center text-white/70 hover:text-white mb-4 sm:mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Link>
 
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-slate-900/80 border border-white/10 shadow-2xl ring-1 ring-white/5 rounded-3xl overflow-hidden">
           {statusMessage && (
-            <div className="p-4">
-              <Alert>
-                <AlertTitle>Client Application</AlertTitle>
-                <AlertDescription>{statusMessage}</AlertDescription>
+            <div className="p-4 bg-slate-900 border-b border-white/5">
+              <Alert className="bg-slate-950 text-white">
+                <AlertTitle className="text-white">Client Application</AlertTitle>
+                <AlertDescription className="text-white/80">{statusMessage}</AlertDescription>
               </Alert>
             </div>
           )}
           <div className="grid md:grid-cols-5">
             <div className="md:col-span-2 relative hidden md:block">
-              <div className="absolute inset-0 bg-black">
+              <div className="absolute inset-0">
                 <Image
-                  src="/images/totl-logo.png"
-                  alt="Client application"
+                  src="/images/client-professional.png"
+                  alt="Client professionals in discussion"
                   fill
-                  className="object-cover opacity-80"
+                  className="object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 text-white">
                   <h2 className="text-2xl font-bold mb-2">Apply to Become a Client</h2>
@@ -205,19 +224,19 @@ export default function ClientApplicationPage() {
               </div>
             </div>
 
-            <div className="md:col-span-3 p-8">
+            <div className="md:col-span-3 p-8 bg-slate-950">
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-2">Client Application</h1>
-                <p className="text-gray-600">
+                <p className="text-white/70">
                   Complete the form below to apply as a client with TOTL Agency. Our team will
                   review your application and contact you within 2-3 business days.
                 </p>
               </div>
 
               {showStatusPanel ? (
-                <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-center">
-                  <p className="text-gray-700 font-semibold mb-2">Application Under Review</p>
-                  <p className="text-gray-500 text-sm">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center shadow-inner shadow-black/30">
+                  <p className="text-white font-semibold mb-2">Application Under Review</p>
+                  <p className="text-white/70 text-sm">
                     {applicationStatus.status === 'pending'
                       ? "We received your application and our admin team is reviewing it. You&apos;ll be notified when we have an update."
                       : applicationStatus.status === 'rejected'
@@ -226,12 +245,15 @@ export default function ClientApplicationPage() {
                   </p>
                 </div>
               ) : shouldShowForm ? (
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <form className="space-y-6 text-white" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label className={labelClass} htmlFor="firstName">
+                        First Name
+                      </Label>
                       <Input
                         id="firstName"
+                        className={inputClass}
                         placeholder="Enter your first name"
                         value={formData.firstName}
                         onChange={handleChange}
@@ -239,9 +261,12 @@ export default function ClientApplicationPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label className={labelClass} htmlFor="lastName">
+                        Last Name
+                      </Label>
                       <Input
                         id="lastName"
+                        className={inputClass}
                         placeholder="Enter your last name"
                         value={formData.lastName}
                         onChange={handleChange}
@@ -251,9 +276,12 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Company Name</Label>
+                    <Label className={labelClass} htmlFor="companyName">
+                      Company Name
+                    </Label>
                     <Input
                       id="companyName"
+                      className={inputClass}
                       placeholder="Enter your company name"
                       value={formData.companyName}
                       onChange={handleChange}
@@ -262,9 +290,12 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Business Email</Label>
+                    <Label className={labelClass} htmlFor="email">
+                      Business Email
+                    </Label>
                     <Input
                       id="email"
+                      className={inputClass}
                       type="email"
                       placeholder="Enter your business email"
                       value={formData.email}
@@ -274,9 +305,12 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
+                    <Label className={labelClass} htmlFor="phone">
+                      Phone Number
+                    </Label>
                     <Input
                       id="phone"
+                      className={inputClass}
                       placeholder="Enter your phone number"
                       value={formData.phone}
                       onChange={handleChange}
@@ -285,9 +319,14 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="industry">Industry</Label>
+                    <Label className={labelClass} htmlFor="industry">
+                      Industry
+                    </Label>
                     <Select value={formData.industry} onValueChange={handleSelectChange}>
-                      <SelectTrigger id="industry">
+                      <SelectTrigger
+                        id="industry"
+                        className="border border-white/10 bg-slate-900 text-white"
+                      >
                         <SelectValue placeholder="Select your industry" />
                       </SelectTrigger>
                       <SelectContent>
@@ -302,8 +341,11 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="businessDescription">Business Description</Label>
+                    <Label className={labelClass} htmlFor="businessDescription">
+                      Business Description
+                    </Label>
                     <Textarea
+                      className="bg-slate-900 text-white border-white/10 focus-visible:border-amber-500"
                       id="businessDescription"
                       placeholder="Tell us about your business and what you do"
                       rows={3}
@@ -314,8 +356,11 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="needsDescription">Talent Needs</Label>
+                    <Label className={labelClass} htmlFor="needsDescription">
+                      Talent Needs
+                    </Label>
                     <Textarea
+                      className="bg-slate-900 text-white border-white/10 focus-visible:border-amber-500"
                       id="needsDescription"
                       placeholder="Describe the types of talent you&apos;re looking for and your typical projects"
                       rows={4}
@@ -326,9 +371,12 @@ export default function ClientApplicationPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="website">Company Website (Optional)</Label>
+                    <Label className={labelClass} htmlFor="website">
+                      Company Website (Optional)
+                    </Label>
                     <Input
                       id="website"
+                      className={inputClass}
                       placeholder="Enter your company website"
                       value={formData.website}
                       onChange={handleChange}
@@ -338,7 +386,7 @@ export default function ClientApplicationPage() {
                   <div className="pt-4">
                     <Button
                       type="submit"
-                      className="w-full bg-black text-white hover:bg-black/90"
+                      className="w-full bg-amber-500 text-black hover:bg-amber-400"
                       disabled={
                         isSubmitting ||
                         applicationStatus?.status === "pending" ||
@@ -347,13 +395,13 @@ export default function ClientApplicationPage() {
                     >
                       {isSubmitting ? "Submitting..." : "Submit Application"}
                     </Button>
-                    <p className="text-sm text-gray-500 mt-4 text-center">
+                    <p className="text-sm text-white/60 mt-4 text-center">
                       By submitting this form, you agree to our{" "}
-                      <Link href="/terms" className="underline">
+                      <Link href="/terms" className="underline text-white/70">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="underline">
+                      <Link href="/privacy" className="underline text-white/70">
                         Privacy Policy
                       </Link>
                       .
