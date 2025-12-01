@@ -264,11 +264,15 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               {!user ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">
-                    You need to be logged in to apply for gigs.
+                    Sign in to apply for this gig.
                   </p>
-                  <Button asChild className="w-full">
-                    <Link href="/login">Sign In to Apply</Link>
-                  </Button>
+                  <Link
+                    data-testid="gig-signin-link"
+                    href={`/login?returnUrl=${encodeURIComponent(`/gigs/${gig.id}`)}`}
+                    className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+                  >
+                    Sign in to apply
+                  </Link>
                 </div>
               ) : hasApplied ? (
                 <div className="text-center space-y-3">

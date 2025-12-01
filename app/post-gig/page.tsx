@@ -129,21 +129,21 @@ export default function PostGigPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-24 text-slate-900">
       <div className="container mx-auto px-4 py-12">
         <Link
           href="/client/dashboard"
-          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+          className="inline-flex items-center text-slate-600 hover:text-slate-900 mb-8 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Link>
 
-        <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="p-8">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2">Post a New Gig</h1>
-              <p className="text-gray-600">
+        <div className="max-w-3xl mx-auto rounded-3xl panel-frosted border border-white/40 shadow-2xl shadow-slate-900/20 overflow-hidden">
+          <div className="p-10 space-y-8">
+            <div className="space-y-3">
+              <h1 className="text-3xl font-bold text-slate-900">Post a New Gig</h1>
+              <p className="text-slate-500">
                 Fill out the form below to create a new casting call or gig. Be as detailed as
                 possible to attract the right talent.
               </p>
@@ -257,8 +257,12 @@ export default function PostGigPage() {
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-6">
-                <Button type="submit" disabled={isSubmitting} className="flex-1 button-glow border-0">
+              <div className="flex flex-col gap-4 pt-6 md:flex-row">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 button-glow border-0"
+                >
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

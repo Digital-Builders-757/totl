@@ -142,26 +142,12 @@ export async function approveClientApplication(applicationId: string, adminNotes
     // Get application details for email
     const { data: applicationData, error: fetchError } = await supabase
       .from("client_applications")
-      .select("first_name, last_name, email, company_name, industry")
+      .select("first_name, last_name, email, company_name, industry, status")
       .eq("id", applicationId)
       .maybeSingle();
 
     if (fetchError || !applicationData) {
       return { error: "Application not found" };
-    }
-
-    // Update the application status to approved
-    const { error } = await supabase
-      .from("client_applications")
-      .update({
-        status: "approved",
-        admin_notes: adminNotes || null,
-      })
-      .eq("id", applicationId);
-
-    if (error) {
-      console.error("Error approving client application:", error);
-      return { error: error.message };
     }
 
     // Promote applicant to client role/account type
@@ -214,6 +200,21 @@ export async function approveClientApplication(applicationId: string, adminNotes
       return { error: "Client profile not found during approval" };
     }
 
+    const previousStatus = applicationData.status ?? "pending";
+    // Update the application status to approved before promoting the profile
+    const { error: updateError } = await supabase
+      .from("client_applications")
+      .update({
+        status: "approved",
+        admin_notes: adminNotes || null,
+      })
+      .eq("id", applicationId);
+
+    if (updateError) {
+      console.error("Error approving client application:", updateError);
+      return { error: updateError.message };
+    }
+
     const { error: profileUpdateError } = await supabaseAdmin
       .from("profiles")
       .update({
@@ -227,6 +228,19 @@ export async function approveClientApplication(applicationId: string, adminNotes
 
     if (profileUpdateError) {
       console.error("Error updating profile during client approval:", profileUpdateError);
+      // Roll back application status to its previous state
+      const { error: rollbackError } = await supabase
+        .from("client_applications")
+        .update({
+          status: previousStatus,
+          admin_notes: null,
+        })
+        .eq("id", applicationId);
+
+      if (rollbackError) {
+        console.error("Error rolling back client application status:", rollbackError);
+      }
+
       return { error: "Failed to promote profile to client" };
     }
 
