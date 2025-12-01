@@ -67,6 +67,7 @@ All other documentation has been organized into the `docs/` folder.
 - `FORM_INPUT_POLISH_IMPLEMENTATION.md` - Form input polish with floating labels & animations (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
+- `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 
 ### **🔧 Development & Code Quality**
