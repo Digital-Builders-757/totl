@@ -418,21 +418,31 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Supabase SSR stores session in cookies with names like:
         // - sb-<project-ref>-auth-token
         // - sb-<project-ref>-auth-token.0, sb-<project-ref>-auth-token.1, etc.
-        if (supabaseUrl) {
-          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
-          const cookieBaseName = `sb-${projectRef}-auth-token`;
-          
-          // Clear base cookie and chunked cookies (0-9)
-          for (let i = 0; i < 10; i++) {
-            const cookieName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
-            // Clear with different path and domain combinations
-            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-            document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
-            if (window.location.hostname.includes(".")) {
-              document.cookie = `${cookieName}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
-            }
+      if (supabaseUrl) {
+        const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+        const cookieBaseName = `sb-${projectRef}-auth-token`;
+        
+        const clearCookie = (name: string) => {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+          if (window.location.hostname.includes(".")) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
           }
+        };
+
+        // Clear Supabase auth-token chunks
+        for (let i = 0; i < 10; i++) {
+          const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
+          clearCookie(chunkName);
         }
+
+        // Clear access/refresh tokens explicit names Supabase uses
+        ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
+          clearCookie(name);
+          clearCookie(`${name}.0`);
+          clearCookie(`${name}.1`);
+        });
+      }
       }
       
       // Use hard redirect to ensure complete session clear and page reload
