@@ -56,6 +56,13 @@
 - ✅ Refreshed the login gate, error/loading contrast, and increments in `app/client/dashboard/page.tsx` plus the post-gig entry button so the light-mode surfaces keep the same feel everywhere  
 - ✅ Verified subscription gating on gigs and subscription redirect handling remain covered by Playwright specs and that the sign-in CTA still includes the `returnUrl` parameter hence the test reflects the real `href`
 
+## 🚀 **Latest Achievement: Logout & Session Reset Flow**
+
+**COOKIE RESET HARDENING** - December 3, 2025  
+- ✅ Added comprehensive cookie clearing to `components/auth/auth-provider.tsx`, deleting Supabase auth-token chunks plus every `sb-access-token`, `sb-refresh-token`, and `sb-user-token` variant before redirecting to `/login`  
+- ✅ Prevents stale session cookies from looping clients back to `/client/dashboard` after sign-out, so the next login starts from a clean slate without needing a manual refresh  
+- ✅ Confirmed by watching the logout network request expire the HttpOnly tokens and verifying the login gate lands on the actual form instead of instantly redirecting
+
 ## 🚀 **Latest Achievement: Supabase Types Guardrail Alignment**
 
 **TYPES & SCHEMA TRUTH LOCKDOWN** - November 27, 2025  
