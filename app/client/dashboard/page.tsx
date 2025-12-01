@@ -323,30 +323,24 @@ export default function ClientDashboard() {
   // Show login prompt if no user
   if (!user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-        {/* Subtle gradient background effect */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
-        
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center relative overflow-hidden">
         <div className="text-center max-w-md mx-auto p-8 relative z-10">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 p-8 backdrop-blur-sm">
-            {/* Top accent bar */}
-            <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600 mb-6" />
-            
-            <User className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+          <div className="bg-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-3xl">
+            <div className="h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 rounded-full" />
+            <User className="h-16 w-16 text-white/80 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
-            <p className="text-gray-400 mb-6 text-lg">
+            <p className="text-gray-300 mb-6 text-lg">
               You need to be logged in to access your client dashboard.
             </p>
-            <Button asChild className="bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
+            <Button
+              asChild
+              className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               <Link href="/login">Sign In to Continue</Link>
             </Button>
-            
             <div className="mt-6 pt-6 border-t border-gray-800">
-              <p className="text-sm text-gray-500 mb-3">New to TOTL?</p>
-              <Link 
-                href="/client/apply" 
-                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
-              >
+              <p className="text-sm text-gray-400 mb-3">New to TOTL?</p>
+              <Link href="/client/apply" className="text-blue-400 hover:text-blue-200 transition-colors text-sm font-medium">
                 Apply to become a client →
               </Link>
             </div>
@@ -356,10 +350,16 @@ export default function ClientDashboard() {
     );
   }
 
+  const quickStatCardClass =
+    "hover:shadow-xl transition-shadow bg-gray-900 border border-gray-800 text-white shadow-lg";
+  const panelCardClass = "bg-gray-900 border border-gray-800 shadow-sm text-white";
+  const tabTriggerClass =
+    "flex items-center gap-2 justify-center text-gray-200 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl border border-transparent hover:bg-gray-800 transition";
+
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-black text-white">
       {/* Header */}
-      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
+      <div className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
@@ -380,17 +380,17 @@ export default function ClientDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="apple-glass border-white/30 text-white">
+              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
                 <Bell className="h-4 w-4 mr-2" />
                 Notifications
               </Button>
-              <Button variant="outline" size="sm" asChild className="apple-glass border-white/30 text-white">
+              <Button variant="outline" size="sm" asChild className="border-gray-700 text-white hover:bg-gray-800">
                 <Link href="/settings">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={signOut} className="apple-glass border-white/30 text-white">
+              <Button variant="outline" size="sm" onClick={signOut} className="border-gray-700 text-white hover:bg-gray-800">
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
               </Button>
@@ -411,11 +411,11 @@ export default function ClientDashboard() {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Total Gigs</p>
+                  <p className="text-sm font-medium text-gray-400">Total Gigs</p>
                   <p className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</p>
                 </div>
                 <div className="bg-blue-500/20 p-2 rounded-full">
@@ -425,11 +425,11 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Active Gigs</p>
+                  <p className="text-sm font-medium text-gray-400">Active Gigs</p>
                   <p className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</p>
                 </div>
                 <div className="bg-green-500/20 p-2 rounded-full">
@@ -439,11 +439,11 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Applications</p>
+                  <p className="text-sm font-medium text-gray-400">Applications</p>
                   <p className="text-2xl font-bold text-white">
                     {dashboardStats.totalApplications}
                   </p>
@@ -455,11 +455,11 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">New</p>
+                  <p className="text-sm font-medium text-gray-400">New</p>
                   <p className="text-2xl font-bold text-white">
                     {dashboardStats.newApplications}
                   </p>
@@ -471,11 +471,11 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Completed</p>
+                  <p className="text-sm font-medium text-gray-400">Completed</p>
                   <p className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</p>
                 </div>
                 <div className="bg-green-500/20 p-2 rounded-full">
@@ -485,11 +485,11 @@ export default function ClientDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card className={quickStatCardClass}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Total Spent</p>
+                  <p className="text-sm font-medium text-gray-400">Total Spent</p>
                   <p className="text-2xl font-bold text-white">
                     ${dashboardStats.totalSpent.toLocaleString()}
                   </p>
@@ -504,20 +504,20 @@ export default function ClientDashboard() {
 
         {/* Main Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-4 gap-2 bg-gray-900 border border-gray-800 rounded-2xl p-1">
+            <TabsTrigger value="overview" className={`${tabTriggerClass}`}>
               <BarChart3 className="h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="gigs" className="flex items-center gap-2">
+            <TabsTrigger value="gigs" className={`${tabTriggerClass}`}>
               <Briefcase className="h-4 w-4" />
               My Gigs
             </TabsTrigger>
-            <TabsTrigger value="applications" className="flex items-center gap-2">
+            <TabsTrigger value="applications" className={`${tabTriggerClass}`}>
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="create" className="flex items-center gap-2">
+            <TabsTrigger value="create" className={`${tabTriggerClass}`}>
               <Plus className="h-4 w-4" />
               Create Gig
             </TabsTrigger>
@@ -527,7 +527,7 @@ export default function ClientDashboard() {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Gigs */}
-              <Card className="bg-gray-900 border-gray-700">
+              <Card className={`${panelCardClass}`}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Briefcase className="h-5 w-5 text-white" />
@@ -585,7 +585,7 @@ export default function ClientDashboard() {
               </Card>
 
               {/* Recent Applications */}
-              <Card className="bg-gray-900 border-gray-700">
+              <Card className={panelCardClass}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Users className="h-5 w-5 text-white" />
@@ -650,7 +650,7 @@ export default function ClientDashboard() {
             </div>
 
             {/* Upcoming Deadlines */}
-            <Card>
+            <Card className={`${panelCardClass}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
@@ -664,18 +664,18 @@ export default function ClientDashboard() {
                     upcomingDeadlines.map((deadline) => (
                       <div
                         key={deadline.id}
-                        className="flex items-center justify-between p-4 rounded-lg border"
+                        className="flex items-center justify-between p-4 rounded-lg border border-gray-800"
                       >
                         <div className="flex items-center gap-4">
                           <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">{deadline.title}</h4>
-                            <p className="text-sm text-gray-600">
+                            <h4 className="font-medium text-white">{deadline.title}</h4>
+                            <p className="text-sm text-gray-400">
                               {deadline.applications_count || 0} applications received
                             </p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-white">
                             Due {deadline.application_deadline}
                           </p>
                           <Badge variant="outline" className={getStatusColor(deadline.status)}>
@@ -700,10 +700,13 @@ export default function ClientDashboard() {
           <TabsContent value="gigs" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">My Gigs</h2>
-                <p className="text-gray-600">Manage your posted gigs and track their performance</p>
+                <h2 className="text-2xl font-bold text-white">My Gigs</h2>
+                <p className="text-gray-300">Manage your posted gigs and track their performance</p>
               </div>
-              <Button asChild>
+              <Button
+                asChild
+                className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:opacity-90"
+              >
                 <Link href="/post-gig">
                   <Plus className="h-4 w-4 mr-2" />
                   Post New Gig
@@ -711,14 +714,17 @@ export default function ClientDashboard() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {gigs.map((gig) => (
-                <Card key={gig.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={gig.id}
+                  className="hover:shadow-lg transition-shadow bg-gray-900/80 border border-gray-800 text-white"
+                >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{gig.title}</CardTitle>
-                        <CardDescription className="mt-1">{gig.location}</CardDescription>
+                        <CardTitle className="text-lg text-white">{gig.title}</CardTitle>
+                        <CardDescription className="mt-1 text-gray-400">{gig.location}</CardDescription>
                       </div>
                       <Button variant="ghost" size="sm">
                         <MoreVertical className="h-4 w-4" />
@@ -744,25 +750,33 @@ export default function ClientDashboard() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Compensation:</span>
+                        <span className="text-gray-400">Compensation:</span>
                         <span className="font-medium">{gig.compensation}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Applications:</span>
+                        <span className="text-gray-400">Applications:</span>
                         <span className="font-medium">{gig.applications_count}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Posted:</span>
+                        <span className="text-gray-400">Posted:</span>
                         <span className="font-medium">{gig.created_at}</span>
                       </div>
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
+                      >
                         <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
+                      >
                         <Users className="h-4 w-4 mr-2" />
                         Applications
                       </Button>
@@ -777,8 +791,8 @@ export default function ClientDashboard() {
           <TabsContent value="applications" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Applications</h2>
-                <p className="text-gray-600">Review and manage talent applications for your gigs</p>
+                <h2 className="text-2xl font-bold text-white">Applications</h2>
+                <p className="text-gray-300">Review and manage talent applications for your gigs</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
@@ -805,7 +819,10 @@ export default function ClientDashboard() {
                 />
               ) : (
                 applications.map((application) => (
-                  <Card key={application.id} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={application.id}
+                    className="hover:shadow-md transition-shadow bg-gray-900/80 border border-gray-800 text-white"
+                  >
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
                         <Avatar className="h-16 w-16">
@@ -832,25 +849,25 @@ export default function ClientDashboard() {
                         <div className="flex-1">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold text-white">
                                 {application.talent_profiles?.first_name &&
                                 application.talent_profiles?.last_name
                                   ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
                                   : application.profiles?.display_name || "Talent User"}
                               </h3>
-                              <p className="text-gray-600">{application.gigs?.title}</p>
+                              <p className="text-gray-300">{application.gigs?.title}</p>
                               <div className="flex items-center gap-4 mt-2">
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-400">
                                   <MapPin className="h-4 w-4 inline mr-1" />
                                   {application.talent_profiles?.location ||
                                     "Location not specified"}
                                 </span>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-400">
                                   <Clock className="h-4 w-4 inline mr-1" />
                                   {application.talent_profiles?.experience ||
                                     "Experience not specified"}
                                 </span>
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-gray-400">
                                   Applied {new Date(application.created_at).toLocaleDateString()}
                                 </span>
                                 {application.profiles?.email_verified && (
@@ -868,11 +885,11 @@ export default function ClientDashboard() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
                             <UserCheck className="h-4 w-4 mr-2" />
                             Review
                           </Button>
-                          <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
                             <Phone className="h-4 w-4 mr-2" />
                             Contact
                           </Button>
@@ -891,39 +908,39 @@ export default function ClientDashboard() {
               <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
                 <Plus className="h-10 w-10 text-blue-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Create Your Next Gig</h2>
-              <p className="text-gray-600 mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">Create Your Next Gig</h2>
+              <p className="text-gray-300 mb-8">
                 Post a new casting call or gig to find the perfect talent for your project. Our
                 platform connects you with qualified models, actors, and performers.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="text-center p-6">
-                  <div className="bg-purple-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-6 w-6 text-purple-600" />
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-purple-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-6 w-6 text-purple-300" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Easy Setup</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="font-semibold text-white mb-2">Easy Setup</h3>
+                  <p className="text-sm text-gray-400">
                     Fill out a simple form with your project details
                   </p>
                 </Card>
 
-                <Card className="text-center p-6">
-                  <div className="bg-green-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-6 w-6 text-green-600" />
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-green-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-6 w-6 text-emerald-300" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Quality Applications</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="font-semibold text-white mb-2">Quality Applications</h3>
+                  <p className="text-sm text-gray-400">
                     Receive applications from qualified talent
                   </p>
                 </Card>
 
-                <Card className="text-center p-6">
-                  <div className="bg-blue-100 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="h-6 w-6 text-blue-600" />
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-blue-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-6 w-6 text-sky-300" />
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Quick Hiring</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="font-semibold text-white mb-2">Quick Hiring</h3>
+                  <p className="text-sm text-gray-400">
                     Review profiles and hire the perfect match
                   </p>
                 </Card>

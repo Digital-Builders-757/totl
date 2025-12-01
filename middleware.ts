@@ -1,6 +1,6 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createServerClient } from "@supabase/ssr";
 import type { Database } from "@/types/supabase";
 
 type AccountType = "unassigned" | "talent" | "client";
@@ -44,6 +44,7 @@ const determineDestination = (profile: ProfileRow | null) => {
 
 const needsClientAccess = (path: string) => path.startsWith("/client/") && path !== "/client/apply";
 const needsTalentAccess = (path: string) => path.startsWith("/talent/") && path !== "/talent";
+const needsAdminAccess = (path: string) => path.startsWith("/admin/");
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -145,6 +146,10 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!isAdmin) {
+    if (needsAdminAccess(path)) {
+      const destination = determineDestination(profile);
+      return NextResponse.redirect(new URL(destination, req.url));
+    }
     if (needsClientAccess(path) && accountType !== "client") {
       const destination = determineDestination(profile);
       return NextResponse.redirect(new URL(destination, req.url));

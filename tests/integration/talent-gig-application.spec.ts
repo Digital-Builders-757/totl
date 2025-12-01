@@ -20,24 +20,21 @@ async function loginAsTalent(page: Page) {
 test.describe("Talent gig application experience", () => {
   test("anonymous visitors see the sign-in CTA before applying", async ({ page }) => {
     await page.goto(GIG_PATH);
-    await expect(page.getByText(/apply for this gig/i)).toBeVisible();
+    await expect(page.getByText(/sign in to apply/i)).toBeVisible();
     await expect(page.getByRole("link", { name: /sign in to apply/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /sign in to apply/i })).toHaveAttribute(
-      "href",
-      "/login"
-    );
+    const signInLink = page.getByRole("link", { name: /sign in to apply/i });
+    await expect(signInLink).toHaveAttribute("href", /\/login\?returnUrl=%2Fgigs%2F/);
   });
 
-  test("logged-in talent sees their application status badge", async ({ page }) => {
+  test("non-subscribed talent sees the subscription gate after login", async ({ page }) => {
     await loginAsTalent(page);
     await page.goto(GIG_PATH);
-    await expect(page.getByText(/apply for this gig/i)).toBeVisible();
-    await expect(page.getByText(/application submitted/i)).toBeVisible();
-    await expect(page.getByRole("link", { name: /view dashboard/i })).toHaveAttribute(
-      "href",
-      "/talent/dashboard"
-    );
-    await expect(page.getByText(/you've already applied/i)).toBeVisible();
+    await expect(
+      page.getByText(/you need an active subscription to apply to this gig/i)
+    ).toBeVisible();
+    const viewPlansLink = page.getByRole("link", { name: /view plans/i });
+    await expect(viewPlansLink).toBeVisible();
+    await expect(viewPlansLink).toHaveAttribute("href", "/talent/subscribe");
   });
 });
 

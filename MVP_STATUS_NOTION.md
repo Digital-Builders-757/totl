@@ -49,6 +49,13 @@
 - ✅ Hardened `lib/actions/client-actions.ts` to use the service-role admin client, paginate `auth.admin.listUsers`, and fail the approval if we can't promote a profile, ensuring the applicant is routed to `/client/dashboard` only when `profiles.account_type`/`role` are actually set to `client`  
 - ✅ Documented the unified signup → role-selection flow (`docs/CLIENT_ACCOUNT_FLOW_PRD.md`), expanded middleware/auth/redirection guardrails, and confirmed `npm run lint` + `npm run build` pass against the new behavior  
 
+## 🚀 **Latest Achievement: Client Dashboard Palette & Subscription Gate**
+
+**CLIENT DASHBOARD POLISH** - December 2, 2025  
+- ✅ Matched the client dashboard background, cards, tabs, and action buttons with the dark, high-contrast palette used on the talent dashboard so both roles share the same premium visual language  
+- ✅ Refreshed the login gate, error/loading contrast, and increments in `app/client/dashboard/page.tsx` plus the post-gig entry button so the light-mode surfaces keep the same feel everywhere  
+- ✅ Verified subscription gating on gigs and subscription redirect handling remain covered by Playwright specs and that the sign-in CTA still includes the `returnUrl` parameter hence the test reflects the real `href`
+
 ## 🚀 **Latest Achievement: Supabase Types Guardrail Alignment**
 
 **TYPES & SCHEMA TRUTH LOCKDOWN** - November 27, 2025  
