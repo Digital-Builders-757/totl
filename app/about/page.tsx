@@ -144,8 +144,11 @@ export default function AboutPage() {
             </Badge>
             <h2 className="text-5xl lg:text-6xl font-bold text-white">What Drives Us</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div
+              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              style={{ animationDelay: "0s" }}
+            >
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <Users className="w-8 h-8 text-white" />
               </div>
@@ -179,6 +182,20 @@ export default function AboutPage() {
               <p className="text-gray-300 leading-relaxed">
                 We&apos;re committed to raising industry standards through ethical practices, fair
                 compensation, and professional development.
+              </p>
+            </div>
+            <div
+              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              style={{ animationDelay: "0.3s" }}
+            >
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-white">Curated Applicant Access</h3>
+              <p className="text-gray-300 leading-relaxed">
+                Clients only see the talent who applied to their gigs—there is no public browseable
+                roster. This approach keeps talent protected and keeps every opportunity contextually
+                relevant.
               </p>
             </div>
           </div>

@@ -440,7 +440,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
           clearCookie(name);
           clearCookie(`${name}.0`);
-          clearCookie(`${name}.1`);
+          for (let i = 1; i < 10; i += 1) {
+            clearCookie(`${name}.${i}`);
+          }
         });
       }
       }

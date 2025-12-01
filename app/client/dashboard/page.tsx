@@ -594,6 +594,9 @@ export default function ClientDashboard() {
                   <CardDescription className="text-gray-400">Latest talent applications to review</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <p className="text-xs text-gray-400">
+                    Clients only see talent who applied to their gigs—no public directory is exposed.
+                  </p>
                   {applications.length > 0 ? (
                     applications.slice(0, 3).map((application) => (
                       <div key={application.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">

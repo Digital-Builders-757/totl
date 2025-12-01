@@ -142,7 +142,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
     // Get application details for email
     const { data: applicationData, error: fetchError } = await supabase
       .from("client_applications")
-      .select("first_name, last_name, email, company_name, industry, status")
+      .select("first_name, last_name, email, company_name, industry, status, admin_notes")
       .eq("id", applicationId)
       .maybeSingle();
 
@@ -201,6 +201,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
     }
 
     const previousStatus = applicationData.status ?? "pending";
+    const previousAdminNotes = applicationData.admin_notes ?? null;
     // Update the application status to approved before promoting the profile
     const { error: updateError } = await supabase
       .from("client_applications")
@@ -233,7 +234,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
         .from("client_applications")
         .update({
           status: previousStatus,
-          admin_notes: null,
+          admin_notes: previousAdminNotes,
         })
         .eq("id", applicationId);
 
