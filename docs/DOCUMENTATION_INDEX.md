@@ -116,6 +116,17 @@ All other documentation has been organized into the `docs/` folder.
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (complete documentation index)
 
+### **🎮 Future Projects & Templates**
+- `blockchaingames/README.md` - **NEW** 🎮 - Blockchain Gang Life project documentation index
+- `blockchaingames/PROJECT_SPEC.md` - **NEW** 🎮 - Complete project specification for Blockchain Gang Life (Solana-based RPG/metaverse game)
+- `blockchaingames/ARCHITECTURE.md` - **NEW** 🎮 - Technical architecture plan with Solana integration and database schema (22+ tables)
+- `blockchaingames/QUICKSTART.md` - **NEW** 🎮 - Quick start guide for building Blockchain Gang Life MVP (4-week plan)
+- `blockchaingames/EXTRACTION_PLAN.md` - **NEW** 🎮 - Step-by-step guide to extract reusable architecture from TOTL with Solana integration
+- `blockchaingames/CURSOR_SETUP_GUIDE.md` - **NEW** 🎮 - Complete guide to setting up Cursor AI with proper rules and context for Solana development
+- `blockchaingames/CI_CD_SETUP.md` - **NEW** 🎮 - CI/CD pipeline setup with GitHub Actions, schema verification, and automated checks
+- `blockchaingames/COST_ANALYSIS.md` - **NEW** 🎮 - Honest cost & performance analysis for 100+ concurrent players, optimization strategies, and scaling projections
+- `blockchaingames/MVP_ROADMAP.md` - **NEW** 🎮 - Complete phased MVP roadmap with checklists, PVP system, wills, social systems, and city wars
+
 ---
 
 ## 🚀 Quick Start Guides
