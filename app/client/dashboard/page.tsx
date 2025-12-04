@@ -330,7 +330,7 @@ export default function ClientDashboard() {
             <User className="h-16 w-16 text-white/80 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
             <p className="text-gray-300 mb-6 text-lg">
-              You need to be logged in to access your client dashboard.
+              You need to be logged in to access your Career Builder dashboard.
             </p>
             <Button
               asChild
@@ -341,7 +341,7 @@ export default function ClientDashboard() {
             <div className="mt-6 pt-6 border-t border-gray-800">
               <p className="text-sm text-gray-400 mb-3">New to TOTL?</p>
               <Link href="/client/apply" className="text-blue-400 hover:text-blue-200 transition-colors text-sm font-medium">
-                Apply to become a client →
+                Apply to become a Career Builder →
               </Link>
             </div>
           </div>
@@ -372,7 +372,7 @@ export default function ClientDashboard() {
               </Avatar>
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  Welcome back, {clientProfile?.contact_name || "Client"}!
+                  Welcome back, {clientProfile?.contact_name || "Career Builder"}!
                 </h1>
                 <p className="text-gray-300">
                   {clientProfile?.company_name || "Manage your gigs and applications"}

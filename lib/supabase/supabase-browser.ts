@@ -7,6 +7,13 @@ import type { Database } from "@/types/supabase";
 
 let client: SupabaseClient<Database> | null = null;
 
+/**
+ * Reset the browser client singleton (useful for sign out)
+ */
+export function resetSupabaseBrowserClient() {
+  client = null;
+}
+
 export function createSupabaseBrowser(): SupabaseClient<Database> | null {
   // Only create client on client-side
   if (typeof window === 'undefined') {

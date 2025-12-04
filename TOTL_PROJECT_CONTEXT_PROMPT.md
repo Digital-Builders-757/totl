@@ -2,6 +2,8 @@
 
 > **Read this file before touching any code, tests, docs, or database objects.**  
 > It collects the non‑negotiable rules, common pitfalls, and references you must revisit before every change.
+>
+> **🤖 NEW AI AGENTS:** Start with `AGENT_ONBOARDING.md` for a quick-start guide, then return here for complete details.
 
 ---
 

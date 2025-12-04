@@ -7,7 +7,7 @@ type Gig = Database['public']['Tables']['gigs']['Row'];
 
 /**
  * Get display title for a gig based on user's subscription status
- * Non-subscribers see obfuscated titles to protect client privacy
+ * Non-subscribers see obfuscated titles to protect Career Builder privacy
  */
 export function getGigDisplayTitle(
   gig: Gig,
@@ -32,11 +32,11 @@ export function getGigDisplayTitle(
     'beauty': 'Beauty Campaign for Cosmetics Brand',
     'fitness': 'Fitness Campaign for Athletic Brand',
     'e-commerce': 'E-commerce Shoot for Retail Brand',
-    'other': 'Professional Shoot for Major Client',
+    'other': 'Professional Shoot for Major Career Builder',
   };
   
   return categoryTitles[category.toLowerCase() as keyof typeof categoryTitles] || 
-         `${category} Project for Major Client`;
+         `${category} Project for Major Career Builder`;
 }
 
 /**
@@ -65,11 +65,11 @@ export function getGigDisplayDescription(
     'beauty': 'Beauty and cosmetics campaign for a major brand. Focus on natural beauty and product showcase.',
     'fitness': 'Athletic and fitness campaign showcasing active lifestyle. Requires fitness modeling experience.',
     'e-commerce': 'Product photography for online retail. Clean, professional shots for e-commerce platform.',
-    'other': 'Professional modeling opportunity with established client. Details available to subscribers.',
+    'other': 'Professional modeling opportunity with established Career Builder. Details available to subscribers.',
   };
   
   return genericDescriptions[category.toLowerCase() as keyof typeof genericDescriptions] || 
-         'Professional modeling opportunity with established client. Subscribe to see full details.';
+         'Professional modeling opportunity with established Career Builder. Subscribe to see full details.';
 }
 
 /**
@@ -80,7 +80,7 @@ export function canApplyToGig(profile: Profile | MinimalProfile | null): boolean
 }
 
 /**
- * Check if user can see full client details
+ * Check if user can see full Career Builder details
  */
 export function canSeeClientDetails(profile: Profile | MinimalProfile | null): boolean {
   if (!profile) return false;
@@ -89,17 +89,17 @@ export function canSeeClientDetails(profile: Profile | MinimalProfile | null): b
 }
 
 /**
- * Get client display name based on subscription status
+ * Get Career Builder display name based on subscription status
  */
 export function getClientDisplayName(
   clientName: string | null,
   profile: Profile | MinimalProfile | null
 ): string {
   if (!profile || profile.role !== 'talent' || isActiveSubscriber(profile)) {
-    return clientName || 'Client';
+    return clientName || 'Career Builder';
   }
   
-  return 'Premium Client';
+  return 'Premium Career Builder';
 }
 
 /**
@@ -120,7 +120,7 @@ export function getSubscriptionPromptMessage(profile: Profile | MinimalProfile |
 
   switch (profile.subscription_status) {
     case 'none':
-      return 'Subscribe to apply to gigs and see full client details';
+      return 'Subscribe to apply to gigs and see full Career Builder details';
     case 'canceled':
       return 'Reactivate your subscription to apply to gigs';
     case 'past_due':

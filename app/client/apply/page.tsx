@@ -144,7 +144,7 @@ export default function ClientApplicationPage() {
           setApplicationStatus(payload);
 
           if (payload.status === "approved") {
-            setStatusMessage("Your application is approved — redirecting to the client dashboard.");
+            setStatusMessage("Your application is approved — redirecting to the Career Builder dashboard.");
             router.push("/client/dashboard");
             return;
           }
@@ -199,7 +199,7 @@ export default function ClientApplicationPage() {
           {statusMessage && (
             <div className="p-4 bg-slate-900 border-b border-white/5">
               <Alert className="bg-slate-950 text-white">
-                <AlertTitle className="text-white">Client Application</AlertTitle>
+                <AlertTitle className="text-white">Career Builder Application</AlertTitle>
                 <AlertDescription className="text-white/80">{statusMessage}</AlertDescription>
               </Alert>
             </div>
@@ -216,7 +216,7 @@ export default function ClientApplicationPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-transparent"></div>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 text-white">
-                  <h2 className="text-2xl font-bold mb-2">Apply to Become a Client</h2>
+                  <h2 className="text-2xl font-bold mb-2">Apply to Become a Career Builder</h2>
                   <p className="text-white/80">
                     Join our exclusive network and gain access to our premium talent roster
                   </p>
@@ -226,9 +226,9 @@ export default function ClientApplicationPage() {
 
             <div className="md:col-span-3 p-8 bg-slate-950">
               <div className="mb-8">
-                <h1 className="text-2xl font-bold mb-2">Client Application</h1>
+                <h1 className="text-2xl font-bold mb-2">Career Builder Application</h1>
                 <p className="text-white/70">
-                  Complete the form below to apply as a client with TOTL Agency. Our team will
+                  Complete the form below to apply as a Career Builder with TOTL Agency. Our team will
                   review your application and contact you within 2-3 business days.
                 </p>
               </div>

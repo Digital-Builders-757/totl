@@ -26,7 +26,7 @@ export default async function ApplicationSuccessPage({
             </div>
             <h1 className="text-2xl font-bold mb-4">Application Submitted Successfully</h1>
             <p className="text-gray-600 mb-6">
-              Thank you for applying to become a client with TOTL Agency. Our team will review your
+              Thank you for applying to become a Career Builder with TOTL Agency. Our team will review your
               application and contact you within 2-3 business days.
             </p>
             {applicationId && (
@@ -80,7 +80,7 @@ export default async function ApplicationSuccessPage({
                     3
                   </span>
                   <span>
-                    Our client success team will schedule an onboarding call to help you get started
+                    Our Career Builder success team will schedule an onboarding call to help you get started
                     and answer any questions
                   </span>
                 </li>

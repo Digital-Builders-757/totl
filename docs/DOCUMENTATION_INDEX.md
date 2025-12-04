@@ -14,6 +14,7 @@ These files remain in the project root for easy access:
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview and setup instructions |
+| `AGENT_ONBOARDING.md` | **🤖 NEW** - AI agent quick-start guide (read this first!) |
 | `TOTL_PROJECT_CONTEXT_PROMPT.md` | **Mandatory** project rules, pitfalls, and pre-change checklist |
 | `database_schema_audit.md` | **SINGLE SOURCE OF TRUTH** for database schema |
 | `MVP_STATUS_NOTION.md` | Current MVP status and next priorities |

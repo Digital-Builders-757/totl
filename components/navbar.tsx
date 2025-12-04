@@ -150,7 +150,7 @@ export default function Navbar() {
                 href="/client/apply"
                 className="px-3 py-1 lg:px-4 rounded-full border border-white/30 text-xs font-semibold uppercase tracking-[0.25em] text-white hover:border-white"
               >
-                Apply to be a Client
+                Apply to be a Career Builder
               </Link>
             )}
             {isTalentUser && (
@@ -212,7 +212,7 @@ export default function Navbar() {
                       href="/client/apply"
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
-                      Apply to be a Client
+                      Apply to be a Career Builder
                     </Link>
                   )}
                   {userRole === "client" && (
@@ -220,7 +220,7 @@ export default function Navbar() {
                       href="/client/dashboard"
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
-                      Client Dashboard
+                      Career Builder Dashboard
                     </Link>
                   )}
                   {userRole === "admin" && (
@@ -326,7 +326,7 @@ export default function Navbar() {
                         href="/client/apply"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
-                        Apply to be a Client
+                        Apply to be a Career Builder
                       </Link>
                     )}
                     {userRole === "talent" && (
@@ -350,7 +350,7 @@ export default function Navbar() {
                         href="/client/dashboard"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
-                        Client Dashboard
+                        Career Builder Dashboard
                       </Link>
                     )}
                     {userRole === "admin" && (

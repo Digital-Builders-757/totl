@@ -6,7 +6,7 @@ import type React from "react";
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -275,13 +275,49 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Error fetching profile on sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
+        // Reset the browser client singleton to ensure clean state
+        // This prevents the old authenticated client from being reused
+        resetSupabaseBrowserClient();
+        
         setUser(null);
         setSession(null);
         setUserRole(null);
         setProfile(null);
         setIsEmailVerified(false);
         setHasHandledInitialSession(false);
-        router.push("/login");
+        
+        // Redirect to login if we're on a protected route
+        // SIGNED_OUT events fire independently when:
+        // - Sessions expire naturally
+        // - Sessions are cleared externally (admin deletes user, etc.)
+        // - Other tabs sign out (cross-tab sync)
+        // In these cases, we need to redirect to prevent users from viewing protected content while logged out
+        if (typeof window !== "undefined") {
+          const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended", "/client/signup", "/client/apply"];
+          const publicRoutePrefixes = ["/talent/", "/gigs/"]; // Dynamic public routes that need prefix matching
+          const authRoutes = ["/login", "/reset-password", "/update-password", "/verification-pending", "/choose-role"];
+          const currentPath = pathname || window.location.pathname;
+          
+          // Check if current path is an exact public route match
+          const isExactPublicRoute = publicRoutes.includes(currentPath);
+          
+          // Check if current path starts with a public route prefix (for dynamic routes like /talent/[slug])
+          const isPublicRoutePrefix = publicRoutePrefixes.some(prefix => currentPath.startsWith(prefix));
+          
+          // Check if current path is an auth route
+          const isAuthRoute = authRoutes.includes(currentPath);
+          
+          // Only redirect if we're not already on a public or auth route
+          if (!isExactPublicRoute && !isPublicRoutePrefix && !isAuthRoute) {
+            // Use hard redirect with cache busting to ensure complete session clear
+            // This matches the pattern used in signOut() for consistency
+            const cacheBuster = `?t=${Date.now()}`;
+            window.location.href = `/login${cacheBuster}`;
+          }
+        } else {
+          // Fallback for server-side (shouldn't happen, but just in case)
+          router.push("/login");
+        }
       } else if (event === "TOKEN_REFRESHED") {
         // Just update the session, no need to refetch profile
         setSession(session);
@@ -383,7 +419,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) return { error: null };
     
     try {
-      // Clear all local state first
+      // Clear all local state FIRST to prevent UI from showing authenticated state
       setUser(null);
       setSession(null);
       setUserRole(null);
@@ -391,8 +427,23 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
       
-      // Sign out from Supabase - this clears server-side session and cookies
-      const { error } = await supabase.auth.signOut();
+      // Reset the browser client singleton to ensure clean state
+      resetSupabaseBrowserClient();
+      
+      // Sign out from Supabase client-side first
+      const { error: clientError } = await supabase.auth.signOut();
+      
+      // Also call server-side sign out API to clear server-side cookies
+      // This ensures both client and server sessions are cleared
+      try {
+        await fetch("/api/auth/signout", {
+          method: "POST",
+          credentials: "include", // Important: include cookies
+        });
+      } catch (apiError) {
+        // Log but don't fail - client-side sign out is more important
+        console.warn("Server-side sign out API call failed:", apiError);
+      }
       
       // Clear all client-side storage and cache
       if (typeof window !== "undefined") {
@@ -418,51 +469,66 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Supabase SSR stores session in cookies with names like:
         // - sb-<project-ref>-auth-token
         // - sb-<project-ref>-auth-token.0, sb-<project-ref>-auth-token.1, etc.
-      if (supabaseUrl) {
-        const projectRef = supabaseUrl.split("//")[1].split(".")[0];
-        const cookieBaseName = `sb-${projectRef}-auth-token`;
-        
-        const clearCookie = (name: string) => {
-          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
-          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
-          if (window.location.hostname.includes(".")) {
-            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
-          }
-        };
+        if (supabaseUrl) {
+          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
+          const cookieBaseName = `sb-${projectRef}-auth-token`;
+          
+          const clearCookie = (name: string, path = "/", domain?: string) => {
+            // Try multiple variations to ensure cookie is cleared
+            const expires = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = `${name}=;${expires};path=${path}`;
+            if (domain) {
+              document.cookie = `${name}=;${expires};path=${path};domain=${domain}`;
+            }
+            // Also try without domain
+            document.cookie = `${name}=;${expires};path=/`;
+            document.cookie = `${name}=;${expires};path=/;domain=${window.location.hostname}`;
+            if (window.location.hostname.includes(".")) {
+              document.cookie = `${name}=;${expires};path=/;domain=.${window.location.hostname}`;
+            }
+          };
 
-        // Clear Supabase auth-token chunks
-        for (let i = 0; i < 10; i++) {
-          const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
-          clearCookie(chunkName);
+          // Clear Supabase auth-token chunks (up to 20 chunks to be safe)
+          for (let i = 0; i < 20; i++) {
+            const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
+            clearCookie(chunkName);
+          }
+
+          // Clear access/refresh tokens explicit names Supabase uses
+          ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
+            clearCookie(name);
+            for (let i = 0; i < 20; i += 1) {
+              const chunkName = i === 0 ? name : `${name}.${i}`;
+              clearCookie(chunkName);
+            }
+          });
         }
-
-        // Clear access/refresh tokens explicit names Supabase uses
-        ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
-          clearCookie(name);
-          clearCookie(`${name}.0`);
-          for (let i = 1; i < 10; i += 1) {
-            clearCookie(`${name}.${i}`);
-          }
-        });
-      }
-      }
-      
-      // Use hard redirect to ensure complete session clear and page reload
-      // This bypasses Next.js router cache and forces a full page reload
-      if (typeof window !== "undefined") {
-        // Small delay to ensure state is cleared before redirect
-        await new Promise((resolve) => setTimeout(resolve, 100));
-        window.location.href = "/login";
+        
+        // Clear Next.js router cache by adding cache-busting query param
+        const cacheBuster = `?t=${Date.now()}`;
+        
+        // Use hard redirect with cache busting to ensure complete session clear
+        // This bypasses Next.js router cache and forces a full page reload
+        // Small delay to ensure all async operations complete
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        
+        // Force a hard reload to clear all caches
+        window.location.href = `/login${cacheBuster}`;
       } else {
         // Fallback for server-side (shouldn't happen, but just in case)
         router.push("/login");
         router.refresh();
       }
       
-      return { error };
+      return { error: clientError };
     } catch (error) {
       console.error("Error during sign out:", error);
       // Even if there's an error, clear local state and force redirect
+      
+      // Reset the browser client singleton to ensure clean state
+      // This prevents the old authenticated client from being reused even on error
+      resetSupabaseBrowserClient();
+      
       setUser(null);
       setSession(null);
       setUserRole(null);
@@ -484,7 +550,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
         });
         sessionStorage.clear();
-        window.location.href = "/login";
+        
+        // Force redirect with cache busting
+        const cacheBuster = `?t=${Date.now()}`;
+        window.location.href = `/login${cacheBuster}`;
       } else {
         router.push("/login");
         router.refresh();

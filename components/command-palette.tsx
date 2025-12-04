@@ -87,8 +87,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         commands.push(
           {
             icon: LayoutDashboard,
-            label: "Client Dashboard",
-            description: "View your client dashboard",
+            label: "Career Builder Dashboard",
+            description: "View your Career Builder dashboard",
             action: () => router.push("/client/dashboard"),
             shortcut: "D",
           },

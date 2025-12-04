@@ -15,7 +15,7 @@ export const USER_ROLE_DISPLAY_NAMES = {
 
 export const USER_ROLE_DESCRIPTIONS = {
   talent: "Actors and models who apply to gigs",
-  client: "Companies who post gigs and hire talent",
+  client: "Career Builders who post gigs and hire talent",
   admin: "TOTL Agency staff who oversee the platform",
 } as const;
 

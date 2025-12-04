@@ -65,7 +65,7 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
           {userRole === "client" && (
             <>
               <Button onClick={() => router.push("/client/dashboard")} variant="outline">
-                Go to Client Dashboard
+                Go to Career Builder Dashboard
               </Button>
               <Button onClick={() => router.push("/post-gig")} variant="outline">
                 Post New Gig
