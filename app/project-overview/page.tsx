@@ -18,14 +18,14 @@ export default function ProjectOverview() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             <Card>
               <CardHeader>
-                <CardTitle>Client Dashboard</CardTitle>
+                <CardTitle>Career Builder Dashboard</CardTitle>
                 <CardDescription>
-                  View the client dashboard with gigs and applications
+                  View the Career Builder dashboard with gigs and applications
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Button asChild className="w-full bg-black text-white hover:bg-black/90">
-                  <Link href="/admin/dashboard">View Client Dashboard</Link>
+                  <Link href="/admin/dashboard">View Career Builder Dashboard</Link>
                 </Button>
               </CardContent>
             </Card>

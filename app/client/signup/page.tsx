@@ -127,7 +127,7 @@ export default function ClientSignup() {
       // Success - redirect to returnUrl, success page or dashboard
       toast({
         title: "Account created!",
-        description: "Your client account has been created successfully.",
+        description: "Your Career Builder account has been created successfully.",
       });
 
       if (returnUrl) {
@@ -169,7 +169,7 @@ export default function ClientSignup() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 text-white">
-                  <h2 className="text-2xl font-bold mb-2">Register as a Client</h2>
+                  <h2 className="text-2xl font-bold mb-2">Register as a Career Builder</h2>
                   <p className="text-white/80">
                     Access our premium talent pool and build your dream campaigns
                   </p>
@@ -179,9 +179,9 @@ export default function ClientSignup() {
 
             <div className="md:col-span-3 p-8">
               <div className="mb-8">
-                <h1 className="text-2xl font-bold mb-2">Client Registration</h1>
+                <h1 className="text-2xl font-bold mb-2">Career Builder Registration</h1>
                 <p className="text-gray-600">
-                  Complete the form below to register as a client with TOTL Agency. Our team will
+                  Complete the form below to register as a Career Builder with TOTL Agency. Our team will
                   review your information and set up your account within 1-2 business days.
                 </p>
               </div>
@@ -302,7 +302,7 @@ export default function ClientSignup() {
                     className="w-full bg-black text-white hover:bg-black/90"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Registering..." : "Register as Client"}
+                    {isSubmitting ? "Registering..." : "Register as Career Builder"}
                   </Button>
                   <p className="text-sm text-gray-500 mt-4 text-center">
                     By submitting this form, you agree to our{" "}

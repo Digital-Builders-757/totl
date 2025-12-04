@@ -78,9 +78,9 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
         <div className="bg-white rounded-lg p-6 border border-gray-300">
           <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
           <div className="text-center py-8">
-            <p className="text-gray-500 mb-4">Contact details are only visible to registered clients</p>
+            <p className="text-gray-500 mb-4">Contact details are only visible to registered Career Builders</p>
             <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
-              <Link href="/client/apply">Apply as Client</Link>
+              <Link href="/client/apply">Apply as Career Builder</Link>
             </Button>
           </div>
         </div>

@@ -540,6 +540,9 @@ gigs (1) ←→ (many) gig_requirements
 9. `portfolio_items.talent_id` → `profiles.id` (CASCADE DELETE)
 10. `gig_requirements.gig_id` → `gigs.id` (CASCADE DELETE)
 11. `gig_notifications.user_id` → `auth.users.id` (CASCADE DELETE)
+12. `content_flags.reporter_id` → `profiles.id` (CASCADE DELETE)
+13. `content_flags.assigned_admin_id` → `profiles.id` (SET NULL - preserves flags when admin deleted)
+14. `content_flags.gig_id` → `gigs.id` (SET NULL - preserves flags when gig deleted)
 
 ## 🔒 Row-Level Security (RLS)
 
@@ -862,6 +865,7 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 11. **`20251021164837_fix_gig_notifications_rls_and_duplicate_indexes.sql`** - Final performance optimization (gig_notifications RLS, duplicate index cleanup)
 12. **`20251127162000_fix_admin_dashboard_comments.sql`** - Rewrites admin dashboard view/function comments without concatenation so migrations run in clean environments
 13. **`20251127173000_fix_query_stats_view.sql`** - Recreates `query_stats` using `relname`/`indexrelname` so it works against modern PostgreSQL catalog columns
+14. **`20251204150904_add_cascade_delete_constraints.sql`** - **🚨 CRITICAL** - Enforces ON DELETE CASCADE on all user-related foreign keys to ensure complete data cleanup when users are deleted
 
 ### **Recent Updates**
 - ✅ **Extension alignment (Nov 27, 2025)** — Added migration `20251016160000_create_pg_trgm_extension.sql` so `pg_trgm` is always installed in the `extensions` schema before later security migrations run (prevents local resets from failing)
@@ -871,6 +875,11 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
   - `profiles.id` → `auth.users.id`
   - `talent_profiles.user_id`, `client_profiles.user_id`, `gigs.client_id`, `applications.talent_id`, `bookings.talent_id`, `portfolio_items.talent_id` → `profiles.id`
   - `gig_notifications.user_id` → `auth.users.id`
+- ✅ **Cascade delete enforcement (Dec 4, 2025)** — Migration `20251204150904_add_cascade_delete_constraints.sql` explicitly enforces ON DELETE CASCADE on all foreign keys:
+  - **Public schema:** All constraints verified and updated to ensure cascading deletes
+  - **Content flags:** `reporter_id` → CASCADE, `assigned_admin_id` → SET NULL (preserves flags when admin deleted)
+  - **Auth schema:** Not modified (Supabase-managed tables - handled internally by Supabase)
+  - **Result:** Deleting a user from `auth.users` will cascade delete all related data (profiles, applications, bookings, portfolio items, etc.)
 - ✅ **Production cleanup** - Removed all mock data
 - ✅ **Production cleanup** - Removed all mock data
 - ✅ **RLS enhancement** - Added secure policies

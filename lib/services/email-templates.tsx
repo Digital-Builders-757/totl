@@ -508,13 +508,13 @@ export function generateNewApplicationClientEmail(data: EmailTemplateData): Emai
 }
 
 /**
- * Email Template: Client Application Submitted - To Admin
- * Sent to admin team when a new client application is submitted
+ * Email Template: Career Builder Application Submitted - To Admin
+ * Sent to admin team when a new Career Builder application is submitted
  */
 export function generateClientApplicationAdminNotificationEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
-    <h1>🎉 New Client Application Received</h1>
-    <p>A new business has applied to become a client on the TOTL Agency platform!</p>
+    <h1>🎉 New Career Builder Application Received</h1>
+    <p>A new business has applied to become a Career Builder on the TOTL Agency platform!</p>
     
     <div class="highlight">
       <p><strong>📋 Application Details:</strong></p>
@@ -531,7 +531,7 @@ export function generateClientApplicationAdminNotificationEmail(data: EmailTempl
     </div>
 
     <div class="highlight">
-      <p><strong>🎯 Client Needs:</strong></p>
+      <p><strong>🎯 Career Builder Needs:</strong></p>
       <p>${escapeHtml(data.needsDescription || "Not provided")}</p>
     </div>
 
@@ -548,17 +548,17 @@ export function generateClientApplicationAdminNotificationEmail(data: EmailTempl
   `;
   
   return {
-    subject: `🎉 New Client Application - ${data.companyName || "TOTL Agency"}`,
+    subject: `🎉 New Career Builder Application - ${data.companyName || "TOTL Agency"}`,
     html: createBaseTemplate(
-      "New Client Application",
+      "New Career Builder Application",
       content,
-      "A new business has applied to become a client"
+      "A new business has applied to become a Career Builder"
     ),
   };
 }
 
 /**
- * Email Template: Client Application Received - To Applicant
+ * Email Template: Career Builder Application Received - To Applicant
  * Confirmation email sent to the applicant immediately after submission
  */
 export function generateClientApplicationConfirmationEmail(data: EmailTemplateData): EmailTemplate {
@@ -567,7 +567,7 @@ export function generateClientApplicationConfirmationEmail(data: EmailTemplateDa
     <p>Hello ${escapeHtml(data.name)},</p>
     <p>Thank you for your interest in partnering with <strong>TOTL Agency</strong>!</p>
     
-    <p>We've successfully received your client application for <strong>${escapeHtml(data.companyName || "your company")}</strong>.</p>
+    <p>We've successfully received your Career Builder application for <strong>${escapeHtml(data.companyName || "your company")}</strong>.</p>
 
     <div class="highlight">
       <p><strong>📋 What Happens Next:</strong></p>
@@ -606,24 +606,24 @@ export function generateClientApplicationConfirmationEmail(data: EmailTemplateDa
   `;
   
   return {
-    subject: `✅ Application Received - TOTL Agency Client Onboarding`,
+    subject: `✅ Application Received - TOTL Agency Career Builder Onboarding`,
     html: createBaseTemplate(
       "Application Received",
       content,
-      "Your client application has been received and is under review"
+      "Your Career Builder application has been received and is under review"
     ),
   };
 }
 
 /**
- * Email Template: Client Application Approved
- * Sent when admin approves a client application
+ * Email Template: Career Builder Application Approved
+ * Sent when admin approves a Career Builder application
  */
 export function generateClientApplicationApprovedEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
     <h1>🎉 Congratulations! Your Application is Approved!</h1>
     <p>Hello ${escapeHtml(data.name)},</p>
-    <p>Fantastic news! Your application to become a client with <strong>TOTL Agency</strong> has been <strong>approved</strong>!</p>
+    <p>Fantastic news! Your application to become a Career Builder with <strong>TOTL Agency</strong> has been <strong>approved</strong>!</p>
     
     <p>Welcome to our exclusive network of premium brands and casting directors. You now have access to our exceptional talent roster.</p>
 
@@ -656,7 +656,7 @@ export function generateClientApplicationApprovedEmail(data: EmailTemplateData):
       <li>Direct messaging with talent (coming soon)</li>
     </ul>
 
-    <p>Need help getting started? Check out our <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/docs" style="color: #000000; text-decoration: underline;">Client Guide</a> or reach out to our support team.</p>
+    <p>Need help getting started? Check out our <a href="${escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "")}/docs" style="color: #000000; text-decoration: underline;">Career Builder Guide</a> or reach out to our support team.</p>
     
     <p>
       Welcome aboard!<br>
@@ -669,14 +669,14 @@ export function generateClientApplicationApprovedEmail(data: EmailTemplateData):
     html: createBaseTemplate(
       "Application Approved",
       content,
-      "Your client application has been approved - welcome to TOTL Agency!"
+      "Your Career Builder application has been approved - welcome to TOTL Agency!"
     ),
   };
 }
 
 /**
- * Email Template: Client Application Rejected
- * Sent when admin rejects a client application
+ * Email Template: Career Builder Application Rejected
+ * Sent when admin rejects a Career Builder application
  */
 export function generateClientApplicationRejectedEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
@@ -684,7 +684,7 @@ export function generateClientApplicationRejectedEmail(data: EmailTemplateData):
     <p>Hello ${escapeHtml(data.name)},</p>
     <p>Thank you for your interest in partnering with <strong>TOTL Agency</strong>.</p>
     
-    <p>After careful review, we're unable to approve your client application at this time.</p>
+    <p>After careful review, we're unable to approve your Career Builder application at this time.</p>
 
     ${data.adminNotes ? `
     <div class="highlight">
@@ -719,20 +719,20 @@ export function generateClientApplicationRejectedEmail(data: EmailTemplateData):
     html: createBaseTemplate(
       "Application Status Update",
       content,
-      "Update regarding your TOTL Agency client application"
+      "Update regarding your TOTL Agency Career Builder application"
     ),
   };
 }
 
 /**
- * Email Template: Client Application Follow-Up (Applicant)
+ * Email Template: Career Builder Application Follow-Up (Applicant)
  * Sent automatically when an application has been pending for several days
  */
 export function generateClientApplicationFollowUpApplicantEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
     <h1>We're Still Reviewing Your Application</h1>
     <p>Hello ${escapeHtml(data.name)},</p>
-    <p>Thank you for your patience while we review your client application for <strong>${escapeHtml(
+    <p>Thank you for your patience while we review your Career Builder application for <strong>${escapeHtml(
       data.companyName || "your company"
     )}</strong>.</p>
 
@@ -769,19 +769,19 @@ export function generateClientApplicationFollowUpApplicantEmail(data: EmailTempl
     html: createBaseTemplate(
       "Application Update",
       content,
-      "Quick update on your TOTL Agency client application"
+      "Quick update on your TOTL Agency Career Builder application"
     ),
   };
 }
 
 /**
- * Email Template: Client Application Follow-Up (Admin Reminder)
+ * Email Template: Career Builder Application Follow-Up (Admin Reminder)
  */
 export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateData): EmailTemplate {
   const siteUrl = escapeHtml(process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com");
   const content = `
-    <h1>Pending Client Application Needs Attention</h1>
-    <p>The following client application has been pending for several days and requires follow-up:</p>
+    <h1>Pending Career Builder Application Needs Attention</h1>
+    <p>The following Career Builder application has been pending for several days and requires follow-up:</p>
 
     <div class="highlight">
       <p><strong>Company:</strong> ${escapeHtml(data.companyName || "Unknown")}</p>
@@ -826,11 +826,11 @@ export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateD
   `;
 
   return {
-    subject: "Reminder: Pending client application awaiting review",
+    subject: "Reminder: Pending Career Builder application awaiting review",
     html: createBaseTemplate(
-      "Client Application Reminder",
+      "Career Builder Application Reminder",
       content,
-      "Pending client application requires attention"
+      "Pending Career Builder application requires attention"
     ),
   };
 }

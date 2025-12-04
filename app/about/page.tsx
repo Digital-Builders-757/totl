@@ -427,7 +427,7 @@ export default function AboutPage() {
                   variant="outline"
                   className="border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-6 text-xl font-semibold"
                 >
-                  Become a Client
+                  Become a Career Builder
                 </Button>
               </Link>
             </div>

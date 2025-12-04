@@ -4,11 +4,12 @@
 
 **BEFORE WRITING ANY CODE, YOU MUST:**
 
-1. **READ** `TOTL_PROJECT_CONTEXT_PROMPT.md` completely
-2. **CHECK** `supabase/migrations/` for current database schema
-3. **VERIFY** RLS policies in the context file
-4. **USE** generated types from `types/database.ts` (NO `any` types)
-5. **FOLLOW** established project structure and naming conventions
+1. **READ** `AGENT_ONBOARDING.md` for quick start guide (NEW AGENTS START HERE)
+2. **READ** `TOTL_PROJECT_CONTEXT_PROMPT.md` completely
+3. **CHECK** `supabase/migrations/` for current database schema
+4. **VERIFY** RLS policies in the context file
+5. **USE** generated types from `types/database.ts` (NO `any` types)
+6. **FOLLOW** established project structure and naming conventions
 
 ## 📋 PROJECT OVERVIEW
 

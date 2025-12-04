@@ -55,7 +55,7 @@ export default async function SelectAccountTypePage() {
           <div className="p-10 border-b border-white/5 md:border-b-0 md:border-r md:p-12">
             <h1 className="text-3xl font-semibold mb-3">Choose your path</h1>
             <p className="text-sm text-white/70 mb-6 leading-relaxed">
-              Select Talent if you&apos;re looking for gigs, or Client if you want to book talent.
+              Select Talent if you&apos;re looking for gigs, or Career Builder if you want to book talent.
             </p>
             <form action={selectAccountType} className="space-y-4">
               <input type="hidden" name="accountType" value="talent" />
@@ -71,12 +71,12 @@ export default async function SelectAccountTypePage() {
           <div className="p-10 md:p-12">
             <form action={selectAccountType} className="space-y-4">
               <input type="hidden" name="accountType" value="client" />
-              <p className="text-sm uppercase tracking-[0.3em] text-white/60">Client</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-white/60">Career Builder</p>
               <p className="text-white/70 mb-4">
                 Post gigs, browse premium talent, and manage applications from one place.
               </p>
               <Button type="submit" className="w-full bg-amber-500 text-black">
-                I&apos;m Client
+                I&apos;m a Career Builder
               </Button>
             </form>
           </div>

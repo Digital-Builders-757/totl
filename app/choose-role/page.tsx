@@ -114,7 +114,7 @@ export default function ChooseRolePage() {
                 <div className="mt-auto">
                   <Link href={returnUrl ? `/client/apply?returnUrl=${returnUrl}` : "/client/apply"}>
                     <Button className="w-full apple-button py-4 text-lg font-semibold">
-                      Apply as Client
+                      Apply as Career Builder
                     </Button>
                   </Link>
                 </div>

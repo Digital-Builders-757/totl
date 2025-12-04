@@ -13,20 +13,34 @@ import {
   XCircle,
   Eye,
   Plus,
+  Trash2,
+  ArrowUp,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
 import { createNameSlug } from "@/lib/utils/slug";
 
@@ -51,12 +65,19 @@ interface AdminUsersClientProps {
 }
 
 export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClientProps) {
+  const router = useRouter();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [users, setUsers] = useState(initialUsers);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
 
   // Filter users based on search query and active tab
   const filteredUsers = useMemo(() => {
-    let filtered = initialUsers;
+    let filtered = users;
 
     // Filter by role based on active tab
     if (activeTab === "talent") {
@@ -79,12 +100,107 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     }
 
     return filtered;
-  }, [initialUsers, searchQuery, activeTab]);
+  }, [users, searchQuery, activeTab]);
 
   // Group by role for stats
-  const talentUsers = initialUsers.filter((u) => u.role === "talent");
-  const careerBuilderUsers = initialUsers.filter((u) => u.role === "client");
-  const adminUsers = initialUsers.filter((u) => u.role === "admin");
+  const talentUsers = users.filter((u) => u.role === "talent");
+  const careerBuilderUsers = users.filter((u) => u.role === "client");
+  const adminUsers = users.filter((u) => u.role === "admin");
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    // Capture the user ID at the start to avoid stale closure issues
+    // if another delete operation starts while this one is in flight
+    const userIdToDelete = userToDelete.id;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/admin/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userIdToDelete }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      toast({
+        title: "Success",
+        description: "User deleted successfully. All related data has been removed.",
+        variant: "success",
+      });
+      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userIdToDelete));
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      router.refresh();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleUpdateRole = async (userId: string, newRole: "talent" | "client") => {
+    setIsUpdatingRole(userId);
+    try {
+      const response = await fetch("/api/admin/update-user-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, newRole }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to update user role");
+      }
+
+      toast({
+        title: "Success",
+        description: `User promoted to ${newRole === "talent" ? "Talent" : "Career Builder"}`,
+        variant: "success",
+      });
+      
+      // Update local state using functional update to avoid stale closure issues
+      setUsers((prevUsers) =>
+        prevUsers.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+      );
+      
+      router.refresh();
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update user role",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingRole(null);
+    }
+  };
+
+  const openDeleteDialog = (userProfile: UserProfile) => {
+    // Prevent deleting yourself
+    if (userProfile.id === user.id) {
+      toast({
+        title: "Error",
+        description: "Cannot delete your own account",
+        variant: "destructive",
+      });
+      return;
+    }
+    setUserToDelete(userProfile);
+    setDeleteDialogOpen(true);
+  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -191,7 +307,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   value="all"
                   className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
                 >
-                  All ({initialUsers.length})
+                  All ({users.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="talent"
@@ -325,6 +441,32 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                                     </Link>
                                   </DropdownMenuItem>
                                 )}
+                                {userProfile.role !== "talent" && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleUpdateRole(userProfile.id, "talent")}
+                                    disabled={isUpdatingRole === userProfile.id}
+                                    className="text-green-400 hover:bg-gray-700 flex items-center"
+                                  >
+                                    {isUpdatingRole === userProfile.id ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <ArrowUp className="mr-2 h-4 w-4" />
+                                    )}
+                                    Promote to Talent
+                                  </DropdownMenuItem>
+                                )}
+                                {userProfile.id !== user.id && (
+                                  <>
+                                    <DropdownMenuSeparator className="bg-gray-700" />
+                                    <DropdownMenuItem
+                                      onClick={() => openDeleteDialog(userProfile)}
+                                      className="text-red-400 hover:bg-gray-700 flex items-center"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete User
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </td>
@@ -429,6 +571,32 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                                     View Talent Profile
                                   </Link>
                                 </DropdownMenuItem>
+                                {userProfile.role !== "client" && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleUpdateRole(userProfile.id, "client")}
+                                    disabled={isUpdatingRole === userProfile.id}
+                                    className="text-blue-400 hover:bg-gray-700 flex items-center"
+                                  >
+                                    {isUpdatingRole === userProfile.id ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <ArrowUp className="mr-2 h-4 w-4" />
+                                    )}
+                                    Promote to Career Builder
+                                  </DropdownMenuItem>
+                                )}
+                                {userProfile.id !== user.id && (
+                                  <>
+                                    <DropdownMenuSeparator className="bg-gray-700" />
+                                    <DropdownMenuItem
+                                      onClick={() => openDeleteDialog(userProfile)}
+                                      className="text-red-400 hover:bg-gray-700 flex items-center"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete User
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </td>
@@ -529,6 +697,32 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                                     View Career Builder Profile
                                   </Link>
                                 </DropdownMenuItem>
+                                {userProfile.role !== "talent" && (
+                                  <DropdownMenuItem
+                                    onClick={() => handleUpdateRole(userProfile.id, "talent")}
+                                    disabled={isUpdatingRole === userProfile.id}
+                                    className="text-green-400 hover:bg-gray-700 flex items-center"
+                                  >
+                                    {isUpdatingRole === userProfile.id ? (
+                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <ArrowUp className="mr-2 h-4 w-4" />
+                                    )}
+                                    Promote to Talent
+                                  </DropdownMenuItem>
+                                )}
+                                {userProfile.id !== user.id && (
+                                  <>
+                                    <DropdownMenuSeparator className="bg-gray-700" />
+                                    <DropdownMenuItem
+                                      onClick={() => openDeleteDialog(userProfile)}
+                                      className="text-red-400 hover:bg-gray-700 flex items-center"
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" />
+                                      Delete User
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </td>
@@ -637,6 +831,61 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           </Tabs>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-red-400">Delete User</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Are you sure you want to delete this user? This action cannot be undone.
+              <br />
+              <br />
+              <strong className="text-white">
+                All related data will be permanently deleted:
+              </strong>
+              <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
+                <li>User profile and account</li>
+                <li>All applications</li>
+                <li>All bookings</li>
+                <li>Portfolio items</li>
+                <li>Gigs (if Career Builder)</li>
+                <li>All other related data</li>
+              </ul>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setUserToDelete(null);
+              }}
+              disabled={isDeleting}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete User
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
