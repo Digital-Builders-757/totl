@@ -296,7 +296,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended", "/client/signup", "/client/apply"];
           const publicRoutePrefixes = ["/talent/", "/gigs/"]; // Dynamic public routes that need prefix matching
           const authRoutes = ["/login", "/reset-password", "/update-password", "/verification-pending", "/choose-role"];
-          const currentPath = pathname || window.location.pathname;
+          
+          // Get current pathname, stripping any query parameters
+          // pathname from usePathname() already excludes query params, but window.location.pathname is more reliable
+          const currentPath = (pathname || window.location.pathname).split("?")[0];
           
           // Check if current path is an exact public route match
           const isExactPublicRoute = publicRoutes.includes(currentPath);
@@ -309,10 +312,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           
           // Only redirect if we're not already on a public or auth route
           if (!isExactPublicRoute && !isPublicRoutePrefix && !isAuthRoute) {
-            // Use hard redirect with cache busting to ensure complete session clear
-            // This matches the pattern used in signOut() for consistency
-            const cacheBuster = `?t=${Date.now()}`;
-            window.location.href = `/login${cacheBuster}`;
+            // Use hard redirect to ensure complete session clear
+            // Use clean /login path without query params to avoid routing issues
+            window.location.href = "/login";
           }
         } else {
           // Fallback for server-side (shouldn't happen, but just in case)
@@ -504,16 +506,14 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
         
-        // Clear Next.js router cache by adding cache-busting query param
-        const cacheBuster = `?t=${Date.now()}`;
-        
-        // Use hard redirect with cache busting to ensure complete session clear
+        // Use hard redirect to ensure complete session clear
         // This bypasses Next.js router cache and forces a full page reload
         // Small delay to ensure all async operations complete
         await new Promise((resolve) => setTimeout(resolve, 150));
         
         // Force a hard reload to clear all caches
-        window.location.href = `/login${cacheBuster}`;
+        // Use clean /login path without query params to avoid routing issues
+        window.location.href = "/login";
       } else {
         // Fallback for server-side (shouldn't happen, but just in case)
         router.push("/login");
@@ -551,9 +551,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         });
         sessionStorage.clear();
         
-        // Force redirect with cache busting
-        const cacheBuster = `?t=${Date.now()}`;
-        window.location.href = `/login${cacheBuster}`;
+        // Force redirect to login page
+        // Use clean /login path without query params to avoid routing issues
+        window.location.href = "/login";
       } else {
         router.push("/login");
         router.refresh();

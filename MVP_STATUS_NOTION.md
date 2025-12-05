@@ -12,10 +12,11 @@
 
 **SIGN-OUT SECURITY & SESSION MANAGEMENT** - December 4, 2025  
 - ✅ Enhanced sign-out function with comprehensive cookie clearing (up to 20 chunks) and server-side API route for complete session termination  
-- ✅ Added cache-busting query parameters to redirect URLs to prevent Next.js router cache issues  
+- ✅ Removed cache-busting query parameters from redirect URLs to fix 404 errors and routing issues  
 - ✅ Created `resetSupabaseBrowserClient()` function to reset browser client singleton on sign-out  
 - ✅ Fixed `SIGNED_OUT` event handler to redirect users from protected routes when sessions expire naturally or are cleared externally  
 - ✅ Added prefix matching for dynamic public routes (`/talent/[slug]`, `/gigs/[id]`) so users aren't incorrectly redirected from public pages  
+- ✅ Fixed pathname checks to properly strip query parameters when determining if user is on auth/public routes  
 - ✅ Fixed error handler in sign-out to also reset browser client singleton, ensuring clean state even on failures  
 - ✅ Fixed all import order linting warnings across admin and API route files  
 - ✅ Created `AGENT_ONBOARDING.md` comprehensive quick-start guide for new AI agents with all critical information consolidated
