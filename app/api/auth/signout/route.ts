@@ -12,27 +12,55 @@ export async function POST() {
   const cookieStore = await cookies();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   
+  // Create response early so we can set cookies in it
+  const response = NextResponse.json({ success: true });
+  
   if (supabaseUrl) {
     const projectRef = supabaseUrl.split("//")[1].split(".")[0];
     const cookieBaseName = `sb-${projectRef}-auth-token`;
     
     // Clear all cookie chunks (up to 20 to be safe)
+    // Use both cookieStore.delete() AND response.cookies.delete() to ensure they're cleared
     for (let i = 0; i < 20; i++) {
       const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
       cookieStore.delete(chunkName);
+      // Also delete via response cookies to ensure browser clears them
+      response.cookies.delete(chunkName);
+      response.cookies.set(chunkName, "", {
+        expires: new Date(0),
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
     }
     
     // Clear other Supabase cookie patterns
     ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
       cookieStore.delete(name);
+      response.cookies.delete(name);
+      response.cookies.set(name, "", {
+        expires: new Date(0),
+        path: "/",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
+      
       for (let i = 0; i < 20; i += 1) {
         const chunkName = i === 0 ? name : `${name}.${i}`;
         cookieStore.delete(chunkName);
+        response.cookies.delete(chunkName);
+        response.cookies.set(chunkName, "", {
+          expires: new Date(0),
+          path: "/",
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+        });
       }
     });
   }
-  
-  const response = NextResponse.json({ success: true });
   
   // Set cache headers to prevent caching of sign out response
   response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");

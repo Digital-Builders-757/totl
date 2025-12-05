@@ -432,20 +432,25 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       // Reset the browser client singleton to ensure clean state
       resetSupabaseBrowserClient();
       
-      // Sign out from Supabase client-side first
-      const { error: clientError } = await supabase.auth.signOut();
-      
-      // Also call server-side sign out API to clear server-side cookies
-      // This ensures both client and server sessions are cleared
+      // Call server-side sign out API FIRST to clear server-side cookies
+      // This ensures cookies are cleared before client-side operations
       try {
-        await fetch("/api/auth/signout", {
+        const signOutResponse = await fetch("/api/auth/signout", {
           method: "POST",
           credentials: "include", // Important: include cookies
+          cache: "no-store", // Prevent caching
         });
+        
+        if (!signOutResponse.ok) {
+          console.warn("Server-side sign out API returned non-OK status:", signOutResponse.status);
+        }
       } catch (apiError) {
-        // Log but don't fail - client-side sign out is more important
+        // Log but continue - we'll still try client-side sign out
         console.warn("Server-side sign out API call failed:", apiError);
       }
+      
+      // Sign out from Supabase client-side after server-side is done
+      const { error: clientError } = await supabase.auth.signOut();
       
       // Clear all client-side storage and cache
       if (typeof window !== "undefined") {
@@ -506,14 +511,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
         
-        // Use hard redirect to ensure complete session clear
-        // This bypasses Next.js router cache and forces a full page reload
-        // Small delay to ensure all async operations complete
-        await new Promise((resolve) => setTimeout(resolve, 150));
+        // Wait longer to ensure all async operations and cookie clearing complete
+        // This is critical - cookies must be cleared before redirect
+        await new Promise((resolve) => setTimeout(resolve, 500));
         
         // Force a hard reload to clear all caches
         // Use clean /login path without query params to avoid routing issues
-        window.location.href = "/login";
+        // Add a timestamp to the URL to force a fresh page load (not as query param, but in path if needed)
+        // Actually, just use clean path - the hard redirect should be enough
+        window.location.replace("/login"); // Use replace() instead of href to prevent back button issues
       } else {
         // Fallback for server-side (shouldn't happen, but just in case)
         router.push("/login");
@@ -551,9 +557,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         });
         sessionStorage.clear();
         
-        // Force redirect to login page
+        // Wait to ensure cleanup completes before redirect
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        // Force redirect to login page using replace() to prevent back button issues
         // Use clean /login path without query params to avoid routing issues
-        window.location.href = "/login";
+        window.location.replace("/login");
       } else {
         router.push("/login");
         router.refresh();
