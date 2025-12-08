@@ -135,9 +135,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-4 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-24 relative overflow-hidden">
-      {/* Subtle gradient background effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
+    <div className="min-h-screen bg-seamless-primary pt-4 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-24 relative overflow-hidden">
+      {/* White gradient overlays matching landing page */}
+      <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]" />
+      <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]" />
+      <div
+        className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
+        style={{ animationDelay: "1s" }}
+      />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8 relative z-10">
         <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-6 transition-colors">
@@ -145,7 +150,7 @@ export default function Login() {
           Back to home
         </Link>
 
-        <div className="max-w-md mx-auto bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 overflow-hidden backdrop-blur-sm">
+        <div className="max-w-md mx-auto apple-glass rounded-xl shadow-2xl shadow-white/5 overflow-hidden">
           {/* Top accent bar */}
           <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600" />
           
@@ -281,10 +286,10 @@ export default function Login() {
             <div className="mt-6 sm:mt-8 mb-6 sm:mb-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-800"></div>
+                  <div className="w-full border-t border-white/10"></div>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-gray-900 px-2 text-gray-500">New to TOTL?</span>
+                  <span className="apple-glass px-2 text-gray-400">New to TOTL?</span>
                 </div>
               </div>
             </div>
