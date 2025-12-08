@@ -67,7 +67,7 @@ export default withSentryConfig(nextConfig, {
 
   org: "the-digital-builders-bi",
 
-  project: "sentry-yellow-notebook",
+  project: "totlmodelagency",
 
   // Sentry auth token for uploading source maps
   authToken: process.env.SENTRY_AUTH_TOKEN,

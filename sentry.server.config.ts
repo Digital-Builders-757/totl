@@ -34,7 +34,7 @@ if (nodeEnv === "development") {
 
   if (SENTRY_DSN) {
     if (projectIdMatches) {
-      console.log("[Sentry Server] ✅ Sentry is configured correctly for sentry-yellow-notebook");
+      console.log("[Sentry Server] ✅ Sentry is configured correctly for totlmodelagency");
     } else {
       console.warn(
         `[Sentry Server] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`
@@ -42,7 +42,7 @@ if (nodeEnv === "development") {
       console.warn("[Sentry Server] ⚠️ Update your .env.local DSNs to point to the correct project");
     }
     console.log(
-      "[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/"
+      "[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/"
     );
     console.log("[Sentry Server] Diagnostic endpoint: http://localhost:3000/api/sentry-diagnostic");
   } else {

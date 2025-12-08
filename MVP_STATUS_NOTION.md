@@ -27,6 +27,8 @@
 - ✅ Fixed import order warnings in `app/choose-role/page.tsx` and `app/client/signup/page.tsx`  
 - ✅ Added `lint:build` npm script for running lint then build sequentially  
 - ✅ Created Next.js update guide (`docs/NEXTJS_UPDATE_EXPLAINED.md`) for future reference
+- ✅ Updated Sentry project configuration to `totlmodelagency` and added auth token locally  
+- ✅ Fixed sign-out redirect loop by honoring `signedOut=true` on `/login` and improving cookie clear timing
 
 ## 🚀 **Previous Achievement: Email Verification UX & Career Builder Flow Fixes**
 

@@ -70,6 +70,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const returnUrl = safeReturnUrl(req.nextUrl.searchParams.get("returnUrl"));
+  const signedOut = req.nextUrl.searchParams.get("signedOut") === "true";
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -140,6 +141,10 @@ export async function middleware(req: NextRequest) {
   }
 
   if (onAuthRoute && user) {
+    // Allow access to /login when signedOut=true to avoid redirect loops while cookies are clearing
+    if (path === "/login" && signedOut) {
+      return res;
+    }
     if (returnUrl && !needsOnboarding && !isAdmin) {
       const returnPath = new URL(returnUrl, req.url);
       const target = returnPath.pathname;
