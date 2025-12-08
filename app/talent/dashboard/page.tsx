@@ -28,7 +28,7 @@ import {
   Heart,
 } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -78,7 +78,8 @@ interface Gig {
 }
 
 function TalentDashboardContent() {
-  const { user, signOut, profile } = useAuth();
+  const router = useRouter();
+  const { user, signOut, profile, isLoading } = useAuth();
   const subscriptionProfile =
     profile && profile.role === "talent"
       ? {
@@ -107,6 +108,13 @@ function TalentDashboardContent() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
+
+  // Redirect unauthenticated users away from dashboard and show clear CTA
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace(`/login?returnUrl=${encodeURIComponent("/talent/dashboard")}`);
+    }
+  }, [isLoading, user, router]);
 
   // Calculate dashboard stats from real data
   const dashboardStats = {
