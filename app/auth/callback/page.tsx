@@ -1,4 +1,4 @@
-﻿import { XCircle } from "lucide-react";
+﻿import { XCircle, CheckCircle2 } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -188,16 +188,51 @@ export default async function AuthCallbackPage({
             .eq("id", user.id)
             .maybeSingle();
 
-          // Redirect based on role
-          if (newProfile?.role === "talent") {
-            redirect("/talent/dashboard");
-          } else if (newProfile?.role === "client") {
-            redirect("/client/dashboard");
-          } else if (newProfile?.role === "admin") {
-            redirect("/admin/dashboard");
-          } else {
-            redirect("/choose-role");
-          }
+          // Always sync email verification status from auth.users.email_confirmed_at
+          const isEmailVerified = user.email_confirmed_at !== null;
+          await supabase
+            .from("profiles")
+            .update({ email_verified: isEmailVerified })
+            .eq("id", user.id);
+
+          // Show success confirmation page before redirecting
+          const redirectUrl = newProfile?.role === "talent" 
+            ? "/talent/dashboard?verified=true"
+            : newProfile?.role === "client"
+            ? "/client/dashboard?verified=true"
+            : newProfile?.role === "admin"
+            ? "/admin/dashboard?verified=true"
+            : "/choose-role?verified=true";
+          
+          // Show success page with auto-redirect
+          return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+              <Card className="w-full max-w-md">
+                <CardHeader>
+                  <CardTitle className="text-center">Email Verified Successfully!</CardTitle>
+                  <CardDescription className="text-center">
+                    Your email has been verified
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center py-8">
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <CheckCircle2 className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-medium text-green-800 mb-2">Verification Successful</h3>
+                    <p className="text-gray-600 text-center mb-4">
+                      Your email address has been verified. You can now access all features of your account.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-center">
+                  <Button asChild>
+                    <a href={redirectUrl}>Continue to Dashboard</a>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          );
         }
 
         // If profile exists but display_name is missing/empty, update it
@@ -222,25 +257,58 @@ export default async function AuthCallbackPage({
             .eq("id", user.id);
         }
 
-        // Update email verification status if not already verified
-        if (profile && !profile.email_verified) {
-          await supabase
+        // Always sync email verification status from auth.users.email_confirmed_at
+        // This ensures profiles.email_verified stays in sync with Supabase auth
+        const isEmailVerified = user.email_confirmed_at !== null;
+        if (profile && profile.email_verified !== isEmailVerified) {
+          const { error: updateError } = await supabase
             .from("profiles")
-            .update({ email_verified: true })
+            .update({ email_verified: isEmailVerified })
             .eq("id", user.id);
+          
+          if (updateError) {
+            console.error("Error updating email_verified:", updateError);
+          }
         }
 
-        // Redirect based on role
-        if (profile?.role === "talent") {
-          redirect("/talent/dashboard");
-        } else if (profile?.role === "client") {
-          redirect("/client/dashboard");
-        } else if (profile?.role === "admin") {
-          redirect("/admin/dashboard");
-        } else {
-          // No role assigned, go to role selection
-          redirect("/choose-role");
-        }
+        // Show success confirmation page before redirecting
+        const redirectUrl = profile?.role === "talent" 
+          ? "/talent/dashboard?verified=true"
+          : profile?.role === "client"
+          ? "/client/dashboard?verified=true"
+          : profile?.role === "admin"
+          ? "/admin/dashboard?verified=true"
+          : "/choose-role?verified=true";
+        
+        // Show success page with auto-redirect
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="text-center">Email Verified Successfully!</CardTitle>
+                <CardDescription className="text-center">
+                  Your email has been verified
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center py-8">
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <CheckCircle2 className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="text-xl font-medium text-green-800 mb-2">Verification Successful</h3>
+                  <p className="text-gray-600 text-center mb-4">
+                    Your email address has been verified. You can now access all features of your account.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-center">
+                <Button asChild>
+                  <a href={redirectUrl}>Continue to Dashboard</a>
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        );
       }
 
       // Fallback redirect

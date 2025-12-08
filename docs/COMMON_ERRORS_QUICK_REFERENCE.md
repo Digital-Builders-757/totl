@@ -77,6 +77,23 @@ npm run build
 
 **🚨 CRITICAL RULE: NEVER PUSH CODE THAT DOESN'T BUILD LOCALLY!**
 
+## **7. EMAIL VERIFICATION & PUBLIC ROUTE ERRORS**
+
+### **Email Verification Not Showing in Admin Dashboard**
+- **Error:** Admin dashboard shows "Unverified" even after email is verified
+- **Fix:** Admin dashboard now auto-syncs from `auth.users.email_confirmed_at` on page load
+- **Prevention:** Always sync `email_verified` from `auth.users.email_confirmed_at` in callback handlers
+
+### **Career Builder Application Success Page Redirects to Talent Dashboard**
+- **Error:** After submitting Career Builder application, user redirected to `/talent/dashboard` instead of success page
+- **Fix:** Added `/client/apply/success` and `/client/application-status` to public routes in middleware
+- **Prevention:** Always add success/status pages to public routes when they don't require authentication
+
+### **Public Route Access Denied**
+- **Error:** Public pages redirecting to login when they shouldn't
+- **Fix:** Ensure route is in `publicRoutes` array in both `middleware.ts` and `auth-provider.tsx`
+- **Check:** Verify route is excluded from `needsClientAccess()` or `needsTalentAccess()` checks
+
 ## **6. PRE-COMMIT CHECKLIST REFERENCE**
 
 **ALWAYS run this checklist before pushing:**

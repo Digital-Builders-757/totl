@@ -10,7 +10,17 @@ type ProfileRow = {
   is_suspended: boolean | null;
 };
 
-const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended", "/client/signup", "/client/apply"];
+const publicRoutes = [
+  "/", 
+  "/about", 
+  "/gigs", 
+  "/talent", 
+  "/suspended", 
+  "/client/signup", 
+  "/client/apply", 
+  "/client/apply/success",
+  "/client/application-status"
+];
 const authRoutes = [
   "/login",
   "/reset-password",
@@ -24,7 +34,7 @@ const isAssetOrApi = (path: string) =>
   path.startsWith("/_next") ||
   path.startsWith("/favicon") ||
   path.startsWith("/images") ||
-  (path.startsWith("/api/") && !path.startsWith("/api/auth")) ||
+  path.startsWith("/api/") || // Allow all API routes (including /api/auth/*) to bypass middleware
   path.includes(".");
 
 const safeReturnUrl = (value: string | null): string | null => {
@@ -42,7 +52,12 @@ const determineDestination = (profile: ProfileRow | null) => {
   return onboardingPath;
 };
 
-const needsClientAccess = (path: string) => path.startsWith("/client/") && path !== "/client/apply";
+const needsClientAccess = (path: string) => 
+  path.startsWith("/client/") && 
+  path !== "/client/apply" && 
+  path !== "/client/apply/success" &&
+  path !== "/client/application-status" &&
+  path !== "/client/signup";
 const needsTalentAccess = (path: string) => path.startsWith("/talent/") && path !== "/talent";
 const needsAdminAccess = (path: string) => path.startsWith("/admin/");
 

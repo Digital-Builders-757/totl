@@ -91,6 +91,7 @@ interface Gig {
 
 export default function ClientDashboard() {
   const { user, signOut, profile } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -390,9 +391,30 @@ export default function ClientDashboard() {
                   Settings
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" onClick={signOut} className="border-gray-700 text-white hover:bg-gray-800">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  if (isSigningOut) return; // Prevent multiple clicks
+                  
+                  setIsSigningOut(true);
+                  try {
+                    // Call signOut and wait for it to complete
+                    await signOut();
+                    
+                    // Force immediate hard refresh to ensure clean state
+                    // This ensures cookies are cleared and page refreshes
+                    window.location.href = '/login';
+                  } catch (error) {
+                    console.error("Sign out error:", error);
+                    setIsSigningOut(false);
+                  }
+                }}
+                disabled={isSigningOut}
+                className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
               </Button>
             </div>
           </div>
