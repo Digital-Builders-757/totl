@@ -45,7 +45,7 @@ export default async function SettingsPage() {
     supabase
       .from("profiles")
       .select(
-        "id, role, display_name, avatar_url, avatar_path, email_verified, created_at, updated_at"
+        "id, role, display_name, avatar_url, avatar_path, email_verified, subscription_status, subscription_plan, subscription_current_period_end, created_at, updated_at"
       )
       .eq("id", user.id)
       .single(),

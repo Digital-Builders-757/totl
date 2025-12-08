@@ -133,7 +133,7 @@ export default function ChooseRolePage() {
                 <Image src="/images/client-professional.png" alt="Professional woman working on laptop" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6">
-                  <h2 className="text-white text-2xl font-bold mb-2">Join as Client</h2>
+                  <h2 className="text-white text-2xl font-bold mb-2">Join as Career Builder</h2>
                   <p className="text-gray-200 text-sm">Find the perfect talent for your projects</p>
                 </div>
               </div>

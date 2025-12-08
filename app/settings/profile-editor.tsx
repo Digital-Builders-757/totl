@@ -26,6 +26,9 @@ type ProfileData = Pick<
   | "avatar_url"
   | "avatar_path"
   | "email_verified"
+  | "subscription_status"
+  | "subscription_plan"
+  | "subscription_current_period_end"
   | "created_at"
   | "updated_at"
 >;
@@ -123,7 +126,15 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
             )}
 
             <TabsContent value="account" className="space-y-4 mt-6">
-              <AccountSettingsSection user={user} />
+              <AccountSettingsSection 
+                user={user} 
+                profile={{
+                  role: profile.role,
+                  subscription_status: (profile.subscription_status ?? "none") as Database["public"]["Enums"]["subscription_status"],
+                  subscription_plan: profile.subscription_plan ?? null,
+                  subscription_current_period_end: profile.subscription_current_period_end ?? null,
+                }}
+              />
             </TabsContent>
           </Tabs>
         </CardContent>
