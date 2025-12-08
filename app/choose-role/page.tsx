@@ -3,9 +3,12 @@
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
+import { useAuth } from "@/components/auth/auth-provider";
 import TalentSignupForm from "@/components/forms/talent-signup-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,6 +24,8 @@ export default function ChooseRolePage() {
   const [mounted, setMounted] = useState(false);
   const [showCareerBuilderDialog, setShowCareerBuilderDialog] = useState(false);
   const [showTalentSignupDialog, setShowTalentSignupDialog] = useState(false);
+  const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -42,6 +47,11 @@ export default function ChooseRolePage() {
     setShowCareerBuilderDialog(false);
     // Open the talent signup form dialog instead of routing
     setShowTalentSignupDialog(true);
+  };
+
+  const handleApplyAsCareerBuilder = () => {
+    setShowCareerBuilderDialog(false);
+    router.push("/client/apply");
   };
 
   if (!mounted) {
@@ -165,15 +175,28 @@ export default function ChooseRolePage() {
       <Dialog open={showCareerBuilderDialog} onOpenChange={setShowCareerBuilderDialog}>
         <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white text-xl font-bold">Create a Talent Account First</DialogTitle>
+            <DialogTitle className="text-white text-xl font-bold">Apply to Become a Career Builder</DialogTitle>
             <DialogDescription className="text-gray-300 pt-2">
-              To become a Career Builder, you must first create a Talent account. Once you have a Talent account, you can apply to become a Career Builder from your dashboard.
+              To become a Career Builder, you need to have a Talent account first. This helps us verify your identity and ensures a smooth onboarding process.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
+          <div className="py-4 space-y-4">
             <p className="text-gray-300 text-sm leading-relaxed">
-              This helps us verify your identity and ensures a smooth onboarding process. After creating your Talent account, you&apos;ll be able to apply for Career Builder status directly from your dashboard.
+              Once you have a Talent account, you can apply to become a Career Builder. Our team will review your application and contact you within 2-3 business days.
             </p>
+            {user ? (
+              <Alert className="bg-green-900/30 border-green-700">
+                <AlertDescription className="text-green-300">
+                  You&apos;re already logged in! You can apply to become a Career Builder now.
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <div className="bg-slate-800/50 rounded-lg p-3">
+                <p className="text-gray-300 text-xs">
+                  <strong className="text-white">Note:</strong> Career Builder access requires approval. You&apos;ll need to create a Talent account first, then submit an application.
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
@@ -183,12 +206,21 @@ export default function ChooseRolePage() {
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleCreateTalentAccount}
-              className="bg-amber-500 text-black hover:bg-amber-400"
-            >
-              Create Talent Account
-            </Button>
+            {user ? (
+              <Button
+                onClick={handleApplyAsCareerBuilder}
+                className="bg-amber-500 text-black hover:bg-amber-400"
+              >
+                Apply as Career Builder
+              </Button>
+            ) : (
+              <Button
+                onClick={handleCreateTalentAccount}
+                className="bg-amber-500 text-black hover:bg-amber-400"
+              >
+                Create Talent Account First
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

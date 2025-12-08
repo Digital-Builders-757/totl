@@ -32,8 +32,18 @@ This document outlines the complete authentication and profile creation strategy
 
 **Current Auth Flow (Updated):**
 1. User clicks "Create Account" in navbar → redirects to `/choose-role`
-2. User selects "Join as Talent" or "Join as Client" → proceeds to role-specific signup
-3. After signup → email verification → role-based dashboard redirect
+2. User selects "Join as Talent" → proceeds to talent signup
+3. After signup → email verification → talent dashboard redirect
+
+**Career Builder Application Flow (Requires Approval):**
+1. User creates Talent account first
+2. User applies to become Career Builder via `/client/apply`
+3. Application stored in `client_applications` table (status: "pending")
+4. Admin reviews and approves application
+5. Profile updated to `role: "client"` and `account_type: "client"`
+6. User gains access to Career Builder dashboard
+
+**Note:** Direct signup as Career Builder is not available. All Career Builder access requires approval through the application process.
 
 **Related Documentation:**
 - `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **MANDATORY** pre-flight checklist
@@ -48,16 +58,42 @@ This document outlines the complete authentication and profile creation strategy
    ↓
 2. Redirects to /choose-role (role selection page)
    ↓
-3. User selects "Join as Talent" or "Join as Client"
+3. User selects "Join as Talent"
    ↓
-4. Proceeds to role-specific signup form
+4. Proceeds to talent signup form
    ↓
 5. Supabase Auth creates user + trigger creates profile
    ↓
 6. Email verification required
    ↓
-7. Redirect to role-based dashboard
+7. Redirect to talent dashboard
 ```
+
+### **Career Builder Application Flow (Requires Approval)**
+```
+1. User creates Talent account (via /choose-role)
+   ↓
+2. Email verification
+   ↓
+3. Talent dashboard access
+   ↓
+4. User applies to become Career Builder (/client/apply)
+   ↓
+5. Application submitted → stored in client_applications (status: "pending")
+   ↓
+6. Admin reviews application (/admin/client-applications)
+   ↓
+7. Admin approves → Profile updated (role: "client", account_type: "client")
+   ↓
+8. User receives approval email
+   ↓
+9. User gains access to Career Builder dashboard (/client/dashboard)
+```
+
+**Important:** 
+- `/client/signup` redirects to `/client/apply` (no direct signup)
+- Career Builder access requires admin approval
+- Users must have Talent account before applying
 
 ### **Database Schema**
 ```
@@ -137,19 +173,34 @@ const { error } = await signUp(data.email, data.password, {
 });
 ```
 
-#### **Client Signup**
+#### **Career Builder Application (Not Direct Signup)**
 ```typescript
-// From: components/client-signup-form.tsx
-const { error } = await signUp(data.email, data.password, {
-  data: {
-    first_name: data.firstName,    // ✅ lowercase with underscore
-    last_name: data.lastName,      // ✅ lowercase with underscore
-    role: "client",                // ✅ lowercase
-    company_name: data.companyName, // ✅ lowercase with underscore
-  },
-  emailRedirectTo: `${window.location.origin}/auth/callback`,
+// Career Builder access requires approval - no direct signup
+// Users must:
+// 1. Create Talent account first
+// 2. Apply via /client/apply page
+// 3. Wait for admin approval
+
+// Application is submitted via:
+// From: app/client/apply/page.tsx
+const result = await submitClientApplication({
+  firstName: formData.firstName,
+  lastName: formData.lastName,
+  companyName: formData.companyName,
+  email: formData.email,
+  phone: formData.phone,
+  industry: formData.industry,
+  businessDescription: formData.businessDescription,
+  needsDescription: formData.needsDescription,
+  website: formData.website,
 });
+
+// Application stored in client_applications table (status: "pending")
+// Admin approves via /admin/client-applications
+// Profile updated: role: "client", account_type: "client"
 ```
+
+**Note:** `/client/signup` redirects to `/client/apply` - direct Career Builder signup is not available.
 
 ### **2. Database Trigger Process**
 
@@ -233,8 +284,17 @@ All scenarios have been tested and work correctly:
 | Partial Talent | `{"role": "talent"}` | ✅ Success | Missing names default to empty strings |
 | Empty Metadata | `{}` | ✅ Success | All defaults applied |
 | NULL Metadata | `NULL` | ✅ Success | All defaults applied |
-| Client Missing Company | `{"role": "client"}` | ✅ Success | Company name defaults to display_name |
 | OAuth User | Minimal metadata | ✅ Success | Graceful fallbacks applied |
+
+### **Career Builder Application Scenarios**
+
+| Scenario | Flow | Result | Notes |
+|----------|------|--------|-------|
+| Talent → Apply | User has Talent account → Applies via `/client/apply` | ✅ Success | Application stored, pending approval |
+| Direct Signup Attempt | User visits `/client/signup` | ✅ Redirects | Redirects to `/client/apply` with message |
+| Application Approval | Admin approves application | ✅ Success | Profile updated to `role: "client"` |
+| Application Rejection | Admin rejects application | ✅ Success | User notified, can reapply |
+| Pending Application | User checks status | ✅ Success | Shows pending status correctly |
 
 ## 🔧 Troubleshooting
 
