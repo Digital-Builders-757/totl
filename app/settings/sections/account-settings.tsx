@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@supabase/supabase-js";
 import { Eye, EyeOff, AlertTriangle, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { changePassword } from "../actions";
@@ -48,11 +48,12 @@ interface AccountSettingsSectionProps {
 export function AccountSettingsSection({ user, profile }: AccountSettingsSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const signOutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
-  const { signOut } = useAuth();
+  const { signOut } = useAuth(); // Only get signOut, profile comes from props
 
   const {
     register,
@@ -124,19 +125,50 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
 
   const passwordStrength = getPasswordStrength(newPassword);
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (signOutTimeoutRef.current) {
+        clearTimeout(signOutTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSignOut = async () => {
     if (isSigningOut) return; // Prevent multiple clicks
+    
+    // Clear any existing timeout
+    if (signOutTimeoutRef.current) {
+      clearTimeout(signOutTimeoutRef.current);
+      signOutTimeoutRef.current = null;
+    }
     
     try {
       setIsSigningOut(true);
       
-      // Call signOut and wait for it to complete
+      // signOut() handles redirect internally in most cases
       await signOut();
       
-      // signOut() will handle the redirect, but if it doesn't, force it
-      // This ensures immediate feedback
-      window.location.replace("/login?signedOut=true");
+      // Fallback redirect: if signOut() returns early (e.g., Supabase not configured)
+      // or fails to redirect, ensure user can still sign out
+      // Use a short delay to check if redirect happened
+      signOutTimeoutRef.current = setTimeout(() => {
+        signOutTimeoutRef.current = null;
+        // If we're still here after signOut(), redirect manually as fallback
+        // This handles edge cases where signOut() returns early without redirecting
+        if (window.location.pathname.startsWith("/talent") || window.location.pathname.startsWith("/client") || window.location.pathname.startsWith("/admin") || window.location.pathname.startsWith("/settings")) {
+          window.location.replace("/login?signedOut=true");
+        } else {
+          // If redirect condition not met, reset state to allow retry
+          setIsSigningOut(false);
+        }
+      }, 100);
     } catch (error) {
+      // Clear timeout on error
+      if (signOutTimeoutRef.current) {
+        clearTimeout(signOutTimeoutRef.current);
+        signOutTimeoutRef.current = null;
+      }
       console.error("Sign out error:", error);
       toast({
         title: "Sign out error",

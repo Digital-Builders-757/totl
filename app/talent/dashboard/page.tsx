@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SafeDate } from "@/components/safe-date";
@@ -94,6 +94,7 @@ function TalentDashboardContent() {
   const searchParams = useSearchParams();
   const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const signOutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [applications, setApplications] = useState<TalentApplication[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [loading, setLoading] = useState(true);
@@ -248,19 +249,56 @@ function TalentDashboardContent() {
     }
   };
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (signOutTimeoutRef.current) {
+        clearTimeout(signOutTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSignOut = async () => {
     if (isSigningOut) return; // Prevent multiple clicks
+    
+    // Clear any existing timeout
+    if (signOutTimeoutRef.current) {
+      clearTimeout(signOutTimeoutRef.current);
+      signOutTimeoutRef.current = null;
+    }
     
     try {
       setIsSigningOut(true);
       
-      // Call signOut and wait for it to complete
+      // signOut() handles redirect internally in most cases
       await signOut();
       
-      // Force immediate hard refresh to ensure clean state
-      // This ensures cookies are cleared and page refreshes
-      window.location.href = '/login';
+      // Fallback redirect: if signOut() returns early (e.g., Supabase not configured)
+      // or fails to redirect, ensure user can still sign out
+      // Use a short delay to check if redirect happened
+      signOutTimeoutRef.current = setTimeout(() => {
+        signOutTimeoutRef.current = null;
+        // If we're still here after signOut(), redirect manually as fallback
+        // This handles edge cases where signOut() returns early without redirecting
+        // Check for all protected routes including /settings for consistency
+        if (window.location.pathname.startsWith("/talent") || 
+            window.location.pathname.startsWith("/client") || 
+            window.location.pathname.startsWith("/admin") || 
+            window.location.pathname.startsWith("/settings")) {
+          // Use replace() to prevent back button from returning to authenticated state
+          // Include signedOut=true query param to avoid redirect loops in middleware
+          window.location.replace("/login?signedOut=true");
+        } else {
+          // If redirect condition not met, reset state to allow retry
+          setIsSigningOut(false);
+        }
+      }, 100);
     } catch (error) {
+      // Clear timeout on error
+      if (signOutTimeoutRef.current) {
+        clearTimeout(signOutTimeoutRef.current);
+        signOutTimeoutRef.current = null;
+      }
       console.error("Sign out error:", error);
       toast({
         title: "Sign out error",

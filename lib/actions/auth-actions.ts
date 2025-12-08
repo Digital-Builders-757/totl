@@ -432,20 +432,63 @@ export async function handleLoginRedirect(returnUrl?: string) {
   }
 
   const accountType = (profile?.account_type ?? "unassigned") as "unassigned" | "talent" | "client";
-  const isAdmin = profile?.role === "admin";
+  const role = (profile?.role ?? null) as "talent" | "client" | "admin" | null;
+  const isAdmin = role === "admin";
+  
+  // Use role as fallback when account_type is unassigned
+  // This handles cases where profile has role but account_type isn't set yet
+  const effectiveAccountType = accountType !== "unassigned" 
+    ? accountType 
+    : role === "talent" 
+      ? "talent" 
+      : role === "client" 
+        ? "client" 
+        : accountType;
+  
+  // Sync account_type with role if role exists but account_type is unassigned
+  // This ensures consistency for future logins
+  let syncSucceeded = false;
+  if (role && role !== "admin" && accountType === "unassigned" && effectiveAccountType !== "unassigned") {
+    const { error: syncError } = await supabase
+      .from("profiles")
+      .update({ account_type: effectiveAccountType as "talent" | "client" })
+      .eq("id", user.id);
+    
+    if (syncError) {
+      console.error("Error syncing account_type with role:", syncError);
+      // Sync failed - account_type remains unassigned in DB
+      // This could indicate a data inconsistency that needs manual resolution
+      // or a legitimate case where user needs to complete onboarding
+      syncSucceeded = false;
+    } else {
+      syncSucceeded = true;
+      // Small delay to ensure database consistency
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      revalidatePath("/", "layout");
+    }
+  }
+  
   const safeUrl = isSafeReturnUrl(returnUrl);
 
-  if (!isAdmin && accountType === "unassigned") {
+  // Redirect to onboarding if:
+  // 1. Both account_type AND role are unassigned/null (new user)
+  // 2. OR account_type is unassigned and sync failed (data inconsistency - ensure onboarding completes)
+  // This ensures users complete onboarding even if there's a data inconsistency
+  // Note: We check accountType (original DB value) not effectiveAccountType because:
+  // - If sync succeeded, accountType is now updated in DB but we still check original to ensure consistency
+  // - If sync failed, accountType remains "unassigned" and user should complete onboarding
+  // - effectiveAccountType is computed from role and used for redirects, but onboarding check uses original accountType
+  if (!isAdmin && accountType === "unassigned" && (!role || !syncSucceeded)) {
     redirect("/onboarding/select-account-type");
     return;
   }
 
-  if (safeUrl && (isAdmin || accountType !== "unassigned")) {
+  if (safeUrl && (isAdmin || effectiveAccountType !== "unassigned")) {
     const returnPath = new URL(safeUrl, "http://localhost");
     const target = returnPath.pathname;
     const canAccessReturnUrl =
-      (!needsClientAccess(target) || accountType === "client") &&
-      (!needsTalentAccess(target) || accountType === "talent") &&
+      (!needsClientAccess(target) || effectiveAccountType === "client") &&
+      (!needsTalentAccess(target) || effectiveAccountType === "talent") &&
       (!target.startsWith("/admin/") || isAdmin);
 
     if (canAccessReturnUrl) {
@@ -459,12 +502,12 @@ export async function handleLoginRedirect(returnUrl?: string) {
     return;
   }
 
-  if (accountType === "client") {
+  if (effectiveAccountType === "client") {
     redirect("/client/dashboard");
     return;
   }
 
-  if (accountType === "talent") {
+  if (effectiveAccountType === "talent") {
     redirect("/talent/dashboard");
     return;
   }
