@@ -523,13 +523,14 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         
         // Wait longer to ensure all async operations and cookie clearing complete
         // This is critical - cookies must be cleared before redirect
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         
         // Force a hard reload to clear all caches and ensure clean state
         // Use window.location.href instead of replace() to ensure full page reload
         // Add cache-busting timestamp to force fresh load
+        // Include signedOut flag so middleware will allow staying on /login while cookies clear
         const timestamp = Date.now();
-        window.location.href = `/login?t=${timestamp}`;
+        window.location.href = `/login?signedOut=true&t=${timestamp}`;
         
         // Fallback: if href doesn't work, use replace
         setTimeout(() => {
