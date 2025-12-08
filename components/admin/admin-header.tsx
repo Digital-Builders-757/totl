@@ -154,7 +154,21 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="text-white hover:bg-gray-800 cursor-pointer"
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    // Show loading state
+                    const menuItem = document.activeElement?.closest('[role="menuitem"]');
+                    if (menuItem) {
+                      menuItem.setAttribute('disabled', 'true');
+                      menuItem.textContent = 'Signing out...';
+                    }
+                    
+                    // Call signOut and wait for it to complete
+                    await signOut();
+                    
+                    // Force immediate hard refresh to ensure clean state
+                    // This ensures cookies are cleared and page refreshes
+                    window.location.href = '/login';
+                  }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out

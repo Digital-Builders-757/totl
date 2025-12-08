@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { selectAccountType } from "./actions";
-import { Button } from "@/components/ui/button";
+import { ClientAccountTypeSelector } from "./client-selector";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 const onboardingPath = "/onboarding/select-account-type";
@@ -51,36 +50,7 @@ export default async function SelectAccountTypePage() {
             className="object-cover opacity-10"
           />
         </div>
-        <div className="relative z-10 grid gap-6 md:grid-cols-2">
-          <div className="p-10 border-b border-white/5 md:border-b-0 md:border-r md:p-12">
-            <h1 className="text-3xl font-semibold mb-3">Choose your path</h1>
-            <p className="text-sm text-white/70 mb-6 leading-relaxed">
-              Select Talent if you&apos;re looking for gigs, or Career Builder if you want to book talent.
-            </p>
-            <form action={selectAccountType} className="space-y-4">
-              <input type="hidden" name="accountType" value="talent" />
-              <p className="text-sm uppercase tracking-[0.3em] text-white/60">Talent</p>
-              <p className="text-white/70 mb-4">
-                Build your profile, submit to casting calls, and access your talent dashboard.
-              </p>
-              <Button type="submit" className="w-full bg-slate-200 text-black">
-                I&apos;m Talent
-              </Button>
-            </form>
-          </div>
-          <div className="p-10 md:p-12">
-            <form action={selectAccountType} className="space-y-4">
-              <input type="hidden" name="accountType" value="client" />
-              <p className="text-sm uppercase tracking-[0.3em] text-white/60">Career Builder</p>
-              <p className="text-white/70 mb-4">
-                Post gigs, browse premium talent, and manage applications from one place.
-              </p>
-              <Button type="submit" className="w-full bg-amber-500 text-black">
-                I&apos;m a Career Builder
-              </Button>
-            </form>
-          </div>
-        </div>
+        <ClientAccountTypeSelector />
       </div>
     </div>
   );

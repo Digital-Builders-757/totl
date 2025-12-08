@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** November 18, 2025
+**Last Updated:** December 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -32,9 +32,11 @@ All other documentation has been organized into the `docs/` folder.
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
 - `AUTH_STRATEGY.md` - **✅ UPDATED** - Authentication strategy and implementation (includes N+1 query fix, Jan 2025)
 - `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
+- `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
+- `SUPABASE_MCP_QUICK_START.md` - **✅ NEW** - Quick start guide for Supabase MCP (Nov 2025)
 
 ### **💳 Payment & Subscription System**
 - `STRIPE_SUBSCRIPTION_PRD.md` - **💳 NEW** - Complete product requirements document for Stripe subscription system (Nov 2025)
@@ -54,7 +56,6 @@ All other documentation has been organized into the `docs/` folder.
 - `DATABASE_REPORT.md` - Database structure and analysis
 - `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - **✅ UPDATED** - Performance optimization guide (database + application-level fixes, Jan 2025)
 - `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
-- `SCHEMA_SYNC_COMPLETE_OCT_23_2025.md` - **NEW** ✅ - Complete schema synchronization summary (Oct 23, 2025)
 - `SQL_RLS_POLICY_CREATION_GUIDE.md` - **🚨 CRITICAL** - PostgreSQL RLS policy creation guide (Nov 2025)
 
 ### **🎨 Features & Implementation**
@@ -88,7 +89,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🛠️ Development & Setup**
 - `DEVELOPER_QUICK_REFERENCE.md` - Quick reference for developers
-- `ENVIRONMENT_SETUP.md` - Environment setup instructions
+- `ENV_SETUP_GUIDE.md` - Environment setup instructions (consolidated)
 - `CODING_STANDARDS.md` - Project coding standards and best practices
 - `COST_OPTIMIZATION_STRATEGY.md` - ⚠️ **CRITICAL** - Zero-cost vs paid features strategy (Oct 2025)
 - `ONBOARDING.md` - New developer onboarding guide
@@ -99,18 +100,15 @@ All other documentation has been organized into the `docs/` folder.
 - `TEST_DATA_REFERENCE.md` - 🧪 **NEW** - Seeded QA personas, gigs, and auth creation tips (Nov 2025)
 
 ### **📧 Services & Integrations**
-- `email-service.md` - Email service implementation
+- `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 - `SENTRY_PRODUCTION_SETUP.md` - Sentry production configuration
 - `SENTRY_ERROR_TRACKING_ENHANCEMENT.md` - **NEW** ✅ - Sentry error tracking enhancements and 406 error fixes (Jan 2025)
-- `SENTRY_CONNECTION_CHECK.md` - Sentry connection troubleshooting and diagnostic tools
+- `SENTRY_CONSOLIDATION.md` - Historical Sentry reference
 
 ### **🐛 Troubleshooting**
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions (9 error patterns including signup fix)
 - `SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md` - 🔴 **CRITICAL** - Database trigger signup error (Oct 23, 2025)
-- `SENTRY_ERROR_FIXES_SUMMARY.md` - Complete Sentry error fix summary
-- `SENTRY_ERROR_FIX_EVENT_HANDLERS.md` - Event handler cache error fix (Oct 21, 2025)
-- `SENTRY_SSR_ERRORS_FIX_OCT_23_2025.md` - SSR errors fix (Oct 23, 2025)
 - `USESEARCHPARAMS_SSR_GUIDE.md` - useSearchParams SSR best practices & fixes (Oct 23, 2025)
 - `AVATAR_UPLOAD_FIX.md` - Avatar upload RLS policy fix guide
 
@@ -183,19 +181,26 @@ All other documentation has been organized into the `docs/` folder.
 
 ## 📊 Documentation Statistics
 
-**Total Documentation Files:** 80+ files
+**Total Documentation Files:** 65+ files (cleaned up from 80+)
 - Root Directory: 4 critical files
-- docs/ Directory: 76+ organized files
+- docs/ Directory: 61+ organized files
 
 **Categories:**
-- Authentication & Security: 3 docs
+- Authentication & Security: 7 docs
 - Admin & User Management: 2 docs
 - Database & Backend: 4 docs
 - Features & Implementation: 10 docs
-- Development & Setup: 7 docs
-- Services & Integrations: 3 docs
-- Troubleshooting: 7 docs
+- Development & Setup: 10 docs
+- Services & Integrations: 4 docs
+- Troubleshooting: 4 docs
 - Project Documentation: 1 doc
+
+**Recent Cleanup (December 2025):**
+- Removed 15+ redundant/outdated files
+- Consolidated Sentry docs (10+ → 3)
+- Consolidated email docs (3 → 1)
+- Consolidated environment setup (2 → 1)
+- Removed historical fix docs that are no longer relevant
 
 ---
 

@@ -1,153 +1,52 @@
 ﻿"use client";
 
-import { ArrowLeft } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeft, Info } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import type React from "react";
-
-import { useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
+/**
+ * Career Builder signup requires approval through the application process.
+ * This page redirects users to the application page instead of allowing direct signup.
+ */
 export default function ClientSignup() {
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    companyName: "",
-    email: "",
-    password: "",
-    phone: "",
-    industry: "",
-    projectDescription: "",
-    website: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { signUp, supabase } = useAuth(); // Moved useAuth here to prevent conditional hook call
   const router = useRouter();
-  const { toast } = useToast();
   const searchParams = useSearchParams();
   const returnUrl = searchParams?.get("returnUrl") ?? null;
+  const { user } = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
+  useEffect(() => {
+    // Redirect to application page after brief delay to show message
+    const timer = setTimeout(() => {
+      const applicationUrl = returnUrl
+        ? `/client/apply?returnUrl=${encodeURIComponent(returnUrl)}`
+        : "/client/apply";
+      router.push(applicationUrl);
+    }, 3000);
 
-  const handleSelectChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, industry: value }));
-  };
+    return () => clearTimeout(timer);
+  }, [router, returnUrl]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Register the user with Supabase Auth
-      const { error } = await signUp(formData.email, formData.password, {
-        data: {
-          role: "client",
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-        },
-      });
-
-      if (error) {
-        toast({
-          title: "Error creating account",
-          description: error.message,
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Create client profile
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available. Please try again.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const user = (await supabase.auth.getUser()).data.user;
-
-      if (user) {
-        const { error: profileError } = await supabase.from("client_profiles").insert([
-          {
-            user_id: user.id,
-            company_name: formData.companyName,
-            industry: formData.industry || null,
-            website: formData.website || null,
-            contact_name: `${formData.firstName} ${formData.lastName}`,
-            contact_email: formData.email,
-            contact_phone: formData.phone || null,
-            company_size: null,
-          },
-        ]);
-
-        if (profileError) {
-          console.error("Error creating client profile:", profileError);
-          toast({
-            title: "Profile creation issue",
-            description:
-              "Your account was created but we had trouble setting up your profile. Please contact support.",
-            variant: "destructive",
-          });
-        }
-
-        // Update the user's profile with first and last name
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            display_name: `${formData.firstName} ${formData.lastName}`,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", user.id);
-
-        if (updateError) {
-          console.error("Error updating profile:", updateError);
-        }
-      }
-
-      // Success - redirect to returnUrl, success page or dashboard
-      toast({
-        title: "Account created!",
-        description: "Your Career Builder account has been created successfully.",
-      });
-
-      if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl));
-      } else {
-        router.push("/admin/dashboard");
-      }
-    } catch (error) {
-      console.error("Signup error:", error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-    }
+  const handleGoToApplication = () => {
+    const applicationUrl = returnUrl
+      ? `/client/apply?returnUrl=${encodeURIComponent(returnUrl)}`
+      : "/client/apply";
+    router.push(applicationUrl);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24">
+    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24 flex items-center justify-center">
       <div className="container mx-auto px-4 py-4 sm:py-12">
         <Link
           href={returnUrl ? `/choose-role?returnUrl=${returnUrl}` : "/"}
@@ -157,168 +56,63 @@ export default function ClientSignup() {
           Back
         </Link>
 
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="grid md:grid-cols-5">
-            <div className="md:col-span-2 relative hidden md:block">
-              <div className="absolute inset-0 bg-black">
-                <Image
-                  src="/images/totl-logo.png"
-                  alt="Client registration"
-                  fill
-                  className="object-cover opacity-80"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-8 text-white">
-                  <h2 className="text-2xl font-bold mb-2">Register as a Career Builder</h2>
-                  <p className="text-white/80">
-                    Access our premium talent pool and build your dream campaigns
-                  </p>
-                </div>
+        <div className="max-w-md mx-auto">
+          <Card>
+            <CardHeader>
+              <div className="w-16 h-16 bg-amber-100 rounded-full mx-auto flex items-center justify-center mb-4">
+                <Info className="h-8 w-8 text-amber-600" />
               </div>
-            </div>
+              <CardTitle className="text-center">Career Builder Signup Requires Approval</CardTitle>
+              <CardDescription className="text-center">
+                To become a Career Builder, you must apply through our approval process.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert>
+                <AlertDescription>
+                  <strong>Career Builder access requires approval.</strong> You must first create a Talent account, then apply to become a Career Builder.
+                </AlertDescription>
+              </Alert>
 
-            <div className="md:col-span-3 p-8">
-              <div className="mb-8">
-                <h1 className="text-2xl font-bold mb-2">Career Builder Registration</h1>
-                <p className="text-gray-600">
-                  Complete the form below to register as a Career Builder with TOTL Agency. Our team will
-                  review your information and set up your account within 1-2 business days.
-                </p>
+              <div className="space-y-3 text-sm text-gray-600">
+                <p className="font-semibold text-gray-800">Here&apos;s how it works:</p>
+                <ol className="list-decimal list-inside space-y-2 ml-2">
+                  <li>Create a Talent account (if you haven&apos;t already)</li>
+                  <li>Apply to become a Career Builder</li>
+                  <li>Our team reviews your application</li>
+                  <li>Once approved, you&apos;ll gain access to Career Builder features</li>
+                </ol>
               </div>
 
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      placeholder="Enter your first name"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      placeholder="Enter your last name"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-                </div>
+              {user ? (
+                <Alert className="bg-green-50 border-green-200">
+                  <AlertDescription className="text-green-800">
+                    You&apos;re already logged in! You can apply to become a Career Builder now.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <Alert className="bg-blue-50 border-blue-200">
+                  <AlertDescription className="text-blue-800">
+                    Don&apos;t have an account yet? Create a Talent account first, then apply to become a Career Builder.
+                  </AlertDescription>
+                </Alert>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input
-                    id="companyName"
-                    placeholder="Enter your company name"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Business Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your business email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    minLength={8}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    placeholder="Enter your phone number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="industry">Industry</Label>
-                  <Select value={formData.industry} onValueChange={handleSelectChange}>
-                    <SelectTrigger id="industry">
-                      <SelectValue placeholder="Select your industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fashion">Fashion</SelectItem>
-                      <SelectItem value="advertising">Advertising</SelectItem>
-                      <SelectItem value="editorial">Editorial</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                      <SelectItem value="entertainment">Entertainment</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="projectDescription">Project Description</Label>
-                  <Textarea
-                    id="projectDescription"
-                    placeholder="Tell us about your typical projects and talent needs"
-                    rows={4}
-                    value={formData.projectDescription}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website">Company Website (Optional)</Label>
-                  <Input
-                    id="website"
-                    placeholder="Enter your company website"
-                    value={formData.website}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="pt-4">
-                  <Button
-                    type="submit"
-                    className="w-full bg-black text-white hover:bg-black/90"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Registering..." : "Register as Career Builder"}
-                  </Button>
-                  <p className="text-sm text-gray-500 mt-4 text-center">
-                    By submitting this form, you agree to our{" "}
-                    <Link href="/terms" className="underline">
-                      Terms of Service
-                    </Link>{" "}
-                    and{" "}
-                    <Link href="/privacy" className="underline">
-                      Privacy Policy
-                    </Link>
-                    .
-                  </p>
-                </div>
-              </form>
-            </div>
-          </div>
+              <p className="text-center text-gray-500 text-sm">
+                Redirecting you to the Career Builder application page...
+              </p>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-2">
+              <Button onClick={handleGoToApplication} className="w-full">
+                Go to Application Page Now
+              </Button>
+              {!user && (
+                <Button variant="outline" asChild className="w-full">
+                  <Link href="/choose-role">Create Talent Account First</Link>
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
         </div>
       </div>
     </div>

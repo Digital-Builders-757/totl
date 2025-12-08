@@ -67,21 +67,14 @@ export default function Navbar() {
       // Close mobile menu if open
       setIsMenuOpen(false);
       
-      // Show loading state (optional - could add a toast here)
-      console.log("Signing out...");
+      // Call signOut and wait for it to complete
+      await signOut();
       
-      // Call sign out
-      const { error } = await signOut();
-      
-      if (error) {
-        console.error("Sign out error:", error);
-        // Could show error toast here if needed
-      } else {
-        console.log("Successfully signed out");
-      }
+      // Force immediate hard refresh to ensure clean state
+      // This ensures cookies are cleared and page refreshes
+      window.location.href = '/login';
     } catch (error) {
-      console.error("Unexpected error during sign out:", error);
-    } finally {
+      console.error("Sign out error:", error);
       setIsSigningOut(false);
     }
   };

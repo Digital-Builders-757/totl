@@ -293,7 +293,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // - Other tabs sign out (cross-tab sync)
         // In these cases, we need to redirect to prevent users from viewing protected content while logged out
         if (typeof window !== "undefined") {
-          const publicRoutes = ["/", "/about", "/gigs", "/talent", "/suspended", "/client/signup", "/client/apply"];
+          const publicRoutes = [
+            "/", 
+            "/about", 
+            "/gigs", 
+            "/talent", 
+            "/suspended", 
+            "/client/signup", 
+            "/client/apply",
+            "/client/apply/success",
+            "/client/application-status"
+          ];
           const publicRoutePrefixes = ["/talent/", "/gigs/"]; // Dynamic public routes that need prefix matching
           const authRoutes = ["/login", "/reset-password", "/update-password", "/verification-pending", "/choose-role"];
           
@@ -513,13 +523,18 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         
         // Wait longer to ensure all async operations and cookie clearing complete
         // This is critical - cookies must be cleared before redirect
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 300));
         
-        // Force a hard reload to clear all caches
-        // Use clean /login path without query params to avoid routing issues
-        // Add a timestamp to the URL to force a fresh page load (not as query param, but in path if needed)
-        // Actually, just use clean path - the hard redirect should be enough
-        window.location.replace("/login"); // Use replace() instead of href to prevent back button issues
+        // Force a hard reload to clear all caches and ensure clean state
+        // Use window.location.href instead of replace() to ensure full page reload
+        // Add cache-busting timestamp to force fresh load
+        const timestamp = Date.now();
+        window.location.href = `/login?t=${timestamp}`;
+        
+        // Fallback: if href doesn't work, use replace
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 100);
       } else {
         // Fallback for server-side (shouldn't happen, but just in case)
         router.push("/login");

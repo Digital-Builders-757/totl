@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,32 +12,31 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 type UserRole = "talent" | "client" | "admin" | null;
 
 export function DashboardClient({ userRole }: { userRole: UserRole }) {
   const router = useRouter();
+  const { signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createSupabaseBrowser();
 
   const handleSignOut = async () => {
+    if (isLoading) return; // Prevent multiple clicks
+    
     setIsLoading(true);
     setError(null);
 
     try {
-      if (!supabase) {
-        setError("Database connection not available");
-        return;
-      }
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      router.push("/");
+      // Call signOut from auth provider and wait for it to complete
+      await signOut();
+      
+      // Force immediate hard refresh to ensure clean state
+      // This ensures cookies are cleared and page refreshes
+      window.location.href = '/login';
     } catch (err) {
       console.error("Error signing out:", err);
       setError("Failed to sign out. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };

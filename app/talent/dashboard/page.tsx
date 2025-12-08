@@ -240,28 +240,20 @@ function TalentDashboardContent() {
     
     try {
       setIsSigningOut(true);
-      console.log("Signing out...");
       
-      const { error } = await signOut();
+      // Call signOut and wait for it to complete
+      await signOut();
       
-      if (error) {
-        console.error("Sign out error:", error);
-        toast({
-          title: "Sign out error",
-          description: "There was an issue signing out. Please try again.",
-          variant: "destructive",
-        });
-      } else {
-        console.log("Successfully signed out");
-      }
+      // Force immediate hard refresh to ensure clean state
+      // This ensures cookies are cleared and page refreshes
+      window.location.href = '/login';
     } catch (error) {
-      console.error("Unexpected error during sign out:", error);
+      console.error("Sign out error:", error);
       toast({
         title: "Sign out error",
-        description: "There was an unexpected error. Please try again.",
+        description: "There was an issue signing out. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsSigningOut(false);
     }
   };
