@@ -29,6 +29,7 @@
 - ✅ Created Next.js update guide (`docs/NEXTJS_UPDATE_EXPLAINED.md`) for future reference
 - ✅ Updated Sentry project configuration to `totlmodelagency` and added auth token locally  
 - ✅ Fixed sign-out redirect loop by honoring `signedOut=true` on `/login` and improving cookie clear timing
+- ✅ Prevented unauthenticated redirect to `/talent/dashboard` by allowing `/login` stay and adding signed-out CTA on talent dashboard
 
 ## 🚀 **Previous Achievement: Email Verification UX & Career Builder Flow Fixes**
 

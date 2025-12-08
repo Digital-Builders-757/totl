@@ -141,8 +141,8 @@ export async function middleware(req: NextRequest) {
   }
 
   if (onAuthRoute && user) {
-    // Allow access to /login when signedOut=true to avoid redirect loops while cookies are clearing
-    if (path === "/login" && signedOut) {
+    // Allow access to auth routes when signedOut=true to avoid redirect loops while cookies are clearing
+    if ((path === "/login" || path === "/choose-role") && signedOut) {
       return res;
     }
     if (returnUrl && !needsOnboarding && !isAdmin) {
