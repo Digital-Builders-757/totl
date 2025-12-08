@@ -521,21 +521,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
         
-        // Wait longer to ensure all async operations and cookie clearing complete
-        // This is critical - cookies must be cleared before redirect
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        
-        // Force a hard reload to clear all caches and ensure clean state
-        // Use window.location.href instead of replace() to ensure full page reload
-        // Add cache-busting timestamp to force fresh load
-        // Include signedOut flag so middleware will allow staying on /login while cookies clear
-        const timestamp = Date.now();
-        window.location.href = `/login?signedOut=true&t=${timestamp}`;
-        
-        // Fallback: if href doesn't work, use replace
-        setTimeout(() => {
-          window.location.replace("/login");
-        }, 100);
+        // Immediate redirect for snappy UX - cookies are already cleared above
+        // Use replace() to prevent back button from returning to authenticated state
+        window.location.replace("/login?signedOut=true");
       } else {
         // Fallback for server-side (shouldn't happen, but just in case)
         router.push("/login");
@@ -573,9 +561,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         });
         sessionStorage.clear();
         
-        // Wait to ensure cleanup completes before redirect
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        
+        // Immediate redirect even on error - cleanup already done above
         // Force redirect to login page using replace() to prevent back button issues
         // Use clean /login path without query params to avoid routing issues
         window.location.replace("/login");

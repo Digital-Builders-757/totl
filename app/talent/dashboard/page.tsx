@@ -131,23 +131,28 @@ function TalentDashboardContent() {
     !talentProfile?.first_name || !talentProfile?.last_name || !talentProfile?.location;
 
   const fetchDashboardData = useCallback(async () => {
-    if (!supabase || !user) return;
+    if (!supabase || !user) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
 
     try {
       // Profile data is already available from auth context (avatar_url, display_name, etc.)
       // No need to fetch it again - this eliminates N+1 query issue
 
-      // Fetch talent profile
+      // Fetch talent profile (handle brand-new accounts that may not have a row yet)
       const { data: talentProfileData, error: talentProfileError } = await supabase
         .from("talent_profiles")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (talentProfileError) {
+      if (talentProfileError && talentProfileError.code !== "PGRST116") {
         console.error("Error fetching talent profile:", talentProfileError);
       } else {
-        setTalentProfile(talentProfileData);
+        setTalentProfile(talentProfileData ?? null);
       }
 
       // Fetch talent's applications

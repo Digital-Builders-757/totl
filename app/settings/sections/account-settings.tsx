@@ -2,17 +2,24 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@supabase/supabase-js";
-import { Eye, EyeOff, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { changePassword } from "../actions";
+import { CareerBuilderSection } from "./career-builder-section";
+import { SubscriptionSection } from "./subscription-section";
+import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import type { Database } from "@/types/supabase";
+
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+type MinimalProfile = Pick<Profile, "role" | "subscription_status" | "subscription_plan" | "subscription_current_period_end">;
 
 const passwordSchema = z
   .object({
@@ -35,14 +42,17 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 
 interface AccountSettingsSectionProps {
   user: User;
+  profile: MinimalProfile;
 }
 
-export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
+export function AccountSettingsSection({ user, profile }: AccountSettingsSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+  const { signOut } = useAuth();
 
   const {
     register,
@@ -113,6 +123,29 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
   };
 
   const passwordStrength = getPasswordStrength(newPassword);
+
+  const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent multiple clicks
+    
+    try {
+      setIsSigningOut(true);
+      
+      // Call signOut and wait for it to complete
+      await signOut();
+      
+      // signOut() will handle the redirect, but if it doesn't, force it
+      // This ensures immediate feedback
+      window.location.replace("/login?signedOut=true");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      toast({
+        title: "Sign out error",
+        description: "There was an issue signing out. Please try again.",
+        variant: "destructive",
+      });
+      setIsSigningOut(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -332,6 +365,42 @@ export function AccountSettingsSection({ user }: AccountSettingsSectionProps) {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Subscription Section */}
+      <SubscriptionSection profile={profile} />
+
+      {/* Career Builder Application Section */}
+      <CareerBuilderSection userEmail={user.email} />
+
+      {/* Sign Out */}
+      <Card className="bg-gray-800 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white">Sign Out</CardTitle>
+          <CardDescription className="text-gray-400">
+            Sign out of your account securely
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            variant="destructive"
+            className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white"
+          >
+            {isSigningOut ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Signing Out...
+              </>
+            ) : (
+              <>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
     </div>
