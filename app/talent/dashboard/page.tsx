@@ -280,16 +280,21 @@ function TalentDashboardContent() {
         signOutTimeoutRef.current = null;
         // If we're still here after signOut(), redirect manually as fallback
         // This handles edge cases where signOut() returns early without redirecting
-        // Check for all protected routes including /settings for consistency
-        if (window.location.pathname.startsWith("/talent") || 
-            window.location.pathname.startsWith("/client") || 
-            window.location.pathname.startsWith("/admin") || 
-            window.location.pathname.startsWith("/settings")) {
+        // Always redirect to login unless already on an auth route (to avoid loops)
+        const currentPath = window.location.pathname;
+        const isAuthRoute = currentPath === "/login" || 
+                           currentPath === "/choose-role" || 
+                           currentPath.startsWith("/reset-password") ||
+                           currentPath.startsWith("/update-password") ||
+                           currentPath === "/verification-pending";
+        
+        if (!isAuthRoute) {
+          // Always redirect to login if signOut() didn't redirect and we're not already on an auth route
           // Use replace() to prevent back button from returning to authenticated state
           // Include signedOut=true query param to avoid redirect loops in middleware
           window.location.replace("/login?signedOut=true");
         } else {
-          // If redirect condition not met, reset state to allow retry
+          // If already on auth route, just reset state (signOut() may have cleared session but not redirected)
           setIsSigningOut(false);
         }
       }, 100);

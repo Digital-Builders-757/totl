@@ -447,7 +447,8 @@ export async function handleLoginRedirect(returnUrl?: string) {
   
   // Sync account_type with role if role exists but account_type is unassigned
   // This ensures consistency for future logins
-  let syncSucceeded = false;
+  // Note: Sync failures are logged but don't affect redirect logic
+  // If sync fails, we still use effectiveAccountType (computed from role) for redirects
   if (role && role !== "admin" && accountType === "unassigned" && effectiveAccountType !== "unassigned") {
     const { error: syncError } = await supabase
       .from("profiles")
@@ -457,12 +458,10 @@ export async function handleLoginRedirect(returnUrl?: string) {
     if (syncError) {
       console.error("Error syncing account_type with role:", syncError);
       // Sync failed - account_type remains unassigned in DB
-      // This could indicate a data inconsistency that needs manual resolution
-      // or a legitimate case where user needs to complete onboarding
-      syncSucceeded = false;
+      // This is a transient DB issue - user can still proceed using effectiveAccountType
+      // Next login will retry the sync
     } else {
-      syncSucceeded = true;
-      // Small delay to ensure database consistency
+      // Sync succeeded - small delay to ensure database consistency
       await new Promise((resolve) => setTimeout(resolve, 100));
       revalidatePath("/", "layout");
     }
@@ -470,15 +469,11 @@ export async function handleLoginRedirect(returnUrl?: string) {
   
   const safeUrl = isSafeReturnUrl(returnUrl);
 
-  // Redirect to onboarding if:
-  // 1. Both account_type AND role are unassigned/null (new user)
-  // 2. OR account_type is unassigned and sync failed (data inconsistency - ensure onboarding completes)
-  // This ensures users complete onboarding even if there's a data inconsistency
-  // Note: We check accountType (original DB value) not effectiveAccountType because:
-  // - If sync succeeded, accountType is now updated in DB but we still check original to ensure consistency
-  // - If sync failed, accountType remains "unassigned" and user should complete onboarding
-  // - effectiveAccountType is computed from role and used for redirects, but onboarding check uses original accountType
-  if (!isAdmin && accountType === "unassigned" && (!role || !syncSucceeded)) {
+  // Redirect to onboarding ONLY if both account_type AND role are unassigned/null (genuinely new user)
+  // Don't redirect based on sync failure - if role exists, user is already set up
+  // Sync failures are transient DB issues, not indicators that onboarding is needed
+  // If sync fails but role exists, we'll use effectiveAccountType (computed from role) for redirects
+  if (!isAdmin && accountType === "unassigned" && !role) {
     redirect("/onboarding/select-account-type");
     return;
   }
