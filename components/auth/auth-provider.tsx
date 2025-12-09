@@ -6,6 +6,7 @@ import type React from "react";
 
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
@@ -171,13 +172,84 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             subscription_plan: profileData.subscription_plan ?? null,
             subscription_current_period_end: profileData.subscription_current_period_end ?? null,
           });
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+          setIsLoading(false);
+          setHasHandledInitialSession(true);
         } else {
-          setUserRole(null);
-          setProfile(null);
+          // CRITICAL FIX: Profile doesn't exist - ensure it's created
+          // This handles brand new accounts that haven't had their profile created yet
+          console.log("Profile is null during initial session check, ensuring profile exists...");
+          try {
+            const profileResult = await ensureProfileExists();
+            if (profileResult.error) {
+              console.error("Error ensuring profile exists in auth provider:", profileResult.error);
+              // Set profile to null but continue - dashboard will handle retry
+              setUserRole(null);
+              setProfile(null);
+            } else if (profileResult.profile) {
+              // Profile was created/updated/exists - set the complete profile data
+              const role = (profileResult.profile.role ?? null) as UserRole;
+              setUserRole(role);
+              setProfile({
+                role,
+                account_type: (profileResult.profile.account_type ?? "unassigned") as AccountType,
+                avatar_url: profileResult.profile.avatar_url ?? null,
+                avatar_path: profileResult.profile.avatar_path ?? null,
+                display_name: profileResult.profile.display_name ?? null,
+                subscription_status: (profileResult.profile.subscription_status ?? "none") as Database['public']['Enums']['subscription_status'],
+                subscription_plan: profileResult.profile.subscription_plan ?? null,
+                subscription_current_period_end: profileResult.profile.subscription_current_period_end ?? null,
+              });
+            } else if (profileResult.exists) {
+              // CRITICAL FIX: Profile exists but query returned null (timing/permissions issue)
+              // Retry fetching the profile directly instead of setting to null
+              console.warn("Profile exists but ensureProfileExists returned null profile, retrying fetch...");
+              const { data: retryProfileData, error: retryError } = await supabase
+                .from("profiles")
+                .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+                .eq("id", session.user.id)
+                .maybeSingle();
+              
+              if (retryError) {
+                console.error("Error retrying profile fetch:", retryError);
+                // Only set to null if retry also fails
+                setUserRole(null);
+                setProfile(null);
+              } else if (retryProfileData) {
+                // Successfully fetched profile on retry
+                const role = (retryProfileData.role ?? null) as UserRole;
+                setUserRole(role);
+                setProfile({
+                  role,
+                  account_type: (retryProfileData.account_type ?? "unassigned") as AccountType,
+                  avatar_url: retryProfileData.avatar_url,
+                  avatar_path: retryProfileData.avatar_path,
+                  display_name: retryProfileData.display_name,
+                  subscription_status: retryProfileData.subscription_status ?? "none",
+                  subscription_plan: retryProfileData.subscription_plan ?? null,
+                  subscription_current_period_end: retryProfileData.subscription_current_period_end ?? null,
+                });
+              } else {
+                // Retry also returned null - this is unexpected but don't break the user's session
+                console.warn("Profile exists but both queries returned null - keeping profile state as-is");
+                // Don't set profile to null - let it remain undefined/null naturally
+                // The dashboard will handle retrying if needed
+              }
+            } else {
+              // Profile doesn't exist and wasn't created (unexpected case)
+              console.warn("ensureProfileExists returned success but no profile data and not exists");
+              setUserRole(null);
+              setProfile(null);
+            }
+          } catch (profileError) {
+            console.error("Unexpected error ensuring profile exists in auth provider:", profileError);
+            setUserRole(null);
+            setProfile(null);
+          }
+          setIsEmailVerified(session.user.email_confirmed_at !== null);
+          setIsLoading(false);
+          setHasHandledInitialSession(true);
         }
-        setIsEmailVerified(session.user.email_confirmed_at !== null);
-        setIsLoading(false);
-        setHasHandledInitialSession(true);
       } catch (error) {
         console.error("Error in initial session check:", error);
         if (mounted) {
@@ -233,20 +305,102 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           if (!mounted) return;
 
-          const role = (profileData?.role ?? null) as UserRole;
-          setUserRole(role);
-          // Store full profile data to avoid duplicate queries
-          setProfile(profileData ? {
-            role: role,
-            account_type: (profileData.account_type ?? "unassigned") as AccountType,
-            avatar_url: profileData.avatar_url,
-            avatar_path: profileData.avatar_path,
-            display_name: profileData.display_name,
-            subscription_status: profileData.subscription_status ?? 'none',
-            subscription_plan: profileData.subscription_plan ?? null,
-            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-          } : null);
-          setIsEmailVerified(session.user.email_confirmed_at !== null);
+          // CRITICAL FIX: Declare role at higher scope to use for redirect logic
+          // State updates (setUserRole) are asynchronous, so we need the local variable
+          let role: UserRole = null;
+
+          if (profileData) {
+            role = (profileData.role ?? null) as UserRole;
+            setUserRole(role);
+            // Store full profile data to avoid duplicate queries
+            setProfile({
+              role: role,
+              account_type: (profileData.account_type ?? "unassigned") as AccountType,
+              avatar_url: profileData.avatar_url,
+              avatar_path: profileData.avatar_path,
+              display_name: profileData.display_name,
+              subscription_status: profileData.subscription_status ?? 'none',
+              subscription_plan: profileData.subscription_plan ?? null,
+              subscription_current_period_end: profileData.subscription_current_period_end ?? null,
+            });
+            setIsEmailVerified(session.user.email_confirmed_at !== null);
+          } else {
+            // CRITICAL FIX: Profile doesn't exist during sign-in - ensure it's created
+            console.log("Profile is null during sign-in, ensuring profile exists...");
+            try {
+              const profileResult = await ensureProfileExists();
+              if (profileResult.error) {
+                console.error("Error ensuring profile exists during sign-in:", profileResult.error);
+                role = null;
+                setUserRole(null);
+                setProfile(null);
+              } else if (profileResult.profile) {
+                role = (profileResult.profile.role ?? null) as UserRole;
+                setUserRole(role);
+                setProfile({
+                  role,
+                  account_type: (profileResult.profile.account_type ?? "unassigned") as AccountType,
+                  avatar_url: profileResult.profile.avatar_url ?? null,
+                  avatar_path: profileResult.profile.avatar_path ?? null,
+                  display_name: profileResult.profile.display_name ?? null,
+                  subscription_status: (profileResult.profile.subscription_status ?? "none") as Database['public']['Enums']['subscription_status'],
+                  subscription_plan: profileResult.profile.subscription_plan ?? null,
+                  subscription_current_period_end: profileResult.profile.subscription_current_period_end ?? null,
+                });
+              } else if (profileResult.exists) {
+                // CRITICAL FIX: Profile exists but query returned null (timing/permissions issue)
+                // Retry fetching the profile directly instead of setting to null
+                console.warn("Profile exists but ensureProfileExists returned null profile during sign-in, retrying fetch...");
+                const { data: retryProfileData, error: retryError } = await supabase
+                  .from("profiles")
+                  .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+                  .eq("id", session.user.id)
+                  .maybeSingle();
+                
+                if (retryError) {
+                  console.error("Error retrying profile fetch during sign-in:", retryError);
+                  role = null;
+                  setUserRole(null);
+                  setProfile(null);
+                } else if (retryProfileData) {
+                  // Successfully fetched profile on retry
+                  role = (retryProfileData.role ?? null) as UserRole;
+                  setUserRole(role);
+                  setProfile({
+                    role,
+                    account_type: (retryProfileData.account_type ?? "unassigned") as AccountType,
+                    avatar_url: retryProfileData.avatar_url,
+                    avatar_path: retryProfileData.avatar_path,
+                    display_name: retryProfileData.display_name,
+                    subscription_status: retryProfileData.subscription_status ?? "none",
+                    subscription_plan: retryProfileData.subscription_plan ?? null,
+                    subscription_current_period_end: retryProfileData.subscription_current_period_end ?? null,
+                  });
+                } else {
+                  // Retry also returned null - this is unexpected but don't break the user's session
+                  console.warn("Profile exists but both queries returned null during sign-in - keeping profile state as-is");
+                  role = null;
+                  // Don't set profile to null - let it remain undefined/null naturally
+                  // The dashboard will handle retrying if needed
+                  setUserRole(null);
+                  // Don't explicitly set profile to null - let it remain undefined
+                  // This allows the dashboard to retry fetching if needed
+                }
+              } else {
+                // Profile doesn't exist and wasn't created (unexpected case)
+                console.warn("ensureProfileExists returned success but no profile data and not exists during sign-in");
+                role = null;
+                setUserRole(null);
+                setProfile(null);
+              }
+            } catch (profileError) {
+              console.error("Unexpected error ensuring profile exists during sign-in:", profileError);
+              role = null;
+              setUserRole(null);
+              setProfile(null);
+            }
+            setIsEmailVerified(session.user.email_confirmed_at !== null);
+          }
 
           // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
           // Check if this is a fresh sign-in (not an initial session load)
@@ -257,7 +411,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
 
             if (!isOnAllowedPage) {
-              // Redirect based on role - only for actual sign-ins
+              // CRITICAL FIX: Use local `role` variable instead of `userRole` state
+              // State updates are asynchronous, so `userRole` may still have the old value
               // Use router.refresh() to clear cache before redirect
               router.refresh();
               if (role === "talent") {

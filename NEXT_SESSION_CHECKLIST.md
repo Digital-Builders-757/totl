@@ -1,7 +1,7 @@
 # 📋 Next Session Checklist - TOTL Agency
 
-**Last Updated:** November 18, 2025  
-**Session Focus:** Admin Portal Completion & Talent Profile URL Improvements
+**Last Updated:** January 2025  
+**Session Focus:** Performance & UX Optimization (Priority 3 Roadmap)
 
 ---
 
@@ -59,31 +59,73 @@
 
 ## 🎯 **NEXT SESSION PRIORITIES**
 
-### **High Priority**
+### **🔴 Critical Priority - Performance & UX (Week 1)**
 
-1. **Test Talent Profile Slugs**
+1. **Eliminate Page Reloads** (Priority 3, Task 1)
+   - [ ] Replace `window.location.reload()` in `app/talent/dashboard/page.tsx` (3 instances)
+   - [ ] Replace `window.location.reload()` in `app/settings/sections/portfolio-section.tsx` (2 instances)
+   - [ ] Replace `window.location.reload()` in `app/talent/error-state.tsx` (1 instance)
+   - [ ] Replace `window.location.reload()` in `app/settings/avatar-upload.tsx` (1 instance)
+   - [ ] Implement optimistic UI updates for profile creation/updates
+   - [ ] Add proper loading states during refresh (skeletons, not spinners)
+   - [ ] Test that state persists correctly after refresh (no data loss)
+   - **Estimated Time:** 2-3 hours
+
+2. **Production Code Cleanup** (Priority 3, Task 2)
+   - [ ] Create centralized logging utility (`lib/utils/logger.ts`) with log levels
+   - [ ] Replace all `console.log` statements with logger utility
+   - [ ] Configure logger to disable debug logs in production
+   - [ ] Audit all files: `grep -r "console\." app/ components/ lib/`
+   - **Estimated Time:** 1-2 hours
+
+3. **Enhanced Loading States** (Priority 3, Task 3)
+   - [ ] Audit all pages for missing `loading.tsx` files
+   - [ ] Create skeleton components matching actual content layout
+   - [ ] Replace generic spinners with content-specific skeletons
+   - [ ] Ensure skeletons match final content dimensions (prevent layout shift)
+   - **Estimated Time:** 2-3 hours
+
+### **🟡 High Priority - Performance Optimization (Week 2)**
+
+4. **React Performance Optimizations** (Priority 3, Task 4)
+   - [ ] Split dashboard into smaller components (`app/talent/dashboard/page.tsx` is 1306 lines)
+   - [ ] Add `React.memo` to expensive list components (gig cards, application cards)
+   - [ ] Memoize expensive computations with `useMemo` (filtered lists, sorted data)
+   - [ ] Wrap callbacks with `useCallback` to prevent child re-renders
+   - [ ] Profile with React DevTools Profiler to identify bottlenecks
+   - **Estimated Time:** 4-6 hours
+
+5. **Request Deduplication & Caching** (Priority 3, Task 5)
+   - [ ] Evaluate React Query or SWR for request deduplication
+   - [ ] Implement request caching for dashboard data fetches
+   - [ ] Cache gig lists with appropriate TTL
+   - [ ] Implement stale-while-revalidate pattern
+   - **Estimated Time:** 3-4 hours
+
+### **🟢 Medium Priority - Architecture Improvements**
+
+6. **Server Component Migration** (Priority 3, Task 6)
+   - [ ] Audit dashboard for server-side data fetching opportunities
+   - [ ] Convert data fetching to Server Components where possible
+   - [ ] Keep only interactive parts as Client Components
+   - [ ] Leverage Next.js streaming for progressive page loads
+   - **Estimated Time:** 4-5 hours
+
+### **Previous Priorities (Lower Priority Now)**
+
+7. **Test Talent Profile Slugs**
    - [ ] Verify all talent profile links work with new slug-based URLs
    - [ ] Test backward compatibility with old UUID-based URLs
    - [ ] Check for any broken links in production
-   - [ ] Verify slug generation handles special characters correctly
 
-2. **Admin Portal Testing**
+8. **Admin Portal Testing**
    - [ ] Test all three new admin pages (`/admin/talent`, `/admin/gigs`, `/admin/users`)
    - [ ] Verify data loads correctly
    - [ ] Test search functionality on all pages
-   - [ ] Test filtering/tabs on Gigs and Users pages
-   - [ ] Verify "View Profile" links work correctly
 
-3. **Documentation Cleanup (Medium Priority)**
-   - [ ] Continue updating remaining docs with "Career Builder" terminology:
-     - `AUTH_STRATEGY.md`
-     - `DEVELOPER_QUICK_REFERENCE.md`
-     - `CODING_STANDARDS.md`
-     - `TROUBLESHOOTING_GUIDE.md`
-   - [ ] Consolidate redundant documentation:
-     - Sentry docs (10+ files → consolidate to 3)
-     - Environment setup (2 files → merge into 1)
-     - Supabase MCP (5 files → keep 2, archive 3)
+9. **Documentation Cleanup**
+   - [ ] Continue updating remaining docs with "Career Builder" terminology
+   - [ ] Consolidate redundant documentation
 
 ### **Medium Priority**
 

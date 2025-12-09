@@ -45,6 +45,7 @@ import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
+import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
@@ -102,6 +103,9 @@ function TalentDashboardContent() {
   const [selectedTalentApplication, setSelectedTalentApplication] = useState<TalentApplication | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const fetchedUserIdRef = useRef<string | null>(null); // Track which user we've fetched data for to prevent infinite loops
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track loading timeout
+  const fetchedProfileRef = useRef<boolean>(false); // Track if we've fetched data when profile was available
+  const currentFetchTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track which timeout belongs to current fetch operation
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -132,7 +136,7 @@ function TalentDashboardContent() {
   const needsProfileCompletion =
     !talentProfile?.first_name || !talentProfile?.last_name || !talentProfile?.location;
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (timeoutId: ReturnType<typeof setTimeout> | null) => {
     if (!supabase || !user) {
       setLoading(false);
       return;
@@ -140,7 +144,47 @@ function TalentDashboardContent() {
 
     setLoading(true);
 
+    // CRITICAL FIX: Use the timeout ID passed as parameter (captured at call site)
+    // This prevents race conditions where a new timeout replaces the old one while fetch is still running
+    // The timeout ID is captured synchronously at the call site (line 318) before the async function executes
+    const thisFetchTimeoutId = timeoutId;
+
     try {
+      // CRITICAL FIX: Ensure profile exists before fetching dashboard data
+      // This handles brand new accounts that may not have a profile yet
+      if (!profile) {
+        console.log("Profile is null, ensuring profile exists...");
+        try {
+          const profileResult = await ensureProfileExists();
+          if (profileResult.error) {
+            console.error("Error ensuring profile exists:", profileResult.error);
+            setError("Failed to load profile. Please try refreshing the page.");
+            // Don't set loading to false here - let finally block handle it with proper race condition check
+            return;
+          }
+          // CRITICAL FIX: Only reload when profile was actually created or updated
+          // Don't reload if profile already existed (exists: true) - that would cause unnecessary reloads
+          // Reload is needed when: created, updated (display_name), or roleUpdated
+          if (profileResult.created || profileResult.updated || profileResult.roleUpdated) {
+            console.log("Profile created/updated, reloading page to refresh auth state...");
+            window.location.reload();
+            return;
+          }
+          // If profile exists but wasn't loaded in auth context, continue without reload
+          // The profile data will be available on next render after auth context syncs
+          // Mark that we fetched without profile - will re-fetch when profile becomes available
+          fetchedProfileRef.current = false;
+        } catch (profileError) {
+          console.error("Unexpected error ensuring profile exists:", profileError);
+          setError("Failed to initialize profile. Please try refreshing the page.");
+          // Don't set loading to false here - let finally block handle it with proper race condition check
+          return;
+        }
+      } else {
+        // Profile is available - mark that we've fetched with profile
+        fetchedProfileRef.current = true;
+      }
+
       // Profile data is already available from auth context (avatar_url, display_name, etc.)
       // No need to fetch it again - this eliminates N+1 query issue
 
@@ -155,6 +199,33 @@ function TalentDashboardContent() {
         console.error("Error fetching talent profile:", talentProfileError);
       } else {
         setTalentProfile(talentProfileData ?? null);
+        
+        // CRITICAL FIX: If talent profile doesn't exist but user has talent role, create it
+        // Check profile from auth context, or fallback to checking user metadata role
+        const isTalentUser = profile 
+          ? (profile.role === "talent" || profile.account_type === "talent")
+          : (user.user_metadata?.role === "talent");
+        
+        if (!talentProfileData && isTalentUser) {
+          console.log("Talent profile missing, creating it...");
+          const firstName = user.user_metadata?.first_name as string || "";
+          const lastName = user.user_metadata?.last_name as string || "";
+          
+          const { error: createTalentError } = await supabase.from("talent_profiles").insert({
+            user_id: user.id,
+            first_name: firstName,
+            last_name: lastName,
+          });
+          
+          if (createTalentError) {
+            console.error("Error creating talent profile:", createTalentError);
+            // Continue anyway - dashboard can still function without talent_profile initially
+          } else {
+            // Reload to get fresh talent profile data
+            window.location.reload();
+            return;
+          }
+        }
       }
 
       // Fetch talent's applications
@@ -186,11 +257,58 @@ function TalentDashboardContent() {
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
-      setError("Failed to load dashboard data");
+      setError("Failed to load dashboard data. Please try refreshing the page.");
     } finally {
-      setLoading(false);
+      // CRITICAL FIX: Only clear timeout and set loading to false if this fetch is still the active one
+      // This prevents race conditions where effect re-runs and starts a new fetch before this one completes
+      // If a new fetch has started (timeout ID changed), don't modify loading state - let the new fetch handle it
+      // Note: timeoutId can be null for manual retries (like "Try Again" button) - skip clearing in that case
+      if (thisFetchTimeoutId !== null && loadingTimeoutRef.current === thisFetchTimeoutId) {
+        // This fetch is still the active one - safe to clear timeout and reset loading
+        clearTimeout(thisFetchTimeoutId);
+        // Only clear the ref if it still matches (hasn't been replaced by a new fetch)
+        if (loadingTimeoutRef.current === thisFetchTimeoutId) {
+          loadingTimeoutRef.current = null;
+        }
+        setLoading(false);
+      } else if (thisFetchTimeoutId === null) {
+        // Manual retry (no timeout ID) - always set loading to false
+        setLoading(false);
+      }
+      // If timeout ID doesn't match, a new fetch is in progress - don't modify loading state
     }
-  }, [supabase, user]);
+  }, [supabase, user, profile]); // Keep profile in dependencies so callback updates when profile changes
+
+  // CRITICAL FIX: Helper function to set up timeout and call fetchDashboardData
+  // This ensures timeout protection is always set up, whether called from effect or manual retry
+  const fetchDashboardDataWithTimeout = useCallback(() => {
+    if (!user || !supabase) {
+      return;
+    }
+
+    // Clear any existing timeout first
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
+      loadingTimeoutRef.current = null;
+    }
+
+    // Set timeout to prevent infinite loading (10 seconds)
+    const timeoutId = setTimeout(() => {
+      console.error("Dashboard loading timeout - forcing loading to complete");
+      setError("Dashboard is taking longer than expected to load. Please try refreshing the page.");
+      setLoading(false);
+      // Only clear if this timeout is still the current one (hasn't been replaced)
+      if (loadingTimeoutRef.current === timeoutId) {
+        loadingTimeoutRef.current = null;
+      }
+    }, 10000);
+
+    loadingTimeoutRef.current = timeoutId;
+    currentFetchTimeoutIdRef.current = timeoutId;
+
+    // Pass timeout ID as parameter (captured synchronously before async execution)
+    fetchDashboardData(timeoutId);
+  }, [user, supabase, fetchDashboardData]);
 
   useEffect(() => {
     // Wait for auth to finish loading before fetching data
@@ -202,10 +320,20 @@ function TalentDashboardContent() {
     // or when user changes (new login)
     // Use ref to track which user we've fetched for to prevent refetching on every isLoading change
     if (user && supabase) {
-      // Only fetch if we haven't fetched for this user yet, or if user changed
-      if (fetchedUserIdRef.current !== user.id) {
-        fetchedUserIdRef.current = user.id;
-        fetchDashboardData();
+      const isNewUser = fetchedUserIdRef.current !== user.id;
+      const profileBecameAvailable = !fetchedProfileRef.current && profile !== null;
+      
+      // CRITICAL FIX: Fetch if:
+      // 1. New user (haven't fetched for this user yet)
+      // 2. Profile became available after initial fetch (was null, now has value)
+      if (isNewUser || profileBecameAvailable) {
+        if (isNewUser) {
+          fetchedUserIdRef.current = user.id;
+          fetchedProfileRef.current = false; // Reset profile fetch flag for new user
+        }
+        
+        // Use helper function to set up timeout and fetch
+        fetchDashboardDataWithTimeout();
       }
     } else if (!isSupabaseConfigured) {
       setError("Supabase is not configured");
@@ -214,9 +342,23 @@ function TalentDashboardContent() {
       // Auth finished loading but no user - stop loading
       setLoading(false);
       fetchedUserIdRef.current = null; // Reset when user logs out
+      fetchedProfileRef.current = false; // Reset profile fetch flag
     }
+
+    // Cleanup timeout on unmount or when dependencies change
+    // CRITICAL FIX: Always clear timeout in cleanup to avoid stale closure issues
+    // fetchDashboardData's finally block will also clear it, but clearing here is safe (no-op if already cleared)
+    // This prevents memory leaks and ensures cleanup happens even if effect re-runs before fetchDashboardData completes
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+    // Note: fetchDashboardDataWithTimeout is intentionally excluded from dependencies to prevent re-runs when callback is recreated
+    // We only want to re-run when profile becomes available (detected via profile dependency)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, supabase, isSupabaseConfigured, isLoading]); // Include isLoading so effect re-runs when auth finishes loading
+  }, [user, supabase, isSupabaseConfigured, isLoading, profile]); // Include profile to detect when it becomes available after initial fetch
 
   // Show success toast when application is submitted
   useEffect(() => {
@@ -265,11 +407,14 @@ function TalentDashboardContent() {
     }
   };
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (signOutTimeoutRef.current) {
         clearTimeout(signOutTimeoutRef.current);
+      }
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
     };
   }, []);
@@ -352,6 +497,18 @@ function TalentDashboardContent() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
           <p className="mt-4 text-gray-300">Loading your dashboard...</p>
+          {error && (
+            <div className="mt-4 max-w-md mx-auto">
+              <p className="text-red-600 text-sm">{error}</p>
+              <Button
+                onClick={() => window.location.reload()}
+                className="mt-2"
+                variant="outline"
+              >
+                Refresh Page
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1050,7 +1207,11 @@ function TalentDashboardContent() {
                     description={error}
                     action={{
                       label: "Try Again",
-                      onClick: fetchDashboardData,
+                      onClick: () => {
+                        // CRITICAL FIX: Use helper function to set up timeout protection for manual retry
+                        // This ensures the retry request has timeout protection, preventing indefinite loading
+                        fetchDashboardDataWithTimeout();
+                      },
                     }}
                   />
                 ) : gigs.length === 0 ? (

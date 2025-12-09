@@ -104,12 +104,37 @@ export async function ensureProfileExists() {
       }
     }
 
+    // Fetch the created profile to return complete data (consistent with update paths)
+    const { data: createdProfile } = await supabase
+      .from("profiles")
+      .select("role, account_type, display_name, avatar_url, avatar_path, subscription_status, subscription_plan, subscription_current_period_end")
+      .eq("id", user.id)
+      .maybeSingle<{
+        role: string | null;
+        account_type: string | null;
+        display_name: string | null;
+        avatar_url: string | null;
+        avatar_path: string | null;
+        subscription_status: string | null;
+        subscription_plan: string | null;
+        subscription_current_period_end: string | null;
+      }>();
+
     revalidatePath("/", "layout");
     // Return the created profile data to avoid duplicate queries
     return { 
       success: true, 
       created: true,
-      profile: { role: role as "talent" | "client" | "admin", account_type: "talent" }
+      profile: { 
+        role: (createdProfile?.role ?? role) as "talent" | "client" | "admin" | null, 
+        account_type: (createdProfile?.account_type ?? "talent") as "talent" | "client" | "unassigned",
+        display_name: createdProfile?.display_name ?? displayName,
+        avatar_url: createdProfile?.avatar_url ?? null,
+        avatar_path: createdProfile?.avatar_path ?? null,
+        subscription_status: (createdProfile?.subscription_status ?? "none") as "none" | "active" | "canceled" | "past_due",
+        subscription_plan: createdProfile?.subscription_plan ?? null,
+        subscription_current_period_end: createdProfile?.subscription_current_period_end ?? null,
+      }
     };
   }
 
@@ -139,8 +164,40 @@ export async function ensureProfileExists() {
       return { error: "Failed to update profile" };
     }
 
+    // Fetch the updated profile to return complete data (consistent with creation path)
+    const { data: updatedProfile } = await supabase
+      .from("profiles")
+      .select("role, account_type, display_name, avatar_url, avatar_path, subscription_status, subscription_plan, subscription_current_period_end")
+      .eq("id", user.id)
+      .maybeSingle<{
+        role: string | null;
+        account_type: string | null;
+        display_name: string | null;
+        avatar_url: string | null;
+        avatar_path: string | null;
+        subscription_status: string | null;
+        subscription_plan: string | null;
+        subscription_current_period_end: string | null;
+      }>();
+
     revalidatePath("/", "layout");
-    return { success: true, updated: true };
+    
+    // Return updated profile data to avoid duplicate queries in auth-provider
+    // Use fetched data (which has all fields) - don't fall back to profile since it's missing fields
+    return { 
+      success: true, 
+      updated: true,
+      profile: { 
+        role: (updatedProfile?.role ?? profile?.role ?? null) as "talent" | "client" | "admin" | null, 
+        account_type: (updatedProfile?.account_type ?? profile?.account_type ?? "unassigned") as "talent" | "client" | "unassigned",
+        display_name: updatedProfile?.display_name ?? displayName,
+        avatar_url: updatedProfile?.avatar_url ?? null,
+        avatar_path: updatedProfile?.avatar_path ?? null,
+        subscription_status: (updatedProfile?.subscription_status ?? "none") as "none" | "active" | "canceled" | "past_due",
+        subscription_plan: updatedProfile?.subscription_plan ?? null,
+        subscription_current_period_end: updatedProfile?.subscription_current_period_end ?? null,
+      }
+    };
   }
 
   // If profile exists but role is missing/null, try to determine it
@@ -199,20 +256,70 @@ export async function ensureProfileExists() {
       return { error: "Failed to update profile role" };
     }
 
+    // Fetch the updated profile to return complete data (consistent with other update paths)
+    const { data: updatedRoleProfile } = await supabase
+      .from("profiles")
+      .select("role, account_type, display_name, avatar_url, avatar_path, subscription_status, subscription_plan, subscription_current_period_end")
+      .eq("id", user.id)
+      .maybeSingle<{
+        role: string | null;
+        account_type: string | null;
+        display_name: string | null;
+        avatar_url: string | null;
+        avatar_path: string | null;
+        subscription_status: string | null;
+        subscription_plan: string | null;
+        subscription_current_period_end: string | null;
+      }>();
+
     revalidatePath("/", "layout");
     // Return updated profile data
     return { 
       success: true, 
       roleUpdated: true,
-      profile: { role: role as "talent" | "client" | "admin", account_type: accountType as "talent" | "client" }
+      profile: {
+        role: (updatedRoleProfile?.role ?? role) as "talent" | "client" | "admin" | null,
+        account_type: (updatedRoleProfile?.account_type ?? accountType) as "talent" | "client" | "unassigned",
+        display_name: updatedRoleProfile?.display_name ?? null,
+        avatar_url: updatedRoleProfile?.avatar_url ?? null,
+        avatar_path: updatedRoleProfile?.avatar_path ?? null,
+        subscription_status: (updatedRoleProfile?.subscription_status ?? "none") as "none" | "active" | "canceled" | "past_due",
+        subscription_plan: updatedRoleProfile?.subscription_plan ?? null,
+        subscription_current_period_end: updatedRoleProfile?.subscription_current_period_end ?? null,
+      }
     };
   }
 
   // Return existing profile data to avoid duplicate queries
+  // Fetch complete profile data to match what auth-provider expects
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("role, account_type, display_name, avatar_url, avatar_path, subscription_status, subscription_plan, subscription_current_period_end")
+    .eq("id", user.id)
+    .maybeSingle<{
+      role: string | null;
+      account_type: string | null;
+      display_name: string | null;
+      avatar_url: string | null;
+      avatar_path: string | null;
+      subscription_status: string | null;
+      subscription_plan: string | null;
+      subscription_current_period_end: string | null;
+    }>();
+
   return { 
     success: true, 
     exists: true,
-    profile: profile ? { role: profile.role as "talent" | "client" | "admin" | null, account_type: (profile.account_type ?? "unassigned") as "unassigned" | "talent" | "client" } : null
+    profile: existingProfile ? {
+      role: (existingProfile.role ?? null) as "talent" | "client" | "admin" | null,
+      account_type: (existingProfile.account_type ?? "unassigned") as "talent" | "client" | "unassigned",
+      display_name: existingProfile.display_name ?? null,
+      avatar_url: existingProfile.avatar_url ?? null,
+      avatar_path: existingProfile.avatar_path ?? null,
+      subscription_status: (existingProfile.subscription_status ?? "none") as "none" | "active" | "canceled" | "past_due",
+      subscription_plan: existingProfile.subscription_plan ?? null,
+      subscription_current_period_end: existingProfile.subscription_current_period_end ?? null,
+    } : null
   };
 }
 
@@ -502,47 +609,87 @@ export async function handleLoginRedirect(returnUrl?: string) {
         ? "client" 
         : accountType;
   
-  // Sync account_type with role if role exists but account_type is unassigned
-  // Do this asynchronously (don't wait) to speed up redirect
-  if (role && role !== "admin" && accountType === "unassigned" && effectiveAccountType !== "unassigned") {
-    // Fire and forget - don't wait for sync to complete
-    void (async () => {
-      try {
-        await supabase
-          .from("profiles")
-          .update({ account_type: effectiveAccountType as "talent" | "client" })
-          .eq("id", user.id);
-        // Revalidate in background after sync completes
-        revalidatePath("/", "layout");
-      } catch (syncError) {
-        console.error("Error syncing account_type with role:", syncError);
-        // Sync failed - account_type remains unassigned in DB
-        // This is a transient DB issue - user can still proceed using effectiveAccountType
-        // Next login will retry the sync
+  // CRITICAL FIX: Ensure talent_profiles exists for talent users before redirecting
+  // This prevents dashboard loading issues for new accounts
+  if (role === "talent" || effectiveAccountType === "talent") {
+    const { data: talentProfile, error: talentProfileError } = await supabase
+      .from("talent_profiles")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    
+    if (!talentProfile && !talentProfileError) {
+      // Talent profile doesn't exist - create it synchronously before redirect
+      const firstName = (user.user_metadata?.first_name as string) || "";
+      const lastName = (user.user_metadata?.last_name as string) || "";
+      
+      const { error: createTalentError } = await supabase.from("talent_profiles").insert({
+        user_id: user.id,
+        first_name: firstName,
+        last_name: lastName,
+      });
+      
+      if (createTalentError) {
+        console.error("Error creating talent profile during login redirect:", createTalentError);
+        // Continue anyway - profile exists, talent_profile can be created later
       }
-    })();
+    }
+  }
+  
+  // Sync account_type with role if role exists but account_type is unassigned
+  // Do this SYNCHRONOUSLY to ensure data consistency before redirect
+  if (role && role !== "admin" && accountType === "unassigned" && effectiveAccountType !== "unassigned") {
+    try {
+      await supabase
+        .from("profiles")
+        .update({ account_type: effectiveAccountType as "talent" | "client" })
+        .eq("id", user.id);
+      // Revalidate after sync completes
+      revalidatePath("/", "layout");
+    } catch (syncError) {
+      console.error("Error syncing account_type with role:", syncError);
+      // Continue anyway - effectiveAccountType will be used for routing
+    }
   }
   
   const safeUrl = isSafeReturnUrl(returnUrl);
 
   // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
   // Only redirect to onboarding if genuinely new user with no role set
-  // If role exists but account_type is unassigned, sync will handle it and redirect to Talent Dashboard
+  // CRITICAL FIX: Set default role SYNCHRONOUSLY before redirecting
   if (!isAdmin && accountType === "unassigned" && !role) {
-    // Set default to talent and redirect immediately (don't wait for update)
-    void (async () => {
-      try {
-        await supabase
-          .from("profiles")
-          .update({ account_type: "talent", role: "talent" })
-          .eq("id", user.id);
-        revalidatePath("/", "layout");
-      } catch (defaultError) {
-        console.error("Error setting default role:", defaultError);
+    try {
+      // Set default to talent and create talent_profile synchronously
+      await supabase
+        .from("profiles")
+        .update({ account_type: "talent", role: "talent" })
+        .eq("id", user.id);
+      
+      // Ensure talent_profiles exists
+      const firstName = (user.user_metadata?.first_name as string) || "";
+      const lastName = (user.user_metadata?.last_name as string) || "";
+      
+      const { data: existingTalentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (!existingTalentProfile) {
+        await supabase.from("talent_profiles").insert({
+          user_id: user.id,
+          first_name: firstName,
+          last_name: lastName,
+        });
       }
-    })();
+      
+      revalidatePath("/", "layout");
+    } catch (defaultError) {
+      console.error("Error setting default role:", defaultError);
+      // Continue anyway - redirect to dashboard where profile can be created
+    }
     
-    // Redirect immediately without waiting
+    // Redirect after ensuring profile exists
     redirect("/talent/dashboard");
     return;
   }
@@ -581,22 +728,41 @@ export async function handleLoginRedirect(returnUrl?: string) {
     return;
   }
 
-  // Fallback: try to get role from metadata and update (async, don't wait)
+  // Fallback: try to get role from metadata and update SYNCHRONOUSLY before redirect
   const roleFromMetadata = (user.user_metadata?.role as string) || "talent";
-  void (async () => {
-    try {
-      await supabase
-        .from("profiles")
-        .update({ role: roleFromMetadata as "talent" | "client" | "admin", account_type: roleFromMetadata === "client" ? "client" : "talent" })
-        .eq("id", user.id);
-      revalidatePath("/", "layout");
-    } catch (metadataUpdateError) {
-      console.error("Error updating profile from metadata:", metadataUpdateError);
+  try {
+    await supabase
+      .from("profiles")
+      .update({ role: roleFromMetadata as "talent" | "client" | "admin", account_type: roleFromMetadata === "client" ? "client" : "talent" })
+      .eq("id", user.id);
+    
+    // Ensure talent_profiles exists if role is talent
+    if (roleFromMetadata === "talent") {
+      const { data: existingTalentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (!existingTalentProfile) {
+        const firstName = (user.user_metadata?.first_name as string) || "";
+        const lastName = (user.user_metadata?.last_name as string) || "";
+        await supabase.from("talent_profiles").insert({
+          user_id: user.id,
+          first_name: firstName,
+          last_name: lastName,
+        });
+      }
     }
-  })();
+    
+    revalidatePath("/", "layout");
+  } catch (metadataUpdateError) {
+    console.error("Error updating profile from metadata:", metadataUpdateError);
+    // Continue anyway - redirect to dashboard
+  }
 
   // MVP: Default fallback to Talent Dashboard (all signups are talent)
-  // Redirect immediately without waiting for metadata update
+  // Redirect after ensuring profile exists
   redirect("/talent/dashboard");
 }
 
