@@ -8,9 +8,14 @@ import type { Database } from "@/types/supabase";
 const onboardingPath = "/onboarding/select-account-type";
 
 export async function selectAccountType(formData: FormData) {
+  // MVP: All signups are talent - Career Builder access is via application link from Talent Dashboard
+  // The form field is kept for backward compatibility but the value is always ignored
   const type = formData.get("accountType");
-  if (type !== "talent" && type !== "client") {
-    throw new Error("Invalid account type");
+  
+  // Validate that type exists (basic validation)
+  // Note: We always set account_type to "talent" regardless of input per MVP requirement
+  if (!type || typeof type !== "string") {
+    throw new Error("Account type is required");
   }
 
   const supabase = await createSupabaseServer();
@@ -34,12 +39,16 @@ export async function selectAccountType(formData: FormData) {
     return;
   }
 
+  // If user already has an account type set, redirect to appropriate dashboard
+  // This matches the page redirect logic for consistency
   if (profile?.account_type && profile.account_type !== "unassigned") {
-    const destination = profile.account_type === "client" ? "/client/apply" : "/talent/dashboard";
+    const destination = profile.account_type === "client" ? "/client/dashboard" : "/talent/dashboard";
     redirect(destination);
     return;
   }
 
+  // MVP: Always set to talent and redirect to Talent Dashboard
+  // Career Builder access is via application link from Talent Dashboard
   const updatePayload = {
     account_type: "talent",
     role: "talent",
@@ -57,10 +66,7 @@ export async function selectAccountType(formData: FormData) {
 
   revalidatePath("/");
 
-  if (type === "client") {
-    redirect("/client/apply");
-  } else {
-    redirect("/talent/dashboard");
-  }
+  // MVP: Always redirect to Talent Dashboard (Career Builder via application link)
+  redirect("/talent/dashboard");
 }
 

@@ -44,12 +44,31 @@ const safeReturnUrl = (value: string | null): string | null => {
   return value;
 };
 
+// Helper functions to check access - fail-safe: deny access if profile is null
+// Used for route protection to prevent unauthorized access
+const hasTalentAccess = (profile: ProfileRow | null): boolean => {
+  if (!profile) return false; // Security: Fail-safe - deny access if profile is null
+  return profile.account_type === "talent" || profile.role === "talent";
+};
+
+const hasClientAccess = (profile: ProfileRow | null): boolean => {
+  if (!profile) return false; // Security: Fail-safe - deny access if profile is null
+  // Check both account_type and role for consistency with hasTalentAccess
+  // This handles sync mismatch cases where role is set but account_type is unassigned
+  return profile.account_type === "client" || profile.role === "client";
+};
+
+// Determines redirect destination - allows default fallback for null profiles
+// Separate from access control to handle routing vs security differently
 const determineDestination = (profile: ProfileRow | null) => {
-  if (!profile) return "/choose-role";
+  if (!profile) return "/talent/dashboard"; // MVP: Default to Talent Dashboard for routing
   if (profile.role === "admin") return "/admin/dashboard";
-  if (profile.account_type === "client") return "/client/dashboard";
-  if (profile.account_type === "talent") return "/talent/dashboard";
-  return onboardingPath;
+  // Check both account_type and role for client (handles sync mismatch cases)
+  if (profile.account_type === "client" || profile.role === "client") return "/client/dashboard";
+  // Check both account_type and role for talent (handles sync mismatch cases)
+  if (profile.account_type === "talent" || profile.role === "talent") return "/talent/dashboard";
+  // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
+  return "/talent/dashboard";
 };
 
 const needsClientAccess = (path: string) => 
@@ -80,7 +99,8 @@ export async function middleware(req: NextRequest) {
       return res;
     }
     const redirectUrl = new URL("/login", req.url);
-    redirectUrl.searchParams.set("returnUrl", encodeURIComponent(path));
+    // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
+    redirectUrl.searchParams.set("returnUrl", path);
     return NextResponse.redirect(redirectUrl);
   }
 
@@ -105,7 +125,8 @@ export async function middleware(req: NextRequest) {
     }
     if (!publicRoutes.includes(path)) {
       const redirectUrl = new URL("/login", req.url);
-      redirectUrl.searchParams.set("returnUrl", encodeURIComponent(path));
+      // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
+      redirectUrl.searchParams.set("returnUrl", path);
       return NextResponse.redirect(redirectUrl);
     }
     return res;
@@ -121,6 +142,18 @@ export async function middleware(req: NextRequest) {
     console.error("Middleware profile query error:", profileError);
   }
 
+  // Security: If profile is null for authenticated user, redirect to login to force re-authentication
+  // This prevents access control bypass and ensures profile is created
+  // Handle both cases: missing profile (no error) and query errors (profileError exists)
+  if (!profile) {
+    // Profile doesn't exist or query failed - redirect to login to trigger profile creation/re-authentication
+    // This prevents unauthorized access when profile query fails
+    const redirectUrl = new URL("/login", req.url);
+    // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
+    redirectUrl.searchParams.set("returnUrl", path);
+    return NextResponse.redirect(redirectUrl);
+  }
+
   const isAdmin = profile?.role === "admin";
   const accountType: AccountType = (profile?.account_type ?? "unassigned") as AccountType;
 
@@ -128,11 +161,32 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/suspended", req.url));
   }
 
+  // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
+  // Only check onboarding for genuinely new users, but redirect to Talent Dashboard instead
   const needsOnboarding = !isAdmin && accountType === "unassigned";
   const onAuthRoute = authRoutes.includes(path);
 
-  if (needsOnboarding && path !== onboardingPath && path !== "/choose-role") {
-    return NextResponse.redirect(new URL(onboardingPath, req.url));
+  // If user needs onboarding but has a role, sync account_type and redirect to appropriate dashboard
+  // Handle both talent and client roles symmetrically
+  // Allow public routes (like /client/apply) to be accessible even during onboarding
+  if (needsOnboarding && profile?.role === "talent" && path !== "/talent/dashboard" && !publicRoutes.includes(path)) {
+    // User has talent role but account_type is unassigned - redirect to Talent Dashboard
+    // The sync will happen in handleLoginRedirect or on next page load
+    return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+  }
+
+  if (needsOnboarding && profile?.role === "client" && path !== "/client/dashboard" && !publicRoutes.includes(path)) {
+    // User has client role but account_type is unassigned - redirect to Client Dashboard
+    // The sync will happen in handleLoginRedirect or on next page load
+    return NextResponse.redirect(new URL("/client/dashboard", req.url));
+  }
+
+  // Only redirect to onboarding if user has no role at all (shouldn't happen with MVP flow)
+  // Allow public routes (like /client/apply) to be accessible even during onboarding
+  // Exclude /talent/dashboard to prevent infinite redirect loop when user is already on that page
+  if (needsOnboarding && !profile?.role && path !== onboardingPath && path !== "/choose-role" && path !== "/talent/dashboard" && !publicRoutes.includes(path)) {
+    // Default to Talent Dashboard instead of onboarding page
+    return NextResponse.redirect(new URL("/talent/dashboard", req.url));
   }
 
   if (!needsOnboarding && path === onboardingPath && !isAdmin) {
@@ -149,8 +203,8 @@ export async function middleware(req: NextRequest) {
       const returnPath = new URL(returnUrl, req.url);
       const target = returnPath.pathname;
       if (
-        (!needsClientAccess(target) || accountType === "client") &&
-        (!needsTalentAccess(target) || accountType === "talent") &&
+        (!needsClientAccess(target) || hasClientAccess(profile)) &&
+        (!needsTalentAccess(target) || hasTalentAccess(profile)) &&
         (!target.startsWith("/admin/") || isAdmin)
       ) {
         return NextResponse.redirect(returnPath);
@@ -168,15 +222,40 @@ export async function middleware(req: NextRequest) {
   if (!isAdmin) {
     if (needsAdminAccess(path)) {
       const destination = determineDestination(profile);
-      return NextResponse.redirect(new URL(destination, req.url));
+      // Prevent infinite redirect loop: don't redirect if already on destination
+      if (destination !== path) {
+        return NextResponse.redirect(new URL(destination, req.url));
+      }
+      // Security: If user doesn't have admin access and is already on destination, redirect to login
+      // This prevents unauthorized access when destination matches current path
+      const redirectUrl = new URL("/login", req.url);
+      redirectUrl.searchParams.set("returnUrl", path);
+      return NextResponse.redirect(redirectUrl);
     }
-    if (needsClientAccess(path) && accountType !== "client") {
+    if (needsClientAccess(path) && !hasClientAccess(profile)) {
       const destination = determineDestination(profile);
-      return NextResponse.redirect(new URL(destination, req.url));
+      // Prevent infinite redirect loop: don't redirect if already on destination
+      if (destination !== path) {
+        return NextResponse.redirect(new URL(destination, req.url));
+      }
+      // Security: If user doesn't have client access and is already on destination, redirect to login
+      // This prevents unauthorized access when destination matches current path
+      const redirectUrl = new URL("/login", req.url);
+      redirectUrl.searchParams.set("returnUrl", path);
+      return NextResponse.redirect(redirectUrl);
     }
-    if (needsTalentAccess(path) && accountType !== "talent") {
+    if (needsTalentAccess(path) && !hasTalentAccess(profile)) {
       const destination = determineDestination(profile);
-      return NextResponse.redirect(new URL(destination, req.url));
+      // Prevent infinite redirect loop: don't redirect if already on destination
+      // Security: If user doesn't have talent access and is already on destination, redirect to login
+      // This prevents unauthorized access for users with null role and unassigned account_type
+      if (destination !== path) {
+        return NextResponse.redirect(new URL(destination, req.url));
+      }
+      // User is already on destination but doesn't have access - redirect to login to force re-authentication
+      const redirectUrl = new URL("/login", req.url);
+      redirectUrl.searchParams.set("returnUrl", path);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 

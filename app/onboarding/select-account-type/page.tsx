@@ -1,9 +1,7 @@
 "use server";
 
-import Image from "next/image";
 import { redirect } from "next/navigation";
 
-import { ClientAccountTypeSelector } from "./client-selector";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 const onboardingPath = "/onboarding/select-account-type";
@@ -31,28 +29,15 @@ export default async function SelectAccountTypePage() {
 
   const accountType = profile?.account_type ?? "unassigned";
 
+  // MVP: Redirect all authenticated users to Talent Dashboard
+  // Career Builder access is via application link from Talent Dashboard
   if (accountType === "client") {
-    redirect("/client/apply");
+    redirect("/client/dashboard");
   }
 
-  if (accountType === "talent") {
-    redirect("/talent/dashboard");
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center py-12">
-      <div className="relative w-full max-w-5xl rounded-3xl bg-black/70 border border-white/10 shadow-2xl shadow-black/70 overflow-hidden">
-        <div className="absolute inset-0">
-          <Image
-            src="/images/totl-logo-transparent.png"
-            alt="TOTL Agency brand"
-            fill
-            className="object-cover opacity-10"
-          />
-        </div>
-        <ClientAccountTypeSelector />
-      </div>
-    </div>
-  );
+  // Default to Talent Dashboard (all signups are talent)
+  // MVP: This page redirects all authenticated users to Talent Dashboard
+  // Career Builder access is via application link from Talent Dashboard
+  redirect("/talent/dashboard");
 }
 

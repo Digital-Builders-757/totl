@@ -17,13 +17,14 @@ export const dynamic = "force-dynamic";
 export default async function AuthCallbackPage({
   searchParams,
 }: {
-  searchParams: Promise<{ code?: string; error?: string; error_description?: string }>;
+  searchParams: Promise<{ code?: string; error?: string; error_description?: string; returnUrl?: string }>;
 }) {
   const supabase = await createSupabaseServer();
   const params = await searchParams;
   const code = params.code;
   const error = params.error;
   const errorDescription = params.error_description;
+  const returnUrl = params.returnUrl;
 
   // Handle OAuth errors
   if (error) {
@@ -127,10 +128,13 @@ export default async function AuthCallbackPage({
             displayName = user.email?.split("@")[0] || "User";
           }
 
-          // Create profile
+          // Create profile with account_type set to talent (MVP: all signups are talent)
+          // Even if role in metadata is "client" (e.g., admin-created), account_type starts as "talent"
+          // Users can apply to become Career Builder (client) through the application process
           const { error: insertError } = await supabase.from("profiles").insert({
             id: user.id,
             role: role as "talent" | "client" | "admin",
+            account_type: "talent", // MVP: All new accounts start as talent, regardless of role in metadata
             display_name: displayName,
             email_verified: user.email_confirmed_at !== null,
           });
@@ -196,13 +200,16 @@ export default async function AuthCallbackPage({
             .eq("id", user.id);
 
           // Show success confirmation page before redirecting
-          const redirectUrl = newProfile?.role === "talent" 
-            ? "/talent/dashboard?verified=true"
+          // Default to Talent Dashboard for new users (MVP: all signups are talent)
+          // Preserve returnUrl if provided
+          const baseRedirectUrl = newProfile?.role === "admin"
+            ? "/admin/dashboard?verified=true"
             : newProfile?.role === "client"
             ? "/client/dashboard?verified=true"
-            : newProfile?.role === "admin"
-            ? "/admin/dashboard?verified=true"
-            : "/choose-role?verified=true";
+            : "/talent/dashboard?verified=true";
+          const redirectUrl = returnUrl
+            ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
+            : baseRedirectUrl;
           
           // Show success page with auto-redirect
           return (
@@ -272,13 +279,16 @@ export default async function AuthCallbackPage({
         }
 
         // Show success confirmation page before redirecting
-        const redirectUrl = profile?.role === "talent" 
-          ? "/talent/dashboard?verified=true"
+        // Default to Talent Dashboard for new users (MVP: all signups are talent)
+        // Preserve returnUrl if provided
+        const baseRedirectUrl = profile?.role === "admin"
+          ? "/admin/dashboard?verified=true"
           : profile?.role === "client"
           ? "/client/dashboard?verified=true"
-          : profile?.role === "admin"
-          ? "/admin/dashboard?verified=true"
-          : "/choose-role?verified=true";
+          : "/talent/dashboard?verified=true";
+        const redirectUrl = returnUrl
+          ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
+          : baseRedirectUrl;
         
         // Show success page with auto-redirect
         return (
