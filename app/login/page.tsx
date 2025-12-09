@@ -299,7 +299,7 @@ export default function Login() {
                 <p className="text-sm sm:text-base text-gray-400">
                   Don&apos;t have an account?{" "}
                   <Link
-                    href={returnUrl ? `/choose-role?returnUrl=${returnUrl}` : "/choose-role"}
+                    href={returnUrl ? `/choose-role?returnUrl=${encodeURIComponent(returnUrl)}` : "/choose-role"}
                     className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
                   >
                     Create an account →

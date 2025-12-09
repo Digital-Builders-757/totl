@@ -29,7 +29,13 @@ export default function ChooseRolePage() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // MVP: Redirect authenticated users to Talent Dashboard
+    // Career Builder access is via application link from Talent Dashboard
+    if (user) {
+      router.push("/talent/dashboard");
+    }
+  }, [user, router]);
 
   const handleCareerBuilderClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();

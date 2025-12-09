@@ -101,6 +101,7 @@ function TalentDashboardContent() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTalentApplication, setSelectedTalentApplication] = useState<TalentApplication | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const fetchedUserIdRef = useRef<string | null>(null); // Track which user we've fetched data for to prevent infinite loops
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -192,15 +193,30 @@ function TalentDashboardContent() {
   }, [supabase, user]);
 
   useEffect(() => {
+    // Wait for auth to finish loading before fetching data
+    if (isLoading) {
+      return; // Don't fetch while auth is still loading
+    }
+
+    // Prevent infinite loops: only fetch when user/supabase are available and we haven't fetched for this user yet
+    // or when user changes (new login)
+    // Use ref to track which user we've fetched for to prevent refetching on every isLoading change
     if (user && supabase) {
-      fetchDashboardData();
+      // Only fetch if we haven't fetched for this user yet, or if user changed
+      if (fetchedUserIdRef.current !== user.id) {
+        fetchedUserIdRef.current = user.id;
+        fetchDashboardData();
+      }
     } else if (!isSupabaseConfigured) {
       setError("Supabase is not configured");
       setLoading(false);
     } else {
+      // Auth finished loading but no user - stop loading
       setLoading(false);
+      fetchedUserIdRef.current = null; // Reset when user logs out
     }
-  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, supabase, isSupabaseConfigured, isLoading]); // Include isLoading so effect re-runs when auth finishes loading
 
   // Show success toast when application is submitted
   useEffect(() => {
@@ -402,6 +418,20 @@ function TalentDashboardContent() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Career Builder Application Link - Only show if user doesn't already have client access */}
+              {profile && profile.account_type !== "client" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500"
+                >
+                  <Link href="/client/apply" className="flex items-center">
+                    <Briefcase className="h-4 w-4 mr-2" />
+                    Apply to be a Career Builder
+                  </Link>
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"

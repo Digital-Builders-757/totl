@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -54,9 +54,19 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { signUp } = useAuth();
+
+  // Safely extract returnUrl from search params in useEffect to avoid SSR issues
+  useEffect(() => {
+    if (searchParams) {
+      const returnUrlParam = searchParams.get("returnUrl");
+      setReturnUrl(returnUrlParam);
+    }
+  }, [searchParams]);
 
   const {
     register,
@@ -83,13 +93,18 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
     setServerError(null);
 
     try {
+      // Include returnUrl in email redirect so it's preserved through email verification
+      const callbackUrl = returnUrl
+        ? `${window.location.origin}/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`
+        : `${window.location.origin}/auth/callback`;
+
       const { error } = await signUp(data.email, data.password, {
         data: {
           first_name: data.firstName,
           last_name: data.lastName,
           role: "talent",
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: callbackUrl,
       });
 
       if (error) {
