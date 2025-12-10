@@ -1,4 +1,4 @@
-﻿import { XCircle, CheckCircle2 } from "lucide-react";
+﻿import { XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -199,7 +199,7 @@ export default async function AuthCallbackPage({
             .update({ email_verified: isEmailVerified })
             .eq("id", user.id);
 
-          // Show success confirmation page before redirecting
+          // Use server-side redirect instead of client-side link to ensure session cookies are set
           // Default to Talent Dashboard for new users (MVP: all signups are talent)
           // Preserve returnUrl if provided
           const baseRedirectUrl = newProfile?.role === "admin"
@@ -211,35 +211,8 @@ export default async function AuthCallbackPage({
             ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
             : baseRedirectUrl;
           
-          // Show success page with auto-redirect
-          return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-              <Card className="w-full max-w-md">
-                <CardHeader>
-                  <CardTitle className="text-center">Email Verified Successfully!</CardTitle>
-                  <CardDescription className="text-center">
-                    Your email has been verified
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                      <CheckCircle2 className="h-8 w-8 text-green-600" />
-                    </div>
-                    <h3 className="text-xl font-medium text-green-800 mb-2">Verification Successful</h3>
-                    <p className="text-gray-600 text-center mb-4">
-                      Your email address has been verified. You can now access all features of your account.
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                  <Button asChild>
-                    <a href={redirectUrl}>Continue to Dashboard</a>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          );
+          // Use Next.js redirect() to ensure session cookies are properly set before navigation
+          redirect(redirectUrl);
         }
 
         // If profile exists but display_name is missing/empty, update it
@@ -278,7 +251,7 @@ export default async function AuthCallbackPage({
           }
         }
 
-        // Show success confirmation page before redirecting
+        // Use server-side redirect instead of client-side link to ensure session cookies are set
         // Default to Talent Dashboard for new users (MVP: all signups are talent)
         // Preserve returnUrl if provided
         const baseRedirectUrl = profile?.role === "admin"
@@ -290,40 +263,28 @@ export default async function AuthCallbackPage({
           ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
           : baseRedirectUrl;
         
-        // Show success page with auto-redirect
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-            <Card className="w-full max-w-md">
-              <CardHeader>
-                <CardTitle className="text-center">Email Verified Successfully!</CardTitle>
-                <CardDescription className="text-center">
-                  Your email has been verified
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center py-8">
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <CheckCircle2 className="h-8 w-8 text-green-600" />
-                  </div>
-                  <h3 className="text-xl font-medium text-green-800 mb-2">Verification Successful</h3>
-                  <p className="text-gray-600 text-center mb-4">
-                    Your email address has been verified. You can now access all features of your account.
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <Button asChild>
-                  <a href={redirectUrl}>Continue to Dashboard</a>
-                </Button>
-              </CardFooter>
-            </Card>
-          </div>
-        );
+        // Use Next.js redirect() to ensure session cookies are properly set before navigation
+        redirect(redirectUrl);
       }
 
       // Fallback redirect
       redirect("/dashboard");
     } catch (error) {
+      // CRITICAL: Next.js redirect() throws a special error to interrupt execution
+      // We must re-throw redirect errors so they work correctly
+      // Check if this is a redirect error by checking for NEXT_REDIRECT digest
+      if (
+        error &&
+        typeof error === "object" &&
+        "digest" in error &&
+        typeof error.digest === "string" &&
+        error.digest.startsWith("NEXT_REDIRECT")
+      ) {
+        // Re-throw redirect errors so Next.js can handle them properly
+        throw error;
+      }
+      
+      // Only log and show error UI for actual errors, not redirects
       console.error("Unexpected error:", error);
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
