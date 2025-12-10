@@ -109,6 +109,21 @@ function TalentDashboardContent() {
   const hasHandledVerificationRef = useRef<boolean>(false); // Track if we've already handled the verification parameter to prevent infinite loops
   const isInVerificationGracePeriodRef = useRef<boolean>(false); // Track grace period state independently of URL
   const urlCleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track the cleanup timeout
+  const hasRequestedProfileCreationRef = useRef<boolean>(false); // Prevent multiple fallback profile creation attempts per mount
+  const shouldRefetchAfterLoadingRef = useRef<boolean>(false); // Track if a fetch was skipped due to auth loading
+
+  // Reset profile creation guard when user changes (fresh login)
+  useEffect(() => {
+    hasRequestedProfileCreationRef.current = false;
+    shouldRefetchAfterLoadingRef.current = false;
+  }, [user?.id]);
+
+  // If a profile becomes available after a fallback attempt, clear the guard so future fetches skip fallback cleanly
+  useEffect(() => {
+    if (profile && hasRequestedProfileCreationRef.current) {
+      hasRequestedProfileCreationRef.current = false;
+    }
+  }, [profile]);
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -266,41 +281,144 @@ function TalentDashboardContent() {
       return;
     }
 
+    // Track the timeout for this fetch across all paths (including early returns and finally)
+    const thisFetchTimeoutId: ReturnType<typeof setTimeout> | null = timeoutId;
+    let didStartFetch = false;
+
+    // Auth still resolving — avoid fallback creation while provider is loading
+    if (isLoading) {
+      // If we were invoked with a timeout guard, clean it up immediately to avoid dangling timers
+      if (thisFetchTimeoutId !== null && loadingTimeoutRef.current === thisFetchTimeoutId) {
+        clearTimeout(thisFetchTimeoutId);
+        if (loadingTimeoutRef.current === thisFetchTimeoutId) {
+          loadingTimeoutRef.current = null;
+        }
+        // Also clear the tracked current fetch timeout to avoid stale references
+        if (currentFetchTimeoutIdRef.current === thisFetchTimeoutId) {
+          currentFetchTimeoutIdRef.current = null;
+        }
+      }
+      // Mark that we should refetch once auth finishes loading
+      shouldRefetchAfterLoadingRef.current = true;
+      // Leave loading state unchanged; main effect will trigger fetch after auth finishes
+      return;
+    }
+
     setLoading(true);
+    didStartFetch = true;
 
     // CRITICAL FIX: Use the timeout ID passed as parameter (captured at call site)
     // This prevents race conditions where a new timeout replaces the old one while fetch is still running
     // The timeout ID is captured synchronously at the call site (line 318) before the async function executes
-    const thisFetchTimeoutId = timeoutId;
 
     try {
+      // Track a resolved profile so we can proceed without forcing a reload
+      type AuthProfile = NonNullable<typeof profile>;
+      let resolvedProfile: typeof profile = profile;
+
       // CRITICAL FIX: Ensure profile exists before fetching dashboard data
       // This handles brand new accounts that may not have a profile yet
       if (!profile) {
+        // Prevent multiple fallback attempts per mount
+        if (hasRequestedProfileCreationRef.current) {
+          setLoading(false);
+          return;
+        }
+
+        hasRequestedProfileCreationRef.current = true;
+
         console.log("Profile is null, ensuring profile exists...");
         try {
           const profileResult = await ensureProfileExists();
           if (profileResult.error) {
             console.error("Error ensuring profile exists:", profileResult.error);
             setError("Failed to load profile. Please try refreshing the page.");
+            // Allow a future retry since creation failed
+            hasRequestedProfileCreationRef.current = false;
             // Don't set loading to false here - let finally block handle it with proper race condition check
             return;
           }
           // CRITICAL FIX: Only reload when profile was actually created or updated
           // Don't reload if profile already existed (exists: true) - that would cause unnecessary reloads
           // Reload is needed when: created, updated (display_name), or roleUpdated
+          const returnedProfile = profileResult.profile;
           if (profileResult.created || profileResult.updated || profileResult.roleUpdated) {
-            console.log("Profile created/updated, reloading page to refresh auth state...");
-            window.location.reload();
-            return;
+            // Prefer using the returned profile to avoid full page reloads.
+            if (returnedProfile) {
+              const normalizedProfile: AuthProfile = {
+                role: (returnedProfile.role ?? null) as AuthProfile["role"],
+                account_type: (returnedProfile.account_type ?? "unassigned") as AuthProfile["account_type"],
+                avatar_url: returnedProfile.avatar_url ?? null,
+                avatar_path: returnedProfile.avatar_path ?? null,
+                display_name: returnedProfile.display_name ?? null,
+                subscription_status: (returnedProfile.subscription_status ?? "none") as AuthProfile["subscription_status"],
+                subscription_plan: returnedProfile.subscription_plan ?? null,
+                subscription_current_period_end:
+                  returnedProfile.subscription_current_period_end ?? null,
+              };
+              resolvedProfile = normalizedProfile;
+              fetchedProfileRef.current = true;
+            } else {
+              // Profile was created/updated but not returned; let downstream retry once profile is available
+              fetchedProfileRef.current = false;
+              hasRequestedProfileCreationRef.current = false;
+            }
+          } else if (returnedProfile) {
+            // exists: true path with no mutations flagged, but profile payload is available — use it
+            const normalizedProfile: AuthProfile = {
+              role: (returnedProfile.role ?? null) as AuthProfile["role"],
+              account_type: (returnedProfile.account_type ?? "unassigned") as AuthProfile["account_type"],
+              avatar_url: returnedProfile.avatar_url ?? null,
+              avatar_path: returnedProfile.avatar_path ?? null,
+              display_name: returnedProfile.display_name ?? null,
+              subscription_status: (returnedProfile.subscription_status ?? "none") as AuthProfile["subscription_status"],
+              subscription_plan: returnedProfile.subscription_plan ?? null,
+              subscription_current_period_end:
+                returnedProfile.subscription_current_period_end ?? null,
+            };
+            resolvedProfile = normalizedProfile;
+            fetchedProfileRef.current = true;
+          } else {
+            // If profile exists but wasn't loaded in auth context and no payload returned,
+            // try a direct fetch to hydrate resolvedProfile.
+            if (!resolvedProfile) {
+              const { data: fetchedProfile, error: fetchedProfileError } = await supabase
+                .from("profiles")
+                .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
+                .eq("id", user.id)
+                .maybeSingle();
+
+              if (fetchedProfileError) {
+                console.error("Error fetching profile after ensureProfileExists:", fetchedProfileError);
+              } else if (fetchedProfile) {
+                const normalizedProfile: AuthProfile = {
+                  role: (fetchedProfile.role ?? null) as AuthProfile["role"],
+                  account_type: (fetchedProfile.account_type ?? "unassigned") as AuthProfile["account_type"],
+                  avatar_url: fetchedProfile.avatar_url ?? null,
+                  avatar_path: fetchedProfile.avatar_path ?? null,
+                  display_name: fetchedProfile.display_name ?? null,
+                  subscription_status: (fetchedProfile.subscription_status ?? "none") as AuthProfile["subscription_status"],
+                  subscription_plan: fetchedProfile.subscription_plan ?? null,
+                  subscription_current_period_end:
+                    fetchedProfile.subscription_current_period_end ?? null,
+                };
+                resolvedProfile = normalizedProfile;
+                fetchedProfileRef.current = true;
+              }
+            }
+
+            // If still no resolved profile, mark for future retry; otherwise mark as fetched
+            fetchedProfileRef.current = Boolean(resolvedProfile);
+            if (!resolvedProfile) {
+              // Allow a future retry since we still lack a profile
+              hasRequestedProfileCreationRef.current = false;
+            }
           }
-          // If profile exists but wasn't loaded in auth context, continue without reload
-          // The profile data will be available on next render after auth context syncs
-          // Mark that we fetched without profile - will re-fetch when profile becomes available
-          fetchedProfileRef.current = false;
         } catch (profileError) {
           console.error("Unexpected error ensuring profile exists:", profileError);
           setError("Failed to initialize profile. Please try refreshing the page.");
+          // Allow a future retry since creation failed
+          hasRequestedProfileCreationRef.current = false;
           // Don't set loading to false here - let finally block handle it with proper race condition check
           return;
         }
@@ -326,9 +444,15 @@ function TalentDashboardContent() {
         
         // CRITICAL FIX: If talent profile doesn't exist but user has talent role, create it
         // Check profile from auth context, or fallback to checking user metadata role
-        const isTalentUser = profile 
-          ? (profile.role === "talent" || profile.account_type === "talent")
-          : (user.user_metadata?.role === "talent");
+        const resolvedRole = resolvedProfile?.role;
+        const resolvedAccountType = resolvedProfile?.account_type;
+        // If we have a resolved profile, trust the database over metadata (even if non-talent)
+        const isTalentFromResolvedProfile =
+          resolvedRole === "talent" || resolvedAccountType === "talent";
+        const isTalentUser =
+          resolvedProfile !== null
+            ? isTalentFromResolvedProfile
+            : user.user_metadata?.role === "talent";
         
         if (!talentProfileData && isTalentUser) {
           console.log("Talent profile missing, creating it...");
@@ -345,9 +469,13 @@ function TalentDashboardContent() {
             console.error("Error creating talent profile:", createTalentError);
             // Continue anyway - dashboard can still function without talent_profile initially
           } else {
-            // Reload to get fresh talent profile data
-            window.location.reload();
-            return;
+            // Re-fetch the newly created talent profile without a full reload
+            const { data: newTalentProfile } = await supabase
+              .from("talent_profiles")
+              .select("*")
+              .eq("user_id", user.id)
+              .maybeSingle();
+            setTalentProfile(newTalentProfile ?? null);
           }
         }
       }
@@ -387,7 +515,7 @@ function TalentDashboardContent() {
       // This prevents race conditions where effect re-runs and starts a new fetch before this one completes
       // If a new fetch has started (timeout ID changed), don't modify loading state - let the new fetch handle it
       // Note: timeoutId can be null for manual retries (like "Try Again" button) - skip clearing in that case
-      if (thisFetchTimeoutId !== null && loadingTimeoutRef.current === thisFetchTimeoutId) {
+      if (didStartFetch && thisFetchTimeoutId !== null && loadingTimeoutRef.current === thisFetchTimeoutId) {
         // This fetch is still the active one - safe to clear timeout and reset loading
         clearTimeout(thisFetchTimeoutId);
         // Only clear the ref if it still matches (hasn't been replaced by a new fetch)
@@ -395,13 +523,16 @@ function TalentDashboardContent() {
           loadingTimeoutRef.current = null;
         }
         setLoading(false);
-      } else if (thisFetchTimeoutId === null) {
+      } else if (didStartFetch && thisFetchTimeoutId === null) {
         // Manual retry (no timeout ID) - always set loading to false
+        setLoading(false);
+      } else if (didStartFetch && loadingTimeoutRef.current === null) {
+        // Timeout was cleared elsewhere (e.g., effect cleanup) and no new fetch took ownership
         setLoading(false);
       }
       // If timeout ID doesn't match, a new fetch is in progress - don't modify loading state
     }
-  }, [supabase, user, profile]); // Keep profile in dependencies so callback updates when profile changes
+  }, [supabase, user, profile, isLoading]); // Keep profile in dependencies so callback updates when profile changes
 
   // CRITICAL FIX: Helper function to set up timeout and call fetchDashboardData
   // This ensures timeout protection is always set up, whether called from effect or manual retry
@@ -446,14 +577,19 @@ function TalentDashboardContent() {
     if (user && supabase) {
       const isNewUser = fetchedUserIdRef.current !== user.id;
       const profileBecameAvailable = !fetchedProfileRef.current && profile !== null;
+      const refetchNeededAfterLoading = shouldRefetchAfterLoadingRef.current;
       
       // CRITICAL FIX: Fetch if:
       // 1. New user (haven't fetched for this user yet)
       // 2. Profile became available after initial fetch (was null, now has value)
-      if (isNewUser || profileBecameAvailable) {
+      // 3. A prior fetch was skipped due to auth still loading
+      if (isNewUser || profileBecameAvailable || refetchNeededAfterLoading) {
         if (isNewUser) {
           fetchedUserIdRef.current = user.id;
           fetchedProfileRef.current = false; // Reset profile fetch flag for new user
+        }
+        if (refetchNeededAfterLoading) {
+          shouldRefetchAfterLoadingRef.current = false;
         }
         
         // Use helper function to set up timeout and fetch
