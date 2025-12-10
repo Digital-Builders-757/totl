@@ -106,6 +106,9 @@ function TalentDashboardContent() {
   const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track loading timeout
   const fetchedProfileRef = useRef<boolean>(false); // Track if we've fetched data when profile was available
   const currentFetchTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track which timeout belongs to current fetch operation
+  const hasHandledVerificationRef = useRef<boolean>(false); // Track if we've already handled the verification parameter to prevent infinite loops
+  const isInVerificationGracePeriodRef = useRef<boolean>(false); // Track grace period state independently of URL
+  const urlCleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null); // Track the cleanup timeout
 
   // Check if Supabase is configured
   const isSupabaseConfigured =
@@ -115,12 +118,133 @@ function TalentDashboardContent() {
 
   const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
 
-  // Redirect unauthenticated users away from dashboard and show clear CTA
+  // EFFECT A: Verification Flow Manager
+  // Responsibility: Handle verification flow & URL cleanup
+  // This effect watches the verified param from URL and manages the grace period
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace(`/login?returnUrl=${encodeURIComponent("/talent/dashboard")}`);
+    const verifiedParam = searchParams.get("verified");
+    
+    // Only start the verification flow once per mount
+    if (verifiedParam !== "true" || hasHandledVerificationRef.current) {
+      return;
     }
-  }, [isLoading, user, router]);
+    
+    // Mark that we've started the verification flow
+    hasHandledVerificationRef.current = true;
+    
+    // Enter grace period immediately (before *anything* else happens)
+    // This ref persists across re-renders even when URL changes
+    isInVerificationGracePeriodRef.current = true;
+    
+    // Pull in the fresh Supabase session after email verification
+    router.refresh();
+    
+    // Clear any previous timer just in case
+    if (urlCleanupTimeoutRef.current) {
+      clearTimeout(urlCleanupTimeoutRef.current);
+      urlCleanupTimeoutRef.current = null;
+    }
+    
+    // Schedule URL cleanup AFTER the 2s grace period
+    // CRITICAL: Timeout callback does NOT check user state (avoids stale closures)
+    urlCleanupTimeoutRef.current = setTimeout(() => {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("verified");
+        // Use relative path to avoid full-page navigation semantics
+        router.replace(`${url.pathname}${url.search}`);
+      } finally {
+        // Exit grace period *after* the URL is clean
+        // Effect B will handle redirects once grace period is false
+        isInVerificationGracePeriodRef.current = false;
+        urlCleanupTimeoutRef.current = null;
+      }
+    }, 2000);
+    
+    // Cleanup function runs on:
+    // 1. Effect re-run (when dependencies change)
+    // 2. Component unmount
+    //
+    // CRITICAL: We need to handle both cases correctly:
+    // - On re-run due to searchParams change: Don't clear timeout if verification handled (prevents race condition)
+    // - On unmount: Always clear timeout (prevents memory leak and operations on unmounted component)
+    // - If verified parameter is removed: Reset grace period to prevent it from being stuck
+    //
+    // Strategy: Always clear the timeout to prevent memory leaks and operations on unmounted components.
+    // Additionally, if the verified parameter is no longer present, reset the grace period ref to prevent
+    // it from being stuck in the true state, which would block Effect B from redirecting users.
+    return () => {
+      // Always clear timeout to prevent memory leaks and operations on unmounted component
+      if (urlCleanupTimeoutRef.current) {
+        clearTimeout(urlCleanupTimeoutRef.current);
+        urlCleanupTimeoutRef.current = null;
+      }
+      
+      // CRITICAL: Read current URL state directly from window.location to avoid stale closure issues.
+      // The searchParams hook value may be captured in the closure, but window.location always reflects
+      // the current URL state. This ensures we correctly detect if the verified parameter was removed.
+      try {
+        const currentUrl = new URL(window.location.href);
+        const currentVerifiedParam = currentUrl.searchParams.get("verified");
+        
+        // CRITICAL: Only reset grace period if verified parameter is actually removed from URL.
+        // Do NOT reset just because timeout was cleared - clearing timeout is just cleanup,
+        // not an indication that verification flow is complete.
+        //
+        // The grace period should remain active until:
+        // 1. The timeout callback completes and removes the parameter (handled in timeout callback's finally block), OR
+        // 2. The parameter is removed by some other means (detected here)
+        //
+        // Resetting grace period prematurely when verified parameter is still present would allow
+        // Effect B to redirect before router.refresh() completes, defeating the grace period's purpose.
+        if (hasHandledVerificationRef.current && currentVerifiedParam !== "true") {
+          // Verified parameter was removed - reset grace period so Effect B can function normally
+          isInVerificationGracePeriodRef.current = false;
+        }
+        // Note: If verified parameter is still present, keep grace period active even if timeout was cleared.
+        // This ensures the grace period protects the verification flow until the parameter is actually removed.
+      } catch (error) {
+        // If URL parsing fails (shouldn't happen), don't reset grace period as safety measure
+        // Better to keep grace period active than risk premature redirects
+        console.error("Error reading URL in cleanup:", error);
+      }
+      
+      // Note: We intentionally don't reset hasHandledVerificationRef here
+      // because cleanup runs on every effect re-run (when deps change), not just unmount.
+      // Resetting it would cause the effect to re-trigger when searchParams object identity changes.
+      //
+      // Race condition prevention: The effect checks `hasHandledVerificationRef.current` at the start (line 128)
+      // and returns early if verification has already been handled, preventing re-scheduling of the timeout.
+      // If verification is still being handled and this is a re-run, the effect will re-enter and restore
+      // the grace period state, so resetting it here is safe.
+    };
+  }, [searchParams, router]);
+
+  // EFFECT B: Redirect Guardrail
+  // Responsibility: Handle redirect logic based on auth state
+  // This effect NEVER reads verified from URL - only checks the grace period ref
+  useEffect(() => {
+    // Don't do anything while auth is still resolving
+    if (isLoading) {
+      return;
+    }
+    
+    // 🚫 During verification grace period, never redirect
+    // Effect A's timeout will exit grace period after URL cleanup completes
+    // This prevents premature redirects before router.refresh() completes
+    if (isInVerificationGracePeriodRef.current) {
+      return;
+    }
+    
+    // --- Normal redirect logic after grace period: ---
+    // Unauthenticated → login
+    if (!user) {
+      router.replace(`/login?returnUrl=${encodeURIComponent("/talent/dashboard")}`);
+      return;
+    }
+    
+    // Other redirect conditions can be added here if needed
+  }, [user, isLoading, router]);
 
   // Calculate dashboard stats from real data
   const dashboardStats = {
@@ -378,6 +502,7 @@ function TalentDashboardContent() {
     }
   }, [searchParams, toast]);
 
+
   const handleViewDetails = (application: TalentApplication) => {
     setSelectedTalentApplication(application);
     setIsModalOpen(true);
@@ -415,6 +540,9 @@ function TalentDashboardContent() {
       }
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
+      }
+      if (urlCleanupTimeoutRef.current) {
+        clearTimeout(urlCleanupTimeoutRef.current);
       }
     };
   }, []);
