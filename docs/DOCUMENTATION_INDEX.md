@@ -71,6 +71,7 @@ All other documentation has been organized into the `docs/` folder.
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 - `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
+- `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md` - Talent dashboard auth/data pattern (Phase 1-4)
 
 ### **🔧 Development & Code Quality**
 - `TYPE_SAFETY_IMPROVEMENTS.md` - 🎯 **CRITICAL** - Complete TypeScript type safety guide (Nov 2, 2025)

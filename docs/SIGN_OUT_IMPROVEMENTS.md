@@ -7,11 +7,20 @@
 
 Enhanced the sign out functionality across the entire application to ensure clean, reliable, and user-friendly logout experience.
 
+### 📅 Phase 5 (Dec 2025) — Simplified Flow
+- Single owner: AuthProvider handles all sign-out state resets (user, session, role/profile, isEmailVerified, isLoading).
+- Order of operations: optional `/api/auth/signout` → `supabase.auth.signOut()` → `window.location.replace("/login?signedOut=true")`.
+- Removed hyper-aggressive cookie/localStorage purges and timers; rely on Supabase + server API to clear cookies.
+- Reset Supabase browser client to avoid stale authenticated instances.
+- Goal: predictable logout with no “half-cleared” state or reload loops.
+
 ---
 
 ## 🔧 Improvements Made
 
 ### **1. Enhanced Auth Provider Sign Out** (`components/auth/auth-provider.tsx`)
+
+*Legacy (pre-Dec 2025). Current flow is summarized in Phase 5 above.*
 
 **Before:** Basic sign out with minimal cleanup
 **After:** Comprehensive cleanup with error handling

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ interface AdminHeaderProps {
 export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   const pathname = usePathname();
   const { signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Safety check: if user is not available yet, return null or loading state
   if (!user) {
@@ -152,26 +154,23 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                     View Talent Portal
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="text-white hover:bg-gray-800 cursor-pointer"
-                  onClick={async () => {
-                    // Show loading state
-                    const menuItem = document.activeElement?.closest('[role="menuitem"]');
-                    if (menuItem) {
-                      menuItem.setAttribute('disabled', 'true');
-                      menuItem.textContent = 'Signing out...';
-                    }
-                    
-                    // Call signOut and wait for it to complete
-                    await signOut();
-                    
-                    // Force immediate hard refresh to ensure clean state
-                    // This ensures cookies are cleared and page refreshes
-                    window.location.href = '/login';
-                  }}
-                >
+            <DropdownMenuItem
+              className="text-white hover:bg-gray-800 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={async () => {
+                if (isSigningOut) return;
+                try {
+                  setIsSigningOut(true);
+                  await signOut();
+                } catch (error) {
+                  console.error("Admin sign out error:", error);
+                } finally {
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
+            >
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+              {isSigningOut ? "Signing out..." : "Sign Out"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

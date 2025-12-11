@@ -8,7 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest Achievement: Talent Dashboard Profile Flow Hardening**
+## 🚀 **Latest Achievement: Talent Dashboard Data Hook + Phase 5 Sign-Out**
+
+**TALENT DASHBOARD DATA HOOK & AUTH PROVIDER ALIGNMENT** - January 2025  
+- ✅ Server page is now a thin shell that renders `DashboardClient` with `dynamic = "force-dynamic"`  
+- ✅ New `useTalentDashboardData` hook owns data/loading/errors/refetch with cancellable effect (no timers) and minimal talent_profile bootstrap  
+- ✅ Verification grace handling preserved with URL cleanup + redirect guard; finishing-setup retry calls `ensureProfileExists()` then refetches  
+- ✅ Middleware now allows `/talent/dashboard` through when profile is missing so AuthProvider can hydrate/create safely  
+- ✅ AuthProvider sign-out simplified to Phase 5 flow: reset state → optional `/api/auth/signout` → `supabase.auth.signOut()` → `resetSupabaseBrowserClient()` → `window.location.replace("/login?signedOut=true")`  
+- ✅ Admin header sign-out now uses loading state instead of DOM hacks; client apply flow prevents duplicate submissions and requires authenticated user  
+- ✅ Docs updated: added `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md`, refreshed `SIGN_OUT_IMPROVEMENTS.md`, and indexed the new guide
+
+## 🚀 **Previous Achievement: Talent Dashboard Profile Flow Hardening**
 
 **TALENT DASHBOARD PROFILE CREATION/LOAD HARDENING** - January 2025  
 - ✅ Replaced full-page reloads with typed, in-memory profile hydration to avoid redirect loops after signup  

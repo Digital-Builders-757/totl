@@ -4,7 +4,7 @@ import type { User, Session, AuthError, AuthChangeEvent, SupabaseClient } from "
 import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
@@ -89,6 +89,102 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createSupabaseBrowser();
 
+  const mapProfileRow = (row: {
+    role: UserRole;
+    account_type: AccountType | null;
+    avatar_url: string | null;
+    avatar_path: string | null;
+    display_name: string | null;
+    subscription_status: Database["public"]["Enums"]["subscription_status"] | null;
+    subscription_plan: string | null;
+    subscription_current_period_end: string | null;
+  } | null): ProfileData => {
+    if (!row) return null;
+    return {
+      role: (row.role ?? null) as UserRole,
+      account_type: (row.account_type ?? "unassigned") as AccountType,
+      avatar_url: row.avatar_url ?? null,
+      avatar_path: row.avatar_path ?? null,
+      display_name: row.display_name ?? null,
+      subscription_status: (row.subscription_status ?? "none") as Database["public"]["Enums"]["subscription_status"],
+      subscription_plan: row.subscription_plan ?? null,
+      subscription_current_period_end: row.subscription_current_period_end ?? null,
+    };
+  };
+
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      if (!supabase) return { profile: null as ProfileData };
+
+      const selectColumns =
+        "role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end";
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(selectColumns)
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (error && error.code !== "PGRST116") {
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(new Error(`Auth provider profile query error: ${error.message}`), {
+          tags: {
+            feature: "auth",
+            error_type: "auth_provider_profile_error",
+            error_code: error.code || "unknown",
+          },
+          extra: {
+            userId,
+            errorCode: error.code,
+            errorDetails: error.details,
+            errorMessage: error.message,
+            timestamp: new Date().toISOString(),
+          },
+          level: "error",
+        });
+      }
+
+      return { profile: mapProfileRow(data as ProfileData) };
+    },
+    [supabase]
+  );
+
+  const ensureAndHydrateProfile = useCallback(
+    async (user: User) => {
+      const { profile: existingProfile } = await fetchProfile(user.id);
+      if (existingProfile) return existingProfile;
+
+      const profileResult = await ensureProfileExists();
+      if (profileResult?.error) {
+        console.error("Error ensuring profile exists:", profileResult.error);
+        return null;
+      }
+
+      if (profileResult?.profile) {
+        return mapProfileRow(profileResult.profile as ProfileData);
+      }
+
+      if (profileResult?.exists) {
+        const { profile: retryProfile } = await fetchProfile(user.id);
+        return retryProfile;
+      }
+
+      return null;
+    },
+    [fetchProfile]
+  );
+
+  const applyProfileToState = useCallback(
+    (nextProfile: ProfileData, currentSession: Session | null) => {
+      setUserRole(nextProfile?.role ?? null);
+      setProfile(nextProfile ?? null);
+      if (currentSession?.user) {
+        setIsEmailVerified(currentSession.user.email_confirmed_at !== null);
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {
@@ -107,6 +203,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
     // Initial session check - only once on mount
     const initialSession = async () => {
+      setIsLoading(true);
       try {
         if (!supabase) return;
         
@@ -126,132 +223,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // If there is a session, proceed to set user and fetch profile
         setUser(session.user);
         setSession(session);
-
-        // Use maybeSingle() to prevent 406 errors when profile doesn't exist
-        // Fetch ALL profile fields once to avoid N+1 queries
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-        // Log profile query errors to Sentry for debugging
-        if (profileError && profileError.code !== "PGRST116") {
-          // Import Sentry dynamically to avoid SSR issues
-          const Sentry = await import("@sentry/nextjs");
-          Sentry.captureException(new Error(`Auth provider profile query error: ${profileError.message}`), {
-            tags: {
-              feature: "auth",
-              error_type: "auth_provider_profile_error",
-              error_code: profileError.code || "unknown",
-            },
-            extra: {
-              userId: session.user.id,
-              userEmail: session.user.email,
-              errorCode: profileError.code,
-              errorDetails: profileError.details,
-              errorMessage: profileError.message,
-              timestamp: new Date().toISOString(),
-            },
-            level: "error",
-          });
-        }
-
+        const hydratedProfile = await ensureAndHydrateProfile(session.user);
         if (!mounted) return;
-
-        if (profileData) {
-          const role = (profileData.role ?? null) as UserRole;
-          setUserRole(role);
-          setProfile({
-            role,
-            account_type: (profileData.account_type ?? "unassigned") as AccountType,
-            avatar_url: profileData.avatar_url,
-            avatar_path: profileData.avatar_path,
-            display_name: profileData.display_name,
-            subscription_status: profileData.subscription_status ?? "none",
-            subscription_plan: profileData.subscription_plan ?? null,
-            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-          });
-          setIsEmailVerified(session.user.email_confirmed_at !== null);
-          setIsLoading(false);
-          setHasHandledInitialSession(true);
-        } else {
-          // CRITICAL FIX: Profile doesn't exist - ensure it's created
-          // This handles brand new accounts that haven't had their profile created yet
-          console.log("Profile is null during initial session check, ensuring profile exists...");
-          try {
-            const profileResult = await ensureProfileExists();
-            if (profileResult.error) {
-              console.error("Error ensuring profile exists in auth provider:", profileResult.error);
-              // Set profile to null but continue - dashboard will handle retry
-              setUserRole(null);
-              setProfile(null);
-            } else if (profileResult.profile) {
-              // Profile was created/updated/exists - set the complete profile data
-              const role = (profileResult.profile.role ?? null) as UserRole;
-              setUserRole(role);
-              setProfile({
-                role,
-                account_type: (profileResult.profile.account_type ?? "unassigned") as AccountType,
-                avatar_url: profileResult.profile.avatar_url ?? null,
-                avatar_path: profileResult.profile.avatar_path ?? null,
-                display_name: profileResult.profile.display_name ?? null,
-                subscription_status: (profileResult.profile.subscription_status ?? "none") as Database['public']['Enums']['subscription_status'],
-                subscription_plan: profileResult.profile.subscription_plan ?? null,
-                subscription_current_period_end: profileResult.profile.subscription_current_period_end ?? null,
-              });
-            } else if (profileResult.exists) {
-              // CRITICAL FIX: Profile exists but query returned null (timing/permissions issue)
-              // Retry fetching the profile directly instead of setting to null
-              console.warn("Profile exists but ensureProfileExists returned null profile, retrying fetch...");
-              const { data: retryProfileData, error: retryError } = await supabase
-                .from("profiles")
-                .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-                .eq("id", session.user.id)
-                .maybeSingle();
-              
-              if (retryError) {
-                console.error("Error retrying profile fetch:", retryError);
-                // Only set to null if retry also fails
-                setUserRole(null);
-                setProfile(null);
-              } else if (retryProfileData) {
-                // Successfully fetched profile on retry
-                const role = (retryProfileData.role ?? null) as UserRole;
-                setUserRole(role);
-                setProfile({
-                  role,
-                  account_type: (retryProfileData.account_type ?? "unassigned") as AccountType,
-                  avatar_url: retryProfileData.avatar_url,
-                  avatar_path: retryProfileData.avatar_path,
-                  display_name: retryProfileData.display_name,
-                  subscription_status: retryProfileData.subscription_status ?? "none",
-                  subscription_plan: retryProfileData.subscription_plan ?? null,
-                  subscription_current_period_end: retryProfileData.subscription_current_period_end ?? null,
-                });
-              } else {
-                // Retry also returned null - this is unexpected but don't break the user's session
-                console.warn("Profile exists but both queries returned null - keeping profile state as-is");
-                // Don't set profile to null - let it remain undefined/null naturally
-                // The dashboard will handle retrying if needed
-              }
-            } else {
-              // Profile doesn't exist and wasn't created (unexpected case)
-              console.warn("ensureProfileExists returned success but no profile data and not exists");
-              setUserRole(null);
-              setProfile(null);
-            }
-          } catch (profileError) {
-            console.error("Unexpected error ensuring profile exists in auth provider:", profileError);
-            setUserRole(null);
-            setProfile(null);
-          }
-          setIsEmailVerified(session.user.email_confirmed_at !== null);
-          setIsLoading(false);
-          setHasHandledInitialSession(true);
-        }
+        applyProfileToState(hydratedProfile, session);
+        setHasHandledInitialSession(true);
       } catch (error) {
         console.error("Error in initial session check:", error);
+      } finally {
         if (mounted) {
           setIsLoading(false);
           setHasHandledInitialSession(true);
@@ -273,147 +251,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event === "SIGNED_IN" && session) {
         try {
-          // Use maybeSingle() to prevent 406 errors when profile doesn't exist
-          // Fetch ALL profile fields once to avoid N+1 queries
-        const { data: profileData, error: profileError } = await supabase
-          .from("profiles")
-          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-          .eq("id", session.user.id)
-          .maybeSingle();
-
-          // Log profile query errors to Sentry for debugging
-          if (profileError && profileError.code !== "PGRST116") {
-            const Sentry = await import("@sentry/nextjs");
-            Sentry.captureException(new Error(`Auth state change profile query error: ${profileError.message}`), {
-              tags: {
-                feature: "auth",
-                error_type: "auth_state_change_profile_error",
-                error_code: profileError.code || "unknown",
-              },
-              extra: {
-                userId: session.user.id,
-                userEmail: session.user.email,
-                pathname: pathname,
-                errorCode: profileError.code,
-                errorDetails: profileError.details,
-                errorMessage: profileError.message,
-                timestamp: new Date().toISOString(),
-              },
-              level: "error",
-            });
-          }
-
+          const hydratedProfile = await ensureAndHydrateProfile(session.user);
           if (!mounted) return;
+          applyProfileToState(hydratedProfile, session);
 
-          // CRITICAL FIX: Declare role at higher scope to use for redirect logic
-          // State updates (setUserRole) are asynchronous, so we need the local variable
-          let role: UserRole = null;
+          const role = hydratedProfile?.role ?? null;
 
-          if (profileData) {
-            role = (profileData.role ?? null) as UserRole;
-            setUserRole(role);
-            // Store full profile data to avoid duplicate queries
-            setProfile({
-              role: role,
-              account_type: (profileData.account_type ?? "unassigned") as AccountType,
-              avatar_url: profileData.avatar_url,
-              avatar_path: profileData.avatar_path,
-              display_name: profileData.display_name,
-              subscription_status: profileData.subscription_status ?? 'none',
-              subscription_plan: profileData.subscription_plan ?? null,
-              subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-            });
-            setIsEmailVerified(session.user.email_confirmed_at !== null);
-          } else {
-            // CRITICAL FIX: Profile doesn't exist during sign-in - ensure it's created
-            console.log("Profile is null during sign-in, ensuring profile exists...");
-            try {
-              const profileResult = await ensureProfileExists();
-              if (profileResult.error) {
-                console.error("Error ensuring profile exists during sign-in:", profileResult.error);
-                role = null;
-                setUserRole(null);
-                setProfile(null);
-              } else if (profileResult.profile) {
-                role = (profileResult.profile.role ?? null) as UserRole;
-                setUserRole(role);
-                setProfile({
-                  role,
-                  account_type: (profileResult.profile.account_type ?? "unassigned") as AccountType,
-                  avatar_url: profileResult.profile.avatar_url ?? null,
-                  avatar_path: profileResult.profile.avatar_path ?? null,
-                  display_name: profileResult.profile.display_name ?? null,
-                  subscription_status: (profileResult.profile.subscription_status ?? "none") as Database['public']['Enums']['subscription_status'],
-                  subscription_plan: profileResult.profile.subscription_plan ?? null,
-                  subscription_current_period_end: profileResult.profile.subscription_current_period_end ?? null,
-                });
-              } else if (profileResult.exists) {
-                // CRITICAL FIX: Profile exists but query returned null (timing/permissions issue)
-                // Retry fetching the profile directly instead of setting to null
-                console.warn("Profile exists but ensureProfileExists returned null profile during sign-in, retrying fetch...");
-                const { data: retryProfileData, error: retryError } = await supabase
-                  .from("profiles")
-                  .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-                  .eq("id", session.user.id)
-                  .maybeSingle();
-                
-                if (retryError) {
-                  console.error("Error retrying profile fetch during sign-in:", retryError);
-                  role = null;
-                  setUserRole(null);
-                  setProfile(null);
-                } else if (retryProfileData) {
-                  // Successfully fetched profile on retry
-                  role = (retryProfileData.role ?? null) as UserRole;
-                  setUserRole(role);
-                  setProfile({
-                    role,
-                    account_type: (retryProfileData.account_type ?? "unassigned") as AccountType,
-                    avatar_url: retryProfileData.avatar_url,
-                    avatar_path: retryProfileData.avatar_path,
-                    display_name: retryProfileData.display_name,
-                    subscription_status: retryProfileData.subscription_status ?? "none",
-                    subscription_plan: retryProfileData.subscription_plan ?? null,
-                    subscription_current_period_end: retryProfileData.subscription_current_period_end ?? null,
-                  });
-                } else {
-                  // Retry also returned null - this is unexpected but don't break the user's session
-                  console.warn("Profile exists but both queries returned null during sign-in - keeping profile state as-is");
-                  role = null;
-                  // Don't set profile to null - let it remain undefined/null naturally
-                  // The dashboard will handle retrying if needed
-                  setUserRole(null);
-                  // Don't explicitly set profile to null - let it remain undefined
-                  // This allows the dashboard to retry fetching if needed
-                }
-              } else {
-                // Profile doesn't exist and wasn't created (unexpected case)
-                console.warn("ensureProfileExists returned success but no profile data and not exists during sign-in");
-                role = null;
-                setUserRole(null);
-                setProfile(null);
-              }
-            } catch (profileError) {
-              console.error("Unexpected error ensuring profile exists during sign-in:", profileError);
-              role = null;
-              setUserRole(null);
-              setProfile(null);
-            }
-            setIsEmailVerified(session.user.email_confirmed_at !== null);
-          }
-
-          // 🔧 FIX: Only redirect on ACTUAL sign-ins, not initial session loads
-          // Check if this is a fresh sign-in (not an initial session load)
-          // Also check if we're not on the login page (where server action handles redirect)
           if (hasHandledInitialSession && !pathname.startsWith("/login")) {
-            // Also check if user is not already on an allowed page
             const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role", "/verification-pending"];
             const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
 
             if (!isOnAllowedPage) {
-              // CRITICAL FIX: Use local `role` variable instead of `userRole` state
-              // State updates are asynchronous, so `userRole` may still have the old value
-              // Use router.refresh() to clear cache before redirect
               router.refresh();
               if (role === "talent") {
                 router.push("/talent/dashboard");
@@ -503,7 +351,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [supabase, router, pathname, hasHandledInitialSession]);
+  }, [supabase, router, pathname, hasHandledInitialSession, ensureAndHydrateProfile, applyProfileToState]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     if (!supabase) return { error: null };
@@ -584,147 +432,58 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async (): Promise<{ error: AuthError | null }> => {
     if (!supabase) return { error: null };
-    
+
     try {
-      // Clear all local state FIRST to prevent UI from showing authenticated state
+      setIsLoading(true);
       setUser(null);
       setSession(null);
       setUserRole(null);
       setProfile(null);
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
-      
-      // Reset the browser client singleton to ensure clean state
       resetSupabaseBrowserClient();
-      
-      // Call server-side sign out API FIRST to clear server-side cookies
-      // This ensures cookies are cleared before client-side operations
+
+      // Try to clear HTTP-only cookies on the server first; ignore failures.
       try {
-        const signOutResponse = await fetch("/api/auth/signout", {
+        await fetch("/api/auth/signout", {
           method: "POST",
-          credentials: "include", // Important: include cookies
-          cache: "no-store", // Prevent caching
+          credentials: "include",
+          cache: "no-store",
         });
-        
-        if (!signOutResponse.ok) {
-          console.warn("Server-side sign out API returned non-OK status:", signOutResponse.status);
-        }
       } catch (apiError) {
-        // Log but continue - we'll still try client-side sign out
         console.warn("Server-side sign out API call failed:", apiError);
       }
-      
-      // Sign out from Supabase client-side after server-side is done
+
       const { error: clientError } = await supabase.auth.signOut();
-      
-      // Clear all client-side storage and cache
+
       if (typeof window !== "undefined") {
-        // Clear localStorage - remove auth-related items
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        if (supabaseUrl) {
-          // Clear Supabase-specific localStorage keys
-          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
-          localStorage.removeItem(`sb-${projectRef}-auth-token`);
-        }
-        
-        // Clear any other auth-related localStorage items
-        Object.keys(localStorage).forEach((key) => {
-          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
-            localStorage.removeItem(key);
-          }
-        });
-        
-        // Clear all sessionStorage
-        sessionStorage.clear();
-        
-        // Clear Supabase auth cookies specifically
-        // Supabase SSR stores session in cookies with names like:
-        // - sb-<project-ref>-auth-token
-        // - sb-<project-ref>-auth-token.0, sb-<project-ref>-auth-token.1, etc.
-        if (supabaseUrl) {
-          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
-          const cookieBaseName = `sb-${projectRef}-auth-token`;
-          
-          const clearCookie = (name: string, path = "/", domain?: string) => {
-            // Try multiple variations to ensure cookie is cleared
-            const expires = "expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = `${name}=;${expires};path=${path}`;
-            if (domain) {
-              document.cookie = `${name}=;${expires};path=${path};domain=${domain}`;
-            }
-            // Also try without domain
-            document.cookie = `${name}=;${expires};path=/`;
-            document.cookie = `${name}=;${expires};path=/;domain=${window.location.hostname}`;
-            if (window.location.hostname.includes(".")) {
-              document.cookie = `${name}=;${expires};path=/;domain=.${window.location.hostname}`;
-            }
-          };
-
-          // Clear Supabase auth-token chunks (up to 20 chunks to be safe)
-          for (let i = 0; i < 20; i++) {
-            const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
-            clearCookie(chunkName);
-          }
-
-          // Clear access/refresh tokens explicit names Supabase uses
-          ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
-            clearCookie(name);
-            for (let i = 0; i < 20; i += 1) {
-              const chunkName = i === 0 ? name : `${name}.${i}`;
-              clearCookie(chunkName);
-            }
-          });
-        }
-        
-        // Immediate redirect for snappy UX - cookies are already cleared above
-        // Use replace() to prevent back button from returning to authenticated state
+        setIsLoading(false);
         window.location.replace("/login?signedOut=true");
       } else {
-        // Fallback for server-side (shouldn't happen, but just in case)
-        router.push("/login");
+        setIsLoading(false);
+        router.replace("/login?signedOut=true");
         router.refresh();
       }
-      
+
       return { error: clientError };
     } catch (error) {
       console.error("Error during sign out:", error);
-      // Even if there's an error, clear local state and force redirect
-      
-      // Reset the browser client singleton to ensure clean state
-      // This prevents the old authenticated client from being reused even on error
       resetSupabaseBrowserClient();
-      
       setUser(null);
       setSession(null);
       setUserRole(null);
       setProfile(null);
       setIsEmailVerified(false);
       setHasHandledInitialSession(false);
-      
-      // Force hard redirect even on error
+      setIsLoading(false);
+
       if (typeof window !== "undefined") {
-        // Clear storage on error too
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-        if (supabaseUrl) {
-          const projectRef = supabaseUrl.split("//")[1].split(".")[0];
-          localStorage.removeItem(`sb-${projectRef}-auth-token`);
-        }
-        Object.keys(localStorage).forEach((key) => {
-          if (key.includes("supabase") || key.includes("auth") || key.includes("sb-")) {
-            localStorage.removeItem(key);
-          }
-        });
-        sessionStorage.clear();
-        
-        // Immediate redirect even on error - cleanup already done above
-        // Force redirect to login page using replace() to prevent back button issues
-        // Use clean /login path without query params to avoid routing issues
-        window.location.replace("/login");
+        window.location.replace("/login?signedOut=true");
       } else {
-        router.push("/login");
+        router.replace("/login?signedOut=true");
         router.refresh();
       }
-      
+
       return { error: error as AuthError };
     }
   };

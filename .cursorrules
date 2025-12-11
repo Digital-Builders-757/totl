@@ -1,274 +1,471 @@
-# TOTL Agency - Cursor AI Assistant Rules
+````markdown
+# TOTL Agency – Cursor AI Assistant Rules
 
 ## 🎯 MANDATORY CONTEXT REFERENCE
 
 **BEFORE WRITING ANY CODE, YOU MUST:**
 
-1. **READ** `AGENT_ONBOARDING.md` for quick start guide (NEW AGENTS START HERE)
+1. **READ** `AGENT_ONBOARDING.md` (NEW AGENTS START HERE)
 2. **READ** `TOTL_PROJECT_CONTEXT_PROMPT.md` completely
 3. **CHECK** `supabase/migrations/` for current database schema
 4. **VERIFY** RLS policies in the context file
-5. **USE** generated types from `types/database.ts` (NO `any` types)
+5. **USE** generated types from `types/database.ts` / `@/types/supabase` (NO `any` types)
 6. **FOLLOW** established project structure and naming conventions
+
+If any of these files are missing from the context, request them explicitly before proceeding.
+
+---
+
+## 🚨 RED ZONE FILES (NO BLIND REWRITES)
+
+These files control **auth, routing, and schema truth**. They must **never** be auto-rewritten or heavily refactored in a single pass.
+
+**Red Zone – Auth & Routing**
+
+- `components/auth/auth-provider.tsx`
+- `middleware.ts`
+- `app/talent/dashboard/page.tsx`
+- `app/talent/dashboard/client.tsx`
+- `app/client/dashboard/page.tsx`
+- `app/client/dashboard/client.tsx`
+- `app/(auth)/**` (login, signup, verification, choose-role, reset-password flows)
+- `app/api/auth/*`
+- `docs/SIGN_OUT_IMPROVEMENTS.md`
+- `docs/AUTH_STRATEGY.md`
+- `docs/TALENT_DASHBOARD_FLOW.md` (if present)
+
+**Red Zone – Schema & Types**
+
+- `database_schema_audit.md`
+- `supabase/migrations/**`
+- `types/database.ts`
+- `types/supabase.ts` (or equivalent re-export)
+- `docs/DATABASE_REPORT.md`
+
+**Red Zone – Project Context**
+
+- `TOTL_PROJECT_CONTEXT_PROMPT.md`
+- `.cursorrules`
+
+### Red Zone Editing Protocol (MANDATORY)
+
+When modifying ANY Red Zone file:
+
+1. **Show current file contents** (or at least the relevant section).
+2. **Summarize the existing behavior** in plain language.
+3. **Propose a small, explicit change** (minimal diff) – not a full rewrite.
+4. **Apply only that change**, preserving existing working logic.
+5. **Re-read** `docs/AUTH_STRATEGY.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`, and `database_schema_audit.md` if the change touches:
+   - auth state
+   - middleware behavior
+   - dashboards
+   - database schema
+6. **Never**:
+   - Convert a Red Zone file into a “brand new pattern” all at once.
+   - Remove working logic without explaining why.
+   - Introduce `window.location.reload()` into auth/dashboards.
+
+If a large refactor is truly needed, it must be broken into **small, reversible steps** with clear justification for each.
+
+---
 
 ## 📋 PROJECT OVERVIEW
 
-**TOTL Agency** - Talent booking platform connecting models/actors with casting directors/brands
+**TOTL Agency** – Talent booking platform connecting models/actors with casting directors and brands.
 
 **Tech Stack:**
+
 - Next.js 15.2.4 + App Router + TypeScript 5
 - Supabase (PostgreSQL + Auth + Storage + Real-time)
 - TailwindCSS + shadcn/ui components
 - Resend API for custom emails
 
-**Database:** PostgreSQL with RLS policies on all tables
-**Auth:** Supabase Auth with role-based access (talent/client/admin)
-**Key Tables:** profiles, talent_profiles, client_profiles, gigs, applications, bookings, portfolio_items
+**Database:** PostgreSQL with RLS on all tables  
+**Auth:** Supabase Auth with role-based access (talent/client/admin)  
+**Key Tables:** `profiles`, `talent_profiles`, `client_profiles`, `gigs`, `applications`, `bookings`, `portfolio_items`
+
+---
 
 ## 📋 PROJECT CONTEXT SUMMARY
 
-**Tech Stack:** Next.js 15.2.4 + Supabase + TypeScript + shadcn/ui
-**Database:** PostgreSQL with RLS policies on all tables
-**Auth:** Supabase Auth with role-based access (talent/client/admin)
-**Key Tables:** profiles, talent_profiles, client_profiles, gigs, applications, bookings, portfolio_items
-**Security:** Row-level security enforced, no service keys in client code
-**Architecture:** Server components for data fetching, presentational components only
+- **Tech:** Next.js App Router + Supabase + TypeScript + shadcn/ui
+- **Database:** PostgreSQL with strict RLS
+- **Auth:** Role-based (`talent`, `client`, `admin`) tied to `profiles`
+- **Security:** RLS enforced everywhere, no service keys in client
+- **Architecture:** Server components for data fetching; presentational components only on the client
 
-## ✅ COMPLIANCE CHECKLIST
+---
 
-Before generating any code, ensure:
-- [ ] Referenced `TOTL_PROJECT_CONTEXT_PROMPT.md` for complete context
-- [ ] **🚨 CRITICAL: database_schema_audit.md is the SINGLE SOURCE OF TRUTH**
+## ✅ COMPLIANCE CHECKLIST (BEFORE GENERATING CODE)
+
+Before writing or editing any code, confirm:
+
+- [ ] Read `TOTL_PROJECT_CONTEXT_PROMPT.md` for full context
+- [ ] **database_schema_audit.md is treated as SINGLE SOURCE OF TRUTH**
 - [ ] Used proper TypeScript types (no `any`)
 - [ ] Followed RLS-compatible query patterns
-- [ ] Separated database logic from React components
-- [ ] Used centralized Supabase clients (`lib/supabase-client.ts`)
-- [ ] Implemented proper error handling
-- [ ] Followed project naming conventions
+- [ ] Kept database logic **out of React components**
+- [ ] Used centralized Supabase clients (`lib/supabase-client.ts` / `lib/supabase-admin-client.ts`)
+- [ ] Implemented meaningful error handling
+- [ ] Followed project naming and folder conventions
+- [ ] For Red Zone files, followed the **Red Zone Editing Protocol**
+
+---
 
 ## 🏗️ ARCHITECTURE RULES
 
 ### Database Access
-- Use `lib/supabase-client.ts` for client-side queries
-- Use `lib/supabase-admin-client.ts` for server-side admin operations
-- Always assume RLS is active - never bypass security policies
-- Use generated types from `types/database.ts`
+
+- Use `lib/supabase-client.ts` for **client-side** queries (user-level access).
+- Use `lib/supabase-admin-client.ts` for **server-side admin** operations only.
+- Always assume **RLS is active** – do not attempt to bypass it.
+- Use generated types from `@/types/supabase` / `types/database.ts`.
 
 ### Component Structure
-- React components should be presentational only
-- No direct database calls in components
-- Use server components for data fetching
-- Pass data as props to client components
 
-### Authentication & Authorization
-- **🚨 BEFORE ANY AUTH CHANGES:** Read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
-- Use `@supabase/auth-helpers-nextjs` for session management
-- Check user roles before allowing actions
-- Use middleware for route protection
-- Implement proper error handling for auth failures
-- **CRITICAL:** Verify database triggers match `database_schema_audit.md` schema
-
-### Security Best Practices
-- Never expose service keys in client code
-- Always validate user permissions before data access
-- Use parameterized queries (Supabase handles this)
-- Follow least privilege principle
-
-## 🚫 FORBIDDEN PATTERNS
-
-- Using `any` types in TypeScript
-- **🚨 Making database changes without updating `database_schema_audit.md`**
-- **🚨 Updating `types/database.ts` without referencing the audit file**
-- Direct database calls in React components
-- Bypassing RLS policies
-- Exposing service keys to client
-- Mixing database logic with UI logic
-- Using raw SQL instead of Supabase query builder
-
-## 📁 CRITICAL FILES TO REFERENCE
-
-- `TOTL_PROJECT_CONTEXT_PROMPT.md` - Complete project context
-- **🚨 `database_schema_audit.md` - SINGLE SOURCE OF TRUTH for database schema**
-- **🚨 `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` - MANDATORY before auth changes**
-- `types/database.ts` - Generated Supabase types
-- `supabase/migrations/` - Database schema history
-- `lib/supabase-client.ts` - Client configuration
-- `middleware.ts` - Route protection logic
-- `components/auth/auth-provider.tsx` - Authentication context (correct path)
-
-## 🔄 WHEN TO APPLY
-
-This rule applies to:
-- All code generation for this project
-- Database schema changes or migrations
-- New feature development
-- Bug fixes or refactoring
-- API route creation or modification
-- Component creation or updates
+- React components should be **presentational**.
+- **No direct database calls** in components.
+- Use **server components** and server actions for data fetching/mutations.
+- Pass data into client components via **props** or typed hooks localized to the feature.
 
 ---
 
-**Remember: Always reference the full context file before writing any code. This ensures consistency, security, and proper architecture compliance.** 
+## 🔐 AUTHENTICATION & AUTHORIZATION
 
-## Database Types & Codegen
-- `types/database.ts` is auto-generated from Supabase. Do not hand-edit.
-- After any SQL/migration changes, run:
-  `npx supabase gen types typescript --project-id "$SUPABASE_PROJECT_ID" --schema public > types/database.ts`
-- Prepend an AUTO-GENERATED banner to discourage edits.
+- **BEFORE ANY AUTH CHANGES:** Read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` and `docs/AUTH_STRATEGY.md`.
+- Use `@supabase/auth-helpers-nextjs` patterns for session management.
+- Check user roles before privileged actions.
+- Use `middleware.ts` for route protection.
+- Implement strong error handling for auth failures.
+- Verify database triggers and constraints match `database_schema_audit.md`.
 
-## Supabase Client
-- Use a single typed client from `lib/supabase-client.ts`.
-- Do not import `@supabase/supabase-js` directly in pages/components.
+### Auth Ownership & Dashboards (CRITICAL)
 
-## Query Style
-- Default: explicit column selection. Avoid `select('*')` in app code.
-- Exception: internal admin scripts in `scripts/` may use `*`.
+- `AuthProvider` is the **single source of truth** for:
+  - `session`
+  - `user`
+  - `profile`
+  - `userRole`
+  - `isLoading`
+  - `isEmailVerified`
+- Client components consume auth via `useAuth()` **only**.  
+  No other place should fetch auth state directly from Supabase in the browser.
 
-## Security
-- No service role in client/browser code. Server-only (API routes, server actions).
+**Middleware responsibilities:**
 
-## Component Boundaries
-- Presentational components: no data fetching.
-- Server components/actions do all data I/O and pass typed props.
+- Gate by **session/role/suspension** only.
+- Never create profiles or mutate data.
+- Must allow onboarding-safe routes even when `profile` is `null`:
+  - Auth pages (login/signup/verification)
+  - Onboarding path
+  - `/talent/dashboard` and `/client/dashboard` so `ensureProfileExists()` can run.
 
-**Schema Management**  
-- **Single Source of Truth:** Always update the `database_schema_audit.md` **before** making any database schema changes. This audit file represents the ground truth of the database schema. Never apply a migration or change the database without first reflecting the change in this file.  
-- **Migrations Required:** All schema modifications must be done via version-controlled Supabase migration files (in `supabase/migrations`). Never edit the database schema manually without a migration. Update the audit file and then generate a new migration file using the Supabase CLI.  
-- **Generated Types Only:** After any schema change, **regenerate** the TypeScript types using the Supabase CLI (`supabase gen types typescript`). The file `types/database.ts` must always be generated from the live schema – do not manually edit this file.  
-- **No Drift:** The schema defined in `database_schema_audit.md`, the database itself, and `types/database.ts` should always be in sync. Use automated checks (scripts/CI) to verify that the audit file and the types file accurately reflect the actual database.  
+**Dashboards:**
 
-**Type Safety**  
-- **Use Generated Types:** The **only** source of TypeScript types for database entities is `types/database.ts`. Do not declare separate interfaces or types in components or elsewhere for tables like Profile, Gig, Application, etc. Instead, import and use the types from the generated file. This prevents duplicate definitions drifting from the truth.  
-- **No `any` for DB Data:** Do not use `any` types when handling database results or writing queries. All data must be strongly typed according to the generated types. If a query result is not properly typed, refine the query or the types rather than resorting to `any`.  
-- **Enum Consistency:** Whenever you update a database enum (for example, adding a new status), update the enum values in `database_schema_audit.md` and regenerate the types file. Ensure that any code using these enum values (strings or union types) is updated to match.  
+- Dashboard **server pages** are thin wrappers:
+  - They may fetch **page data** (gigs, bookings, etc.).
+  - They do **not** own auth/profile logic.
+- Dashboard **client components**:
+  - Read `user`, `profile`, `userRole`, and `isLoading` from `useAuth()`.
+  - Use a **single loading gate** combining auth + data-loading flags.
+  - Avoid `window.location.reload()`.
+  - Use `router.refresh()` only when strictly necessary (and never in a mount loop).
 
-**Database Access Pattern**  
-- **Centralized Client:** All database calls must go through the single Supabase client instances provided (`lib/supabase-client.ts` for user-level access and `lib/supabase-admin-client.ts` for admin tasks). **Do not** instantiate new Supabase clients or use the Supabase JS library directly in components or API routes. This ensures that Row-Level Security (RLS) policies are consistently applied and that the types are correctly utilized.  
-- **Secure by Default:** RLS policies are in effect on all tables. Query the database in a role-appropriate way (e.g., using the anon/user client for user operations which will enforce RLS). Only use the admin client (service role) in server-side code that is trusted and needs to bypass RLS (such as internal tools or admin functionality).  
-- **No Logic in Components:** Keep database logic out of React components. React components (especially UI and pages) should call functions in the `lib/` layer (or Next.js Server Actions) which contain the actual database queries. This separation ensures easier maintenance and consistent enforcement of types and security.  
+### Sign-Out Flow (Phase 5 Behavior)
 
-**Verification**  
-- **Pre-commit Checks:** Always run the schema verification script (`scripts/verify-schema-sync.ps1`) before committing or opening a PR. This script will flag any type mismatches, outdated schema documentation, usage of `any`, or local interface duplications. Fix any issues it reports.  
-- **CI Enforcement:** The CI pipeline will block any pull request that introduces schema drift or type inconsistencies. If the CI fails due to the schema truth checks, regenerate the types, update the audit documentation, or remove any forbidden patterns as indicated, then commit the fixes.  
+Sign-out must follow this pattern:
 
-**PowerShell Environment**
-- **Use PowerShell Commands:** Always use PowerShell-compatible commands in this Windows environment
-- **File Operations:** Use `Get-ChildItem` instead of `ls`, `Get-Content` instead of `cat`, `Select-String` instead of `grep`
-- **Scripts:** All verification and automation scripts should be PowerShell-compatible
+1. **Reset auth state** in `AuthProvider`:
+   - `user`, `session`, `userRole`, `profile`, `isEmailVerified`, `hasHandledInitialSession`, `isLoading`.
+2. Optionally call `/api/auth/signout` (POST) to clear HTTP-only cookies server-side.
+3. Call `supabase.auth.signOut()` from the browser client.
+4. Call `resetSupabaseBrowserClient()` to avoid stale authenticated instances.
+5. Redirect with:
+   - `window.location.replace("/login?signedOut=true")` in the browser.
+6. No aggressive manual cookie/localStorage purges or timers unless fixing a **specific documented bug**.
 
-**Documentation-First Approach**
-- **Check Documentation FIRST:** Before making ANY changes, check `docs/DOCUMENTATION_INDEX.md` to find relevant documentation for the area you're working on
-- **Read Relevant Docs:** Read all applicable documentation files for the feature/component you're modifying
-- **Common Documentation to Check:**
-  - Authentication work → Read `docs/AUTH_STRATEGY.md`
-  - Security changes → Read `docs/SECURITY_CONFIGURATION.md`
-  - Database changes → Read `database_schema_audit.md` (root) and `docs/DATABASE_REPORT.md`
-  - Admin features → Read `docs/ADMIN_ACCOUNT_GUIDE.md`
-  - Feature implementation → Check `docs/` for related implementation guides
-  - Bug fixes → Check `docs/TROUBLESHOOTING_GUIDE.md`
-- **Update Documentation:** Always update relevant documentation after significant changes
-- **Reference Audit File:** Always reference `database_schema_audit.md` for database schema truth
-- **Maintain Consistency:** Ensure all documentation reflects the current state of the project
+**Do not:**
 
-## 📚 MANDATORY DOCUMENTATION CHECK WORKFLOW
+- Change sign-out to use `window.location.reload()`.
+- Introduce multiple competing redirect locations.
+- Change `SIGNED_OUT` handling without explaining how it interacts with `signOut()`.
 
-**BEFORE starting ANY work:**
-1. Check `docs/DOCUMENTATION_INDEX.md` to identify relevant documentation
-2. Read ALL relevant docs for the area you're working on
-3. Verify your approach aligns with documented patterns
-4. Only then proceed with implementation
+If updating `SIGNED_OUT` handling in `onAuthStateChange`:
 
-**AFTER completing work:**
-1. Update any relevant documentation
-2. Add new documentation if you created a significant feature
-3. Update `docs/DOCUMENTATION_INDEX.md` if you added new docs
+- Treat **manual sign out** (user clicked “Sign Out”) as handled primarily by `signOut()`.
+- Treat `SIGNED_OUT` as a safety net for:
+  - Session expiry
+  - Admin deletion
+  - Cross-tab sync
+- Avoid double redirects and loops.
 
-## 📝 DOCUMENTATION CREATION RULES
+---
 
-**ALL new documentation files MUST be created in the `docs/` folder, NOT the root directory.**
+## 🛡️ SECURITY BEST PRACTICES
 
-**Exceptions (ONLY these files belong in root):**
-- `README.md` - Project overview
-- `database_schema_audit.md` - Database schema single source of truth
-- `MVP_STATUS_NOTION.md` - MVP tracking (update before commits)
-- `notion_update.md` - Notion update tracking
+- Never expose **service keys** in client code.
+- Always validate that the current user has permission to access or modify data.
+- Supabase queries are parameterized by default – do not use string concatenation to build queries.
+- Respect the **least privilege** principle:
+  - Use anon/user client whenever possible.
+  - Use admin client only from trusted server code.
 
-**Everything else goes in `docs/`:**
-- ✅ Feature implementation guides → `docs/`
-- ✅ Bug fix summaries → `docs/`
-- ✅ Setup guides → `docs/`
-- ✅ Troubleshooting docs → `docs/`
-- ✅ Security documentation → `docs/`
-- ✅ Any other documentation → `docs/`
+---
 
-**When creating new documentation:**
-1. Always create files in `docs/` folder
-2. Use clear, descriptive filenames (ALL_CAPS_WITH_UNDERSCORES.md or lowercase-with-hyphens.md)
-3. Update `docs/DOCUMENTATION_INDEX.md` to include the new file
-4. Add appropriate category tags and cross-references
+## 🚫 FORBIDDEN PATTERNS
 
-## 🚨 CRITICAL ERROR PREVENTION - MANDATORY CHECKS
+- Using `any` types for database results or DTOs.
+- Making database changes without updating `database_schema_audit.md`.
+- Updating `types/database.ts` by hand (must be generated).
+- Direct database calls in React components.
+- Bypassing or weakening RLS policies.
+- Exposing service keys to client/browser.
+- Mixing database logic into UI components.
+- Using raw SQL instead of the Supabase query builder (except in migrations/admin scripts where appropriate).
+- Full-file rewrites of Red Zone files without going through the **Red Zone Editing Protocol**.
 
-**BEFORE PUSHING ANY CODE TO DEVELOP OR MAIN, YOU MUST:**
+---
 
-### **1. SCHEMA & TYPES VERIFICATION**
+## 📁 CRITICAL FILES TO REFERENCE
+
+- `TOTL_PROJECT_CONTEXT_PROMPT.md` – Complete project context
+- `AGENT_ONBOARDING.md` – Quick start guide for agents
+- `database_schema_audit.md` – **Single source of truth** for schema
+- `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` – Mandatory for auth changes
+- `docs/AUTH_STRATEGY.md` – Auth architecture and patterns
+- `docs/SIGN_OUT_IMPROVEMENTS.md` – Current sign-out behavior
+- `types/database.ts` / `@/types/supabase` – Generated Supabase types
+- `supabase/migrations/**` – Schema history
+- `lib/supabase-client.ts` – Browser client config
+- `lib/supabase-admin-client.ts` – Server admin client
+- `middleware.ts` – Route protection logic
+- `components/auth/auth-provider.tsx` – Authentication context owner
+
+---
+
+## 🔄 WHEN TO APPLY THESE RULES
+
+These rules apply to:
+
+- All code generation for this project
+- Database schema changes or migrations
+- New feature development
+- Refactors and bug fixes
+- API route creation or modification
+- Component creation or updates
+- Any changes touching auth, dashboards, or schema
+
+---
+
+## 🧬 DATABASE TYPES & CODEGEN
+
+- `types/database.ts` is **auto-generated** from Supabase. Do not hand-edit.
+- After any schema/migration changes, run:
+
+  ```bash
+  npx supabase gen types typescript \
+    --project-id "$SUPABASE_PROJECT_ID" \
+    --schema public > types/database.ts
+````
+
+* Prepend or keep an **AUTO-GENERATED** banner comment in `types/database.ts` to discourage manual edits.
+* If there is a `types/supabase.ts` wrapper, it should only re-export from `types/database.ts`.
+
+---
+
+## 🧩 SUPABASE CLIENT USAGE
+
+* Use a **single typed client** from `lib/supabase-client.ts` for user-level browser access.
+* Use `lib/supabase-admin-client.ts` for server-side admin operations (service role).
+* Do **not** import `@supabase/supabase-js` directly in pages/components.
+* For server components/actions, use the project’s existing Supabase helpers (e.g., `createSupabaseServer` pattern if present).
+
+---
+
+## 🧮 QUERY STYLE
+
+* Default: **explicit column selection**. Avoid `select('*')` in app code.
+* Exception: internal admin scripts in `scripts/` may use `*` with care.
+* Use `.maybeSingle()` when a row may be missing; use `.single()` only when you’re sure a row must exist and handle errors accordingly.
+* For profile fetching, follow the established `fetchProfile` + `ensureAndHydrateProfile` pattern in `AuthProvider`.
+
+---
+
+## 🧱 SCHEMA MANAGEMENT
+
+* **Single Source of Truth:** Always update `database_schema_audit.md` **before** changing schema.
+* All schema modifications must:
+
+  1. Be documented in `database_schema_audit.md`.
+  2. Have a corresponding migration in `supabase/migrations`.
+  3. Regenerate `types/database.ts`.
+* Never modify the live database schema manually without a migration.
+* Keep **audit file, live DB, and generated types** in sync.
+* Use scripts/CI to check for drift where available.
+
+---
+
+## 🔒 TYPE SAFETY
+
+* Use generated types from `@/types/supabase` / `types/database.ts` for all DB entities.
+* Do not declare parallel interfaces/types for core tables (`profiles`, `gigs`, `applications`, etc.).
+* No `any` for DB data:
+
+  * If a result is typed as `any`, fix the query or import the right type.
+* When changing an enum in the DB:
+
+  * Update enum in `database_schema_audit.md`.
+  * Regenerate types.
+  * Update all string/union references in code.
+
+---
+
+## 🗄️ DATABASE ACCESS PATTERN
+
+* All database calls must go through:
+
+  * `lib/supabase-client.ts` for anon/user-level access
+  * `lib/supabase-admin-client.ts` for admin/service-level access
+* Do not instantiate new Supabase clients ad-hoc.
+* RLS is always on for anon/user clients; rely on it.
+* Admin client use must be explicit and server-only.
+
+---
+
+## ✅ VERIFICATION & CI
+
+* Always run `scripts/verify-schema-sync.ps1` before commits/PRs.
+* Fix:
+
+  * Type mismatches
+  * Outdated schema docs
+  * `any` usages for DB data
+  * Local interface duplication of DB entities
+* CI will block PRs if:
+
+  * Schema drift is detected
+  * Types are out of sync
+  * Forbidden patterns are introduced
+
+---
+
+## 💻 POWERSHELL ENVIRONMENT
+
+* Use PowerShell commands:
+
+  * `Get-ChildItem` instead of `ls`
+  * `Get-Content` instead of `cat`
+  * `Select-String` instead of `grep`
+
+* All verification and automation scripts should be PowerShell-compatible.
+
+---
+
+## 📚 DOCUMENTATION-FIRST WORKFLOW
+
+**Before starting ANY work:**
+
+1. Check `docs/DOCUMENTATION_INDEX.md` to find relevant docs.
+2. Read all relevant docs for the area you’re touching:
+
+   * Auth → `docs/AUTH_STRATEGY.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`
+   * Security → `docs/SECURITY_CONFIGURATION.md`
+   * Database → `database_schema_audit.md`, `docs/DATABASE_REPORT.md`
+   * Admin features → `docs/ADMIN_ACCOUNT_GUIDE.md`
+   * Feature implementation → related guides in `docs/`
+   * Bug fixes → `docs/TROUBLESHOOTING_GUIDE.md`
+3. Verify your approach aligns with documented patterns.
+
+**After work:**
+
+1. Update relevant documentation.
+2. Add new docs for significant features.
+3. Update `docs/DOCUMENTATION_INDEX.md` with new entries.
+
+**All new docs go in `docs/`, not root.**
+
+Root exceptions:
+
+* `README.md`
+* `database_schema_audit.md`
+* `MVP_STATUS_NOTION.md`
+* `notion_update.md`
+
+---
+
+## 🚨 CRITICAL ERROR PREVENTION – MANDATORY CHECKS
+
+**Before pushing any code to `develop` or `main`:**
+
+### 1. Schema & Types Verification
+
 ```bash
-# ALWAYS run these commands before pushing
 npm run schema:verify:comprehensive
 npm run types:check
 npm run build
 ```
 
-### **2. IMPORT PATH VERIFICATION**
-**❌ NEVER USE THESE INCORRECT PATHS:**
-- `@/lib/supabase/supabase-admin-client` (WRONG - extra `/supabase/`)
-- `@/types/database` (WRONG - should be `/types/supabase`)
+### 2. Import Path Verification
 
-**✅ ALWAYS USE THESE CORRECT PATHS:**
-- `@/lib/supabase-admin-client` (CORRECT)
-- `@/types/supabase` (CORRECT)
+**Never use:**
 
-### **3. COMMON ERRORS TO AVOID**
-- **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
-  - **Fix:** Run `npm run types:regen` for correct environment
-- **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
-  - **Fix:** Use correct path `@/lib/supabase-admin-client`
-- **Type Errors:** `Property 'role' does not exist on type 'never'`
-  - **Fix:** Ensure Database type is imported from `@/types/supabase`
-- **Build Failures:** Any build that doesn't pass locally
-  - **Fix:** Never push code that doesn't build locally
+* `@/lib/supabase/supabase-admin-client` (WRONG – extra `/supabase/`)
+* `@/types/database` (WRONG – should be `/types/supabase`)
 
-### **4. BRANCH-SPECIFIC REQUIREMENTS**
-- **DEVELOP Branch:** Use `npm run types:regen:dev` if needed
-- **MAIN Branch:** Use `npm run types:regen:prod` if needed
-- **Both Branches:** Must pass `npm run build` before pushing
+**Always use:**
 
-### **5. EMERGENCY FIXES**
-If you encounter these errors:
+* `@/lib/supabase-admin-client`
+* `@/types/supabase`
+
+### 3. Common Errors to Avoid
+
+* **Schema sync error:** `types/database.ts is out of sync with remote schema`
+  → `npm run types:regen` for the correct environment.
+
+* **Import path errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
+  → Fix path to `@/lib/supabase-admin-client`.
+
+* **Type errors:** `Property 'role' does not exist on type 'never'`
+  → Ensure `Database` type is imported from `@/types/supabase`.
+
+* **Build failures:** any non-passing local build
+  → Do not push.
+
+### 4. Branch-Specific Requirements
+
+* `develop` branch: use `npm run types:regen:dev` if needed.
+* `main` branch: use `npm run types:regen:prod` if needed.
+* Both: must pass `npm run build` before pushing.
+
+### 5. Emergency Fix Commands
+
 ```bash
 # Schema sync error
 npm run types:regen && npm run build
 
-# Import path errors - find and fix manually
+# Import path errors – find and fix manually
 grep -r "@/lib/supabase/supabase-admin-client" . --exclude-dir=node_modules
 
-# Build failures - fix locally first
+# Build failures – fix locally first
 npm run build
 ```
 
-**🚨 CRITICAL RULE: NEVER PUSH CODE THAT DOESN'T BUILD LOCALLY!**
+**Absolute rule:** Never push code that does not build locally.
 
-## 📋 PRE-PUSH CHECKLIST REFERENCE
+---
 
-**ALWAYS run this checklist before pushing:**
+## 📋 PRE-PUSH CHECKLIST
+
+Always run this checklist before pushing:
+
 1. ✅ `npm run schema:verify:comprehensive`
 2. ✅ `npm run build`
 3. ✅ `npm run lint`
-4. ✅ Check import paths are correct
-5. ✅ Verify branch-specific types are generated
-6. ✅ Read `docs/PRE_PUSH_CHECKLIST.md` for detailed guidance
+4. ✅ Import paths are correct
+5. ✅ Branch-specific types are generated
+6. ✅ `docs/PRE_PUSH_CHECKLIST.md` reviewed and followed
 
-**If ANY step fails, DO NOT PUSH until it's fixed!**
+If ANY step fails, fix it **before** pushing.
 
 ---
 
@@ -276,406 +473,149 @@ npm run build
 
 ### TypeScript Code Style
 
-**General Principles:**
-- Write concise, technical TypeScript code with accurate examples
-- Use functional and declarative programming patterns; avoid classes
-- Prefer iteration and modularization over code duplication
-- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`, `canEdit`)
-- Structure files: exported component → subcomponents → helpers → static content → types
+* Use functional and declarative patterns; avoid classes.
+* Prefer modular code over duplication.
+* Use descriptive names with auxiliary verbs for booleans (`isLoading`, `hasError`, `canEdit`).
+* File structure:
 
-**TypeScript Usage:**
-- Use TypeScript for all code; prefer `interface` over `type` for object shapes
-- Avoid enums; use const objects with `as const` or union types instead
-- Use functional components with TypeScript interfaces for props
-- Always use strict TypeScript mode (already configured)
-- Import types with `import type` when importing only types
+  1. Imports
+  2. Types/interfaces
+  3. Constants/helpers
+  4. Main component/exports
+  5. Subcomponents
 
-**Example:**
-```typescript
-// ✅ GOOD - Interface for props
+**TypeScript usage:**
+
+* Use `interface` for object shapes where possible.
+* Avoid enums; use `const` objects + union types.
+* Use `import type` when importing only types.
+* Strict TypeScript mode is assumed and must remain clean.
+
+```ts
 interface ButtonProps {
   isLoading?: boolean;
   hasError?: boolean;
   onClick: () => void;
 }
 
-// ✅ GOOD - Const object instead of enum
 const Status = {
   ACTIVE: "active",
   INACTIVE: "inactive",
   PENDING: "pending",
 } as const;
 
-type Status = typeof Status[keyof typeof Status];
-
-// ❌ BAD - Avoid enums
-enum Status {
-  ACTIVE = "active",
-  INACTIVE = "inactive",
-}
+type Status = (typeof Status)[keyof typeof Status];
 ```
 
 ### Naming Conventions
 
-**Files & Directories:**
-- Use **kebab-case** for all file and directory names
-  - ✅ `talent-signup-form.tsx`
-  - ✅ `apply-as-talent-button.tsx`
-  - ✅ `components/auth/`
-  - ✅ `components/forms/`
-  - ❌ `TalentSignupForm.tsx` (PascalCase)
-  - ❌ `applyAsTalentButton.tsx` (camelCase)
+* Files/directories: **kebab-case**
 
-**Components:**
-- Use **PascalCase** for component names
-- Prefer **named exports** for components (default exports acceptable for pages)
-- Use descriptive, component-specific names
+  * `talent-signup-form.tsx`
+  * `apply-as-talent-button.tsx`
+* Components: **PascalCase**
+* Variables/functions: **camelCase**
 
-**Example:**
-```typescript
-// ✅ GOOD - Named export
-export function TalentSignupForm({ ... }: TalentSignupFormProps) {
-  // ...
-}
-
-// ✅ GOOD - Default export for pages
-export default function TalentDashboard() {
-  // ...
-}
-
-// ✅ GOOD - Component-specific interface
-interface TalentSignupFormProps {
-  onComplete?: () => void;
-}
-```
-
-**Variables & Functions:**
-- Use **camelCase** for variables and functions
-- Use descriptive names with auxiliary verbs for booleans (`is`, `has`, `can`, `should`)
-- Use verb-noun pattern for functions (`getUser`, `createGig`, `updateProfile`)
-
-**Example:**
-```typescript
-// ✅ GOOD
-const isLoading = true;
-const hasError = false;
-const canEdit = user.role === "admin";
-const userCount = users.length;
-
-function getUserById(id: string) { ... }
-function createGig(data: GigData) { ... }
-```
+---
 
 ### Syntax and Formatting
 
-**Function Declarations:**
-- Use the `function` keyword for pure functions and components
-- Use arrow functions for callbacks, inline functions, and short utilities
-- Prefer concise syntax for simple conditionals (avoid unnecessary braces)
+* Use `function` declarations for components and pure helpers.
+* Use arrow functions for callbacks and small utilities.
+* Prefer concise conditionals:
 
-**Example:**
-```typescript
-// ✅ GOOD - Function keyword for components
-export function Button({ children }: ButtonProps) {
-  return <button>{children}</button>;
-}
-
-// ✅ GOOD - Arrow function for callbacks
-const handleClick = () => {
-  // ...
-};
-
-// ✅ GOOD - Concise conditional
+```tsx
 if (isLoading) return <Spinner />;
-if (hasError) return <Error />;
-
-// ❌ BAD - Unnecessary braces
-if (isLoading) {
-  return <Spinner />;
-}
+if (hasError) return <ErrorMessage />;
 ```
 
-**JSX & Declarative Code:**
-- Use declarative JSX patterns
-- Prefer composition over complex conditional rendering
-- Extract complex logic into helper functions or custom hooks
+---
 
-**Example:**
-```typescript
-// ✅ GOOD - Declarative
-return (
-  <div>
-    {isLoading && <Spinner />}
-    {!isLoading && data && <DataDisplay data={data} />}
-    {error && <ErrorMessage error={error} />}
-  </div>
-);
+### UI & Styling
 
-// ✅ BETTER - Extract complex logic
-function renderContent() {
-  if (isLoading) return <Spinner />;
-  if (error) return <ErrorMessage error={error} />;
-  return <DataDisplay data={data} />;
-}
+* Use **shadcn/ui** and Radix primitives.
+* Use TailwindCSS; no styled-components/CSS modules.
+* Mobile-first responsive classes.
 
-return <div>{renderContent()}</div>;
-```
-
-### Component Structure
-
-**File Organization:**
-1. Imports (external → internal → types)
-2. Type definitions (interfaces, types)
-3. Constants and helpers
-4. Main component
-5. Subcomponents (if any)
-6. Exports
-
-**Example Structure:**
-```typescript
-// 1. Imports
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import type { Database } from "@/types/supabase";
-
-// 2. Types
-interface ComponentProps {
-  userId: string;
-}
-
-// 3. Constants
-const MAX_RETRIES = 3;
-
-// 4. Helpers
-function formatDate(date: Date) {
-  // ...
-}
-
-// 5. Main Component
-export function Component({ userId }: ComponentProps) {
-  // ...
-}
-
-// 6. Subcomponents (if any)
-function SubComponent() {
-  // ...
-}
-```
-
-### UI and Styling
-
-**Component Libraries:**
-- Use **shadcn/ui** components as the primary UI library
-- Use **Radix UI** primitives (via shadcn/ui) for accessibility
-- Use **TailwindCSS** for all styling (no CSS modules or styled-components)
-
-**Responsive Design:**
-- Implement responsive design with TailwindCSS
-- Use **mobile-first approach** (base styles for mobile, then `md:`, `lg:`, `xl:` breakpoints)
-- Test on multiple screen sizes
-
-**Example:**
-```typescript
-// ✅ GOOD - Mobile-first Tailwind
+```tsx
 <div className="flex flex-col gap-4 md:flex-row md:gap-8 lg:gap-12">
   <div className="w-full md:w-1/2 lg:w-1/3">...</div>
 </div>
 ```
 
-**Image Optimization:**
-- Use Next.js `Image` component or project's `SafeImage` component
-- Prefer WebP format when possible
-- Include size data (`width`, `height`, or `fill`)
-- Implement lazy loading for below-the-fold images
-
-**Example:**
-```typescript
-// ✅ GOOD - Using SafeImage component
-import { SafeImage } from "@/components/ui/safe-image";
-
-<SafeImage
-  src={imageUrl}
-  alt="Description"
-  width={800}
-  height={600}
-  className="rounded-lg"
-/>
-```
-
-### Performance Optimization
-
-**React Server Components (RSC):**
-- **Minimize `"use client"`** - Default to Server Components
-- Use Server Components for:
-  - Data fetching (Supabase queries)
-  - Server-side logic
-  - Environment variable access
-  - SEO-critical content
-- Use Client Components only for:
-  - Browser APIs (`window`, `localStorage`, etc.)
-  - Event handlers (`onClick`, `onChange`)
-  - React hooks (`useState`, `useEffect`, `useContext`)
-  - Third-party client-only libraries
-
-**Example:**
-```typescript
-// ✅ GOOD - Server Component (default)
-export default async function GigsPage() {
-  const supabase = await createSupabaseServer();
-  const { data } = await supabase.from("gigs").select("*");
-  
-  return <GigsList gigs={data} />;
-}
-
-// ✅ GOOD - Client Component (only when needed)
-"use client";
-
-export function GigsList({ gigs }: { gigs: Gig[] }) {
-  const [filter, setFilter] = useState("");
-  
-  return (
-    <div>
-      <input onChange={(e) => setFilter(e.target.value)} />
-      {/* ... */}
-    </div>
-  );
-}
-```
-
-**Hooks & State Management:**
-- Minimize `useEffect` and `useState` usage
-- Prefer Server Components and Server Actions for data mutations
-- Use `useEffect` only for:
-  - Browser API interactions
-  - Subscriptions (Supabase real-time)
-  - Side effects that can't be handled server-side
-
-**Suspense & Loading States:**
-- Wrap client components in `Suspense` with fallback
-- Use loading.tsx files for route-level loading states
-- Provide meaningful loading indicators
-
-**Example:**
-```typescript
-// ✅ GOOD - Suspense boundary
-<Suspense fallback={<LoadingSpinner />}>
-  <AsyncComponent />
-</Suspense>
-```
-
-**Dynamic Loading:**
-- Use `next/dynamic` for non-critical components
-- Lazy load heavy components (charts, editors, etc.)
-- Use `ssr: false` for client-only components
-
-**Example:**
-```typescript
-// ✅ GOOD - Dynamic import for heavy component
-import dynamic from "next/dynamic";
-
-const HeavyChart = dynamic(() => import("./heavy-chart"), {
-  loading: () => <ChartSkeleton />,
-  ssr: false,
-});
-```
-
-### URL Search Parameters
-
-**Next.js App Router Pattern:**
-- Use Next.js `searchParams` prop for Server Components
-- Use `useSearchParams()` hook for Client Components (with SSR safety)
-- Always use optional chaining (`?.`) and nullish coalescing (`??`) for safety
-- See `docs/USESEARCHPARAMS_SSR_GUIDE.md` for detailed patterns
-
-**Example:**
-```typescript
-// ✅ GOOD - Server Component
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  const category = typeof params.category === "string" ? params.category : "all";
-  
-  return <GigsList category={category} />;
-}
-
-// ✅ GOOD - Client Component (safe SSR pattern)
-"use client";
-
-export function FilterComponent() {
-  const searchParams = useSearchParams();
-  const [category, setCategory] = useState("all");
-  
-  useEffect(() => {
-    const categoryParam = searchParams?.get("category") ?? "all";
-    setCategory(categoryParam);
-  }, [searchParams]);
-  
-  return <div>Category: {category}</div>;
-}
-```
-
-### Web Vitals Optimization
-
-**Core Web Vitals:**
-- **LCP (Largest Contentful Paint):** Optimize images, use `priority` prop for above-the-fold images
-- **CLS (Cumulative Layout Shift):** Set explicit dimensions for images and containers
-- **FID (First Input Delay):** Minimize JavaScript, use code splitting, defer non-critical scripts
-
-**Example:**
-```typescript
-// ✅ GOOD - Optimized image with priority
-<SafeImage
-  src={heroImage}
-  alt="Hero"
-  width={1920}
-  height={1080}
-  priority
-  className="w-full h-auto"
-/>
-```
-
-### Code Quality Standards
-
-**Error Handling:**
-- Always wrap async operations in try-catch blocks
-- Provide meaningful error messages
-- Use project's error logging utilities (`lib/error-logger.ts`)
-- Handle Supabase errors gracefully
-
-**Example:**
-```typescript
-// ✅ GOOD - Proper error handling
-async function fetchGig(id: string) {
-  try {
-    const { data, error } = await supabase
-      .from("gigs")
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Failed to fetch gig:", error);
-    throw error;
-  }
-}
-```
-
-**Code Comments:**
-- Write self-documenting code (prefer clear names over comments)
-- Add comments for complex business logic or non-obvious decisions
-- Use JSDoc for public APIs and utilities
-
-**Accessibility:**
-- Use semantic HTML elements
-- Include proper ARIA labels where needed
-- Ensure keyboard navigation works
-- Test with screen readers (Radix UI components handle this)
+* For images, use Next.js `Image` or project `SafeImage` with explicit sizes.
 
 ---
 
-**Remember:** These style guidelines complement the existing architecture and security rules. Always prioritize security, type safety, and RLS compliance over style preferences. 
+### Performance & RSC
+
+* Default to **Server Components**.
+* Use Client Components only when needed:
+
+  * Browser APIs
+  * Event handlers
+  * React hooks
+  * Client-only libraries
+
+```tsx
+// Server Component
+export default async function GigsPage() {
+  const supabase = await createSupabaseServer();
+  const { data } = await supabase.from("gigs").select("*");
+  return <GigsList gigs={data} />;
+}
+
+// Client Component
+"use client";
+export function GigsList({ gigs }: { gigs: Gig[] }) {
+  // ...
+}
+```
+
+* Minimize `useEffect` and `useState`.
+* Use Suspense and `loading.tsx` for loading states.
+* Use `next/dynamic` for heavy components.
+
+---
+
+### URL Search Parameters
+
+* In Server Components: use `searchParams` prop.
+* In Client Components: use `useSearchParams()` safely with `useEffect`.
+* Use optional chaining and nullish coalescing.
+
+Refer to `docs/USESEARCHPARAMS_SSR_GUIDE.md` for patterns.
+
+---
+
+### Web Vitals
+
+* Optimize LCP with prioritized hero images.
+* Prevent CLS with explicit dimensions.
+* Minimize JS, use code splitting, and lazy load non-critical UI.
+
+---
+
+### Code Quality & Error Handling
+
+* Wrap async operations in `try/catch`.
+* Use project error logging utilities (e.g., `lib/error-logger.ts`).
+* Handle Supabase errors gracefully with meaningful messages.
+
+---
+
+### Accessibility
+
+* Use semantic HTML.
+* Add ARIA attributes when needed.
+* Ensure keyboard navigation works.
+* Rely on Radix for accessible primitives.
+
+---
+
+**Final Principle:**
+Prioritize **security**, **type safety**, and **auth stability** over stylistic preferences.
+Red Zone files must be changed with precision, not rewritten on a whim.
+
+```
+```
