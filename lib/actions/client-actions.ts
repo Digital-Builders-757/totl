@@ -29,11 +29,38 @@ export async function submitClientApplication(data: ClientApplicationData) {
   const supabase = await createSupabaseServer();
 
   try {
+    // 🔐 Require authenticated user and capture their id for RLS
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("No authenticated user when submitting client application:", userError);
+      return { error: "You must be logged in to apply as a Career Builder." };
+    }
+
+    // Prevent duplicate non-rejected applications for this user
+    const { data: existing, error: existingError } = await supabase
+      .from("client_applications")
+      .select("id, status")
+      .eq("user_id", user.id)
+      .not("status", "eq", "rejected")
+      .maybeSingle();
+
+    if (!existingError && existing) {
+      return {
+        error:
+          "You already have an application on file. Please wait for a decision or contact support if you need to make changes.",
+      };
+    }
+
     // Insert the application into the client_applications table
     const { data: application, error } = await supabase
       .from("client_applications")
       .insert([
         {
+          user_id: user.id,
           first_name: data.firstName,
           last_name: data.lastName,
           company_name: data.companyName,

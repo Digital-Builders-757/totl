@@ -34,6 +34,8 @@ export default function ClientApplicationPage() {
     website: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasStartedEditing, setHasStartedEditing] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -65,6 +67,7 @@ export default function ClientApplicationPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
+    if (!hasStartedEditing) setHasStartedEditing(true);
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
@@ -99,6 +102,9 @@ export default function ClientApplicationPage() {
         return;
       }
 
+      // ✅ Only now do we mark it as successfully submitted
+      setHasSubmitted(true);
+
       // Success - redirect to success page with the application ID for reference
       if (result.applicationId) {
         const search = new URLSearchParams({ applicationId: result.applicationId }).toString();
@@ -119,7 +125,7 @@ export default function ClientApplicationPage() {
 
   useEffect(() => {
     const userEmail = user?.email;
-    if (!userEmail) {
+    if (!userEmail || hasStartedEditing || hasSubmitted) {
       setApplicationStatus(null);
       setStatusMessage(null);
       return;
@@ -175,12 +181,14 @@ export default function ClientApplicationPage() {
     checkStatus();
 
     return () => controller.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.email]);
+  }, [user?.email, hasStartedEditing, hasSubmitted, router]);
 
   const showStatusPanel =
-    applicationStatus?.status && applicationStatus.status !== "approved" && user;
-  const shouldShowForm = !applicationStatus?.status;
+    !hasStartedEditing &&
+    applicationStatus?.status &&
+    applicationStatus.status !== "approved" &&
+    user;
+  const shouldShowForm = hasStartedEditing || !applicationStatus?.status;
   const labelClass = "text-sm font-semibold text-white/80";
   const inputClass = "bg-slate-900 text-white border-white/10 focus-visible:border-amber-500";
 

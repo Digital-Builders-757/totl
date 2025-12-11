@@ -142,14 +142,20 @@ export async function middleware(req: NextRequest) {
     console.error("Middleware profile query error:", profileError);
   }
 
-  // Security: If profile is null for authenticated user, redirect to login to force re-authentication
-  // This prevents access control bypass and ensures profile is created
-  // Handle both cases: missing profile (no error) and query errors (profileError exists)
+  // If profile is missing, allow through on safe routes so AuthProvider can create/hydrate it.
+  // Only force redirect on routes that truly require a completed profile.
   if (!profile) {
-    // Profile doesn't exist or query failed - redirect to login to trigger profile creation/re-authentication
-    // This prevents unauthorized access when profile query fails
+    const isSafeForProfileBootstrap =
+      authRoutes.includes(path) ||
+      publicRoutes.includes(path) ||
+      path === onboardingPath ||
+      path === "/talent/dashboard";
+
+    if (isSafeForProfileBootstrap) {
+      return res;
+    }
+
     const redirectUrl = new URL("/login", req.url);
-    // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
     redirectUrl.searchParams.set("returnUrl", path);
     return NextResponse.redirect(redirectUrl);
   }
