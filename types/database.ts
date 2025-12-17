@@ -159,6 +159,7 @@ export type Database = {
           phone: string | null
           status: string
           updated_at: string
+          user_id: string
           website: string | null
         }
         Insert: {
@@ -176,6 +177,7 @@ export type Database = {
           phone?: string | null
           status?: string
           updated_at?: string
+          user_id: string
           website?: string | null
         }
         Update: {
@@ -193,6 +195,7 @@ export type Database = {
           phone?: string | null
           status?: string
           updated_at?: string
+          user_id?: string
           website?: string | null
         }
         Relationships: []
@@ -635,17 +638,6 @@ export type Database = {
           n_distinct: number | null
           schemaname: unknown
           tablename: unknown
-        }
-        Relationships: []
-      }
-      query_stats: {
-        Row: {
-          calls: number | null
-          max_exec_time: number | null
-          mean_exec_time: number | null
-          min_exec_time: number | null
-          query: string | null
-          total_exec_time: number | null
         }
         Relationships: []
       }

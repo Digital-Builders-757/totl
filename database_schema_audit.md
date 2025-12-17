@@ -1,6 +1,6 @@
 # TOTL Agency Database Schema Audit
 
-**Audit Date:** July 23, 2025  
+**Audit Date:** December 16, 2025  
 **Database:** Supabase PostgreSQL  
 **Schema:** public  
 **Status:** Production Ready
@@ -38,7 +38,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 - **Foreign Key Relationships:** 10
 - **Indexes:** 50+ (including primary keys and performance indexes)
 - **RLS Policies:** 25+ active policies
-- **Views:** 5 (including admin dashboards and performance monitoring)
+- **Views:** 4 (including admin dashboards and performance monitoring)
 - **Functions:** 15+ (including triggers and utilities)
 
 ## 🧩 Extensions
@@ -503,15 +503,6 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 - `schemaname`, `tablename`, `attname`
 - `n_distinct`, `correlation`
 
-### 5. `query_stats` - Query Performance
-**Purpose:** Query statistics for performance monitoring
-
-**Columns:**
-- `query`, `calls`, `total_exec_time`
-- `mean_exec_time`, `max_exec_time`, `min_exec_time`
-
----
-
 ## 🔗 Relationships & Constraints
 
 ### **Entity Relationship Diagram**
@@ -798,6 +789,12 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 
 **Function:** `handle_new_user()`
 
+### **on_auth_user_email_confirmed Trigger**
+**Purpose:** Keeps `profiles.email_verified` in sync when `auth.users.email_confirmed_at` changes (email verification)
+
+**Function:** `sync_profiles_email_verified_from_auth_users()`
+**Location:** `supabase/migrations/20251216013000_sync_profiles_email_verified_on_auth_confirm.sql`
+
 ## 📈 Production Data Status
 
 ### **Current Database State**
@@ -866,11 +863,13 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 12. **`20251127162000_fix_admin_dashboard_comments.sql`** - Rewrites admin dashboard view/function comments without concatenation so migrations run in clean environments
 13. **`20251127173000_fix_query_stats_view.sql`** - Recreates `query_stats` using `relname`/`indexrelname` so it works against modern PostgreSQL catalog columns
 14. **`20251204150904_add_cascade_delete_constraints.sql`** - **🚨 CRITICAL** - Enforces ON DELETE CASCADE on all user-related foreign keys to ensure complete data cleanup when users are deleted
+15. **`20251217200615_drop_query_stats_view.sql`** - Drops `public.query_stats` (not needed) to eliminate security advisor warnings and reduce exposed monitoring surface
 
 ### **Recent Updates**
 - ✅ **Extension alignment (Nov 27, 2025)** — Added migration `20251016160000_create_pg_trgm_extension.sql` so `pg_trgm` is always installed in the `extensions` schema before later security migrations run (prevents local resets from failing)
 - ✅ **Admin dashboard comment fix (Nov 27, 2025)** — Added migration `20251127162000_fix_admin_dashboard_comments.sql` to remove `'||'` concatenation from COMMENT statements that caused local resets to fail
 - ✅ **Query stats view fix (Nov 27, 2025)** — Added migration `20251127173000_fix_query_stats_view.sql` so the view aliases `relname`/`indexrelname` (Postgres 15 catalogs) and no longer references nonexistent `tablename` columns
+- ✅ **Query stats view removal (Dec 17, 2025)** — Added migration `20251217200615_drop_query_stats_view.sql` to remove `public.query_stats` entirely since it is not needed and was generating security advisor warnings
 - ✅ **Cascading delete alignment (Nov 23, 2025)** — All user-centric foreign keys now use `ON DELETE CASCADE` with supporting indexes:
   - `profiles.id` → `auth.users.id`
   - `talent_profiles.user_id`, `client_profiles.user_id`, `gigs.client_id`, `applications.talent_id`, `bookings.talent_id`, `portfolio_items.talent_id` → `profiles.id`
@@ -906,7 +905,7 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
   - Added missing tables: `client_applications`, `gig_notifications`
   - Updated column types: `gigs.date` (date), `bookings.date` (timestamp)
   - Added missing columns: `talent_profiles.experience_years`, `specialties`, `weight`
-  - Added missing views: `performance_metrics`, `query_stats`
+  - Added missing views: `performance_metrics`
   - Updated RLS policies for all tables
   - Verified 50+ indexes and 25+ RLS policies
 

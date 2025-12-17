@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Schema Drift Fix + Security Advisor Cleanup + Admin Routing Debug**
+
+**SCHEMA / SECURITY / ROUTING STABILIZATION** - December 17, 2025  
+- ✅ Eliminated Supabase Security Advisor finding by removing the unused `public.query_stats` view (tracked via migration `supabase/migrations/20251217200615_drop_query_stats_view.sql`)  
+- ✅ Reconciled “docs/types/schema truth” after SQL Editor changes: regenerated `types/database.ts` from the remote schema and updated `database_schema_audit.md` + `docs/DATABASE_REPORT.md` accordingly  
+- ✅ Documented the “Studio/SQL Editor → immediate `supabase db pull schema_sync_dec17`” guardrail in `docs/SCHEMA_SYNC_FIX_GUIDE.md` and `docs/PRE_PUSH_CHECKLIST.md` to prevent future drift  
+- ✅ Added safe, env-guarded routing diagnostics (`DEBUG_ROUTING=1`) to middleware to log `user.id`, resolved profile role/account_type, and redirect decisions  
+- ✅ Fixed “admin → talent terminal” downgrades by removing the hardcoded login redirect to `/talent/dashboard` and adding an admin safety redirect to `/admin/dashboard` for non-admin terminals
+
 ## 🚀 **Latest Achievement: Talent Dashboard Data Hook + Phase 5 Sign-Out**
 
 **TALENT DASHBOARD DATA HOOK & AUTH PROVIDER ALIGNMENT** - January 2025  
@@ -334,7 +343,7 @@
 - ✅ Corrected error handling pattern - removed PGRST116 checks when using `.maybeSingle()`
 - ✅ Updated all profile queries to use proper error handling pattern (handle errors first, then check `!data`)
 - ✅ Enhanced `COMMON_ERRORS_QUICK_REFERENCE.md` with new error patterns (14 sections now)
-- ✅ Created `SCHEMA_TYPES_VERIFICATION.md` to ensure schema/types alignment
+- ✅ Created `docs/archive/SCHEMA_TYPES_VERIFICATION.md` (historical) to ensure schema/types alignment
 - ✅ All builds passing successfully with zero TypeScript errors
 - ✅ Comprehensive documentation updates for error prevention patterns
 

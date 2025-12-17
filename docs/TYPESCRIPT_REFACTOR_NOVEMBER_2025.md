@@ -329,7 +329,7 @@ npm run lint            # ✅ Check code quality
 - `TYPE_SAFETY_PREVENTION_SYSTEM.md` → Merge into main doc
 - `TYPE_SAFETY_AUDIT_REPORT.md` → Archive (historical)
 - `TYPE_SAFETY_IMPLEMENTATION_SUMMARY.md` → Merge into main doc
-- `TYPE_SAFETY_COMPLETE.md` → Archive (historical)
+- `docs/archive/TYPE_SAFETY_COMPLETE.md` → Archive (historical)
 - `TYPE_SAFETY_PREVENTION_SUMMARY.md` → Merge into main doc
 - `TYPES_SYNC_PREVENTION_SYSTEM.md` → Keep separate (different focus)
 

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 export async function POST(request: Request) {
@@ -7,6 +7,14 @@ export async function POST(request: Request) {
 
     if (!email || !password || !firstName || !lastName || !role) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // PR #3: Creating Career Builder (client) is only allowed via client application approval.
+    if (role === "client") {
+      return NextResponse.json(
+        { error: "Client promotion is only allowed via client application approval." },
+        { status: 400 }
+      );
     }
 
     const supabase = createSupabaseAdminClient();
@@ -37,16 +45,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
-    // Step 2: Create profile record (profiles table only has display_name, not first_name/last_name)
-    const { error: profileError } = await supabase.from("profiles").insert([
-      {
-        id: authData.user.id,
-        display_name: `${firstName} ${lastName}`,
-        role,
-        email_verified: true,
-        updated_at: new Date().toISOString(),
-      },
-    ]);
+    // Step 2: Create/update profile record
+    // NOTE: DB trigger will create the base Talent profile. For admin-provisioned users,
+    // we upsert to ensure requested role is reflected (admin tooling only).
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert(
+        {
+          id: authData.user.id,
+          display_name: `${firstName} ${lastName}`,
+          role,
+          // Keep admin accounts routable by role; account_type is not a terminal for admins.
+          account_type: role === "admin" ? "unassigned" : "talent",
+          email_verified: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
 
     if (profileError) {
       console.error("Profile creation failed:", profileError);

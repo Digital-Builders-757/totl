@@ -39,6 +39,7 @@ Get-Content database_schema_audit.md | Select-String -Pattern "profiles" -Contex
 #### **profiles table:**
 - ✅ `id` (uuid, NOT NULL)
 - ✅ `role` (user_role, NOT NULL, DEFAULT 'talent')
+- ✅ `account_type` (account_type_enum, NOT NULL, DEFAULT 'unassigned')
 - ✅ `display_name` (text)
 - ✅ `avatar_url` (text)
 - ✅ `avatar_path` (text)
@@ -77,17 +78,14 @@ WHERE p.proname = 'handle_new_user';
 **The function MUST insert these exact columns:**
 
 ```sql
--- CORRECT VERSION (as of Oct 23, 2025)
-INSERT INTO public.profiles (id, role, display_name, email_verified)
-VALUES (new.id, user_role::user_role, display_name, new.email_confirmed_at IS NOT NULL);
+-- CORRECT VERSION (PR #3: Auth Bootstrap Contract)
+-- New users always bootstrap as Talent in app identity (no client/admin via metadata).
+INSERT INTO public.profiles (id, role, account_type, display_name, email_verified)
+VALUES (new.id, 'talent'::user_role, 'talent'::account_type_enum, display_name, new.email_confirmed_at IS NOT NULL);
 
 -- For talent:
 INSERT INTO public.talent_profiles (user_id, first_name, last_name)
 VALUES (new.id, user_first_name, user_last_name);
-
--- For client:
-INSERT INTO public.client_profiles (user_id, company_name)
-VALUES (new.id, COALESCE(new.raw_user_meta_data->>'company_name', display_name));
 ```
 
 **❌ WRONG - Will cause production failure:**
@@ -113,7 +111,10 @@ Select-String -Path "supabase/migrations/*.sql" -Pattern "handle_new_user" -Cont
 **Look for:**
 - ❌ Any references to `profiles.email` column
 - ❌ Conflicting function definitions
-- ✅ Only the latest correct version should be in production
+- ✅ Latest correct version must enforce **Talent-only bootstrap** and include `account_type`
+
+**Current authoritative migration (PR #3):**
+- `supabase/migrations/20251216190000_auth_bootstrap_contract_handle_new_user.sql`
 
 ---
 
@@ -150,12 +151,12 @@ import { useAuth } from "@/components/auth-provider";
    - Role: talent
    ```
 
-2. **Client Signup:**
+2. **Career Builder Promotion (Approval Path):**
    ```
-   - Email: test-client@example.com
-   - Password: TestPass123!
-   - Company: Test Company
-   - Role: client
+   - Start as verified Talent user
+   - Submit application via /client/apply (creates client_applications status=pending)
+   - Admin approves via /admin/client-applications
+   - Verify promotion: profiles.role=client AND profiles.account_type=client AND client_profiles exists
    ```
 
 3. **Verify in Database:**
@@ -269,7 +270,7 @@ LIMIT 10;
 - [ ] Search migrations for conflicting function definitions
 - [ ] Verify auth provider import paths are correct
 - [ ] Test talent signup locally
-- [ ] Test client signup locally
+- [ ] Test Career Builder promotion locally (Talent → apply → admin approve)
 - [ ] Verify profiles created in local database
 - [ ] Run `npm run build` to catch TypeScript errors
 - [ ] Push to staging first
@@ -304,7 +305,7 @@ LIMIT 10;
 
 **After any auth code change:**
 - Run through this entire checklist
-- Test both talent and client signup
+- Test talent signup + Career Builder promotion (approval path)
 - Monitor Sentry for 24 hours after deployment
 
 ---

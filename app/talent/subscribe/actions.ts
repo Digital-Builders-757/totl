@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { PATHS } from "@/lib/constants/routes";
 import { getAppUrl, stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
@@ -12,7 +13,7 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
   // 1. Require authenticated talent user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (!user || authError) {
-    redirect('/login');
+    redirect(PATHS.LOGIN);
   }
 
   // 2. Get profile and verify role

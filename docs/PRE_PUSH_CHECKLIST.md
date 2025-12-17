@@ -10,6 +10,17 @@ npm run types:check
 npm run build
 ```
 
+## **1.5. IF YOU USED SUPABASE STUDIO / SQL EDITOR FOR SCHEMA CHANGES TODAY**
+Studio/SQL Editor can fix the live database but leave the repo migration ledger out of sync. If you touched schema in Studio, do this **the same day**:
+
+```bash
+# Reconcile schema drift into a migration
+supabase db pull schema_sync_dec17
+
+# Regenerate types so types/database.ts matches the live schema
+npm run types:regen
+```
+
 ## **2. IMPORT PATH VERIFICATION**
 **❌ NEVER USE THESE INCORRECT PATHS:**
 - `@/lib/supabase/supabase-admin-client` (WRONG - extra `/supabase/`)

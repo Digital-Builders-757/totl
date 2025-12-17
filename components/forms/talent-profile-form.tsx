@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
@@ -186,7 +187,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       reset(data);
 
       // Redirect to dashboard
-      router.push("/talent/dashboard");
+      router.push(PATHS.TALENT_DASHBOARD);
     } catch (error) {
       console.error("Error updating profile:", error);
       
@@ -553,7 +554,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.push("/talent/dashboard")}
+          onClick={() => router.push(PATHS.TALENT_DASHBOARD)}
           disabled={isSubmitting}
           className="border-gray-600 text-gray-300 hover:bg-gray-800"
         >

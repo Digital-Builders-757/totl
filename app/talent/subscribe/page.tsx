@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 
 import { SubscriptionPlans } from "./subscription-plans";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export default async function SubscribePage() {
   const supabase = await createSupabaseServer();
   
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  if (!user) redirect(PATHS.LOGIN);
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -17,11 +18,11 @@ export default async function SubscribePage() {
 
   if (profileError) {
     console.error('Error loading profile for subscribe page:', profileError);
-    redirect('/talent/dashboard');
+    redirect(PATHS.TALENT_DASHBOARD);
   }
 
   if (!profile || profile.role !== 'talent') {
-    redirect('/talent/dashboard');
+    redirect(PATHS.TALENT_DASHBOARD);
   }
 
   // If already subscribed, redirect to billing

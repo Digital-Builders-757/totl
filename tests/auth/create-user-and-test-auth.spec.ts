@@ -343,7 +343,7 @@ test.describe("Complete User Creation and Authentication Flow", () => {
     });
   });
 
-  test("Client account creation and login flow", async ({ page, request }) => {
+  test("Client promotion requires approval (no direct client creation)", async ({ page, request }) => {
     const timestamp = Date.now();
     const clientUser = {
       email: `playwright-client-${timestamp}@example.com`,
@@ -353,65 +353,7 @@ test.describe("Complete User Creation and Authentication Flow", () => {
       companyName: `Test Company ${timestamp}`,
     };
 
-    await test.step("Navigate to client signup", async () => {
-      // Navigate directly to client signup page (more reliable than going through choose-role)
-      await page.goto(`${baseURL}/client/signup`);
-      await expect(page).toHaveURL(/.*\/client\/signup/, { timeout: 10000 });
-      
-      // Wait for page to load
-      await page.waitForLoadState("networkidle");
-      await expect(page.locator('text=/Client Registration/i')).toBeVisible({ timeout: 10000 });
-    });
-
-    await test.step("Fill client signup form", async () => {
-      await page.waitForLoadState("networkidle");
-
-      // Fill form fields by ID
-      const firstNameField = page.locator("#firstName");
-      const lastNameField = page.locator("#lastName");
-      const emailField = page.locator("#email");
-      const passwordField = page.locator("#password");
-      const companyField = page.locator("#companyName");
-      const phoneField = page.locator("#phone");
-      const projectDescriptionField = page.locator("#projectDescription");
-
-      // Wait for fields to be visible
-      await expect(firstNameField).toBeVisible({ timeout: 5000 });
-      await expect(emailField).toBeVisible({ timeout: 5000 });
-
-      await firstNameField.fill(clientUser.firstName);
-      await lastNameField.fill(clientUser.lastName);
-      await emailField.fill(clientUser.email);
-      await passwordField.fill(clientUser.password);
-      await companyField.fill(clientUser.companyName);
-      await phoneField.fill("+1234567890");
-      await projectDescriptionField.fill("Test project description for E2E testing");
-    });
-
-    await test.step("Submit client signup", async () => {
-      const submitButton = page.locator('button[type="submit"]').first();
-      await expect(submitButton).toBeVisible({ timeout: 5000 });
-      await submitButton.click();
-
-      // Client signup redirects to /admin/dashboard (see client/signup/page.tsx line 136)
-      // Wait for navigation - could be admin dashboard or verification pending
-      await page.waitForLoadState("networkidle");
-      await page.waitForTimeout(2000); // Give time for redirect
-      
-      // Check if we're redirected (client signup goes to admin dashboard)
-      const currentURL = page.url();
-      // Client signup currently redirects to /admin/dashboard, but that might be wrong
-      // For now, just verify we're not on signup page anymore
-      if (currentURL.includes("/client/signup")) {
-        // If still on signup, there might be an error - check for error messages
-        const errorMessage = page.locator('text=/error/i').first();
-        if (await errorMessage.isVisible({ timeout: 2000 }).catch(() => false)) {
-          throw new Error(`Client signup failed: ${await errorMessage.textContent()}`);
-        }
-      }
-    });
-
-    await test.step("Create verified client via admin API", async () => {
+    await test.step("Direct client creation via admin API is rejected (PR #3)", async () => {
       const createResponse = await request.post(`${baseURL}/api/admin/create-user`, {
         data: {
           email: clientUser.email,
@@ -422,6 +364,21 @@ test.describe("Complete User Creation and Authentication Flow", () => {
         },
       });
 
+      expect(createResponse.status()).toBe(400);
+      const body = await createResponse.json();
+      expect(body.error).toMatch(/Client promotion is only allowed/i);
+    });
+
+    await test.step("Create verified talent via admin API (allowed)", async () => {
+      const createResponse = await request.post(`${baseURL}/api/admin/create-user`, {
+        data: {
+          email: clientUser.email,
+          password: clientUser.password,
+          firstName: clientUser.firstName,
+          lastName: clientUser.lastName,
+          role: "talent",
+        },
+      });
       expect([200, 500]).toContain(createResponse.status());
     });
 
@@ -448,8 +405,8 @@ test.describe("Complete User Creation and Authentication Flow", () => {
       ]);
     });
 
-    await test.step("Verify redirect to client dashboard", async () => {
-      await expect(page).toHaveURL(/.*\/client\/dashboard/, { timeout: 15000 });
+    await test.step("Verify redirect to talent dashboard (not client)", async () => {
+      await expect(page).toHaveURL(/.*\/talent\/dashboard/, { timeout: 15000 });
     });
   });
 });

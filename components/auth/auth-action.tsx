@@ -7,6 +7,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import type { ButtonProps } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 
 interface AuthActionProps extends ButtonProps {
   actionText?: string;
@@ -59,7 +60,7 @@ export function AuthAction({
   return (
     <RequireAuth
       fallback={
-        <Button onClick={() => router.push("/choose-role")} {...buttonProps}>
+        <Button onClick={() => router.push(PATHS.CHOOSE_ROLE)} {...buttonProps}>
           {unauthenticatedText}
         </Button>
       }

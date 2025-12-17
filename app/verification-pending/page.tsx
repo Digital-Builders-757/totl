@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export default function VerificationPendingPage() {
@@ -175,7 +176,7 @@ export default function VerificationPendingPage() {
             <div className="text-center text-sm text-gray-400">
               Already verified?{" "}
               <Link
-                href="/login"
+                href={PATHS.LOGIN}
                 className="text-white font-semibold hover:text-gray-200 hover:underline transition-colors"
               >
                 Sign in

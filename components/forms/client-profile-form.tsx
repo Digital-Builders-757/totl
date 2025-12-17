@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 
 // Import the generated type instead of defining our own
@@ -152,7 +153,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       });
 
       // Redirect to dashboard
-      router.push("/client/dashboard");
+      router.push(PATHS.CLIENT_DASHBOARD);
     } catch (err) {
       console.error("Error updating profile:", err);
       
@@ -316,7 +317,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push("/client/dashboard")}
+              onClick={() => router.push(PATHS.CLIENT_DASHBOARD)}
             >
               Cancel
             </Button>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
+import { PATHS } from "@/lib/constants/routes";
 
 interface SignInGateProps {
   variant: "gigs" | "talent";
@@ -19,8 +20,8 @@ const variantConfig = {
     description: "Join our trusted community of talent and clients. Access premium gigs, connect with industry professionals, and take your career to the next level.",
     primaryCta: "Sign in to view gigs",
     secondaryCta: "Create an account",
-    primaryHref: "/login",
-    secondaryHref: "/choose-role",
+    primaryHref: PATHS.LOGIN,
+    secondaryHref: PATHS.CHOOSE_ROLE,
     learnMoreHref: "/about",
   },
   talent: {
@@ -30,8 +31,8 @@ const variantConfig = {
     description: "Access our exclusive network of professional models and actors. Find the perfect talent for your next project with our premium discovery tools.",
     primaryCta: "Sign in to explore talent",
     secondaryCta: "Create an account", 
-    primaryHref: "/login",
-    secondaryHref: "/choose-role",
+    primaryHref: PATHS.LOGIN,
+    secondaryHref: PATHS.CHOOSE_ROLE,
     learnMoreHref: "/about",
   },
 } as const;

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export default async function SuspendedPage() {
@@ -60,7 +61,7 @@ export default async function SuspendedPage() {
             <Link href="mailto:support@thetotlagency.com">Contact Support</Link>
           </Button>
           <Button asChild variant="outline" className="px-6">
-            <Link href="/login">Return to Login</Link>
+            <Link href={PATHS.LOGIN}>Return to Login</Link>
           </Button>
         </div>
       </div>

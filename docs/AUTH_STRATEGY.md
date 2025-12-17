@@ -101,7 +101,10 @@ auth.users (Supabase Auth)
     ↓ (trigger)
 profiles (Main user profiles)
     ↓ (1:1 relationship)
-talent_profiles OR client_profiles (Role-specific data)
+talent_profiles (Talent bootstrap)
+
+Client promotion (Career Builder) is handled by admin approval:
+profiles promoted to client + client_profiles created (no client bootstrap in trigger)
 ```
 
 ### **Key Tables**
@@ -110,6 +113,7 @@ talent_profiles OR client_profiles (Role-specific data)
 ```sql
 id              UUID NOT NULL PRIMARY KEY REFERENCES auth.users(id)
 role            user_role NOT NULL DEFAULT 'talent'
+account_type     account_type_enum NOT NULL DEFAULT 'unassigned'
 display_name    TEXT
 avatar_url      TEXT               -- Legacy profile picture URL
 avatar_path     TEXT               -- Storage path for avatar
@@ -206,11 +210,10 @@ const result = await submitClientApplication({
 
 #### **Trigger Function: `handle_new_user()`**
 ```sql
--- Location: supabase/migrations/20250722015600_fix_handle_new_user_trigger_null_handling.sql
+-- Location: supabase/migrations/20251216190000_auth_bootstrap_contract_handle_new_user.sql
 -- Fires: AFTER INSERT ON auth.users
 
--- Safe metadata extraction with defaults
-user_role := COALESCE(new.raw_user_meta_data->>'role', 'talent');
+-- Auth bootstrap contract (PR #3): never trust metadata.role for privilege escalation
 user_first_name := COALESCE(new.raw_user_meta_data->>'first_name', '');
 user_last_name := COALESCE(new.raw_user_meta_data->>'last_name', '');
 
@@ -227,17 +230,16 @@ ELSE
 END IF;
 
 -- Create profiles
-INSERT INTO profiles (id, role, display_name, email_verified)
-VALUES (new.id, user_role::user_role, display_name, new.email_confirmed_at IS NOT NULL);
+INSERT INTO profiles (id, role, account_type, display_name, email_verified)
+VALUES (new.id, 'talent'::user_role, 'talent'::account_type_enum, display_name, new.email_confirmed_at IS NOT NULL)
+ON CONFLICT (id) DO UPDATE
+SET role = 'talent'::user_role,
+    account_type = 'talent'::account_type_enum;
 
--- Create role-specific profile
-IF user_role = 'talent' THEN
-  INSERT INTO talent_profiles (user_id, first_name, last_name)
-  VALUES (new.id, user_first_name, user_last_name);
-ELSIF user_role = 'client' THEN
-  INSERT INTO client_profiles (user_id, company_name)
-  VALUES (new.id, COALESCE(new.raw_user_meta_data->>'company_name', display_name));
-END IF;
+-- Create talent profile (idempotent)
+INSERT INTO talent_profiles (user_id, first_name, last_name)
+VALUES (new.id, user_first_name, user_last_name)
+ON CONFLICT (user_id) DO NOTHING;
 ```
 
 ## 🚨 Critical Requirements
@@ -246,20 +248,16 @@ END IF;
 **⚠️ CRITICAL:** All metadata keys must use **lowercase with underscores**:
 
 ```typescript
-// ✅ CORRECT - Will work with trigger
+// ✅ CORRECT - trigger uses only snake_case name fields (role is ignored for privilege)
 {
   first_name: "John",      // lowercase with underscore
   last_name: "Doe",        // lowercase with underscore
-  role: "talent",          // lowercase
-  company_name: "Acme Co"  // lowercase with underscore
 }
 
-// ❌ WRONG - Will cause NULL values in database
+// ❌ WRONG - trigger won't find these keys
 {
   firstName: "John",       // camelCase - trigger won't find this
   lastName: "Doe",         // camelCase - trigger won't find this
-  Role: "talent",          // PascalCase - trigger won't find this
-  companyName: "Acme Co"   // camelCase - trigger won't find this
 }
 ```
 
@@ -269,9 +267,10 @@ All NOT NULL columns are protected with safe defaults:
 | Column | Table | Default | Protection |
 |--------|-------|---------|------------|
 | `role` | profiles | `'talent'` | COALESCE with 'talent' default |
+| `account_type` | profiles | `'unassigned'` (schema) → `'talent'` (bootstrap) | DB trigger + runtime repair enforce talent on signup |
 | `first_name` | talent_profiles | `''` | COALESCE with empty string |
 | `last_name` | talent_profiles | `''` | COALESCE with empty string |
-| `company_name` | client_profiles | `display_name` | COALESCE with display_name fallback |
+| `company_name` | client_profiles | `''` | client_profiles is created only on admin approval (not at signup) |
 
 ## 🧪 Testing Scenarios
 
@@ -309,8 +308,8 @@ All scenarios have been tested and work correctly:
 **Solution:** Check if `on_auth_user_created` trigger exists on `auth.users` table
 
 #### **Wrong role assigned**
-**Cause:** Missing or incorrect role in metadata  
-**Solution:** Ensure `role` is set to `"talent"` or `"client"` in signup metadata
+**Cause:** Attempting to rely on `role` in auth metadata  
+**Solution:** **Do not** rely on `user_metadata.role` for privilege. New signups always bootstrap as **Talent**. Career Builder (client) is granted only via **admin approval** of `client_applications`.
 
 ### **Debug Queries**
 ```sql
@@ -393,8 +392,8 @@ supabase db push
 ## 🎯 Best Practices
 
 ### **For Frontend Developers**
-1. Always use lowercase with underscores for metadata keys
-2. Include role in every signup call
+1. Always use lowercase with underscores for metadata keys (names only)
+2. **Do not treat `role` metadata as authoritative** — it is ignored for security; all signups bootstrap as Talent
 3. Handle email verification flow properly
 4. Test with incomplete metadata
 

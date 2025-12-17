@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -91,7 +92,7 @@ export async function uploadPortfolioImage(formData: FormData) {
     }
 
     revalidatePath("/settings");
-    revalidatePath("/talent/dashboard");
+    revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
       portfolioItem,
@@ -150,7 +151,7 @@ export async function deletePortfolioItem(portfolioItemId: string) {
     // Primary image logic removed - is_primary field no longer exists
 
     revalidatePath("/settings");
-    revalidatePath("/talent/dashboard");
+    revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
       message: "Portfolio item deleted successfully",
@@ -182,7 +183,7 @@ export async function reorderPortfolioItems(_itemIds: string[]) {
     // TODO: Re-implement reordering if needed with a different approach
 
     revalidatePath("/settings");
-    revalidatePath("/talent/dashboard");
+    revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
       message: "Portfolio order updated successfully",
@@ -212,7 +213,7 @@ export async function setPrimaryPortfolioItem(_portfolioItemId: string) {
     // Feature removed - is_primary field no longer exists in schema
     // Return success to prevent breaking existing code
     revalidatePath("/settings");
-    revalidatePath("/talent/dashboard");
+    revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
       message: "Primary image feature has been removed",
@@ -271,7 +272,7 @@ export async function updatePortfolioItem(
     }
 
     revalidatePath("/settings");
-    revalidatePath("/talent/dashboard");
+    revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
       message: "Portfolio item updated successfully",

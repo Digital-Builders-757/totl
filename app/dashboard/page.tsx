@@ -1,5 +1,6 @@
 ﻿import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +14,12 @@ export default async function DashboardPage() {
   // âœ… Fixed: Proper type guards
   if (error) {
     console.error("Error fetching profile:", error);
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   if (!profile) {
     console.error("No profile found");
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   // Now safe to access profile.role

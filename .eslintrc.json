@@ -26,6 +26,19 @@
           {
             "name": "@/types/database",
             "message": "Import Database from '@/types/supabase' instead."
+          },
+          {
+            "name": "@/lib/supabase/supabase-admin-client",
+            "message": "Use the canonical admin client: @/lib/supabase-admin-client"
+          }
+        ],
+        "patterns": [
+          {
+            "group": [
+              "@/lib/supabase/supabase-admin-client",
+              "@/lib/supabase/supabase-admin-client.*"
+            ],
+            "message": "Use the canonical admin client: @/lib/supabase-admin-client"
           }
         ]
       }
@@ -35,10 +48,47 @@
       {
         "selector": "JSXAttribute[name.name='placeholderQuery']",
         "message": "Do not pass `placeholderQuery` to <SafeImage /> (deprecated)."
+      },
+      {
+        "selector": "Literal[value='/onboarding/select-account-type']",
+        "message": "Do not hardcode onboarding routes. Use ONBOARDING_PATH from '@/lib/constants/routes'."
+      },
+      {
+        "selector": "Literal[value='/talent/dashboard']",
+        "message": "Do not hardcode dashboard routes. Use canonical routing helpers/constants."
+      },
+      {
+        "selector": "Literal[value='/client/dashboard']",
+        "message": "Do not hardcode dashboard routes. Use canonical routing helpers/constants."
+      },
+      {
+        "selector": "Literal[value='/admin/dashboard']",
+        "message": "Do not hardcode dashboard routes. Use canonical routing helpers/constants."
+      },
+      {
+        "selector": "Literal[value='/login']",
+        "message": "Do not hardcode auth routes. Use AUTH_ROUTES / route helpers from '@/lib/constants/routes'."
+      },
+      {
+        "selector": "Literal[value='/choose-role']",
+        "message": "Do not hardcode auth routes. Use AUTH_ROUTES / route helpers from '@/lib/constants/routes'."
+      },
+      {
+        "selector": "Literal[value='/verification-pending']",
+        "message": "Do not hardcode auth routes. Use AUTH_ROUTES / route helpers from '@/lib/constants/routes'."
       }
     ]
   },
   "overrides": [
+    {
+      "files": [
+        "lib/constants/routes.ts",
+        "lib/routing/decide-redirect.ts"
+      ],
+      "rules": {
+        "no-restricted-syntax": "off"
+      }
+    },
     {
       "files": ["components/**/*.{ts,tsx}"],
       "rules": {

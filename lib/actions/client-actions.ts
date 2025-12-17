@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import {
@@ -169,7 +169,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
     // Get application details for email
     const { data: applicationData, error: fetchError } = await supabase
       .from("client_applications")
-      .select("first_name, last_name, email, company_name, industry, status, admin_notes")
+      .select("first_name, last_name, email, company_name, industry, phone, website, status, admin_notes")
       .eq("id", applicationId)
       .maybeSingle();
 
@@ -270,6 +270,59 @@ export async function approveClientApplication(applicationId: string, adminNotes
       }
 
       return { error: "Failed to promote profile to client" };
+    }
+
+    // -----------------------------------------------------------------------
+    // PR #3 contract: promotion guarantees
+    // 1) client_profiles must exist (idempotent)
+    // 2) role/account_type must match (handled above)
+    // -----------------------------------------------------------------------
+    try {
+      const contactName = `${applicationData.first_name} ${applicationData.last_name}`.trim();
+
+      const { error: clientProfileUpsertError } = await supabaseAdmin
+        .from("client_profiles")
+        .upsert(
+          {
+            user_id: matchingUser.id,
+            company_name: applicationData.company_name || "",
+            industry: applicationData.industry ?? null,
+            website: applicationData.website ?? null,
+            contact_name: contactName || null,
+            contact_email: applicationData.email ?? null,
+            contact_phone: applicationData.phone ?? null,
+          } as Database["public"]["Tables"]["client_profiles"]["Insert"],
+          { onConflict: "user_id" }
+        );
+
+      if (clientProfileUpsertError) {
+        // If profile promotion succeeded but client_profiles creation failed, we must fail the approval
+        // to avoid an inconsistent "client without client_profiles" state.
+        console.error("Error ensuring client_profiles during approval:", clientProfileUpsertError);
+
+        // Best-effort rollback: revert profiles back to Talent so routing doesn't treat user as client.
+        await supabaseAdmin
+          .from("profiles")
+          .update({ role: "talent", account_type: "talent" } as Pick<
+            Database["public"]["Tables"]["profiles"]["Update"],
+            "role" | "account_type"
+          >)
+          .eq("id", matchingUser.id);
+
+        // Best-effort rollback application status
+        await supabase
+          .from("client_applications")
+          .update({
+            status: previousStatus,
+            admin_notes: previousAdminNotes,
+          })
+          .eq("id", applicationId);
+
+        return { error: "Failed to provision client profile during approval" };
+      }
+    } catch (clientProfileProvisionError) {
+      console.error("Unexpected error provisioning client_profiles during approval:", clientProfileProvisionError);
+      return { error: "Failed to provision client profile during approval" };
     }
 
     // Send approval email to applicant

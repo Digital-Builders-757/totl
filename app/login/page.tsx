@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { handleLoginRedirect } from "@/lib/actions/auth-actions";
+import { PATHS } from "@/lib/constants/routes";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +22,7 @@ export default function Login() {
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [verified, setVerified] = useState(false);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
-  const { signIn, userRole } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
 
@@ -64,16 +64,15 @@ export default function Login() {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validate form before submission
     if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    setFormErrors({}); // Clear any existing errors
+    setFormErrors({});
 
     try {
       const { error } = await signIn(email, password);
@@ -81,13 +80,9 @@ export default function Login() {
       if (error) {
         console.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
-          setFormErrors({
-            auth: "Invalid email or password. Please try again.",
-          });
+          setFormErrors({ auth: "Invalid email or password. Please try again." });
         } else if (error.message.includes("Email not confirmed")) {
-          setFormErrors({
-            auth: "Please verify your email address before signing in.",
-          });
+          setFormErrors({ auth: "Please verify your email address before signing in." });
         } else {
           toast({
             title: "Error signing in",
@@ -95,7 +90,6 @@ export default function Login() {
             variant: "destructive",
           });
         }
-        setIsLoading(false);
         return;
       }
 
@@ -104,25 +98,18 @@ export default function Login() {
         description: "Redirecting to your dashboard...",
       });
 
-      // Use server-side redirect to ensure fresh session and profile check
-      // This prevents stale cookie/cache issues
-      try {
-        await handleLoginRedirect(returnUrl ?? undefined);
-      } catch (error) {
-        // If server redirect fails, fall back to client-side redirect
-        console.error("Server redirect failed, using client redirect:", error);
-        // Force a hard refresh to clear any cached state
-        // Use userRole from auth provider to redirect correctly
-        const redirectPath =
-          userRole === "talent"
-            ? "/talent/dashboard"
-            : userRole === "client"
-              ? "/client/dashboard"
-              : userRole === "admin"
-                ? "/admin/dashboard"
-                : "/choose-role";
-        window.location.href = redirectPath;
+      // If they were trying to hit a protected route, honor it when safe
+      const isSafeReturnUrl =
+        returnUrl && returnUrl.startsWith("/") && !returnUrl.startsWith("//");
+
+      if (isSafeReturnUrl) {
+        window.location.href = returnUrl;
+        return;
       }
+
+      // Otherwise send them to a neutral route and let middleware/AuthProvider
+      // route by the *actual* profiles.role at request time (admin/client/talent).
+      window.location.href = PATHS.HOME;
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -130,6 +117,7 @@ export default function Login() {
         description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };

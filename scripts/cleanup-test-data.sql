@@ -1,37 +1,32 @@
 -- Clean up test data from TOTL Agency database
 -- This script removes test users, gigs, and related data
 
--- Delete applications first (due to foreign key constraints)
-DELETE FROM applications WHERE id IN (
-  SELECT a.id FROM applications a
+-- =====================================================
+-- HARD DELETE CONTRACT (DEV CLEANUP)
+-- =====================================================
+-- ✅ Always delete users by deleting from auth.users
+--    and rely on ON DELETE CASCADE to clean up public.* rows.
+-- 🚫 Do NOT delete from public.profiles directly (it can create orphan auth.users).
+--
+-- Run in Supabase SQL Editor (service role context).
+
+-- Delete applications for test gigs first (safe even if cascades exist)
+DELETE FROM applications
+WHERE id IN (
+  SELECT a.id
+  FROM applications a
   JOIN gigs g ON a.gig_id = g.id
-  WHERE g.title LIKE '%test%' OR g.title LIKE '%Test%'
+  WHERE g.title ILIKE '%test%'
 );
 
--- Delete gigs (test gigs)
-DELETE FROM gigs WHERE title LIKE '%test%' OR title LIKE '%Test%';
+-- Delete test gigs by title (in case they were created by non-test users)
+DELETE FROM gigs
+WHERE title ILIKE '%test%';
 
--- Delete talent profiles for test users
-DELETE FROM talent_profiles WHERE user_id IN (
-  SELECT id FROM profiles 
-  WHERE email LIKE '%test%' OR email LIKE '%@example.com' OR display_name LIKE '%test%'
-);
-
--- Delete client profiles for test users  
-DELETE FROM client_profiles WHERE user_id IN (
-  SELECT id FROM profiles 
-  WHERE email LIKE '%test%' OR email LIKE '%@example.com' OR display_name LIKE '%test%'
-);
-
--- Delete profiles for test users
-DELETE FROM profiles 
-WHERE email LIKE '%test%' OR email LIKE '%@example.com' OR display_name LIKE '%test%';
-
--- Delete portfolio items for test users (if any remain)
-DELETE FROM portfolio_items WHERE user_id IN (
-  SELECT id FROM profiles 
-  WHERE email LIKE '%test%' OR email LIKE '%@example.com' OR display_name LIKE '%test%'
-);
+-- Delete test users from auth.users (CASCADE handles profiles + related data)
+DELETE FROM auth.users
+WHERE email ILIKE '%test%'
+   OR email ILIKE '%@example.com';
 
 -- Show remaining data counts
 SELECT 'profiles' as table_name, COUNT(*) as count FROM profiles
