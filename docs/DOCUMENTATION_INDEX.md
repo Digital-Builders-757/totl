@@ -1,8 +1,8 @@
-# TOTL Agency - Documentation Index
+# TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** December 16, 2025
+**Last Updated:** December 18, 2025
 
-This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
+This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
 ---
 
@@ -16,7 +16,7 @@ These files remain in the project root for easy access:
 | `README.md` | Project overview and setup instructions |
 | `AGENT_ONBOARDING.md` | **🤖 NEW** - AI agent quick-start guide (read this first!) |
 | `TOTL_PROJECT_CONTEXT_PROMPT.md` | **Mandatory** project rules, pitfalls, and pre-change checklist |
-| `database_schema_audit.md` | **SINGLE SOURCE OF TRUTH** for database schema |
+| `database_schema_audit.md` | Schema audit (**must match** `supabase/migrations/**` + generated `types/database.ts`) |
 | `MVP_STATUS_NOTION.md` | Current MVP status and next priorities |
 | `PAST_PROGRESS_HISTORY.md` | **NEW** 📚 - Complete history of all accomplishments and milestones |
 | `notion_update.md` | Notion update tracking |
@@ -28,12 +28,28 @@ All other documentation has been organized into the `docs/` folder.
 
 ---
 
-## 📚 Documentation Categories
+## 🧠 Source of Truth Spine (3 layers)
+
+### **Layer 1 — Global Laws + Wiring + Security (canonical)**
+- `ARCHITECTURE_CONSTITUTION.md` (non-negotiables; red-zone rules)
+- `ARCHITECTURE_SOURCE_OF_TRUTH.md` (canonical modules + “no duplicate brains” laws)
+- `OFF_SYNC_INVENTORY.md` (duplicate/conflicting primitives; winners declared)
+- `diagrams/*` (airport model, wiring, flows)
+
+### **Layer 2 — Domain Contracts (canonical)**
+- `contracts/INDEX.md`
+
+### **Layer 3 — Journeys (canonical acceptance tests)**
+- `journeys/INDEX.md`
+
+---
+
+## 📚 Reference Docs (useful, non-authoritative)
 
 ### **🔐 Authentication & Security**
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
-- `AUTH_BOOTSTRAP_CONTRACT.md` - **✅ NEW** - Enforceable contract: trigger bootstraps Talent; approval promotes Client (Dec 2025)
-- `AUTH_STRATEGY.md` - **✅ UPDATED** - Authentication strategy and implementation (includes N+1 query fix, Jan 2025)
+- `AUTH_BOOTSTRAP_CONTRACT.md` - Legacy notes (superseded by `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
+- `AUTH_STRATEGY.md` - Legacy strategy notes (superseded by contracts + journeys; keep for history only)
 - `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
 - `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
@@ -104,6 +120,7 @@ All other documentation has been organized into the `docs/` folder.
 - `MCP_PLAYWRIGHT_TROUBLESHOOTING.md` - 🔧 **NEW** - Complete Playwright MCP troubleshooting guide (Nov 2025)
 - `MCP_QUICK_FIX.md` - ⚡ **NEW** - Quick 2-step fix for Playwright MCP connection issues (Nov 2025)
 - `TEST_DATA_REFERENCE.md` - 🧪 **NEW** - Seeded QA personas, gigs, and auth creation tips (Nov 2025)
+- `tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` - Proof ledger mapping Auth contract scenarios → Playwright coverage (Dec 2025)
 
 ### **📧 Services & Integrations**
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)
@@ -119,9 +136,10 @@ All other documentation has been organized into the `docs/` folder.
 - `AVATAR_UPLOAD_FIX.md` - Avatar upload RLS policy fix guide
 
 ### **📖 Project Documentation & Organization**
-- `DOCUMENTATION_INDEX.md` - This file (complete documentation index)
+- `DOCUMENTATION_INDEX.md` - This file (documentation spine)
 - `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
+- `OFF_SYNC_INVENTORY.md` - Winners declared + drift remediation tracker (Dec 2025)
 - `NEW_DEV_ONBOARDING.md` - **NEW** - New developer onboarding (“operate the airport”) (Dec 2025)
 
 ---
@@ -135,11 +153,11 @@ All other documentation has been organized into the `docs/` folder.
 4. Read `CODING_STANDARDS.md` to understand project conventions
 
 ### **For Administrators**
-1. Read `ADMIN_ACCOUNT_GUIDE.md` for complete admin setup
+1. Start with `contracts/ADMIN_CONTRACT.md` for admin setup + capabilities
 2. Review `SECURITY_CONFIGURATION.md` for security best practices
 
 ### **For Understanding the System**
-1. Check `AUTH_STRATEGY.md` for authentication flow
+1. Start with `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` for authentication flow
 2. Review `DATABASE_REPORT.md` for database structure
 3. See feature-specific docs for implementation details
 
@@ -158,34 +176,30 @@ All other documentation has been organized into the `docs/` folder.
 
 ---
 
-## 🔄 Keeping Documentation Updated
+## 🔄 How to update docs without drift (MANDATORY)
 
-### **Before Every Commit:**
-✅ Update `MVP_STATUS_NOTION.md` (in root) with current status
+### Update order (never skip)
+1) **Prove schema + types first**
+   - `supabase/migrations/**`
+   - generated `types/database.ts`
+   - If docs disagree, docs are wrong until updated.
+2) **Update the relevant Layer 2 contract** (`contracts/*_CONTRACT.md`).
+   - Routes involved (exact paths)
+   - Canonical server actions/services (file paths + function names)
+   - Tables/views/functions touched (explicit columns used)
+   - RLS expectations (intent)
+   - Failure modes + symptoms
+   - Proof checklist + test steps
+3) **Update the relevant Layer 3 journey** (`journeys/*_JOURNEY.md`) if user-facing behavior changed.
+4) **Update Layer 1** only when wiring/laws changed (routing contracts, middleware rules, canonical helpers, or a new “winner”).
 
-### **When Adding Features:**
-✅ Create/update relevant feature documentation in `docs/`
-✅ Update this index if adding new categories
+### Evidence rule
+- If you can’t prove a claim by pointing to a file/migration/type/policy, mark it **UNVERIFIED**.
+- If it’s a duplicate/conflict, add it to `OFF_SYNC_INVENTORY.md`.
 
-### **When Fixing Bugs:**
-✅ Document the fix in `docs/`
-✅ Update `TROUBLESHOOTING_GUIDE.md` if it's a common issue
-
-### **When Changing Database:**
-✅ **ALWAYS** update `database_schema_audit.md` (in root) FIRST
-✅ Then update `DATABASE_REPORT.md` in docs/ if needed
-
----
-
-## 🎯 Documentation Best Practices
-
-1. **Single Source of Truth:** One doc per topic - no duplicates
-2. **Database Schema:** Always in root as `database_schema_audit.md`
-3. **MVP Tracking:** Always in root for easy access
-4. **Feature Docs:** Always in `docs/` folder
-5. **Update After Changes:** Keep documentation current
-6. **Cross-Reference:** Link related docs together
-7. **Clear Titles:** Use descriptive file names
+### Redundancy rule
+- Contracts + journeys are canonical.
+- Legacy implementation docs must be reduced to **pointers** or moved to `archive/`.
 
 ---
 

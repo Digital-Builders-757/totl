@@ -113,6 +113,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | - | Primary key, links to auth.users |
 | `role` | `user_role` | NO | `'talent'` | User role (talent/client/admin) |
+| `account_type` | `account_type_enum` | NO | `'talent'` | Routing/account terminal (talent/client/unassigned) |
 | `display_name` | `text` | YES | - | User's display name |
 | `avatar_url` | `text` | YES | - | Profile picture URL (legacy) |
 | `avatar_path` | `text` | YES | - | Storage path for avatar |

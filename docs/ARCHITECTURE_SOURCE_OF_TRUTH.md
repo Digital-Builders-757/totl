@@ -23,8 +23,9 @@ If a rule isn’t here (or in a referenced canonical doc), it’s not enforceabl
 - **DB schema truth**: `database_schema_audit.md` (root)  
   - Supporting evidence: `supabase/migrations/**`
 - **Docs map**: `docs/DOCUMENTATION_INDEX.md`
+- **Off-sync inventory (winners declared)**: `docs/OFF_SYNC_INVENTORY.md`
 - **MVP scope/status**: `MVP_STATUS_NOTION.md`
-- **Auth architecture**: `docs/AUTH_STRATEGY.md`
+- **Auth contract**: `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`
 - **Sign-out behavior**: `docs/SIGN_OUT_IMPROVEMENTS.md`
 
 ### Truth code (canonical modules)
@@ -54,10 +55,11 @@ If a rule isn’t here (or in a referenced canonical doc), it’s not enforceabl
 - **Canonical type import**: `types/supabase.ts`  
   - Re-exports the generated `Database` type from `types/database.ts` (auto-generated; never hand-edit).
 
-#### Email sending (placeholder for upcoming audit)
+#### Email sending (canonical)
 
-- **Canonical path**: **TBD (PR #3 will define)**  
-  Until then, do not create “one-off” send helpers; consolidate into the existing email system docs: `docs/EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md`.
+- **Send primitive**: `lib/email-service.ts` (`sendEmail`, `logEmailSent`)
+- **Template primitive**: `lib/services/email-templates.tsx` (`generate*Email`)
+- **Contract**: `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md`
 
 ---
 
@@ -71,27 +73,17 @@ Each domain gets a “contract sheet” doc (1–2 pages) that states:
 - Canonical server actions/services (and their files)
 - Known failure modes + “proof it works” checklist
 
-Planned contracts:
+Canonical contracts index:
 
-- Auth + onboarding
-- Profiles
-- Gigs
-- Applications
-- Bookings
-- Portfolio + uploads
-- Stripe + webhooks
-- Email notifications
-- Admin
+- `docs/contracts/INDEX.md`
 
 ---
 
 ## Layer 3 — Journeys (acceptance tests in plain English)
 
-These are living “happy path” checklists used to validate “perfectly working” behavior:
+Canonical journeys index:
 
-- Talent flow
-- Client flow
-- Admin flow
+- `docs/journeys/INDEX.md`
 
 If a change breaks a journey, it’s not “done” even if it compiles.
 

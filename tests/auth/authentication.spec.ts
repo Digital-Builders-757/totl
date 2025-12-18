@@ -57,6 +57,10 @@ async function fillSignupForm(
 }
 
 async function fillLoginForm(page: Page, email: string, password: string) {
+  // Give the client bundle time to hydrate before interactions.
+  // In dev-mode App Router, the first navigation can be compile-heavy.
+  await page.waitForLoadState("networkidle");
+  await page.locator('[data-testid="login-hydrated"]').waitFor({ timeout: 30000, state: "attached" });
   await page.fill('[data-testid="email"]', email);
   await page.fill('[data-testid="password"]', password);
 }
@@ -199,6 +203,8 @@ test.describe("User Login", () => {
     await page.goto("/login");
 
     // Try to submit empty form
+    await page.waitForLoadState("networkidle");
+    await page.locator('[data-testid="login-hydrated"]').waitFor({ timeout: 30000, state: "attached" });
     await page.click('[data-testid="login-button"]');
 
     // Verify validation errors

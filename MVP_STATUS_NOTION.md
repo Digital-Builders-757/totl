@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Auth Bootstrap Contract Lockdown + Contract-Aligned Proof (No Drift)**
+
+**AUTH BOOTSTRAP + ONBOARDING “BORING & ENFORCEABLE” CONTRACT** - December 18, 2025  
+- ✅ Locked the canonical contract: `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (routes truth + email verified sync + RLS truth tables)  
+- ✅ Added the **Role Promotion Boundary** (no user-controlled writes to `profiles.role` / `profiles.account_type`; promotion happens only via admin approval pipeline)  
+- ✅ Created a proof ledger + drift tracker:  
+  - `docs/tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` (matrix of scenarios → DB assertions → Playwright coverage)  
+  - `docs/DRIFT_REPORT.md` (mismatches tracked until resolved)  
+- ✅ Closed the last proof gap with Playwright coverage:  
+  - Career Builder approval pipeline E2E: `tests/admin/career-builder-approval-pipeline.spec.ts`  
+  - Guardrail: generic role update must reject `client`: updated `tests/admin/admin-functionality.spec.ts`  
+  - Missing profile repair: `tests/auth/missing-profile-repair.spec.ts` (delete `public.profiles` → re-login → `ensureProfileExists()` repairs → no loop)  
+- ✅ Added dev-only helper endpoint for contract proofs (blocked in production): `app/api/dev/profile-bootstrap/route.ts`  
+- ✅ Documentation system refactor shipped (3-layer “laws → contracts → journeys” with minimal redundancy), plus stubs + archive migration for legacy docs  
+- ✅ Login page redesigned to match dashboard visual language (“quiet airlock” / Soft Entry v2) with stable Playwright selectors
+
 ## 🚀 **Latest Achievement: Schema Drift Fix + Security Advisor Cleanup + Admin Routing Debug**
 
 **SCHEMA / SECURITY / ROUTING STABILIZATION** - December 17, 2025  

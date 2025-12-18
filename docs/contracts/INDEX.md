@@ -1,0 +1,15 @@
+# Domain Contracts Index
+
+**Date:** December 18, 2025  
+**Status:** ✅ CURRENT  
+**Purpose:** Single index of Layer 2 contract docs.
+
+- `AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`
+- `PROFILES_CONTRACT.md`
+- `GIGS_CONTRACT.md`
+- `APPLICATIONS_CONTRACT.md`
+- `BOOKINGS_CONTRACT.md`
+- `PORTFOLIO_UPLOADS_CONTRACT.md`
+- `STRIPE_WEBHOOKS_CONTRACT.md`
+- `EMAIL_NOTIFICATIONS_CONTRACT.md`
+- `ADMIN_CONTRACT.md`
