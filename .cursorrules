@@ -134,7 +134,7 @@ If a large refactor is truly needed, it must be broken into **small, reversible 
 Before writing or editing any code, confirm:
 
 - [ ] Read `TOTL_PROJECT_CONTEXT_PROMPT.md` for full context
-- [ ] **database_schema_audit.md is treated as SINGLE SOURCE OF TRUTH**
+- [ ] `database_schema_audit.md` is treated as a **schema audit** that must match `supabase/migrations/**` + generated `types/database.ts`
 - [ ] Used proper TypeScript types (no `any`)
 - [ ] Followed RLS-compatible query patterns
 - [ ] Kept database logic **out of React components**
@@ -263,9 +263,12 @@ If updating `SIGNED_OUT` handling in `onAuthStateChange`:
 
 - `TOTL_PROJECT_CONTEXT_PROMPT.md` – Complete project context
 - `AGENT_ONBOARDING.md` – Quick start guide for agents
-- `database_schema_audit.md` – **Single source of truth** for schema
+- `database_schema_audit.md` – Schema audit (must match migrations + generated types)
 - `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` – Mandatory for auth changes
-- `docs/AUTH_STRATEGY.md` – Auth architecture and patterns
+- `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` – Auth bootstrap + routing contract (canonical)
+- `docs/contracts/INDEX.md` – All domain contracts (canonical)
+- `docs/journeys/INDEX.md` – End-to-end journeys (canonical)
+- `docs/OFF_SYNC_INVENTORY.md` – Winners declared + drift remediation tracker
 - `docs/SIGN_OUT_IMPROVEMENTS.md` – Current sign-out behavior
 - `types/database.ts` / `@/types/supabase` – Generated Supabase types
 - `supabase/migrations/**` – Schema history
@@ -401,10 +404,10 @@ These rules apply to:
 1. Check `docs/DOCUMENTATION_INDEX.md` to find relevant docs.
 2. Read all relevant docs for the area you’re touching:
 
-   * Auth → `docs/AUTH_STRATEGY.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`
+   * Auth → `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`
    * Security → `docs/SECURITY_CONFIGURATION.md`
    * Database → `database_schema_audit.md`, `docs/DATABASE_REPORT.md`
-   * Admin features → `docs/ADMIN_ACCOUNT_GUIDE.md`
+   * Admin features → `docs/contracts/ADMIN_CONTRACT.md`
    * Feature implementation → related guides in `docs/`
    * Bug fixes → `docs/TROUBLESHOOTING_GUIDE.md`
 3. Verify your approach aligns with documented patterns.

@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowLeft, Eye, EyeOff, CheckCircle2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type React from "react";
@@ -19,12 +18,17 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [verified, setVerified] = useState(false);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const { signIn } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   // Safely extract search params in useEffect to avoid SSR issues
   useEffect(() => {
@@ -80,7 +84,7 @@ export default function Login() {
       if (error) {
         console.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
-          setFormErrors({ auth: "Invalid email or password. Please try again." });
+          setFormErrors({ auth: "Invalid credentials. Please try again." });
         } else if (error.message.includes("Email not confirmed")) {
           setFormErrors({ auth: "Please verify your email address before signing in." });
         } else {
@@ -123,36 +127,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-seamless-primary pt-4 sm:pt-12 md:pt-16 lg:pt-20 xl:pt-24 relative overflow-hidden">
-      {/* White gradient overlays matching landing page */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]" />
-      <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]" />
-      <div
-        className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
-        style={{ animationDelay: "1s" }}
-      />
+    <div className="min-h-screen bg-black pt-24 sm:pt-28 relative overflow-hidden grain-texture">
+      {/* Quiet “airlock” backdrop: subtle gradient + grain, no blob animations */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40 z-[1]" />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8 relative z-10">
+        {isHydrated ? (
+          <span data-testid="login-hydrated" className="sr-only">
+            ready
+          </span>
+        ) : null}
         <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
 
-        <div className="max-w-md mx-auto apple-glass rounded-xl shadow-2xl shadow-white/5 overflow-hidden">
-          {/* Top accent bar */}
-          <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600" />
+        <div className="max-w-md mx-auto panel-frosted overflow-hidden">
           
           <div className="p-4 sm:p-6 md:p-8">
             <div className="text-center mb-6 sm:mb-8">
-              <Image
-                src="/images/totl-logo-transparent.png"
-                alt="TOTL Agency"
-                width={140}
-                height={58}
-                className="mx-auto mb-4 sm:mb-6 sm:w-[180px] sm:h-[75px] filter brightness-0 invert"
-              />
-              <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">Welcome Back</h1>
-              <p className="text-sm sm:text-base text-gray-400">Sign in to access your TOTL Agency account</p>
+              <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">Welcome back</h1>
+              <p className="text-sm sm:text-base text-gray-300">Sign in to continue to your dashboard</p>
             </div>
 
             {verified && (
@@ -171,13 +166,14 @@ export default function Login() {
               </div>
             )}
 
-            <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit} noValidate>
               <div className="space-y-1.5 sm:space-y-2">
                 <Label htmlFor="email" className={`text-white text-sm sm:text-base ${formErrors.email ? "text-red-400" : ""}`}>
                   Email
                 </Label>
                 <Input
                   id="email"
+                  data-testid="email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
@@ -198,8 +194,7 @@ export default function Login() {
                       });
                     }
                   }}
-                  required
-                  className={`bg-gray-800 text-white border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-base placeholder:text-gray-500 ${formErrors.email ? "border-red-500" : ""}`}
+                  className={`bg-gray-900/60 text-white border-white/10 focus:border-white/20 text-base placeholder:text-gray-500 input-glow ${formErrors.email ? "border-red-500" : ""}`}
                 />
                 {formErrors.email && (
                   <p className="text-sm text-red-400 mt-1">{formErrors.email}</p>
@@ -218,6 +213,7 @@ export default function Login() {
                 <div className="relative">
                   <Input
                     id="password"
+                    data-testid="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
@@ -238,13 +234,14 @@ export default function Login() {
                         });
                       }
                     }}
-                    required
-                    className={`bg-gray-800 text-white border-gray-700 focus:border-gray-500 focus:ring-gray-500 text-base placeholder:text-gray-500 ${formErrors.password ? "border-red-500" : ""}`}
+                    className={`bg-gray-900/60 text-white border-white/10 focus:border-white/20 text-base placeholder:text-gray-500 input-glow ${formErrors.password ? "border-red-500" : ""}`}
                   />
                   <button
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -256,7 +253,8 @@ export default function Login() {
 
               <Button
                 type="submit"
-                className="w-full bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 border-0 shadow-lg hover:shadow-xl"
+                data-testid="login-button"
+                className="w-full button-glow"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -277,18 +275,20 @@ export default function Login() {
                   <div className="w-full border-t border-white/10"></div>
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="apple-glass px-2 text-gray-400">New to TOTL?</span>
+                  <span className="bg-black/40 border border-white/10 rounded px-2 text-gray-400">
+                    New to TOTL?
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 sm:space-y-4">
               <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-400">
+                <p className="text-sm sm:text-base text-gray-300">
                   Don&apos;t have an account?{" "}
                   <Link
                     href={returnUrl ? `/choose-role?returnUrl=${encodeURIComponent(returnUrl)}` : "/choose-role"}
-                    className="text-white font-medium hover:text-gray-300 inline-block transition-colors"
+                    className="text-white/90 font-medium hover:text-white inline-block transition-colors"
                   >
                     Create an account →
                   </Link>

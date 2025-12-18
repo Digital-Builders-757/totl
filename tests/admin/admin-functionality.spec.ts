@@ -25,11 +25,25 @@ const testUser = {
 
 // Helper functions
 async function loginAsAdmin(page: Page) {
-  await page.goto("/login");
-  await page.fill('[data-testid="email"]', adminUser.email);
-  await page.fill('[data-testid="password"]', adminUser.password);
-  await page.click('[data-testid="login-button"]');
-  await expect(page).toHaveURL(/.*\/admin\/dashboard/);
+  // Ensure admin test user exists (deterministic login for e2e).
+  await page.request.post("/api/admin/create-user", {
+    data: {
+      email: adminUser.email,
+      password: adminUser.password,
+      firstName: "Admin",
+      lastName: "TOTL",
+      role: "admin",
+    },
+  });
+
+  // Avoid cross-test cookie leakage (especially when reusing dev servers).
+  await page.context().clearCookies();
+  await page.goto("/login?signedOut=true");
+  await page.locator('[data-testid="login-hydrated"]').waitFor({ state: "attached", timeout: 30_000 });
+  await page.getByTestId("email").fill(adminUser.email);
+  await page.getByTestId("password").fill(adminUser.password);
+  await page.getByTestId("login-button").click();
+  await expect(page).toHaveURL(/.*\/admin\/dashboard/, { timeout: 60_000 });
 }
 
 async function fillUserCreationForm(
@@ -168,21 +182,39 @@ test.describe("User Management", () => {
     await expect(page.locator("text=User deleted successfully")).toBeVisible();
   });
 
-  test("Change user role", async ({ page }) => {
+  test("Client promotion is rejected by generic role update endpoint (contract guardrail)", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
     await loginAsAdmin(page);
-    await page.goto("/admin/users");
 
-    // Click edit on first user
-    await page.click('[data-testid="edit-user"]:first-child');
+    // Create a fresh non-admin user so we have a stable userId to target
+    const timestamp = Date.now();
+    const newUserEmail = `pw-role-guardrail-${timestamp}@example.com`;
 
-    // Change role
-    await page.selectOption('[data-testid="role"]', "client");
+    const createRes = await page.request.post("/api/admin/create-user", {
+      data: {
+        email: newUserEmail,
+        password: "TestPassword123!",
+        firstName: "Role",
+        lastName: "Guardrail",
+        role: "talent",
+      },
+    });
 
-    // Submit form
-    await page.click('[data-testid="update-user-button"]');
+    expect(createRes.ok()).toBeTruthy();
+    const created = (await createRes.json()) as { user?: { id?: string } };
+    const userId = created.user?.id;
+    expect(userId).toBeTruthy();
 
-    // Verify success message
-    await expect(page.locator("text=User role updated")).toBeVisible();
+    // Attempt forbidden shortcut: set role=client via generic endpoint
+    const res = await page.request.post("/api/admin/update-user-role", {
+      data: { userId, newRole: "client" },
+    });
+
+    expect(res.status()).toBe(400);
+    const payload = (await res.json()) as { error?: string };
+    expect(payload.error).toContain("Client promotion is only allowed via client application approval");
   });
 
   test("Search and filter users", async ({ page }) => {
