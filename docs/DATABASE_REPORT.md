@@ -808,7 +808,6 @@ WITH CHECK (
 - ⚠️ **Postgres Version**: Upgrade available (security patches)
 
 ### **Known Issues**
-- ⚠️ `query_stats` view has SECURITY DEFINER (SQL fix ready)
 - ⚠️ `pg_trgm` extension in public schema (SQL fix ready)
 - ⚠️ OTP expiry > 1 hour (dashboard setting needed)
 - ⚠️ Leaked password protection disabled (dashboard setting needed)
@@ -816,7 +815,7 @@ WITH CHECK (
 ### **Recommended Next Steps**
 
 1. **Immediate** (5 minutes):
-   - Run `fix_remaining_security_warnings.sql` to fix query_stats and pg_trgm
+   - Run `fix_remaining_security_warnings.sql` to fix pg_trgm
    - Enable leaked password protection in dashboard
    - Reduce OTP expiry to 30 minutes
 
@@ -1001,7 +1000,7 @@ const { data: booking } = await supabase
 - ESLint compliance for deployment
 
 **Remaining Work**:
-- 1 SQL migration to run (query_stats + pg_trgm)
+- 1 SQL migration to run (pg_trgm)
 - 3 Auth dashboard settings
 - Postgres upgrade (coordinate timing)
 

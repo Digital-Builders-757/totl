@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PATHS } from "@/lib/constants/routes";
 
 interface AdminHeaderProps {
   user?: User;
@@ -38,7 +39,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   }
 
   const navigationItems = [
-    { href: "/admin/dashboard", label: "Overview", icon: "📊" },
+    { href: PATHS.ADMIN_DASHBOARD, label: "Overview", icon: "📊" },
     { href: "/admin/applications", label: "Talent Applications", icon: "📝" },
     { href: "/admin/client-applications", label: "Career Builder Applications", icon: "🏢" },
     { href: "/admin/talent", label: "Talent", icon: "👥" },
@@ -48,8 +49,8 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
   ];
 
   const isActive = (href: string) => {
-    if (href === "/admin/dashboard") {
-      return pathname === "/admin/dashboard";
+    if (href === PATHS.ADMIN_DASHBOARD) {
+      return pathname === PATHS.ADMIN_DASHBOARD;
     }
     return pathname.startsWith(href);
   };

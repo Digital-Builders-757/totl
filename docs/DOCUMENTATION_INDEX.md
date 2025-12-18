@@ -1,6 +1,6 @@
 # TOTL Agency - Documentation Index
 
-**Last Updated:** December 2025
+**Last Updated:** December 16, 2025
 
 This document provides a complete index of all documentation in the TOTL Agency project, organized by category for easy navigation.
 
@@ -24,12 +24,15 @@ These files remain in the project root for easy access:
 ### **docs/ Directory** (All Other Documentation)
 All other documentation has been organized into the `docs/` folder.
 
+**Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
+
 ---
 
 ## 📚 Documentation Categories
 
 ### **🔐 Authentication & Security**
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
+- `AUTH_BOOTSTRAP_CONTRACT.md` - **✅ NEW** - Enforceable contract: trigger bootstraps Talent; approval promotes Client (Dec 2025)
 - `AUTH_STRATEGY.md` - **✅ UPDATED** - Authentication strategy and implementation (includes N+1 query fix, Jan 2025)
 - `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
 - `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
@@ -91,6 +94,8 @@ All other documentation has been organized into the `docs/` folder.
 ### **🛠️ Development & Setup**
 - `DEVELOPER_QUICK_REFERENCE.md` - Quick reference for developers
 - `ENV_SETUP_GUIDE.md` - Environment setup instructions (consolidated)
+- `ENV_VARIABLES_COMPLETE_LIST.md` - Full environment variables reference (names, where to find them, templates)
+- `STRIPE_ENV_VARIABLES.txt` - Stripe-specific env var snippet (additive to `.env.local`)
 - `CODING_STANDARDS.md` - Project coding standards and best practices
 - `COST_OPTIMIZATION_STRATEGY.md` - ⚠️ **CRITICAL** - Zero-cost vs paid features strategy (Oct 2025)
 - `ONBOARDING.md` - New developer onboarding guide
@@ -115,17 +120,9 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (complete documentation index)
-
-### **🎮 Future Projects & Templates**
-- `blockchaingames/README.md` - **NEW** 🎮 - Blockchain Gang Life project documentation index
-- `blockchaingames/PROJECT_SPEC.md` - **NEW** 🎮 - Complete project specification for Blockchain Gang Life (Solana-based RPG/metaverse game)
-- `blockchaingames/ARCHITECTURE.md` - **NEW** 🎮 - Technical architecture plan with Solana integration and database schema (22+ tables)
-- `blockchaingames/QUICKSTART.md` - **NEW** 🎮 - Quick start guide for building Blockchain Gang Life MVP (4-week plan)
-- `blockchaingames/EXTRACTION_PLAN.md` - **NEW** 🎮 - Step-by-step guide to extract reusable architecture from TOTL with Solana integration
-- `blockchaingames/CURSOR_SETUP_GUIDE.md` - **NEW** 🎮 - Complete guide to setting up Cursor AI with proper rules and context for Solana development
-- `blockchaingames/CI_CD_SETUP.md` - **NEW** 🎮 - CI/CD pipeline setup with GitHub Actions, schema verification, and automated checks
-- `blockchaingames/COST_ANALYSIS.md` - **NEW** 🎮 - Honest cost & performance analysis for 100+ concurrent players, optimization strategies, and scaling projections
-- `blockchaingames/MVP_ROADMAP.md` - **NEW** 🎮 - Complete phased MVP roadmap with checklists, PVP system, wills, social systems, and city wars
+- `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
+- `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
+- `NEW_DEV_ONBOARDING.md` - **NEW** - New developer onboarding (“operate the airport”) (Dec 2025)
 
 ---
 
@@ -134,7 +131,7 @@ All other documentation has been organized into the `docs/` folder.
 ### **For New Developers**
 1. Start with `ONBOARDING.md`
 2. Review `DEVELOPER_QUICK_REFERENCE.md`
-3. Set up your environment using `ENVIRONMENT_SETUP.md`
+3. Set up your environment using `ENV_SETUP_GUIDE.md` (and `ENV_VARIABLES_COMPLETE_LIST.md` for the full reference)
 4. Read `CODING_STANDARDS.md` to understand project conventions
 
 ### **For Administrators**
@@ -180,31 +177,6 @@ All other documentation has been organized into the `docs/` folder.
 
 ---
 
-## 📊 Documentation Statistics
-
-**Total Documentation Files:** 65+ files (cleaned up from 80+)
-- Root Directory: 4 critical files
-- docs/ Directory: 61+ organized files
-
-**Categories:**
-- Authentication & Security: 7 docs
-- Admin & User Management: 2 docs
-- Database & Backend: 4 docs
-- Features & Implementation: 10 docs
-- Development & Setup: 10 docs
-- Services & Integrations: 4 docs
-- Troubleshooting: 4 docs
-- Project Documentation: 1 doc
-
-**Recent Cleanup (December 2025):**
-- Removed 15+ redundant/outdated files
-- Consolidated Sentry docs (10+ → 3)
-- Consolidated email docs (3 → 1)
-- Consolidated environment setup (2 → 1)
-- Removed historical fix docs that are no longer relevant
-
----
-
 ## 🎯 Documentation Best Practices
 
 1. **Single Source of Truth:** One doc per topic - no duplicates
@@ -227,54 +199,4 @@ If you can't find what you're looking for:
 
 ---
 
-## 🗂️ Complete File List
-
-### Root Directory
-- README.md
-- database_schema_audit.md
-- MVP_STATUS_NOTION.md
-- notion_update.md
-
-### docs/ Directory
-1. ADMIN_ACCOUNT_GUIDE.md
-2. APPLICATION_SUBMISSION_406_ERROR_REPORT.md
-3. AUTH_DATABASE_TRIGGER_CHECKLIST.md
-4. AUTH_STRATEGY.md
-5. AVATAR_UPLOAD_FIX.md
-6. BETA_TESTING_CHECKLIST.md
-7. BOOKING_FLOW_IMPLEMENTATION.md
-8. CODING_STANDARDS.md
-9. COMMAND_PALETTE_IMPLEMENTATION.md
-10. COST_OPTIMIZATION_STRATEGY.md
-11. DATABASE_REPORT.md
-12. DEVELOPER_QUICK_REFERENCE.md
-13. DOCUMENTATION_INDEX.md
-14. email-service.md
-15. ENVIRONMENT_SETUP.md
-16. FORM_INPUT_POLISH_IMPLEMENTATION.md
-17. LOGIN_PAGE_STYLING_IMPROVEMENTS.md
-18. ONBOARDING.md
-19. PORTFOLIO_GALLERY_IMPLEMENTATION.md
-20. PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md
-21. POWERSHELL_GIT_COMMIT_GUIDELINES.md
-22. PROFILE_IMAGE_UPLOAD_SETUP.md
-23. SCHEMA_SYNC_COMPLETE_OCT_23_2025.md
-24. SCHEMA_SYNC_FIX_GUIDE.md
-25. SECURITY_CONFIGURATION.md
-26. SENTRY_ERROR_FIXES_SUMMARY.md
-27. SENTRY_ERROR_FIX_EVENT_HANDLERS.md
-28. SENTRY_PRODUCTION_SETUP.md
-29. SENTRY_SETUP_GUIDE.md
-30. SENTRY_SSR_ERRORS_FIX_OCT_23_2025.md
-31. SIGN_OUT_IMPROVEMENTS.md
-32. SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md
-33. SUPABASE_PERFORMANCE_FIX_GUIDE.md
-34. TECH_STACK_BREAKDOWN.md
-35. TOTL_AGENCY_USER_GUIDE.md
-36. TROUBLESHOOTING_GUIDE.md
-37. UI_UX_TESTING_GUIDE.md
-38. USESEARCHPARAMS_SSR_GUIDE.md
-
----
-
-**Note:** This index is maintained manually. When adding new documentation, please update this file to reflect the changes.
+**Note:** This index is intentionally curated. Do not maintain a “complete file list” here (it rots). If you need to enumerate files, use repo search or folder view; keep this doc focused on categories and canonical entry points.

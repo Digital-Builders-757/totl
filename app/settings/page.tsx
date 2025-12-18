@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import {
   type ProfileRow,
@@ -37,7 +38,7 @@ export default async function SettingsPage() {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   // Fetch profile data with explicit column selection
@@ -100,7 +101,7 @@ export default async function SettingsPage() {
             <nav className="flex items-center gap-2 text-sm text-gray-400 mb-4">
               {profile?.role === "talent" && (
                 <>
-                  <PrefetchLink href="/talent/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href={PATHS.TALENT_DASHBOARD} className="hover:text-white transition-colors">
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -109,7 +110,7 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "client" && (
                 <>
-                  <PrefetchLink href="/client/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href={PATHS.CLIENT_DASHBOARD} className="hover:text-white transition-colors">
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -118,7 +119,7 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "admin" && (
                 <>
-                  <PrefetchLink href="/admin/dashboard" className="hover:text-white transition-colors">
+                  <PrefetchLink href={PATHS.ADMIN_DASHBOARD} className="hover:text-white transition-colors">
                     Admin Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -134,7 +135,7 @@ export default async function SettingsPage() {
               </div>
               {profile?.role === "talent" && (
                 <PrefetchLink
-                  href="/talent/dashboard"
+                  href={PATHS.TALENT_DASHBOARD}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +146,7 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "client" && (
                 <PrefetchLink
-                  href="/client/dashboard"
+                  href={PATHS.CLIENT_DASHBOARD}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +157,7 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "admin" && (
                 <PrefetchLink
-                  href="/admin/dashboard"
+                  href={PATHS.ADMIN_DASHBOARD}
                   className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -7,14 +7,45 @@
 
 1. **READ** `AGENT_ONBOARDING.md` (NEW AGENTS START HERE)
 2. **READ** `TOTL_PROJECT_CONTEXT_PROMPT.md` completely
-3. **CHECK** `supabase/migrations/` for current database schema
-4. **VERIFY** RLS policies in the context file
-5. **USE** generated types from `types/database.ts` / `@/types/supabase` (NO `any` types)
-6. **FOLLOW** established project structure and naming conventions
+3. **READ** `docs/ARCHITECTURE_CONSTITUTION.md` (MANDATORY — system boundaries)
+4. **CHECK** `supabase/migrations/` for current database schema
+5. **VERIFY** RLS policies in the context file
+6. **USE** generated types from `types/database.ts` / `@/types/supabase` (NO `any` types)
+7. **FOLLOW** established project structure and naming conventions
 
-If any of these files are missing from the context, request them explicitly before proceeding.
+If any of these files are missing from the context, proceed with best effort and flag the missing doc(s) in the plan (and any assumptions you’re making).
 
 ---
+
+## 🧱 Architecture Constitution (MANDATORY)
+
+Before implementing any feature, read:
+
+- `docs/ARCHITECTURE_CONSTITUTION.md`
+
+Non-negotiables:
+
+- Middleware is security only; never create/update DB rows in middleware.
+- Supabase Auth is identity; profiles is app identity; missing profile is a valid state during bootstrap.
+- Mutations go through Server Actions / API routes only.
+- Client components do not perform DB writes or direct privileged reads.
+- RLS is the final authority; do not bypass with service role in client code.
+- No `select('*')`; explicit columns.
+- Never manually edit generated types.
+
+If your change touches auth, middleware, redirects, profiles, onboarding, Stripe webhooks, or RLS:
+
+1) Summarize the constitution in **5 bullets**.
+2) Propose the change as a **minimal diff**.
+3) List **risk points** and **tests** (redirect loops, bootstrap, RLS, webhook retries).
+
+If modifying middleware/auth callback/profile bootstrap:
+
+- Explain **why** the change is needed and **how it prevents redirect loops** (safe routes, signedOut handling, etc.).
+
+If modifying Stripe webhooks:
+
+- Must be **idempotent** (safe to retry), and must verify Stripe signatures.
 
 ## 🚨 RED ZONE FILES (NO BLIND REWRITES)
 
@@ -24,12 +55,14 @@ These files control **auth, routing, and schema truth**. They must **never** be 
 
 - `components/auth/auth-provider.tsx`
 - `middleware.ts`
+- `app/auth/callback/page.tsx`
 - `app/talent/dashboard/page.tsx`
 - `app/talent/dashboard/client.tsx`
 - `app/client/dashboard/page.tsx`
 - `app/client/dashboard/client.tsx`
 - `app/(auth)/**` (login, signup, verification, choose-role, reset-password flows)
 - `app/api/auth/*`
+- `app/api/stripe/webhook/route.ts` (must be idempotent)
 - `docs/SIGN_OUT_IMPROVEMENTS.md`
 - `docs/AUTH_STRATEGY.md`
 - `docs/TALENT_DASHBOARD_FLOW.md` (if present)
@@ -391,6 +424,33 @@ Root exceptions:
 * `MVP_STATUS_NOTION.md`
 * `notion_update.md`
 
+### Documentation Date Format
+
+**When creating new documentation files:**
+
+1. **Always include a date field** at the top of the document:
+   ```markdown
+   **Date:** [Current Date]
+   ```
+   
+2. **Date format:** Use full date format: `MMMM d, yyyy` (e.g., "December 15, 2025")
+   
+3. **How to get current date:** Run `Get-Date -Format "MMMM d, yyyy"` in PowerShell to get the current date
+
+4. **Required fields for new docs:**
+   - `**Date:** [Current Date]` - Always include
+   - `**Status:**` - Current status (e.g., "✅ COMPLETE", "🚧 IN PROGRESS", "📋 PLANNED")
+   - `**Purpose:**` or `**Scope:**` - What the doc covers
+
+**Example header:**
+```markdown
+# Document Title
+
+**Date:** December 15, 2025  
+**Status:** ✅ COMPLETE  
+**Purpose:** Description of what this document covers
+```
+
 ---
 
 ## 🚨 CRITICAL ERROR PREVENTION – MANDATORY CHECKS
@@ -610,6 +670,12 @@ Refer to `docs/USESEARCHPARAMS_SSR_GUIDE.md` for patterns.
 * Add ARIA attributes when needed.
 * Ensure keyboard navigation works.
 * Rely on Radix for accessible primitives.
+
+Before proposing or implementing a feature,
+the agent must explain which Airport Zone(s) are affected
+(Security, Ticketing, Manifest, Staff, Locks, Terminals, Control Tower)
+and justify why.
+
 
 ---
 

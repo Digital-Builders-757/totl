@@ -187,7 +187,7 @@ find . -name "*safe-image*" -type f
 3. `docs/DOCUMENTATION_INDEX.md` - Available documentation
 4. `MVP_STATUS_NOTION.md` - Current project status
 5. `docs/IMPORT_PATH_BEST_PRACTICES.md` - Import guidelines
-6. `docs/CRITICAL_SECURITY_FIXES_OCT_24_2025.md` - Security patterns
+6. `docs/archive/CRITICAL_SECURITY_FIXES_OCT_24_2025.md` - Security patterns
 
 ### **Must Update After Any Work:**
 1. `MVP_STATUS_NOTION.md` - Feature completion status

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export function UpdatePasswordForm() {
@@ -70,7 +71,7 @@ export function UpdatePasswordForm() {
 
         // Redirect to login after a short delay
         setTimeout(() => {
-          router.push("/login");
+          router.push(PATHS.LOGIN);
         }, 3000);
       }
     } catch (error) {
@@ -92,7 +93,7 @@ export function UpdatePasswordForm() {
           Your password has been updated successfully. Redirecting to login...
         </p>
         <Button asChild variant="outline" className="w-full">
-          <a href="/login">Go to Login</a>
+          <a href={PATHS.LOGIN}>Go to Login</a>
         </Button>
       </div>
     );

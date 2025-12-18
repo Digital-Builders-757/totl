@@ -1,34 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  ONBOARDING_PATH,
+  PATHS,
+  isAuthRoute,
+  isPublicPath,
+} from "@/lib/constants/routes";
+import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
+import { determineDestination } from "@/lib/utils/determine-destination";
+import {
+  hasClientAccess,
+  hasTalentAccess,
+  needsAdminAccess,
+  needsClientAccess,
+  needsTalentAccess,
+} from "@/lib/utils/route-access";
 import type { Database } from "@/types/supabase";
 
 type AccountType = "unassigned" | "talent" | "client";
 type ProfileRow = {
   role: Database["public"]["Tables"]["profiles"]["Row"]["role"];
-  account_type: AccountType;
+  account_type: AccountType | null;
   is_suspended: boolean | null;
 };
-
-const publicRoutes = [
-  "/", 
-  "/about", 
-  "/gigs", 
-  "/talent", 
-  "/suspended", 
-  "/client/signup", 
-  "/client/apply", 
-  "/client/apply/success",
-  "/client/application-status"
-];
-const authRoutes = [
-  "/login",
-  "/reset-password",
-  "/update-password",
-  "/verification-pending",
-  "/choose-role",
-];
-const onboardingPath = "/onboarding/select-account-type";
 
 const isAssetOrApi = (path: string) =>
   path.startsWith("/_next") ||
@@ -37,68 +32,27 @@ const isAssetOrApi = (path: string) =>
   path.startsWith("/api/") || // Allow all API routes (including /api/auth/*) to bypass middleware
   path.includes(".");
 
-const safeReturnUrl = (value: string | null): string | null => {
-  if (!value) return null;
-  if (value.includes("://") || value.startsWith("//")) return null;
-  if (!value.startsWith("/")) return null;
-  return value;
-};
-
-// Helper functions to check access - fail-safe: deny access if profile is null
-// Used for route protection to prevent unauthorized access
-const hasTalentAccess = (profile: ProfileRow | null): boolean => {
-  if (!profile) return false; // Security: Fail-safe - deny access if profile is null
-  return profile.account_type === "talent" || profile.role === "talent";
-};
-
-const hasClientAccess = (profile: ProfileRow | null): boolean => {
-  if (!profile) return false; // Security: Fail-safe - deny access if profile is null
-  // Check both account_type and role for consistency with hasTalentAccess
-  // This handles sync mismatch cases where role is set but account_type is unassigned
-  return profile.account_type === "client" || profile.role === "client";
-};
-
-// Determines redirect destination - allows default fallback for null profiles
-// Separate from access control to handle routing vs security differently
-const determineDestination = (profile: ProfileRow | null) => {
-  if (!profile) return "/talent/dashboard"; // MVP: Default to Talent Dashboard for routing
-  if (profile.role === "admin") return "/admin/dashboard";
-  // Check both account_type and role for client (handles sync mismatch cases)
-  if (profile.account_type === "client" || profile.role === "client") return "/client/dashboard";
-  // Check both account_type and role for talent (handles sync mismatch cases)
-  if (profile.account_type === "talent" || profile.role === "talent") return "/talent/dashboard";
-  // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
-  return "/talent/dashboard";
-};
-
-const needsClientAccess = (path: string) => 
-  path.startsWith("/client/") && 
-  path !== "/client/apply" && 
-  path !== "/client/apply/success" &&
-  path !== "/client/application-status" &&
-  path !== "/client/signup";
-const needsTalentAccess = (path: string) => path.startsWith("/talent/") && path !== "/talent";
-const needsAdminAccess = (path: string) => path.startsWith("/admin/");
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const res = NextResponse.next();
+  const debugRouting = process.env.DEBUG_ROUTING === "1";
 
   if (isAssetOrApi(path)) {
     return res;
   }
 
-  const returnUrl = safeReturnUrl(req.nextUrl.searchParams.get("returnUrl"));
+  // NOTE: returnUrl handling is delegated to the shared routing decision brain where applicable.
   const signedOut = req.nextUrl.searchParams.get("signedOut") === "true";
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    if (authRoutes.includes(path) || publicRoutes.includes(path) || path === onboardingPath) {
+    if (isAuthRoute(path) || isPublicPath(path) || path === ONBOARDING_PATH) {
       return res;
     }
-    const redirectUrl = new URL("/login", req.url);
+    const redirectUrl = new URL(PATHS.LOGIN, req.url);
     // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
     redirectUrl.searchParams.set("returnUrl", path);
     return NextResponse.redirect(redirectUrl);
@@ -119,12 +73,20 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  if (debugRouting) {
+    console.info("[totl][middleware] auth.getUser()", {
+      path,
+      userId: user?.id ?? null,
+      email: user?.email ?? null,
+    });
+  }
+
   if (!user) {
-    if (authRoutes.includes(path) || publicRoutes.includes(path) || path === onboardingPath) {
+    if (isAuthRoute(path) || isPublicPath(path) || path === ONBOARDING_PATH) {
       return res;
     }
-    if (!publicRoutes.includes(path)) {
-      const redirectUrl = new URL("/login", req.url);
+    if (!isPublicPath(path)) {
+      const redirectUrl = new URL(PATHS.LOGIN, req.url);
       // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
       redirectUrl.searchParams.set("returnUrl", path);
       return NextResponse.redirect(redirectUrl);
@@ -142,20 +104,33 @@ export async function middleware(req: NextRequest) {
     console.error("Middleware profile query error:", profileError);
   }
 
+  if (debugRouting) {
+    console.info("[totl][middleware] profile lookup", {
+      path,
+      userId: user.id,
+      role: profile?.role ?? null,
+      accountType: profile?.account_type ?? null,
+      isSuspended: profile?.is_suspended ?? null,
+      profileMissing: !profile,
+      profileErrorCode: profileError?.code ?? null,
+      profileErrorMessage: profileError?.message ?? null,
+    });
+  }
+
   // If profile is missing, allow through on safe routes so AuthProvider can create/hydrate it.
   // Only force redirect on routes that truly require a completed profile.
   if (!profile) {
     const isSafeForProfileBootstrap =
-      authRoutes.includes(path) ||
-      publicRoutes.includes(path) ||
-      path === onboardingPath ||
-      path === "/talent/dashboard";
+      isAuthRoute(path) ||
+      isPublicPath(path) ||
+      path === ONBOARDING_PATH ||
+      path === PATHS.TALENT_DASHBOARD;
 
     if (isSafeForProfileBootstrap) {
       return res;
     }
 
-    const redirectUrl = new URL("/login", req.url);
+    const redirectUrl = new URL(PATHS.LOGIN, req.url);
     redirectUrl.searchParams.set("returnUrl", path);
     return NextResponse.redirect(redirectUrl);
   }
@@ -163,66 +138,121 @@ export async function middleware(req: NextRequest) {
   const isAdmin = profile?.role === "admin";
   const accountType: AccountType = (profile?.account_type ?? "unassigned") as AccountType;
 
-  if (profile?.is_suspended && path !== "/suspended") {
-    return NextResponse.redirect(new URL("/suspended", req.url));
+  if (debugRouting) {
+    console.info("[totl][middleware] access flags", {
+      path,
+      userId: user.id,
+      isAdmin,
+      accountType,
+      needsOnboarding: !isAdmin && accountType === "unassigned",
+      signedOut,
+    });
+  }
+
+  // Admins should not "fall into" Talent/Client terminals (often caused by hardcoded client redirects).
+  // Keep this narrowly scoped: only routes that explicitly require non-admin access are redirected.
+  if (isAdmin && (needsClientAccess(path) || needsTalentAccess(path))) {
+    if (debugRouting) {
+      console.info("[totl][middleware] redirect admin to admin dashboard", {
+        from: path,
+        to: PATHS.ADMIN_DASHBOARD,
+        userId: user.id,
+        role: profile.role ?? null,
+        accountType: profile.account_type ?? null,
+        reason: "admin_on_non_admin_terminal",
+      });
+    }
+    return NextResponse.redirect(new URL(PATHS.ADMIN_DASHBOARD, req.url));
+  }
+
+  if (profile?.is_suspended && path !== PATHS.SUSPENDED) {
+    return NextResponse.redirect(new URL(PATHS.SUSPENDED, req.url));
   }
 
   // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
   // Only check onboarding for genuinely new users, but redirect to Talent Dashboard instead
   const needsOnboarding = !isAdmin && accountType === "unassigned";
-  const onAuthRoute = authRoutes.includes(path);
+  const onAuthRoute = isAuthRoute(path);
 
   // If user needs onboarding but has a role, sync account_type and redirect to appropriate dashboard
   // Handle both talent and client roles symmetrically
   // Allow public routes (like /client/apply) to be accessible even during onboarding
-  if (needsOnboarding && profile?.role === "talent" && path !== "/talent/dashboard" && !publicRoutes.includes(path)) {
+  if (needsOnboarding && profile?.role === "talent" && path !== PATHS.TALENT_DASHBOARD && !isPublicPath(path)) {
     // User has talent role but account_type is unassigned - redirect to Talent Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
-    return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+    return NextResponse.redirect(new URL(PATHS.TALENT_DASHBOARD, req.url));
   }
 
-  if (needsOnboarding && profile?.role === "client" && path !== "/client/dashboard" && !publicRoutes.includes(path)) {
+  if (needsOnboarding && profile?.role === "client" && path !== PATHS.CLIENT_DASHBOARD && !isPublicPath(path)) {
     // User has client role but account_type is unassigned - redirect to Client Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
-    return NextResponse.redirect(new URL("/client/dashboard", req.url));
+    return NextResponse.redirect(new URL(PATHS.CLIENT_DASHBOARD, req.url));
   }
 
   // Only redirect to onboarding if user has no role at all (shouldn't happen with MVP flow)
   // Allow public routes (like /client/apply) to be accessible even during onboarding
   // Exclude /talent/dashboard to prevent infinite redirect loop when user is already on that page
-  if (needsOnboarding && !profile?.role && path !== onboardingPath && path !== "/choose-role" && path !== "/talent/dashboard" && !publicRoutes.includes(path)) {
+  if (
+    needsOnboarding &&
+    !profile?.role &&
+    path !== ONBOARDING_PATH &&
+    path !== PATHS.CHOOSE_ROLE &&
+    path !== PATHS.TALENT_DASHBOARD &&
+    !isPublicPath(path)
+  ) {
     // Default to Talent Dashboard instead of onboarding page
-    return NextResponse.redirect(new URL("/talent/dashboard", req.url));
+    return NextResponse.redirect(new URL(PATHS.TALENT_DASHBOARD, req.url));
   }
 
-  if (!needsOnboarding && path === onboardingPath && !isAdmin) {
+  if (!needsOnboarding && path === ONBOARDING_PATH && !isAdmin) {
     const destination = determineDestination(profile);
     return NextResponse.redirect(new URL(destination, req.url));
   }
 
   if (onAuthRoute && user) {
     // Allow access to auth routes when signedOut=true to avoid redirect loops while cookies are clearing
-    if ((path === "/login" || path === "/choose-role") && signedOut) {
+    if ((path === PATHS.LOGIN || path === PATHS.CHOOSE_ROLE) && signedOut) {
       return res;
     }
-    if (returnUrl && !needsOnboarding && !isAdmin) {
-      const returnPath = new URL(returnUrl, req.url);
-      const target = returnPath.pathname;
-      if (
-        (!needsClientAccess(target) || hasClientAccess(profile)) &&
-        (!needsTalentAccess(target) || hasTalentAccess(profile)) &&
-        (!target.startsWith("/admin/") || isAdmin)
-      ) {
-        return NextResponse.redirect(returnPath);
-      }
+    const profileAccess = { role: profile.role ?? null, account_type: profile.account_type ?? null };
+    const decision = decidePostAuthRedirect({
+      pathname: path,
+      // Preserve existing behavior: don't honor returnUrl while onboarding is unresolved or for admins.
+      returnUrlRaw: !needsOnboarding && !isAdmin ? req.nextUrl.searchParams.get("returnUrl") : null,
+      signedOut,
+      profile: profileAccess,
+      fallback: PATHS.TALENT_DASHBOARD,
+    });
+
+    if (debugRouting) {
+      console.info("[totl][middleware] decidePostAuthRedirect", {
+        path,
+        userId: user.id,
+        profile: profileAccess,
+        decision,
+      });
     }
-    const destination = determineDestination(profile);
-    return NextResponse.redirect(new URL(destination, req.url));
+
+    if (decision.type === "redirect") {
+      return NextResponse.redirect(new URL(decision.to, req.url));
+    }
+    return res;
   }
 
-  if (path === "/" && !needsOnboarding) {
-    const destination = determineDestination(profile);
-    return NextResponse.redirect(new URL(destination, req.url));
+  if (path === PATHS.HOME && !needsOnboarding) {
+    const profileAccess = { role: profile.role ?? null, account_type: profile.account_type ?? null };
+    const decision = decidePostAuthRedirect({
+      pathname: path,
+      returnUrlRaw: null,
+      signedOut,
+      profile: profileAccess,
+      fallback: PATHS.TALENT_DASHBOARD,
+    });
+
+    if (decision.type === "redirect") {
+      return NextResponse.redirect(new URL(decision.to, req.url));
+    }
+    return res;
   }
 
   if (!isAdmin) {
@@ -234,7 +264,7 @@ export async function middleware(req: NextRequest) {
       }
       // Security: If user doesn't have admin access and is already on destination, redirect to login
       // This prevents unauthorized access when destination matches current path
-      const redirectUrl = new URL("/login", req.url);
+      const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
       return NextResponse.redirect(redirectUrl);
     }
@@ -246,7 +276,7 @@ export async function middleware(req: NextRequest) {
       }
       // Security: If user doesn't have client access and is already on destination, redirect to login
       // This prevents unauthorized access when destination matches current path
-      const redirectUrl = new URL("/login", req.url);
+      const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
       return NextResponse.redirect(redirectUrl);
     }
@@ -259,7 +289,7 @@ export async function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL(destination, req.url));
       }
       // User is already on destination but doesn't have access - redirect to login to force re-authentication
-      const redirectUrl = new URL("/login", req.url);
+      const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
       return NextResponse.redirect(redirectUrl);
     }

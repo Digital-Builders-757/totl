@@ -1,4 +1,4 @@
-﻿# Schema Sync & CI Fix Guide
+# Schema Sync & CI Fix Guide
 
 **Date:** October 21, 2025  
 **Issue:** "Binary files differ" error in CI schema verification  
@@ -121,6 +121,27 @@ npm run types:regen
 git add types/database.ts
 git commit -m "chore: regenerate types after schema change"
 ```
+
+### 1.5. **If you changed schema in Supabase Studio / SQL Editor (drift reconciliation)**
+
+Changing schema in Studio/SQL Editor updates the *database*, but it can leave the repo migration ledger out of sync.
+Whenever you use Studio/SQL Editor for schema changes (hotfixes/emergencies), reconcile immediately:
+
+```bash
+# 1) Pull the current remote schema diff into a migration (same day)
+supabase db pull schema_sync_dec17
+
+# 2) Regenerate types from the remote schema
+npm run types:regen
+
+# 3) Update schema documentation
+# - database_schema_audit.md (root)
+# - any relevant docs (e.g., docs/DATABASE_REPORT.md)
+```
+
+Notes:
+- `supabase db pull <name>` requires the project to be linked (`supabase link --project-ref utvircuwknqzpnmvxidp`).
+- Avoid "double authoring" the same change (Studio + a hand-written migration + db pull). Keep *one* canonical migration.
 
 ### 2. **Never Manually Edit types/database.ts**
 

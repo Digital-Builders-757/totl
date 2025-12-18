@@ -109,9 +109,9 @@
 ## 8. Quick Reference Links
 
 - **Docs Index:** `docs/DOCUMENTATION_INDEX.md`  
-- **Schema Truth:** `database_schema_audit.md`, `supabase/migrations/`, `SCHEMA_TYPES_VERIFICATION.md`  
+- **Schema Truth:** `database_schema_audit.md`, `supabase/migrations/`, `scripts/verify-schema-sync.ps1` (historical: `docs/archive/SCHEMA_TYPES_VERIFICATION.md`)  
 - **Common Errors:** `docs/COMMON_ERRORS_QUICK_REFERENCE.md`, `docs/TYPESCRIPT_COMMON_ERRORS.md`  
-- **Type Safety:** `docs/TYPE_SAFETY_IMPROVEMENTS.md`, `TYPE_SAFETY_COMPLETE.md`  
+- **Type Safety:** `docs/TYPE_SAFETY_IMPROVEMENTS.md` (historical: `docs/archive/TYPE_SAFETY_COMPLETE.md`)  
 - **Security/Auth:** `docs/SECURITY_CONFIGURATION.md`, `docs/AUTH_STRATEGY.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`  
 - **Stripe:** `docs/STRIPE_SUBSCRIPTION_PRD.md`, `docs/STRIPE_IMPLEMENTATION_PLAN.md`, `docs/STRIPE_TROUBLESHOOTING.md`  
 - **Testing/QA:** `docs/COMPREHENSIVE_QA_CHECKLIST.md`, `docs/UI_UX_TESTING_GUIDE.md`

@@ -24,6 +24,7 @@ const testScenarios = [
     },
     expected: {
       profile_role: "talent",
+      account_type: "talent",
       talent_profile_exists: true,
       client_profile_exists: false,
       first_name: "John",
@@ -31,18 +32,19 @@ const testScenarios = [
     },
   },
   {
-    name: "Complete Client Signup",
+    name: "Metadata Role Client (should still bootstrap as Talent)",
     metadata: {
       first_name: "Jane",
       last_name: "Client",
+      // Attempted escalation (should be ignored by trigger)
       role: "client",
       company_name: "Acme Corporation",
     },
     expected: {
-      profile_role: "client",
-      talent_profile_exists: false,
-      client_profile_exists: true,
-      company_name: "Acme Corporation",
+      profile_role: "talent",
+      account_type: "talent",
+      talent_profile_exists: true,
+      client_profile_exists: false,
     },
   },
   {
@@ -52,6 +54,7 @@ const testScenarios = [
     },
     expected: {
       profile_role: "talent",
+      account_type: "talent",
       talent_profile_exists: true,
       client_profile_exists: false,
       first_name: "",
@@ -59,17 +62,18 @@ const testScenarios = [
     },
   },
   {
-    name: "Client with Missing Company",
+    name: "Metadata Role Client with Missing Company (should still bootstrap as Talent)",
     metadata: {
       first_name: "Bob",
       last_name: "Business",
+      // Attempted escalation (should be ignored by trigger)
       role: "client",
     },
     expected: {
-      profile_role: "client",
-      talent_profile_exists: false,
-      client_profile_exists: true,
-      company_name: "Bob Business", // Should default to display_name
+      profile_role: "talent",
+      account_type: "talent",
+      talent_profile_exists: true,
+      client_profile_exists: false,
     },
   },
   {
@@ -77,6 +81,7 @@ const testScenarios = [
     metadata: {},
     expected: {
       profile_role: "talent", // Default role
+      account_type: "talent",
       talent_profile_exists: true,
       client_profile_exists: false,
       first_name: "",
@@ -99,15 +104,16 @@ const testScenarios = [
     },
   },
   {
-    name: "Admin Role Test",
+    name: "Metadata Role Admin (should still bootstrap as Talent)",
     metadata: {
       first_name: "Admin",
       last_name: "User",
       role: "admin",
     },
     expected: {
-      profile_role: "admin",
-      talent_profile_exists: false,
+      profile_role: "talent",
+      account_type: "talent",
+      talent_profile_exists: true,
       client_profile_exists: false,
       first_name: "Admin",
       last_name: "User",
@@ -191,7 +197,7 @@ async function runTestScenario(
     // Step 3: Check profile creation
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, role, account_type")
       .eq("id", authData.user.id)
       .single();
 
@@ -210,11 +216,19 @@ async function runTestScenario(
       return false;
     }
 
+    // Step 4b: Verify account_type (PR #3 contract)
+    if ("account_type" in scenario.expected && profile.account_type !== scenario.expected.account_type) {
+      console.error(
+        `❌ Wrong account_type: expected ${scenario.expected.account_type}, got ${profile.account_type}`
+      );
+      return false;
+    }
+
     // Step 5: Check role-specific profile
     if (scenario.expected.talent_profile_exists) {
       const { data: talentProfile, error: talentError } = await supabase
         .from("talent_profiles")
-        .select("*")
+        .select("user_id, first_name, last_name")
         .eq("user_id", authData.user.id)
         .single();
 
@@ -244,7 +258,7 @@ async function runTestScenario(
     if (scenario.expected.client_profile_exists) {
       const { data: clientProfile, error: clientError } = await supabase
         .from("client_profiles")
-        .select("*")
+        .select("user_id, company_name")
         .eq("user_id", authData.user.id)
         .single();
 
@@ -254,14 +268,14 @@ async function runTestScenario(
       }
 
       // Verify client profile data
-      if (
-        scenario.expected.company_name &&
-        clientProfile.company_name !== scenario.expected.company_name
-      ) {
-        console.error(
-          `❌ Wrong company_name: expected "${scenario.expected.company_name}", got "${clientProfile.company_name}"`
-        );
-        return false;
+      if ("company_name" in scenario.expected) {
+        const expectedCompanyName = scenario.expected.company_name;
+        if (expectedCompanyName && clientProfile.company_name !== expectedCompanyName) {
+          console.error(
+            `❌ Wrong company_name: expected "${expectedCompanyName}", got "${clientProfile.company_name}"`
+          );
+          return false;
+        }
       }
 
       console.log("✅ Client profile verified");

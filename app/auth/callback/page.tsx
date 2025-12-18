@@ -1,4 +1,4 @@
-﻿import { XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PATHS } from "@/lib/constants/routes";
+import { syncEmailVerifiedForUser } from "@/lib/server/sync-email-verified";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
@@ -50,7 +52,7 @@ export default async function AuthCallbackPage({
           </CardContent>
           <CardFooter className="flex justify-center">
             <Button asChild>
-              <a href="/login">Return to Login</a>
+              <a href={PATHS.LOGIN}>Return to Login</a>
             </Button>
           </CardFooter>
         </Card>
@@ -88,7 +90,7 @@ export default async function AuthCallbackPage({
               </CardContent>
               <CardFooter className="flex justify-center">
                 <Button asChild>
-                  <a href="/login">Return to Login</a>
+                  <a href={PATHS.LOGIN}>Return to Login</a>
                 </Button>
               </CardFooter>
             </Card>
@@ -101,20 +103,20 @@ export default async function AuthCallbackPage({
         const user = data.session.user;
         
         // Check if profile exists - use maybeSingle() to prevent 406 errors
-        const { data: profile, error: profileError } = await supabase
+        const { data: profile } = await supabase
           .from("profiles")
           .select("role,email_verified,display_name")
           .eq("id", user.id)
           .maybeSingle();
 
-        // If profile doesn't exist, create it with name from user metadata
-        // With maybeSingle(), no rows returns null data (not an error), so check !profile
-        const isNotFoundError = profileError && typeof profileError === 'object' && 'code' in profileError && (profileError as { code: string }).code === "PGRST116";
-        if (!profile || isNotFoundError) {
+        // If profile doesn't exist, create it with name from user metadata.
+        // Auth bootstrap contract (PR #3): never trust metadata.role for privilege escalation.
+        // New signups are always Talent; Career Builder access comes only from admin approval.
+        if (!profile) {
           // Extract name from user metadata
           const firstName = (user.user_metadata?.first_name as string) || "";
           const lastName = (user.user_metadata?.last_name as string) || "";
-          const role = (user.user_metadata?.role as string) || "talent";
+          const role = "talent" as const;
 
           // Create display name
           let displayName = "";
@@ -133,8 +135,8 @@ export default async function AuthCallbackPage({
           // Users can apply to become Career Builder (client) through the application process
           const { error: insertError } = await supabase.from("profiles").insert({
             id: user.id,
-            role: role as "talent" | "client" | "admin",
-            account_type: "talent", // MVP: All new accounts start as talent, regardless of role in metadata
+            role: "talent",
+            account_type: "talent",
             display_name: displayName,
             email_verified: user.email_confirmed_at !== null,
           });
@@ -163,7 +165,7 @@ export default async function AuthCallbackPage({
                   </CardContent>
                   <CardFooter className="flex justify-center">
                     <Button asChild>
-                      <a href="/login">Return to Login</a>
+                      <a href={PATHS.LOGIN}>Return to Login</a>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -171,7 +173,7 @@ export default async function AuthCallbackPage({
             );
           }
 
-          // Create role-specific profile if talent
+          // Create role-specific profile (always talent at signup)
           if (role === "talent") {
             const { error: talentError } = await supabase.from("talent_profiles").insert({
               user_id: user.id,
@@ -188,25 +190,27 @@ export default async function AuthCallbackPage({
           // Re-fetch profile after creation - use maybeSingle() to prevent 406 errors
           const { data: newProfile } = await supabase
             .from("profiles")
-            .select("role")
+            .select("role, email_verified")
             .eq("id", user.id)
             .maybeSingle();
 
-          // Always sync email verification status from auth.users.email_confirmed_at
-          const isEmailVerified = user.email_confirmed_at !== null;
-          await supabase
-            .from("profiles")
-            .update({ email_verified: isEmailVerified })
-            .eq("id", user.id);
+          // Sync email verification status using shared primitive (PR #1)
+          const syncResult = await syncEmailVerifiedForUser({
+            supabase,
+            user,
+            currentEmailVerified: newProfile?.email_verified ?? null,
+          });
+          if (!syncResult.success) {
+            console.error("[auth/callback] email_verified sync failed (post-create):", syncResult.error);
+          }
 
           // Use server-side redirect instead of client-side link to ensure session cookies are set
-          // Default to Talent Dashboard for new users (MVP: all signups are talent)
+          // Default to Talent Dashboard for new users (PR #3: all signups are talent)
           // Preserve returnUrl if provided
-          const baseRedirectUrl = newProfile?.role === "admin"
-            ? "/admin/dashboard?verified=true"
-            : newProfile?.role === "client"
-            ? "/client/dashboard?verified=true"
-            : "/talent/dashboard?verified=true";
+          const baseRedirectUrl =
+            newProfile?.role === "admin"
+              ? "/admin/dashboard?verified=true"
+              : "/talent/dashboard?verified=true";
           const redirectUrl = returnUrl
             ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
             : baseRedirectUrl;
@@ -237,18 +241,15 @@ export default async function AuthCallbackPage({
             .eq("id", user.id);
         }
 
-        // Always sync email verification status from auth.users.email_confirmed_at
+        // Sync email verification status using shared primitive (PR #1)
         // This ensures profiles.email_verified stays in sync with Supabase auth
-        const isEmailVerified = user.email_confirmed_at !== null;
-        if (profile && profile.email_verified !== isEmailVerified) {
-          const { error: updateError } = await supabase
-            .from("profiles")
-            .update({ email_verified: isEmailVerified })
-            .eq("id", user.id);
-          
-          if (updateError) {
-            console.error("Error updating email_verified:", updateError);
-          }
+        const syncResult = await syncEmailVerifiedForUser({
+          supabase,
+          user,
+          currentEmailVerified: profile?.email_verified ?? null,
+        });
+        if (!syncResult.success) {
+          console.error("[auth/callback] email_verified sync failed (existing profile):", syncResult.error);
         }
 
         // Use server-side redirect instead of client-side link to ensure session cookies are set
@@ -308,7 +309,7 @@ export default async function AuthCallbackPage({
             </CardContent>
             <CardFooter className="flex justify-center">
               <Button asChild>
-                <a href="/login">Return to Login</a>
+                <a href={PATHS.LOGIN}>Return to Login</a>
               </Button>
             </CardFooter>
           </Card>

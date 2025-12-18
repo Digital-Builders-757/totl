@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 
 import TalentProfileForm from "@/components/forms/talent-profile-form";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent static pre-rendering
@@ -16,7 +17,7 @@ export default async function TalentProfilePage() {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   // Get the user's profile
@@ -27,7 +28,7 @@ export default async function TalentProfilePage() {
     .single();
 
   if (profileError || !profile) {
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   // Verify this is a talent user

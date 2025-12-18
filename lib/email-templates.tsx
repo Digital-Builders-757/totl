@@ -2,6 +2,8 @@
 // Do NOT import in any Client Component or file with "use client".
 
 // Pure TypeScript approach - no React dependencies
+import { PATHS } from "@/lib/constants/routes";
+
 export interface EmailTemplateData {
   name: string;
   loginUrl?: string;
@@ -245,7 +247,7 @@ export function generateApplicationAcceptedEmail(data: EmailTemplateData): Email
     </div>
     <p>View your booking and get all the details in your dashboard:</p>
     <div style="text-align: center;">
-      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Details</a>
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + PATHS.TALENT_DASHBOARD)}" class="button">View Booking Details</a>
     </div>
     <p>This is a great opportunity! Make sure you're prepared and ready to deliver your best work.</p>
     <p>
@@ -324,7 +326,7 @@ export function generateBookingConfirmedEmail(data: EmailTemplateData): EmailTem
     </div>
     <p>You can view all booking details and communicate with the client through your dashboard:</p>
     <div style="text-align: center;">
-      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Dashboard</a>
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + PATHS.TALENT_DASHBOARD)}" class="button">View Booking Dashboard</a>
     </div>
     <p>We'll send you a reminder 24 hours before your booking. Good luck!</p>
     <p>
@@ -369,7 +371,7 @@ export function generateBookingReminderEmail(data: EmailTemplateData): EmailTemp
     </div>
     <p>Review your booking details one more time:</p>
     <div style="text-align: center;">
-      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/talent/dashboard")}" class="button">View Booking Details</a>
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + PATHS.TALENT_DASHBOARD)}" class="button">View Booking Details</a>
     </div>
     <p>You've got this! Have a great shoot tomorrow.</p>
     <p>
@@ -404,7 +406,7 @@ export function generateNewApplicationClientEmail(data: EmailTemplateData): Emai
     </div>
     <p>The talent is waiting to hear from you! Review their application now:</p>
     <div style="text-align: center;">
-      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + "/client/dashboard")}" class="button">Review Application</a>
+      <a href="${escapeHtml(data.dashboardUrl || process.env.NEXT_PUBLIC_SITE_URL + PATHS.CLIENT_DASHBOARD)}" class="button">Review Application</a>
     </div>
     <p>The best talent gets booked quickly, so don't wait too long to make your decision!</p>
     <p>

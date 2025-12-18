@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { PATHS } from "@/lib/constants/routes";
 import { getSubscriptionStatusText, needsSubscription } from "@/lib/subscription";
 
 export default function Navbar() {
@@ -37,7 +38,7 @@ export default function Navbar() {
         }
       : null;
   const shouldPromptSubscription = isTalentUser && needsSubscription(subscriptionAwareProfile);
-  const isOnTalentDashboard = pathname?.startsWith("/talent/dashboard");
+  const isOnTalentDashboard = pathname?.startsWith(PATHS.TALENT_DASHBOARD);
   const showPersistentSubscribeCta =
     shouldPromptSubscription && !isOnTalentDashboard;
 
@@ -72,7 +73,7 @@ export default function Navbar() {
       
       // Force immediate hard refresh to ensure clean state
       // This ensures cookies are cleared and page refreshes
-      window.location.href = '/login';
+      window.location.href = PATHS.LOGIN;
     } catch (error) {
       console.error("Sign out error:", error);
       setIsSigningOut(false);
@@ -131,7 +132,7 @@ export default function Navbar() {
             </Link>
             {userRole === "admin" && (
               <Link
-                href="/admin/dashboard"
+                href={PATHS.ADMIN_DASHBOARD}
                 className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
               >
                 Admin
@@ -186,7 +187,7 @@ export default function Navbar() {
                 <div className="absolute right-0 mt-2 w-48 bg-black/95 rounded-md shadow-lg shadow-white/10 overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 backdrop-blur-sm border border-white/10">
                   {userRole === "talent" && (
                     <Link
-                      href="/talent/dashboard"
+                      href={PATHS.TALENT_DASHBOARD}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Talent Dashboard
@@ -210,7 +211,7 @@ export default function Navbar() {
                   )}
                   {userRole === "client" && (
                     <Link
-                      href="/client/dashboard"
+                      href={PATHS.CLIENT_DASHBOARD}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Career Builder Dashboard
@@ -218,7 +219,7 @@ export default function Navbar() {
                   )}
                   {userRole === "admin" && (
                     <Link
-                      href="/admin/dashboard"
+                      href={PATHS.ADMIN_DASHBOARD}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Admin Dashboard
@@ -241,7 +242,7 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Link href="/login">
+                <Link href={PATHS.LOGIN}>
                   <Button
                     variant="ghost"
                     className={`${textColor} hover:text-gray-300 font-medium transition-colors`}
@@ -249,7 +250,7 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/choose-role">
+                <Link href={PATHS.CHOOSE_ROLE}>
                   <Button
                     variant="default"
                     className="bg-white text-black hover:bg-gray-200 font-semibold"
@@ -324,7 +325,7 @@ export default function Navbar() {
                     )}
                     {userRole === "talent" && (
                       <Link
-                        href="/talent/dashboard"
+                        href={PATHS.TALENT_DASHBOARD}
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Talent Dashboard
@@ -340,7 +341,7 @@ export default function Navbar() {
                     )}
                     {userRole === "client" && (
                       <Link
-                        href="/client/dashboard"
+                        href={PATHS.CLIENT_DASHBOARD}
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Career Builder Dashboard
@@ -348,7 +349,7 @@ export default function Navbar() {
                     )}
                     {userRole === "admin" && (
                       <Link
-                        href="/admin/dashboard"
+                        href={PATHS.ADMIN_DASHBOARD}
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Admin Dashboard
@@ -371,13 +372,13 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link
-                      href="/login"
+                      href={PATHS.LOGIN}
                       className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                     >
                       Sign In
                     </Link>
                     <div className="mt-4">
-                      <Link href="/choose-role">
+                      <Link href={PATHS.CHOOSE_ROLE}>
                         <Button className="w-full bg-white text-black hover:bg-gray-200">
                           Create Account
                         </Button>

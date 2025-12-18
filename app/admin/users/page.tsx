@@ -56,34 +56,49 @@ export default async function AdminUsersPage() {
   // Sync email verification status from auth.users.email_confirmed_at to profiles.email_verified
   // This ensures the admin dashboard shows accurate verification status
   if (profiles && profiles.length > 0) {
-    // Get email confirmation status from auth.users for all profiles
-    const { data: authUsers } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (authUsers?.users) {
+    // Pull a large page so we don't miss users due to pagination limits
+    const {
+      data,
+      error: listError,
+    } = await supabaseAdmin.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (listError) {
+      console.error("[AdminUsersPage] Error listing auth users:", listError);
+    } else if (data?.users) {
+      const authUsers = data.users;
       const updates: Array<{ id: string; email_verified: boolean }> = [];
-      
+
       for (const profile of profiles) {
-        const authUser = authUsers.users.find((u) => u.id === profile.id);
-        if (authUser) {
-          const isEmailVerified = authUser.email_confirmed_at !== null;
-          // Only update if there's a mismatch
-          if (profile.email_verified !== isEmailVerified) {
-            updates.push({ id: profile.id, email_verified: isEmailVerified });
-          }
+        const authUser = authUsers.find((u) => u.id === profile.id);
+        if (!authUser) continue;
+
+        const isEmailVerified = authUser.email_confirmed_at !== null;
+        if (profile.email_verified !== isEmailVerified) {
+          updates.push({ id: profile.id, email_verified: isEmailVerified });
         }
       }
-      
-      // Batch update profiles with correct email verification status
+
       if (updates.length > 0) {
         for (const update of updates) {
-          await supabaseAdmin
+          const { error: updateError } = await supabaseAdmin
             .from("profiles")
             .update({ email_verified: update.email_verified })
             .eq("id", update.id);
+
+          if (updateError) {
+            console.error(
+              "[AdminUsersPage] Error updating email_verified for profile",
+              update.id,
+              updateError
+            );
+          }
         }
-        
+
         // Re-fetch profiles after sync
-        const { data: syncedProfiles } = await supabase
+        const { data: syncedProfiles, error: refetchError } = await supabase
           .from("profiles")
           .select(`
             id,
@@ -97,8 +112,13 @@ export default async function AdminUsersPage() {
             talent_profiles!left(first_name, last_name)
           `)
           .order("created_at", { ascending: false });
-        
-        if (syncedProfiles) {
+
+        if (refetchError) {
+          console.error(
+            "[AdminUsersPage] Error refetching profiles after sync:",
+            refetchError
+          );
+        } else if (syncedProfiles) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return <AdminUsersClient users={syncedProfiles as any} user={user} />;
         }

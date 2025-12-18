@@ -572,17 +572,14 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                                   </Link>
                                 </DropdownMenuItem>
                                 {userProfile.role !== "client" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleUpdateRole(userProfile.id, "client")}
-                                    disabled={isUpdatingRole === userProfile.id}
-                                    className="text-blue-400 hover:bg-gray-700 flex items-center"
-                                  >
-                                    {isUpdatingRole === userProfile.id ? (
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
+                                  <DropdownMenuItem asChild>
+                                    <Link
+                                      href="/admin/client-applications"
+                                      className="text-blue-400 hover:bg-gray-700 flex items-center"
+                                    >
                                       <ArrowUp className="mr-2 h-4 w-4" />
-                                    )}
-                                    Promote to Career Builder
+                                      Review Career Builder Applications
+                                    </Link>
                                   </DropdownMenuItem>
                                 )}
                                 {userProfile.id !== user.id && (

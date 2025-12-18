@@ -2,10 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
-
-const onboardingPath = "/onboarding/select-account-type";
 
 export async function selectAccountType(formData: FormData) {
   // MVP: All signups are talent - Career Builder access is via application link from Talent Dashboard
@@ -25,7 +24,7 @@ export async function selectAccountType(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect(`/login?returnUrl=${encodeURIComponent(onboardingPath)}`);
+    redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(ONBOARDING_PATH)}`);
   }
 
   const { data: profile } = await supabase
@@ -35,14 +34,14 @@ export async function selectAccountType(formData: FormData) {
     .maybeSingle<{ role: string | null; account_type: string | null }>();
 
   if (profile?.role === "admin") {
-    redirect("/admin/dashboard");
+    redirect(PATHS.ADMIN_DASHBOARD);
     return;
   }
 
   // If user already has an account type set, redirect to appropriate dashboard
   // This matches the page redirect logic for consistency
   if (profile?.account_type && profile.account_type !== "unassigned") {
-    const destination = profile.account_type === "client" ? "/client/dashboard" : "/talent/dashboard";
+    const destination = profile.account_type === "client" ? PATHS.CLIENT_DASHBOARD : PATHS.TALENT_DASHBOARD;
     redirect(destination);
     return;
   }
@@ -67,6 +66,6 @@ export async function selectAccountType(formData: FormData) {
   revalidatePath("/");
 
   // MVP: Always redirect to Talent Dashboard (Career Builder via application link)
-  redirect("/talent/dashboard");
+  redirect(PATHS.TALENT_DASHBOARD);
 }
 

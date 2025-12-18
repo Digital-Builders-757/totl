@@ -33,7 +33,9 @@ export default async function AdminClientApplicationsPage() {
   // Fetch client applications
   const { data: applications, error: applicationsError } = await supabase
     .from("client_applications")
-    .select("*")
+    .select(
+      "id, user_id, first_name, last_name, email, phone, company_name, industry, website, business_description, needs_description, status, admin_notes, follow_up_sent_at, created_at, updated_at"
+    )
     .order("created_at", { ascending: false });
 
   if (applicationsError) {

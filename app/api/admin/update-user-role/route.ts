@@ -15,6 +15,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid role. Must be 'talent', 'client', or 'admin'" }, { status: 400 });
     }
 
+    // PR #3: Client promotion is a product-state transition, not a generic admin role toggle.
+    // Only allow Career Builder (client) promotion via client application approval.
+    if (newRole === "client") {
+      return NextResponse.json(
+        { error: "Client promotion is only allowed via client application approval." },
+        { status: 400 }
+      );
+    }
+
     // Check if requester is authenticated and is admin
     const supabase = await createSupabaseServer();
     const {
@@ -56,10 +65,14 @@ export async function POST(request: Request) {
 
     const oldRole = currentProfile.role;
 
-    // Update profile role
+    // Update profile role + keep account_type self-consistent
+    // - talent => account_type: talent
+    // - admin  => account_type: unassigned (admins route by role; account_type is not a terminal)
+    const nextAccountType = newRole === "talent" ? "talent" : "unassigned";
+
     const { error: updateError } = await supabaseAdmin
       .from("profiles")
-      .update({ role: newRole })
+      .update({ role: newRole, account_type: nextAccountType })
       .eq("id", userId);
 
     if (updateError) {
@@ -73,8 +86,9 @@ export async function POST(request: Request) {
       await supabaseAdmin.from("talent_profiles").delete().eq("user_id", userId);
     }
 
-    if (oldRole === "client" && newRole !== "client") {
-      // Delete client profile if switching away from client
+    // NOTE: We no longer allow setting role=client in this endpoint.
+    // If the user was previously a client, switching away should remove client_profiles.
+    if (oldRole === "client") {
       await supabaseAdmin.from("client_profiles").delete().eq("user_id", userId);
     }
 
@@ -85,7 +99,7 @@ export async function POST(request: Request) {
         .from("talent_profiles")
         .select("id")
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       if (!existingTalentProfile) {
         // Create basic talent profile
@@ -93,23 +107,6 @@ export async function POST(request: Request) {
           user_id: userId,
           first_name: "",
           last_name: "",
-        });
-      }
-    }
-
-    if (newRole === "client") {
-      // Check if client profile exists
-      const { data: existingClientProfile } = await supabaseAdmin
-        .from("client_profiles")
-        .select("id")
-        .eq("user_id", userId)
-        .single();
-
-      if (!existingClientProfile) {
-        // Create basic client profile
-        await supabaseAdmin.from("client_profiles").insert({
-          user_id: userId,
-          company_name: "",
         });
       }
     }

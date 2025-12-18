@@ -259,7 +259,7 @@ Install "DotENV" extension for syntax highlighting in `.env` files!
 ---
 
 **Need help getting your keys?** Check the sections above or see:
-- **Supabase:** `docs/ENVIRONMENT_SETUP.md`
+- **Supabase:** `docs/ENV_SETUP_GUIDE.md`
 - **Resend:** `docs/EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md`
 
 ---

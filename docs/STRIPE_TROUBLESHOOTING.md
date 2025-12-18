@@ -14,7 +14,7 @@ Practical fixes for Stripe-related issues that recently surfaced in the subscrip
     throw new Error('STRIPE_WEBHOOK_SECRET is required');
   }
   ```
-  Document new env vars in `STRIPE_ENV_VARIABLES.txt` whenever they are introduced.
+  Document new env vars in `docs/STRIPE_ENV_VARIABLES.txt` whenever they are introduced.
 
 ## 2. Invalid API Version Format (`.clover` suffix)
 

@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PATHS } from "@/lib/constants/routes";
 
 type UserRole = "talent" | "client" | "admin" | null;
 
@@ -33,7 +34,7 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
       
       // Force immediate hard refresh to ensure clean state
       // This ensures cookies are cleared and page refreshes
-      window.location.href = '/login';
+      window.location.href = PATHS.LOGIN;
     } catch (err) {
       console.error("Error signing out:", err);
       setError("Failed to sign out. Please try again.");
@@ -58,13 +59,13 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
             Refresh Data
           </Button>
           {userRole === "talent" && (
-            <Button onClick={() => router.push("/talent/dashboard")} variant="outline">
+            <Button onClick={() => router.push(PATHS.TALENT_DASHBOARD)} variant="outline">
               Go to Talent Dashboard
             </Button>
           )}
           {userRole === "client" && (
             <>
-              <Button onClick={() => router.push("/client/dashboard")} variant="outline">
+              <Button onClick={() => router.push(PATHS.CLIENT_DASHBOARD)} variant="outline">
                 Go to Career Builder Dashboard
               </Button>
               <Button onClick={() => router.push("/post-gig")} variant="outline">

@@ -2,9 +2,8 @@
 
 import { redirect } from "next/navigation";
 
+import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-
-const onboardingPath = "/onboarding/select-account-type";
 
 export default async function SelectAccountTypePage() {
   const supabase = await createSupabaseServer();
@@ -14,7 +13,7 @@ export default async function SelectAccountTypePage() {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect(`/login?returnUrl=${encodeURIComponent(onboardingPath)}`);
+    redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(ONBOARDING_PATH)}`);
   }
 
   const { data: profile } = await supabase
@@ -24,7 +23,7 @@ export default async function SelectAccountTypePage() {
     .maybeSingle<{ role: string | null; account_type: string | null }>();
 
   if (profile?.role === "admin") {
-    redirect("/admin/dashboard");
+    redirect(PATHS.ADMIN_DASHBOARD);
   }
 
   const accountType = profile?.account_type ?? "unassigned";
@@ -32,12 +31,12 @@ export default async function SelectAccountTypePage() {
   // MVP: Redirect all authenticated users to Talent Dashboard
   // Career Builder access is via application link from Talent Dashboard
   if (accountType === "client") {
-    redirect("/client/dashboard");
+    redirect(PATHS.CLIENT_DASHBOARD);
   }
 
   // Default to Talent Dashboard (all signups are talent)
   // MVP: This page redirects all authenticated users to Talent Dashboard
   // Career Builder access is via application link from Talent Dashboard
-  redirect("/talent/dashboard");
+  redirect(PATHS.TALENT_DASHBOARD);
 }
 

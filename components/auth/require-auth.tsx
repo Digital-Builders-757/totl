@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PATHS } from "@/lib/constants/routes";
 
 type RequireAuthProps = {
   children: ReactNode;
@@ -18,7 +19,7 @@ type RequireAuthProps = {
 export function RequireAuth({
   children,
   fallback,
-  redirectTo = "/choose-role",
+  redirectTo = PATHS.CHOOSE_ROLE,
   preserveReturnUrl = true,
 }: RequireAuthProps) {
   const { user, isLoading } = useAuth();

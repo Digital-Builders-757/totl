@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -55,7 +56,7 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-gray-50 pt-24">
       <div className="container mx-auto px-4 py-12">
         <Link
-          href="/login"
+          href={PATHS.LOGIN}
           className="inline-flex items-center text-gray-600 hover:text-black mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -109,7 +110,7 @@ export default function ResetPassword() {
                   link shortly.
                 </p>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/login">Return to Login</Link>
+                  <Link href={PATHS.LOGIN}>Return to Login</Link>
                 </Button>
               </div>
             )}

@@ -19,6 +19,7 @@ import * as React from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { PATHS } from "@/lib/constants/routes";
 import { cn } from "@/lib/utils/utils";
 
 interface CommandPaletteProps {
@@ -65,7 +66,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             icon: LayoutDashboard,
             label: "Talent Dashboard",
             description: "View your talent dashboard",
-            action: () => router.push("/talent/dashboard"),
+            action: () => router.push(PATHS.TALENT_DASHBOARD),
             shortcut: "D",
           },
           {
@@ -79,7 +80,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             icon: FileText,
             label: "My Applications",
             description: "View your gig applications",
-            action: () => router.push("/talent/dashboard"),
+            action: () => router.push(PATHS.TALENT_DASHBOARD),
             shortcut: "A",
           }
         );
@@ -89,7 +90,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             icon: LayoutDashboard,
             label: "Career Builder Dashboard",
             description: "View your Career Builder dashboard",
-            action: () => router.push("/client/dashboard"),
+            action: () => router.push(PATHS.CLIENT_DASHBOARD),
             shortcut: "D",
           },
           {

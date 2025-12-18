@@ -7,6 +7,12 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
+import {
+  PATHS,
+  isAuthRoute,
+  isPublicPath,
+} from "@/lib/constants/routes";
+import { decideSignedInClientRedirect } from "@/lib/routing/decide-redirect";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
@@ -255,23 +261,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           if (!mounted) return;
           applyProfileToState(hydratedProfile, session);
 
-          const role = hydratedProfile?.role ?? null;
+          if (hasHandledInitialSession && pathname !== PATHS.LOGIN) {
+            const profileAccess = hydratedProfile
+              ? {
+                  role: hydratedProfile.role ?? null,
+                  account_type: (hydratedProfile.account_type ?? null) as AccountType | null,
+                }
+              : null;
 
-          if (hasHandledInitialSession && !pathname.startsWith("/login")) {
-            const allowedPages = ["/settings", "/profile", "/onboarding", "/choose-role", "/verification-pending"];
-            const isOnAllowedPage = allowedPages.some((page) => pathname.startsWith(page));
+            const to = decideSignedInClientRedirect({
+              pathname,
+              profile: profileAccess,
+            });
 
-            if (!isOnAllowedPage) {
+            if (to) {
               router.refresh();
-              if (role === "talent") {
-                router.push("/talent/dashboard");
-              } else if (role === "client") {
-                router.push("/client/dashboard");
-              } else if (role === "admin") {
-                router.push("/admin/dashboard");
-              } else {
-                router.push("/choose-role");
-              }
+              router.push(to);
             }
           }
         } catch (error) {
@@ -296,42 +301,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // - Other tabs sign out (cross-tab sync)
         // In these cases, we need to redirect to prevent users from viewing protected content while logged out
         if (typeof window !== "undefined") {
-          const publicRoutes = [
-            "/", 
-            "/about", 
-            "/gigs", 
-            "/talent", 
-            "/suspended", 
-            "/client/signup", 
-            "/client/apply",
-            "/client/apply/success",
-            "/client/application-status"
-          ];
-          const publicRoutePrefixes = ["/talent/", "/gigs/"]; // Dynamic public routes that need prefix matching
-          const authRoutes = ["/login", "/reset-password", "/update-password", "/verification-pending", "/choose-role"];
-          
           // Get current pathname, stripping any query parameters
           // pathname from usePathname() already excludes query params, but window.location.pathname is more reliable
           const currentPath = (pathname || window.location.pathname).split("?")[0];
           
-          // Check if current path is an exact public route match
-          const isExactPublicRoute = publicRoutes.includes(currentPath);
-          
-          // Check if current path starts with a public route prefix (for dynamic routes like /talent/[slug])
-          const isPublicRoutePrefix = publicRoutePrefixes.some(prefix => currentPath.startsWith(prefix));
-          
           // Check if current path is an auth route
-          const isAuthRoute = authRoutes.includes(currentPath);
+          const isAuthRouteMatch = isAuthRoute(currentPath);
           
           // Only redirect if we're not already on a public or auth route
-          if (!isExactPublicRoute && !isPublicRoutePrefix && !isAuthRoute) {
+          if (!isPublicPath(currentPath) && !isAuthRouteMatch) {
             // Use hard redirect to ensure complete session clear
             // Use clean /login path without query params to avoid routing issues
-            window.location.href = "/login";
+            window.location.href = PATHS.LOGIN;
           }
         } else {
           // Fallback for server-side (shouldn't happen, but just in case)
-          router.push("/login");
+          router.push(PATHS.LOGIN);
         }
       } else if (event === "TOKEN_REFRESHED") {
         // Just update the session, no need to refetch profile
@@ -456,12 +441,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       const { error: clientError } = await supabase.auth.signOut();
 
+      const to = `${PATHS.LOGIN}?signedOut=true`;
       if (typeof window !== "undefined") {
         setIsLoading(false);
-        window.location.replace("/login?signedOut=true");
+        window.location.replace(to);
       } else {
         setIsLoading(false);
-        router.replace("/login?signedOut=true");
+        router.replace(to);
         router.refresh();
       }
 
@@ -477,10 +463,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setHasHandledInitialSession(false);
       setIsLoading(false);
 
+      const to = `${PATHS.LOGIN}?signedOut=true`;
       if (typeof window !== "undefined") {
-        window.location.replace("/login?signedOut=true");
+        window.location.replace(to);
       } else {
-        router.replace("/login?signedOut=true");
+        router.replace(to);
         router.refresh();
       }
 
@@ -522,7 +509,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       if (!supabase) return { error: null };
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: `${window.location.origin}${PATHS.UPDATE_PASSWORD}`,
       });
       return { error };
     } catch (error) {

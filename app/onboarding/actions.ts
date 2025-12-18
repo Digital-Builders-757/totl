@@ -1,6 +1,7 @@
 ﻿"use server";
 
 import { redirect } from "next/navigation";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export async function createProfile(formData: {
@@ -18,7 +19,7 @@ export async function createProfile(formData: {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect(PATHS.LOGIN);
   }
 
   const userId = user.id;

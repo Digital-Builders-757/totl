@@ -81,6 +81,6 @@ if (allGood) {
 } else {
   console.log('❌ Some environment variables are missing or incorrect.');
   console.log('📝 Please check your .env.local file and update the values.');
-  console.log('🔗 See docs/ENVIRONMENT_SETUP.md for detailed instructions.');
+  console.log('🔗 See docs/ENV_SETUP_GUIDE.md for detailed instructions.');
   process.exit(1);
 }
