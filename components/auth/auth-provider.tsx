@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { User, Session, AuthError, AuthChangeEvent, SupabaseClient } from "@supabase/supabase-js";
 import { useRouter, usePathname } from "next/navigation";
@@ -160,21 +160,60 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const { profile: existingProfile } = await fetchProfile(user.id);
       if (existingProfile) return existingProfile;
 
-      const profileResult = await ensureProfileExists();
-      if (profileResult?.error) {
-        console.error("Error ensuring profile exists:", profileResult.error);
-        return null;
+      const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+      const breadcrumb = async (data: Record<string, unknown>) => {
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.addBreadcrumb({
+            category: "auth.bootstrap",
+            message: "ensureAndHydrateProfile",
+            level: "info",
+            data: {
+              userId: user.id,
+              ...data,
+            },
+          });
+        } catch {
+          // Ignore if Sentry isn't available (or blocked) in dev/test.
+        }
+      };
+
+      // Bounded retry: first login after signup can race server-session cookie propagation.
+      // Goal: avoid settling into `user != null` + `profile == null` until a hard refresh.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        await breadcrumb({ phase: "attempt_start", attempt });
+        const profileResult = await ensureProfileExists();
+        if (profileResult?.error) {
+          console.error("Error ensuring profile exists:", profileResult.error);
+          await breadcrumb({ phase: "ensure_error", attempt, error: profileResult.error });
+          return null;
+        }
+
+        if (profileResult?.profile) {
+          await breadcrumb({ phase: "ensure_returned_profile", attempt });
+          return mapProfileRow(profileResult.profile as ProfileData);
+        }
+
+        if (profileResult?.exists) {
+          const { profile: retryProfile } = await fetchProfile(user.id);
+          await breadcrumb({ phase: "ensure_reported_exists", attempt, fetchedAfterExists: Boolean(retryProfile) });
+          return retryProfile;
+        }
+
+        // If server action reports "skipped" (no session yet) or returns no useful signal,
+        // wait briefly and retry once. Also re-check the profile directly after waiting.
+        await breadcrumb({
+          phase: "no_signal_wait",
+          attempt,
+          skipped: Boolean((profileResult as { skipped?: boolean } | null)?.skipped),
+        });
+        await sleep(attempt === 0 ? 300 : 600);
+        const { profile: afterWait } = await fetchProfile(user.id);
+        await breadcrumb({ phase: "after_wait_fetch", attempt, found: Boolean(afterWait) });
+        if (afterWait) return afterWait;
       }
 
-      if (profileResult?.profile) {
-        return mapProfileRow(profileResult.profile as ProfileData);
-      }
-
-      if (profileResult?.exists) {
-        const { profile: retryProfile } = await fetchProfile(user.id);
-        return retryProfile;
-      }
-
+      await breadcrumb({ phase: "exhausted", attempts: 2 });
       return null;
     },
     [fetchProfile]

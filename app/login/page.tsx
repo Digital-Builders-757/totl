@@ -132,11 +132,10 @@ export default function Login() {
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40 z-[1]" />
       
       <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8 relative z-10">
-        {isHydrated ? (
-          <span data-testid="login-hydrated" className="sr-only">
-            ready
-          </span>
-        ) : null}
+        {/* Hydration marker for E2E stability (element exists pre-hydration). */}
+        <span data-testid="login-hydrated" className="sr-only">
+          {isHydrated ? "ready" : "loading"}
+        </span>
         <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home

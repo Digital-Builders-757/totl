@@ -8,6 +8,10 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 type SubscriptionPlan = 'monthly' | 'annual';
 
+function isCanonicalPlan(value: unknown): value is SubscriptionPlan {
+  return value === "monthly" || value === "annual";
+}
+
 function determinePlanFromSubscription(subscription: Stripe.Subscription): SubscriptionPlan | null {
   const monthlyPriceId = process.env.STRIPE_PRICE_TALENT_MONTHLY;
   const annualPriceId = process.env.STRIPE_PRICE_TALENT_ANNUAL;
@@ -196,7 +200,9 @@ async function handleSubscriptionUpdate(
   // Update profile
   const currentPeriodEnd = getCurrentPeriodEnd(subscription);
 
-  const planToPersist = plan ?? profile.subscription_plan ?? null;
+  // Guardrail: keep `profiles.subscription_plan` normalized to 'monthly' | 'annual' (never persist price IDs).
+  const existingPlan = isCanonicalPlan(profile.subscription_plan) ? profile.subscription_plan : null;
+  const planToPersist = plan ?? existingPlan ?? null;
 
   const { error: updateError } = await supabase
     .from("profiles")

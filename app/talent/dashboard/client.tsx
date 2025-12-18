@@ -459,11 +459,11 @@ function TalentDashboardContent() {
 
   if (fatalError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{fatalError}</p>
+          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Configuration Error</h2>
+          <p className="text-gray-300 mb-4">{fatalError}</p>
           <Button asChild>
             <Link href="/login">Go to Login</Link>
           </Button>
@@ -474,13 +474,13 @@ function TalentDashboardContent() {
 
   if (authLoading || dataLoading || isInVerificationGracePeriodRef.current) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/70 mx-auto" />
           <p className="mt-4 text-gray-300">Loading your dashboard...</p>
           {dataError && (
             <div className="mt-4 max-w-md mx-auto">
-              <p className="text-red-600 text-sm">{dataError}</p>
+              <p className="text-red-400 text-sm">{dataError}</p>
               <Button
                 onClick={() => {
                   refetch();
@@ -500,11 +500,11 @@ function TalentDashboardContent() {
 
   if (user && !profile) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Finishing your setup</h2>
-          <p className="text-gray-600 mb-4">
+          <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Finishing your setup</h2>
+          <p className="text-gray-300 mb-4">
             We’re creating your profile. This usually takes a moment.
           </p>
           <Button onClick={handleRetrySetup} variant="outline">

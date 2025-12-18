@@ -38,6 +38,25 @@
 
 ## Canonical services/actions
 
+### Admin metrics: Paid Talent (Subscriptions) (official definition)
+
+**Purpose:** Track subscription performance as **paid members**, not Stripe revenue truth.
+
+**Definition (MVP; freeze):**
+- **Paid Talent** = `public.profiles.role = 'talent'` AND `public.profiles.subscription_status = 'active'`
+- **Bucket by plan**:
+  - `subscription_plan = 'monthly'` → **monthly**
+  - `subscription_plan = 'annual'` → **annual**
+  - anything else / NULL → **unknown** (must be surfaced; do not hide drift)
+
+**Dashboard display:**
+- Show counts (monthly/annual/unknown).
+- Show **Estimated** MRR/ARR derived from counts (no Stripe API calls):
+  - MRR est. = `monthly * $20 + annual * ($200 / 12)` (display $16.67/mo per annual sub)
+  - ARR est. = `monthly * $240 + annual * $200`
+
+**Source of truth:** subscription fields are written by the Stripe webhook into `public.profiles`.
+
 ### Career Builder approval (promotion)
 - `lib/actions/client-actions.ts`
   - `approveClientApplication(applicationId: string, adminNotes?: string)`

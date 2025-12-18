@@ -35,8 +35,8 @@ test.describe("Complete User Creation and Authentication Flow", () => {
       await expect(page).toHaveURL(/.*\/choose-role/);
       
       // The page is a client component that returns null until mounted
-      // Wait for React to hydrate and render content
-      await page.waitForLoadState("networkidle");
+      // Avoid `networkidle` (can hang due to long-lived connections in dev).
+      await page.waitForLoadState("domcontentloaded");
       
       // Wait for the actual content to be visible - the page has an h1 with "Choose Your Role"
       // Try multiple selectors to be safe
@@ -62,7 +62,7 @@ test.describe("Complete User Creation and Authentication Flow", () => {
     // Step 3: Fill out signup form
     await test.step("Fill out talent signup form", async () => {
       // Form is in a dialog, wait for it to be fully visible
-      await page.waitForLoadState("networkidle");
+      await page.waitForLoadState("domcontentloaded");
       
       // Wait for dialog content to be visible
       const dialog = page.locator('[role="dialog"]');
@@ -310,26 +310,25 @@ test.describe("Complete User Creation and Authentication Flow", () => {
     await test.step("Login with verified account", async () => {
       // Navigate with timeout and wait for load
       // Use a longer timeout and wait for load state
-      await page.goto(`${baseURL}/login`, { waitUntil: "networkidle", timeout: 60000 });
+      // Warm server first (dev builds can delay hydration/JS on first hit).
+      await page.goto(`${baseURL}/`, { waitUntil: "domcontentloaded", timeout: 60000 });
+      await page.goto(`${baseURL}/login`, { waitUntil: "domcontentloaded", timeout: 60000 });
       
       // Verify we're on login page
       await expect(page).toHaveURL(/.*\/login/, { timeout: 10000 });
 
-      const emailField = page.locator("#email");
-      const passwordField = page.locator("#password");
-      const submitButton = page.locator('button[type="submit"]').first();
+      // Login page is client-rendered; wait for hydration marker so inputs don't get wiped.
+      await expect(page.getByTestId("login-hydrated")).toHaveText("ready", { timeout: 120_000 });
       
-      // Wait for fields to be visible
-      await expect(emailField).toBeVisible({ timeout: 15000 });
-      await expect(passwordField).toBeVisible({ timeout: 15000 });
-
-      await emailField.fill(directTestUser.email);
-      await passwordField.fill(directTestUser.password);
+      await page.getByTestId("email").fill(directTestUser.email);
+      await expect(page.getByTestId("email")).toHaveValue(directTestUser.email);
+      await page.getByTestId("password").fill(directTestUser.password);
+      await expect(page.getByTestId("password")).toHaveValue(directTestUser.password);
       
       // Submit and wait for redirect
       await Promise.all([
-        page.waitForURL(/.*\/(talent|client|admin)\/dashboard/, { timeout: 30000 }),
-        submitButton.click(),
+        page.waitForURL(/.*\/(talent|client|admin)\/dashboard/, { timeout: 60_000 }),
+        page.getByTestId("login-button").click(),
       ]);
     });
 
