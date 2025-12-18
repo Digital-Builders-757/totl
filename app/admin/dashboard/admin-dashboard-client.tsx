@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { User } from "@supabase/supabase-js";
 import {
@@ -38,10 +38,19 @@ interface AdminDashboardClientProps {
   user: User;
   gigs: Gig[];
   applications: Application[];
+  paidTalentStats: {
+    monthlyCount: number;
+    annualCount: number;
+    unknownPlanCount: number;
+    estimatedMrrCents: number;
+    estimatedArrCents: number;
+  };
 }
 
-export function AdminDashboardClient({ user, gigs, applications }: AdminDashboardClientProps) {
+export function AdminDashboardClient({ user, gigs, applications, paidTalentStats }: AdminDashboardClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const money = (cents: number) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 
   // Filter gigs based on search query
   const filteredGigs = gigs.filter(
@@ -58,7 +67,6 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
     totalApplications: applications.length,
     pendingApplications: applications.filter((a) => a.status === "new").length,
     acceptedApplications: applications.filter((a) => a.status === "accepted").length,
-    totalRevenue: 12450, // This would come from bookings data
   };
 
         return (
@@ -138,12 +146,31 @@ export function AdminDashboardClient({ user, gigs, applications }: AdminDashboar
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card
+            className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800"
+            data-testid="paid-talent-card"
+          >
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-white">Revenue</p>
-                  <p className="text-2xl font-bold text-white">${dashboardStats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-white" data-testid="paid-talent-card-title">
+                    Paid Talent (Subscriptions)
+                  </p>
+                  <p className="text-2xl font-bold text-white">
+                    <span data-testid="paid-talent-total">
+                      {paidTalentStats.monthlyCount + paidTalentStats.annualCount}
+                    </span>
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Monthly: <span data-testid="paid-talent-monthly">{paidTalentStats.monthlyCount}</span> · Annual:{" "}
+                    <span data-testid="paid-talent-annual">{paidTalentStats.annualCount}</span> · Unknown:{" "}
+                    <span data-testid="paid-talent-unknown">{paidTalentStats.unknownPlanCount}</span>
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    Est. MRR:{" "}
+                    <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span> · Est. ARR:{" "}
+                    <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
+                  </p>
                 </div>
                 <div className="bg-orange-900/30 p-2 rounded-full">
                   <DollarSign className="h-4 w-4 text-orange-400" />

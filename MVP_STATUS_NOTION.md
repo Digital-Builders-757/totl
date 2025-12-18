@@ -8,6 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Admin Paid Talent Metrics + First-Login Bootstrap Hardening**
+
+**PAID MEMBERSHIP METRICS + BOOTSTRAP RELIABILITY** - December 18, 2025  
+- ✅ Replaced admin dashboard “Revenue” placeholder with **Paid Talent (Subscriptions)** counts (monthly/annual/unknown) sourced from `public.profiles` only (no Stripe API calls).  
+- ✅ Added clear **Estimated** MRR/ARR calculations (MRR: `$20/mo` + `$200/yr ÷ 12`; ARR: `$240/mo` + `$200/yr`).  
+- ✅ Added stable `data-testid` hooks for the Paid Talent card to keep Playwright resilient.  
+- ✅ Normalized Stripe webhook persistence: `profiles.subscription_plan` is now constrained to `'monthly' | 'annual' | null` (never price IDs; unknown plans surface as “Unknown”).  
+- ✅ Fixed the “first login after signup → stuck until refresh” failure mode by adding a bounded retry (2 attempts) in `AuthProvider.ensureAndHydrateProfile()` and adding breadcrumbs for postmortem clarity.  
+- ✅ Updated `/talent/dashboard` loading + “Finishing setup” gates to dark, readable styling (no more white-screen perception).
+
 ## 🚀 **Latest Achievement: Auth Bootstrap Contract Lockdown + Contract-Aligned Proof (No Drift)**
 
 **AUTH BOOTSTRAP + ONBOARDING “BORING & ENFORCEABLE” CONTRACT** - December 18, 2025  
