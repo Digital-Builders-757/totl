@@ -71,15 +71,6 @@
   h2 { font-size: 1.5rem; }
   h3 { font-size: 1.25rem; }
   
-  /* Improve button spacing */
-  .flex.gap-2 > * {
-    margin-right: 0.5rem;
-  }
-  
-  .flex.gap-2 > *:last-child {
-    margin-right: 0;
-  }
-
   /* Prevent text selection on interactive elements */
   button,
   .card-backlit,

@@ -79,6 +79,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🎨 Features & Implementation**
 - `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
+- `UI_LAYOUT_CONTRACT.md` - 🎨 **NEW** - Canonical Terminal Kit (PageShell/PageHeader/SectionCard/DataTableShell) + mobile safety rules (Dec 2025)
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
 - `UI_VISUAL_LANGUAGE.md` - 🎨 **NEW** - Visual design system and component guidelines (Jan 2025)
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation

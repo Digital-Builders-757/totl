@@ -1,6 +1,7 @@
-﻿import { CheckCircle, ArrowLeft, Clipboard } from "lucide-react";
+import { CheckCircle, ArrowLeft, Clipboard } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { LongToken } from "@/components/ui/long-token";
 
 export default async function ApplicationSuccessPage({
   searchParams,
@@ -39,9 +40,11 @@ export default async function ApplicationSuccessPage({
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <code className="font-mono text-sm bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-900">
-                    {applicationId}
-                  </code>
+                  <LongToken
+                    as="code"
+                    value={applicationId}
+                    className="font-mono text-sm bg-white border border-gray-200 rounded-xl px-4 py-2 text-gray-900"
+                  />
                   <Button
                     asChild
                     variant="outline"
