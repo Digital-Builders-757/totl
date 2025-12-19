@@ -1,5 +1,7 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -93,15 +95,19 @@ export default async function SettingsPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            {/* Breadcrumb Navigation */}
-            <nav className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+    <PageShell className="bg-black" containerClassName="py-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <PageHeader
+          title="Settings"
+          subtitle="Manage your account and profile information"
+          breadcrumbs={
+            <nav className="flex items-center gap-2 text-sm text-gray-400">
               {profile?.role === "talent" && (
                 <>
-                  <PrefetchLink href={PATHS.TALENT_DASHBOARD} className="hover:text-white transition-colors">
+                  <PrefetchLink
+                    href={PATHS.TALENT_DASHBOARD}
+                    className="hover:text-white transition-colors"
+                  >
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -110,7 +116,10 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "client" && (
                 <>
-                  <PrefetchLink href={PATHS.CLIENT_DASHBOARD} className="hover:text-white transition-colors">
+                  <PrefetchLink
+                    href={PATHS.CLIENT_DASHBOARD}
+                    className="hover:text-white transition-colors"
+                  >
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -119,7 +128,10 @@ export default async function SettingsPage() {
               )}
               {profile?.role === "admin" && (
                 <>
-                  <PrefetchLink href={PATHS.ADMIN_DASHBOARD} className="hover:text-white transition-colors">
+                  <PrefetchLink
+                    href={PATHS.ADMIN_DASHBOARD}
+                    className="hover:text-white transition-colors"
+                  >
                     Admin Dashboard
                   </PrefetchLink>
                   <span>→</span>
@@ -127,58 +139,66 @@ export default async function SettingsPage() {
                 </>
               )}
             </nav>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Settings</h1>
-                <p className="text-gray-300">Manage your account and profile information</p>
-              </div>
-              {profile?.role === "talent" && (
-                <PrefetchLink
-                  href={PATHS.TALENT_DASHBOARD}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Back to Dashboard
-                </PrefetchLink>
-              )}
-              {profile?.role === "client" && (
-                <PrefetchLink
-                  href={PATHS.CLIENT_DASHBOARD}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Back to Dashboard
-                </PrefetchLink>
-              )}
-              {profile?.role === "admin" && (
-                <PrefetchLink
-                  href={PATHS.ADMIN_DASHBOARD}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
-                  Back to Admin
-                </PrefetchLink>
-              )}
-            </div>
-          </div>
+          }
+          actions={
+            profile?.role === "talent" ? (
+              <PrefetchLink
+                href={PATHS.TALENT_DASHBOARD}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Back to Dashboard
+              </PrefetchLink>
+            ) : profile?.role === "client" ? (
+              <PrefetchLink
+                href={PATHS.CLIENT_DASHBOARD}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Back to Dashboard
+              </PrefetchLink>
+            ) : (
+              <PrefetchLink
+                href={PATHS.ADMIN_DASHBOARD}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Back to Admin
+              </PrefetchLink>
+            )
+          }
+        />
 
-          <ProfileEditor
-            user={user}
-            profile={profile as ProfileRow}
-            talent={talent as TalentProfileRow | null}
-            client={client as ClientProfileRow | null}
-            avatarSrc={avatarSrc}
-            portfolioItems={portfolioItemsWithUrls}
-          />
-        </div>
+        <ProfileEditor
+          user={user}
+          profile={profile as ProfileRow}
+          talent={talent as TalentProfileRow | null}
+          client={client as ClientProfileRow | null}
+          avatarSrc={avatarSrc}
+          portfolioItems={portfolioItemsWithUrls}
+        />
       </div>
-    </div>
+    </PageShell>
   );
 }

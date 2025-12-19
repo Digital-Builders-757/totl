@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LongToken } from "@/components/ui/long-token";
 import { checkClientApplicationStatus } from "@/lib/actions/client-actions";
 
 type ApplicationStatusResult = {
@@ -152,9 +153,9 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
       {result && (
         <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wide text-gray-500">Application ID</p>
-              <p className="font-mono text-sm text-gray-800">{result.id}</p>
+              <LongToken as="p" value={result.id} className="font-mono text-sm text-gray-800" />
             </div>
             {statusMeta && (
               <div className="flex items-center gap-3">

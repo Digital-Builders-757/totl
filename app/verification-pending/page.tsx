@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft, Mail, CheckCircle2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { LongToken } from "@/components/ui/long-token";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
@@ -113,7 +114,8 @@ export default function VerificationPendingPage() {
             </div>
             <CardTitle className="text-center text-white text-xl sm:text-2xl font-bold">Verify your email</CardTitle>
             <CardDescription className="text-center text-gray-400 mt-2">
-              We&apos;ve sent a verification email to <strong className="text-white">{email}</strong>
+              We&apos;ve sent a verification email to{" "}
+              <LongToken as="strong" value={email} className="text-white" />
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-4 sm:p-6 md:p-8 pt-0">

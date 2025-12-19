@@ -23,6 +23,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AdminHeader } from "@/components/admin/admin-header";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,11 +71,16 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
     acceptedApplications: applications.filter((a) => a.status === "accepted").length,
   };
 
-        return (
-          <div className="min-h-screen bg-black">
-            <AdminHeader user={user} notificationCount={3} />
+  return (
+    <PageShell topPadding={false} fullBleed className="bg-black">
+      <AdminHeader user={user} notificationCount={3} />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-6">
+          <PageHeader
+            title="Overview"
+            subtitle="Platform performance, activity, and quick actions."
+          />
 
-      <div className="container mx-auto px-4 py-8">
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
@@ -506,7 +513,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

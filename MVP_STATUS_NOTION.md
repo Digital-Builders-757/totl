@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: UI Terminal Kit + Mobile Overflow Guardrails (No Layout Drift)**
+
+**UI LAYOUT CONTRACT + SENTINEL QA** - December 19, 2025  
+- ✅ Introduced a canonical **Terminal Kit** (`PageShell`, `PageHeader`, `SectionCard`, `DataTableShell`, `PageLoading`, `EmptyState`) to stop layout drift across pages.  
+- ✅ Adopted the kit on **Settings**, **Admin Dashboard**, and **Career Builder Applications** (admin list) with structural-only diffs (no business logic changes).  
+- ✅ Locked mobile safety rules: **LongToken** for UUID/email/url, `min-w-0` for shrinkable flex rows, and `DataTableShell` for safe horizontal table scroll.  
+- ✅ Added/expanded a Playwright **mobile overflow sentinel** so regressions are caught immediately (page must not scroll horizontally).  
+
 ## 🚀 **Latest Achievement: Logout Redirect Convergence (No “stuck until refresh”)**
 
 **SIGN-OUT UX RELIABILITY (SETTINGS + NAVBAR)** - December 19, 2025  

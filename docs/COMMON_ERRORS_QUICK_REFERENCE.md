@@ -100,6 +100,17 @@ npm run build
 - **Fix:** Ensure sign-out always converges to **`/login?signedOut=true`** and only one layer owns navigation for user-initiated sign-out.
 - **Where to check:** `components/auth/auth-provider.tsx` (manual sign-out owner + SIGNED_OUT safety net), `middleware.ts` (allow `/login` when `signedOut=true`), `components/navbar.tsx` (avoid post-signOut competing redirects).
 
+### **Mobile page scrolls sideways / text goes off-screen (horizontal overflow)**
+- **Symptom:** On mobile, you can pan the entire page left/right, or long IDs/emails/URLs push content off-screen.
+- **Root cause:** Long unbroken tokens + flex children that can’t shrink (`min-w-0` missing), or “silent spacing hacks” (e.g., global rules that add margins to `gap-*` layouts).
+- **Fix:** Prefer shrink/wrap correctness over global clamping:
+  - Use `components/ui/long-token.tsx` (`LongToken`) for UUID/email/url rendering
+  - Add `min-w-0` to flex text containers that must shrink
+  - Wrap tables in `components/layout/data-table-shell.tsx` (`DataTableShell`)
+  - Remove global spacing hacks that duplicate Tailwind spacing behavior
+  - Keep Playwright mobile overflow sentinel green (`tests/integration/mobile-overflow-sentinel.spec.ts`)
+- **Where to check:** `docs/UI_LAYOUT_CONTRACT.md` (Terminal Kit rules), `app/globals.css`, and any affected page/section components.
+
 ## **6. PRE-COMMIT CHECKLIST REFERENCE**
 
 **ALWAYS run this checklist before pushing:**

@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { DataTableShell } from "@/components/layout/data-table-shell";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LongToken } from "@/components/ui/long-token";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
@@ -326,52 +331,51 @@ export function AdminClientApplicationsClient({
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
+    <PageShell
+      topPadding={false}
+      fullBleed
+      className="bg-gradient-to-br from-gray-900 via-black to-gray-800"
+    >
       <AdminHeader user={user} notificationCount={3} />
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
-              Career Builder Applications
-            </h1>
-            <p className="text-gray-400 text-lg">
-              Manage companies applying to become Career Builders on the platform
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 flex items-center space-x-4">
-            <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 py-2 rounded-lg font-medium">
-              {pendingApplications.length} Pending
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <PageHeader
+          title="Career Builder Applications"
+          subtitle="Manage companies applying to become Career Builders on the platform"
+          actions={
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 py-2 rounded-lg font-medium">
+                {pendingApplications.length} Pending
+              </div>
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium">
+                {approvedApplications.length} Approved
+              </div>
+              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
+                {rejectedApplications.length} Rejected
+              </div>
+              <Button
+                onClick={handleSendFollowUps}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+                disabled={isSendingFollowUps}
+              >
+                <Mail className="h-4 w-4" />
+                {isSendingFollowUps ? "Sending..." : "Send follow-ups"}
+              </Button>
+              <Button
+                onClick={handleExport}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
             </div>
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium">
-              {approvedApplications.length} Approved
-            </div>
-            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
-              {rejectedApplications.length} Rejected
-            </div>
-            <Button
-              onClick={handleSendFollowUps}
-              variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
-              disabled={isSendingFollowUps}
-            >
-              <Mail className="h-4 w-4" />
-              {isSendingFollowUps ? "Sending..." : "Send follow-ups"}
-            </Button>
-            <Button
-              onClick={handleExport}
-              variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export CSV
-            </Button>
-          </div>
-        </div>
+          }
+        />
 
         {/* Applications Section */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden mb-8">
+        <SectionCard className="border-gray-700 bg-gray-800/50" paddingClassName="p-0">
           <div className="p-6 border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
@@ -433,7 +437,7 @@ export function AdminClientApplicationsClient({
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <DataTableShell>
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
@@ -552,7 +556,7 @@ export function AdminClientApplicationsClient({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </DataTableShell>
               )}
             </TabsContent>
 
@@ -568,7 +572,7 @@ export function AdminClientApplicationsClient({
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <DataTableShell>
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
@@ -661,7 +665,7 @@ export function AdminClientApplicationsClient({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </DataTableShell>
               )}
             </TabsContent>
 
@@ -677,7 +681,7 @@ export function AdminClientApplicationsClient({
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <DataTableShell>
                   <table className="w-full">
                     <thead>
                       <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
@@ -770,11 +774,11 @@ export function AdminClientApplicationsClient({
                       ))}
                     </tbody>
                   </table>
-                </div>
+                </DataTableShell>
               )}
             </TabsContent>
           </Tabs>
-        </div>
+        </SectionCard>
       </div>
 
       {/* Approve Dialog */}
@@ -948,14 +952,14 @@ export function AdminClientApplicationsClient({
                   {selectedApplication.website && (
                     <div>
                       <p className="text-sm text-gray-400">Website</p>
-                      <a
+                      <LongToken
+                        as="a"
+                        value={selectedApplication.website}
                         href={selectedApplication.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-medium text-blue-400 hover:underline"
-                      >
-                        {selectedApplication.website}
-                      </a>
+                      />
                     </div>
                   )}
                 </div>
@@ -1010,9 +1014,13 @@ export function AdminClientApplicationsClient({
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-white">Application Metadata</h3>
                 <div className="bg-gray-700/50 p-4 rounded-lg space-y-2 text-sm">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between gap-4 min-w-0">
                     <span className="text-gray-400">Application ID</span>
-                    <span className="font-mono text-xs text-gray-300">{selectedApplication.id}</span>
+                    <LongToken
+                      as="span"
+                      value={selectedApplication.id}
+                      className="font-mono text-xs text-gray-300 text-right min-w-0"
+                    />
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Status</span>
@@ -1071,6 +1079,6 @@ export function AdminClientApplicationsClient({
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

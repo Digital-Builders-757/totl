@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -61,7 +61,17 @@ export default function ChooseRolePage() {
   };
 
   if (!mounted) {
-    return null;
+    return (
+      <div className="min-h-screen bg-black pt-20 sm:pt-24">
+        {/* Hydration marker for E2E stability */}
+        <span data-testid="choose-role-hydrated" className="sr-only">
+          loading
+        </span>
+        <div className="container mx-auto px-4 py-12 text-center text-gray-300">
+          Loading…
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -75,6 +85,10 @@ export default function ChooseRolePage() {
       ></div>
 
       <div className="container mx-auto px-4 py-4 sm:py-12 relative z-10">
+        {/* Hydration marker for E2E stability */}
+        <span data-testid="choose-role-hydrated" className="sr-only">
+          ready
+        </span>
         <Link href="/" className="inline-flex items-center text-gray-300 hover:text-white mb-4 sm:mb-8 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
