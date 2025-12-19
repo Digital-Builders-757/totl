@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Menu, X, ChevronDown } from "lucide-react";
 import Image from "next/image";
@@ -70,10 +70,6 @@ export default function Navbar() {
       
       // Call signOut and wait for it to complete
       await signOut();
-      
-      // Force immediate hard refresh to ensure clean state
-      // This ensures cookies are cleared and page refreshes
-      window.location.href = PATHS.LOGIN;
     } catch (error) {
       console.error("Sign out error:", error);
       setIsSigningOut(false);

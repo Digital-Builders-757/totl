@@ -4,7 +4,7 @@ import type { User, Session, AuthError, AuthChangeEvent, SupabaseClient } from "
 import { useRouter, usePathname } from "next/navigation";
 import type React from "react";
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import {
@@ -89,6 +89,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
+  const manualSignOutInProgressRef = useRef(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -322,6 +323,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Error fetching profile on sign in:", error);
         }
       } else if (event === "SIGNED_OUT") {
+        const wasManualSignOut = manualSignOutInProgressRef.current;
+        manualSignOutInProgressRef.current = false;
+
         // Reset the browser client singleton to ensure clean state
         // This prevents the old authenticated client from being reused
         resetSupabaseBrowserClient();
@@ -339,7 +343,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // - Sessions are cleared externally (admin deletes user, etc.)
         // - Other tabs sign out (cross-tab sync)
         // In these cases, we need to redirect to prevent users from viewing protected content while logged out
+        //
+        // IMPORTANT: For user-initiated signOut(), the signOut() method is the single redirect owner.
+        // The SIGNED_OUT handler should act as a safety net only (expiry, admin deletion, cross-tab sync).
         if (typeof window !== "undefined") {
+          if (wasManualSignOut) {
+            // signOut() will handle the canonical redirect (/login?signedOut=true).
+            // Avoid competing redirects that can drop signedOut=true and trigger middleware bounce.
+            setIsLoading(false);
+            return;
+          }
+
           // Get current pathname, stripping any query parameters
           // pathname from usePathname() already excludes query params, but window.location.pathname is more reliable
           const currentPath = (pathname || window.location.pathname).split("?")[0];
@@ -350,8 +364,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Only redirect if we're not already on a public or auth route
           if (!isPublicPath(currentPath) && !isAuthRouteMatch) {
             // Use hard redirect to ensure complete session clear
-            // Use clean /login path without query params to avoid routing issues
-            window.location.href = PATHS.LOGIN;
+            // Always include signedOut=true to avoid middleware "helpful" redirects during auth-clearing window
+            window.location.replace(`${PATHS.LOGIN}?signedOut=true`);
           }
         } else {
           // Fallback for server-side (shouldn't happen, but just in case)
@@ -458,6 +472,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) return { error: null };
 
     try {
+      manualSignOutInProgressRef.current = true;
       setIsLoading(true);
       setUser(null);
       setSession(null);
@@ -493,6 +508,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       return { error: clientError };
     } catch (error) {
       console.error("Error during sign out:", error);
+      manualSignOutInProgressRef.current = false;
       resetSupabaseBrowserClient();
       setUser(null);
       setSession(null);
