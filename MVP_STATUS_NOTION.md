@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Logout Redirect Convergence (No “stuck until refresh”)**
+
+**SIGN-OUT UX RELIABILITY (SETTINGS + NAVBAR)** - December 19, 2025  
+- ✅ Fixed “Sign out looks stuck until refresh/click” by removing competing redirects during the auth-clearing window.  
+- ✅ Enforced a single canonical destination for sign-out: `/login?signedOut=true` (prevents middleware bounce while cookies clear).  
+- ✅ Made `SIGNED_OUT` handler a safety net only for non-user sign-outs (session expiry / cross-tab), while user-initiated `signOut()` is the single redirect owner.  
+
 ## 🚀 **Latest Achievement: Admin Paid Talent Metrics + First-Login Bootstrap Hardening**
 
 **PAID MEMBERSHIP METRICS + BOOTSTRAP RELIABILITY** - December 18, 2025  
