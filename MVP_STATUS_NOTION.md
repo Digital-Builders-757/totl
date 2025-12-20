@@ -21,6 +21,7 @@
 - ✅ Audit finish line (Diff 4 / Option 1): locked `client_applications` truth as **one row per email** (`UNIQUE(email)`), with `user_id` treated as optional linkage (not a uniqueness key). Updated submission flow to respect this (update-on-reapply vs duplicate insert).  
 - ✅ Audit finish line (Diff 5): sealed regression gates — CI/pre-commit now blocks `select('*')` and Supabase mutations inside `"use client"` files (`npm run guard:select-star`, `npm run guard:client-writes`, included in `npm run verify-all`).  
 - ✅ P0 hardening: added **DB-backed email send ledger** (`public.email_send_ledger`) and server-side claim gate so public “Resend verification” / “Password reset” is **one click → one send** across multi-instance/serverless.  
+- ✅ DX hardening: made `npm run verify-all` the **CI-parity** local gate and added `npm run verify-fast` as the daily loop (guards + types + lint), reducing “passes locally, fails later” drift.  
 
 **Next (P0)**
 - [x] Apply pending migrations to the remote Supabase project via `npm run db:push`.  
