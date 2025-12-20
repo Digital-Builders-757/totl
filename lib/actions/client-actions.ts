@@ -147,7 +147,6 @@ export async function approveClientApplication(applicationId: string, adminNotes
   const supabase = await createSupabaseServer();
 
   try {
-    // First, check if the current user is an admin
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -156,205 +155,86 @@ export async function approveClientApplication(applicationId: string, adminNotes
       return { error: "Not authenticated" };
     }
 
-    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    // DB truth: approval + promotion is atomic + idempotent via SECURITY DEFINER RPC.
+    // We intentionally do not scan auth.users by email; the promotion target is client_applications.user_id.
+    type ApproveRpcRow = {
+      application_id: string;
+      user_id: string;
+      application_status: string;
+      did_decide: boolean;
+      did_promote: boolean;
+    };
+    type RpcErrorShape = { message?: string } | null;
+    type RpcResultShape<T> = { data: T | null; error: RpcErrorShape };
+    type RpcClient = {
+      rpc: (
+        fn: string,
+        args: { p_application_id: string; p_admin_notes: string | null }
+      ) => Promise<RpcResultShape<ApproveRpcRow[]>>;
+    };
 
-    if (profileError || profile?.role !== "admin") {
-      return { error: "Not authorized" };
-    }
-
-    // Get application details for email
-    const { data: applicationData, error: fetchError } = await supabase
-      .from("client_applications")
-      .select("first_name, last_name, email, company_name, industry, phone, website, status, admin_notes")
-      .eq("id", applicationId)
-      .maybeSingle();
-
-    if (fetchError || !applicationData) {
-      return { error: "Application not found" };
-    }
-
-    // Promote applicant to client role/account type
-    const supabaseAdmin = createSupabaseAdminClient();
-    const normalizedEmail = applicationData.email.trim().toLowerCase();
-    const perPage = 100;
-    let page = 1;
-    let matchingUser:
-      | {
-          id: string;
-          email?: string | null;
-        }
-      | undefined;
-
-    while (!matchingUser) {
-      const { data: userList, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-        page,
-        perPage,
-      });
-
-      if (listError) {
-        console.error("Error listing users during client approval:", listError);
-        return { error: "Failed to promote profile to client" };
+    const { data: rpcData, error: rpcError } = await (supabase as unknown as RpcClient).rpc(
+      "approve_client_application_and_promote",
+      {
+        p_application_id: applicationId,
+        p_admin_notes: adminNotes ?? null,
       }
+    );
 
-      if (!userList) {
-        break;
-      }
-
-      matchingUser = userList.users.find(
-        (userItem) => userItem.email?.toLowerCase() === normalizedEmail
-      );
-
-      if (matchingUser) {
-        break;
-      }
-
-      if (!userList.nextPage || userList.nextPage === page) {
-        break;
-      }
-
-      page = userList.nextPage;
+    if (rpcError || !rpcData || rpcData.length === 0) {
+      const msg = rpcError?.message || "Approval failed";
+      if (msg.toLowerCase().includes("forbidden")) return { error: "Not authorized" };
+      if (msg.toLowerCase().includes("unauthorized")) return { error: "Not authenticated" };
+      if (msg.toLowerCase().includes("not found")) return { error: "Application not found" };
+      if (msg.toLowerCase().includes("cannot approve")) return { error: "Cannot approve a rejected application" };
+      return { error: msg };
     }
 
-    if (!matchingUser?.id) {
-      console.warn(
-        "Could not find profile to promote after approving client application",
-        applicationData.email
-      );
-      return { error: "Client profile not found during approval" };
-    }
+    const row = rpcData[0];
 
-    const previousStatus = applicationData.status ?? "pending";
-    const previousAdminNotes = applicationData.admin_notes ?? null;
-    // Update the application status to approved before promoting the profile
-    const { error: updateError } = await supabase
-      .from("client_applications")
-      .update({
-        status: "approved",
-        admin_notes: adminNotes || null,
-      })
-      .eq("id", applicationId);
-
-    if (updateError) {
-      console.error("Error approving client application:", updateError);
-      return { error: updateError.message };
-    }
-
-    const { error: profileUpdateError } = await supabaseAdmin
-      .from("profiles")
-      .update({
-        account_type: "client",
-        role: "client",
-      } as Pick<
-        Database["public"]["Tables"]["profiles"]["Update"],
-        "account_type" | "role"
-      >)
-      .eq("id", matchingUser.id);
-
-    if (profileUpdateError) {
-      console.error("Error updating profile during client approval:", profileUpdateError);
-      // Roll back application status to its previous state
-      const { error: rollbackError } = await supabase
+    // Email side effects: send only on the first decision/promotion.
+    if (row.did_promote) {
+      const { data: applicationData } = await supabase
         .from("client_applications")
-        .update({
-          status: previousStatus,
-          admin_notes: previousAdminNotes,
-        })
-        .eq("id", applicationId);
+        .select("first_name, last_name, email, company_name")
+        .eq("id", applicationId)
+        .maybeSingle();
 
-      if (rollbackError) {
-        console.error("Error rolling back client application status:", rollbackError);
+      if (applicationData?.email) {
+        try {
+          const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
+          const approvalEmail = generateClientApplicationApprovedEmail({
+            name: applicantName,
+            companyName: applicationData.company_name,
+            adminNotes: adminNotes || undefined,
+            loginUrl: absoluteUrl("/login"),
+          });
+
+          await sendEmail({
+            to: applicationData.email,
+            subject: approvalEmail.subject,
+            html: approvalEmail.html,
+          });
+
+          await logEmailSent(applicationData.email, "client-application-approved", true);
+        } catch (emailError) {
+          console.error("Error sending approval email:", emailError);
+          await logEmailSent(
+            applicationData.email,
+            "client-application-approved",
+            false,
+            emailError instanceof Error ? emailError.message : "Unknown error"
+          );
+        }
       }
-
-      return { error: "Failed to promote profile to client" };
     }
 
-    // -----------------------------------------------------------------------
-    // PR #3 contract: promotion guarantees
-    // 1) client_profiles must exist (idempotent)
-    // 2) role/account_type must match (handled above)
-    // -----------------------------------------------------------------------
-    try {
-      const contactName = `${applicationData.first_name} ${applicationData.last_name}`.trim();
-
-      const { error: clientProfileUpsertError } = await supabaseAdmin
-        .from("client_profiles")
-        .upsert(
-          {
-            user_id: matchingUser.id,
-            company_name: applicationData.company_name || "",
-            industry: applicationData.industry ?? null,
-            website: applicationData.website ?? null,
-            contact_name: contactName || null,
-            contact_email: applicationData.email ?? null,
-            contact_phone: applicationData.phone ?? null,
-          } as Database["public"]["Tables"]["client_profiles"]["Insert"],
-          { onConflict: "user_id" }
-        );
-
-      if (clientProfileUpsertError) {
-        // If profile promotion succeeded but client_profiles creation failed, we must fail the approval
-        // to avoid an inconsistent "client without client_profiles" state.
-        console.error("Error ensuring client_profiles during approval:", clientProfileUpsertError);
-
-        // Best-effort rollback: revert profiles back to Talent so routing doesn't treat user as client.
-        await supabaseAdmin
-          .from("profiles")
-          .update({ role: "talent", account_type: "talent" } as Pick<
-            Database["public"]["Tables"]["profiles"]["Update"],
-            "role" | "account_type"
-          >)
-          .eq("id", matchingUser.id);
-
-        // Best-effort rollback application status
-        await supabase
-          .from("client_applications")
-          .update({
-            status: previousStatus,
-            admin_notes: previousAdminNotes,
-          })
-          .eq("id", applicationId);
-
-        return { error: "Failed to provision client profile during approval" };
-      }
-    } catch (clientProfileProvisionError) {
-      console.error("Unexpected error provisioning client_profiles during approval:", clientProfileProvisionError);
-      return { error: "Failed to provision client profile during approval" };
-    }
-
-    // Send approval email to applicant
-    try {
-      const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
-      const approvalEmail = generateClientApplicationApprovedEmail({
-        name: applicantName,
-        companyName: applicationData.company_name,
-        adminNotes: adminNotes || undefined,
-        loginUrl: absoluteUrl("/login"),
-      });
-
-      await sendEmail({
-        to: applicationData.email,
-        subject: approvalEmail.subject,
-        html: approvalEmail.html,
-      });
-
-      await logEmailSent(applicationData.email, "client-application-approved", true);
-    } catch (emailError) {
-      // Log email errors but don't fail the approval
-      console.error("Error sending approval email:", emailError);
-      await logEmailSent(
-        applicationData.email,
-        "client-application-approved",
-        false,
-        emailError instanceof Error ? emailError.message : "Unknown error"
-      );
-    }
-
-    return { success: true };
+    return {
+      success: true,
+      didDecide: row.did_decide,
+      didPromote: row.did_promote,
+      status: row.application_status,
+    };
   } catch (error) {
     console.error("Unexpected error approving client application:", error);
     return { error: "An unexpected error occurred. Please try again." };
@@ -365,7 +245,6 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
   const supabase = await createSupabaseServer();
 
   try {
-    // First, check if the current user is an admin
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -374,70 +253,81 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
       return { error: "Not authenticated" };
     }
 
-    // Use maybeSingle() to prevent 406 errors when profile doesn't exist
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
+    type RejectRpcRow = {
+      application_id: string;
+      user_id: string;
+      application_status: string;
+      did_decide: boolean;
+    };
+    type RpcErrorShape = { message?: string } | null;
+    type RpcResultShape<T> = { data: T | null; error: RpcErrorShape };
+    type RpcClient = {
+      rpc: (
+        fn: string,
+        args: { p_application_id: string; p_admin_notes: string | null }
+      ) => Promise<RpcResultShape<RejectRpcRow[]>>;
+    };
 
-    if (profileError || profile?.role !== "admin") {
-      return { error: "Not authorized" };
+    const { data: rpcData, error: rpcError } = await (supabase as unknown as RpcClient).rpc(
+      "reject_client_application",
+      {
+        p_application_id: applicationId,
+        p_admin_notes: adminNotes ?? null,
+      }
+    );
+
+    if (rpcError || !rpcData || rpcData.length === 0) {
+      const msg = rpcError?.message || "Rejection failed";
+      if (msg.toLowerCase().includes("forbidden")) return { error: "Not authorized" };
+      if (msg.toLowerCase().includes("unauthorized")) return { error: "Not authenticated" };
+      if (msg.toLowerCase().includes("not found")) return { error: "Application not found" };
+      if (msg.toLowerCase().includes("cannot reject")) return { error: "Cannot reject an approved application" };
+      return { error: msg };
     }
 
-    // Get application details for email
-    const { data: applicationData, error: fetchError } = await supabase
-      .from("client_applications")
-      .select("first_name, last_name, email, company_name")
-      .eq("id", applicationId)
-      .maybeSingle();
+    const row = rpcData[0];
 
-    if (fetchError || !applicationData) {
-      return { error: "Application not found" };
+    // Email side effects: send only on the first rejection decision.
+    if (row.did_decide) {
+      const { data: applicationData } = await supabase
+        .from("client_applications")
+        .select("first_name, last_name, email, company_name")
+        .eq("id", applicationId)
+        .maybeSingle();
+
+      if (applicationData?.email) {
+        try {
+          const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
+          const rejectionEmail = generateClientApplicationRejectedEmail({
+            name: applicantName,
+            companyName: applicationData.company_name,
+            adminNotes: adminNotes || undefined,
+          });
+
+          await sendEmail({
+            to: applicationData.email,
+            subject: rejectionEmail.subject,
+            html: rejectionEmail.html,
+          });
+
+          await logEmailSent(applicationData.email, "client-application-rejected", true);
+        } catch (emailError) {
+          console.error("Error sending rejection email:", emailError);
+          await logEmailSent(
+            applicationData.email,
+            "client-application-rejected",
+            false,
+            emailError instanceof Error ? emailError.message : "Unknown error"
+          );
+        }
+      }
     }
 
-    // Update the application status to rejected
-    const { error } = await supabase
-      .from("client_applications")
-      .update({
-        status: "rejected",
-        admin_notes: adminNotes || null,
-      })
-      .eq("id", applicationId);
-
-    if (error) {
-      console.error("Error rejecting client application:", error);
-      return { error: error.message };
-    }
-
-    // Send rejection email to applicant
-    try {
-      const applicantName = `${applicationData.first_name} ${applicationData.last_name}`;
-      const rejectionEmail = generateClientApplicationRejectedEmail({
-        name: applicantName,
-        companyName: applicationData.company_name,
-        adminNotes: adminNotes || undefined,
-      });
-
-      await sendEmail({
-        to: applicationData.email,
-        subject: rejectionEmail.subject,
-        html: rejectionEmail.html,
-      });
-
-      await logEmailSent(applicationData.email, "client-application-rejected", true);
-    } catch (emailError) {
-      // Log email errors but don't fail the rejection
-      console.error("Error sending rejection email:", emailError);
-      await logEmailSent(
-        applicationData.email,
-        "client-application-rejected",
-        false,
-        emailError instanceof Error ? emailError.message : "Unknown error"
-      );
-    }
-
-    return { success: true };
+    return {
+      success: true,
+      didDecide: row.did_decide,
+      status: row.application_status,
+    };
   } catch (error) {
     console.error("Unexpected error rejecting client application:", error);
     return { error: "An unexpected error occurred. Please try again." };

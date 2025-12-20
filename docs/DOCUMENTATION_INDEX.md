@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** December 19, 2025
+**Last Updated:** December 20, 2025
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
