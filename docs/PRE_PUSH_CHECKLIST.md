@@ -4,10 +4,11 @@
 
 ## **1. SCHEMA & TYPES VERIFICATION**
 ```bash
-# ALWAYS run these commands before pushing
-npm run schema:verify:comprehensive
-npm run types:check
-npm run build
+# Canonical gate (CI-parity)
+npm run verify-all
+
+# Daily dev loop (fast lane)
+npm run verify-fast
 ```
 
 ## **1.5. IF YOU USED SUPABASE STUDIO / SQL EDITOR FOR SCHEMA CHANGES TODAY**

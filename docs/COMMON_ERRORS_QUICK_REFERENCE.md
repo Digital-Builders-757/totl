@@ -63,6 +63,12 @@ npm run build
   - **Fix:** Move the mutation into a **Server Action** or **API route** and call that from the client component.
   - **Command:** `npm run guard:client-writes`
 
+### **CI/DX drift: passes locally, fails later**
+- **Symptom:** You ran `lint`/`build` manually, but a later gate fails on guards/schema/policies.
+- **Fix:** Use the canonical commands:
+  - **Daily loop:** `npm run verify-fast`
+  - **Before push/PR:** `npm run verify-all` (CI-parity gate)
+
 ### **Next.js EPERM on Windows/OneDrive (`.next\\trace`)**
 - **Symptom:** `EPERM: operation not permitted, open '...\\.next\\trace'` during `next build` or when Playwright starts a dev server.
 - **Root cause:** Windows file-locking + OneDrive sync contention on `.next` artifacts (especially `trace`).
