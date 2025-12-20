@@ -30,26 +30,65 @@ export async function submitClientApplication(data: ClientApplicationData) {
   const supabase = await createSupabaseServer();
 
   try {
-    // 🔐 Require authenticated user and capture their id for RLS
+    // 🔐 Require authenticated user (RLS truth for authenticated submissions is email-match).
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (userError || !user || !user.email) {
       console.error("No authenticated user when submitting client application:", userError);
       return { error: "You must be logged in to apply as a Career Builder." };
     }
 
-    // Prevent duplicate non-rejected applications for this user
+    // Option 1 (finish-line truth): client_applications is UNIQUE(email).
+    // `user_id` is optional linkage; never treat it as the uniqueness key.
+    const canonicalEmail = user.email.trim().toLowerCase();
+
+    // Prevent duplicate non-rejected applications for this email.
     const { data: existing, error: existingError } = await supabase
       .from("client_applications")
       .select("id, status")
-      .eq("user_id", user.id)
-      .not("status", "eq", "rejected")
+      .ilike("email", canonicalEmail)
       .maybeSingle();
 
-    if (!existingError && existing) {
+    if (existingError) {
+      console.error("Error checking existing client application:", existingError);
+      return { error: "Failed to check existing application. Please try again." };
+    }
+
+    if (existing) {
+      if (existing.status === "rejected") {
+        // Allow re-apply by updating the same row (keeps UNIQUE(email) truth intact).
+        const { error: updateError } = await supabase
+          .from("client_applications")
+          .update({
+            user_id: user.id,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            company_name: data.companyName,
+            email: canonicalEmail,
+            phone: data.phone,
+            industry: data.industry,
+            business_description: data.businessDescription,
+            needs_description: data.needsDescription,
+            website: data.website,
+            status: "pending",
+            admin_notes: null,
+            follow_up_sent_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+
+        if (updateError) {
+          console.error("Error updating rejected client application:", updateError);
+          return { error: updateError.message };
+        }
+
+        // Keep response shape consistent with insert path.
+        return { success: true, applicationId: existing.id };
+      }
+
       return {
         error:
           "You already have an application on file. Please wait for a decision or contact support if you need to make changes.",
@@ -65,7 +104,7 @@ export async function submitClientApplication(data: ClientApplicationData) {
           first_name: data.firstName,
           last_name: data.lastName,
           company_name: data.companyName,
-          email: data.email,
+          email: canonicalEmail,
           phone: data.phone,
           industry: data.industry,
           business_description: data.businessDescription,
@@ -97,18 +136,18 @@ export async function submitClientApplication(data: ClientApplicationData) {
       });
 
       await sendEmail({
-        to: data.email,
+        to: canonicalEmail,
         subject: confirmationEmail.subject,
         html: confirmationEmail.html,
       });
 
-      await logEmailSent(data.email, "client-application-confirmation", true);
+      await logEmailSent(canonicalEmail, "client-application-confirmation", true);
 
       // 2. Send notification email to admin team
       const adminEmail = generateClientApplicationAdminNotificationEmail({
         name: applicantName,
         companyName: data.companyName,
-        clientName: data.email, // Using for display in admin email
+        clientName: canonicalEmail, // Using for display in admin email
         industry: data.industry || undefined,
         businessDescription: data.businessDescription,
         needsDescription: data.needsDescription,
@@ -129,7 +168,7 @@ export async function submitClientApplication(data: ClientApplicationData) {
       // Log email errors but don't fail the application submission
       console.error("Error sending client application emails:", emailError);
       await logEmailSent(
-        data.email,
+        canonicalEmail,
         "client-application-confirmation",
         false,
         emailError instanceof Error ? emailError.message : "Unknown error"
@@ -156,7 +195,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
     }
 
     // DB truth: approval + promotion is atomic + idempotent via SECURITY DEFINER RPC.
-    // We intentionally do not scan auth.users by email; the promotion target is client_applications.user_id.
+    // Finish-line truth: promotion is keyed by application id; `client_applications.user_id` is linkage (not uniqueness).
     type ApproveRpcRow = {
       application_id: string;
       user_id: string;

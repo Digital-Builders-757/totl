@@ -378,6 +378,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 | Column | Data Type | Nullable | Default | Description |
 |--------|-----------|----------|---------|-------------|
 | `id` | `uuid` | NO | `uuid_generate_v4()` | Primary key |
+| `user_id` | `uuid` | YES | - | Optional linkage to `profiles.id` for authenticated submissions / admin promotion |
 | `first_name` | `text` | NO | - | First name |
 | `last_name` | `text` | NO | - | Last name |
 | `email` | `text` | NO | - | Email address (unique) |
@@ -396,6 +397,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 **Constraints:**
 - Primary Key: `id`
 - Unique: `email` (one application per email)
+- Foreign Key: `user_id` → `profiles.id` **ON DELETE CASCADE** (optional linkage)
 
 **Indexes:**
 - `client_applications_pkey` (Primary Key)
