@@ -23,6 +23,29 @@ ERROR: syntax error at or near "NOT"
 
 ---
 
+## 🚨 Critical Rule: RLS policies must not query the same table they protect (42P17 recursion)
+
+Postgres will abort with:
+
+```
+SQLSTATE 42P17: infinite recursion detected in policy for relation "profiles"
+```
+
+when a policy on a table (e.g., `public.profiles`) **reads from that same table** inside `USING` / `WITH CHECK`.
+
+### ✅ Safe examples (on `public.profiles`)
+
+- `USING (id = (SELECT auth.uid()))`
+- `WITH CHECK (id = (SELECT auth.uid()))`
+
+### ❌ Unsafe examples (on `public.profiles`)
+
+- `USING (EXISTS (SELECT 1 FROM profiles ...))`
+- `USING (auth.uid() IN (SELECT id FROM profiles ...))`
+- any `FROM profiles` / `JOIN profiles` inside a policy **ON profiles**
+
+> Important: The common “admin check” pattern using `EXISTS (SELECT 1 FROM profiles ...)` is fine when the policy is on **other tables** (e.g. `applications`), but **not** when the policy is on `profiles` itself.
+
 ## ✅ Correct Pattern: Use DO Blocks with Conditional Checks
 
 PostgreSQL requires using `DO $$` blocks with conditional checks to create policies idempotently.

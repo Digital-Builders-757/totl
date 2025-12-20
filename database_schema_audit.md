@@ -585,6 +585,10 @@ USING (id = auth.uid());
 -- Users can insert their own profile
 CREATE POLICY "Insert profile by user or service" ON profiles FOR INSERT TO public 
 WITH CHECK (id = auth.uid());
+
+-- NOTE: A recursive admin-read policy on profiles was removed because it caused:
+--   SQLSTATE 42P17: infinite recursion detected in policy for relation "profiles"
+-- Migration: supabase/migrations/20251220131212_drop_recursive_profiles_admin_policy.sql
 ```
 
 #### **talent_profiles Table**

@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚑 **Latest Fix: Schema truth alignment (stop signup/bootstrap DB failures)**
+
+**SCHEMA DRIFT HOTFIXES** - December 20, 2025  
+- ✅ Fixed Postgres RLS hard failure `42P17` by dropping the recursive `profiles` policy (`Admins can view all profiles`) via migration.  
+- ✅ Fixed local PostgREST `42703` (`profiles.avatar_path` missing) by adding `public.profiles.avatar_path` via migration and re-running local reset.  
+- ✅ Added guardrail `npm run rls:guard` to prevent future self-referential `profiles` policies from landing in migrations.  
+- ✅ Regenerated `types/database.ts` so repo types match live schema again (schema verify green).  
+
+**Next (P0)**
+- [ ] Apply pending migrations to the remote Supabase project via `npm run db:push` (after merge as appropriate).  
+- [ ] Re-run `npm run schema:verify:comprehensive && npm run build && npm run lint` post-push to confirm no drift.  
+
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 
 **STRIPE WEBHOOKS VERIFIED** - December 20, 2025  

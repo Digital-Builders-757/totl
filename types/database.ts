@@ -688,7 +688,30 @@ export type Database = {
       }
     }
     Functions: {
+      accept_application_and_create_booking: {
+        Args: {
+          application_id: string
+          booking_compensation?: number
+          booking_date?: string
+          booking_notes?: string
+        }
+        Returns: {
+          application_status: Database["public"]["Enums"]["application_status"]
+          booking_id: string
+          did_accept: boolean
+        }[]
+      }
       analyze_tables: { Args: never; Returns: undefined }
+      approve_client_application_and_promote: {
+        Args: { p_admin_notes?: string; p_application_id: string }
+        Returns: {
+          application_id: string
+          application_status: string
+          did_decide: boolean
+          did_promote: boolean
+          user_id: string
+        }[]
+      }
       backfill_missing_profiles: {
         Args: never
         Returns: {
@@ -738,6 +761,15 @@ export type Database = {
       }
       maintenance_cleanup: { Args: never; Returns: undefined }
       refresh_admin_dashboard_cache: { Args: never; Returns: undefined }
+      reject_client_application: {
+        Args: { p_admin_notes?: string; p_application_id: string }
+        Returns: {
+          application_id: string
+          application_status: string
+          did_decide: boolean
+          user_id: string
+        }[]
+      }
       test_enum_casting: { Args: { test_role: string }; Returns: string }
       test_trigger_function_exists: { Args: never; Returns: boolean }
     }

@@ -47,7 +47,8 @@
     "env:test": "node scripts/test-env.js",
     "test:unit": "vitest run --config vitest.config.ts",
     "status:auto": "git add MVP_STATUS_NOTION.md && git commit -m 'docs: update MVP status (auto)' || exit 0",
-    "status:update": "powershell -ExecutionPolicy Bypass -File scripts/update-mvp-status.ps1"
+    "status:update": "powershell -ExecutionPolicy Bypass -File scripts/update-mvp-status.ps1",
+    "rls:guard": "node scripts/check-rls-policy-recursion.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

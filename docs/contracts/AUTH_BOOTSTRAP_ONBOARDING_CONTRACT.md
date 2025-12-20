@@ -140,11 +140,14 @@
 | Policy name | Operation | Role(s) | USING predicate | WITH CHECK predicate | Migration |
 |---|---|---|---|---|---|
 | `Users can view own profile` | SELECT | authenticated | `auth.uid() = id` | — | `20250101000001_rls_policies.sql` |
-| `Admins can view all profiles` | SELECT | authenticated | `EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')` | — | `20250101000001_rls_policies.sql` |
 | `Public profiles view` | SELECT | anon, authenticated | `true` | — | `20251024182916_fix_rls_policies_only.sql` |
 | `Users can update own profile` | UPDATE | authenticated | `auth.uid() = id` | — | `20250101000001_rls_policies.sql` |
 | `Update own profile` | UPDATE | authenticated | `id = (SELECT auth.uid())` | — | `20251016172507_fix_performance_advisor_warnings.sql` |
 | `Insert profile by user or service` | INSERT | PUBLIC (effectively authenticated only) | — | `id = (SELECT auth.uid())` | `20251016172507_fix_performance_advisor_warnings.sql` |
+
+**Removed policy (recursion fix)**
+- `Admins can view all profiles` was dropped because it caused `SQLSTATE 42P17` (self-referential policy on `profiles`).
+- Migration: `supabase/migrations/20251220131212_drop_recursive_profiles_admin_policy.sql`
 
 **Net effect**
 - **SELECT:** public (anon) can select **all rows** (`Public profiles view`).
