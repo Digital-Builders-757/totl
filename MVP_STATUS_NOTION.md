@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Email Notifications Contract VERIFIED (Governed + non-leaky + guarded)**
+
+**EMAIL CONTRACT AUDIT-TO-VERIFIED** - December 20, 2025  
+- ✅ Promoted `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` to **✅ VERIFIED** with a canonical ledger (email type → trigger → posture → proof).  
+- ✅ Enforced explicit auth posture for `/api/email/*`: public-callable (verification/password reset) vs internal-only (header-guarded).  
+- ✅ Prevented account existence leaks on public email routes (uniform `{ success: true, requestId }` responses even for unknown emails / failures).  
+- ✅ Added best-effort public abuse throttle (non-leaky) + internal-only 403 sentinel checks in Playwright.  
+- ✅ Removed server→server internal HTTP hops for email sending (direct function calls only) and standardized URL building via `absoluteUrl()`.  
+
 ## 🚀 **Latest Achievement: UI Terminal Kit + Mobile Overflow Guardrails (No Layout Drift)**
 
 **UI LAYOUT CONTRACT + SENTINEL QA** - December 19, 2025  
@@ -15,6 +24,13 @@
 - ✅ Adopted the kit on **Settings**, **Admin Dashboard**, and **Career Builder Applications** (admin list) with structural-only diffs (no business logic changes).  
 - ✅ Locked mobile safety rules: **LongToken** for UUID/email/url, `min-w-0` for shrinkable flex rows, and `DataTableShell` for safe horizontal table scroll.  
 - ✅ Added/expanded a Playwright **mobile overflow sentinel** so regressions are caught immediately (page must not scroll horizontally).  
+
+## 🚀 **Latest Achievement: Profiles Contract VERIFIED (Routes + RLS truth + safe selects)**
+
+**PROFILES CONTRACT AUDIT** - December 19, 2025  
+- ✅ Audited and promoted `docs/contracts/PROFILES_CONTRACT.md` to **VERIFIED** (routes, canonical actions, table/column usage, and RLS reality grounded in migrations).  
+- ✅ Removed `select('*')` from profile surfaces and replaced with explicit column lists (`/talent/profile`, `/client/profile`).  
+- ✅ Hardened public talent profile payload to avoid shipping `phone` by default on `/talent/[slug]` (best-effort mitigation while RLS remains permissive).  
 
 ## 🚀 **Latest Achievement: Logout Redirect Convergence (No “stuck until refresh”)**
 

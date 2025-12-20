@@ -561,12 +561,19 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string): Promise<{ error: AuthError | null }> => {
     try {
-      if (!supabase) return { error: null };
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}${PATHS.UPDATE_PASSWORD}`,
+      // Use our public email route to avoid existence leaks and keep email logic governed by the Email Contract.
+      const response = await fetch("/api/email/send-password-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
-      return { error };
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as { error?: string } | null;
+        return { error: { message: data?.error || "Failed to send password reset email" } as AuthError };
+      }
+
+      return { error: null };
     } catch (error) {
       console.error("Password reset error:", error);
       return { error: { message: "Failed to send password reset email" } as AuthError };

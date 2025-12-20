@@ -1,5 +1,7 @@
 "use server";
 
+import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { generateApplicationRejectedEmail } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -184,16 +186,12 @@ export async function rejectApplication(params: {
           const gig = fullApplication.gigs;
           
           const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
-
-          await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-rejected`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: talentUser.user.email,
-              talentName: talentName || "Talent",
-              gigTitle: gig?.title || "Gig",
-            }),
+          const rejected = generateApplicationRejectedEmail({
+            name: talentName || "Talent",
+            gigTitle: gig?.title || "Gig",
           });
+          await sendEmail({ to: talentUser.user.email, subject: rejected.subject, html: rejected.html });
+          await logEmailSent(talentUser.user.email, "application-rejected", true);
         }
       }
     } catch (emailError) {

@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import TalentProfileForm from "@/components/forms/talent-profile-form";
 import { PATHS } from "@/lib/constants/routes";
@@ -39,7 +39,9 @@ export default async function TalentProfilePage() {
   // Get the talent profile
   const { data: talentProfile, error: talentError } = await supabase
     .from("talent_profiles")
-    .select("*")
+    .select(
+      "id,user_id,first_name,last_name,phone,age,location,experience,portfolio_url,height,measurements,hair_color,eye_color,shoe_size,languages,created_at,updated_at"
+    )
     .eq("user_id", user.id)
     .single();
 

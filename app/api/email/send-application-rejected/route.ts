@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
 import { generateApplicationRejectedEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {
   try {
+    const forbidden = requireInternalEmailRequest(request);
+    if (forbidden) return forbidden;
+
     const { email, talentName, gigTitle } = await request.json();
 
     if (!email || !talentName || !gigTitle) {

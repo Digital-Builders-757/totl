@@ -1,6 +1,7 @@
 "use server";
 
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { absoluteUrl } from "@/lib/server/get-site-url";
 import {
   generateClientApplicationAdminNotificationEmail,
   generateClientApplicationConfirmationEmail,
@@ -332,7 +333,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
         name: applicantName,
         companyName: applicationData.company_name,
         adminNotes: adminNotes || undefined,
-        loginUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/login`,
+        loginUrl: absoluteUrl("/login"),
       });
 
       await sendEmail({

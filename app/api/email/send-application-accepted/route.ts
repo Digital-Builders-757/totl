@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
+import { absoluteUrl } from "@/lib/server/get-site-url";
+import { safeRequestJson } from "@/lib/server/safe-request-json";
 import { generateApplicationAcceptedEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {
   try {
-    const { email, talentName, gigTitle, clientName, dashboardUrl } = await request.json();
+    const forbidden = requireInternalEmailRequest(request);
+    if (forbidden) return forbidden;
+
+    const { email, talentName, gigTitle, clientName, dashboardUrl } = await safeRequestJson<{
+      email?: string;
+      talentName?: string;
+      gigTitle?: string;
+      clientName?: string;
+      dashboardUrl?: string;
+    }>(request);
 
     if (!email || !talentName || !gigTitle) {
       return NextResponse.json(
@@ -18,7 +30,7 @@ export async function POST(request: Request) {
       name: talentName,
       gigTitle,
       clientName: clientName || "the client",
-      dashboardUrl: dashboardUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
+      dashboardUrl: dashboardUrl || absoluteUrl("/talent/dashboard"),
     });
 
     // Send the email

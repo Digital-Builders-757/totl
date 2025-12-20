@@ -2,6 +2,9 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
+import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { absoluteUrl } from "@/lib/server/get-site-url";
+import { generateApplicationReceivedEmail, generateNewApplicationClientEmail } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 interface ApplyToGigParams {
@@ -176,16 +179,16 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
 
   // Send email notifications
   try {
-    // 1. Email to talent confirming application received
-    await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-received`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: user.email,
-        firstName: talentProfile.first_name,
+    // 1) Email to talent confirming application received (server-only direct call; no internal HTTP hop).
+    const talentEmail = user.email;
+    if (talentEmail) {
+      const { subject, html } = generateApplicationReceivedEmail({
+        name: talentProfile.first_name,
         gigTitle: gig.title,
-      }),
-    });
+      });
+      await sendEmail({ to: talentEmail, subject, html });
+      await logEmailSent(talentEmail, "application-received", true);
+    }
 
     // 2. Email to client about new application
     const { data: clientProfile } = await supabase
@@ -195,17 +198,13 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       .single();
 
     if (clientProfile?.contact_email) {
-      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-new-application-client`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: clientProfile.contact_email,
-          clientName: clientProfile.contact_name || "Client",
-          gigTitle: gig.title,
-          talentName: `${talentProfile.first_name} ${talentProfile.last_name}`,
-          dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/client/dashboard`,
-        }),
+      const { subject, html } = generateNewApplicationClientEmail({
+        name: clientProfile.contact_name || "Client",
+        gigTitle: gig.title,
+        dashboardUrl: absoluteUrl("/client/dashboard"),
       });
+      await sendEmail({ to: clientProfile.contact_email, subject, html });
+      await logEmailSent(clientProfile.contact_email, "new-application-client", true);
     }
   } catch (emailError) {
     // Log email errors but don't fail the application

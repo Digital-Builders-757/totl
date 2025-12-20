@@ -1,5 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { absoluteUrl } from "@/lib/server/get-site-url";
+import { generateApplicationAcceptedEmail, generateBookingConfirmedEmail } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -103,33 +106,29 @@ export async function POST(req: Request) {
       if (talentUser?.user?.email && talentProfile && gig) {
         const talentName = `${talentProfile.first_name || ""} ${talentProfile.last_name || ""}`.trim();
         
-        // 1. Send application accepted email to talent
-        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-application-accepted`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: talentUser.user.email,
-            talentName: talentName || "Talent",
-            gigTitle: gig.title,
-            clientName: clientProfile?.display_name || "Client",
-            dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
-          }),
+        // 1) Application accepted email (server-only direct call; no internal HTTP hop).
+        const acceptedEmail = generateApplicationAcceptedEmail({
+          name: talentName || "Talent",
+          gigTitle: gig.title,
+          clientName: clientProfile?.display_name || "Client",
+          dashboardUrl: absoluteUrl("/talent/dashboard"),
         });
+        await sendEmail({ to: talentUser.user.email, subject: acceptedEmail.subject, html: acceptedEmail.html });
+        await logEmailSent(talentUser.user.email, "application-accepted", true);
 
-        // 2. Send booking confirmed email to talent
-        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/email/send-booking-confirmed`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: talentUser.user.email,
-            talentName: talentName || "Talent",
-            gigTitle: gig.title,
-            bookingDate: date ? new Date(date).toLocaleDateString() : new Date(Date.now() + 7 * 864e5).toLocaleDateString(),
-            bookingLocation: gig.location || "TBD",
-            compensation: compensation || "TBD",
-            dashboardUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
-          }),
+        // 2) Booking confirmed email (server-only direct call; no internal HTTP hop).
+        const bookingConfirmed = generateBookingConfirmedEmail({
+          name: talentName || "Talent",
+          gigTitle: gig.title,
+          bookingDate: date
+            ? new Date(date).toLocaleDateString()
+            : new Date(Date.now() + 7 * 864e5).toLocaleDateString(),
+          bookingLocation: gig.location || "TBD",
+          compensation: compensation || "TBD",
+          dashboardUrl: absoluteUrl("/talent/dashboard"),
         });
+        await sendEmail({ to: talentUser.user.email, subject: bookingConfirmed.subject, html: bookingConfirmed.html });
+        await logEmailSent(talentUser.user.email, "booking-confirmed", true);
       }
     } catch (emailError) {
       // Log email errors but don't fail the application acceptance

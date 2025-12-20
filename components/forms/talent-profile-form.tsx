@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Save, User, FileText } from "lucide-react";
@@ -19,6 +19,22 @@ import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type TalentProfileFormData = Pick<
+  TalentProfile,
+  | "first_name"
+  | "last_name"
+  | "phone"
+  | "location"
+  | "age"
+  | "experience"
+  | "portfolio_url"
+  | "height"
+  | "measurements"
+  | "hair_color"
+  | "eye_color"
+  | "shoe_size"
+  | "languages"
+>;
 
 // Define the form schema
 const profileSchema = z.object({
@@ -66,7 +82,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface TalentProfileFormProps {
-  initialData?: TalentProfile | null;
+  initialData?: TalentProfileFormData | null;
 }
 
 export default function TalentProfileForm({ initialData }: TalentProfileFormProps) {
@@ -154,7 +170,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             ignoreDuplicates: false, // Update on conflict
           }
         )
-        .select()
+        .select("user_id")
         .maybeSingle(); // Use maybeSingle instead of single to handle no rows
 
       if (updateError) {
