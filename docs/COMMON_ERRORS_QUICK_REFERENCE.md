@@ -151,6 +151,39 @@ git add types/database.ts
 git commit -m "Fix schema sync: regenerate types"
 ```
 
+### **1c. PostgREST 400 / Postgres 42703: `profiles.avatar_path does not exist` (local schema drift)**
+```bash
+# Symptom:
+#   GET http://127.0.0.1:54321/rest/v1/profiles?select=...avatar_path... 400
+#   SQLSTATE 42703: column "avatar_path" of relation "profiles" does not exist
+#
+# Fix:
+# 1) Ensure the repo contains a migration adding the column (additive, idempotent):
+#    ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_path text;
+#
+# 2) Rebuild local DB from migrations:
+npx -y supabase@2.34.3 db reset --yes
+#
+# 3) Re-run build to confirm auth bootstrap no longer fails:
+npm run build
+```
+
+### **1d. Postgres 42P17: infinite recursion detected in RLS policy for `profiles`**
+```bash
+# Symptom:
+#   SQLSTATE 42P17: infinite recursion detected in policy for relation "profiles"
+#
+# Cause:
+#   An RLS policy ON public.profiles queries public.profiles inside USING/WITH CHECK.
+#
+# Fix:
+# - Drop or rewrite the recursive policy (example fix is dropping the offending policy):
+#   DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
+#
+# Guardrail:
+npm run rls:guard
+```
+
 ### **1b. Schema Truth Error on `main` (Production)**
 ```bash
 # 1. Export your production project ref
