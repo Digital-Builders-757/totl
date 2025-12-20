@@ -156,9 +156,13 @@ export function AdminClientApplicationsClient({
           variant: "destructive",
         });
       } else {
+        const emailNote =
+          result.didPromote === false
+            ? "Already approved (no new email sent)."
+            : "Approval email sent.";
         toast({
           title: "Application Approved",
-          description: `${selectedApplication.company_name} has been approved. Approval email sent.`,
+          description: `${selectedApplication.company_name} has been approved. ${emailNote}`,
         });
 
         // Update local state
@@ -201,9 +205,13 @@ export function AdminClientApplicationsClient({
           variant: "destructive",
         });
       } else {
+        const emailNote =
+          result.didDecide === false
+            ? "Already rejected (no new email sent)."
+            : "Notification email sent.";
         toast({
           title: "Application Rejected",
-          description: `${selectedApplication.company_name} has been rejected. Notification email sent.`,
+          description: `${selectedApplication.company_name} has been rejected. ${emailNote}`,
         });
 
         // Update local state
@@ -877,8 +885,7 @@ export function AdminClientApplicationsClient({
 
             <div className="p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-md">
               <p className="text-sm text-yellow-300">
-                ⚠️ This will send a rejection email to the applicant. This action can be reversed
-                later if needed.
+                ⚠️ This will send a rejection email to the applicant. This action cannot be reversed.
               </p>
             </div>
           </div>

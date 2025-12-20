@@ -1,8 +1,9 @@
 # Profiles Contract (App identity + public/private profile surfaces)
 
 **Date:** December 18, 2025  
-**Status:** ✅ VERIFIED (truth audited; open risks called out)  
-**Last audited:** December 19, 2025  
+Status: ✅ VERIFIED  
+Last audited: 2025-12-20  
+**Status note:** truth audited; open risks called out  
 **Purpose:** Define profile surfaces, canonical profile mutation paths, and which profile fields are allowed to be public.
 
 ---
@@ -18,15 +19,20 @@
 
 ### Public profile surfaces
 - `/talent/[slug]` (public talent profile page)
-  - Evidence: `app/talent/[slug]/page.tsx`
+  - **Server**: RSC page `app/talent/[slug]/page.tsx`
+  - **Client**: sidebar/details `app/talent/[slug]/talent-profile-client.tsx`
 
 ### Profile management (authenticated)
 - `/settings`
-  - Evidence: `app/settings/page.tsx` + `app/settings/profile-editor.tsx`
+  - **Server**: page loader `app/settings/page.tsx`
+  - **Client**: editor UI `app/settings/profile-editor.tsx`
+  - **Server (mutations)**: `app/settings/actions.ts`
 - `/client/profile`
-  - Evidence: `app/client/profile/page.tsx`
+  - **Server**: page `app/client/profile/page.tsx` (loads initial data)
+  - **Client (VIOLATION; see Drift note)**: `components/forms/client-profile-form.tsx` writes to DB from client
 - `/talent/profile`
-  - Evidence: `app/talent/profile/page.tsx`
+  - **Server**: page `app/talent/profile/page.tsx` (loads initial data)
+  - **Client (VIOLATION; see Drift note)**: `components/forms/talent-profile-form.tsx` writes to DB from client
 
 ### Redirect alias
 - `/profile` → redirects to `/settings`
@@ -54,12 +60,41 @@
 
 ### Drift note (IMPORTANT)
 - `components/forms/talent-profile-form.tsx` and `components/forms/client-profile-form.tsx` currently perform **client-side writes** to `talent_profiles` / `client_profiles` and `profiles.display_name`.
-  - This is **off-sync** with Layer 1 (“no DB writes in client components”).
-  - This contract documents the current reality; remediation should migrate these writes behind server actions (preferably reusing the settings actions above).
+  - **This is a contract violation** vs Layer 1 (“No DB calls in client components”).
+  - This contract documents the current reality so we can stop pretending; remediation should migrate these writes behind server actions (preferably reusing `app/settings/actions.ts`).
 
 ---
 
 ## Data model touched (tables / columns)
+
+### Read/write matrix (explicit)
+
+#### `public.profiles`
+- **Reads**:
+  - `id, role, account_type` (routing/terminals)
+  - `display_name, avatar_url, avatar_path, email_verified` (settings UI/header)
+- **Writes (canonical winner)**:
+  - `display_name` via `app/settings/actions.ts#updateBasicProfile`
+  - `avatar_path` via `app/settings/actions.ts#uploadAvatar`
+- **Writes (violation / drift)**:
+  - `display_name` via `components/forms/*-profile-form.tsx` (client-side update)
+
+#### `public.talent_profiles`
+- **Reads**:
+  - Public surface `/talent/[slug]`: safe allowlist (no `phone`)
+  - Editor surfaces: include `phone` for self
+- **Writes (canonical winner)**:
+  - Upsert via `app/settings/actions.ts#upsertTalentProfile`
+- **Writes (violation / drift)**:
+  - Upsert via `components/forms/talent-profile-form.tsx` (client-side upsert)
+
+#### `public.client_profiles`
+- **Reads**:
+  - `/client/profile` (editor initial load)
+- **Writes (canonical winner)**:
+  - Upsert via `app/settings/actions.ts#upsertClientProfile`
+- **Writes (violation / drift)**:
+  - Upsert via `components/forms/client-profile-form.tsx` (client-side upsert)
 
 ## Minimum select sets (to prevent type regressions)
 
@@ -153,6 +188,11 @@ Verified observed reads:
   - avoid shipping sensitive fields in RSC/client props
 - Sensitive fields (e.g., phone) must be treated as **private by convention**, not by DB enforcement, until RLS/schema is tightened.
 
+### Forbidden (contract-level, enforceable claims)
+- `public.profiles` / `public.talent_profiles` / `public.client_profiles` **DELETE** is not permitted under current RLS (no delete policy in migrations).
+- Public surfaces MUST NOT select or serialize `talent_profiles.phone` (or other contact/sensitive fields) to anonymous viewers.
+- Any write to profile tables from **client components** is forbidden by Layer 1 (currently violated; see Drift note).
+
 ---
 
 ## Known failure modes
@@ -176,6 +216,16 @@ Verified observed reads:
   - narrow component props to the actual fields used (do not force full Row)
   - Evidence: `components/forms/talent-profile-form.tsx` now accepts a field-level pick for `initialData`
 
+4) **Profile missing on first login (bootstrap gap)**
+- Symptom: user is authenticated but profile pages/terminals bounce or error.
+- Likely cause: bootstrap trigger didn’t run, or profile row was deleted.
+- Canonical repair: `lib/actions/auth-actions.ts#ensureProfileExists()` (see `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`).
+
+5) **Role/account_type defaults incorrectly**
+- Symptom: user routed into wrong terminal.
+- Likely cause: drift in bootstrap trigger / profile repair logic.
+- Canonical truth: `supabase/migrations/20251216190000_auth_bootstrap_contract_handle_new_user.sql` forces new users to Talent.
+
 ---
 
 ## Proof (acceptance + test steps)
@@ -193,6 +243,8 @@ Verified observed reads:
 - Manual (sensitive field check):
   - Visit `/talent/[slug]` logged out and ensure phone is not present in rendered UI.
   - Visit `/talent/[slug]` as client/admin/self and ensure phone appears (if stored).
+
+**PROOF:** Partially automated (Playwright) + manual verification steps above.
 
 ---
 

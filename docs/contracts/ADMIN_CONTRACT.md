@@ -1,7 +1,7 @@
 # Admin Contract (Users, Moderation, Career Builder approvals)
 
-**Date:** December 18, 2025  
-**Status:** 🚧 IN PROGRESS  
+**Date:** December 20, 2025  
+**Status:** ✅ VERIFIED  
 **Purpose:** Define admin-only surfaces, canonical admin operations, and the promotion workflow for Career Builders.
 
 ---
@@ -62,6 +62,17 @@
   - `approveClientApplication(applicationId: string, adminNotes?: string)`
   - `rejectClientApplication(applicationId: string, adminNotes?: string)`
   - `submitClientApplication(data)` (submission side; used by `/client/apply`)
+
+### DB primitives (VERIFIED; single source of truth for promotion/decision)
+- Migration: `supabase/migrations/20251220130000_client_application_promotion_rpc.sql`
+  - `public.approve_client_application_and_promote(p_application_id uuid, p_admin_notes text)`
+    - Atomic: updates `client_applications` + promotes `profiles` + provisions `client_profiles`
+    - Idempotent: `approved → approved` is a no-op (`did_promote=false`)
+    - Terminal guard: `rejected → approved` is forbidden (deterministic `P0001`)
+  - `public.reject_client_application(p_application_id uuid, p_admin_notes text)`
+    - Atomic: updates `client_applications` decision
+    - Idempotent: `rejected → rejected` is a no-op (`did_decide=false`)
+    - Terminal guard: `approved → rejected` is forbidden (deterministic `P0001`)
 
 ### Career Builder approval pipeline (end-to-end; admin-controlled promotion)
 
@@ -154,6 +165,51 @@
   - `client_applications.status='approved'`
   - `profiles.role='client' AND profiles.account_type='client'`
   - `client_profiles` exists
+- Retry approve → verify:
+  - RPC returns `did_promote=false`
+  - no duplicate `client_profiles` rows (still 1)
+  - no second approval email is sent (side effects gated in `approveClientApplication()` by `didPromote`)
+- Reject a pending application → verify:
+  - RPC returns `did_decide=true` then `did_decide=false` on retry
+  - rejection email only sends once
+- Terminal guards:
+  - `rejected → approved` fails deterministically (`P0001` “Cannot approve a rejected application”)
+  - `approved → rejected` fails deterministically (`P0001` “Cannot reject an approved application”)
+
+### DB truth proof pack (copy/paste)
+
+```sql
+-- Proof 1: idempotent approve + stable promotion
+select id, status, user_id
+from public.client_applications
+where id = '<APP_ID>';
+
+select *
+from public.approve_client_application_and_promote('<APP_ID>', 'welcome');
+
+select status, admin_notes
+from public.client_applications
+where id = '<APP_ID>';
+
+select role, account_type
+from public.profiles
+where id = (select user_id from public.client_applications where id = '<APP_ID>');
+
+select count(*)
+from public.client_profiles
+where user_id = (select user_id from public.client_applications where id = '<APP_ID>');
+
+-- Retry (idempotent)
+select *
+from public.approve_client_application_and_promote('<APP_ID>', 'welcome');
+
+-- Proof 2: terminal guard (rejected can't be approved)
+update public.client_applications set status = 'rejected' where id = '<APP_ID>';
+select * from public.approve_client_application_and_promote('<APP_ID>', 'x');
+
+-- Proof 3: boundary enforcement (generic admin role toggle cannot promote client)
+-- Call `/api/admin/update-user-role` with { userId, newRole: 'client' } => 400
+```
 
 ### Automated tests
 - `tests/admin/admin-functionality.spec.ts` (audited: contains a direct “Change user role → client” test, which is drift vs Role Promotion Boundary; tracked in `docs/DRIFT_REPORT.md`).

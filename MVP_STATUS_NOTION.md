@@ -49,6 +49,7 @@
 - ✅ Audited and promoted `docs/contracts/PROFILES_CONTRACT.md` to **VERIFIED** (routes, canonical actions, table/column usage, and RLS reality grounded in migrations).  
 - ✅ Removed `select('*')` from profile surfaces and replaced with explicit column lists (`/talent/profile`, `/client/profile`).  
 - ✅ Hardened public talent profile payload to avoid shipping `phone` by default on `/talent/[slug]` (best-effort mitigation while RLS remains permissive).  
+- ✅ Profiles Contract locked: verification pass complete (status block standardized, proof section tightened, and `docs/journeys/TALENT_JOURNEY.md` profile steps marked **PROVEN**).
 
 ## 🚀 **Latest Achievement: Logout Redirect Convergence (No “stuck until refresh”)**
 

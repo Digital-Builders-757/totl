@@ -37,7 +37,8 @@
 - **Route:** `/talent/dashboard`
 - **Reads:** `profiles`, `talent_profiles`, talent dashboard domain data
 - **Writes:** none by default
-- **Contracts:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`, `docs/contracts/PROFILES_CONTRACT.md`
+- **Contracts:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (bootstrap), `docs/contracts/PROFILES_CONTRACT.md` (profile reads)
+- **Status:** PROVEN (profile truth and RLS posture verified by `docs/contracts/PROFILES_CONTRACT.md` → “RLS expectations” + “Proof”)
 
 ### 4) Complete profile + uploads
 - **Route:** `/settings`
@@ -45,7 +46,8 @@
   - `profiles.display_name` (basic)
   - `talent_profiles` (upsert)
   - Storage: `avatars` bucket + `profiles.avatar_path`
-- **Contracts:** `docs/contracts/PROFILES_CONTRACT.md` (**VERIFIED: 2025-12-19**), `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`
+- **Contracts:** `docs/contracts/PROFILES_CONTRACT.md` (**VERIFIED: 2025-12-20**) → “Canonical server actions/services (winners)” + “Proof”, `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`
+- **Status:** PROVEN (verified by `docs/contracts/PROFILES_CONTRACT.md`)
 
 ### 5) Subscribe (if applying is gated)
 - **Routes:** `/talent/subscribe` → `/api/stripe/webhook` → `/talent/settings/billing`
@@ -70,7 +72,9 @@
 ## RLS expectations (high-level)
 - Talent can read/write their own profile (`profiles.id = auth.uid()`), their own `talent_profiles`, and their own `applications`.
 
-**UNVERIFIED:** exact RLS policies; verify against `supabase/migrations/**`.
+**PROVEN (Profiles + bootstrap):**
+- Verified effective RLS posture for profile tables is documented in `docs/contracts/PROFILES_CONTRACT.md` → “RLS expectations (truth, from migrations)”.
+- Verified bootstrap/promotion boundary truth is documented in `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`.
 
 ---
 
