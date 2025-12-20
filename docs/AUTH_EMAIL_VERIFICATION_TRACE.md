@@ -51,7 +51,8 @@
 
 1. **Verification Pending Page** → `app/verification-pending/page.tsx`
    - Line 36: `handleResendEmail()` function
-   - Line 58: Calls `supabase.auth.resend()` directly (client-side)
+   - ✅ Current behavior: Calls `POST /api/email/send-verification` (server-side) so resend is non-enumerating and ledger-throttled
+   - ⚠️ Legacy note: older versions used `supabase.auth.resend()` directly (client-side) — no longer true
 
 2. **Email Verification Reminder Component** → `components/ui/email-verification-reminder.tsx`
    - Line 20: `handleResend()` function
@@ -114,8 +115,8 @@
 1. User clicks "Resend verification email" button
    ↓
 2a. Path A: app/verification-pending/page.tsx
-   ├─ Line 58: supabase.auth.resend({ type: "signup", email })
-   └─ Line 62: emailRedirectTo: /auth/callback
+   ├─ Calls `POST /api/email/send-verification` (public-callable, non-enumerating)
+   └─ Server route performs DB-backed claim gate (`public.email_send_ledger`) before link generation / provider send
    ↓
    OR
    ↓

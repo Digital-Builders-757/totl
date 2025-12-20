@@ -88,10 +88,11 @@ The dev default is only allowed on **local** dev; hosted previews must set `INTE
   - Rule: no internal HTTP hops (server → same server). Use direct function calls instead.
 
 ### Abuse control (public routes)
-- Public routes MUST have a minimum abuse throttle (best-effort is OK in MVP):
-  - Winner: `lib/server/email/public-email-throttle.ts`
+- Public routes MUST have a minimum abuse throttle:
+  - Winner: `lib/server/email/claim-email-send.ts` (DB-backed claim gate + durable ledger)
+  - Rule: claim gate MUST happen **before** link generation and provider calls.
   - Rule: throttle MUST NOT change response semantics (still return `{ success: true, requestId }`).
-  - Note: throttle is **best-effort unless backed by shared storage** (Redis/DB/etc); in serverless/multi-instance it may not be strict.
+  - Note: `lib/server/email/public-email-throttle.ts` remains an optional best-effort pre-filter to reduce DB/provider load, but is not authoritative.
 
 ---
 
@@ -160,7 +161,7 @@ Source: `lib/email-service.ts` (union type `EmailTemplate`).
 
 ## Data model touched
 
-- No email tables are currently canonical.
+- Canonical durable throttle/ledger table: `public.email_send_ledger` (schema via `supabase/migrations/*`).
 - `logEmailSent()` currently logs to console.
 
 **UNVERIFIED:** whether an `email_logs` table exists (commented example exists in `lib/email-service.ts`).

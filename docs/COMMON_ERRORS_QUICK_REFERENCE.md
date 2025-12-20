@@ -117,6 +117,16 @@ npm run build
 - **Fix:** Ensure route is in `publicRoutes` array in both `middleware.ts` and `auth-provider.tsx`
 - **Check:** Verify route is excluded from `needsClientAccess()` or `needsTalentAccess()` checks
 
+### **Public email routes double-send / spam-click floods Resend**
+- **Symptom:** Clicking “Resend verification email” or “Password reset” multiple times results in multiple emails or provider rate limiting.
+- **Fix:** Public routes are now enforced by a DB-backed ledger (`public.email_send_ledger`) + server-side claim gate (`lib/server/email/claim-email-send.ts`) so **one click → one send** per cooldown bucket across multi-instance/serverless.
+- **Sanity check (Supabase SQL editor):**
+  - Confirm no duplicates exist:
+    - `SELECT purpose, recipient_email, cooldown_bucket, COUNT(*) FROM public.email_send_ledger GROUP BY 1,2,3 HAVING COUNT(*) > 1;`
+  - Confirm no user-facing policies exist:
+    - `SELECT * FROM pg_policies WHERE schemaname='public' AND tablename='email_send_ledger';`
+- **Admin debug (optional):** `GET /api/admin/email-ledger-debug?purpose=verify_email&email=<email>` (admin-only) returns the computed key/bucket and the matching ledger row if present.
+
 ### **Logout looks “stuck” until refresh/click (redirect race)**
 - **Symptom:** After clicking Sign Out (often from `/settings`), the UI still looks logged in until you click/refresh, or you bounce off `/login`.
 - **Root cause:** Competing redirects during the transient cookie/session-clearing window (e.g., landing on `/login` without `signedOut=true` while middleware still sees a user).

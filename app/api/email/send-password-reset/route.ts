@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { claimEmailSend, EmailSendPurpose } from "@/lib/server/email/claim-email-send";
 import { shouldThrottlePublicEmail } from "@/lib/server/email/public-email-throttle";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generatePasswordResetEmail } from "@/lib/services/email-templates";
@@ -18,9 +19,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     // Abuse throttle (must not affect response semantics).
-    if (shouldThrottlePublicEmail({ request, route: "send-password-reset", email })) {
-      await logEmailSent(email, "password-reset", false, "throttled");
+    if (shouldThrottlePublicEmail({ request, route: "send-password-reset", email: normalizedEmail })) {
+      await logEmailSent(normalizedEmail, "password-reset", false, "throttled");
+      return NextResponse.json({ success: true, requestId });
+    }
+
+    // Durable throttle + idempotency gate (one click → one send).
+    // MUST happen before link generation and provider calls.
+    const claim = await claimEmailSend({
+      purpose: EmailSendPurpose.PASSWORD_RESET,
+      recipientEmail: normalizedEmail,
+    });
+    if (!claim.didClaim) {
+      await logEmailSent(normalizedEmail, "password-reset", false, `ledger:${claim.reason}`);
       return NextResponse.json({ success: true, requestId });
     }
 
@@ -29,7 +43,7 @@ export async function POST(request: Request) {
     // Generate a password reset link using Supabase
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
-      email,
+      email: normalizedEmail,
       options: {
         redirectTo: absoluteUrl("/update-password"),
       },
@@ -42,24 +56,24 @@ export async function POST(request: Request) {
         requestId,
         errorMessage: error?.message ?? null,
       });
-      await logEmailSent(email, "password-reset", false, error?.message);
+      await logEmailSent(normalizedEmail, "password-reset", false, error?.message);
       return NextResponse.json({ success: true, requestId });
     }
 
     const resetUrl = data.properties.action_link;
-    const name = email.split("@")[0];
+    const name = normalizedEmail.split("@")[0];
 
     // Generate the email template
     const { subject, html } = generatePasswordResetEmail({ name, resetUrl });
 
     // Send the email
     await sendEmail({
-      to: email,
+      to: normalizedEmail,
       subject,
       html,
     });
 
-    await logEmailSent(email, "password-reset", true);
+    await logEmailSent(normalizedEmail, "password-reset", true);
 
     return NextResponse.json({ success: true, requestId });
   } catch (error) {

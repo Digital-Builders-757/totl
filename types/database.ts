@@ -250,6 +250,45 @@ export type Database = {
           },
         ]
       }
+      email_send_ledger: {
+        Row: {
+          cooldown_bucket: string
+          created_at: string
+          id: string
+          idempotency_key: string
+          meta: Json | null
+          provider_message_id: string | null
+          purpose: string
+          recipient_email: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          cooldown_bucket: string
+          created_at?: string
+          id?: string
+          idempotency_key: string
+          meta?: Json | null
+          provider_message_id?: string | null
+          purpose: string
+          recipient_email: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          cooldown_bucket?: string
+          created_at?: string
+          id?: string
+          idempotency_key?: string
+          meta?: Json | null
+          provider_message_id?: string | null
+          purpose?: string
+          recipient_email?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       gig_notifications: {
         Row: {
           categories: string[] | null

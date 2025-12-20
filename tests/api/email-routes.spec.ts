@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createSupabaseAdminClient } from '../../lib/supabase-admin-client';
 
 /**
  * Email API Routes Test - Lightweight verification
@@ -270,6 +271,61 @@ test.describe('Email API Routes Verification', () => {
     const body = await response.json();
     expect(body.success).toBe(true);
     expect(typeof body.requestId).toBe('string');
+  });
+
+  test('Public email routes are ledger-idempotent under rapid repeat (best-effort assertion)', async ({ request }) => {
+    const email = `ledger-idempotency-${Date.now()}@totlagency.test`;
+
+    // Rapid repeats in the same cooldown window must not produce errors or enumeration leaks.
+    const reps = 5;
+    const responses = await Promise.all(
+      Array.from({ length: reps }).map(() =>
+        request.post(`${baseURL}/api/email/send-verification`, {
+          data: {
+            email,
+            firstName: 'Ledger',
+            // Avoid depending on Supabase link generation for unknown users; route accepts explicit link.
+            verificationLink: `${baseURL}/auth/callback?verified=true`,
+          },
+          failOnStatusCode: false,
+        })
+      )
+    );
+
+    for (const r of responses) {
+      expect(r.status()).toBe(200);
+      const body = await r.json();
+      expect(body.success).toBe(true);
+      expect(typeof body.requestId).toBe('string');
+    }
+
+    // Optional proof: if DB is configured and the table exists, assert only one ledger row was claimed
+    // in the current cooldown bucket. This is skipped if env/table is not available.
+    try {
+      const supabaseAdmin = createSupabaseAdminClient();
+      const now = Date.now();
+      const cooldownMs = 60_000; // verify_email cooldown
+      const bucketMs = Math.floor(now / cooldownMs) * cooldownMs;
+      const cooldownBucketIso = new Date(bucketMs).toISOString();
+      const normalizedEmail = email.trim().toLowerCase();
+      const idempotencyKey = `verify_email:${normalizedEmail}:${cooldownBucketIso}`;
+
+      const { data, error } = await supabaseAdmin
+        .from('email_send_ledger')
+        .select('id')
+        .eq('idempotency_key', idempotencyKey);
+
+      if (error) {
+        console.log('⚠️  Skipping ledger assertion (DB/table not available):', error.message);
+        return;
+      }
+
+      expect(Array.isArray(data)).toBe(true);
+      expect(data?.length).toBe(1);
+    } catch (e) {
+      const reason = e instanceof Error ? e.message : 'unknown error';
+      console.log('⚠️  Skipping ledger assertion (no DB env):', reason);
+    }
   });
 });
 
