@@ -55,7 +55,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .from("talent_profiles")
     .select("id, user_id, first_name, last_name")
     .eq("user_id", user.id)
-    .single();
+    .maybeSingle();
 
   if (talentProfileError || !talentProfile) {
     console.error("Talent profile not found:", talentProfileError);
@@ -101,12 +101,17 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
   }
 
   // Check if user already applied
-  const { data: existingApplication } = await supabase
+  const { data: existingApplication, error: existingApplicationError } = await supabase
     .from("applications")
     .select("id")
     .eq("gig_id", gigId)
     .eq("talent_id", user.id)
-    .single();
+    .maybeSingle();
+
+  if (existingApplicationError) {
+    console.error("Existing application check error:", existingApplicationError);
+    return { error: "Failed to verify existing application. Please try again." };
+  }
 
   if (existingApplication) {
     return { error: "You have already applied for this gig" };
@@ -118,7 +123,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .select("id, title, client_id")
     .eq("id", gigId)
     .eq("status", "active")
-    .single();
+    .maybeSingle();
 
   if (gigError || !gig) {
     return { error: "Gig not found or no longer available" };
@@ -133,7 +138,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       status: "new",
       message: message,
     })
-    .select()
+    .select("id,gig_id,talent_id,status,message,created_at,updated_at")
     .single();
 
   if (insertError) {
@@ -195,7 +200,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       .from("client_profiles")
       .select("contact_email, contact_name")
       .eq("user_id", gig.client_id)
-      .single();
+      .maybeSingle();
 
     if (clientProfile?.contact_email) {
       const { subject, html } = generateNewApplicationClientEmail({

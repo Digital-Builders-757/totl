@@ -48,6 +48,8 @@ npm run build
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
 - **Stripe Webhook Duplicate Concurrency (in-flight double processing):** Same `event.id` delivered twice concurrently can cause double side effects if the second request proceeds while the first is still `processing`.
   - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
+- **Non-idempotent application acceptance (duplicate bookings / double emails):** Clicking “Accept” twice (or retries) creates multiple bookings and/or sends duplicate acceptance emails.
+  - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
 
@@ -522,6 +524,7 @@ npm run build               # Verifies middleware + server actions compile
 | `No server info found` (Playwright MCP) | MCP server not connecting | Install locally + restart Cursor |
 | `406 Not Acceptable` (Supabase) | Using `.single()` when row might not exist | Replace with `.maybeSingle()` |
 | `Cannot find name 'talentProfile'` (TypeScript) | Variable out of scope | Check variable scope, wrap case blocks in braces |
+| `Duplicate bookings` after accepting an application | Accept flow not atomic/idempotent | Use DB RPC acceptance + unique `bookings(gig_id, talent_id)` + send emails only when `did_accept=true` |
 | `ReferenceError: createNameSlug is not defined` | Missing import for utility function | Add `import { createNameSlug } from "@/lib/utils/slug";` |
 | `ReferenceError: [function] is not defined` | Using function without import | Check file imports, add missing import statement |
 | `N+1 API Call` (Sentry) - Multiple profile queries | Duplicate profile queries in components | Use `profile` from `useAuth()` instead of fetching separately |

@@ -27,6 +27,14 @@
 - ✅ Added best-effort public abuse throttle (non-leaky) + internal-only 403 sentinel checks in Playwright.  
 - ✅ Removed server→server internal HTTP hops for email sending (direct function calls only) and standardized URL building via `absoluteUrl()`.  
 
+## 🚀 **Latest Achievement: Applications Contract VERIFIED (Atomic + Idempotent Acceptance via DB RPC)**
+
+**APPLICATIONS ACCEPTANCE VERIFIED HARDENING** - December 20, 2025  
+- ✅ Promoted `docs/contracts/APPLICATIONS_CONTRACT.md` to **✅ VERIFIED** with DB-truth clauses (atomicity + idempotency + RLS reality).  
+- ✅ Acceptance is now DB-enforced via `public.accept_application_and_create_booking(...)` (SECURITY DEFINER) + `bookings(gig_id, talent_id)` uniqueness guard.  
+- ✅ Hardened the acceptance primitive with `SET search_path = public, pg_temp` and a terminal-state guard (`rejected → accepted` forbidden) with deterministic error mapping (API returns HTTP 409).  
+- ✅ Performance & correctness cleanup: removed `select('*')`, fixed N+1 profile fetches, and replaced fragile `.single()` calls with `.maybeSingle()` where rows may be absent (prevents 406 traps).  
+
 ## 🚀 **Latest Achievement: UI Terminal Kit + Mobile Overflow Guardrails (No Layout Drift)**
 
 **UI LAYOUT CONTRACT + SENTINEL QA** - December 19, 2025  
@@ -928,7 +936,7 @@
 
 ---
 
-*Last Updated: January 2025*
-*Current Status: MVP Complete - Build Passing, TypeScript Errors Fixed, Error Handling Refined*
+*Last Updated: December 20, 2025*
+*Current Status: MVP Complete - Schema truth + build + lint passing*
 *Codebase Rating: 7.5/10 - Production Ready, Performance & UX Optimization Roadmap Added*
 *Next Review: After performance optimizations (Priority 3 tasks)*

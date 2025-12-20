@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { FileText, Clock, MapPin, DollarSign, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
@@ -87,7 +87,13 @@ export default function ClientApplicationsPage() {
         .from("applications")
         .select(
           `
-          *,
+          id,
+          gig_id,
+          talent_id,
+          status,
+          message,
+          created_at,
+          updated_at,
           gigs!inner(title, category, location, compensation),
           profiles!talent_id(display_name, email_verified, role)
         `
@@ -99,22 +105,30 @@ export default function ClientApplicationsPage() {
         console.error("Error fetching applications:", fetchError);
         setError("Failed to load applications");
       } else {
-        // Fetch talent_profiles separately for each application since there's no direct FK
-        const applicationsWithTalent = await Promise.all(
-          (data || []).map(async (app) => {
-            const { data: talentProfile } = await supabase
-              .from("talent_profiles")
-              .select("first_name, last_name")
-              .eq("user_id", app.talent_id)
-              .maybeSingle();
-            
-            return {
-              ...app,
-              talent_profiles: talentProfile || null,
-            };
-          })
-        );
-        setApplications(applicationsWithTalent as Application[]);
+        const rows = (data || []) as Application[];
+        const talentIds = Array.from(new Set(rows.map((a) => a.talent_id).filter(Boolean)));
+
+        const talentProfileByUserId = new Map<string, { first_name: string; last_name: string }>();
+        if (talentIds.length > 0) {
+          const { data: talentProfiles } = await supabase
+            .from("talent_profiles")
+            .select("user_id, first_name, last_name")
+            .in("user_id", talentIds);
+
+          (talentProfiles || []).forEach((tp) => {
+            talentProfileByUserId.set(tp.user_id, {
+              first_name: tp.first_name,
+              last_name: tp.last_name,
+            });
+          });
+        }
+
+        const applicationsWithTalent = rows.map((app) => ({
+          ...app,
+          talent_profiles: talentProfileByUserId.get(app.talent_id) || null,
+        }));
+
+        setApplications(applicationsWithTalent);
       }
     } catch (err) {
       console.error("Error in fetchApplications:", err);
