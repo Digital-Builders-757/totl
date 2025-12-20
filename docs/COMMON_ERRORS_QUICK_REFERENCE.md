@@ -46,8 +46,19 @@ npm run build
   - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
 - **Webhook Acknowledges Failure:** Stripe receives `{ received: true }` even when Supabase updates fail
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
+- **Stripe Webhook Duplicate Concurrency (in-flight double processing):** Same `event.id` delivered twice concurrently can cause double side effects if the second request proceeds while the first is still `processing`.
+  - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
+
+### **Next.js EPERM on Windows/OneDrive (`.next\\trace`)**
+- **Symptom:** `EPERM: operation not permitted, open '...\\.next\\trace'` during `next build` or when Playwright starts a dev server.
+- **Root cause:** Windows file-locking + OneDrive sync contention on `.next` artifacts (especially `trace`).
+- **Fix (safe, local-only):**
+  - Stop all running `node`/Next processes
+  - Delete `.next/` and rerun `npm run build`
+  - For Playwright, prefer running against `next start` (build → start) to reduce trace-write flakiness.
+- **Prevention:** Keep `.next/` and `playwright-report/` ignored (already in `.gitignore`); avoid running `next dev` and `next build` concurrently.
 - **Schema Truth Failure (merging to `main`):** `types/database.ts is out of sync with remote schema (Environment: production)`
   - **Root Cause:** `types/database.ts` was regenerated from the dev project while `main` CI compares against the production Supabase project.
   - **Fix:** Before merging to `main`, set `SUPABASE_PROJECT_ID=<prod_project_ref>`, apply pending migrations to production (`npx supabase@2.34.3 db push --db-url ...`), then run `npm run types:regen:prod`. Commit the regenerated file only after prod schema matches.

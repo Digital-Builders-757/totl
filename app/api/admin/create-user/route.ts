@@ -3,7 +3,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, firstName, lastName, role } = await request.json();
+    const { email, password, firstName, lastName, role, phone } = await request.json();
 
     if (!email || !password || !firstName || !lastName || !role) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -70,13 +70,19 @@ export async function POST(request: Request) {
 
     // Step 3: Create role-specific profile if needed
     if (role === "talent") {
-      const { error: talentError } = await supabase.from("talent_profiles").insert([
-        {
-          user_id: authData.user.id,
-          first_name: firstName,
-          last_name: lastName,
-        },
-      ]);
+      // NOTE: the auth bootstrap trigger may already create this row; use upsert to keep this endpoint idempotent.
+      const { error: talentError } = await supabase
+        .from("talent_profiles")
+        .upsert(
+          {
+            user_id: authData.user.id,
+            first_name: firstName,
+            last_name: lastName,
+            phone: typeof phone === "string" ? phone : null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" }
+        );
 
       if (talentError) {
         console.error("Talent profile creation failed:", talentError);

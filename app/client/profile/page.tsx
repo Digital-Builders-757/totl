@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import ClientProfileForm from "@/components/forms/client-profile-form";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -37,7 +37,9 @@ export default async function ClientProfilePage() {
 
   const { data: clientProfile } = await supabase
     .from("client_profiles")
-    .select("*")
+    .select(
+      "id,user_id,company_name,industry,website,contact_name,contact_email,contact_phone,company_size,created_at,updated_at"
+    )
     .eq("user_id", user.id as string)
     .single();
 

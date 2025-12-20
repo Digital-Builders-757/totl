@@ -45,7 +45,7 @@
   - `profiles.display_name` (basic)
   - `talent_profiles` (upsert)
   - Storage: `avatars` bucket + `profiles.avatar_path`
-- **Contracts:** `docs/contracts/PROFILES_CONTRACT.md`, `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`
+- **Contracts:** `docs/contracts/PROFILES_CONTRACT.md` (**VERIFIED: 2025-12-19**), `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`
 
 ### 5) Subscribe (if applying is gated)
 - **Routes:** `/talent/subscribe` → `/api/stripe/webhook` → `/talent/settings/billing`

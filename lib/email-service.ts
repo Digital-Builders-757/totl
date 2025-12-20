@@ -1,4 +1,4 @@
-﻿import { Resend } from "resend";
+import { Resend } from "resend";
 
 // Initialize Resend with API key (only if available)
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -42,10 +42,16 @@ export async function sendEmail({
   html: string;
   text?: string;
 }) {
+  if (process.env.DISABLE_EMAIL_SENDING === "1") {
+    console.warn("[totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)", { to, subject });
+    return { success: true, messageId: "disabled" };
+  }
+
   if (!resendApiKey || !resend) {
     console.warn("RESEND_API_KEY is not defined - email sending disabled");
-    // In development/build time, return success to prevent build failures
-    if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "production") {
+    // In non-production (dev/test), no-op success to avoid blocking local workflows.
+    // In production, we must fail loudly to avoid silent email loss.
+    if (process.env.NODE_ENV !== "production") {
       console.log(`[DEV] Would send email to ${to}: ${subject}`);
       return { success: true, messageId: "dev-mode" };
     }

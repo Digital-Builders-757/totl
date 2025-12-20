@@ -27,7 +27,7 @@ describe("client application email templates", () => {
       applicationDate: "Jan 1, 2025",
     });
 
-    expect(template.subject).toBe("✅ Application Received - TOTL Agency Client Onboarding");
+    expect(template.subject).toBe("✅ Application Received - TOTL Agency Career Builder Onboarding");
     expect(template.html).toContain("Sunrise &amp; Co &lt;LLC&gt;");
     expect(template.html).toContain("<code>cab-test-123</code>");
     expect(template.html).toContain("Jan 1, 2025");
@@ -81,7 +81,7 @@ describe("client application email templates", () => {
       needsDescription: "Editorial & runway talent",
     });
 
-    expect(template.subject).toBe("Reminder: Pending client application awaiting review");
+    expect(template.subject).toBe("Reminder: Pending Career Builder application awaiting review");
     expect(template.html).toContain('href="https://tests.totl.agency/admin/client-applications"');
     expect(template.html).toContain("Sunrise &amp; Co");
     expect(template.html).toContain("Need &lt;models&gt; with brand experience");

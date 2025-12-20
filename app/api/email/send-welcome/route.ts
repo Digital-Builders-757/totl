@@ -1,9 +1,14 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
+import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateWelcomeEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {
   try {
+    const forbidden = requireInternalEmailRequest(request);
+    if (forbidden) return forbidden;
+
     const { email, firstName } = await request.json();
 
     if (!email) {
@@ -11,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const name = firstName || email.split("@")[0];
-    const loginUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/login`;
+    const loginUrl = absoluteUrl("/login");
 
     // Generate the email template
     const { subject, html } = generateWelcomeEmail({ name, loginUrl });

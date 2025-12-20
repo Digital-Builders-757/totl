@@ -11,6 +11,30 @@ import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+
+type PublicTalentProfile = Pick<
+  TalentProfile,
+  | "id"
+  | "user_id"
+  | "first_name"
+  | "last_name"
+  | "age"
+  | "location"
+  | "experience"
+  | "portfolio_url"
+  | "height"
+  | "measurements"
+  | "hair_color"
+  | "eye_color"
+  | "shoe_size"
+  | "languages"
+  | "experience_years"
+  | "specialties"
+  | "weight"
+  | "created_at"
+  | "updated_at"
+>;
 
 interface TalentProfilePageProps {
   params: Promise<{
@@ -25,7 +49,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
   // This handles cookies correctly in server components
   const supabase = await createSupabaseServer();
 
-  let talent: TalentProfile | null = null;
+  let talent: (PublicTalentProfile & Pick<TalentProfile, "phone">) | null = null;
   let error: string | null = null;
 
   try {
@@ -38,7 +62,6 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         user_id,
         first_name,
         last_name,
-        phone,
         age,
         location,
         experience,
@@ -62,18 +85,55 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
       error = `Database error: ${fetchError.message}`;
     } else if (allTalent) {
       // Find talent by matching slug
-      talent =
+      const slugMatch =
         allTalent.find((t) => {
           const talentSlug = createNameSlug(t.first_name, t.last_name);
           return talentSlug === slug;
         }) ?? null;
+
+      talent = slugMatch ? { ...slugMatch, phone: null } : null;
 
       // If not found by slug, try to find by ID (for backward compatibility)
       if (!talent) {
         // Check if slug is a valid UUID format
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         if (uuidRegex.test(slug)) {
-          talent = allTalent.find((t) => t.id === slug || t.user_id === slug) ?? null;
+          const idMatch = allTalent.find((t) => t.id === slug || t.user_id === slug) ?? null;
+          talent = idMatch ? { ...idMatch, phone: null } : null;
+        }
+      }
+
+      // IMPORTANT: Do not ship sensitive fields (e.g. phone) in the public RSC payload.
+      // If the viewer is authorized (self/client/admin), fetch phone separately on the server.
+      if (talent) {
+        const {
+          data: { user: viewer },
+        } = await supabase.auth.getUser();
+
+        let viewerProfile: Pick<ProfileRow, "id" | "role"> | null = null;
+        if (viewer?.id) {
+          const { data } = await supabase
+            .from("profiles")
+            .select("id,role")
+            .eq("id", viewer.id)
+            .maybeSingle();
+          viewerProfile = data ?? null;
+        }
+
+        const canViewSensitive =
+          !!viewerProfile &&
+          (viewerProfile.id === talent.user_id || viewerProfile.role === "client" || viewerProfile.role === "admin");
+
+        if (canViewSensitive) {
+          const { data } = await supabase
+            .from("talent_profiles")
+            .select("phone")
+            .eq("user_id", talent.user_id)
+            .maybeSingle();
+
+          talent = { ...(talent as PublicTalentProfile), phone: data?.phone ?? null };
+        } else {
+          talent = { ...(talent as PublicTalentProfile), phone: null };
         }
       }
     }

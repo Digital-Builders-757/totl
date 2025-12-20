@@ -1,9 +1,16 @@
-﻿import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { shouldThrottlePublicEmail } from "@/lib/server/email/public-email-throttle";
+import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generatePasswordResetEmail } from "@/lib/services/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
+  const requestId = randomUUID();
+
   try {
     const { email } = await request.json();
 
@@ -11,35 +18,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const supabase = createSupabaseAdminClient();
+    // Abuse throttle (must not affect response semantics).
+    if (shouldThrottlePublicEmail({ request, route: "send-password-reset", email })) {
+      await logEmailSent(email, "password-reset", false, "throttled");
+      return NextResponse.json({ success: true, requestId });
+    }
 
-    // Get user info to personalize the email
-    const { data: userData } = await supabase
-      .from("profiles")
-      .select("display_name")
-      .eq("email", email)
-      .single();
+    const supabase = createSupabaseAdminClient();
 
     // Generate a password reset link using Supabase
     const { data, error } = await supabase.auth.admin.generateLink({
       type: "recovery",
       email,
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
+        redirectTo: absoluteUrl("/update-password"),
       },
     });
 
+    // IMPORTANT: Do not leak whether the email exists.
+    // If link generation fails (non-existent email, misconfig, etc.), still return success.
     if (error || !data.properties?.action_link) {
-      console.error("Error generating password reset link:", error);
+      console.warn("[totl][email] password reset link generation failed (masked)", {
+        requestId,
+        errorMessage: error?.message ?? null,
+      });
       await logEmailSent(email, "password-reset", false, error?.message);
-      return NextResponse.json(
-        { error: "Failed to generate password reset link" },
-        { status: 500 }
-      );
+      return NextResponse.json({ success: true, requestId });
     }
 
     const resetUrl = data.properties.action_link;
-    const name = userData?.display_name || email.split("@")[0];
+    const name = email.split("@")[0];
 
     // Generate the email template
     const { subject, html } = generatePasswordResetEmail({ name, resetUrl });
@@ -53,9 +61,10 @@ export async function POST(request: Request) {
 
     await logEmailSent(email, "password-reset", true);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, requestId });
   } catch (error) {
     console.error("Error sending password reset email:", error);
-    return NextResponse.json({ error: "Failed to send password reset email" }, { status: 500 });
+    // IMPORTANT: Do not leak whether the email exists.
+    return NextResponse.json({ success: true, requestId });
   }
 }

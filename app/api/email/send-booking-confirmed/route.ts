@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
+import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateBookingConfirmedEmail } from "@/lib/services/email-templates";
 
 export async function POST(request: Request) {
   try {
+    const forbidden = requireInternalEmailRequest(request);
+    if (forbidden) return forbidden;
+
     const {
       email,
       talentName,
@@ -30,7 +35,7 @@ export async function POST(request: Request) {
       bookingTime,
       bookingLocation,
       compensation,
-      dashboardUrl: dashboardUrl || `${process.env.NEXT_PUBLIC_SITE_URL}/talent/dashboard`,
+      dashboardUrl: dashboardUrl || absoluteUrl("/talent/dashboard"),
     });
 
     // Send the email

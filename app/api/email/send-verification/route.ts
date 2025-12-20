@@ -1,7 +1,10 @@
-﻿import "server-only";
+import "server-only";
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { shouldThrottlePublicEmail } from "@/lib/server/email/public-email-throttle";
+import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateVerificationEmail } from "@/lib/services/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
@@ -16,22 +19,24 @@ const verificationSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const requestId = randomUUID();
+
   try {
     const body = await request.json();
 
     // Validate input with Zod
     const result = verificationSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json(
-        {
-          error: "Invalid input",
-          details: result.error.errors,
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid input", requestId }, { status: 400 });
     }
 
     const { email, firstName, verificationLink } = result.data;
+
+    // Abuse throttle (must not affect response semantics).
+    if (shouldThrottlePublicEmail({ request, route: "send-verification", email })) {
+      await logEmailSent(email, "verification", false, "throttled");
+      return NextResponse.json({ success: true, requestId });
+    }
 
     let verificationUrl: string;
 
@@ -47,17 +52,19 @@ export async function POST(request: Request) {
         email,
         password: "", // Empty password for existing users
         options: {
-          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+          redirectTo: absoluteUrl("/auth/callback"),
         },
       });
 
+      // IMPORTANT: Do not leak whether the email/user exists or any other sensitive state.
+      // If link generation fails, still return success.
       if (error || !data.properties?.action_link) {
-        console.error("Error generating verification link:", error);
+        console.warn("[totl][email] verification link generation failed (masked)", {
+          requestId,
+          errorMessage: error?.message ?? null,
+        });
         await logEmailSent(email, "verification", false, error?.message);
-        return NextResponse.json(
-          { error: "Failed to generate verification link" },
-          { status: 500 }
-        );
+        return NextResponse.json({ success: true, requestId });
       }
 
       verificationUrl = data.properties.action_link;
@@ -76,9 +83,10 @@ export async function POST(request: Request) {
 
     await logEmailSent(email, "verification", true);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, requestId });
   } catch (error) {
     console.error("Error sending verification email:", error);
-    return NextResponse.json({ error: "Failed to send verification email" }, { status: 500 });
+    // IMPORTANT: Do not leak whether the email/user exists.
+    return NextResponse.json({ success: true, requestId });
   }
 }

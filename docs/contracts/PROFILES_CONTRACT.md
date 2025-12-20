@@ -1,7 +1,8 @@
 # Profiles Contract (App identity + public/private profile surfaces)
 
 **Date:** December 18, 2025  
-**Status:** 🚧 IN PROGRESS  
+**Status:** ✅ VERIFIED (truth audited; open risks called out)  
+**Last audited:** December 19, 2025  
 **Purpose:** Define profile surfaces, canonical profile mutation paths, and which profile fields are allowed to be public.
 
 ---
@@ -17,19 +18,25 @@
 
 ### Public profile surfaces
 - `/talent/[slug]` (public talent profile page)
+  - Evidence: `app/talent/[slug]/page.tsx`
 
 ### Profile management (authenticated)
 - `/settings`
+  - Evidence: `app/settings/page.tsx` + `app/settings/profile-editor.tsx`
 - `/client/profile`
+  - Evidence: `app/client/profile/page.tsx`
 - `/talent/profile`
+  - Evidence: `app/talent/profile/page.tsx`
 
-**UNVERIFIED:** whether `/profile` is used as a first-class route in current UI.
+### Redirect alias
+- `/profile` → redirects to `/settings`
+  - Evidence: `app/profile/page.tsx`
 
 ---
 
-## Canonical server actions/services
+## Canonical server actions/services (winners)
 
-### Profile mutations
+### Profile mutations (settings)
 - `app/settings/actions.ts`
   - `updateBasicProfile(formData)`
   - `updateEmail(newEmail)`
@@ -42,35 +49,109 @@
 - `lib/actions/auth-actions.ts`
   - `ensureProfileExists()`
 
+### Enforcement rule (Cursor-proof)
+- **Any other write** to `public.profiles`, `public.talent_profiles`, or `public.client_profiles` **outside** the winners above is a **contract violation** and must be migrated behind these server-side primitives.
+
+### Drift note (IMPORTANT)
+- `components/forms/talent-profile-form.tsx` and `components/forms/client-profile-form.tsx` currently perform **client-side writes** to `talent_profiles` / `client_profiles` and `profiles.display_name`.
+  - This is **off-sync** with Layer 1 (“no DB writes in client components”).
+  - This contract documents the current reality; remediation should migrate these writes behind server actions (preferably reusing the settings actions above).
+
 ---
 
 ## Data model touched (tables / columns)
 
+## Minimum select sets (to prevent type regressions)
+
+These are the **minimum required columns** by surface. If you tighten selects, keep these in mind to avoid breaking typed consumers.
+
 ### `public.profiles`
-- Observed in code:
-  - `id`, `display_name`, `role`, `account_type`
-  - `avatar_url`, `avatar_path`
-  - `email_verified`
-  - `bio`, `instagram_handle`, `website` (**present in generated types; usage in app is UNVERIFIED**)
+- **Routing / authorization checks**: `id,role,account_type` (and `is_suspended` where applicable)
+- **Settings header/UI**: `id,display_name,avatar_url,avatar_path,email_verified`
 
 ### `public.talent_profiles`
-- Observed: `user_id`, `first_name`, `last_name`, `phone`, `age`, `location`, `experience`, `portfolio_url`, and more optional fields.
+- **Public talent profile surface (`/talent/[slug]`)**: must include identity + display fields
+  - Minimum: `id,user_id,first_name,last_name,created_at,updated_at`
+- **Self/editor surfaces (`/talent/profile`, `/settings`)**:
+  - Minimum: `id,user_id,first_name,last_name,created_at,updated_at`
 
 ### `public.client_profiles`
-- Observed: `user_id`, `company_name`, `industry`, `website`, `contact_name`, `contact_email`, `contact_phone`, `company_size`.
+- **Client editor surface (`/client/profile`, `/settings`)**:
+  - Minimum: `id,user_id,company_name,contact_email,created_at,updated_at`
+
+## Allowed columns by surface (privacy)
+
+Because RLS permits broad reads, privacy is enforced by **surface-level allowlists** (explicit selects + payload discipline).
+
+### Public (anonymous) surfaces
+- **Allowed** (example allowlist for `/talent/[slug]`):
+  - `talent_profiles`: `id,user_id,first_name,last_name,age,location,experience,portfolio_url,height,measurements,hair_color,eye_color,shoe_size,languages,experience_years,specialties,weight,created_at,updated_at`
+- **Disallowed**:
+  - `talent_profiles.phone` (and any other contact or sensitive fields) must not be shipped in the public RSC payload.
+
+### Signed-in / owner / admin surfaces
+- May include sensitive fields **only when required by the UI**:
+  - Example: `talent_profiles.phone` visible for **self/client/admin** (best-effort behavior; see `/talent/[slug]` implementation)
+
+### `public.profiles`
+Verified observed reads/writes:
+- **Routing reads**: `role`
+  - Evidence: `app/talent/profile/page.tsx`, `app/client/profile/page.tsx`
+- **Settings writes**: `display_name`
+  - Evidence: `app/settings/actions.ts` → `updateBasicProfile()`
+- **Avatar writes**: `avatar_path`, `updated_at`
+  - Evidence: `app/settings/actions.ts` → `uploadAvatar()`
+- **Settings post-update select (for optimistic validation)**:
+  - `id,display_name,avatar_url,avatar_path,email_verified,created_at,updated_at`
+  - Evidence: `app/settings/actions.ts` (`.select(...)`)
+
+### `public.talent_profiles`
+Verified observed reads:
+- **Public talent profile** `/talent/[slug]`:
+  - Safe/public payload columns:
+    - `id,user_id,first_name,last_name,age,location,experience,portfolio_url,height,measurements,hair_color,eye_color,shoe_size,languages,experience_years,specialties,weight,created_at,updated_at`
+  - **Sensitive (best-effort)**:
+    - `phone` is fetched server-side **only** when viewer is self/client/admin.
+  - Evidence: `app/talent/[slug]/page.tsx`
+- **Talent profile editor** `/talent/profile` (initial load):
+  - `id,user_id,first_name,last_name,phone,age,location,experience,portfolio_url,height,measurements,hair_color,eye_color,shoe_size,languages,created_at,updated_at`
+  - Evidence: `app/talent/profile/page.tsx`
+
+### `public.client_profiles`
+Verified observed reads:
+- `/client/profile` (initial load):
+  - `id,user_id,company_name,industry,website,contact_name,contact_email,contact_phone,company_size,created_at,updated_at`
+  - Evidence: `app/client/profile/page.tsx`
 
 ### Storage
-- Bucket: `avatars` (path format observed in `uploadAvatar`: `{userId}/avatar-{timestamp}.{ext}`)
+- Bucket: `avatars`
+- Path format: `{userId}/avatar-{timestamp}.{ext}`
+  - Evidence: `app/settings/actions.ts` → `uploadAvatar()`
 
 ---
 
-## RLS expectations (intent)
-- Users can update their own `profiles` row.
-- Talent can upsert their own `talent_profiles` row.
-- Client can upsert their own `client_profiles` row.
-- Public access to talent profile surface should not expose sensitive columns (application must select safe fields).
+## RLS expectations (truth, from migrations)
 
-**UNVERIFIED:** exact public policy and which columns are considered “safe”.
+### Source migrations (canonical)
+- `supabase/migrations/20250101000001_rls_policies.sql`
+- `supabase/migrations/20251024182916_fix_rls_policies_only.sql`
+
+### Verified effective policy reality (high signal)
+- `public.profiles`
+  - **Public SELECT is allowed** (`FOR SELECT TO anon, authenticated USING (true)`)
+  - **Implication**: data protection depends on **explicit safe column selection** in app code, not RLS.
+- `public.talent_profiles`
+  - **Public SELECT is allowed** (`FOR SELECT TO anon, authenticated USING (true)`)
+  - **Implication**: UI “hiding” sensitive fields is **not security**. Treat RLS as permissive.
+- `public.client_profiles`
+  - **SELECT is allowed to any authenticated user** (`FOR SELECT TO authenticated USING (true)`)
+  - **Implication**: `client_profiles` reads are **not owner-scoped** by RLS; application code must treat this table as broadly readable by signed-in users.
+
+### App-level safety rules (required because RLS is permissive)
+- Public pages MUST:
+  - select only safe columns
+  - avoid shipping sensitive fields in RSC/client props
+- Sensitive fields (e.g., phone) must be treated as **private by convention**, not by DB enforcement, until RLS/schema is tightened.
 
 ---
 
@@ -82,7 +163,18 @@
 
 2) **Public profile leaks sensitive info**
 - Symptom: anon can see phone/contact data.
-- Likely cause: selecting too many columns under permissive RLS.
+- Likely cause:
+  - selecting too many columns under permissive RLS, or
+  - shipping sensitive fields in a public RSC payload / client props.
+- Mitigation implemented (best-effort):
+  - `/talent/[slug]` does not include `phone` in the public select; it is fetched conditionally server-side for authorized viewers.
+
+3) **Build/type drift when removing `select('*')`**
+- Symptom: Type errors when passing partial rows into typed components expecting full table row shapes.
+- Fix pattern:
+  - keep explicit selects at call sites
+  - narrow component props to the actual fields used (do not force full Row)
+  - Evidence: `components/forms/talent-profile-form.tsx` now accepts a field-level pick for `initialData`
 
 ---
 
@@ -92,10 +184,15 @@
 - Talent can update their own profile + avatar.
 - Client can update their own profile.
 - Public `/talent/[slug]` renders without requiring auth.
+- Public `/talent/[slug]` does not ship `phone` unless viewer is self/client/admin (best-effort mitigation while RLS remains permissive).
 
 ### Tests
 - Playwright: `tests/integration/talent-public-profile.spec.ts` (public profile surface).
+- Playwright (sentinel): `tests/integration/profiles-privacy-sentinel.spec.ts` (asserts public profile does not render phone, but owner can).
 - Manual: update profile in `/settings` and refresh.
+- Manual (sensitive field check):
+  - Visit `/talent/[slug]` logged out and ensure phone is not present in rendered UI.
+  - Visit `/talent/[slug]` as client/admin/self and ensure phone appears (if stored).
 
 ---
 

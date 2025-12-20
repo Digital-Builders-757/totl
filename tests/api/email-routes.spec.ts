@@ -8,8 +8,35 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Email API Routes Verification', () => {
-  const baseURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  test.describe.configure({ mode: 'serial' });
+  test.setTimeout(60_000);
+
+  const baseURL =
+    process.env.NEXT_PUBLIC_SITE_URL && /(localhost|127\.0\.0\.1)/i.test(process.env.NEXT_PUBLIC_SITE_URL)
+      ? process.env.NEXT_PUBLIC_SITE_URL
+      : 'http://localhost:3000';
+  const internalKey = process.env.INTERNAL_EMAIL_API_KEY || 'dev-internal-email-key';
+  const internalHeaders = { 'x-totl-internal-email-key': internalKey };
   
+  test('Internal-only routes reject missing internal header (403)', async ({ request }) => {
+    const internalOnly = [
+      'send-welcome',
+      'send-application-received',
+      'send-new-application-client',
+      'send-application-accepted',
+      'send-application-rejected',
+      'send-booking-confirmed',
+    ];
+
+    for (const route of internalOnly) {
+      const response = await request.post(`${baseURL}/api/email/${route}`, {
+        data: {},
+        failOnStatusCode: false,
+      });
+      expect(response.status(), `Expected 403 for ${route} without header`).toBe(403);
+    }
+  });
+
   test('send-application-received route exists and validates', async ({ request }) => {
     const response = await request.post(`${baseURL}/api/email/send-application-received`, {
       data: {
@@ -18,6 +45,7 @@ test.describe('Email API Routes Verification', () => {
         firstName: 'John',
         gigTitle: 'Test Gig',
       },
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
     
@@ -37,6 +65,7 @@ test.describe('Email API Routes Verification', () => {
         talentName: 'John Actor',
         dashboardUrl: `${baseURL}/client/dashboard`,
       },
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
     
@@ -54,6 +83,7 @@ test.describe('Email API Routes Verification', () => {
         clientName: 'Test Client',
         dashboardUrl: `${baseURL}/talent/dashboard`,
       },
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
     
@@ -70,6 +100,7 @@ test.describe('Email API Routes Verification', () => {
         gigTitle: 'Test Gig',
         rejectionReason: 'Not selected at this time',
       },
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
     
@@ -89,6 +120,7 @@ test.describe('Email API Routes Verification', () => {
         compensation: '$1000',
         dashboardUrl: `${baseURL}/talent/dashboard`,
       },
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
     
@@ -106,6 +138,7 @@ test.describe('Email API Routes Verification', () => {
           firstName: 'John',
           gigTitle: 'Test Gig',
         },
+        internal: true,
       },
       {
         name: 'send-new-application-client',
@@ -116,6 +149,7 @@ test.describe('Email API Routes Verification', () => {
           talentName: 'John Actor',
           dashboardUrl: `${baseURL}/client/dashboard`,
         },
+        internal: true,
       },
       {
         name: 'send-application-accepted',
@@ -126,6 +160,7 @@ test.describe('Email API Routes Verification', () => {
           clientName: 'Test Client',
           dashboardUrl: `${baseURL}/talent/dashboard`,
         },
+        internal: true,
       },
       {
         name: 'send-application-rejected',
@@ -135,6 +170,7 @@ test.describe('Email API Routes Verification', () => {
           gigTitle: 'Test Gig',
           rejectionReason: 'Not selected',
         },
+        internal: true,
       },
       {
         name: 'send-booking-confirmed',
@@ -146,6 +182,23 @@ test.describe('Email API Routes Verification', () => {
           bookingLocation: 'Studio A',
           dashboardUrl: `${baseURL}/talent/dashboard`,
         },
+        internal: true,
+      },
+      {
+        name: 'send-verification',
+        data: {
+          email: 'unknown-user@totlagency.test',
+          firstName: 'Unknown',
+          verificationLink: `${baseURL}/auth/callback?verified=true`,
+        },
+        internal: false,
+      },
+      {
+        name: 'send-password-reset',
+        data: {
+          email: 'unknown-user@totlagency.test',
+        },
+        internal: false,
       },
     ];
 
@@ -156,6 +209,7 @@ test.describe('Email API Routes Verification', () => {
     for (const route of routes) {
       const response = await request.post(`${baseURL}/api/email/${route.name}`, {
         data: route.data,
+        headers: route.internal ? internalHeaders : undefined,
         failOnStatusCode: false,
       });
 
@@ -190,6 +244,7 @@ test.describe('Email API Routes Verification', () => {
     // Send empty data - should get 400 validation error, not 500 crash
     const response = await request.post(`${baseURL}/api/email/send-application-received`, {
       data: {},
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
 
@@ -204,6 +259,18 @@ test.describe('Email API Routes Verification', () => {
     
     console.log('✅ Email routes properly validate input');
   });
+
+  test('Password reset does not leak account existence (uniform success)', async ({ request }) => {
+    const response = await request.post(`${baseURL}/api/email/send-password-reset`, {
+      data: { email: 'definitely-not-a-user@totlagency.test' },
+      failOnStatusCode: false,
+    });
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(typeof body.requestId).toBe('string');
+  });
 });
 
 /**
@@ -211,6 +278,8 @@ test.describe('Email API Routes Verification', () => {
  */
 test('Email System Smoke Test', async ({ request }) => {
   const baseURL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const internalKey = process.env.INTERNAL_EMAIL_API_KEY || 'dev-internal-email-key';
+  const internalHeaders = { 'x-totl-internal-email-key': internalKey };
   
   console.log('\n🔥 Email System Smoke Test\n');
   
@@ -225,6 +294,7 @@ test('Email System Smoke Test', async ({ request }) => {
   for (const route of criticalRoutes) {
     const response = await request.post(`${baseURL}/api/email/${route}`, {
       data: {},
+      headers: internalHeaders,
       failOnStatusCode: false,
     });
 

@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 
-type EmailType = "welcome" | "verification" | "password-reset" | "application-received";
+// Only public-callable routes should be exposed to client components.
+type EmailType = "verification" | "password-reset";
 
 interface SendEmailOptions {
   email: string;
@@ -46,10 +47,6 @@ export function useEmailService() {
     }
   };
 
-  const sendWelcomeEmail = (options: SendEmailOptions) => {
-    return sendEmail("welcome", options);
-  };
-
   const sendVerificationEmail = (options: SendEmailOptions) => {
     return sendEmail("verification", options);
   };
@@ -58,16 +55,10 @@ export function useEmailService() {
     return sendEmail("password-reset", options);
   };
 
-  const sendApplicationReceivedEmail = (options: SendEmailOptions) => {
-    return sendEmail("application-received", options);
-  };
-
   return {
     isLoading,
     error,
-    sendWelcomeEmail,
     sendVerificationEmail,
     sendPasswordResetEmail,
-    sendApplicationReceivedEmail,
   };
 }

@@ -22,7 +22,7 @@
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
 **Key Highlights:**
-- ✅ **11 tables** with proper relationships
+- ✅ **13 tables** with proper relationships
 - ✅ **RLS enabled** on all tables for security
 - ✅ **Custom enums** for status management
 - ✅ **Automatic triggers** for profile creation
@@ -32,7 +32,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 11
+- **Total Tables:** 13
 - **Total Columns:** 85+
 - **Custom Types (Enums):** 5
 - **Foreign Key Relationships:** 10
@@ -468,6 +468,39 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 
 ---
 
+### 13. `stripe_webhook_events` - Stripe Webhook Event Ledger
+**Purpose:** Proof layer for Stripe webhook handling (idempotency + debugging + operations).
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | Primary key |
+| `event_id` | `text` | NO | - | Stripe `event.id` (**unique**) |
+| `type` | `text` | NO | - | Stripe `event.type` |
+| `stripe_created` | `bigint` | NO | - | Stripe `event.created` (unix seconds) |
+| `livemode` | `boolean` | YES | - | Stripe `event.livemode` |
+| `received_at` | `timestamp with time zone` | NO | `now()` | When we received the webhook |
+| `processed_at` | `timestamp with time zone` | YES | - | When we finished processing |
+| `status` | `text` | NO | `'processing'` | `processing | processed | failed | ignored` |
+| `error` | `text` | YES | - | Error message when failed/ignored |
+| `customer_id` | `text` | YES | - | Stripe customer ID (if available) |
+| `subscription_id` | `text` | YES | - | Stripe subscription ID (if available) |
+| `checkout_session_id` | `text` | YES | - | Stripe checkout session ID (if available) |
+
+**Constraints:**
+- Primary Key: `id`
+- Unique: `event_id` (provable idempotency)
+- Check: `status IN ('processing','processed','failed','ignored')`
+
+**Indexes:**
+- `stripe_webhook_events_event_id_key` (Unique event lookup)
+- `stripe_webhook_events_customer_created_idx` (customer_id + stripe_created for monotonic checks)
+- `stripe_webhook_events_customer_processed_created_idx` (customer_id + stripe_created for latest processed lookup)
+
+**RLS:**
+- RLS enabled; no user-facing policies (service role / DB admin only).
+
+---
+
 ## 📊 Views & Materialized Views
 
 ### 1. `admin_bookings_dashboard` - Admin Booking Overview
@@ -795,6 +828,12 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 
 **Function:** `sync_profiles_email_verified_from_auth_users()`
 **Location:** `supabase/migrations/20251216013000_sync_profiles_email_verified_on_auth_confirm.sql`
+
+### **profiles_stripe_fields_lock Trigger**
+**Purpose:** Prevent authenticated users from mutating Stripe/subscription entitlement fields directly via PostgREST.
+
+**Function:** `prevent_profile_stripe_fields_user_update()`
+**Location:** `supabase/migrations/20251220033929_add_stripe_webhook_events_ledger.sql`
 
 ## 📈 Production Data Status
 

@@ -498,6 +498,51 @@ export type Database = {
         }
         Relationships: []
       }
+      stripe_webhook_events: {
+        Row: {
+          checkout_session_id: string | null
+          customer_id: string | null
+          error: string | null
+          event_id: string
+          id: string
+          livemode: boolean | null
+          processed_at: string | null
+          received_at: string
+          status: string
+          stripe_created: number
+          subscription_id: string | null
+          type: string
+        }
+        Insert: {
+          checkout_session_id?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_id: string
+          id?: string
+          livemode?: boolean | null
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_created: number
+          subscription_id?: string | null
+          type: string
+        }
+        Update: {
+          checkout_session_id?: string | null
+          customer_id?: string | null
+          error?: string | null
+          event_id?: string
+          id?: string
+          livemode?: boolean | null
+          processed_at?: string | null
+          received_at?: string
+          status?: string
+          stripe_created?: number
+          subscription_id?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       talent_profiles: {
         Row: {
           age: number | null
