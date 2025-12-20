@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { GIG_PUBLIC_SELECT } from "@/lib/db/selects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 interface ApplyToGigPageProps {
@@ -31,7 +32,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     .from("profiles")
     .select("role, subscription_status")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError || !profile || profile.role !== "talent") {
     redirect("/login?error=talent-only");
@@ -46,7 +47,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   // Fetch gig details
   const { data: gig, error: gigError } = await supabase
     .from("gigs")
-    .select("*")
+    .select(GIG_PUBLIC_SELECT)
     .eq("id", id)
     .eq("status", "active")
     .single();
@@ -61,7 +62,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     .select("id, status")
     .eq("gig_id", id)
     .eq("talent_id", user.id)
-    .single();
+    .maybeSingle();
 
   const alreadyApplied = !!existingApplication;
 

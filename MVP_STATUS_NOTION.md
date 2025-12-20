@@ -15,10 +15,16 @@
 - ✅ Fixed local PostgREST `42703` (`profiles.avatar_path` missing) by adding `public.profiles.avatar_path` via migration and re-running local reset.  
 - ✅ Added guardrail `npm run rls:guard` to prevent future self-referential `profiles` policies from landing in migrations.  
 - ✅ Regenerated `types/database.ts` so repo types match live schema again (schema verify green).  
+- ✅ Audit finish line (Diff 1): removed **all** `select('*')` usage under `app/` (public-ish + authed routes) using explicit, UI-driven selects (plus a tiny `lib/db/selects.ts` “B-lite” helper for gig/profile surfaces).  
+- ✅ Audit finish line (Diff 2): removed **all** DB writes from `"use client"` files by moving profile upserts into Server Actions (`lib/actions/profile-actions.ts`) and using server-owned bootstrap (`ensureProfileExists()`) instead of client inserts.  
+- ✅ Audit finish line (Diff 3): unified verification resend so **all** resend UI flows through `POST /api/email/send-verification` (no client-side `supabase.auth.resend()` split-brain).  
+- ✅ Audit finish line (Diff 4 / Option 1): locked `client_applications` truth as **one row per email** (`UNIQUE(email)`), with `user_id` treated as optional linkage (not a uniqueness key). Updated submission flow to respect this (update-on-reapply vs duplicate insert).  
+- ✅ Audit finish line (Diff 5): sealed regression gates — CI/pre-commit now blocks `select('*')` and Supabase mutations inside `"use client"` files (`npm run guard:select-star`, `npm run guard:client-writes`, included in `npm run verify-all`).  
 
 **Next (P0)**
 - [ ] Apply pending migrations to the remote Supabase project via `npm run db:push` (after merge as appropriate).  
 - [ ] Re-run `npm run schema:verify:comprehensive && npm run build && npm run lint` post-push to confirm no drift.  
+- [ ] (Optional hardening) Add a second guard for `"use client"` files that call `.rpc(` if/when we want to forbid client-side RPC usage too.  
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 

@@ -3,6 +3,22 @@ echo "🚨 Running pre-commit checks..."
 # 1. CRITICAL ERROR PREVENTION CHECKS
 echo "🔍 Checking for common errors..."
 
+# Guardrail: No `select('*')` in app query surfaces
+echo "🛑 Guard: blocking select('*')..."
+if ! node scripts/guard-no-select-star.mjs > /dev/null 2>&1; then
+  echo "❌ ERROR: Found disallowed select('*') usage"
+  echo "   Fix: Replace with explicit column selects"
+  exit 1
+fi
+
+# Guardrail: No DB writes in client components (`\"use client\"`)
+echo "🛑 Guard: blocking client-side DB writes..."
+if ! node scripts/guard-no-client-writes.mjs > /dev/null 2>&1; then
+  echo "❌ ERROR: Found disallowed client-side DB write in a \"use client\" file"
+  echo "   Fix: Move mutation to a Server Action or API route"
+  exit 1
+fi
+
 # Check for incorrect import paths (exclude docs and examples)
 if grep -r "@/lib/supabase/supabase-admin-client" app/ components/ lib/ types/ --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next > /dev/null 2>&1; then
   echo "❌ ERROR: Found incorrect import path '@/lib/supabase/supabase-admin-client'"

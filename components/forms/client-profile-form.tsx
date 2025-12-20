@@ -13,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useToast } from "@/components/ui/use-toast";
+import { upsertClientProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
-import { useSupabase } from "@/lib/hooks/use-supabase";
 
 // Import the generated type instead of defining our own
 import type { Database } from "@/types/supabase";
@@ -60,7 +60,6 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = useSupabase();
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -80,71 +79,18 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
     setError(null);
 
     try {
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
+      const result = await upsertClientProfileAction({
+        company_name: data.company_name,
+        industry: data.industry || null,
+        website: data.website || null,
+        contact_name: data.contact_name || null,
+        contact_email: data.contact_email,
+        contact_phone: data.contact_phone || null,
+        company_size: data.company_size || null,
+      });
 
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        throw new Error("Authentication error. Please log in again.");
-      }
-
-      // Update client profile
-      const { error: profileError } = await supabase
-        .from("client_profiles")
-        .upsert(
-          {
-            user_id: user.id,
-            company_name: data.company_name,
-            industry: data.industry || null,
-            website: data.website || null,
-            contact_name: data.contact_name || null,
-            contact_email: data.contact_email,
-            contact_phone: data.contact_phone || null,
-            company_size: data.company_size || null,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            onConflict: 'user_id', // Specify unique constraint
-            ignoreDuplicates: false, // Update on conflict
-          }
-        );
-
-      if (profileError) {
-        console.error("Supabase update error details:", {
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint,
-          code: profileError.code,
-        });
-        throw new Error(
-          profileError.message || 
-          profileError.details || 
-          profileError.hint || 
-          "Profile update failed"
-        );
-      }
-
-      // Update display_name in profiles table
-      const { error: displayNameError } = await supabase
-        .from("profiles")
-        .update({
-          display_name: data.company_name,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user.id);
-
-      if (displayNameError) {
-        console.warn("Failed to update display name:", displayNameError);
+      if (!result.ok) {
+        throw new Error(result.error);
       }
 
       toast({

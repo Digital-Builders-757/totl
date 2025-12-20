@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { updateTalentProfessionalInfoAction } from "@/lib/actions/profile-actions";
 
 interface ProfessionalInfoFormData {
   experience: string;
@@ -39,7 +40,7 @@ export default function TalentProfessionalInfoForm({
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { supabase, user } = useAuth();
+  const { user } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -89,32 +90,20 @@ export default function TalentProfessionalInfoForm({
     setIsSubmitting(true);
 
     try {
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
+      const specialties = formData.specialties
+        ? formData.specialties
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : null;
 
-      const { error } = await supabase
-        .from("talent_profiles")
-        .update({
-          experience: formData.experience,
-          portfolio_url: formData.portfolio || null,
-          specialties: formData.specialties
-            ? formData.specialties.split(",").map((s) => s.trim())
-            : null,
-          achievements: formData.achievements || null,
-          availability: formData.availability || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
+      const result = await updateTalentProfessionalInfoAction({
+        experience: formData.experience,
+        portfolio_url: formData.portfolio || null,
+        specialties,
+      });
 
-      if (error) {
-        throw error;
-      }
+      if (!result.ok) throw new Error(result.error);
 
       toast({
         title: "Profile updated",

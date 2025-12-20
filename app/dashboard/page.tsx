@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
 import { PATHS } from "@/lib/constants/routes";
+import { PROFILE_ROLE_SELECT } from "@/lib/db/selects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -8,17 +9,23 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const supabase = await createSupabaseServer();
 
-  // Get user profile data directly - use maybeSingle() to prevent 406 errors
-  const { data: profile, error } = await supabase.from("profiles").select("*").maybeSingle();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // âœ… Fixed: Proper type guards
-  if (error) {
-    console.error("Error fetching profile:", error);
+  if (!user) {
     redirect(PATHS.LOGIN);
   }
 
-  if (!profile) {
-    console.error("No profile found");
+  // Auth-critical: never select '*'
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_ROLE_SELECT)
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (error || !profile) {
+    console.error("Error fetching profile:", error);
     redirect(PATHS.LOGIN);
   }
 

@@ -18,9 +18,9 @@ Ensure every new visitor creates a base Supabase account **before** choosing Tal
 
 3. **Authenticated `/client/apply`**
    - Middleware must allow `/client/apply` for any authenticated user (even talent) while keeping other `/client/*` routes gated by client status.
-   - The page pre-fills form data from `profiles`/`user` and relies on `client_applications.user_id` (not just `email`).
+   - The page pre-fills form data from `profiles`/`user` and treats `client_applications.email` as the uniqueness key (**UNIQUE(email)**). `user_id` is optional linkage only.
    - Submissions insert/update rows tied to `auth.uid()` and obey the new RLS policy that uses `auth.email()`/`auth.uid()` to enforce ownership.
-   - The status panel now checks `user.id`→`client_applications` to show pending, rejected, or approved messaging.
+   - The status panel checks the authenticated user’s email → `client_applications.email` to show pending, rejected, or approved messaging.
 
 4. **Talent header CTA**
    - Logged-in Talent users see an “Apply to be a Client” link that hits `/client/apply`.
@@ -30,7 +30,7 @@ Ensure every new visitor creates a base Supabase account **before** choosing Tal
 
 - **Backfill `profiles.account_type`:** update legacy rows so admins → `admin`, talent → `talent`, already-approved clients → `client`. This prevents current users from being forced into the select page.
 - **Redirect precedence:** `returnUrl` should win when safe; otherwise redirect to `/onboarding/select-account-type` for unassigned users before branching by role.
-- **RLS + status API:** status endpoints, client application submission, and `client_applications` inserts/queries must rely on `auth.uid()`/`user.id`, not open email parameters.
+- **RLS + status API:** status endpoints and client application submission must rely on `auth.getUser()` + email match. Do not “find application by user_id alone”; `email` is the uniqueness key.
 - **Common-errors checklist:** verify `COMMON_ERRORS_QUICK_REFERENCE.md` entries covering middleware, RLS, and Next.js auth flows still apply after the change.
 
 ### Implementation notes

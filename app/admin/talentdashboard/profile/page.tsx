@@ -13,6 +13,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type TalentProfileLite = Pick<
+  TalentProfile,
+  | "id"
+  | "user_id"
+  | "height"
+  | "weight"
+  | "measurements"
+  | "portfolio_url"
+  | "experience_years"
+  | "specialties"
+>;
 
 // Type definitions for form data
 interface PersonalInfoFormData {
@@ -37,7 +48,7 @@ interface ProfessionalInfoFormData {
 }
 
 // Helper function to convert TalentProfile to PersonalInfoFormData
-const mapTalentProfileToPersonalInfo = (profile: TalentProfile): Partial<PersonalInfoFormData> => ({
+const mapTalentProfileToPersonalInfo = (profile: TalentProfileLite): Partial<PersonalInfoFormData> => ({
   phone: "", // Not in TalentProfile anymore
   age: "", // Not in TalentProfile anymore
   location: "", // Not in TalentProfile anymore
@@ -52,7 +63,7 @@ const mapTalentProfileToPersonalInfo = (profile: TalentProfile): Partial<Persona
 
 // Helper function to convert TalentProfile to ProfessionalInfoFormData
 const mapTalentProfileToProfessionalInfo = (
-  profile: TalentProfile
+  profile: TalentProfileLite
 ): Partial<ProfessionalInfoFormData> => ({
   experience: profile.experience_years?.toString() || "",
   portfolio: profile.portfolio_url || "",
@@ -63,7 +74,7 @@ const mapTalentProfileToProfessionalInfo = (
 
 export default function TalentProfilePage() {
   const [activeTab, setActiveTab] = useState("personal");
-  const [profileData, setProfileData] = useState<TalentProfile | null>(null);
+  const [profileData, setProfileData] = useState<TalentProfileLite | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { supabase, user } = useAuth();
 
@@ -76,13 +87,12 @@ export default function TalentProfilePage() {
 
         const { data, error } = await supabase
           .from("talent_profiles")
-          .select("*")
+          .select("id,user_id,height,weight,measurements,portfolio_url,experience_years,specialties")
           .eq("user_id", user.id)
-          .single();
+          .maybeSingle();
 
-        if (error) throw error;
-
-        setProfileData(data);
+        if (error && error.code !== "PGRST116") throw error;
+        setProfileData(data ?? null);
       } catch (err: unknown) {
         console.error("Error fetching profile data:", err);
       } finally {
@@ -101,14 +111,14 @@ export default function TalentProfilePage() {
       setIsLoading(true);
       supabase
         .from("talent_profiles")
-        .select("*")
+        .select("id,user_id,height,weight,measurements,portfolio_url,experience_years,specialties")
         .eq("user_id", user.id)
-        .single()
+        .maybeSingle()
         .then(({ data, error }) => {
-          if (error) {
+          if (error && error.code !== "PGRST116") {
             console.error("Error refreshing profile data:", error);
           } else {
-            setProfileData(data);
+            setProfileData(data ?? null);
           }
           setIsLoading(false);
         });
@@ -118,8 +128,8 @@ export default function TalentProfilePage() {
   const isProfileComplete = () => {
     if (!profileData) return false;
 
-    const requiredPersonalFields: (keyof TalentProfile)[] = ["height", "weight"];
-    const requiredProfessionalFields: (keyof TalentProfile)[] = ["experience_years"];
+    const requiredPersonalFields: (keyof TalentProfileLite)[] = ["height", "weight"];
+    const requiredProfessionalFields: (keyof TalentProfileLite)[] = ["experience_years"];
 
     const hasRequiredPersonal = requiredPersonalFields.every((field) => !!profileData[field]);
     const hasRequiredProfessional = requiredProfessionalFields.every(

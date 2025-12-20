@@ -68,7 +68,17 @@ export default function ClientGigsPage() {
         .from("gigs")
         .select(
           `
-          *,
+          id,
+          client_id,
+          title,
+          description,
+          category,
+          location,
+          compensation,
+          status,
+          image_url,
+          created_at,
+          application_deadline,
           applications_count:applications(count)
         `
         )
@@ -81,7 +91,20 @@ export default function ClientGigsPage() {
       } else {
         // Transform the data to flatten the applications_count
         // Type assertion needed for aggregated query
-        type GigWithCount = Database["public"]["Tables"]["gigs"]["Row"] & {
+        type GigWithCount = Pick<
+          Database["public"]["Tables"]["gigs"]["Row"],
+          | "id"
+          | "client_id"
+          | "title"
+          | "description"
+          | "category"
+          | "location"
+          | "compensation"
+          | "status"
+          | "image_url"
+          | "created_at"
+          | "application_deadline"
+        > & {
           applications_count: Array<{ count: number }>;
         };
         const transformedData =

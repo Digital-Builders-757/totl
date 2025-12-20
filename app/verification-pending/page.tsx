@@ -16,7 +16,6 @@ import {
 import { LongToken } from "@/components/ui/long-token";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 export default function VerificationPendingPage() {
   const searchParams = useSearchParams();
@@ -25,7 +24,6 @@ export default function VerificationPendingPage() {
   const [justSent, setJustSent] = useState(false);
   const [emailStatus, setEmailStatus] = useState<"unknown" | "sent" | "error">("unknown");
   const { toast } = useToast();
-  const supabase = createSupabaseBrowser();
 
   useEffect(() => {
     // Check if we just created the account
@@ -48,26 +46,16 @@ export default function VerificationPendingPage() {
     setIsSending(true);
 
     try {
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+      // Single owner: all resend traffic flows through the governed server route.
+      // This route generates a Supabase-native verification link and sends via Resend (non-enumerating).
+      const response = await fetch("/api/email/send-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
 
-      if (error) {
-        console.error("Error resending verification email:", error);
-        throw new Error(error.message);
+      if (!response.ok) {
+        throw new Error(`Resend failed: HTTP ${response.status}`);
       }
 
       setJustSent(true);
