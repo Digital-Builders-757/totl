@@ -1,6 +1,6 @@
 # TOTL Agency Database Schema Audit
 
-**Audit Date:** December 16, 2025  
+**Audit Date:** December 20, 2025  
 **Database:** Supabase PostgreSQL  
 **Schema:** public  
 **Status:** Production Ready
@@ -22,7 +22,7 @@
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
 **Key Highlights:**
-- ✅ **13 tables** with proper relationships
+- ✅ **14 tables** with proper relationships
 - ✅ **RLS enabled** on all tables for security
 - ✅ **Custom enums** for status management
 - ✅ **Automatic triggers** for profile creation
@@ -32,7 +32,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 13
+- **Total Tables:** 14
 - **Total Columns:** 85+
 - **Custom Types (Enums):** 5
 - **Foreign Key Relationships:** 10
@@ -497,6 +497,37 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 - `stripe_webhook_events_event_id_key` (Unique event lookup)
 - `stripe_webhook_events_customer_created_idx` (customer_id + stripe_created for monotonic checks)
 - `stripe_webhook_events_customer_processed_created_idx` (customer_id + stripe_created for latest processed lookup)
+
+**RLS:**
+- RLS enabled; no user-facing policies (service role / DB admin only).
+
+---
+
+### 14. `email_send_ledger` - Email Send Ledger (Durable Throttle)
+**Purpose:** Provable idempotency + cooldown throttling for public-callable email routes (verification + password reset).
+
+| Column | Data Type | Nullable | Default | Description |
+|--------|-----------|----------|---------|-------------|
+| `id` | `uuid` | NO | `gen_random_uuid()` | Primary key |
+| `created_at` | `timestamp with time zone` | NO | `now()` | Ledger row creation timestamp |
+| `purpose` | `text` | NO | - | `verify_email` or `password_reset` |
+| `recipient_email` | `text` | NO | - | Normalized recipient email |
+| `user_id` | `uuid` | YES | - | Optional linkage to auth user/profile id |
+| `idempotency_key` | `text` | NO | - | Unique claim key (`purpose:email:cooldown_bucket_iso`) |
+| `cooldown_bucket` | `timestamp with time zone` | NO | - | Rounded cooldown window marker |
+| `status` | `text` | NO | `'claimed'` | `claimed | sent | failed` (P0 uses claim gate) |
+| `provider_message_id` | `text` | YES | - | Resend message id (optional) |
+| `meta` | `jsonb` | YES | - | Small metadata blob (optional) |
+
+**Constraints:**
+- Primary Key: `id`
+- Unique: `(idempotency_key)` (one click → one send per cooldown bucket)
+- Check: `purpose IN ('verify_email','password_reset')`
+- Check: `status IN ('claimed','sent','failed')`
+
+**Indexes:**
+- `email_send_ledger_idempotency_key_key` (Unique claim lookup)
+- `email_send_ledger_lookup_idx` (purpose + recipient_email + cooldown_bucket desc)
 
 **RLS:**
 - RLS enabled; no user-facing policies (service role / DB admin only).

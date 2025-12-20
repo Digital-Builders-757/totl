@@ -20,10 +20,11 @@
 - ✅ Audit finish line (Diff 3): unified verification resend so **all** resend UI flows through `POST /api/email/send-verification` (no client-side `supabase.auth.resend()` split-brain).  
 - ✅ Audit finish line (Diff 4 / Option 1): locked `client_applications` truth as **one row per email** (`UNIQUE(email)`), with `user_id` treated as optional linkage (not a uniqueness key). Updated submission flow to respect this (update-on-reapply vs duplicate insert).  
 - ✅ Audit finish line (Diff 5): sealed regression gates — CI/pre-commit now blocks `select('*')` and Supabase mutations inside `"use client"` files (`npm run guard:select-star`, `npm run guard:client-writes`, included in `npm run verify-all`).  
+- ✅ P0 hardening: added **DB-backed email send ledger** (`public.email_send_ledger`) and server-side claim gate so public “Resend verification” / “Password reset” is **one click → one send** across multi-instance/serverless.  
 
 **Next (P0)**
-- [ ] Apply pending migrations to the remote Supabase project via `npm run db:push` (after merge as appropriate).  
-- [ ] Re-run `npm run schema:verify:comprehensive && npm run build && npm run lint` post-push to confirm no drift.  
+- [x] Apply pending migrations to the remote Supabase project via `npm run db:push`.  
+- [x] Re-run `npm run schema:verify:comprehensive && npm run build && npm run lint` post-push to confirm no drift.  
 - [ ] (Optional hardening) Add a second guard for `"use client"` files that call `.rpc(` if/when we want to forbid client-side RPC usage too.  
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
@@ -42,6 +43,7 @@
 - ✅ Promoted `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` to **✅ VERIFIED** with a canonical ledger (email type → trigger → posture → proof).  
 - ✅ Enforced explicit auth posture for `/api/email/*`: public-callable (verification/password reset) vs internal-only (header-guarded).  
 - ✅ Prevented account existence leaks on public email routes (uniform `{ success: true, requestId }` responses even for unknown emails / failures).  
+- ✅ Added durable, DB-backed throttle + idempotency gate for public routes via `public.email_send_ledger` + `claimEmailSend()` (plus an optional best-effort pre-filter).  
 - ✅ Added best-effort public abuse throttle (non-leaky) + internal-only 403 sentinel checks in Playwright.  
 - ✅ Removed server→server internal HTTP hops for email sending (direct function calls only) and standardized URL building via `absoluteUrl()`.  
 
