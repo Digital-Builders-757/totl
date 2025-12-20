@@ -37,6 +37,11 @@ import {
   type AdminBookingsDashboardRow,
 } from "@/types/database-helpers";
 
+type TalentProfileLite = Pick<
+  TalentProfileRow,
+  "id" | "user_id" | "first_name" | "last_name" | "height" | "weight" | "experience_years"
+>;
+
 export default async function TalentDashboard() {
   // Check if Supabase environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -50,7 +55,7 @@ export default async function TalentDashboard() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profileData: TalentProfileRow | null = null;
+  let profileData: TalentProfileLite | null = null;
   let isProfileComplete = false;
   let applicationsData: AdminTalentDashboardRow[] = [];
   let bookingsData: AdminBookingsDashboardRow[] = [];
@@ -62,7 +67,7 @@ export default async function TalentDashboard() {
       await Promise.all([
         supabase
           .from("talent_profiles")
-          .select("*")
+          .select("id,user_id,first_name,last_name,height,weight,experience_years")
           .eq("user_id", user.id as string)
           .single(),
         supabase
@@ -98,9 +103,9 @@ export default async function TalentDashboard() {
       console.error("Error fetching main profile:", mainProfileResult.error);
 
     if (profileResult.data) {
-      profileData = profileResult.data;
-      const requiredFields: (keyof TalentProfileRow)[] = ["height", "weight", "experience_years"];
-      isProfileComplete = requiredFields.every((field) => !!profileData?.[field]);
+      profileData = profileResult.data as TalentProfileLite;
+      isProfileComplete =
+        !!profileData.height && !!profileData.weight && !!profileData.experience_years;
     }
 
     applicationsData = (applicationsResult.data || []) as AdminTalentDashboardRow[];

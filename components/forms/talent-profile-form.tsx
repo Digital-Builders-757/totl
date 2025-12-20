@@ -13,11 +13,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { upsertTalentProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
-import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
-// Use proper database types instead of custom interface
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
 type TalentProfileFormData = Pick<
   TalentProfile,
@@ -90,7 +89,6 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
-  const supabase = useSupabase();
 
   const {
     register,
@@ -121,35 +119,19 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
     setServerError(null);
 
     try {
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
+      const languages = data.languages
+        ? data.languages
+            .split(",")
+            .map((lang) => lang.trim())
+            .filter(Boolean)
+        : null;
 
-      // Get current user
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError || !user) {
-        throw new Error("Authentication error");
-      }
-
-      // Prepare data for upsert with proper typing
-      type TalentProfileInsert = Database["public"]["Tables"]["talent_profiles"]["Insert"];
-      
-      const upsertData: TalentProfileInsert = {
-        user_id: user.id,
+      const result = await upsertTalentProfileAction({
         first_name: data.first_name,
         last_name: data.last_name,
         phone: data.phone || null,
         location: data.location || null,
-        age: data.age ? parseInt(data.age) : null,
+        age: data.age ? parseInt(data.age, 10) : null,
         experience: data.experience || null,
         portfolio_url: data.portfolio_url || null,
         height: data.height || null,
@@ -157,41 +139,11 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         hair_color: data.hair_color || null,
         eye_color: data.eye_color || null,
         shoe_size: data.shoe_size || null,
-        languages: data.languages ? data.languages.split(",").map((lang) => lang.trim()).filter(Boolean) : null,
-      };
+        languages,
+      });
 
-      // Update talent profile using upsert with the user_id as the conflict target
-      const { error: updateError } = await supabase
-        .from("talent_profiles")
-        .upsert(
-          upsertData,
-          {
-            onConflict: 'user_id', // Specify the unique constraint column
-            ignoreDuplicates: false, // Update on conflict
-          }
-        )
-        .select("user_id")
-        .maybeSingle(); // Use maybeSingle instead of single to handle no rows
-
-      if (updateError) {
-        console.error("Supabase update error details:", {
-          message: updateError.message,
-          details: updateError.details,
-          hint: updateError.hint,
-          code: updateError.code,
-        });
-        throw new Error(updateError.message || updateError.details || updateError.hint || "Failed to update profile");
-      }
-
-      // Update display name in profiles table
-      const displayName = `${data.first_name} ${data.last_name}`;
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({ display_name: displayName })
-        .eq("id", user.id);
-
-      if (profileError) {
-        console.error("Error updating display name:", profileError);
+      if (!result.ok) {
+        throw new Error(result.error);
       }
 
       toast({

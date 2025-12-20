@@ -20,10 +20,19 @@ import {
 } from "@/lib/subscription";
 import type { Database } from "@/types/supabase";
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+
+type BillingProfile = Pick<
+  Profile,
+  | "role"
+  | "subscription_status"
+  | "subscription_plan"
+  | "subscription_current_period_end"
+  | "stripe_customer_id"
+>;
 
 interface BillingSettingsProps {
-  profile: Profile;
+  profile: BillingProfile;
 }
 
 export function BillingSettings({ profile }: BillingSettingsProps) {

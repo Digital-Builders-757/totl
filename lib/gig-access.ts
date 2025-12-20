@@ -3,14 +3,15 @@ import type { Database } from "@/types/supabase";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 type MinimalProfile = Pick<Profile, 'role' | 'subscription_status'>;
-type Gig = Database['public']['Tables']['gigs']['Row'];
+type Gig = Database["public"]["Tables"]["gigs"]["Row"];
+type GigDisplaySource = Pick<Gig, "title" | "description" | "category">;
 
 /**
  * Get display title for a gig based on user's subscription status
  * Non-subscribers see obfuscated titles to protect Career Builder privacy
  */
 export function getGigDisplayTitle(
-  gig: Gig,
+  gig: GigDisplaySource,
   profile: Profile | MinimalProfile | null
 ): string {
   const isTalent = profile?.role === 'talent';
@@ -43,7 +44,7 @@ export function getGigDisplayTitle(
  * Get display description for a gig based on user's subscription status
  */
 export function getGigDisplayDescription(
-  gig: Gig,
+  gig: GigDisplaySource,
   profile: Profile | MinimalProfile | null
 ): string {
   const isTalent = profile?.role === 'talent';

@@ -2,6 +2,7 @@
 import { OnboardingForm } from "./onboarding-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PATHS } from "@/lib/constants/routes";
+import { PROFILE_ROLE_SELECT } from "@/lib/db/selects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 // Force dynamic rendering to prevent build-time Supabase access
@@ -10,22 +11,26 @@ export const dynamic = "force-dynamic";
 export default async function OnboardingPage() {
   const supabase = await createSupabaseServer();
 
-  // Get user profile data directly - use maybeSingle() to prevent 406 errors
-  const { data: profile, error } = await supabase.from("profiles").select("*").maybeSingle();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // âœ… Fixed: Proper type guards
+  if (!user) {
+    redirect(PATHS.LOGIN);
+  }
+
+  // Auth-critical: never select '*'
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select(PROFILE_ROLE_SELECT)
+    .eq("id", user.id)
+    .maybeSingle();
+
+  // If profile is missing (bootstrap gap), allow onboarding UI to render rather than bouncing.
   if (error) {
     console.error("Error fetching profile:", error);
-    redirect(PATHS.LOGIN);
-  }
-
-  if (!profile) {
-    console.error("No profile found");
-    redirect(PATHS.LOGIN);
-  }
-
-  // If user already has a role, redirect to their dashboard
-  if (profile.role) {
+  } else if (profile?.role) {
+    // If user already has a role, redirect to their dashboard
     if (profile.role === "talent") {
       redirect(PATHS.TALENT_DASHBOARD);
     } else if (profile.role === "client") {

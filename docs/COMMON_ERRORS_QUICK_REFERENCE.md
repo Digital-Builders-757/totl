@@ -37,7 +37,7 @@ npm run build
 - **Stripe Property Access Errors:** `Property 'current_period_end' does not exist on type 'Subscription'`
   - **Fix:** Use subscription items: read `current_period_end` from `subscription.items.data[n]` and fall back to legacy property only if available.
 - **Profile Type Mismatch Errors:** `Type 'Partial<Profile>' is missing required properties`
-  - **Fix:** Select all columns with `select("*")` instead of specific columns when passing to components expecting full Profile type
+- **Fix:** Do **not** widen queries to `select("*")`. Instead, **narrow the component prop type** to the columns it actually uses (e.g., `Pick<Profile, "role" | "subscription_status">`) and keep **explicit column selects** in the query.
 - **Subscription Plan Detection Errors:** Silent fallback to `'monthly'` when `subscription.items` missing or price IDs not matched
   - **Fix:** Check every subscription item, fall back to `subscription.metadata.plan`, and if still unknown retain the existing `profiles.subscription_plan` value to avoid data loss.
 - **Redirect Errors Intercepted in Client Components:** `redirect()` throws special error that gets swallowed by `try/catch`

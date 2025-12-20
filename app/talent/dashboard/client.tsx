@@ -54,6 +54,8 @@ type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
 type GigRow = Database["public"]["Tables"]["gigs"]["Row"];
 type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
+type TalentProfileLite = Pick<TalentProfile, "first_name" | "last_name" | "location">;
+
 interface TalentApplication extends ApplicationRow {
   gigs?: GigRow & {
     client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
@@ -82,7 +84,7 @@ function useTalentDashboardData({
   profile: ReturnType<typeof useAuth>["profile"];
   authLoading: boolean;
 }) {
-  const [talentProfile, setTalentProfile] = useState<TalentProfile | null>(null);
+  const [talentProfile, setTalentProfile] = useState<TalentProfileLite | null>(null);
   const [applications, setApplications] = useState<TalentApplication[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
@@ -120,9 +122,9 @@ function useTalentDashboardData({
       try {
         const { data: talentProfileData, error: talentProfileError } = await supabase
           .from("talent_profiles")
-          .select("*")
+          .select("first_name,last_name,location")
           .eq("user_id", user.id)
-          .maybeSingle<TalentProfile>();
+          .maybeSingle<TalentProfileLite>();
 
         if (!cancelled) {
           if (talentProfileError && talentProfileError.code !== "PGRST116") {
@@ -140,27 +142,20 @@ function useTalentDashboardData({
           profile != null ? isTalentFromProfile : user.user_metadata?.role === "talent";
 
         if (!talentProfileData && isTalentUser && !cancelled) {
-          const firstName = (user.user_metadata?.first_name as string) || "";
-          const lastName = (user.user_metadata?.last_name as string) || "";
+          // Client components must not write to the DB. Ensure setup via server action.
+          await ensureProfileExists();
 
-          const { error: createTalentError } = await supabase.from("talent_profiles").insert({
-            user_id: user.id,
-            first_name: firstName,
-            last_name: lastName,
-          });
+          const { data: newTalentProfile, error: refetchTalentError } = await supabase
+            .from("talent_profiles")
+            .select("first_name,last_name,location")
+            .eq("user_id", user.id)
+            .maybeSingle<TalentProfileLite>();
 
-          if (createTalentError) {
-            console.error("Error creating talent profile:", createTalentError);
-          } else {
-            const { data: newTalentProfile } = await supabase
-              .from("talent_profiles")
-              .select("*")
-              .eq("user_id", user.id)
-              .maybeSingle<TalentProfile>();
-
-            if (!cancelled) {
-              setTalentProfile(newTalentProfile ?? null);
+          if (!cancelled) {
+            if (refetchTalentError) {
+              console.error("Error refetching talent profile after ensureProfileExists:", refetchTalentError);
             }
+            setTalentProfile(newTalentProfile ?? null);
           }
         }
 
@@ -170,7 +165,7 @@ function useTalentDashboardData({
         } = await supabase
           .from("applications")
           .select(
-            "*, gigs(title, category, location, compensation, image_url, client_profiles(company_name))"
+            "id,status,created_at,updated_at,message,gigs(title,description,category,location,compensation,image_url,date,client_profiles(company_name))"
           )
           .eq("talent_id", user.id)
           .order("created_at", { ascending: false });
@@ -189,7 +184,9 @@ function useTalentDashboardData({
           error: gigsError,
         } = await supabase
           .from("gigs")
-          .select("*")
+          .select(
+            "id,title,description,location,compensation,category,status,image_url,created_at,application_deadline,date"
+          )
           .eq("status", "active")
           .order("created_at", { ascending: false })
           .limit(10);

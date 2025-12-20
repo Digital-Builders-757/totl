@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from "@/lib/db/selects";
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
@@ -32,16 +33,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
   // Fetch gig by ID with client details - FIXED: join to profiles, not client_profiles
   const { data: gig, error } = await supabase
     .from("gigs")
-    .select(
-      `
-      *,
-      profiles:client_id (
-        id,
-        display_name,
-        role
-      )
-    `
-    )
+    .select(GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT)
     .eq("id", id)
     .eq("status", "active")
     .single();
@@ -60,13 +52,13 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
       .select("id")
       .eq("gig_id", id)
       .eq("talent_id", user.id)
-      .single();
+      .maybeSingle();
 
     hasApplied = !!existingApplication;
 
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("role, subscription_status")
+      .select(PROFILE_GIG_VIEWER_SELECT)
       .eq("id", user.id)
       .maybeSingle();
     if (profileData) {
