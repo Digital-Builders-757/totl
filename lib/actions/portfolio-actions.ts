@@ -295,7 +295,7 @@ export async function getPortfolioItems(talentId: string): Promise<{
 
     const { data: items, error } = await supabase
       .from("portfolio_items")
-      .select("*")
+      .select("id,talent_id,title,description,caption,image_url,created_at,updated_at")
       .eq("talent_id", talentId)
       .order("created_at", { ascending: false });
 

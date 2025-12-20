@@ -193,7 +193,13 @@ export default function ClientDashboard() {
         .from("applications")
         .select(
           `
-          *,
+          id,
+          gig_id,
+          talent_id,
+          status,
+          message,
+          created_at,
+          updated_at,
           gigs!inner(title, category, location, compensation),
           profiles!talent_id(display_name, email_verified, role, avatar_url)
         `

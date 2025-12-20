@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
+import { updateTalentPersonalInfoAction } from "@/lib/actions/profile-actions";
 
 interface PersonalInfoFormData {
   phone: string;
@@ -57,7 +58,7 @@ export default function TalentPersonalInfoForm({
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const { supabase, user } = useAuth();
+  const { user } = useAuth();
 
   // Available options for select fields
   const hairColorOptions = ["Black", "Brown", "Blonde", "Red", "Gray", "White", "Other"];
@@ -189,35 +190,20 @@ export default function TalentPersonalInfoForm({
     setIsSubmitting(true);
 
     try {
-      if (!supabase) {
-        toast({
-          title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
+      const result = await updateTalentPersonalInfoAction({
+        phone: formData.phone,
+        age: Number.parseInt(formData.age) || null,
+        location: formData.location,
+        height: formData.height || null,
+        measurements: formData.measurements || null,
+        hair_color: formData.hairColor || null,
+        eye_color: formData.eyeColor || null,
+        shoe_size: formData.shoeSize || null,
+        languages: formData.languages,
+        instagram_handle: formData.instagram ? formData.instagram.replace(/^@/, "") : null,
+      });
 
-      const { error } = await supabase
-        .from("talent_profiles")
-        .update({
-          phone: formData.phone,
-          age: Number.parseInt(formData.age) || null,
-          location: formData.location,
-          height: formData.height || null,
-          measurements: formData.measurements || null,
-          hair_color: formData.hairColor || null,
-          eye_color: formData.eyeColor || null,
-          shoe_size: formData.shoeSize || null,
-          languages: formData.languages,
-          instagram: formData.instagram || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id);
-
-      if (error) {
-        throw error;
-      }
+      if (!result.ok) throw new Error(result.error);
 
       toast({
         title: "Profile updated",

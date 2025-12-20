@@ -33,7 +33,7 @@ npm run build
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
 - **Stripe API Version Errors:** `Invalid Stripe API version format with unsupported '.clover' suffix`
-  - **Fix:** Stripe API versions must be plain `YYYY-MM-DD` strings. Use the latest stable release without suffix (currently `apiVersion: '2024-06-20'`).
+  - **Fix:** If you hit this at runtime, use a plain `YYYY-MM-DD` version in production code. If you hit a **TypeScript** error like `TS2322: Type '"2024-06-20"' is not assignable to type '"2025-11-17.clover"'`, align the constant with the installed Stripe typings (or update Stripe deps to remove the mismatch).
 - **Stripe Property Access Errors:** `Property 'current_period_end' does not exist on type 'Subscription'`
   - **Fix:** Use subscription items: read `current_period_end` from `subscription.items.data[n]` and fall back to legacy property only if available.
 - **Profile Type Mismatch Errors:** `Type 'Partial<Profile>' is missing required properties`
@@ -52,6 +52,16 @@ npm run build
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
+
+## **6. REGRESSION GUARDS (AUDIT FINISH LINE)**
+- **Guard failure: `select('*')` reintroduced**
+  - **Symptom:** `guard:no-select-star` fails (pre-commit or CI)
+  - **Fix:** Replace `.select("*")` or `*, relation(...)` selects with explicit column lists.
+  - **Command:** `npm run guard:select-star`
+- **Guard failure: client-side DB write**
+  - **Symptom:** `guard:no-client-writes` fails on a `"use client"` file
+  - **Fix:** Move the mutation into a **Server Action** or **API route** and call that from the client component.
+  - **Command:** `npm run guard:client-writes`
 
 ### **Next.js EPERM on Windows/OneDrive (`.next\\trace`)**
 - **Symptom:** `EPERM: operation not permitted, open '...\\.next\\trace'` during `next build` or when Playwright starts a dev server.

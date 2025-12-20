@@ -35,7 +35,7 @@ import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useSupabase } from "@/lib/hooks/use-supabase";
+import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
 import type { Database } from "@/types/supabase";
 
 // Type for the joined application data
@@ -66,7 +66,6 @@ export function AdminApplicationsClient({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { toast } = useToast();
-  const supabase = useSupabase();
 
   // Filter applications based on search query and active tab
   useEffect(() => {
@@ -104,25 +103,15 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
-      if (!supabase) {
+      const result = await adminSetApplicationStatusAction({
+        applicationId: selectedApplication.id,
+        status: "accepted",
+      });
+
+      if (!result.ok) {
         toast({
           title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update application status to accepted
-      const { error } = await supabase
-        .from("applications")
-        .update({ status: "accepted" })
-        .eq("id", selectedApplication.id);
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
+          description: result.error,
           variant: "destructive",
         });
       } else {
@@ -158,25 +147,15 @@ export function AdminApplicationsClient({
 
     setIsProcessing(true);
     try {
-      if (!supabase) {
+      const result = await adminSetApplicationStatusAction({
+        applicationId: selectedApplication.id,
+        status: "rejected",
+      });
+
+      if (!result.ok) {
         toast({
           title: "Error",
-          description: "Database connection not available",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Update application status to rejected
-      const { error } = await supabase
-        .from("applications")
-        .update({ status: "rejected" })
-        .eq("id", selectedApplication.id);
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
+          description: result.error,
           variant: "destructive",
         });
       } else {

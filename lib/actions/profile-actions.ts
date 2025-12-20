@@ -35,6 +35,8 @@ const clientProfileSchema = z.object({
 
 type TalentProfilesInsert = Database["public"]["Tables"]["talent_profiles"]["Insert"];
 type ClientProfilesInsert = Database["public"]["Tables"]["client_profiles"]["Insert"];
+type TalentProfilesUpdate = Database["public"]["Tables"]["talent_profiles"]["Update"];
+type ProfilesUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 
 export async function upsertTalentProfileAction(
   input: z.infer<typeof talentProfileSchema>
@@ -124,6 +126,101 @@ export async function upsertClientProfileAction(
       message: nameError.message,
     });
   }
+
+  return { ok: true };
+}
+
+const talentPersonalInfoSchema = z.object({
+  phone: z.string().min(1).max(50),
+  age: z.number().int().min(16).max(100).nullable(),
+  location: z.string().min(1).max(100),
+  height: z.string().max(20).nullable(),
+  measurements: z.string().max(100).nullable(),
+  hair_color: z.string().max(30).nullable(),
+  eye_color: z.string().max(30).nullable(),
+  shoe_size: z.string().max(10).nullable(),
+  languages: z.array(z.string().min(1).max(50)).nullable(),
+  instagram_handle: z.string().max(50).nullable(),
+});
+
+export async function updateTalentPersonalInfoAction(
+  input: z.infer<typeof talentPersonalInfoSchema>
+): Promise<ActionResult> {
+  const parsed = talentPersonalInfoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" };
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) return { ok: false, error: "Authentication error. Please log in again." };
+
+  const talentPatch: TalentProfilesUpdate = {
+    phone: parsed.data.phone,
+    age: parsed.data.age,
+    location: parsed.data.location,
+    height: parsed.data.height,
+    measurements: parsed.data.measurements,
+    hair_color: parsed.data.hair_color,
+    eye_color: parsed.data.eye_color,
+    shoe_size: parsed.data.shoe_size,
+    languages: parsed.data.languages,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error: talentError } = await supabase
+    .from("talent_profiles")
+    .update(talentPatch)
+    .eq("user_id", user.id);
+
+  if (talentError) return { ok: false, error: talentError.message };
+
+  const profilePatch: ProfilesUpdate = {
+    instagram_handle: parsed.data.instagram_handle,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update(profilePatch)
+    .eq("id", user.id);
+
+  if (profileError) return { ok: false, error: profileError.message };
+
+  return { ok: true };
+}
+
+const talentProfessionalInfoSchema = z.object({
+  experience: z.string().min(1).max(500),
+  portfolio_url: z.string().url().nullable(),
+  specialties: z.array(z.string().min(1).max(50)).nullable(),
+});
+
+export async function updateTalentProfessionalInfoAction(
+  input: z.infer<typeof talentProfessionalInfoSchema>
+): Promise<ActionResult> {
+  const parsed = talentProfessionalInfoSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" };
+
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) return { ok: false, error: "Authentication error. Please log in again." };
+
+  const patch: TalentProfilesUpdate = {
+    experience: parsed.data.experience,
+    portfolio_url: parsed.data.portfolio_url,
+    specialties: parsed.data.specialties,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("talent_profiles").update(patch).eq("user_id", user.id);
+  if (error) return { ok: false, error: error.message };
 
   return { ok: true };
 }

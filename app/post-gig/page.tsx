@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type React from "react";
 import { useState } from "react";
 
+import { createGigAction } from "./actions";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -31,9 +31,6 @@ export default function PostGigPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Use createSupabaseBrowser for this page to handle build-time rendering
-  const supabase = createSupabaseBrowser();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -66,35 +63,19 @@ export default function PostGigPage() {
       return;
     }
 
-    if (!supabase) {
-      setError("Database connection not available. Please try again.");
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      const { error: gigError } = await supabase
-        .from("gigs")
-        .insert([
-          {
-            client_id: user.id,
-            title: formData.title,
-            description: formData.description,
-            category: formData.category,
-            location: formData.location,
-            compensation: formData.compensation,
-            duration: formData.duration,
-            date: formData.date,
-            application_deadline: formData.application_deadline || null,
-            status: "active",
-          },
-        ])
-        .select()
-        .single();
+      const result = await createGigAction({
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        location: formData.location,
+        compensation: formData.compensation,
+        duration: formData.duration,
+        date: formData.date,
+        application_deadline: formData.application_deadline || null,
+      });
 
-      if (gigError) {
-        throw new Error(gigError.message);
-      }
+      if (!result.ok) throw new Error(result.error);
 
       toast({
         title: "Gig Posted Successfully!",

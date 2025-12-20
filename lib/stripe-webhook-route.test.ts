@@ -178,7 +178,10 @@ function createSupabaseMock(opts: {
   return { supabase, calls };
 }
 
-const stripeForTests = new Stripe("sk_test_unit_tests", { apiVersion: "2024-06-20", typescript: true });
+const stripeForTests = new Stripe("sk_test_unit_tests", {
+  apiVersion: "2025-11-17.clover",
+  typescript: true,
+});
 
 function signPayload(payload: string, secret: string): string {
   // Stripe test helper exists in stripe-node.
@@ -199,7 +202,7 @@ function buildSubscriptionUpdatedEventPayload(args: {
   return JSON.stringify({
     id: args.eventId,
     object: "event",
-    api_version: "2024-06-20",
+    api_version: "2025-11-17.clover",
     created: args.created,
     livemode: false,
     pending_webhooks: 1,
