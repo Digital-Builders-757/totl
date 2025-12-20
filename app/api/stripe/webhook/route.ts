@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
@@ -7,6 +6,7 @@ import { mapStripeStatusToLocal } from "@/lib/subscription";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
 type SubscriptionPlan = 'monthly' | 'annual';
+type StripeWebhookLedgerStatus = "processing" | "processed" | "failed" | "ignored";
 
 function isCanonicalPlan(value: unknown): value is SubscriptionPlan {
   return value === "monthly" || value === "annual";
@@ -37,15 +37,14 @@ function determinePlanFromSubscription(subscription: Stripe.Subscription): Subsc
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const headersList = await headers();
-  const signature = headersList.get("stripe-signature");
+  const signature = req.headers.get("stripe-signature");
 
   if (!signature) {
     console.error("No Stripe signature found");
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
-  let event;
+  let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
@@ -56,6 +55,42 @@ export async function POST(req: Request) {
   const supabase = createSupabaseAdminClient();
 
   try {
+    const ledgerContext = extractLedgerContext(event);
+
+    // 1) Idempotency proof: attempt to record the event first (unique event_id).
+    const ledgerInsert = await insertStripeWebhookEventLedgerRow(supabase, ledgerContext);
+    if (ledgerInsert.shouldShortCircuit) {
+      // Already processed/ignored OR in-flight — respond 2xx so Stripe stops retrying this duplicate delivery.
+      return NextResponse.json({ received: true, duplicate: true, in_flight: ledgerInsert.inFlight });
+    }
+    if (ledgerInsert.error) {
+      // Truthful ACK: if we can't write the ledger, we cannot prove idempotency → force Stripe retry.
+      return NextResponse.json({ error: "Failed to write webhook ledger" }, { status: 500 });
+    }
+
+    // 2) Record ignored-but-tracked events (contract: ignored events are still recorded).
+    if (!isHandledEventType(event.type)) {
+      await markStripeWebhookEventLedgerRow(supabase, {
+        eventId: event.id,
+        status: "ignored",
+        error: `Unhandled event type: ${event.type}`,
+      });
+      return NextResponse.json({ received: true });
+    }
+
+    // 3) Out-of-order tolerance: do not allow older events to overwrite newer processed state.
+    if (ledgerContext.customerId) {
+      const latestProcessed = await getLatestProcessedStripeCreatedForCustomer(supabase, ledgerContext.customerId);
+      if (typeof latestProcessed === "number" && ledgerContext.stripeCreated < latestProcessed) {
+        await markStripeWebhookEventLedgerRow(supabase, {
+          eventId: event.id,
+          status: "ignored",
+          error: `Out-of-order event ignored (stripe_created=${ledgerContext.stripeCreated} < latest_processed=${latestProcessed})`,
+        });
+        return NextResponse.json({ received: true, ignored: "out_of_order" });
+      }
+    }
+
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
@@ -71,6 +106,11 @@ export async function POST(req: Request) {
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
           const success = await handleSubscriptionUpdate(supabase, subscription);
           if (!success) {
+            await markStripeWebhookEventLedgerRow(supabase, {
+              eventId: event.id,
+              status: "failed",
+              error: "Failed to process subscription update (checkout.session.completed)",
+            });
             return NextResponse.json({ error: "Failed to process subscription update" }, { status: 500 });
           }
         }
@@ -83,6 +123,11 @@ export async function POST(req: Request) {
         console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
         const success = await handleSubscriptionUpdate(supabase, subscription);
         if (!success) {
+          await markStripeWebhookEventLedgerRow(supabase, {
+            eventId: event.id,
+            status: "failed",
+            error: "Failed to process subscription update (customer.subscription.*)",
+          });
           return NextResponse.json({ error: "Failed to process subscription update" }, { status: 500 });
         }
         break;
@@ -98,6 +143,11 @@ export async function POST(req: Request) {
 
         if (!customerId) {
           console.error("No customer ID found for subscription deletion:", subscription.id);
+          await markStripeWebhookEventLedgerRow(supabase, {
+            eventId: event.id,
+            status: "failed",
+            error: "No customer ID found for subscription deletion",
+          });
           return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
         }
 
@@ -109,6 +159,11 @@ export async function POST(req: Request) {
 
         if (findError) {
           console.error("Error finding profile for deleted subscription:", findError);
+          await markStripeWebhookEventLedgerRow(supabase, {
+            eventId: event.id,
+            status: "failed",
+            error: `Error finding profile for deleted subscription: ${findError.message}`,
+          });
           return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
         }
 
@@ -125,6 +180,11 @@ export async function POST(req: Request) {
 
           if (updateError) {
             console.error("Error updating profile for deleted subscription:", updateError);
+            await markStripeWebhookEventLedgerRow(supabase, {
+              eventId: event.id,
+              status: "failed",
+              error: `Error updating profile for deleted subscription: ${updateError.message}`,
+            });
             return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
           }
 
@@ -142,17 +202,185 @@ export async function POST(req: Request) {
       }
 
       default:
+        // This should be unreachable because we short-circuit unhandled events above,
+        // but keep as a defense-in-depth fallback.
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    await markStripeWebhookEventLedgerRow(supabase, { eventId: event.id, status: "processed" });
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Webhook handler error:", error);
+    await markStripeWebhookEventLedgerRow(supabase, {
+      eventId: (event as Stripe.Event | undefined)?.id ?? null,
+      status: "failed",
+      error: error instanceof Error ? error.message : "Unknown webhook handler error",
+    });
     return NextResponse.json(
       { error: "Webhook handler failed" }, 
       { status: 500 }
     );
   }
+}
+
+function isHandledEventType(type: string): boolean {
+  return (
+    type === "checkout.session.completed" ||
+    type === "customer.subscription.created" ||
+    type === "customer.subscription.updated" ||
+    type === "customer.subscription.deleted" ||
+    type === "invoice.payment_failed"
+  );
+}
+
+type StripeWebhookLedgerContext = {
+  eventId: string;
+  type: string;
+  stripeCreated: number;
+  livemode: boolean;
+  customerId: string | null;
+  subscriptionId: string | null;
+  checkoutSessionId: string | null;
+};
+
+function extractLedgerContext(event: Stripe.Event): StripeWebhookLedgerContext {
+  const stripeCreated = typeof event.created === "number" ? event.created : 0;
+  let customerId: string | null = null;
+  let subscriptionId: string | null = null;
+  let checkoutSessionId: string | null = null;
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    checkoutSessionId = session.id ?? null;
+    customerId = typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+    subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id ?? null;
+  } else if (event.type.startsWith("customer.subscription.")) {
+    const subscription = event.data.object as Stripe.Subscription;
+    subscriptionId = subscription.id ?? null;
+    customerId = typeof subscription.customer === "string" ? subscription.customer : subscription.customer?.id ?? null;
+  } else if (event.type.startsWith("invoice.")) {
+    const invoice = event.data.object as Stripe.Invoice;
+    customerId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id ?? null;
+    // Some Stripe API versions/type defs do not expose invoice.subscription on the Invoice type.
+    // We don't require it for idempotency/monotonic checks; customer_id is sufficient.
+    subscriptionId = null;
+  }
+
+  return {
+    eventId: event.id,
+    type: event.type,
+    stripeCreated,
+    livemode: !!event.livemode,
+    customerId,
+    subscriptionId,
+    checkoutSessionId,
+  };
+}
+
+async function insertStripeWebhookEventLedgerRow(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  context: StripeWebhookLedgerContext
+): Promise<{ shouldShortCircuit: boolean; inFlight: boolean; error: unknown | null }> {
+  if (typeof context.stripeCreated !== "number" || Number.isNaN(context.stripeCreated)) {
+    return { shouldShortCircuit: false, inFlight: false, error: new Error("Invalid Stripe event.created") };
+  }
+
+  const { error } = await supabase
+    .from("stripe_webhook_events")
+    .insert(
+      {
+        event_id: context.eventId,
+        type: context.type,
+        stripe_created: context.stripeCreated,
+        livemode: context.livemode,
+        status: "processing" as StripeWebhookLedgerStatus,
+        customer_id: context.customerId,
+        subscription_id: context.subscriptionId,
+        checkout_session_id: context.checkoutSessionId,
+      }
+    );
+
+  if (!error) return { shouldShortCircuit: false, inFlight: false, error: null };
+
+  // PostgREST propagates unique violations as SQLSTATE 23505.
+  // If we've already processed the event, short-circuit. If the prior attempt failed,
+  // allow Stripe to retry (truthful ACK behavior).
+  const maybeAny = error as { code?: string; message?: string } | null;
+  if (maybeAny?.code === "23505") {
+    const { data: existing, error: readError } = await supabase
+      .from("stripe_webhook_events")
+      .select("status")
+      .eq("event_id", context.eventId)
+      .maybeSingle();
+
+    if (readError) {
+      console.error("Failed to read existing Stripe webhook ledger row:", readError);
+      return { shouldShortCircuit: false, inFlight: false, error: readError };
+    }
+
+    const existingStatus = (existing as { status?: string } | null)?.status;
+    if (existingStatus === "processed" || existingStatus === "ignored") {
+      return { shouldShortCircuit: true, inFlight: false, error: null };
+    }
+
+    if (existingStatus === "processing") {
+      // Another request is already handling this event. Short-circuit to avoid double side effects.
+      return { shouldShortCircuit: true, inFlight: true, error: null };
+    }
+
+    // Prior attempt is `failed` (or unknown) — re-mark as processing and proceed.
+    await supabase
+      .from("stripe_webhook_events")
+      .update({ status: "processing", error: null, processed_at: null })
+      .eq("event_id", context.eventId);
+
+    return { shouldShortCircuit: false, inFlight: false, error: null };
+  }
+
+  console.error("Failed to insert Stripe webhook ledger row:", error);
+  return { shouldShortCircuit: false, inFlight: false, error };
+}
+
+async function markStripeWebhookEventLedgerRow(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  args: { eventId: string | null; status: StripeWebhookLedgerStatus; error?: string }
+): Promise<void> {
+  if (!args.eventId) return;
+  const processedAt = args.status === "processing" ? null : new Date().toISOString();
+  const { error } = await supabase
+    .from("stripe_webhook_events")
+    .update({
+      status: args.status,
+      error: args.error ?? null,
+      processed_at: processedAt,
+    })
+    .eq("event_id", args.eventId);
+
+  if (error) {
+    console.error("Failed to update Stripe webhook ledger row:", error);
+  }
+}
+
+async function getLatestProcessedStripeCreatedForCustomer(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  customerId: string
+): Promise<number | null> {
+  const { data, error } = await supabase
+    .from("stripe_webhook_events")
+    .select("stripe_created")
+    .eq("customer_id", customerId)
+    .eq("status", "processed")
+    .order("stripe_created", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to read latest processed Stripe event for customer:", error);
+    return null;
+  }
+
+  const stripeCreated = data?.stripe_created;
+  return typeof stripeCreated === "number" ? stripeCreated : null;
 }
 
 async function handleSubscriptionUpdate(

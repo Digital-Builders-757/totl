@@ -46,6 +46,8 @@ npm run build
   - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
 - **Webhook Acknowledges Failure:** Stripe receives `{ received: true }` even when Supabase updates fail
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
+- **Stripe Webhook Duplicate Concurrency (in-flight double processing):** Same `event.id` delivered twice concurrently can cause double side effects if the second request proceeds while the first is still `processing`.
+  - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
 

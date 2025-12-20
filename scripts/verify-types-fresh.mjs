@@ -2,18 +2,14 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import path from 'path';
 
 const typesFile = 'types/database.ts';
 const tempFile = 'types/database.__fresh.ts';
 
 try {
-  // Check if SUPABASE_PROJECT_ID is set
-  const projectId = process.env.SUPABASE_PROJECT_ID;
-  if (!projectId) {
-    console.error('SUPABASE_PROJECT_ID environment variable is required');
-    process.exit(1);
-  }
+  // Prefer explicit SUPABASE_PROJECT_ID (prod verification),
+  // but default to the canonical project ref used by `types:regen` / `types:regen:dev`.
+  const projectId = process.env.SUPABASE_PROJECT_ID || 'utvircuwknqzpnmvxidp';
 
   // Check if types file exists
   if (!fs.existsSync(typesFile)) {
@@ -22,7 +18,7 @@ try {
   }
 
   // Generate fresh types
-  console.log('Generating fresh types from Supabase schema...');
+  console.log(`Generating fresh types from Supabase schema (project: ${projectId})...`);
   execSync(`npx supabase@v2.34.3 gen types typescript --project-id "${projectId}" --schema public > ${tempFile}`, { stdio: 'inherit' });
 
   // Read both files

@@ -8,6 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
+
+**STRIPE WEBHOOKS VERIFIED** - December 20, 2025  
+- ✅ Promoted `docs/contracts/STRIPE_WEBHOOKS_CONTRACT.md` to **✅ VERIFIED** (threat model, canonical rules, event matrix, proofs).  
+- ✅ Added DB-backed webhook ledger `public.stripe_webhook_events` with **unique `event_id`** for provable idempotency.  
+- ✅ Implemented **truthful ACK** (HTTP **500** on ledger/DB failures so Stripe retries).  
+- ✅ Prevented concurrent duplicate processing: in-flight (`status='processing'`) duplicates short-circuit (no double side effects).  
+- ✅ Added DB lock trigger to block user tampering of Stripe/subscription entitlement fields (service role only).  
+- ✅ Added runbook `docs/STRIPE_WEBHOOKS_RUNBOOK.md` and unit tests covering signature, idempotency, in-flight duplicates, failure=500, out-of-order.  
+
 ## 🚀 **Latest Achievement: Email Notifications Contract VERIFIED (Governed + non-leaky + guarded)**
 
 **EMAIL CONTRACT AUDIT-TO-VERIFIED** - December 20, 2025  
