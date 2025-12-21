@@ -146,8 +146,19 @@ npm run build
 
 ### **Career Builder Application Success Page Redirects to Talent Dashboard**
 - **Error:** After submitting Career Builder application, user redirected to `/talent/dashboard` instead of success page
-- **Fix:** Added `/client/apply/success` and `/client/application-status` to public routes in middleware
-- **Prevention:** Always add success/status pages to public routes when they don't require authentication
+- **Fix (LAW):** Career Builder application is **AUTH REQUIRED**. Signed-out users should be redirected to:\n  - `/login?returnUrl=/client/apply`\n\n  The routing allowlist should **not** treat `/client/apply`, `/client/apply/success`, or `/client/application-status` as public.
+- **Prevention:** Keep auth posture consistent: if a flow requires auth, remove it from `PUBLIC_ROUTES` and enforce ownership via RLS.
+
+### `42501 permission denied for table users` during Career Builder submission/status
+
+- **Symptom:** Career Builder submission or status checks fail with:
+
+```text
+permission denied for table users
+```
+
+- **Root cause:** `client_applications` RLS referenced `auth.users` (forbidden for normal `authenticated` role).
+- **Fix:** Replace policy logic with ownership by `user_id = auth.uid()` and remove anon access.\n  - See migrations:\n    - `supabase/migrations/20251221123500_rebuild_client_applications_policies_no_auth_users.sql`
 
 ### **Public Route Access Denied**
 - **Error:** Public pages redirecting to login when they shouldn't

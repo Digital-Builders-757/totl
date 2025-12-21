@@ -133,10 +133,7 @@ export default function ClientApplicationPage() {
     const controller = new AbortController();
     const checkStatus = async () => {
       try {
-        const response = await fetch(
-          `/api/client-applications/status?email=${encodeURIComponent(userEmail)}`,
-          { signal: controller.signal }
-        );
+        const response = await fetch(`/api/client-applications/status`, { signal: controller.signal });
 
         if (!response.ok) {
           throw new Error("Unable to check application status");

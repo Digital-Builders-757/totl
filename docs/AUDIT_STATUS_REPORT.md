@@ -515,14 +515,14 @@ Status: 🚧 IN PROGRESS
 | Dashboard loads | ✅ | `docs/journeys/TALENT_JOURNEY.md` marks dashboard/profile bootstrap as “PROVEN”; see `docs/contracts/PROFILES_CONTRACT.md` status ✅ VERIFIED. |
 | Portfolio upload/manage | UNKNOWN | Pointers exist: `tests/integration/portfolio-gallery.spec.ts` (from journey); confirm it passes in your environment. |
 | Apply to gig | UNKNOWN | **Route:** `app/gigs/[id]/apply/page.tsx` + **Action:** `app/gigs/[id]/apply/actions.ts` + **Tables:** `applications` + **Test:** `npx playwright test tests/integration/talent-gig-application.spec.ts --project=chromium --retries=0 --reporter=list` |
-| **P1: Booking created after accept** | ❌ (blocked) | Proof attempt failed due to `client_applications` RLS error while running Career Builder approval prerequisite. See `docs/AUDIT_LOG.md` (P1). |
+| **P1: Booking created after accept** | ✅ | Proof: `npx playwright test tests/integration/booking-accept.spec.ts --project=chromium --retries=0 --reporter=list` (see `docs/AUDIT_LOG.md` P1). |
 
 ### Client (sign up → client application → status portal → create gigs → manage applicants)
 
 | Step | Status | Proof / what to check next |
 | --- | --- | --- |
 | Submit client application | ✅ (authenticated flow) | `lib/actions/client-actions.ts#submitClientApplication` requires `auth.getUser()` and inserts into `client_applications`. |
-| **P2: Status portal works end-to-end** | ❌ (blocked) | Proof attempt failed: authenticated Career Builder submission fails with `permission denied for table users` (RLS policy). See `docs/AUDIT_LOG.md` (P2). |
+| **P2: Status portal works end-to-end** | ✅ | Proof: `npx playwright test tests/admin/career-builder-approval-pipeline.spec.ts --project=chromium --retries=0 --reporter=list` (see `docs/AUDIT_LOG.md` P2). |
 | Admin approval promotes role | UNKNOWN | `docs/journeys/CLIENT_JOURNEY.md` checklist item; confirm via `lib/actions/client-actions.ts#approveClientApplication` + related RPC/migration and E2E test. |
 | Client dashboard routing | UNKNOWN | Confirm via `middleware.ts` + `lib/routing/decide-redirect.ts` + `app/client/dashboard/page.tsx`. |
 | Create gigs | UNKNOWN | Confirm via `app/post-gig/actions.ts` and `app/client/gigs/page.tsx`. |
@@ -576,9 +576,9 @@ DRIFT WARNING: ... routes.ts treats /client/apply as public, but submitClientApp
 - If `/client/apply` is truly public, implement a non-auth submission path consistent with RLS (and update contract/journey).
 - If it must be authenticated, remove it from `PUBLIC_ROUTES` and ensure middleware blocks unauthenticated access (and update journey).
 
-**Decision (required):** DECISION NEEDED  
-**Canonical docs to update:** `lib/constants/routes.ts`, `docs/journeys/CLIENT_JOURNEY.md`, `docs/contracts/ADMIN_CONTRACT.md`  
-**Proof required:** rerun **P2** and confirm signed-out access behavior for `/client/apply`
+**Decision (required):** **AUTH REQUIRED** (signed-out users must be redirected to login)  
+**Canonical docs to update:** `lib/constants/routes.ts`, `database_schema_audit.md` (RLS for `client_applications`), `docs/journeys/CLIENT_JOURNEY.md`  
+**Proof required:** rerun **P2** and confirm signed-out access behavior for `/client/apply` and `/client/application-status`
 
 ### 6.2 Drift: Client-side profile writes in `components/forms/*` (contract violation)
 

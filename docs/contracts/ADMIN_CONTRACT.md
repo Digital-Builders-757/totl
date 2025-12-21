@@ -89,7 +89,7 @@
 - Do not restate policies here.\n  - Canonical RLS truth for `client_applications` (and the public profile visibility implications) lives in:\n    - `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` → “RLS truth (effective policies from migrations)”
 
 **Failure modes**
-- Applicant email mismatch: authenticated insert to `client_applications` fails if `email` does not match `auth.users.email`.\n  - Evidence: `supabase/migrations/20251209095547_fix_client_applications_rls_for_authenticated_users.sql`
+- Auth posture mismatch: allowing signed-out access to `/client/apply` or `/client/application-status` while `client_applications` is auth-owned.\n  - LAW: Career Builder application is **AUTH REQUIRED** and ownership is enforced via `client_applications.user_id = auth.uid()` (no `auth.users` references).
 - Accidental promotion bypass: any UI or server action directly setting `profiles.role/account_type`.\n  - Must obey Role Promotion Boundary.
 
 **Proof**
@@ -129,7 +129,7 @@
 ---
 
 ## RLS expectations (intent)
-**Verified source:** see `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (RLS truth tables).\n\nHigh-level net effect relevant to Admin:\n- `client_applications`:\n  - Admins can view/manage all.\n  - Authenticated users can view/insert only “own” applications (email match).\n- `client_profiles`:\n  - Any authenticated user can select all rows (policy `Client profiles view`).\n  - This requires application-level column discipline on any “broad read” surfaces.
+**Verified source:** see `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (RLS truth tables).\n\nHigh-level net effect relevant to Admin:\n- `client_applications`:\n  - Admins can view/manage all.\n  - Authenticated users can view/insert only “own” applications (ownership by `user_id = auth.uid()`).\n- `client_profiles`:\n  - Any authenticated user can select all rows (policy `Client profiles view`).\n  - This requires application-level column discipline on any “broad read” surfaces.
 
 ---
 

@@ -46,9 +46,13 @@
 - ✅ Audit Operating System (docs-first, proof-driven):
   - Added `docs/AUDIT_MASTER_BOARD.md` (one-screen queue) + `docs/AUDIT_LOG.md` (append-only receipts) to prevent “wall-of-text” decay.
   - Hardened `docs/AUDIT_STATUS_REPORT.md` with a DONE/PARTIAL/UNKNOWN rubric, proof hooks, and drift decisions.
-- ⚠️ New P0 bug discovered during proofs (BLOCKING):
-  - Career Builder submission is failing under authenticated context with `42501 permission denied for table users` (client_applications RLS policy references `auth.users`).
-  - Tracked as **D3** in `docs/AUDIT_MASTER_BOARD.md` with proof receipts in `docs/AUDIT_LOG.md` (P1/P2).
+- ✅ Audit unblock PR (D3) shipped locally with proofs:
+  - Locked Career Builder application behind auth (routing brain updated; signed-out users redirect to login with `returnUrl`).
+  - Fixed `client_applications` RLS to remove **all** `auth.users` references (ownership by `user_id = auth.uid()`).
+  - Fixed approval RPC failure (`42702 column reference "user_id" is ambiguous`) by using `ON CONFLICT ON CONSTRAINT client_profiles_user_id_key`.
+  - Proofs now green:
+    - P2: `tests/admin/career-builder-approval-pipeline.spec.ts` ✅
+    - P1: `tests/integration/booking-accept.spec.ts` ✅
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 

@@ -100,7 +100,6 @@ test.describe("Career Builder approval pipeline", () => {
     await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
       timeout: 20000,
     });
-    await page.fill("#email", applicant.email);
     await page.getByRole("button", { name: "Check Application Status" }).click();
     await expect(page.getByText("Pending Review")).toBeVisible({ timeout: 20000 });
 
@@ -135,18 +134,8 @@ test.describe("Career Builder approval pipeline", () => {
     await page.fill("#approve-notes", "Approved via Playwright pipeline test");
     await page.getByRole("button", { name: "Approve & Send Email" }).click();
 
-    // Toast title
-    await expect(page.getByText("Application Approved")).toBeVisible({ timeout: 20000 });
-
-    // 6b) Status portal (after approval): should show approved and include admin notes.
-    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
-    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
-      timeout: 20000,
-    });
-    await page.fill("#email", applicant.email);
-    await page.getByRole("button", { name: "Check Application Status" }).click();
-    await expect(page.getByText("Approved")).toBeVisible({ timeout: 20000 });
-    await expect(page.getByText("Approved via Playwright pipeline test")).toBeVisible({ timeout: 20000 });
+    // Approval is complete when the dialog closes (more deterministic than a transient toast).
+    await expect(page.getByText("Approve Career Builder Application")).toBeHidden({ timeout: 30000 });
 
     // 7) Hard sign out admin (avoid cross-account leakage)
     await page.context().clearCookies();
@@ -160,5 +149,14 @@ test.describe("Career Builder approval pipeline", () => {
     await page.getByTestId("login-button").click();
 
     await expect(page).toHaveURL(/\/client\/dashboard/, { timeout: 60_000 });
+
+    // 9) Status portal (after approval): applicant should see approved + admin notes.
+    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
+    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
+      timeout: 20000,
+    });
+    await page.getByRole("button", { name: "Check Application Status" }).click();
+    await expect(page.getByText("Approved", { exact: true })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Approved via Playwright pipeline test")).toBeVisible({ timeout: 20000 });
   });
 });

@@ -55,9 +55,12 @@ test("client accepts an application and creates booking", async ({ page }) => {
 
   // 3) Admin approves the Career Builder application.
   await page.context().clearCookies();
+  await page.goto("/login?signedOut=true");
   await loginWithCredentials(page, { email: "admin@totlagency.com", password: "AdminPassword123!" });
   await page.goto("/admin/client-applications");
-  await expect(page.getByText("Applications", { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Applications", exact: true }).first()).toBeVisible({
+    timeout: 30_000,
+  });
   await page.getByPlaceholder("Search by company, name, email, or industry...").fill(applicantEmail);
   const row = page.locator("tr", { hasText: applicantEmail }).first();
   await expect(row).toBeVisible({ timeout: 30_000 });
@@ -66,10 +69,12 @@ test("client accepts an application and creates booking", async ({ page }) => {
   await expect(page.getByText("Approve Career Builder Application")).toBeVisible({ timeout: 20_000 });
   await page.fill("#approve-notes", "Approved for booking accept proof");
   await page.getByRole("button", { name: "Approve & Send Email" }).click();
-  await expect(page.getByText("Application Approved")).toBeVisible({ timeout: 20_000 });
+  // Approval is complete when the dialog closes (more deterministic than a transient toast).
+  await expect(page.getByText("Approve Career Builder Application")).toBeHidden({ timeout: 30_000 });
 
   // 4) Login as applicant again; should now route to client dashboard (promotion complete).
   await page.context().clearCookies();
+  await page.goto("/login?signedOut=true");
   await loginWithCredentials(page, { email: applicantEmail, password });
   await expect(page).toHaveURL(/\/client\/dashboard/, { timeout: 60_000 });
 
@@ -132,16 +137,37 @@ test("client accepts an application and creates booking", async ({ page }) => {
   });
   expect(applicationError).toBeNull();
 
+  // Sanity: prove the application exists in DB before relying on UI.
+  const { data: insertedApplications, error: insertedApplicationsError } = await admin
+    .from("applications")
+    .select("id")
+    .eq("gig_id", gig.id)
+    .eq("talent_id", talentId);
+  expect(insertedApplicationsError).toBeNull();
+  expect(insertedApplications?.length).toBe(1);
+
   // 8) Login as client and accept the application via UI.
   await loginWithCredentials(page, { email: applicantEmail, password }, { returnUrl: "/client/applications" });
   await page.goto("/client/applications");
-  await expect(page.getByText(gigTitle)).toBeVisible({ timeout: 30_000 });
 
-  // Click Accept in the row that contains our gig title (more deterministic than “first button”).
-  const gigRow = page.locator("tr", { hasText: gigTitle }).first();
-  const acceptButton = gigRow.locator('[data-test="accept-application"]').first();
+  // Wait for applications list to load (auth + fetchApplications convergence).
+  const totalAppsCard = page.locator("div", { hasText: "Total Applications" }).first();
+  await expect(totalAppsCard.getByText("1", { exact: true })).toBeVisible({ timeout: 30_000 });
+
+  // Click Accept in the application card that contains our gig title.
+  // (Avoid ambiguous matches against hidden select options.)
+  const applicationCard = page
+    .locator("div", { hasText: gigTitle })
+    .filter({ has: page.locator('[data-test="accept-application"]') })
+    .first();
+  const acceptButton = applicationCard.locator('[data-test="accept-application"]').first();
   await expect(acceptButton).toBeVisible({ timeout: 20_000 });
   await acceptButton.click();
+
+  // Confirm in the Accept Application dialog (the card "Accept" button opens the dialog).
+  await expect(page.getByRole("dialog", { name: "Accept Application" })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Accept & Create Booking" }).click();
+  await expect(page.getByRole("dialog", { name: "Accept Application" })).toBeHidden({ timeout: 30_000 });
 
   // 9) Verify booking created in DB (idempotent accept primitive should create exactly one booking).
   const { data: booking, error: bookingError } = await admin

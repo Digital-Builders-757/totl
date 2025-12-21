@@ -23,11 +23,11 @@
 - **Writes:** `client_applications` (insert)
 - **Side effects:** confirmation email + admin notification email
 - **Contracts:** `docs/contracts/ADMIN_CONTRACT.md`, `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md`
-
-**DRIFT WARNING:** `docs/lib/constants/routes.ts` treats `/client/apply` as public, but `submitClientApplication()` currently requires an authenticated user.
+ 
+**LAW (canonical):** Career Builder application requires authentication (signed-out users must be redirected to `/login?returnUrl=/client/apply`).
 
 ### 2) Wait for approval
-- **Route:** `/client/application-status` (**UNVERIFIED behavior; must be audited**)
+- **Route:** `/client/application-status` (authenticated)
 - **Reads:** `client_applications` status
 - **Contracts:** `docs/contracts/ADMIN_CONTRACT.md`
 

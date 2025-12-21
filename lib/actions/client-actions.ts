@@ -221,6 +221,12 @@ export async function approveClientApplication(applicationId: string, adminNotes
     );
 
     if (rpcError || !rpcData || rpcData.length === 0) {
+      console.error("approveClientApplication RPC failed", {
+        applicationId,
+        rpcError,
+        rpcDataPresent: Boolean(rpcData),
+        rpcRowCount: Array.isArray(rpcData) ? rpcData.length : null,
+      });
       const msg = rpcError?.message || "Approval failed";
       if (msg.toLowerCase().includes("forbidden")) return { error: "Not authorized" };
       if (msg.toLowerCase().includes("unauthorized")) return { error: "Not authenticated" };
@@ -543,26 +549,29 @@ type ClientApplicationStatusResponse =
 
 export async function checkClientApplicationStatus({
   applicationId,
-  email,
 }: {
-  applicationId: string;
-  email: string;
+  applicationId?: string;
 }): Promise<ClientApplicationStatusResponse> {
-  const normalizedId = applicationId?.trim();
-  const normalizedEmail = email?.trim().toLowerCase();
-
-  if (!normalizedId || !normalizedEmail) {
-    return { success: false, error: "Application ID and email are required." };
-  }
+  const normalizedId = applicationId?.trim() || null;
 
   try {
-    const supabaseAdmin = createSupabaseAdminClient();
+    const supabase = await createSupabaseServer();
 
-    const { data, error } = await supabaseAdmin
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return { success: false, error: "You must be signed in to check application status." };
+    }
+
+    let query = supabase
       .from("client_applications")
       .select(
         `
           id,
+          user_id,
           company_name,
           first_name,
           last_name,
@@ -574,9 +583,15 @@ export async function checkClientApplicationStatus({
           updated_at
         `
       )
-      .eq("id", normalizedId)
-      .ilike("email", normalizedEmail)
-      .maybeSingle();
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (normalizedId) {
+      query = query.eq("id", normalizedId);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       console.error("Error fetching client application status:", error);
@@ -589,7 +604,7 @@ export async function checkClientApplicationStatus({
     if (!data) {
       return {
         success: false,
-        error: "We couldn't find an application matching that ID and email.",
+        error: "We couldn't find an application matching that ID.",
       };
     }
 
