@@ -26,6 +26,7 @@ import {
   Phone,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +38,8 @@ import { ProfileCompletionBanner } from "@/components/ui/profile-completion-bann
 import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getBootState } from "@/lib/actions/boot-actions";
+import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 import type { Database } from "@/types/supabase";
@@ -91,6 +94,7 @@ interface Gig {
 
 export default function ClientDashboard() {
   const { user, signOut, profile } = useAuth();
+  const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
@@ -106,6 +110,34 @@ export default function ClientDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
+
+  // Canonical gating: ask the server-owned BootState once and redirect if this user
+  // should not be on the client terminal (or needs onboarding).
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const boot = await getBootState();
+        if (cancelled) return;
+
+        if (!boot) {
+          router.replace(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.CLIENT_DASHBOARD)}`);
+          return;
+        }
+
+        const target = boot.needsOnboarding ? ONBOARDING_PATH : boot.nextPath;
+        if (target !== PATHS.CLIENT_DASHBOARD) {
+          router.replace(target);
+        }
+      } catch (e) {
+        console.error("[client/dashboard] boot gate failed:", e);
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   // Calculate dashboard stats from real data
   const dashboardStats = {

@@ -82,7 +82,9 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!user) {
-    if (isAuthRoute(path) || isPublicPath(path) || path === ONBOARDING_PATH) {
+    // Signed-out allowlist: auth routes + public routes only.
+    // Onboarding requires an authenticated session (bootstrap-safe handling is for signed-in users with missing profile rows).
+    if (isAuthRoute(path) || isPublicPath(path)) {
       return res;
     }
     if (!isPublicPath(path)) {
@@ -202,11 +204,6 @@ export async function middleware(req: NextRequest) {
   ) {
     // Default to Talent Dashboard instead of onboarding page
     return NextResponse.redirect(new URL(PATHS.TALENT_DASHBOARD, req.url));
-  }
-
-  if (!needsOnboarding && path === ONBOARDING_PATH && !isAdmin) {
-    const destination = determineDestination(profile);
-    return NextResponse.redirect(new URL(destination, req.url));
   }
 
   if (onAuthRoute && user) {

@@ -7,10 +7,12 @@ import type React from "react";
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
+import { getBootState } from "@/lib/actions/boot-actions";
 import {
   PATHS,
   isAuthRoute,
   isPublicPath,
+  ONBOARDING_PATH,
 } from "@/lib/constants/routes";
 import { decideSignedInClientRedirect } from "@/lib/routing/decide-redirect";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
@@ -315,8 +317,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (to) {
+              // Use server-owned BootState to prevent local-vs-server routing drift.
+              const boot = await getBootState();
+              const bootTarget = boot ? (boot.needsOnboarding ? ONBOARDING_PATH : boot.nextPath) : PATHS.LOGIN;
+
               router.refresh();
-              router.push(to);
+              router.push(bootTarget);
             }
           }
         } catch (error) {

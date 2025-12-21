@@ -69,6 +69,14 @@ npm run build
   - **Daily loop:** `npm run verify-fast`
   - **Before push/PR:** `npm run verify-all` (CI-parity gate)
 
+### **Playwright admin helper fails: `invalid JWT signature`**
+- **Symptom:** Playwright specs that call `POST /api/admin/create-user` fail early with `500` and `invalid JWT: ... signature is invalid`.
+- **Root cause:** `SUPABASE_SERVICE_ROLE_KEY` does **not** belong to the same Supabase project as the URL being used by the server (`SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL` mismatch).
+- **Fix:** Align env vars so they refer to the same project:
+  - `SUPABASE_URL` == `NEXT_PUBLIC_SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY` is copied from that same project’s dashboard
+  - Restart `next dev` / `next start` before rerunning tests
+
 ### **Next.js EPERM on Windows/OneDrive (`.next\\trace`)**
 - **Symptom:** `EPERM: operation not permitted, open '...\\.next\\trace'` during `next build` or when Playwright starts a dev server.
 - **Root cause:** Windows file-locking + OneDrive sync contention on `.next` artifacts (especially `trace`).

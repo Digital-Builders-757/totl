@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -24,7 +24,7 @@ export async function selectAccountType(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(ONBOARDING_PATH)}`);
+    redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.ONBOARDING_SELECT_ACCOUNT_TYPE)}`);
   }
 
   const { data: profile } = await supabase

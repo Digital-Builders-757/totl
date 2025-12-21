@@ -74,51 +74,27 @@ function Test-Pattern {
 
 # Check 1: Custom Application interface
 Write-Host "`n🔍 Check 1: Custom 'Application' Interfaces" -ForegroundColor Cyan
-$hasAppInterface = Test-Pattern `
-    -Pattern "^\s*interface\s+Application\s*\{" `
-    -Description "Custom 'Application' interface (should use generated types)" `
-    -Severity "CRITICAL" `
-    -Paths @("components", "app", "lib")
+$hasAppInterface = Test-Pattern -Pattern '^\s*interface\s+Application\s*\{' -Description "Custom 'Application' interface (should use generated types)" -Severity "CRITICAL" -Paths @("components", "app", "lib")
 
 # Check 2: Custom Gig interface
 Write-Host "`n🔍 Check 2: Custom 'Gig' Interfaces" -ForegroundColor Cyan
-$hasGigInterface = Test-Pattern `
-    -Pattern "^\s*interface\s+Gig\s*\{" `
-    -Description "Custom 'Gig' interface (should use generated types)" `
-    -Severity "CRITICAL" `
-    -Paths @("components", "app", "lib")
+$hasGigInterface = Test-Pattern -Pattern '^\s*interface\s+Gig\s*\{' -Description "Custom 'Gig' interface (should use generated types)" -Severity "CRITICAL" -Paths @("components", "app", "lib")
 
 # Check 3: Custom Profile interface
 Write-Host "`n🔍 Check 3: Custom 'Profile' Interfaces" -ForegroundColor Cyan
-$hasProfileInterface = Test-Pattern `
-    -Pattern "^\s*interface\s+(Profile|TalentProfile|ClientProfile)\s*\{" `
-    -Description "Custom 'Profile' interface (should use generated types)" `
-    -Severity "CRITICAL" `
-    -Paths @("components", "app", "lib")
+$hasProfileInterface = Test-Pattern -Pattern '^\s*interface\s+(Profile|TalentProfile|ClientProfile)\s*\{' -Description "Custom 'Profile' interface (should use generated types)" -Severity "CRITICAL" -Paths @("components", "app", "lib")
 
 # Check 4: Custom Booking interface
 Write-Host "`n🔍 Check 4: Custom 'Booking' Interfaces" -ForegroundColor Cyan
-$hasBookingInterface = Test-Pattern `
-    -Pattern "^\s*interface\s+Booking\s*\{" `
-    -Description "Custom 'Booking' interface (should use generated types)" `
-    -Severity "CRITICAL" `
-    -Paths @("components", "app", "lib")
+$hasBookingInterface = Test-Pattern -Pattern '^\s*interface\s+Booking\s*\{' -Description "Custom 'Booking' interface (should use generated types)" -Severity "CRITICAL" -Paths @("components", "app", "lib")
 
 # Check 5: Incorrect application status "pending"
 Write-Host "`n🔍 Check 5: Incorrect Application Status 'pending'" -ForegroundColor Cyan
-$hasPendingStatus = Test-Pattern `
-    -Pattern "status.*===.*['\"]pending['\"]" `
-    -Description "Incorrect 'pending' status (should be 'new' or 'under_review')" `
-    -Severity "CRITICAL" `
-    -Paths @("components", "app", "lib")
+$hasPendingStatus = Test-Pattern -Pattern 'status.*===.*[''"]pending[''"]' -Description "Incorrect 'pending' status (should be 'new' or 'under_review')" -Severity "CRITICAL" -Paths @("components", "app", "lib")
 
 # Check 6: Plain string for status (warning)
 Write-Host "`n🔍 Check 6: Untyped Status Fields" -ForegroundColor Cyan
-$hasStringStatus = Test-Pattern `
-    -Pattern "status:\s*string" `
-    -Description "Untyped 'status' field (should use enum type)" `
-    -Severity "WARNING" `
-    -Paths @("components", "app", "lib")
+$hasStringStatus = Test-Pattern -Pattern 'status:\s*string' -Description "Untyped 'status' field (should use enum type)" -Severity "WARNING" -Paths @("components", "app", "lib")
 
 # Check 7: Missing Database import when using database entities
 Write-Host "`n🔍 Check 7: Missing Type Imports" -ForegroundColor Cyan

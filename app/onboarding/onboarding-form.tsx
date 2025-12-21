@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { finishOnboarding } from "./actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,13 +26,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 const profileFormSchema = z.object({
@@ -44,9 +38,6 @@ const profileFormSchema = z.object({
       message: "Experience must not be longer than 500 characters.",
     })
     .optional(),
-  role: z.enum(["talent", "client"], {
-    required_error: "Please select a role.",
-  }),
   location: z.string().optional(),
   website: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal("")),
 });
@@ -56,19 +47,9 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 // Default values for the form
 const defaultValues: Partial<ProfileFormValues> = {
   experience: "",
-  role: "talent",
   location: "",
   website: "",
 };
-
-// Create a mock action for profile creation if it doesn't exist
-async function createProfile() {
-  // This would typically call a server action or API endpoint
-
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return { success: true };
-}
 
 export function OnboardingForm() {
   const router = useRouter();
@@ -86,16 +67,19 @@ export function OnboardingForm() {
 
     try {
       const data = form.getValues();
-      await createProfile();
+      const result = await finishOnboarding({
+        full_name: data.full_name,
+        experience: data.experience,
+        location: data.location,
+        website: data.website,
+      });
 
-      // Redirect based on role
-      if (data.role === "talent") {
-        router.push("/talent/dashboard");
-      } else if (data.role === "client") {
-        router.push("/client/dashboard");
-      } else {
-        router.push("/admin/dashboard");
+      if (!result.ok) {
+        setError(result.error);
+        return;
       }
+
+      router.replace(result.nextPath);
     } catch (err) {
       console.error("Error creating profile:", err);
       setError(err instanceof Error ? err.message : "Failed to create profile. Please try again.");
@@ -125,31 +109,6 @@ export function OnboardingForm() {
                     <Input placeholder="Enter your full name" {...field} />
                   </FormControl>
                   <FormDescription>This is how you&apos;ll appear on the platform.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your account type" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="talent">Talent</SelectItem>
-                      <SelectItem value="client">Client</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Choose whether you&apos;re joining as talent or a client.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -220,7 +179,7 @@ export function OnboardingForm() {
         </Form>
       </CardContent>
       <CardFooter className="flex justify-center text-sm text-gray-500">
-        You can update your profile information at any time after creation.
+        Career Builder (client) access is granted via application + admin approval. You can update your profile anytime.
       </CardFooter>
     </Card>
   );
