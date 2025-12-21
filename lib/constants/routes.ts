@@ -20,6 +20,7 @@ export const PATHS = {
   CHOOSE_ROLE: "/choose-role",
 
   // Onboarding
+  ONBOARDING: "/onboarding",
   ONBOARDING_SELECT_ACCOUNT_TYPE: "/onboarding/select-account-type",
 
   // Dashboards
@@ -112,7 +113,8 @@ export function isPublicPath(pathname: string): boolean {
   return true;
 }
 
-export const ONBOARDING_PATH = PATHS.ONBOARDING_SELECT_ACCOUNT_TYPE;
+// Canonical onboarding entrypoint (BootState routes here when profile completion is required)
+export const ONBOARDING_PATH = PATHS.ONBOARDING;
 
 // Used by AuthProvider to prevent redirect churn immediately after SIGNED_IN
 export const SIGNED_IN_ALLOWED_PREFIXES: readonly string[] = [

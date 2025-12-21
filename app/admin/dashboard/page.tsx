@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
+
 import { AdminDashboardClient } from "./admin-dashboard-client";
+
+import { getBootState } from "@/lib/actions/boot-actions";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
-import { type ProfileRow } from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -15,28 +18,16 @@ type PaidTalentStats = {
 };
 
 export default async function AdminDashboard() {
-  const supabase = await createSupabaseServer();
+  const boot = await getBootState();
+  if (!boot) redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.ADMIN_DASHBOARD)}`);
+  if (boot.needsOnboarding) redirect(boot.nextPath);
+  if (boot.role !== "admin") redirect(boot.nextPath);
 
-  // Check if user is authenticated and is admin
+  const supabase = await createSupabaseServer();
   const {
     data: { user },
-    error: authError,
   } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    redirect("/login?returnUrl=/admin/dashboard");
-  }
-
-  // Get user role from profiles table
-  const { data: userData, error: userError } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id as string)
-    .single();
-
-  if (userError || (userData as ProfileRow)?.role !== "admin") {
-    redirect("/login?returnUrl=/admin/dashboard");
-  }
+  if (!user) redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.ADMIN_DASHBOARD)}`);
 
   // Paid members = active talent subscriptions (no Stripe API calls here).
   // Definition (MVP): role='talent' AND subscription_status='active' bucketed by subscription_plan.

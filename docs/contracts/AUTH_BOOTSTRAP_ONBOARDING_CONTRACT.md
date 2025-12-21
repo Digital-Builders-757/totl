@@ -221,6 +221,32 @@
 - Likely cause: trigger didn’t create profile or profile was manually deleted.
 - Canonical repair: `ensureProfileExists()`.
 
+3) **Split-brain routing (auth callback vs dashboards vs client provider)**
+- Symptom: user briefly lands on the wrong terminal, bounces between routes, or onboarding logic differs between server and client.
+- Likely cause: multiple independent layers “guess” destination from partial data.
+- Canonical fix: server-owned **BootState** determines `needsOnboarding` + `nextPath` in one place, and callers redirect to that.
+
+---
+
+## BootState (server-owned routing truth) — ✅ IMPLEMENTED
+
+**Contract:**
+- The app must be able to answer deterministically after any session establishment (login/callback/refresh):
+  - who the user is
+  - what terminal they belong to
+  - whether they need onboarding/profile completion
+  - what the next safe route is
+
+**Winner (Staff):**
+- `lib/actions/boot-actions.ts`
+  - `getBootState()`: read-only routing truth (`needsOnboarding`, `nextPath`)
+  - `finishOnboardingAction()`: single “commit” for talent profile completion (no role escalation)
+
+**Non-negotiables preserved:**
+- No middleware DB writes
+- No client DB writes
+- No role escalation (client is admin-promoted only)
+
 3) **Client privilege escalation during onboarding (SECURITY BUG)**
 - Symptom: a user becomes `role=client` without admin approval.
 - Likely cause: off-sync onboarding actions writing `profiles.role` directly.

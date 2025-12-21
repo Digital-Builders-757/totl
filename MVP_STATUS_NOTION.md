@@ -939,10 +939,10 @@
 ## 🎯 **Next Session Priorities**
 
 ### **Immediate Actions (This Week):**
-1. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
-2. **Production Cleanup** - Remove console.log statements (Priority 3, Task 2)
-3. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
-4. **Final Testing Expansion** - Complete remaining test coverage
+1. **Onboarding spine polish (P0)** - Verify BootState routing in preview/prod (auth callback → onboarding → dashboard) and watch for redirect loops.
+2. **Fix Playwright admin test helper env (P0)** - Align `SUPABASE_SERVICE_ROLE_KEY` with `NEXT_PUBLIC_SUPABASE_URL` so e2e user-creation helpers work (current error: invalid JWT signature).
+3. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
+4. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
 
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle
@@ -959,6 +959,6 @@
 ---
 
 *Last Updated: December 20, 2025*
-*Current Status: MVP Complete - Schema truth + build + lint passing*
-*Codebase Rating: 7.5/10 - Production Ready, Performance & UX Optimization Roadmap Added*
+*Current Status: MVP Complete - BootState routing spine implemented + verify-all passing*
+*Codebase Rating: 8/10 - Production Ready, Auth/Onboarding Stability Improved*
 *Next Review: After performance optimizations (Priority 3 tasks)*

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 
-type Action = "delete-profile" | "check-profile";
+type Action = "delete-profile" | "check-profile" | "blank-onboarding-fields";
 
 type PostBody = {
   action: Action;
@@ -61,6 +61,31 @@ export async function POST(request: Request) {
         },
         { status: 200 }
       );
+    }
+
+    if (action === "blank-onboarding-fields") {
+      // Intentionally create an "incomplete profile" state to exercise onboarding gating in dev/tests.
+      // - Blank profiles.display_name
+      // - Blank talent_profiles first/last name
+      const { error: profileError } = await supabaseAdmin
+        .from("profiles")
+        .update({ display_name: "" })
+        .eq("id", userId);
+
+      if (profileError) {
+        return NextResponse.json({ error: profileError.message }, { status: 500 });
+      }
+
+      const { error: talentError } = await supabaseAdmin
+        .from("talent_profiles")
+        .update({ first_name: "", last_name: "" })
+        .eq("user_id", userId);
+
+      if (talentError) {
+        return NextResponse.json({ error: talentError.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true }, { status: 200 });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });

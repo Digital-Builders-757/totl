@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getBootState } from "@/lib/actions/boot-actions";
 import { PATHS } from "@/lib/constants/routes";
 import { syncEmailVerifiedForUser } from "@/lib/server/sync-email-verified";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -101,171 +102,25 @@ export default async function AuthCallbackPage({
       // Success! Check if profile exists and update email verification status
       if (data.session?.user) {
         const user = data.session.user;
-        
-        // Check if profile exists - use maybeSingle() to prevent 406 errors
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role,email_verified,display_name")
-          .eq("id", user.id)
-          .maybeSingle();
 
-        // If profile doesn't exist, create it with name from user metadata.
-        // Auth bootstrap contract (PR #3): never trust metadata.role for privilege escalation.
-        // New signups are always Talent; Career Builder access comes only from admin approval.
-        if (!profile) {
-          // Extract name from user metadata
-          const firstName = (user.user_metadata?.first_name as string) || "";
-          const lastName = (user.user_metadata?.last_name as string) || "";
-          const role = "talent" as const;
-
-          // Create display name
-          let displayName = "";
-          if (firstName && lastName) {
-            displayName = `${firstName} ${lastName}`;
-          } else if (firstName) {
-            displayName = firstName;
-          } else if (lastName) {
-            displayName = lastName;
-          } else {
-            displayName = user.email?.split("@")[0] || "User";
-          }
-
-          // Create profile with account_type set to talent (MVP: all signups are talent)
-          // Even if role in metadata is "client" (e.g., admin-created), account_type starts as "talent"
-          // Users can apply to become Career Builder (client) through the application process
-          const { error: insertError } = await supabase.from("profiles").insert({
-            id: user.id,
-            role: "talent",
-            account_type: "talent",
-            display_name: displayName,
-            email_verified: user.email_confirmed_at !== null,
-          });
-
-          if (insertError) {
-            console.error("Error creating profile:", insertError);
-            return (
-              <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-                <Card className="w-full max-w-md">
-                  <CardHeader>
-                    <CardTitle className="text-center">Profile Setup Error</CardTitle>
-                    <CardDescription className="text-center">
-                      Your account was created but profile setup failed
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col items-center justify-center py-8">
-                    <div className="flex flex-col items-center">
-                      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                        <XCircle className="h-8 w-8 text-red-600" />
-                      </div>
-                      <h3 className="text-xl font-medium text-red-800 mb-2">Setup Error</h3>
-                      <p className="text-gray-600 text-center mb-4">
-                        Please contact support to complete your account setup.
-                      </p>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-center">
-                    <Button asChild>
-                      <a href={PATHS.LOGIN}>Return to Login</a>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            );
-          }
-
-          // Create role-specific profile (always talent at signup)
-          if (role === "talent") {
-            const { error: talentError } = await supabase.from("talent_profiles").insert({
-              user_id: user.id,
-              first_name: firstName,
-              last_name: lastName,
-            });
-
-            if (talentError) {
-              console.error("Error creating talent profile:", talentError);
-              // Don't fail - profile was created
-            }
-          }
-
-          // Re-fetch profile after creation - use maybeSingle() to prevent 406 errors
-          const { data: newProfile } = await supabase
-            .from("profiles")
-            .select("role, email_verified")
-            .eq("id", user.id)
-            .maybeSingle();
-
-          // Sync email verification status using shared primitive (PR #1)
-          const syncResult = await syncEmailVerifiedForUser({
-            supabase,
-            user,
-            currentEmailVerified: newProfile?.email_verified ?? null,
-          });
-          if (!syncResult.success) {
-            console.error("[auth/callback] email_verified sync failed (post-create):", syncResult.error);
-          }
-
-          // Use server-side redirect instead of client-side link to ensure session cookies are set
-          // Default to Talent Dashboard for new users (PR #3: all signups are talent)
-          // Preserve returnUrl if provided
-          const baseRedirectUrl =
-            newProfile?.role === "admin"
-              ? "/admin/dashboard?verified=true"
-              : "/talent/dashboard?verified=true";
-          const redirectUrl = returnUrl
-            ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
-            : baseRedirectUrl;
-          
-          // Use Next.js redirect() to ensure session cookies are properly set before navigation
-          redirect(redirectUrl);
-        }
-
-        // If profile exists but display_name is missing/empty, update it
-        if (profile && (!profile.display_name || profile.display_name.trim() === "")) {
-          const firstName = (user.user_metadata?.first_name as string) || "";
-          const lastName = (user.user_metadata?.last_name as string) || "";
-
-          let displayName = "";
-          if (firstName && lastName) {
-            displayName = `${firstName} ${lastName}`;
-          } else if (firstName) {
-            displayName = firstName;
-          } else if (lastName) {
-            displayName = lastName;
-          } else {
-            displayName = user.email?.split("@")[0] || "User";
-          }
-
-          await supabase
-            .from("profiles")
-            .update({ display_name: displayName })
-            .eq("id", user.id);
-        }
-
-        // Sync email verification status using shared primitive (PR #1)
-        // This ensures profiles.email_verified stays in sync with Supabase auth
+        // Keep profiles.email_verified in sync with Supabase auth.
         const syncResult = await syncEmailVerifiedForUser({
           supabase,
           user,
-          currentEmailVerified: profile?.email_verified ?? null,
+          currentEmailVerified: null,
         });
         if (!syncResult.success) {
-          console.error("[auth/callback] email_verified sync failed (existing profile):", syncResult.error);
+          console.error("[auth/callback] email_verified sync failed:", syncResult.error);
         }
 
-        // Use server-side redirect instead of client-side link to ensure session cookies are set
-        // Default to Talent Dashboard for new users (MVP: all signups are talent)
-        // Preserve returnUrl if provided
-        const baseRedirectUrl = profile?.role === "admin"
-          ? "/admin/dashboard?verified=true"
-          : profile?.role === "client"
-          ? "/client/dashboard?verified=true"
-          : "/talent/dashboard?verified=true";
-        const redirectUrl = returnUrl
-          ? `${baseRedirectUrl}&returnUrl=${encodeURIComponent(returnUrl)}`
-          : baseRedirectUrl;
-        
-        // Use Next.js redirect() to ensure session cookies are properly set before navigation
-        redirect(redirectUrl);
+        // Single routing truth: compute BootState and redirect to server-computed nextPath.
+        const boot = await getBootState({ postAuth: true, returnUrlRaw: returnUrl ?? null });
+        const baseNext = boot?.nextPath ?? PATHS.TALENT_DASHBOARD;
+        const nextWithVerified = baseNext.includes("?")
+          ? `${baseNext}&verified=true`
+          : `${baseNext}?verified=true`;
+
+        redirect(nextWithVerified);
       }
 
       // Fallback redirect
