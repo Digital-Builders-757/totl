@@ -199,6 +199,35 @@ npm run build
 
 ## ⚡ EMERGENCY FIXES - COPY & PASTE COMMANDS
 
+### **0. “No project currently linked” during `schema:verify:comprehensive`**
+
+**Meaning:** This is **not an error** for schema drift verification.  
+The drift check is deterministic because it targets a project explicitly via `--project-id`.
+
+**Evidence (script behavior):**
+- `scripts/verify-schema-sync-comprehensive.mjs` prints link status for awareness, then verifies drift against `TARGET_PROJECT_ID` (defaults to `utvircuwknqzpnmvxidp` unless `SUPABASE_PROJECT_ID` is set).
+
+**When linking is actually required:**
+- For `supabase db *` workflows (e.g., `db push`, `db reset`, `db status --linked`).
+
+**Optional strict mode (seatbelt):**
+
+```bash
+# Fails if no link is detected (intended for release prep / onboarded devs / dedicated CI jobs)
+npm run schema:verify:linked
+```
+
+**How to fix (if you want to link):**
+
+```bash
+# Dev project
+npm run link:dev
+
+# Prod project (requires SUPABASE_PROJECT_ID env var)
+# PowerShell: $env:SUPABASE_PROJECT_ID="<prod_project_ref>"
+npm run link:prod
+```
+
 ### **1. Schema Sync Error**
 ```bash
 # Error: types/database.ts is out of sync with remote schema

@@ -40,6 +40,9 @@
   - Reduced local worker default for Windows/OneDrive reliability: `playwright.config.ts` now defaults to **2 workers** (override via `PW_WORKERS`).
 - ✅ Line-ending noise controlled:
   - `.gitattributes` enforces LF for repo text files but keeps `*.ps1/*.cmd/*.bat` as CRLF to avoid churn.
+- ✅ Schema verify UX clarified (no “contradiction”):
+  - `npm run schema:verify:comprehensive` now reports “link: none (OK)” and prints the drift target project (`--project-id`), so unlinked dev machines aren’t misled.
+  - Added optional strict mode `npm run schema:verify:linked` (fails when no link is detected) for release prep/onboarded environments.
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 
