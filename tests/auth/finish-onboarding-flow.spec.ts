@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
+import { ensureTalentReady, loginWithCredentials } from "../helpers/auth";
+import { safeGoto } from "../helpers/navigation";
 import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
+import { createTalentTestUser } from "../helpers/test-data";
 
 /**
  * Finish onboarding flow (BootState gate + finishOnboardingAction)
@@ -12,25 +15,13 @@ test.describe("BootState: finish onboarding", () => {
   test("blanked name fields force onboarding; submit completes and redirects", async ({ page, request }) => {
     test.setTimeout(180_000);
 
-    const safeGoto = async (url: string) => {
-      try {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-      } catch {
-        await page.waitForTimeout(1500);
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-      }
-    };
-
-    const timestamp = Date.now();
-    const user = {
-      email: `pw-onboarding-${timestamp}@example.com`,
-      password: "TestPassword123!",
+    const user = createTalentTestUser("pw-onboarding", {
       firstName: "Onboarding",
-      lastName: `User${timestamp}`,
-    };
+      lastName: `User${Date.now()}`,
+    });
 
     // Warm server
-    await safeGoto("/");
+    await safeGoto(page, "/");
 
     // Create a verified talent user
     const createRes = await request.post("/api/admin/create-user", {
@@ -83,18 +74,15 @@ test.describe("BootState: finish onboarding", () => {
 
     // Login
     await page.context().clearCookies();
-    await safeGoto("/login");
-    await page.locator('[data-testid="login-hydrated"]').waitFor({ state: "attached", timeout: 30_000 });
-    await page.getByTestId("email").fill(user.email);
-    await page.getByTestId("password").fill(user.password);
-    await page.getByTestId("login-button").click();
+    await safeGoto(page, "/login");
+    await loginWithCredentials(page, { email: user.email, password: user.password });
 
     // Prefer: BootState gate routes to onboarding.
     // In some environments, the login redirect may land on the dashboard first; in that case
     // we still validate that finishing onboarding succeeds by navigating to /onboarding.
-    await page.waitForURL(/\/onboarding|\/talent\/dashboard/, { timeout: 60_000 });
+    await expect(page).toHaveURL(/\/(onboarding|talent\/dashboard)(\/|$)/, { timeout: 60_000 });
     if (!/\/onboarding/.test(page.url())) {
-      await safeGoto("/onboarding");
+      await safeGoto(page, "/onboarding");
       await expect(page).toHaveURL(/\/onboarding/, { timeout: 60_000 });
     }
 
@@ -106,7 +94,8 @@ test.describe("BootState: finish onboarding", () => {
     await page.getByRole("button", { name: "Complete Profile" }).click();
 
     // Should converge to talent dashboard
-    await expect(page).toHaveURL(/\/talent\/dashboard/, { timeout: 60_000 });
+    await ensureTalentReady(page);
+    await expect(page).toHaveURL(/\/talent\/dashboard(\/|$)/, { timeout: 60_000 });
   });
 });
 

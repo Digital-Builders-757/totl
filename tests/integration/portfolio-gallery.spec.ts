@@ -1,22 +1,11 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const TALENT_ACCOUNT = {
-  email: "emma.seed@thetotlagency.local",
-  password: "Password123!",
-};
-
-async function loginAsTalent(page: Page) {
-  await page.goto("/login");
-  await page.fill("#email", TALENT_ACCOUNT.email);
-  await page.fill("#password", TALENT_ACCOUNT.password);
-  await page.click('button[type="submit"]');
-  await page.waitForURL(/\/talent\/dashboard/, { timeout: 20000 });
-  await page.waitForLoadState("networkidle");
-}
+import { test, expect } from "@playwright/test";
+import { loginAsTalent } from "../helpers/auth";
+import { ensureTalentReady } from "../helpers/ensure-talent-ready";
 
 test.describe("Portfolio Gallery", () => {
   test("renders the gallery grid, hover overlay, and edit controls", async ({ page }) => {
     await loginAsTalent(page);
+    await ensureTalentReady(page);
 
     await page.goto("/settings");
     await expect(page).toHaveURL(/\/settings/);

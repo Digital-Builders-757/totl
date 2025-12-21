@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
+import { loginAsClient } from "../helpers/auth";
 
 test("client accepts an application and creates booking", async ({ page }) => {
-  await page.goto("/login");
-  await page.fill('#email', 'bboylion@gmail.com');
-  await page.fill('#password', 'Aiight123!');
-  await page.click('button[type="submit"]');
+  if (!process.env.PLAYWRIGHT_CLIENT_EMAIL || !process.env.PLAYWRIGHT_CLIENT_PASSWORD) {
+    test.skip(true, "Set PLAYWRIGHT_CLIENT_EMAIL and PLAYWRIGHT_CLIENT_PASSWORD to run client booking tests");
+  }
 
-  await page.waitForLoadState("networkidle");
+  await loginAsClient(page, { returnUrl: "/client/applications" });
   await page.goto("/client/applications");
 
   // Click Accept on the first application if present

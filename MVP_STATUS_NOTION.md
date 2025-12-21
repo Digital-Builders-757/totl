@@ -663,6 +663,10 @@
 
 ### **4. Testing Expansion**
 - ✅ Seeded QA personas/gigs/content flags via `supabase/seed.sql` (see `docs/TEST_DATA_REFERENCE.md`)
+- ✅ Playwright auth convergence stabilization (Dec 21, 2025)
+  - Refactored `tests/auth/**` + `tests/integration/talent-gig-application.spec.ts` to use shared helpers + env-driven credentials
+  - Removed brittle waits and strict-mode selector collisions (scoped locators instead of `networkidle`/hardcoded terminals)
+  - Focused subset proof: `npx playwright test tests/auth tests/integration/talent-gig-application.spec.ts --project=chromium --retries=0 --reporter=list` → **25 passed, 4 skipped**
 - [x] Portfolio E2E tests
   - [x] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
   - [x] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS

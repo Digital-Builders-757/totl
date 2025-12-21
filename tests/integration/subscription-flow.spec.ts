@@ -1,21 +1,10 @@
 import { test, expect } from "@playwright/test";
+import { loginAsTalent } from "../helpers/auth";
+import { ensureTalentReady } from "../helpers/ensure-talent-ready";
 
 const talentEmail = process.env.PLAYWRIGHT_TALENT_EMAIL;
 const talentPassword = process.env.PLAYWRIGHT_TALENT_PASSWORD;
 const testGigId = process.env.PLAYWRIGHT_TEST_GIG_ID;
-
-async function loginAsTalent(page: import("@playwright/test").Page) {
-  if (!talentEmail || !talentPassword) {
-    test.skip(true, "PLAYWRIGHT_TALENT_EMAIL and PLAYWRIGHT_TALENT_PASSWORD must be set");
-    return;
-  }
-
-  await page.goto("/login");
-  await page.getByLabel(/email/i).fill(talentEmail!);
-  await page.getByLabel(/password/i).fill(talentPassword!);
-  await page.getByRole("button", { name: /sign in/i }).click();
-  await page.waitForLoadState("networkidle");
-}
 
 test.describe("Talent subscription flow (requires test credentials)", () => {
   test.beforeEach(async ({ page }) => {
@@ -23,6 +12,7 @@ test.describe("Talent subscription flow (requires test credentials)", () => {
       test.skip(true, "Set PLAYWRIGHT_TALENT_EMAIL and PLAYWRIGHT_TALENT_PASSWORD to run these tests");
     }
     await loginAsTalent(page);
+    await ensureTalentReady(page);
   });
 
   test("shows subscription banner on dashboard for unsubscribed talent", async ({ page }) => {

@@ -277,6 +277,24 @@ npx --no-install @playwright/mcp --help
 
 **See:** `docs/MCP_QUICK_FIX.md` for detailed steps
 
+### **5b. Playwright error: Project(s) "chromium" not found**
+```bash
+# Error:
+#   Error: Project(s) "chromium" not found. Available projects: ""
+#
+# Root cause:
+# - Playwright didn't load `playwright.config.ts` (often because the command was run from the wrong working directory).
+#
+# Fix:
+# 1) cd to the repo root (where `playwright.config.ts` lives)
+cd <repo-root>
+#
+# 2) re-run the test without overriding projects, or pass the config explicitly
+npx playwright test tests/auth
+# or:
+npx playwright test --config=playwright.config.ts tests/auth
+```
+
 ### **6. Sentry 406 Not Acceptable Errors**
 ```bash
 # Error: profiles?select=role&id=eq.xxx returned 406 Not Acceptable
