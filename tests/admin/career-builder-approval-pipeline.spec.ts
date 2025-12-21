@@ -90,6 +90,20 @@ test.describe("Career Builder approval pipeline", () => {
     await page.click('button[type="submit"]:has-text("Submit Application")');
     await expect(page).toHaveURL(/\/client\/apply\/success/, { timeout: 30000 });
 
+    // P2 proof hook: capture applicationId from success URL and prove status portal works.
+    const successUrl = new URL(page.url());
+    const applicationId = successUrl.searchParams.get("applicationId");
+    expect(applicationId, "Expected applicationId in /client/apply/success URL").toBeTruthy();
+
+    // 3b) Status portal (before approval): should show pending.
+    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
+    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
+      timeout: 20000,
+    });
+    await page.fill("#email", applicant.email);
+    await page.getByRole("button", { name: "Check Application Status" }).click();
+    await expect(page.getByText("Pending Review")).toBeVisible({ timeout: 20000 });
+
     // 4) Hard sign out applicant (avoid cross-account leakage)
     await page.context().clearCookies();
     await page.goto("/login?signedOut=true");
@@ -123,6 +137,16 @@ test.describe("Career Builder approval pipeline", () => {
 
     // Toast title
     await expect(page.getByText("Application Approved")).toBeVisible({ timeout: 20000 });
+
+    // 6b) Status portal (after approval): should show approved and include admin notes.
+    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
+    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
+      timeout: 20000,
+    });
+    await page.fill("#email", applicant.email);
+    await page.getByRole("button", { name: "Check Application Status" }).click();
+    await expect(page.getByText("Approved")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Approved via Playwright pipeline test")).toBeVisible({ timeout: 20000 });
 
     // 7) Hard sign out admin (avoid cross-account leakage)
     await page.context().clearCookies();

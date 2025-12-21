@@ -47,7 +47,6 @@ export default function ClientApplicationPage() {
     adminNotes?: string | null;
   } | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [statusLoading, setStatusLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -134,7 +133,6 @@ export default function ClientApplicationPage() {
     const controller = new AbortController();
     const checkStatus = async () => {
       try {
-        setStatusLoading(true);
         const response = await fetch(
           `/api/client-applications/status?email=${encodeURIComponent(userEmail)}`,
           { signal: controller.signal }
@@ -171,16 +169,14 @@ export default function ClientApplicationPage() {
       } catch (error) {
         console.error("Failed to load application status", error);
         setStatusMessage("Unable to load your application status right now.");
-      } finally {
-        if (!controller.signal.aborted) {
-          setStatusLoading(false);
-        }
       }
     };
 
     checkStatus();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [user?.email, hasStartedEditing, hasSubmitted, router]);
 
   const showStatusPanel =
@@ -397,8 +393,7 @@ export default function ClientApplicationPage() {
                       className="w-full bg-amber-500 text-black hover:bg-amber-400"
                       disabled={
                         isSubmitting ||
-                        applicationStatus?.status === "pending" ||
-                        Boolean(statusLoading && user?.email)
+                        applicationStatus?.status === "pending"
                       }
                     >
                       {isSubmitting ? "Submitting..." : "Submit Application"}

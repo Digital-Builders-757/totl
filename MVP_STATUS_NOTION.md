@@ -43,6 +43,12 @@
 - ✅ Schema verify UX clarified (no “contradiction”):
   - `npm run schema:verify:comprehensive` now reports “link: none (OK)” and prints the drift target project (`--project-id`), so unlinked dev machines aren’t misled.
   - Added optional strict mode `npm run schema:verify:linked` (fails when no link is detected) for release prep/onboarded environments.
+- ✅ Audit Operating System (docs-first, proof-driven):
+  - Added `docs/AUDIT_MASTER_BOARD.md` (one-screen queue) + `docs/AUDIT_LOG.md` (append-only receipts) to prevent “wall-of-text” decay.
+  - Hardened `docs/AUDIT_STATUS_REPORT.md` with a DONE/PARTIAL/UNKNOWN rubric, proof hooks, and drift decisions.
+- ⚠️ New P0 bug discovered during proofs (BLOCKING):
+  - Career Builder submission is failing under authenticated context with `42501 permission denied for table users` (client_applications RLS policy references `auth.users`).
+  - Tracked as **D3** in `docs/AUDIT_MASTER_BOARD.md` with proof receipts in `docs/AUDIT_LOG.md` (P1/P2).
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 

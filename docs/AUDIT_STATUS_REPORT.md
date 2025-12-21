@@ -4,13 +4,30 @@
 **Mode:** Repo Audit Report (evidence-based)  
 **Goal:** Show what is **DONE / PARTIAL / NOT DONE / UNKNOWN** vs the “perfectly working” North Star, with proof pointers.
 
+**Operating system (canonical):**
+- **Snapshot:** `docs/AUDIT_STATUS_REPORT.md` (this file)
+- **Queue:** `docs/AUDIT_MASTER_BOARD.md` (one-screen execution list)
+- **Proof ledger:** `docs/AUDIT_LOG.md` (append-only receipts)
+
 ---
+
+## Status rubric (non-negotiable semantics)
+
+- **DONE** = quality gates green **and** call-sites unified **and** at least one reproducible proof exists:
+  - passing E2E test **or**
+  - manual QA log entry (timestamp + steps + outcome) in `docs/AUDIT_LOG.md` **or**
+  - deterministic contract proof (e.g., idempotency ledger + test)
+- **PARTIAL** = code exists but one is missing:
+  - call-sites drift **or**
+  - proof missing **or**
+  - contract says one thing while implementation does another
+- **UNKNOWN** = proof has not been executed yet (even if code “looks right”).
 
 ## 1) Executive Summary
 
 - **Quality gates are green in this workspace** (schema verify, types check, build, lint). Evidence: command outputs in **Section 2**.
 - **Foundation PRs status**:
-  - **Email verification sync primitive**: **PARTIAL** (canonical helper exists; called from auth callback + `ensureProfileExists()`, but **not called directly inside AuthProvider**). Evidence: **Section 3.1**.
+  - **Email verification sync primitive**: **PARTIAL** (canonical helper exists and is called from server convergence points; remains PARTIAL until convergence proof is logged). Evidence: **Section 3.1** + queue item `docs/AUDIT_MASTER_BOARD.md` (**P?**).
   - **Routing constants + decision function**: **DONE** (canonical route constants + edge-safe redirect decision; used by middleware + server actions + AuthProvider via BootState). Evidence: **Section 3.2**.
   - **Resend unification**: **DONE** (no client-side `supabase.auth.resend()`; verification “resend” funnels through `POST /api/email/send-verification`). Evidence: **Section 3.3**.
 - **Core journeys are documented but not fully proven**: `docs/journeys/*` are marked **🚧 IN PROGRESS** and include multiple **UNVERIFIED** checkboxes. Evidence: **Section 5**.
@@ -31,6 +48,13 @@ npm run build
 npm run lint
 ```
 
+### Environment integrity (must be explicit)
+
+- **Schema drift target (deterministic):** `utvircuwknqzpnmvxidp` via `--project-id`
+- **Supabase link status:** informational for drift checks; required for some `supabase db * --linked` workflows
+- **Strict mode available:** `npm run schema:verify:linked` (fails if no link is detected)
+- **Truth source:** `scripts/verify-schema-sync-comprehensive.mjs`
+
 ### Outputs (captured)
 
 <details>
@@ -38,7 +62,8 @@ npm run lint
 
 ```text
 ✅ CLI version: 2.34.3
-⚠️  No project currently linked
+ℹ️ Supabase project link: utvircuwknqzpnmvxidp
+ℹ️ Drift check target: utvircuwknqzpnmvxidp (via --project-id)
 ✅ Types file has proper auto-generated banner
 ✅ Types are in sync with project utvircuwknqzpnmvxidp
 🎉 Schema sync verification complete!
@@ -148,8 +173,12 @@ components/auth/auth-provider.tsx
 
 #### What to check next (to resolve PARTIAL → DONE)
 
-- Confirm whether AuthProvider **must** call `syncEmailVerifiedForUser()` on `SIGNED_IN`/`TOKEN_REFRESHED`, or whether “DB trigger + callback + ensureProfileExists” is the intended convergence mechanism.
-  - Evidence to consult next: `supabase/migrations/20251216013000_sync_profiles_email_verified_on_auth_confirm.sql` (trigger path) and `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (contract truth).
+- **Do not “fix” AuthProvider just because it doesn’t call the helper.** This can still be DONE if convergence is proven via:
+  - auth callback (`app/auth/callback/page.tsx`)
+  - `ensureProfileExists()` server bootstrap (`lib/actions/auth-actions.ts`)
+  - DB trigger sync (`supabase/migrations/20251216013000_sync_profiles_email_verified_on_auth_confirm.sql`)
+- **Required proof to flip PARTIAL → DONE:** run and log a convergence scenario (manual or E2E) where email is verified and both UI + `profiles.email_verified` converge.
+  - Log location: `docs/AUDIT_LOG.md`
 
 ---
 
@@ -318,6 +347,9 @@ docs/journeys/INDEX.md
   - `lib/actions/boot-actions.ts` (`getBootState`, `finishOnboardingAction`) — uses `ensureProfileExists()`
   - `lib/actions/auth-actions.ts` (`ensureProfileExists`, `handleLoginRedirect`, …)
   - Evidence: `lib/actions/boot-actions.ts` calls `ensureProfileExists()` (server-only bootstrap).
+  - **Winner files**:
+    - `lib/actions/boot-actions.ts`
+    - `lib/actions/auth-actions.ts`
 - **Tables touched**:
   - `profiles`, `talent_profiles`, `client_profiles`
   - Evidence: `lib/actions/boot-actions.ts` reads `profiles`, `client_profiles`, `talent_profiles` via `.from("...")`.
@@ -335,6 +367,9 @@ docs/journeys/INDEX.md
   - Winner: `app/settings/actions.ts` (per contract)
   - Supporting actions: `lib/actions/profile-actions.ts`
   - Evidence: `docs/contracts/PROFILES_CONTRACT.md` “Canonical server actions/services (winners)”.
+  - **Winner files**:
+    - `app/settings/actions.ts`
+    - `lib/actions/profile-actions.ts`
 - **Tables touched**: `profiles`, `talent_profiles`, `client_profiles`
   - Evidence: `lib/actions/profile-actions.ts` contains `.from("talent_profiles")`, `.from("profiles")`, `.from("client_profiles")` (see grep output in Section 5 tables evidence below).
 - **Canonical docs**: `docs/contracts/PROFILES_CONTRACT.md`.
@@ -348,6 +383,8 @@ docs/journeys/INDEX.md
 - **Server actions/services**:
   - `app/post-gig/actions.ts` (gig creation)
   - Evidence: `app/post-gig/actions.ts` uses `.from("gigs")` (see grep evidence below).
+  - **Winner files**:
+    - `app/post-gig/actions.ts`
 - **Tables touched**: `gigs`, (plus `gig_requirements` if used)
   - Schema evidence: `database_schema_audit.md` includes `gigs` and `gig_requirements`.
 - **Canonical docs**: `docs/contracts/GIGS_CONTRACT.md`.
@@ -363,6 +400,9 @@ docs/journeys/INDEX.md
   - `app/gigs/[id]/apply/actions.ts` (apply)
   - `lib/actions/booking-actions.ts` (accept/reject application)
   - Evidence: `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` ledger lines reference `app/gigs/[id]/apply/actions.ts` and `lib/actions/booking-actions.ts`.
+  - **Winner files**:
+    - `app/gigs/[id]/apply/actions.ts`
+    - `lib/actions/booking-actions.ts`
 - **Tables touched**: `applications`, `gigs`, `profiles`
   - Evidence: multiple `.from("applications")` call sites under `app/**` (see grep evidence below).
 - **Canonical docs**: `docs/contracts/APPLICATIONS_CONTRACT.md`.
@@ -375,6 +415,8 @@ docs/journeys/INDEX.md
   - Evidence: `docs/journeys/TALENT_JOURNEY.md` step 7 reads `bookings`; route exists at `app/client/bookings/page.tsx`.
 - **Server actions/services**:
   - `lib/actions/booking-actions.ts`
+  - **Winner files**:
+    - `lib/actions/booking-actions.ts`
 - **Tables touched**: `bookings`
   - Evidence: `lib/actions/booking-actions.ts` contains `.from("bookings")` (see grep evidence below).
 - **Canonical docs**: `docs/contracts/BOOKINGS_CONTRACT.md`.
@@ -387,6 +429,8 @@ docs/journeys/INDEX.md
   - Evidence: `docs/journeys/TALENT_JOURNEY.md` step 4, and `app/settings/page.tsx` uses `.from("portfolio_items")` (see grep evidence below).
 - **Server actions/services**:
   - `lib/actions/portfolio-actions.ts`
+  - **Winner files**:
+    - `lib/actions/portfolio-actions.ts`
 - **Tables touched**: `portfolio_items`
   - Evidence: `lib/actions/portfolio-actions.ts` contains `.from("portfolio_items")` (see grep evidence below).
 - **Canonical docs**: `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`.
@@ -398,6 +442,9 @@ docs/journeys/INDEX.md
 - **Server actions/services**:
   - Winner: `lib/email-service.ts` + `lib/services/email-templates.tsx`
   - Evidence: `docs/contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` “Canonical primitives (winners)”.
+  - **Winner files**:
+    - `lib/email-service.ts`
+    - `lib/services/email-templates.tsx`
 - **Tables touched**:
   - `email_send_ledger` (durable throttle / idempotency gate)
   - Evidence: `database_schema_audit.md` table `email_send_ledger` exists.
@@ -412,6 +459,10 @@ docs/journeys/INDEX.md
   - `lib/actions/client-actions.ts` (approval/promote)
   - `lib/actions/moderation-actions.ts`
   - `app/api/admin/*` (auth admin operations)
+  - **Winner files**:
+    - `lib/actions/client-actions.ts`
+    - `lib/actions/moderation-actions.ts`
+    - `app/api/admin/*/route.ts`
 - **Tables touched**:
   - `client_applications`, `profiles`, `client_profiles`, `content_flags`, `gigs`
   - Evidence: `lib/actions/client-actions.ts` uses `.from("client_applications")`; `lib/actions/moderation-actions.ts` uses `.from("content_flags")` and `.from("gigs")` (see grep evidence above).
@@ -463,15 +514,15 @@ Status: 🚧 IN PROGRESS
 | Choose role | UNKNOWN | Confirm `/choose-role` behavior with `app/choose-role/page.tsx` and `tests/auth/authentication.spec.ts`. |
 | Dashboard loads | ✅ | `docs/journeys/TALENT_JOURNEY.md` marks dashboard/profile bootstrap as “PROVEN”; see `docs/contracts/PROFILES_CONTRACT.md` status ✅ VERIFIED. |
 | Portfolio upload/manage | UNKNOWN | Pointers exist: `tests/integration/portfolio-gallery.spec.ts` (from journey); confirm it passes in your environment. |
-| Apply to gig | UNKNOWN | Pointer exists: `tests/integration/talent-gig-application.spec.ts` (from journey). |
-| Booking created after accept | UNKNOWN | `docs/journeys/TALENT_JOURNEY.md` explicitly marks booking creation coverage as **UNVERIFIED**. |
+| Apply to gig | UNKNOWN | **Route:** `app/gigs/[id]/apply/page.tsx` + **Action:** `app/gigs/[id]/apply/actions.ts` + **Tables:** `applications` + **Test:** `npx playwright test tests/integration/talent-gig-application.spec.ts --project=chromium --retries=0 --reporter=list` |
+| **P1: Booking created after accept** | ❌ (blocked) | Proof attempt failed due to `client_applications` RLS error while running Career Builder approval prerequisite. See `docs/AUDIT_LOG.md` (P1). |
 
 ### Client (sign up → client application → status portal → create gigs → manage applicants)
 
 | Step | Status | Proof / what to check next |
 | --- | --- | --- |
 | Submit client application | ✅ (authenticated flow) | `lib/actions/client-actions.ts#submitClientApplication` requires `auth.getUser()` and inserts into `client_applications`. |
-| Status portal works end-to-end | UNKNOWN | `docs/journeys/CLIENT_JOURNEY.md` marks `/client/application-status` **UNVERIFIED**. Confirm route + API: `app/client/application-status/*`, `app/api/client-applications/status/route.ts`, and add/confirm tests. |
+| **P2: Status portal works end-to-end** | ❌ (blocked) | Proof attempt failed: authenticated Career Builder submission fails with `permission denied for table users` (RLS policy). See `docs/AUDIT_LOG.md` (P2). |
 | Admin approval promotes role | UNKNOWN | `docs/journeys/CLIENT_JOURNEY.md` checklist item; confirm via `lib/actions/client-actions.ts#approveClientApplication` + related RPC/migration and E2E test. |
 | Client dashboard routing | UNKNOWN | Confirm via `middleware.ts` + `lib/routing/decide-redirect.ts` + `app/client/dashboard/page.tsx`. |
 | Create gigs | UNKNOWN | Confirm via `app/post-gig/actions.ts` and `app/client/gigs/page.tsx`. |
@@ -525,6 +576,10 @@ DRIFT WARNING: ... routes.ts treats /client/apply as public, but submitClientApp
 - If `/client/apply` is truly public, implement a non-auth submission path consistent with RLS (and update contract/journey).
 - If it must be authenticated, remove it from `PUBLIC_ROUTES` and ensure middleware blocks unauthenticated access (and update journey).
 
+**Decision (required):** DECISION NEEDED  
+**Canonical docs to update:** `lib/constants/routes.ts`, `docs/journeys/CLIENT_JOURNEY.md`, `docs/contracts/ADMIN_CONTRACT.md`  
+**Proof required:** rerun **P2** and confirm signed-out access behavior for `/client/apply`
+
 ### 6.2 Drift: Client-side profile writes in `components/forms/*` (contract violation)
 
 Evidence:
@@ -557,6 +612,25 @@ docs/DOCUMENTATION_INDEX.md
 
 **Candidate duplicates to merge/archive (do not delete blindly):**
 - `docs/AUTH_STRATEGY.md` → keep as “historical”, but add a loud header pointing to the contract + journeys (already described as legacy in index).
+
+### 6.4 BUG: `client_applications` RLS policy references `auth.users` (breaks authenticated submit/status)
+
+**Symptom (proven):**
+- Playwright proofs **P1/P2** fail with:
+  - `permission denied for table users` (code `42501`)
+  - Evidence: `docs/AUDIT_LOG.md` entries for **P1** and **P2**
+
+**Root cause (evidence):** `supabase/migrations/20251209095547_fix_client_applications_rls_for_authenticated_users.sql` policies contain:
+
+```text
+AND LOWER(TRIM(email)) = LOWER(TRIM((SELECT email FROM auth.users WHERE id = auth.uid())))
+```
+
+This requires `authenticated` to read `auth.users`, which is not permitted.
+
+**Decision (required):** FIX REQUIRED (Locks zone)  
+**Canonical docs to update:** `database_schema_audit.md` (RLS section for `client_applications`)  
+**Proof required:** rerun **P2** then **P1**
 - `docs/AUTH_BOOTSTRAP_CONTRACT.md` → same treatment (contract supersedes).
 
 ---
