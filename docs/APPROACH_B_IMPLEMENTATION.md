@@ -118,16 +118,38 @@
 
 ---
 
-### 🚧 PR3: Locks + Data Shape (PENDING)
+### ✅ PR3: Locks + Data Shape (COMPLETE - Option B)
 
-**Goal:** Make Approach B true at database + data layer.
+**Goal:** Make Approach B true at database + data layer (no migrations).
 
-**Planned Changes:**
-- Ensure public marketing profile reads don't expose sensitive fields
-- Enforce relationship-bound sensitive field access for clients
-- Review/update RLS policies if needed
+**Changes Made:**
 
-**Risk Level:** Medium (RLS changes)
+1. **Gig Detail Page (`app/gigs/[id]/page.tsx`)**
+   - Ensured `status='active'` filter applies to all users (signed-out and signed-in)
+   - Changed back link: signed-out → `/`, signed-in → `/gigs`
+
+2. **Gig List Page (`app/gigs/page.tsx`)**
+   - Moved `getUser()` check to top of function
+   - Early return `<SignInGate />` before any DB queries (performance + correctness)
+
+3. **Talent Profile Page (`app/talent/[slug]/page.tsx`)**
+   - Replaced blanket client access with relationship-bound check:
+     - Client can view sensitive fields **only if** talent applied to client's gig OR client has booking with talent
+   - Changed "Back to Talent" link to "Back to Home" (points to `/` instead of `/talent`)
+
+**Files Changed:**
+- `app/gigs/[id]/page.tsx`
+- `app/gigs/page.tsx`
+- `app/talent/[slug]/page.tsx`
+
+**Acceptance Criteria Met:**
+- ✅ Signed-out `/gigs/[id]` only works for active gigs
+- ✅ Signed-out `/talent/[slug]` never returns sensitive fields
+- ✅ Client sensitive visibility is relationship-only
+- ✅ No `select('*')` introduced
+- ✅ All verification checks passed (schema, types, build, lint)
+
+**Risk Level:** Low-Medium (Data layer changes, no schema changes)
 
 ---
 

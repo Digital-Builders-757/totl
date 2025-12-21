@@ -95,6 +95,7 @@ All other documentation has been organized into the `docs/` folder.
 - `APPROACH_B_IMPLEMENTATION.md` - 🚧 **NEW** - Implementation tracker for Approach B policy alignment (PR sequence status)
 - `PR1_SUMMARY.md` - ✅ **NEW** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
 - `PR2_SUMMARY.md` - ✅ **NEW** - PR2 summary: Control plane alignment (middleware + routing changes)
+- `PR3_SUMMARY.md` - ✅ **NEW** - PR3 summary: Locks + data shape (Option B - no migrations, query discipline)
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 - `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md` - Talent dashboard auth/data pattern (Phase 1-4)
 

@@ -1,0 +1,28 @@
+fix(data): enforce relationship-bound sensitive field access (PR3 - Option B)
+
+Implement data-level restrictions for Approach B + G1 policy without schema changes.
+
+Changes:
+- Gig detail: ensure status='active' filter for all users (signed-out and signed-in)
+- Gig list: move getUser() to top, early return before DB query (performance + correctness)
+- Talent profile: replace blanket client access with relationship-bound check
+  - Created reusable helper: lib/utils/talent-access.ts (canClientSeeTalentSensitive)
+  - Client can only see sensitive fields if relationship exists (applicant/booking)
+  - Improved relationship check: explicit gigs.client_id query (no PostgREST inference)
+  - Added RLS-aware phone fetch: treats null as "protected" not "missing"
+- TalentProfileClient: fixed to respect server-side relationship determination
+- Truth-surface fixes: removed links to /talent directory, conditional /gigs back link
+
+Documentation:
+- Created PR3 summary: docs/PR3_SUMMARY.md
+- Updated implementation tracker: docs/APPROACH_B_IMPLEMENTATION.md
+- Updated common errors reference: docs/COMMON_ERRORS_QUICK_REFERENCE.md
+
+What didn't change:
+- RLS policies (Option B - no migrations)
+- Schema structure (no new columns/tables)
+- Slug resolution query strategy (PR4 - still enumerates)
+
+Risk: Low-Medium (Data layer changes, no schema changes)
+RED ZONE INVOLVED: NO
+

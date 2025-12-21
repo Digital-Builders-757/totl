@@ -39,6 +39,14 @@ export default async function GigsPage({
 }) {
   const supabase = await createSupabaseServer();
 
+  // PR3: Check auth first, before any DB queries (G1: list requires sign-in)
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // If no user session, show sign-in gate immediately (no DB query wasted)
+  if (!user) {
+    return <SignInGate variant="gigs" />;
+  }
+
   const sp = await searchParams;
   const keyword = typeof sp.q === "string" ? sp.q.trim() : "";
   const category = typeof sp.category === "string" ? sp.category.trim() : "";
@@ -155,29 +163,21 @@ export default async function GigsPage({
     return `/gigs?${params.toString()}`;
   };
 
-  // Get user session and role
-  const { data: { user } } = await supabase.auth.getUser();
+  // Get user role and profile (user is guaranteed to exist here due to early return above)
   let userRole: string | null = null;
   let profile: SubscriptionAwareProfile | null = null;
   
-  if (user) {
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("role, subscription_status")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (profileData) {
-      profile = {
-        role: profileData.role,
-        subscription_status: profileData.subscription_status,
-      };
-      userRole = profileData.role;
-    }
-  }
-
-  // If no user session, show sign-in gate
-  if (!user) {
-    return <SignInGate variant="gigs" />;
+  const { data: profileData } = await supabase
+    .from("profiles")
+    .select("role, subscription_status")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profileData) {
+    profile = {
+      role: profileData.role,
+      subscription_status: profileData.subscription_status,
+    };
+    userRole = profileData.role;
   }
 
   return (

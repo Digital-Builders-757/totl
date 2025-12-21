@@ -25,12 +25,14 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
   
   const isLoading = false; // Auth context already loaded
 
-  // Check if user can see sensitive information
-  // Only talent themselves, clients, or admins can see sensitive details
+  // PR3: Check if user can see sensitive information
+  // Note: Server-side relationship check already happened in page.tsx
+  // This component receives talent prop with phone already set (or null)
+  // We only check self/admin here; client relationship is handled server-side
   const canViewSensitiveInfo = user && (
     user.id === talent.user_id || 
-    user.role === 'client' || 
-    user.role === 'admin'
+    user.role === 'admin' ||
+    (user.role === 'client' && talent.phone !== null) // Only show if server already determined relationship exists
   );
 
   // Show loading state while checking authentication
