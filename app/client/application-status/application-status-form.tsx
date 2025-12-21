@@ -51,7 +51,6 @@ type ApplicationStatusFormProps = {
 
 export function ApplicationStatusForm({ defaultApplicationId = "" }: ApplicationStatusFormProps) {
   const [applicationId, setApplicationId] = useState(defaultApplicationId);
-  const [email, setEmail] = useState("");
   const [result, setResult] = useState<ApplicationStatusResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -62,8 +61,7 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
 
     startTransition(async () => {
       const response = await checkClientApplicationStatus({
-        applicationId,
-        email,
+        applicationId: applicationId.trim() ? applicationId : undefined,
       });
 
       if (!response.success) {
@@ -100,32 +98,17 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
       >
         <div className="space-y-1">
           <Label htmlFor="applicationId" className="text-sm font-medium text-gray-700">
-            Application ID
+            Application ID (optional)
           </Label>
           <Input
             id="applicationId"
             value={applicationId}
             onChange={(event) => setApplicationId(event.target.value)}
             placeholder="e.g. 4f4e99aa-..."
-            required
           />
           <p className="text-xs text-gray-500">
-            You can find this in the confirmation email we sent right after you applied.
+            Leave this blank to check your most recent application.
           </p>
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Business Email Used on the Application
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@company.com"
-            required
-          />
         </div>
 
         {error && (

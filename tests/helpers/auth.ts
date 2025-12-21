@@ -39,9 +39,16 @@ export function getClientCredentials(): PlaywrightCredentials {
 
 export async function waitForLoginHydrated(page: Page) {
   // Prevent SSR shell interactions causing flake.
-  await expect(page.getByTestId("login-hydrated")).toHaveText("ready", {
-    timeout: 20000,
-  });
+  try {
+    await expect(page.getByTestId("login-hydrated")).toHaveText("ready", {
+      timeout: 20_000,
+    });
+  } catch {
+    // If we were redirected away from /login before hydration marker exists,
+    // treat as already-authenticated convergence.
+    if (!/\/login(\?|$)/.test(page.url())) return;
+    throw new Error(`Login hydration marker not found on /login. Current URL: ${page.url()}`);
+  }
 }
 
 export async function loginWithCredentials(
@@ -56,7 +63,15 @@ export async function loginWithCredentials(
   // Always begin from the login surface so AuthProvider's SIGNED_IN handler
   // (auth-route gated redirect) is guaranteed to run.
   await safeGoto(page, loginUrl, { timeoutMs: 60_000 });
+
+  // If we're already signed in (e.g., cookies/local state persisted), middleware/BootState may
+  // redirect away from /login immediately. In that case, treat login as complete.
+  if (!/\/login(\?|$)/.test(page.url())) return;
+
   await waitForLoginHydrated(page);
+
+  // Login page can redirect away between hydration and field fill. If so, treat as complete.
+  if (!/\/login(\?|$)/.test(page.url())) return;
 
   await page.getByTestId("email").fill(creds.email);
   await page.getByTestId("password").fill(creds.password);

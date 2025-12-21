@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const email = url.searchParams.get("email");
-
-  if (!email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
-  }
-
+export async function GET() {
   const supabase = await createSupabaseServer();
-  const normalizedEmail = email.toLowerCase();
 
   const {
     data: { user },
@@ -22,14 +14,14 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unable to determine authenticated user" }, { status: 500 });
   }
 
-  if (!user || !user.email || user.email.toLowerCase() !== normalizedEmail) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const { data: application, error } = await supabase
     .from("client_applications")
     .select("id, status, admin_notes, created_at")
-    .ilike("email", normalizedEmail)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();

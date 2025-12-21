@@ -5,7 +5,7 @@ import { ApplicationStatusForm } from "./application-status-form";
 
 export const metadata: Metadata = {
   title: "Client Application Status | TOTL Agency",
-  description: "Check the status of your client application with your application ID and email.",
+  description: "Check the status of your client application (signed-in).",
 };
 
 export default async function ClientApplicationStatusPage({
@@ -38,9 +38,9 @@ export default async function ClientApplicationStatusPage({
                 Check Your Application Status
               </h1>
               <p className="text-gray-600">
-                Enter the application ID from your confirmation email along with the business email
-                you used when applying. We&apos;ll give you an instant status update along with any
-                notes from the admin team.
+                You must be signed in to view your Career Builder application status. Enter an
+                application ID to look up a specific submission, or leave it blank to view your most
+                recent application.
               </p>
             </div>
           </div>

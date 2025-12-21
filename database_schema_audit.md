@@ -780,9 +780,16 @@ USING (((SELECT auth.uid()) = user_id));
 
 #### **client_applications Table**
 ```sql
--- Anonymous users can insert applications
-CREATE POLICY "Allow anonymous users to insert applications" ON client_applications FOR INSERT TO anon 
-WITH CHECK (true);
+-- AUTH REQUIRED (Career Builder application)
+-- Authenticated users can insert their own applications (ownership by user_id)
+CREATE POLICY "Authenticated users can insert own client applications" ON client_applications
+FOR INSERT TO authenticated
+WITH CHECK (user_id = (SELECT auth.uid()));
+
+-- Authenticated users can view their own applications (ownership by user_id)
+CREATE POLICY "Authenticated users can view own client applications" ON client_applications
+FOR SELECT TO authenticated
+USING (user_id = (SELECT auth.uid()));
 
 -- Admins can view all applications
 CREATE POLICY "Allow admins to view applications" ON client_applications FOR SELECT 
@@ -871,6 +878,12 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 
 **Function:** `prevent_profile_stripe_fields_user_update()`
 **Location:** `supabase/migrations/20251220033929_add_stripe_webhook_events_ledger.sql`
+
+### **Career Builder decision + promotion RPCs (client applications)**
+**Purpose:** Atomic, idempotent admin decision primitives for Career Builder applications (approve → promote role to `client`).
+
+**Function:** `approve_client_application_and_promote()` (SECURITY DEFINER, admin-only)
+**Location:** `supabase/migrations/20251220130000_client_application_promotion_rpc.sql` (with follow-up fixes in later migrations)
 
 ## 📈 Production Data Status
 

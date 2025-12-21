@@ -26,6 +26,7 @@
     "link:prod": "if not defined SUPABASE_PROJECT_ID (echo SUPABASE_PROJECT_ID env var is required for prod linking && exit /b 1) else npx -y supabase@2.34.3 link --project-ref %SUPABASE_PROJECT_ID%",
     "schema:verify": "powershell -ExecutionPolicy Bypass -File scripts/verify-schema-sync.ps1",
     "schema:verify:comprehensive": "node scripts/verify-schema-sync-comprehensive.mjs",
+    "schema:verify:linked": "cmd /d /c \"set REQUIRE_SUPABASE_LINK=1&& node scripts\\verify-schema-sync-comprehensive.mjs\"",
     "async-cookies:check": "powershell -ExecutionPolicy Bypass -File scripts/fix-async-cookies.ps1",
     "security:check": "powershell -ExecutionPolicy Bypass -File scripts/security-standards-check.ps1",
     "type-safety:check": "powershell -ExecutionPolicy Bypass -File scripts/check-type-safety-comprehensive.ps1",

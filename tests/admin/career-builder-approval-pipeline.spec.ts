@@ -90,6 +90,19 @@ test.describe("Career Builder approval pipeline", () => {
     await page.click('button[type="submit"]:has-text("Submit Application")');
     await expect(page).toHaveURL(/\/client\/apply\/success/, { timeout: 30000 });
 
+    // P2 proof hook: capture applicationId from success URL and prove status portal works.
+    const successUrl = new URL(page.url());
+    const applicationId = successUrl.searchParams.get("applicationId");
+    expect(applicationId, "Expected applicationId in /client/apply/success URL").toBeTruthy();
+
+    // 3b) Status portal (before approval): should show pending.
+    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
+    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
+      timeout: 20000,
+    });
+    await page.getByRole("button", { name: "Check Application Status" }).click();
+    await expect(page.getByText("Pending Review")).toBeVisible({ timeout: 20000 });
+
     // 4) Hard sign out applicant (avoid cross-account leakage)
     await page.context().clearCookies();
     await page.goto("/login?signedOut=true");
@@ -121,8 +134,8 @@ test.describe("Career Builder approval pipeline", () => {
     await page.fill("#approve-notes", "Approved via Playwright pipeline test");
     await page.getByRole("button", { name: "Approve & Send Email" }).click();
 
-    // Toast title
-    await expect(page.getByText("Application Approved")).toBeVisible({ timeout: 20000 });
+    // Approval is complete when the dialog closes (more deterministic than a transient toast).
+    await expect(page.getByText("Approve Career Builder Application")).toBeHidden({ timeout: 30000 });
 
     // 7) Hard sign out admin (avoid cross-account leakage)
     await page.context().clearCookies();
@@ -136,5 +149,14 @@ test.describe("Career Builder approval pipeline", () => {
     await page.getByTestId("login-button").click();
 
     await expect(page).toHaveURL(/\/client\/dashboard/, { timeout: 60_000 });
+
+    // 9) Status portal (after approval): applicant should see approved + admin notes.
+    await page.goto(`/client/application-status?applicationId=${encodeURIComponent(applicationId ?? "")}`);
+    await expect(page.getByRole("heading", { name: "Check Your Application Status" })).toBeVisible({
+      timeout: 20000,
+    });
+    await page.getByRole("button", { name: "Check Application Status" }).click();
+    await expect(page.getByText("Approved", { exact: true })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText("Approved via Playwright pipeline test")).toBeVisible({ timeout: 20000 });
   });
 });

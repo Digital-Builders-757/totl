@@ -146,8 +146,19 @@ npm run build
 
 ### **Career Builder Application Success Page Redirects to Talent Dashboard**
 - **Error:** After submitting Career Builder application, user redirected to `/talent/dashboard` instead of success page
-- **Fix:** Added `/client/apply/success` and `/client/application-status` to public routes in middleware
-- **Prevention:** Always add success/status pages to public routes when they don't require authentication
+- **Fix (LAW):** Career Builder application is **AUTH REQUIRED**. Signed-out users should be redirected to:\n  - `/login?returnUrl=/client/apply`\n\n  The routing allowlist should **not** treat `/client/apply`, `/client/apply/success`, or `/client/application-status` as public.
+- **Prevention:** Keep auth posture consistent: if a flow requires auth, remove it from `PUBLIC_ROUTES` and enforce ownership via RLS.
+
+### `42501 permission denied for table users` during Career Builder submission/status
+
+- **Symptom:** Career Builder submission or status checks fail with:
+
+```text
+permission denied for table users
+```
+
+- **Root cause:** `client_applications` RLS referenced `auth.users` (forbidden for normal `authenticated` role).
+- **Fix:** Replace policy logic with ownership by `user_id = auth.uid()` and remove anon access.\n  - See migrations:\n    - `supabase/migrations/20251221123500_rebuild_client_applications_policies_no_auth_users.sql`
 
 ### **Public Route Access Denied**
 - **Error:** Public pages redirecting to login when they shouldn't
@@ -198,6 +209,35 @@ npm run build
 # 🚨 COMMON ERRORS QUICK REFERENCE
 
 ## ⚡ EMERGENCY FIXES - COPY & PASTE COMMANDS
+
+### **0. “No project currently linked” during `schema:verify:comprehensive`**
+
+**Meaning:** This is **not an error** for schema drift verification.  
+The drift check is deterministic because it targets a project explicitly via `--project-id`.
+
+**Evidence (script behavior):**
+- `scripts/verify-schema-sync-comprehensive.mjs` prints link status for awareness, then verifies drift against `TARGET_PROJECT_ID` (defaults to `utvircuwknqzpnmvxidp` unless `SUPABASE_PROJECT_ID` is set).
+
+**When linking is actually required:**
+- For `supabase db *` workflows (e.g., `db push`, `db reset`, `db status --linked`).
+
+**Optional strict mode (seatbelt):**
+
+```bash
+# Fails if no link is detected (intended for release prep / onboarded devs / dedicated CI jobs)
+npm run schema:verify:linked
+```
+
+**How to fix (if you want to link):**
+
+```bash
+# Dev project
+npm run link:dev
+
+# Prod project (requires SUPABASE_PROJECT_ID env var)
+# PowerShell: $env:SUPABASE_PROJECT_ID="<prod_project_ref>"
+npm run link:prod
+```
 
 ### **1. Schema Sync Error**
 ```bash

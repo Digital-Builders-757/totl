@@ -40,6 +40,19 @@
   - Reduced local worker default for Windows/OneDrive reliability: `playwright.config.ts` now defaults to **2 workers** (override via `PW_WORKERS`).
 - ✅ Line-ending noise controlled:
   - `.gitattributes` enforces LF for repo text files but keeps `*.ps1/*.cmd/*.bat` as CRLF to avoid churn.
+- ✅ Schema verify UX clarified (no “contradiction”):
+  - `npm run schema:verify:comprehensive` now reports “link: none (OK)” and prints the drift target project (`--project-id`), so unlinked dev machines aren’t misled.
+  - Added optional strict mode `npm run schema:verify:linked` (fails when no link is detected) for release prep/onboarded environments.
+- ✅ Audit Operating System (docs-first, proof-driven):
+  - Added `docs/AUDIT_MASTER_BOARD.md` (one-screen queue) + `docs/AUDIT_LOG.md` (append-only receipts) to prevent “wall-of-text” decay.
+  - Hardened `docs/AUDIT_STATUS_REPORT.md` with a DONE/PARTIAL/UNKNOWN rubric, proof hooks, and drift decisions.
+- ✅ Audit unblock PR (D3) shipped locally with proofs:
+  - Locked Career Builder application behind auth (routing brain updated; signed-out users redirect to login with `returnUrl`).
+  - Fixed `client_applications` RLS to remove **all** `auth.users` references (ownership by `user_id = auth.uid()`).
+  - Fixed approval RPC failure (`42702 column reference "user_id" is ambiguous`) by using `ON CONFLICT ON CONSTRAINT client_profiles_user_id_key`.
+  - Proofs now green:
+    - P2: `tests/admin/career-builder-approval-pipeline.spec.ts` ✅
+    - P1: `tests/integration/booking-accept.spec.ts` ✅
 
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 

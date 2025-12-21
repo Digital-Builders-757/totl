@@ -20,6 +20,15 @@ const PINNED_CLI_VERSION = '2.34.3';
 const DEV_PROJECT_ID = 'utvircuwknqzpnmvxidp';
 const PROD_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || '<PROD_ID>';
 const TARGET_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || DEV_PROJECT_ID;
+const REQUIRE_SUPABASE_LINK = process.env.REQUIRE_SUPABASE_LINK === '1';
+
+function tryReadTextFile(path) {
+  try {
+    return readFileSync(path, 'utf8').trim();
+  } catch {
+    return null;
+  }
+}
 
 console.log('🔍 Comprehensive Schema Sync Verification');
 console.log('==========================================');
@@ -36,16 +45,55 @@ try {
 
 // Step 2: Check current project link
 console.log('\n2. Checking current project link...');
+let linkedProjectRef = null;
+
+// Prefer local link markers when present (non-interactive, no auth required).
+// Supabase CLI typically writes this when `supabase link` is used.
+const localLinkCandidates = [
+  join(process.cwd(), 'supabase', '.temp', 'project-ref'),
+  join(process.cwd(), '.supabase', 'project-ref'),
+];
+for (const candidate of localLinkCandidates) {
+  const value = tryReadTextFile(candidate);
+  if (value) {
+    linkedProjectRef = value;
+    break;
+  }
+}
+
 try {
   const linkInfo = execSync('npx -y supabase@2.34.3 projects list', { encoding: 'utf8' });
-  const linkedProject = linkInfo.match(/●.*?│\s*(\w+)\s*│/);
-  if (linkedProject) {
-    console.log(`✅ Currently linked to project: ${linkedProject[1]}`);
-  } else {
-    console.log('⚠️  No project currently linked');
+  if (!linkedProjectRef) {
+    // Best-effort parse for a selected project (format can vary by CLI / auth state).
+    const linkedProject = linkInfo.match(/●.*?│\s*([a-z0-9]{12,})\s*│/i);
+    if (linkedProject) {
+      linkedProjectRef = linkedProject[1];
+    }
   }
 } catch (error) {
-  console.error('❌ Failed to check project link:', error.message);
+  // Non-fatal: drift checking does not require linking or even auth.
+  // Keep going so this command remains CI/dev-friendly.
+}
+
+if (linkedProjectRef) {
+  console.log(`ℹ️ Supabase project link: ${linkedProjectRef}`);
+} else {
+  console.log('ℹ️ Supabase project link: none (OK)');
+}
+console.log(`ℹ️ Drift check target: ${TARGET_PROJECT_ID} (via --project-id)`);
+console.log('Tip: linking is only required for db:* commands; drift check does not need it.');
+
+if (REQUIRE_SUPABASE_LINK && !linkedProjectRef) {
+  console.error('\n❌ REQUIRE_SUPABASE_LINK=1 but no Supabase project link was detected.');
+  console.error('This strict mode is intended for onboarded devs / release prep / dedicated CI jobs.');
+  console.error('\nFix: link the CLI to a project (may require Supabase login):');
+  if (process.env.SUPABASE_PROJECT_ID) {
+    console.error('  - Set SUPABASE_PROJECT_ID to the target project ref');
+    console.error('  - Run: npm run link:prod');
+  } else {
+    console.error('  - Run: npm run link:dev');
+  }
+  console.error('\nNote: schema drift verification is still deterministic without linking because it targets --project-id directly.');
   process.exit(1);
 }
 
