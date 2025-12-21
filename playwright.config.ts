@@ -11,14 +11,15 @@ dotenv.config({ path: ".env" });
  */
 export default defineConfig({
   testDir: './tests',
+  // Local Windows runs can get flaky with too many workers (OneDrive + `next start` + Chromium).
+  // Prefer reliability; override locally via `PW_WORKERS=<n>` if desired.
+  workers: process.env.CI ? 1 : Number(process.env.PW_WORKERS ?? 2),
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html'],
@@ -55,7 +56,9 @@ export default defineConfig({
     command:
       'cmd /d /c "set DISABLE_EMAIL_SENDING=1&& set INTERNAL_EMAIL_API_KEY=dev-internal-email-key&& set NEXT_TELEMETRY_DISABLED=1&& (if not exist .next\\BUILD_ID (npm run build)) && npm run start"',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    // Reliability-first: avoid reusing an already-running server, which can mask stale builds and cause false failures.
+    // If you explicitly want reuse for speed, set PW_REUSE_SERVER=1 locally.
+    reuseExistingServer: Boolean(process.env.PW_REUSE_SERVER) && !process.env.CI,
     timeout: 600 * 1000,
   },
 });

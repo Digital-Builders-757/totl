@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { PATHS } from "@/lib/constants/routes";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -102,18 +101,9 @@ export default function Login() {
         description: "Redirecting to your dashboard...",
       });
 
-      // If they were trying to hit a protected route, honor it when safe
-      const isSafeReturnUrl =
-        returnUrl && returnUrl.startsWith("/") && !returnUrl.startsWith("//");
-
-      if (isSafeReturnUrl) {
-        window.location.href = returnUrl;
-        return;
-      }
-
-      // Otherwise send them to a neutral route and let middleware/AuthProvider
-      // route by the *actual* profiles.role at request time (admin/client/talent).
-      window.location.href = PATHS.HOME;
+      // Redirect ownership is handled by AuthProvider's SIGNED_IN handler (BootState-driven).
+      // This prevents client-side "guess redirects" that can race profile bootstrap and create loops.
+      return;
     } catch (error) {
       console.error("Login error:", error);
       toast({

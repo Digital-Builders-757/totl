@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { Upload, X, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { uploadAvatar } from "./actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +19,7 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const initials = displayName
     ? displayName.substring(0, 2).toUpperCase()
@@ -93,8 +95,8 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
           fileInputRef.current.value = "";
         }
         setPreviewUrl(null);
-        // Refresh the page to get the new signed URL
-        window.location.reload();
+        // Refresh server components to get the new signed URL (no full-page reload).
+        router.refresh();
       }
     } catch (error) {
       console.error("Avatar upload error:", error);

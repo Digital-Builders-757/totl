@@ -9,10 +9,22 @@ import type { Database } from "@/types/supabase";
  * - This helper is safe for Node test runners and uses env vars (no Next runtime assumptions).
  */
 export function createSupabaseAdminClientForTests() {
-  const url =
-    process.env.SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    "http://127.0.0.1:54321";
+  const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const explicitUrl = process.env.SUPABASE_URL;
+  const url = publicUrl || explicitUrl;
+
+  if (!url) {
+    throw new Error(
+      "Missing SUPABASE URL for tests. Set NEXT_PUBLIC_SUPABASE_URL (preferred) or SUPABASE_URL."
+    );
+  }
+
+  if (publicUrl && explicitUrl && publicUrl !== explicitUrl) {
+    throw new Error(
+      `Supabase URL mismatch for tests. NEXT_PUBLIC_SUPABASE_URL (${publicUrl}) !== SUPABASE_URL (${explicitUrl}). ` +
+        "Fix env parity so Playwright/Vitest target the same project as the app."
+    );
+  }
 
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceRoleKey) {

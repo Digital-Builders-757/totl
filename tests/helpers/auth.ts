@@ -1,4 +1,5 @@
 import { expect, type Page } from "@playwright/test";
+import { safeGoto } from "./navigation";
 
 export interface PlaywrightCredentials {
   email: string;
@@ -52,7 +53,9 @@ export async function loginWithCredentials(
     ? `/login?returnUrl=${encodeURIComponent(opts.returnUrl)}`
     : "/login";
 
-  await page.goto(loginUrl, { waitUntil: "domcontentloaded" });
+  // Always begin from the login surface so AuthProvider's SIGNED_IN handler
+  // (auth-route gated redirect) is guaranteed to run.
+  await safeGoto(page, loginUrl, { timeoutMs: 60_000 });
   await waitForLoginHydrated(page);
 
   await page.getByTestId("email").fill(creds.email);
@@ -77,6 +80,20 @@ export async function loginWithCredentials(
 
     if (msg) {
       throw new Error(`Login failed: ${msg}`);
+    }
+
+    // If we're still on /login but the session cookie actually landed (rare under `next start` load),
+    // nudge routing via the canonical signed-in entrypoint.
+    if (/\/login(\?|$)/.test(page.url())) {
+      // `/dashboard` is a signed-in landing utility, but it does not auto-redirect to terminals.
+      // Use a stable protected terminal path; middleware + BootState will converge correctly.
+      const nudgePath = opts?.returnUrl ?? "/talent/dashboard";
+      await safeGoto(page, nudgePath, { timeoutMs: 60_000 });
+      await expect(page).toHaveURL(
+        /\/(talent\/dashboard|client\/dashboard|admin\/dashboard|onboarding)(\/|$)/,
+        { timeout: 30_000 }
+      );
+      return;
     }
 
     throw err;

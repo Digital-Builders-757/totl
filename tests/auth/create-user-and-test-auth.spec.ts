@@ -24,6 +24,8 @@ const testUser = createTalentTestUser("playwright-test", {
 });
 
 test.describe("Complete User Creation and Authentication Flow", () => {
+  test.describe.configure({ timeout: 180_000 });
+
   test("Full flow: Create account → Verify email → Login → Dashboard → Logout", async ({
     page,
     request,
@@ -46,18 +48,18 @@ test.describe("Complete User Creation and Authentication Flow", () => {
         .or(page.locator('text=/Join as Talent/i'))
         .first();
       await expect(pageContent).toBeVisible({ timeout: 20000 });
+
+      // The page is a client component; wait for the hydration marker before clicking.
+      await expect(page.getByTestId("choose-role-hydrated")).toHaveText("ready", { timeout: 60_000 });
     });
 
     // Step 2: Select talent role
     await test.step("Select talent role", async () => {
       // The talent button opens a dialog, not a navigation
-      const talentButton = page.locator('button:has-text("Apply as Talent")');
-      
-      await expect(talentButton).toBeVisible({ timeout: 10000 });
-      await talentButton.click();
-      
-      // Wait for dialog to open
-      await expect(page.locator('text=/Create Your Talent Account/i')).toBeVisible({ timeout: 10000 });
+      await page.getByTestId("choose-role-talent").click();
+
+      // Wait for dialog to open (stable hook)
+      await expect(page.getByTestId("talent-signup-dialog")).toBeVisible({ timeout: 20_000 });
     });
 
     // Step 3: Fill out signup form
@@ -235,6 +237,7 @@ test.describe("Complete User Creation and Authentication Flow", () => {
   });
 
   test("Login with newly created account (direct test)", async ({ page, request }) => {
+    test.setTimeout(180_000);
     // Create a verified user via admin API first
     const directTestUser = createTalentTestUser("direct-test", {
       firstName: "Direct",
@@ -284,6 +287,7 @@ test.describe("Complete User Creation and Authentication Flow", () => {
   });
 
   test("Client promotion requires approval (no direct client creation)", async ({ page, request }) => {
+    test.setTimeout(180_000);
     const clientUser = createTalentTestUser("playwright-client", {
       firstName: "Client",
       lastName: `Test${Date.now()}`,

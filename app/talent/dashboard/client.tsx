@@ -115,6 +115,7 @@ function useTalentDashboardData({
     if (!supabase || !user || !profile) return;
 
     let cancelled = false;
+    let watchdog: ReturnType<typeof setTimeout> | null = null;
     setDataLoading(true);
     setDataError(null);
 
@@ -206,15 +207,33 @@ function useTalentDashboardData({
         }
       } finally {
         if (!cancelled) {
+          if (watchdog) {
+            clearTimeout(watchdog);
+            watchdog = null;
+          }
           setDataLoading(false);
         }
       }
     };
 
+    // Stability: avoid an infinite loading spinner if a network call hangs.
+    // If we hit this, we surface an error and let the user refresh (or sign out).
+    watchdog = setTimeout(() => {
+      if (cancelled) return;
+      cancelled = true;
+      console.error("[talent-dashboard] data load timed out");
+      setDataError("Loading is taking longer than expected. Please refresh the page.");
+      setDataLoading(false);
+    }, 20_000);
+
     load();
 
     return () => {
       cancelled = true;
+      if (watchdog) {
+        clearTimeout(watchdog);
+        watchdog = null;
+      }
     };
   }, [
     authLoading,

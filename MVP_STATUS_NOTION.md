@@ -28,6 +28,19 @@
 - [x] Re-run `npm run schema:verify:comprehensive && npm run build && npm run lint` post-push to confirm no drift.  
 - [ ] (Optional hardening) Add a second guard for `"use client"` files that call `.rpc(` if/when we want to forbid client-side RPC usage too.  
 
+## 🚑 **Latest Fix: Auth redirect + Playwright reliability (Sprint A / Launch Safety)**
+
+**AUTH + E2E STABILITY** - December 21, 2025
+- ✅ Removed remaining “split brain” redirects:
+  - `/choose-role` no longer hard-pushes authenticated users to `/talent/dashboard` (BootState remains the routing truth).
+  - `AuthProvider.signIn()` no longer does its own profile fetch/hydration (SIGNED_IN handler owns hydration + BootState redirect).
+- ✅ Stabilized Playwright `tests/auth/**` under `next start`:
+  - Added stable UI hooks (e.g. `data-testid="choose-role-talent"` + dialog marker).
+  - Hardened login helper convergence when auth cookie lands but client routing stalls (nudge via protected terminal path).
+  - Reduced local worker default for Windows/OneDrive reliability: `playwright.config.ts` now defaults to **2 workers** (override via `PW_WORKERS`).
+- ✅ Line-ending noise controlled:
+  - `.gitattributes` enforces LF for repo text files but keeps `*.ps1/*.cmd/*.bat` as CRLF to avoid churn.
+
 ## 🚀 **Latest Achievement: Stripe Webhooks Contract VERIFIED (Ledger + Locks + Truthful ACK)**
 
 **STRIPE WEBHOOKS VERIFIED** - December 20, 2025  
@@ -664,9 +677,9 @@
 ### **4. Testing Expansion**
 - ✅ Seeded QA personas/gigs/content flags via `supabase/seed.sql` (see `docs/TEST_DATA_REFERENCE.md`)
 - ✅ Playwright auth convergence stabilization (Dec 21, 2025)
-  - Refactored `tests/auth/**` + `tests/integration/talent-gig-application.spec.ts` to use shared helpers + env-driven credentials
-  - Removed brittle waits and strict-mode selector collisions (scoped locators instead of `networkidle`/hardcoded terminals)
-  - Focused subset proof: `npx playwright test tests/auth tests/integration/talent-gig-application.spec.ts --project=chromium --retries=0 --reporter=list` → **25 passed, 4 skipped**
+  - `tests/auth/**` runs reliably against `next start` (Windows/OneDrive-safe)
+  - Uses stable `data-testid` hooks + hydration gates + robust login convergence helper
+  - Proof: `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list` → **23 passed, 4 skipped** (skips are env-driven client creds / regression sentinels)
 - [x] Portfolio E2E tests
   - [x] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
   - [x] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
@@ -963,7 +976,7 @@
 
 ---
 
-*Last Updated: December 20, 2025*
+*Last Updated: December 21, 2025*
 *Current Status: MVP Complete - BootState routing spine implemented + verify-all passing*
-*Codebase Rating: 8/10 - Production Ready, Auth/Onboarding Stability Improved*
+*Codebase Rating: 8/10 - Production Ready, Auth/Onboarding + E2E Stability Improved*
 *Next Review: After performance optimizations (Priority 3 tasks)*
