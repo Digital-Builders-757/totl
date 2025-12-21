@@ -941,8 +941,9 @@
 ### **Immediate Actions (This Week):**
 1. **Onboarding spine polish (P0)** - Verify BootState routing in preview/prod (auth callback → onboarding → dashboard) and watch for redirect loops.
 2. **Fix Playwright admin test helper env (P0)** - Align `SUPABASE_SERVICE_ROLE_KEY` with `NEXT_PUBLIC_SUPABASE_URL` so e2e user-creation helpers work (current error: invalid JWT signature).
-3. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
-4. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
+3. **Playwright stability (P0)** - Ensure tests do not import `server-only` guarded modules; load `.env.local` in Playwright config so admin helpers work consistently.
+4. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
+5. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
 
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle

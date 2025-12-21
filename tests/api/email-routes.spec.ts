@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createSupabaseAdminClient } from '../../lib/supabase-admin-client';
+import { createSupabaseAdminClientForTests } from '../helpers/supabase-admin';
 
 /**
  * Email API Routes Test - Lightweight verification
@@ -302,7 +302,7 @@ test.describe('Email API Routes Verification', () => {
     // Optional proof: if DB is configured and the table exists, assert only one ledger row was claimed
     // in the current cooldown bucket. This is skipped if env/table is not available.
     try {
-      const supabaseAdmin = createSupabaseAdminClient();
+      const supabaseAdmin = createSupabaseAdminClientForTests();
       const now = Date.now();
       const cooldownMs = 60_000; // verify_email cooldown
       const bucketMs = Math.floor(now / cooldownMs) * cooldownMs;

@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from "dotenv";
+
+// Ensure Playwright has the same env vars as local dev (especially SUPABASE_SERVICE_ROLE_KEY).
+// `dotenv/config` only loads `.env` by default, but this repo uses `.env.local`.
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 /**
  * @see https://playwright.dev/docs/test-configuration
