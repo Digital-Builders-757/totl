@@ -1,16 +1,9 @@
 import { test, expect } from "@playwright/test";
+import { loginAsTalent, ensureTalentReady } from "../helpers/auth";
 
 test("logs in and filters gigs", async ({ page }) => {
-  // Go to login
-  await page.goto("/login");
-
-  // Fill email and password
-  await page.fill('#email', 'bboylion@gmail.com');
-  await page.fill('#password', 'Aiight123!');
-  await page.click('button[type="submit"]');
-
-  // After login, navigate to gigs page
-  await page.waitForLoadState("networkidle");
+  await loginAsTalent(page, { returnUrl: "/gigs" });
+  await ensureTalentReady(page);
   await page.goto("/gigs");
 
   // Use filters
@@ -24,11 +17,8 @@ test("logs in and filters gigs", async ({ page }) => {
 
 test.describe("gigs filter scenarios", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-    await page.fill('#email', 'bboylion@gmail.com');
-    await page.fill('#password', 'Aiight123!');
-    await page.click('button[type="submit"]');
-    await page.waitForLoadState("networkidle");
+    await loginAsTalent(page, { returnUrl: "/gigs" });
+    await ensureTalentReady(page);
     await page.goto("/gigs");
   });
 

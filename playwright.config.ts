@@ -1,4 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from "dotenv";
+
+// Ensure Playwright has the same env vars as local dev (especially SUPABASE_SERVICE_ROLE_KEY).
+// `dotenv/config` only loads `.env` by default, but this repo uses `.env.local`.
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -47,7 +53,7 @@ export default defineConfig({
     // Prevent tests from hitting the real email provider (rate limits, flakiness).
     // Use `next start` (not `next dev`) to reduce Windows/OneDrive `.next\\trace` file-lock flakiness.
     command:
-      'cmd /d /c "set DISABLE_EMAIL_SENDING=1&& set INTERNAL_EMAIL_API_KEY=dev-internal-email-key&& set NEXT_TELEMETRY_DISABLED=1&& if not exist .next\\BUILD_ID npm run build&& npm run start"',
+      'cmd /d /c "set DISABLE_EMAIL_SENDING=1&& set INTERNAL_EMAIL_API_KEY=dev-internal-email-key&& set NEXT_TELEMETRY_DISABLED=1&& (if not exist .next\\BUILD_ID (npm run build)) && npm run start"',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 600 * 1000,

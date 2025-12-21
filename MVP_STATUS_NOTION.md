@@ -663,6 +663,10 @@
 
 ### **4. Testing Expansion**
 - ✅ Seeded QA personas/gigs/content flags via `supabase/seed.sql` (see `docs/TEST_DATA_REFERENCE.md`)
+- ✅ Playwright auth convergence stabilization (Dec 21, 2025)
+  - Refactored `tests/auth/**` + `tests/integration/talent-gig-application.spec.ts` to use shared helpers + env-driven credentials
+  - Removed brittle waits and strict-mode selector collisions (scoped locators instead of `networkidle`/hardcoded terminals)
+  - Focused subset proof: `npx playwright test tests/auth tests/integration/talent-gig-application.spec.ts --project=chromium --retries=0 --reporter=list` → **25 passed, 4 skipped**
 - [x] Portfolio E2E tests
   - [x] `portfolio-gallery.spec.ts`: verify grid render, hover effects, and modal viewer
   - [x] `talent-public-profile.spec.ts`: ensure SafeImage + flag dialog work under RLS
@@ -941,8 +945,9 @@
 ### **Immediate Actions (This Week):**
 1. **Onboarding spine polish (P0)** - Verify BootState routing in preview/prod (auth callback → onboarding → dashboard) and watch for redirect loops.
 2. **Fix Playwright admin test helper env (P0)** - Align `SUPABASE_SERVICE_ROLE_KEY` with `NEXT_PUBLIC_SUPABASE_URL` so e2e user-creation helpers work (current error: invalid JWT signature).
-3. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
-4. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
+3. **Playwright stability (P0)** - Ensure tests do not import `server-only` guarded modules; load `.env.local` in Playwright config so admin helpers work consistently.
+4. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
+5. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
 
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle

@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { ensureTalentReady, loginWithCredentials } from "../helpers/auth";
+import { safeGoto } from "../helpers/navigation";
+import { createTalentTestUser } from "../helpers/test-data";
 
 /**
  * Wrong-terminal redirect (BootState gate)
@@ -11,25 +14,13 @@ test.describe("BootState: wrong-terminal redirect", () => {
   test("talent visiting client dashboard is redirected to talent dashboard", async ({ page, request }) => {
     test.setTimeout(180_000);
 
-    const safeGoto = async (url: string) => {
-      try {
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-      } catch {
-        await page.waitForTimeout(1500);
-        await page.goto(url, { waitUntil: "domcontentloaded", timeout: 60_000 });
-      }
-    };
-
-    const timestamp = Date.now();
-    const user = {
-      email: `pw-wrong-terminal-${timestamp}@example.com`,
-      password: "TestPassword123!",
+    const user = createTalentTestUser("pw-wrong-terminal", {
       firstName: "Wrong",
-      lastName: `Terminal${timestamp}`,
-    };
+      lastName: `Terminal${Date.now()}`,
+    });
 
     // Warm server
-    await safeGoto("/");
+    await safeGoto(page, "/");
 
     // Create a verified talent user (admin API shortcut)
     const createRes = await request.post("/api/admin/create-user", {
@@ -45,19 +36,17 @@ test.describe("BootState: wrong-terminal redirect", () => {
 
     // Login
     await page.context().clearCookies();
-    await safeGoto("/login");
-    await page.locator('[data-testid="login-hydrated"]').waitFor({ state: "attached", timeout: 30_000 });
-    await page.getByTestId("email").fill(user.email);
-    await page.getByTestId("password").fill(user.password);
-    await page.getByTestId("login-button").click();
-    await expect(page).toHaveURL(/\/talent\/dashboard/, { timeout: 60_000 });
+    await safeGoto(page, "/login");
+    await loginWithCredentials(page, { email: user.email, password: user.password });
+    await ensureTalentReady(page);
+    await expect(page).toHaveURL(/\/talent\/dashboard(\/|$)/, { timeout: 60_000 });
 
     // Visit wrong terminal
-    await safeGoto("/client/dashboard");
+    await safeGoto(page, "/client/dashboard");
 
     // Should converge back to talent dashboard (BootState gate)
-    await expect(page).toHaveURL(/\/talent\/dashboard/, { timeout: 60_000 });
-    await page.waitForTimeout(1000);
+    await expect(page).toHaveURL(/\/talent\/dashboard(\/|$)/, { timeout: 60_000 });
+    await expect(page.getByRole("button", { name: /sign out/i })).toBeVisible({ timeout: 20_000 });
     await expect(page).toHaveURL(/\/talent\/dashboard/);
   });
 });

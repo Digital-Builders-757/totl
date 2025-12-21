@@ -78,6 +78,7 @@
 |----------|-------------|---------|
 | `PLAYWRIGHT_TALENT_EMAIL` | Test talent account email | `test-talent@example.com` |
 | `PLAYWRIGHT_TALENT_PASSWORD` | Test talent account password | `test-password-123` |
+| `PLAYWRIGHT_TEST_PASSWORD` | Default password used for dynamically-created Playwright users (admin API + signup flows) | `TestPassword123!` |
 | `PLAYWRIGHT_TEST_GIG_ID` | Test gig ID for integration tests | `123e4567-e89b-12d3-a456-426614174000` |
 | `PLAYWRIGHT_TEST_BASE_URL` | Base URL for Playwright tests | `http://localhost:3000` |
 
@@ -161,6 +162,7 @@ NEXT_PUBLIC_VERCEL_ENV=development
 # ======================================
 PLAYWRIGHT_TALENT_EMAIL=test-talent@example.com
 PLAYWRIGHT_TALENT_PASSWORD=test-password-123
+PLAYWRIGHT_TEST_PASSWORD=TestPassword123!
 PLAYWRIGHT_TEST_GIG_ID=123e4567-e89b-12d3-a456-426614174000
 PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000
 ```
