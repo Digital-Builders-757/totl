@@ -119,7 +119,9 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY_HERE
 
 # Project configuration
 SUPABASE_PROJECT_ID=utvircuwknqzpnmvxidp
-SUPABASE_ACCESS_TOKEN=YOUR_ACCESS_TOKEN_HERE
+# NOTE (CLI-only secret):
+# Do NOT keep SUPABASE_ACCESS_TOKEN in .env.local (Next loads it). Put it in .env.cli instead.
+# SUPABASE_ACCESS_TOKEN=YOUR_ACCESS_TOKEN_HERE
 
 # ======================================
 # 📧 Resend Email (REQUIRED for emails)
@@ -178,6 +180,7 @@ PLAYWRIGHT_TEST_BASE_URL=http://localhost:3000
 - [ ] Copy `SUPABASE_SERVICE_ROLE_KEY` (service_role key)
 - [ ] Set `SUPABASE_PROJECT_ID=utvircuwknqzpnmvxidp`
 - [ ] (Optional) Get `SUPABASE_ACCESS_TOKEN` from Account → Access Tokens
+- [ ] Save `SUPABASE_ACCESS_TOKEN` to `.env.cli` (not `.env.local`)
 
 ### **Step 2: Resend API Key** ⏱️ 3 minutes
 - [ ] Go to https://resend.com/api-keys
