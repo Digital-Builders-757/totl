@@ -48,6 +48,9 @@ npm run build
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
 - **Stripe Webhook Duplicate Concurrency (in-flight double processing):** Same `event.id` delivered twice concurrently can cause double side effects if the second request proceeds while the first is still `processing`.
   - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
+- **Navigation/Discoverability Surfaces Violate Policy:** UI surfaces advertise "Browse Talent Directory" or "Browse Gigs" when policy requires sign-in or no directory exists.
+  - **Fix:** Remove directory links from signed-out navigation, update CTAs to reflect sign-in requirements, align footer links with policy matrix. Reference: `docs/POLICY_MATRIX_APPROACH_B.md`
+  - **Prevention:** Before adding nav/footer/CTA links, verify against policy matrix. Signed-out users should not see links to gated directories.
 - **Non-idempotent application acceptance (duplicate bookings / double emails):** Clicking “Accept” twice (or retries) creates multiple bookings and/or sends duplicate acceptance emails.
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally

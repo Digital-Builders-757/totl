@@ -249,7 +249,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                   <Button className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800" variant="outline" asChild>
                     <Link href="/talent" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      View Talent Portal
+                      Public Site View
                     </Link>
                   </Button>
                 </CardContent>

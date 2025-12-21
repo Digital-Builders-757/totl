@@ -44,29 +44,9 @@ export default function ProjectOverview() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Browse Talent</CardTitle>
-                <CardDescription>Browse available talent and view profiles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full bg-black text-white hover:bg-black/90">
-                  <Link href="/talent">Browse Talent</Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Browse Gigs</CardTitle>
-                <CardDescription>Browse available gigs and view details</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild className="w-full bg-black text-white hover:bg-black/90">
-                  <Link href="/gigs">Browse Gigs</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Removed "Browse Talent" card per Approach B: no talent directory exists */}
+            {/* Removed "Browse Gigs" card per G1: gig list requires sign-in (not discoverable for signed-out) */}
+            {/* Note: This is an internal demo/presentation page. Consider gating to admin/dev-only. */}
 
             <Card>
               <CardHeader>

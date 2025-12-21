@@ -32,8 +32,9 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **Layer 1 — Global Laws + Wiring + Security (canonical)**
 - `ARCHITECTURE_CONSTITUTION.md` (non-negotiables; red-zone rules)
-- `ARCHITECTURE_SOURCE_OF_TRUTH.md` (canonical modules + “no duplicate brains” laws)
+- `ARCHITECTURE_SOURCE_OF_TRUTH.md` (canonical modules + "no duplicate brains" laws)
 - `OFF_SYNC_INVENTORY.md` (duplicate/conflicting primitives; winners declared)
+- `POLICY_MATRIX_APPROACH_B.md` (🚨 **NEW** - Locked access/visibility policy matrix - Approach B + G1)
 - `diagrams/*` (airport model, wiring, flows)
 
 ### **Layer 2 — Domain Contracts (canonical)**
@@ -90,7 +91,9 @@ All other documentation has been organized into the `docs/` folder.
 - `FORM_INPUT_POLISH_IMPLEMENTATION.md` - Form input polish with floating labels & animations (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
-- `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory
+- `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory (must align with `POLICY_MATRIX_APPROACH_B.md`)
+- `APPROACH_B_IMPLEMENTATION.md` - 🚧 **NEW** - Implementation tracker for Approach B policy alignment (PR sequence status)
+- `PR1_SUMMARY.md` - ✅ **NEW** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 - `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md` - Talent dashboard auth/data pattern (Phase 1-4)
 

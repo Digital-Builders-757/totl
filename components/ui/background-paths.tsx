@@ -167,8 +167,8 @@ export function DemoBackgroundPaths() {
     <BackgroundPaths 
       title="TOTL Agency" 
       subtitle="Premium talent booking reimagined"
-      ctaText="Explore Talent"
-      ctaHref="/talent"
+      ctaText="Back to Home"
+      ctaHref="/"
     />
   );
 }

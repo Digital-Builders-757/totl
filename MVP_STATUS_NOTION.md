@@ -8,6 +8,24 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚑 **Latest Fix: Approach B Policy Implementation (PR1 - Truthful UI Surfaces)**
+
+**ACCESS/VISIBILITY POLICY ALIGNMENT** - January 20, 2025  
+- ✅ Locked **Approach B (Hybrid)** policy matrix: public talent marketing profiles at `/talent/[slug]` (no sensitive fields), no talent directory exists, clients see talent only via relationships (Applicants/Bookings), gigs list requires sign-in (G1).  
+- ✅ **PR1 Complete**: Removed all discoverability surfaces that advertise "Browse Talent Directory" or "Browse Gigs" for signed-out users.  
+- ✅ Updated navbar: removed "Talent" directory link, removed "Gigs" link for signed-out (G1: list requires sign-in).  
+- ✅ Updated homepage: removed "Browse Talent" hero/footer CTAs, removed "Find Gigs" footer link.  
+- ✅ Updated command palette: changed "Browse Gigs" to "Sign in to Browse Gigs" for signed-out users.  
+- ✅ Updated admin labels: renamed "View Talent Portal" → "Public Site View" for clarity.  
+- ✅ Updated demo pages: removed links to `/talent` directory from `/project-overview` and `/ui-showcase`.  
+- ✅ Created canonical policy matrix document: `docs/POLICY_MATRIX_APPROACH_B.md` (source of truth for access/visibility rules).  
+- ✅ Created implementation tracker: `docs/APPROACH_B_IMPLEMENTATION.md` (PR sequence status).  
+
+**Next (P0)**
+- [ ] **PR2**: Control plane alignment (routing constants + middleware) - redirect `/talent` directory away from SO/C, ensure `/talent/[slug]` remains public, align `/gigs` classification with G1.  
+- [ ] **PR3**: Locks + data shape (RLS + sensitive fields) - ensure public marketing profiles don't expose sensitive fields, enforce relationship-bound access for clients.  
+- [ ] **PR4**: Query strategy cleanup (no enumeration) - remove "fetch all talent then find slug" patterns, implement non-enumerating slug resolution.
+
 ## 🚑 **Latest Fix: Schema truth alignment (stop signup/bootstrap DB failures)**
 
 **SCHEMA DRIFT HOTFIXES** - December 20, 2025  

@@ -50,13 +50,26 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         action: () => router.push("/"),
         shortcut: "H",
       },
-      {
-        icon: Search,
-        label: "Browse Gigs",
-        description: "View all available gigs",
-        action: () => router.push("/gigs"),
-        shortcut: "G",
-      },
+      // Gigs browsing: only show for signed-in users (G1: list requires sign-in)
+      ...(user
+        ? [
+            {
+              icon: Search,
+              label: "Browse Gigs",
+              description: "View all available gigs",
+              action: () => router.push("/gigs"),
+              shortcut: "G",
+            },
+          ]
+        : [
+            {
+              icon: Search,
+              label: "Sign in to Browse Gigs",
+              description: "Sign in required to view opportunities",
+              action: () => router.push(PATHS.LOGIN),
+              shortcut: "G",
+            },
+          ]),
     ];
 
     if (user && userRole) {
