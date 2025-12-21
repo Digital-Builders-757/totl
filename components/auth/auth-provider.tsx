@@ -12,9 +12,7 @@ import {
   PATHS,
   isAuthRoute,
   isPublicPath,
-  ONBOARDING_PATH,
 } from "@/lib/constants/routes";
-import { decideSignedInClientRedirect } from "@/lib/routing/decide-redirect";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
 import type { Database } from "@/types/supabase";
 
@@ -303,27 +301,28 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           if (!mounted) return;
           applyProfileToState(hydratedProfile, session);
 
-          if (hasHandledInitialSession && pathname !== PATHS.LOGIN) {
-            const profileAccess = hydratedProfile
-              ? {
-                  role: hydratedProfile.role ?? null,
-                  account_type: (hydratedProfile.account_type ?? null) as AccountType | null,
-                }
-              : null;
+          // Single redirect owner (SIGNED_IN):
+          // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
+          // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
+          // - Honor returnUrl only when safe (BootState uses the shared routing brain).
+          // Redirect on SIGNED_IN when we are on an auth surface.
+          // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
+          // session check and we'd get "stuck on /login" flakes.
+          const currentPath =
+            typeof window !== "undefined"
+              ? (pathname || window.location.pathname).split("?")[0]
+              : pathname;
 
-            const to = decideSignedInClientRedirect({
-              pathname,
-              profile: profileAccess,
-            });
+          if (currentPath && isAuthRoute(currentPath)) {
+            const returnUrlRaw =
+              typeof window !== "undefined"
+                ? new URLSearchParams(window.location.search).get("returnUrl")
+                : null;
 
-            if (to) {
-              // Use server-owned BootState to prevent local-vs-server routing drift.
-              const boot = await getBootState();
-              const bootTarget = boot ? (boot.needsOnboarding ? ONBOARDING_PATH : boot.nextPath) : PATHS.LOGIN;
+            const boot = await getBootState({ postAuth: true, returnUrlRaw });
+            const bootTarget = boot?.nextPath ?? PATHS.TALENT_DASHBOARD;
 
-              router.refresh();
-              router.push(bootTarget);
-            }
+            router.push(bootTarget);
           }
         } catch (error) {
           console.error("Error fetching profile on sign in:", error);
@@ -400,62 +399,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     if (!supabase) return { error: null };
     
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (!error && data.session) {
-      // Manually set the session if the sign-in was successful
-      setUser(data.session.user);
-      setSession(data.session);
-      setIsEmailVerified(data.session.user.email_confirmed_at !== null);
-
-      // Fetch user role with a fresh query - use maybeSingle() to prevent 406 errors
-      // Fetch ALL profile fields once to avoid N+1 queries
-      try {
-        const { data: profileData } = (await supabase
-          .from("profiles")
-          .select("role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end")
-          .eq("id", data.session.user.id)
-          .maybeSingle()) as {
-            data: {
-              role: string;
-              account_type: Database["public"]["Enums"]["account_type_enum"] | null;
-              avatar_url: string | null;
-              avatar_path: string | null;
-              display_name: string | null;
-              subscription_status: Database["public"]["Enums"]["subscription_status"] | null;
-              subscription_plan: string | null;
-              subscription_current_period_end: string | null;
-            } | null;
-            error: unknown;
-          };
-
-        if (profileData) {
-          const role = (profileData.role ?? null) as UserRole;
-          setUserRole(role);
-          setProfile({
-            role,
-            account_type: (profileData.account_type ?? "unassigned") as AccountType,
-            avatar_url: profileData.avatar_url,
-            avatar_path: profileData.avatar_path,
-            display_name: profileData.display_name,
-            subscription_status: profileData.subscription_status ?? "none",
-            subscription_plan: profileData.subscription_plan ?? null,
-            subscription_current_period_end: profileData.subscription_current_period_end ?? null,
-          });
-        } else {
-          setUserRole(null);
-          setProfile(null);
-        }
-
-        // Note: The login page uses handleLoginRedirect() server action for redirect
-        // This ensures fresh session data and proper cache clearing
-        // We don't redirect here to avoid conflicts with server-side redirect
-      } catch (profileError) {
-        console.error("Error fetching profile on sign in:", profileError);
-        // Don't redirect here - let the server action handle it
-      }
-    }
-
+    // SIGNED_IN event handler owns hydration + redirect (BootState-driven).
+    // Avoid split-brain profile fetch/sets here, which can race bootstrap and feel “random”.
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error };
   };
 

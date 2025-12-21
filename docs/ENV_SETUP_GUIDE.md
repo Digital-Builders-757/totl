@@ -41,7 +41,9 @@ SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY_HERE
 
 # Project configuration
 SUPABASE_PROJECT_ID=utvircuwknqzpnmvxidp
-SUPABASE_ACCESS_TOKEN=YOUR_ACCESS_TOKEN_HERE
+# NOTE (CLI-only secret):
+# Do NOT keep SUPABASE_ACCESS_TOKEN in .env.local (Next loads it). Put it in .env.cli instead.
+# SUPABASE_ACCESS_TOKEN=YOUR_ACCESS_TOKEN_HERE
 
 # ======================================
 # 📧 Resend Email (REQUIRED for emails)
@@ -88,6 +90,25 @@ VERCEL_ENV=development
    - Go to: Account → Access Tokens
    - Create new token: `TOTL Development`
    - Copy token (starts with `sbp_`)
+   - Save it to `.env.cli` (not `.env.local`)
+
+### **CLI-only env file (.env.cli)**
+
+Create a separate file in the repo root named `.env.cli` (gitignored) and put CLI-only secrets there:
+
+```bash
+# Supabase CLI token (CLI-only, not loaded by Next.js)
+SUPABASE_ACCESS_TOKEN=sbp_your_token_here
+```
+
+When you need it for a one-off command, load it into your terminal session (PowerShell):
+
+```powershell
+# Load SUPABASE_ACCESS_TOKEN for this terminal session
+Get-Content .env.cli | ForEach-Object {
+  if ($_ -match '^(?<k>[A-Z0-9_]+)=(?<v>.*)$') { Set-Item -Path \"Env:$($Matches.k)\" -Value $Matches.v }
+}
+```
 
 ### **2. Resend API Key**
 
@@ -173,6 +194,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 - Use `NEXT_PUBLIC_*` only for browser-safe values
 - Store service role keys server-side only
 - Use different keys for dev/prod environments
+- Keep `SUPABASE_ACCESS_TOKEN` in `.env.cli` or your terminal session (never in `.env.local`)
 
 ---
 

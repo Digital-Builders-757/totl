@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PortfolioGallery } from "@/components/portfolio/portfolio-gallery";
 import { PortfolioUpload } from "@/components/portfolio/portfolio-upload";
@@ -16,16 +17,17 @@ interface PortfolioSectionProps {
 
 export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
   const [showUpload, setShowUpload] = useState(false);
+  const router = useRouter();
 
   const handleUploadSuccess = () => {
     setShowUpload(false);
-    // Refresh the page to reload portfolio items
-    window.location.reload();
+    // Refresh server components to reload portfolio items (no full-page reload).
+    router.refresh();
   };
 
   const handleGalleryUpdate = () => {
-    // Refresh the page to reload portfolio items
-    window.location.reload();
+    // Refresh server components to reload portfolio items (no full-page reload).
+    router.refresh();
   };
 
   return (

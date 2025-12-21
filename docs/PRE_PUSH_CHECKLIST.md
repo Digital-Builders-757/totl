@@ -11,6 +11,12 @@ npm run verify-all
 npm run verify-fast
 ```
 
+## **1.1 CLI-only secrets (SUPABASE_ACCESS_TOKEN)**
+
+- Keep `SUPABASE_ACCESS_TOKEN` out of `.env.local` (Next.js loads it).
+- Store it in `.env.cli` (gitignored) or set it in your terminal session when needed.
+
+
 ## **1.5. IF YOU USED SUPABASE STUDIO / SQL EDITOR FOR SCHEMA CHANGES TODAY**
 Studio/SQL Editor can fix the live database but leave the repo migration ledger out of sync. If you touched schema in Studio, do this **the same day**:
 

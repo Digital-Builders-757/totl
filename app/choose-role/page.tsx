@@ -21,20 +21,14 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ChooseRolePage() {
-  const [mounted, setMounted] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [showCareerBuilderDialog, setShowCareerBuilderDialog] = useState(false);
   const [showTalentSignupDialog, setShowTalentSignupDialog] = useState(false);
   const router = useRouter();
   const { user } = useAuth();
 
   useEffect(() => {
-    setMounted(true);
-    
-    // MVP: Redirect authenticated users to Talent Dashboard
-    // Career Builder access is via application link from Talent Dashboard
-    if (user) {
-      router.push("/talent/dashboard");
-    }
+    setIsHydrated(true);
   }, [user, router]);
 
   const handleCareerBuilderClick = (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -60,20 +54,6 @@ export default function ChooseRolePage() {
     router.push("/client/apply");
   };
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-black pt-20 sm:pt-24">
-        {/* Hydration marker for E2E stability */}
-        <span data-testid="choose-role-hydrated" className="sr-only">
-          loading
-        </span>
-        <div className="container mx-auto px-4 py-12 text-center text-gray-300">
-          Loading…
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-black pt-20 sm:pt-24">
       {/* Background Effects */}
@@ -87,7 +67,7 @@ export default function ChooseRolePage() {
       <div className="container mx-auto px-4 py-4 sm:py-12 relative z-10">
         {/* Hydration marker for E2E stability */}
         <span data-testid="choose-role-hydrated" className="sr-only">
-          ready
+          {isHydrated ? "ready" : "loading"}
         </span>
         <Link href="/" className="inline-flex items-center text-gray-300 hover:text-white mb-4 sm:mb-8 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -134,7 +114,10 @@ export default function ChooseRolePage() {
                   </li>
                 </ul>
                 <div className="mt-auto">
-                  <ApplyAsTalentButton className="w-full apple-button py-4 text-lg font-semibold" />
+                  <ApplyAsTalentButton
+                    data-testid="choose-role-talent"
+                    className="w-full apple-button py-4 text-lg font-semibold"
+                  />
                 </div>
               </div>
             </div>
@@ -194,7 +177,7 @@ export default function ChooseRolePage() {
       {/* Career Builder Dialog */}
       <Dialog open={showCareerBuilderDialog} onOpenChange={setShowCareerBuilderDialog}>
         <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader data-testid="career-builder-dialog">
             <DialogTitle className="text-white text-xl font-bold">Apply to Become a Career Builder</DialogTitle>
             <DialogDescription className="text-gray-300 pt-2">
               To become a Career Builder, you need to have a Talent account first. This helps us verify your identity and ensures a smooth onboarding process.

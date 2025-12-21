@@ -44,7 +44,7 @@ export function ApplyAsTalentButton({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] p-0">
           <ScrollArea className="max-h-[90vh]">
-            <div className="p-6">
+            <div data-testid="talent-signup-dialog" className="p-6">
               <DialogHeader className="mb-4">
                 <DialogTitle>Create Your Talent Account</DialogTitle>
                 <DialogDescription>

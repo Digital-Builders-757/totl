@@ -85,6 +85,29 @@ npm run build
   - Delete `.next/` and rerun `npm run build`
   - For Playwright, prefer running against `next start` (build → start) to reduce trace-write flakiness.
 - **Prevention:** Keep `.next/` and `playwright-report/` ignored (already in `.gitignore`); avoid running `next dev` and `next build` concurrently.
+
+### **Playwright flake on Windows (too many workers / hydration never completes)**
+- **Symptom:** Random timeouts like `choose-role-hydrated = loading` / `browserContext.newPage timeout` / auth suite passes only sometimes.
+- **Root cause:** Local parallelism (many Chromium workers) + Windows/OneDrive file contention + `next start` server load.
+- **Fix:**
+  - Run Playwright with fewer workers (recommended default is now 2):
+    - `set PW_WORKERS=2` (PowerShell: `$env:PW_WORKERS="2"`)
+  - Re-run:
+    - `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
+- **Notes:** The repo Playwright config now defaults to **2 workers** locally; CI remains **1**.
+
+### **Playwright runs against stale build (next start)**
+- **Symptom:** UI changes (e.g. new `data-testid`) don’t show up in Playwright, but work in dev.
+- **Root cause:** Playwright webServer uses `next start` and may not rebuild automatically between edits.
+- **Fix:** Run a fresh build before Playwright:
+  - `npm run build`
+  - then `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
+
+### **CRLF ↔ LF warnings / noisy diffs on Windows**
+- **Symptom:** Git warns about line endings or shows whitespace-only diffs.
+- **Fix:** Ensure `.gitattributes` is present (repo enforces LF for code/docs and CRLF for Windows scripts).
+- **Normalize once (if needed):**
+  - `git add --renormalize .`
 - **Schema Truth Failure (merging to `main`):** `types/database.ts is out of sync with remote schema (Environment: production)`
   - **Root Cause:** `types/database.ts` was regenerated from the dev project while `main` CI compares against the production Supabase project.
   - **Fix:** Before merging to `main`, set `SUPABASE_PROJECT_ID=<prod_project_ref>`, apply pending migrations to production (`npx supabase@2.34.3 db push --db-url ...`), then run `npm run types:regen:prod`. Commit the regenerated file only after prod schema matches.
