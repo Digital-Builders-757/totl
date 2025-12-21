@@ -53,13 +53,15 @@ export type PostAuthFallback = typeof PATHS.TALENT_DASHBOARD | typeof PATHS.CHOO
 export const PUBLIC_ROUTES: readonly string[] = [
   PATHS.HOME,
   PATHS.ABOUT,
-  PATHS.GIGS,
-  PATHS.TALENT_LANDING,
   PATHS.SUSPENDED,
   PATHS.CLIENT_SIGNUP,
+  // NOTE: PATHS.GIGS and PATHS.TALENT_LANDING removed per Approach B + G1:
+  // - /gigs (list) requires sign-in
+  // - /talent (directory) is disabled
 ];
 
-export const PUBLIC_ROUTE_PREFIXES: readonly string[] = [PREFIXES.TALENT, PREFIXES.GIGS];
+// Removed PUBLIC_ROUTE_PREFIXES - too broad for Approach B + G1.
+// Public dynamic routes are now handled explicitly in isPublicPath().
 
 export const AUTH_ROUTES: readonly string[] = [
   PATHS.LOGIN,
@@ -87,27 +89,62 @@ export function isSignedInAllowedPath(pathname: string): boolean {
 
 /**
  * Public means "safe to remain on while signed out".
- * This includes public routes plus public prefixes (e.g. /talent/[slug], /gigs/[id]),
- * but explicitly excludes known protected subtrees that share those prefixes.
+ * 
+ * Approach B + G1 Policy:
+ * - /talent/[slug] is public (marketing profiles)
+ * - /gigs/[id] is public (gig detail pages for published gigs)
+ * - /gigs (list) requires sign-in
+ * - /talent (directory) is disabled
+ * - /gigs/[id]/apply requires sign-in (talent-only)
  */
 export function isPublicPath(pathname: string): boolean {
+  // Explicit public routes
   if (isPublicRoute(pathname)) return true;
 
-  const isPrefixedPublic = PUBLIC_ROUTE_PREFIXES.some((p) => pathname.startsWith(p));
-  if (!isPrefixedPublic) return false;
-
-  // /talent/[slug] is public, but /talent/dashboard, /talent/profile, /talent/settings/*, /talent/subscribe/* are protected.
-  if (pathname.startsWith(PREFIXES.TALENT)) {
-    const isTalentProtected =
-      isPathOrChild(pathname, PATHS.TALENT_DASHBOARD) ||
-      isPathOrChild(pathname, PATHS.TALENT_PROFILE) ||
-      isPathOrChild(pathname, PREFIXES.TALENT_SETTINGS) ||
-      isPathOrChild(pathname, PATHS.TALENT_SUBSCRIBE);
-
-    return !isTalentProtected;
+  // Hard deny: /talent directory and /gigs list
+  if (pathname === PATHS.TALENT_LANDING || pathname === PATHS.GIGS) {
+    return false;
   }
 
-  return true;
+  // /talent/[slug] - public marketing profile (exactly one segment after /talent/)
+  if (pathname.startsWith(PREFIXES.TALENT)) {
+    const talentPath = pathname.slice(PREFIXES.TALENT.length);
+    const segments = talentPath.split("/").filter(Boolean);
+    
+    // Must be exactly one segment (the slug), and not a protected talent route
+    if (segments.length === 1) {
+      const slug = segments[0];
+      // Deny protected talent routes even if they look like slugs
+      const isTalentProtected =
+        slug === "dashboard" ||
+        slug === "profile" ||
+        slug.startsWith("settings") ||
+        slug.startsWith("subscribe") ||
+        slug === "signup";
+      
+      return !isTalentProtected;
+    }
+    
+    // More than one segment = protected (e.g., /talent/dashboard/something)
+    return false;
+  }
+
+  // /gigs/[id] - public gig detail (exactly one segment after /gigs/)
+  // /gigs/[id]/apply - protected (talent-only)
+  if (pathname.startsWith(PREFIXES.GIGS)) {
+    const gigsPath = pathname.slice(PREFIXES.GIGS.length);
+    const segments = gigsPath.split("/").filter(Boolean);
+    
+    // Must be exactly one segment (the gig ID)
+    if (segments.length === 1) {
+      return true; // /gigs/[id] is public
+    }
+    
+    // More than one segment = protected (e.g., /gigs/[id]/apply)
+    return false;
+  }
+
+  return false;
 }
 
 // Canonical onboarding entrypoint (BootState routes here when profile completion is required)

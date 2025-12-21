@@ -79,26 +79,39 @@
 
 ---
 
-## Manual Verification Checklist
+## Pre-Push Verification Results
 
-### Signed-out (SO)
+### Automated Checks ✅
+- ✅ `npm run schema:verify:comprehensive` - PASSED (types in sync)
+- ✅ `npm run types:check` - PASSED (types fresh)
+- ✅ `npm run build` - PASSED (compiled successfully, 57 pages)
+- ✅ `npm run lint` - PASSED (no ESLint warnings or errors)
+- ✅ Pre-commit hooks - PASSED (guards, build, lint, MVP status check)
+
+### Schema/Types Verification ✅
+- ✅ No unexpected changes to `types/database.ts` (auto-generated, unchanged)
+- ✅ No unexpected changes to `supabase/migrations/*` (no migrations modified)
+
+### Manual Verification Checklist (Post-Deploy)
+
+**Signed-out (SO)**
 - [ ] Load `/` - No "Browse Talent" anywhere
 - [ ] Navbar - No "Gigs" link visible
 - [ ] Command palette (⌘K) - Shows "Sign in to Browse Gigs"
 - [ ] Footer - No "Browse Talent" or "Find Gigs" links
 - [ ] Demo pages (`/ui-showcase`, `/project-overview`) - No links to `/talent`
 
-### Signed-in Talent (T)
+**Signed-in Talent (T)**
 - [ ] Navbar shows "Gigs" link ✅
 - [ ] Gigs list loads as expected
 - [ ] Apply CTAs still respect eligibility gates (subscription/verification)
 
-### Signed-in Client (C)
+**Signed-in Client (C)**
 - [ ] Navbar shows "Gigs" link ✅ (G1: list access allowed)
 - [ ] No "Talent" browse surface anywhere
 - [ ] Client can still reach applicants/bookings surfaces
 
-### Admin (A)
+**Admin (A)**
 - [ ] "Public Site View" label is correct (no "portal" language)
 - [ ] Admin can navigate admin tools normally
 

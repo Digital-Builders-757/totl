@@ -8,9 +8,9 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Approach B Policy Implementation (PR1 - Truthful UI Surfaces)**
+## 🚑 **Latest Fix: Approach B Policy Implementation (PR1 + PR2 Complete)**
 
-**ACCESS/VISIBILITY POLICY ALIGNMENT** - January 20, 2025  
+**ACCESS/VISIBILITY POLICY ALIGNMENT** - December 21, 2025  
 - ✅ Locked **Approach B (Hybrid)** policy matrix: public talent marketing profiles at `/talent/[slug]` (no sensitive fields), no talent directory exists, clients see talent only via relationships (Applicants/Bookings), gigs list requires sign-in (G1).  
 - ✅ **PR1 Complete**: Removed all discoverability surfaces that advertise "Browse Talent Directory" or "Browse Gigs" for signed-out users.  
 - ✅ Updated navbar: removed "Talent" directory link, removed "Gigs" link for signed-out (G1: list requires sign-in).  
@@ -20,10 +20,11 @@
 - ✅ Updated demo pages: removed links to `/talent` directory from `/project-overview` and `/ui-showcase`.  
 - ✅ Created canonical policy matrix document: `docs/POLICY_MATRIX_APPROACH_B.md` (source of truth for access/visibility rules).  
 - ✅ Created implementation tracker: `docs/APPROACH_B_IMPLEMENTATION.md` (PR sequence status).  
+- ✅ **PR2 Complete**: Control plane alignment (routing constants + middleware) - removed `/gigs` and `/talent` from public routes, eliminated public prefix allowlist, implemented explicit one-segment public matchers only (`/talent/[slug]` and `/gigs/[id]`), hard deny `/talent` directory and require sign-in for `/gigs` list, fixed profile-missing bootstrap bug (allow `/gigs` for signed-in users without profile).  
+- ✅ Updated middleware: explicit handling for `/talent` directory (redirect SO/T/C away), `/gigs` list (require sign-in for SO), preserved `/gigs/[id]` and `/talent/[slug]` as public, bootstrap-safe routes preserved (no redirect loops).  
 
 **Next (P0)**
-- [ ] **PR2**: Control plane alignment (routing constants + middleware) - redirect `/talent` directory away from SO/C, ensure `/talent/[slug]` remains public, align `/gigs` classification with G1.  
-- [ ] **PR3**: Locks + data shape (RLS + sensitive fields) - ensure public marketing profiles don't expose sensitive fields, enforce relationship-bound access for clients.  
+- [ ] **PR3**: Locks + data shape (RLS + sensitive fields) - ensure public marketing profiles don't expose sensitive fields, enforce relationship-bound access for clients, ensure `/gigs/[id]` only shows published gigs for signed-out users.  
 - [ ] **PR4**: Query strategy cleanup (no enumeration) - remove "fetch all talent then find slug" patterns, implement non-enumerating slug resolution.
 
 ## 🚑 **Latest Fix: Schema truth alignment (stop signup/bootstrap DB failures)**

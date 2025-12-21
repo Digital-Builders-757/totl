@@ -94,6 +94,7 @@ All other documentation has been organized into the `docs/` folder.
 - `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory (must align with `POLICY_MATRIX_APPROACH_B.md`)
 - `APPROACH_B_IMPLEMENTATION.md` - 🚧 **NEW** - Implementation tracker for Approach B policy alignment (PR sequence status)
 - `PR1_SUMMARY.md` - ✅ **NEW** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
+- `PR2_SUMMARY.md` - ✅ **NEW** - PR2 summary: Control plane alignment (middleware + routing changes)
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 - `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md` - Talent dashboard auth/data pattern (Phase 1-4)
 

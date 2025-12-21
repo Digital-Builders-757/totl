@@ -51,6 +51,9 @@ npm run build
 - **Navigation/Discoverability Surfaces Violate Policy:** UI surfaces advertise "Browse Talent Directory" or "Browse Gigs" when policy requires sign-in or no directory exists.
   - **Fix:** Remove directory links from signed-out navigation, update CTAs to reflect sign-in requirements, align footer links with policy matrix. Reference: `docs/POLICY_MATRIX_APPROACH_B.md`
   - **Prevention:** Before adding nav/footer/CTA links, verify against policy matrix. Signed-out users should not see links to gated directories.
+- **Profile-Missing Bootstrap Redirect Loop:** Signed-in users without profile get redirected to login when accessing `/gigs`, causing redirect loops.
+  - **Fix:** Allow `/gigs` in `isSafeForProfileBootstrap` for signed-in users without profile. AuthProvider handles profile creation, and page can gate by profile if needed.
+  - **Prevention:** When adding route restrictions, ensure bootstrap-safe routes (signed-in but profile missing) are handled correctly. Reference: `docs/ARCHITECTURE_CONSTITUTION.md` (missing profile is valid bootstrap state).
 - **Non-idempotent application acceptance (duplicate bookings / double emails):** Clicking “Accept” twice (or retries) creates multiple bookings and/or sends duplicate acceptance emails.
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally

@@ -73,15 +73,46 @@
 
 ---
 
-### 🚧 PR2: Control Plane Alignment (PENDING)
+### ✅ PR2: Control Plane Alignment (COMPLETE)
 
 **Goal:** Make routing truth match policy matrix. No bypass by direct URL.
 
-**Planned Changes:**
-- Update `lib/constants/routes.ts` to remove `/talent` from public routes
-- Update `middleware.ts` to redirect `/talent` (directory) away from SO/C
-- Ensure `/talent/[slug]` remains public (marketing profiles)
-- Align `/gigs` classification with G1 (list requires sign-in, detail public)
+**Changes Made:**
+
+1. **Route Constants (`lib/constants/routes.ts`)**
+   - Removed `PATHS.GIGS` and `PATHS.TALENT_LANDING` from `PUBLIC_ROUTES`
+   - Removed `PUBLIC_ROUTE_PREFIXES` (too broad for Approach B + G1)
+   - Rewrote `isPublicPath()` to explicitly allow only:
+     - `/talent/[slug]` (exactly one segment after `/talent/`)
+     - `/gigs/[id]` (exactly one segment after `/gigs/`)
+   - Hard deny `/talent` directory and `/gigs` list
+   - Hard deny `/gigs/[id]/apply` (talent-only)
+
+2. **Middleware (`middleware.ts`)**
+   - Added explicit handling for `/talent` directory:
+     - Signed-out: redirect to `/`
+     - Signed-in (all roles): redirect to appropriate dashboard
+   - Added explicit handling for `/gigs` list:
+     - Signed-out: redirect to `/login?returnUrl=/gigs`
+     - Signed-in: allow (T/C/A can browse)
+   - Preserved `/gigs/[id]` and `/talent/[slug]` as public (via `isPublicPath()`)
+   - Preserved bootstrap safe routes (no redirect loops)
+
+3. **Route Access Helpers (`lib/utils/route-access.ts`)**
+   - Updated `needsTalentAccess()` to correctly identify public `/talent/[slug]` routes
+
+**Files Changed:**
+- `lib/constants/routes.ts`
+- `middleware.ts`
+- `lib/utils/route-access.ts`
+
+**Acceptance Criteria Met:**
+- ✅ Direct URL to `/talent` never shows roster (redirects away)
+- ✅ Direct URL to `/gigs` as signed-out redirects to login
+- ✅ Direct URL to `/gigs/[id]` as signed-out works (public gig detail)
+- ✅ Direct URL to `/talent/[slug]` as signed-out works (public marketing profile)
+- ✅ No redirect loops during bootstrap states
+- ✅ All verification checks passed (schema, types, build, lint)
 
 **Risk Level:** Medium (red zone - middleware/routing)
 
