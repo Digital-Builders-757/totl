@@ -12,6 +12,8 @@
 - ✅ Gig detail page (`/gigs/[id]`): Ensured signed-out users can only see `status='active'` gigs (public status)
 - ✅ Gig list page (`/gigs`): Moved `getUser()` to top, early return before DB query (performance + correctness)
 - ✅ Talent profile page (`/talent/[slug]`): Fixed client access to require relationship check (applicant/booking) before showing sensitive fields
+- ✅ TalentProfileClient component: Fixed critical leak - removed client-side access logic (`user.role === 'client'` check), changed prop type from full `TalentProfile` to safe `TalentPublicClientModel`, render based on server-determined phone presence only
+- ✅ Updated locked copy text: Changed from "only visible to registered Career Builders" to "unlock after you've applied to or booked talent through TOTL" (truth-surface alignment)
 - ✅ Removed "Back to Talent" link pointing to `/talent` directory (hard-denied route)
 - ✅ Made "Back to All Gigs" link conditional (signed-out → home, signed-in → `/gigs`)
 
@@ -28,7 +30,7 @@
 1. `app/gigs/[id]/page.tsx` - Gig detail page (status filtering + conditional back link)
 2. `app/gigs/page.tsx` - Gig list page (early auth check before DB query)
 3. `app/talent/[slug]/page.tsx` - Talent profile page (relationship-bound sensitive field access + fixed back link)
-4. `app/talent/[slug]/talent-profile-client.tsx` - Client component (fixed to respect server-side relationship check)
+4. `app/talent/[slug]/talent-profile-client.tsx` - Client component (CRITICAL FIX: removed client-side access leak, safe prop type, render based on server-determined phone presence)
 
 ### Utility Functions
 5. `lib/utils/talent-access.ts` - NEW: Reusable helper for relationship-bound access checks
