@@ -121,7 +121,7 @@ export default function HomePage() {
                 location: "Los Angeles",
                 rating: 4.8,
                 price: "$450/day",
-                image: "https://picsum.photos/400/500?random=2",
+                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=500&fit=crop&crop=face",
                 specialties: ["Fitness", "Lifestyle", "Commercial"],
               },
               {
@@ -130,7 +130,7 @@ export default function HomePage() {
                 location: "Miami",
                 rating: 4.9,
                 price: "$400/day",
-                image: "https://picsum.photos/400/500?random=3",
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face",
                 specialties: ["Beauty", "Fashion", "Editorial"],
               },
               {
@@ -139,7 +139,7 @@ export default function HomePage() {
                 location: "Chicago",
                 rating: 4.7,
                 price: "$350/day",
-                image: "https://picsum.photos/400/500?random=4",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
                 specialties: ["Commercial", "Corporate", "Lifestyle"],
               },
             ].map((talent, index) => (
