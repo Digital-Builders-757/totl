@@ -301,9 +301,11 @@ export default function AboutPage() {
                   <div>
                     <h4 className="font-bold">Address</h4>
                     <p>
-                      123 Fashion Avenue, Suite 500
+                      TOTL Agency
                       <br />
-                      New York, NY 10001
+                      PO Box 13
+                      <br />
+                      Glassboro, NJ, 08028
                     </p>
                   </div>
                 </div>
@@ -318,7 +320,7 @@ export default function AboutPage() {
                   <Mail className="w-6 h-6 mr-4 flex-shrink-0" />
                   <div>
                     <h4 className="font-bold">Email</h4>
-                    <p>info@totlagency.com</p>
+                    <p>contact@thetotlagency.com</p>
                   </div>
                 </div>
                 <div className="flex items-start">
