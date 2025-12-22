@@ -71,6 +71,8 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
+- `ADMIN_VISIBILITY_AUDIT_REPORT.md` - **✅ NEW** - Comprehensive audit report for admin profile viewing fixes (Dec 2025)
+- `ADMIN_VISIBILITY_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Implementation summary for admin profile visibility feature (Dec 2025)
 - `TOTL_AGENCY_USER_GUIDE.md` - User guide for talent and Career Builders
 
 ### **🗄️ Database & Backend**

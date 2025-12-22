@@ -167,6 +167,24 @@ export async function middleware(req: NextRequest) {
 
   // Admins should not "fall into" Talent/Client terminals (often caused by hardcoded client redirects).
   // Keep this narrowly scoped: only routes that explicitly require non-admin access are redirected.
+  // Exception: Admin can view profile pages for other users (view-only, not edit).
+  if (isAdmin) {
+    // Allow admin to view /client/profile when userId query param is present and non-empty (viewing other user)
+    if (path === "/client/profile") {
+      const userId = req.nextUrl.searchParams.get("userId");
+      // Allow only if userId looks non-empty and UUID-like (prevents empty string, "null", junk values)
+      if (typeof userId === "string" && userId.trim().length > 0) {
+        // Optional: validate UUID format for cleaner logs (not required, but prevents weird edge cases)
+        const uuidLike = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (uuidLike.test(userId.trim())) {
+          return res;
+        }
+      }
+    }
+    // /talent/[slug] is public, so admin can access it (needsTalentAccess returns false for public routes)
+    // No exception needed here, but we check needsTalentAccess below which will allow it
+  }
+
   if (isAdmin && (needsClientAccess(path) || needsTalentAccess(path))) {
     if (debugRouting) {
       console.info("[totl][middleware] redirect admin to admin dashboard", {
