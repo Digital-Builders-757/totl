@@ -26,6 +26,7 @@
 - ✅ **PR4 Complete**: Query strategy cleanup (no enumeration) - replaced "fetch all talent then find slug" pattern with bounded candidate queries (UUID path: `limit(1)`, name path: `limit(25)`), implemented ambiguity handling (duplicates return `notFound()`), preserved UUID backward compatibility, eliminated enumeration pattern completely (no `.order("created_at")` queries), no schema changes (Option B compliant).
 - ✅ **PR5 Complete**: Marketing page conversion + copy cleanup - converted `/talent` directory page to pure marketing explainer (no DB queries, no listings), updated middleware and route constants to allow `/talent` as public marketing page, fixed remaining copy violations (removed "browse roster" language from choose-role and homepage), compliance score: 100% ✅.
 - ✅ **PR1 Copy Migration Complete**: Tier A safe swaps - replaced modeling-specific language with generalized professional language in form labels, placeholders, and UI copy (10 replacements across 5 files: talent-professional-info-form.tsx, talent-profile-form.tsx, choose-role/page.tsx, client/dashboard/page.tsx, gigs/page.tsx), copy-only changes with no logic/database/routing modifications.
+- ✅ **Marketing Images Update**: Replaced placeholder images (picsum.photos) with professional Unsplash images for example accounts on homepage - now using industry-appropriate professional portraits that look like actual people working in the industry.
 
 **Next (Future Enhancements)**
 - [ ] Consider slug column migration (Option 4A from PR4 plan) if scale demands it
