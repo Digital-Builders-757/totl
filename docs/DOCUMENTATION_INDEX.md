@@ -92,10 +92,16 @@ All other documentation has been organized into the `docs/` folder.
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 - `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory (must align with `POLICY_MATRIX_APPROACH_B.md`)
-- `APPROACH_B_IMPLEMENTATION.md` - 🚧 **NEW** - Implementation tracker for Approach B policy alignment (PR sequence status)
-- `PR1_SUMMARY.md` - ✅ **NEW** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
-- `PR2_SUMMARY.md` - ✅ **NEW** - PR2 summary: Control plane alignment (middleware + routing changes)
-- `PR3_SUMMARY.md` - ✅ **NEW** - PR3 summary: Locks + data shape (Option B - no migrations, query discipline)
+- `APPROACH_B_IMPLEMENTATION.md` - ✅ **COMPLETE** - Implementation tracker for Approach B policy alignment (PR1-5 complete)
+- `COPY_MIGRATION_PLAN.md` - 📋 **NEW** - Copy migration plan: Modeling → Professional Talent Platform (3-tier PR strategy)
+- `PR1_COPY_MIGRATION_SUMMARY.md` - ✅ **COMPLETE** - PR1 summary: Tier A safe swaps (copy-only changes)
+- `PR1_SUMMARY.md` - ✅ **COMPLETE** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
+- `PR2_SUMMARY.md` - ✅ **COMPLETE** - PR2 summary: Control plane alignment (middleware + routing changes)
+- `PR3_SUMMARY.md` - ✅ **COMPLETE** - PR3 summary: Locks + data shape (Option B - no migrations, query discipline)
+- `PR4_PLAN.md` - ✅ **COMPLETE** - PR4 plan: Query strategy cleanup (remove enumeration patterns)
+- `PR4_SUMMARY.md` - ✅ **COMPLETE** - PR4 summary: Query strategy cleanup (bounded candidate queries)
+- `PR5_SUMMARY.md` - ✅ **COMPLETE** - PR5 summary: Marketing page conversion + copy cleanup
+- `VERIFICATION_AUDIT_POST_PR1-3.md` - ✅ **NEW** - Post-PR1-3 verification audit report (compliance score: 95% → 100%)
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - PRD for the unified signup → role-selection and client application flow
 - `TALENT_DASHBOARD_DATA_HOOK_GUIDE.md` - Talent dashboard auth/data pattern (Phase 1-4)
 

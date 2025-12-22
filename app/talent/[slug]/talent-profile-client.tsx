@@ -9,8 +9,9 @@ import type { Database } from "@/types/supabase";
 
 type TalentProfileRow = Database["public"]["Tables"]["talent_profiles"]["Row"];
 
-// PR3: Only accept what server actually sends (public fields + optional phone)
+// PR3: Only accept what server actually sends (public fields + phone)
 // This prevents accidental leakage if server ever includes sensitive fields
+// phone is always present (either string or null) - never optional
 type TalentPublicClientModel = Pick<
   TalentProfileRow,
   | "user_id"
@@ -22,7 +23,7 @@ type TalentPublicClientModel = Pick<
   | "measurements"
   | "experience_years"
   | "portfolio_url"
-> & { phone?: string | null };
+> & { phone: string | null };
 
 interface TalentProfileClientProps {
   talent: TalentPublicClientModel;
@@ -43,9 +44,9 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
 
   // PR3: Do NOT infer access client-side (Option B requirement)
   // Server already determined relationship and included/excluded phone accordingly
-  // If phone exists, viewer is authorized (self/admin/relationship client)
-  // If phone is null/undefined, show locked state
-  const hasPhone = !!talent.phone;
+  // If phone exists (non-empty string), viewer is authorized (self/admin/relationship client)
+  // If phone is null or empty string, show locked state
+  const hasPhone = typeof talent.phone === "string" && talent.phone.trim().length > 0;
 
   return (
     <div className="space-y-6">
@@ -69,9 +70,19 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
             <p className="text-gray-600 mb-4">
               Contact details unlock after you&apos;ve applied to or booked talent through TOTL.
             </p>
-            <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
-              <Link href="/client/apply">Apply as Career Builder</Link>
-            </Button>
+            {!user ? (
+              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                <Link href="/login">Sign in to unlock</Link>
+              </Button>
+            ) : user.role === "talent" ? (
+              <p className="text-sm text-gray-500">
+                Clients unlock contact details after applying or booking talent.
+              </p>
+            ) : (
+              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                <Link href="/client/apply">Apply as Career Builder</Link>
+              </Button>
+            )}
           </div>
         )}
       </div>

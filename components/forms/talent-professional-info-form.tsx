@@ -129,11 +129,11 @@ export default function TalentProfessionalInfoForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="experience" className={formErrors.experience ? "text-red-500" : ""}>
-          Modeling Experience *
+          Professional Experience *
         </Label>
         <Textarea
           id="experience"
-          placeholder="Tell us about your modeling experience, previous work, and any specialties"
+          placeholder="Tell us about your professional experience, previous work, and any specialties"
           rows={6}
           value={formData.experience}
           onChange={handleChange}
@@ -162,7 +162,7 @@ export default function TalentProfessionalInfoForm({
         <Label htmlFor="specialties">Specialties</Label>
         <Textarea
           id="specialties"
-          placeholder="List your modeling specialties (e.g., runway, editorial, commercial)"
+          placeholder="List your professional specialties (e.g., runway, editorial, commercial)"
           rows={3}
           value={formData.specialties}
           onChange={handleChange}

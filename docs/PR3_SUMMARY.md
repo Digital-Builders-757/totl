@@ -12,7 +12,7 @@
 - ✅ Gig detail page (`/gigs/[id]`): Ensured signed-out users can only see `status='active'` gigs (public status)
 - ✅ Gig list page (`/gigs`): Moved `getUser()` to top, early return before DB query (performance + correctness)
 - ✅ Talent profile page (`/talent/[slug]`): Fixed client access to require relationship check (applicant/booking) before showing sensitive fields
-- ✅ TalentProfileClient component: Fixed critical leak - removed client-side access logic (`user.role === 'client'` check), changed prop type from full `TalentProfile` to safe `TalentPublicClientModel`, render based on server-determined phone presence only
+- ✅ TalentProfileClient component: Fixed critical leak - removed client-side access logic (`user.role === 'client'` check), changed prop type from full `TalentProfile` to safe `TalentPublicClientModel` (phone: string | null, not optional), explicit phone presence check (`typeof talent.phone === "string" && talent.phone.trim().length > 0`), tightened CTA logic (role-aware: signed-out → "Sign in", talent → info text, client → "Apply as Career Builder"), render based on server-determined phone presence only
 - ✅ Updated locked copy text: Changed from "only visible to registered Career Builders" to "unlock after you've applied to or booked talent through TOTL" (truth-surface alignment)
 - ✅ Removed "Back to Talent" link pointing to `/talent` directory (hard-denied route)
 - ✅ Made "Back to All Gigs" link conditional (signed-out → home, signed-in → `/gigs`)

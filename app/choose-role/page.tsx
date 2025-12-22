@@ -102,7 +102,7 @@ export default function ChooseRolePage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Apply to exclusive modeling opportunities</span>
+                    <span className="text-gray-300">Apply to exclusive opportunities</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
@@ -142,17 +142,17 @@ export default function ChooseRolePage() {
               </div>
               <div className="p-4 sm:p-8 flex flex-col flex-grow">
                 <p className="text-gray-300 mb-6 leading-relaxed">
-                  Post gigs, browse our talent roster, and find the perfect models for your
+                  Post gigs, connect with talent, and find the perfect professionals for your
                   projects, campaigns, and events.
                 </p>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Post modeling opportunities</span>
+                    <span className="text-gray-300">Post opportunities</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Browse our curated talent roster</span>
+                    <span className="text-gray-300">Connect with verified talent through applications</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>

@@ -101,8 +101,13 @@ export function isPublicPath(pathname: string): boolean {
   // Explicit public routes
   if (isPublicRoute(pathname)) return true;
 
-  // Hard deny: /talent directory and /gigs list
-  if (pathname === PATHS.TALENT_LANDING || pathname === PATHS.GIGS) {
+  // /talent is now a public marketing page (not a directory)
+  if (pathname === PATHS.TALENT_LANDING) {
+    return true;
+  }
+
+  // Hard deny: /gigs list requires sign-in
+  if (pathname === PATHS.GIGS) {
     return false;
   }
 

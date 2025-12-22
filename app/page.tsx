@@ -223,8 +223,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Discover</h3>
               <p className="text-gray-300 leading-relaxed">
-                Browse our curated selection of verified talent across all categories and
-                specialties.
+                Connect with verified talent across all categories and specialties through intentional matching.
               </p>
             </div>
             <div className="text-center space-y-6">
