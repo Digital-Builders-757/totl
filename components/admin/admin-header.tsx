@@ -152,7 +152,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                 <DropdownMenuItem asChild>
                   <Link href="/talent" className="text-white hover:bg-gray-800">
                     <span className="mr-2">👁️</span>
-                    View Talent Portal
+                    Public Site View
                   </Link>
                 </DropdownMenuItem>
             <DropdownMenuItem

@@ -82,18 +82,29 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!user) {
+    // Approach B + G1: Hard deny /talent directory for signed-out users
+    if (path === PATHS.TALENT_LANDING) {
+      return NextResponse.redirect(new URL(PATHS.HOME, req.url));
+    }
+
+    // Approach B + G1: /gigs list requires sign-in
+    if (path === PATHS.GIGS) {
+      const redirectUrl = new URL(PATHS.LOGIN, req.url);
+      redirectUrl.searchParams.set("returnUrl", path);
+      return NextResponse.redirect(redirectUrl);
+    }
+
     // Signed-out allowlist: auth routes + public routes only.
     // Onboarding requires an authenticated session (bootstrap-safe handling is for signed-in users with missing profile rows).
     if (isAuthRoute(path) || isPublicPath(path)) {
       return res;
     }
-    if (!isPublicPath(path)) {
-      const redirectUrl = new URL(PATHS.LOGIN, req.url);
-      // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
-      redirectUrl.searchParams.set("returnUrl", path);
-      return NextResponse.redirect(redirectUrl);
-    }
-    return res;
+
+    // Not auth/public → redirect to login
+    const redirectUrl = new URL(PATHS.LOGIN, req.url);
+    // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
+    redirectUrl.searchParams.set("returnUrl", path);
+    return NextResponse.redirect(redirectUrl);
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -122,11 +133,19 @@ export async function middleware(req: NextRequest) {
   // If profile is missing, allow through on safe routes so AuthProvider can create/hydrate it.
   // Only force redirect on routes that truly require a completed profile.
   if (!profile) {
+    // Approach B + G1: Hard deny /talent directory even for signed-in users without profile
+    if (path === PATHS.TALENT_LANDING) {
+      return NextResponse.redirect(new URL(PATHS.HOME, req.url));
+    }
+
+    // Approach B + G1: /gigs list is allowed for signed-in users (even without profile)
+    // AuthProvider will handle profile bootstrap, and /gigs page can gate by profile if needed
     const isSafeForProfileBootstrap =
       isAuthRoute(path) ||
       isPublicPath(path) ||
       path === ONBOARDING_PATH ||
-      path === PATHS.TALENT_DASHBOARD;
+      path === PATHS.TALENT_DASHBOARD ||
+      path === PATHS.GIGS; // Allow /gigs for signed-in users without profile
 
     if (isSafeForProfileBootstrap) {
       return res;
@@ -139,6 +158,18 @@ export async function middleware(req: NextRequest) {
 
   const isAdmin = profile?.role === "admin";
   const accountType: AccountType = (profile?.account_type ?? "unassigned") as AccountType;
+
+  // Approach B + G1: Hard deny /talent directory for all roles (except optional admin-only roster elsewhere)
+  // Redirect to appropriate dashboard based on role
+  if (path === PATHS.TALENT_LANDING) {
+    if (isAdmin) {
+      // Optional: allow admin to access /admin/talent if it exists, otherwise redirect to admin dashboard
+      return NextResponse.redirect(new URL(PATHS.ADMIN_DASHBOARD, req.url));
+    }
+    // For talent/client: redirect to their dashboard
+    const destination = determineDestination(profile);
+    return NextResponse.redirect(new URL(destination, req.url));
+  }
 
   if (debugRouting) {
     console.info("[totl][middleware] access flags", {

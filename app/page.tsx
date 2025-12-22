@@ -59,15 +59,8 @@ export default function HomePage() {
                     Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </Link>
-                <Link href="/talent" className="w-full sm:w-auto">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold min-h-[56px]"
-                  >
-                    Browse Talent
-                  </Button>
-                </Link>
+                {/* Removed "Browse Talent" CTA per Approach B: no talent directory exists */}
+                {/* Public users can discover talent only via shared profile links (/talent/[slug]) */}
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-8 md:gap-12 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center space-x-3">
@@ -301,15 +294,8 @@ export default function HomePage() {
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
-              <Link href="/talent">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-5 text-xl font-semibold"
-                >
-                  Browse Talent
-                </Button>
-              </Link>
+              {/* Removed "Browse Talent" CTA per Approach B: no talent directory exists */}
+              {/* Public users can discover talent only via shared profile links (/talent/[slug]) */}
             </div>
           </div>
         </div>
@@ -334,18 +320,8 @@ export default function HomePage() {
             <div className="space-y-4">
               <h3 className="text-white font-semibold">Platform</h3>
               <div className="space-y-2">
-                <Link
-                  href="/talent"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Browse Talent
-                </Link>
-                <Link
-                  href="/gigs"
-                  className="block text-gray-400 hover:text-white transition-colors"
-                >
-                  Find Gigs
-                </Link>
+                {/* Removed "Browse Talent" per Approach B: no talent directory exists */}
+                {/* Removed "Find Gigs" per G1: gig list requires sign-in (not discoverable for signed-out) */}
                 <Link
                   href="/about"
                   className="block text-gray-400 hover:text-white transition-colors"

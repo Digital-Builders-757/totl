@@ -1,0 +1,28 @@
+fix(ui): align discoverability surfaces with Approach B + G1 policy
+
+Remove all UI surfaces that advertise "Browse Talent Directory" or "Browse Gigs" 
+for signed-out users, aligning with locked policy matrix (Approach B + G1).
+
+Date: December 21, 2025
+
+Changes:
+- Navbar: removed "Talent" directory link; "Gigs" only for signed-in users
+- Homepage: removed "Browse Talent" CTAs (hero + footer); removed "Find Gigs" footer link
+- Command palette: changed "Browse Gigs" to "Sign in to Browse Gigs" for signed-out
+- Admin labels: renamed "View Talent Portal" → "Public Site View"
+- Demo pages: removed links to restricted areas
+
+Documentation:
+- Created canonical policy matrix: docs/POLICY_MATRIX_APPROACH_B.md
+- Created implementation tracker: docs/APPROACH_B_IMPLEMENTATION.md
+- Created PR1 summary: docs/PR1_SUMMARY.md
+
+What didn't change:
+- Middleware routing logic (PR2)
+- Route allowlists (PR2)
+- RLS policies (PR3)
+- Database queries (PR4)
+
+Risk: Low (UI-only changes, no red zone)
+RED ZONE INVOLVED: NO
+

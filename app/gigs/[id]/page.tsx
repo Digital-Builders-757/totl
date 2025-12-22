@@ -30,7 +30,9 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch gig by ID with client details - FIXED: join to profiles, not client_profiles
+  // PR3: Fetch gig by ID with client details
+  // Approach B + G1: All users (signed-out and signed-in) can only see active gigs via this route
+  // (RLS handles additional restrictions for signed-in users viewing their own drafts)
   const { data: gig, error } = await supabase
     .from("gigs")
     .select(GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT)
@@ -96,9 +98,9 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
-          <Link href="/gigs" className="flex items-center gap-2">
+          <Link href={user ? "/gigs" : "/"} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Back to All Gigs
+            {user ? "Back to All Gigs" : "Back to Home"}
           </Link>
         </Button>
       </div>

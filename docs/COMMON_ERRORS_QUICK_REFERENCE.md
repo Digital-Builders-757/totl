@@ -48,6 +48,18 @@ npm run build
   - **Fix:** Bubble up failures from `handleSubscriptionUpdate()` and return HTTP 500 so Stripe retries when the database update does not succeed.
 - **Stripe Webhook Duplicate Concurrency (in-flight double processing):** Same `event.id` delivered twice concurrently can cause double side effects if the second request proceeds while the first is still `processing`.
   - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
+- **Navigation/Discoverability Surfaces Violate Policy:** UI surfaces advertise "Browse Talent Directory" or "Browse Gigs" when policy requires sign-in or no directory exists.
+  - **Fix:** Remove directory links from signed-out navigation, update CTAs to reflect sign-in requirements, align footer links with policy matrix. Reference: `docs/POLICY_MATRIX_APPROACH_B.md`
+  - **Prevention:** Before adding nav/footer/CTA links, verify against policy matrix. Signed-out users should not see links to gated directories.
+- **Profile-Missing Bootstrap Redirect Loop:** Signed-in users without profile get redirected to login when accessing `/gigs`, causing redirect loops.
+  - **Fix:** Allow `/gigs` in `isSafeForProfileBootstrap` for signed-in users without profile. AuthProvider handles profile creation, and page can gate by profile if needed.
+  - **Prevention:** When adding route restrictions, ensure bootstrap-safe routes (signed-in but profile missing) are handled correctly. Reference: `docs/ARCHITECTURE_CONSTITUTION.md` (missing profile is valid bootstrap state).
+- **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
+  - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
+  - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.
+- **Client Component Reintroduces Access Leak:** Client components compute access client-side (e.g., `user.role === 'client'`) which bypasses server-side relationship checks.
+  - **Fix:** Remove client-side access logic. Accept safe prop types (public fields + optional phone). Render based on what server sends (if phone exists, show it; else show locked state). Server determines access, client only renders. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access must be server-side).
+  - **Prevention:** Never compute sensitive field access in client components. Server determines access and includes/excludes sensitive fields in props. Client components should only render what they receive.
 - **Non-idempotent application acceptance (duplicate bookings / double emails):** Clicking “Accept” twice (or retries) creates multiple bookings and/or sends duplicate acceptance emails.
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally

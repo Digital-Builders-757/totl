@@ -105,20 +105,18 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-16">
-            <Link
-              href="/gigs"
-              className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
-            >
-              Gigs
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            <Link
-              href="/talent"
-              className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
-            >
-              Talent
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-            </Link>
+            {/* Gigs link: only show for signed-in users (G1: list requires sign-in) */}
+            {user && (
+              <Link
+                href="/gigs"
+                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
+              >
+                Gigs
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+            )}
+            {/* Talent directory removed per Approach B: no roster browsing */}
+            {/* Admin-only: optional talent directory access via admin terminal */}
             <Link
               href="/about"
               className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
@@ -290,18 +288,16 @@ export default function Navbar() {
                       Subscribe & Apply
                     </Link>
                   )}
-              <Link
-                href="/gigs"
-                className="text-white hover:text-gray-300 font-medium transition-colors py-2"
-              >
-                Gigs
-              </Link>
-              <Link
-                href="/talent"
-                className="text-white hover:text-gray-300 font-medium transition-colors py-2"
-              >
-                Talent
-              </Link>
+              {/* Gigs link: only show for signed-in users (G1: list requires sign-in) */}
+              {user && (
+                <Link
+                  href="/gigs"
+                  className="text-white hover:text-gray-300 font-medium transition-colors py-2"
+                >
+                  Gigs
+                </Link>
+              )}
+              {/* Talent directory removed per Approach B: no roster browsing */}
               <Link
                 href="/about"
                 className="text-white hover:text-gray-300 font-medium transition-colors py-2"

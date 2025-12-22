@@ -1,0 +1,30 @@
+fix(security): align middleware + route classification with Approach B + G1
+
+Remove /gigs and /talent from public routes, eliminate public prefix allowlist,
+and implement explicit one-segment public matchers only.
+
+Changes:
+- Route constants: removed /gigs and /talent from PUBLIC_ROUTES
+- Route constants: removed PUBLIC_ROUTE_PREFIXES (too broad)
+- Route constants: rewrote isPublicPath() to explicitly allow only:
+  - /talent/[slug] (exactly one segment, not protected routes)
+  - /gigs/[id] (exactly one segment)
+- Middleware: hard deny /talent directory (redirect SO/T/C away)
+- Middleware: require sign-in for /gigs list (redirect SO to login)
+- Middleware: preserve /gigs/[id] and /talent/[slug] as public
+- Middleware: bootstrap-safe - allow /gigs for signed-in users without profile
+- Route access: updated needsTalentAccess() to correctly identify public slug routes
+
+Documentation:
+- Created PR2 summary: docs/PR2_SUMMARY.md
+- Updated implementation tracker: docs/APPROACH_B_IMPLEMENTATION.md
+- Updated common errors reference: docs/COMMON_ERRORS_QUICK_REFERENCE.md
+
+What didn't change:
+- RLS policies (PR3)
+- Page-level data fetching (PR3)
+- Slug resolution query strategy (PR4)
+
+Risk: Medium (red zone - middleware/routing)
+RED ZONE INVOLVED: YES
+

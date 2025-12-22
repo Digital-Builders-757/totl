@@ -1,0 +1,21 @@
+fix(security): remove client-side access leak in TalentProfileClient (PR3 hardening)
+
+Fix critical security leak where TalentProfileClient component was computing
+access client-side, bypassing server-side relationship checks.
+
+Changes:
+- Changed prop type from full TalentProfile to TalentPublicClientModel (safe public shape + optional phone)
+- Removed client-side access logic (user.role === 'client' check)
+- Render based on server-determined phone presence only (if phone exists, show it; else show locked)
+- Updated locked copy text to match Option B policy (relationship-bound, not blanket client access)
+
+This ensures Option B is enforced end-to-end: server determines access,
+client only renders what server sends.
+
+Documentation:
+- Updated PR3 summary: docs/PR3_SUMMARY.md
+- Updated common errors reference: docs/COMMON_ERRORS_QUICK_REFERENCE.md
+
+Risk: Low (Client component fix, no server changes)
+RED ZONE INVOLVED: NO
+

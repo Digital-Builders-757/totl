@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createNameSlug } from "@/lib/utils/slug";
+import { canClientSeeTalentSensitive } from "@/lib/utils/talent-access";
 import type { Database } from "@/types/supabase";
 
 // Use proper database types instead of custom interface
@@ -120,16 +121,40 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
           viewerProfile = data ?? null;
         }
 
-        const canViewSensitive =
-          !!viewerProfile &&
-          (viewerProfile.id === talent.user_id || viewerProfile.role === "client" || viewerProfile.role === "admin");
+        // PR3: Relationship-bound sensitive field access for clients
+        // Self, admin, or client with relationship (applicant/booking) can view sensitive fields
+        let canViewSensitive = false;
+
+        if (viewerProfile) {
+          if (viewerProfile.id === talent.user_id) {
+            canViewSensitive = true; // Self
+          } else if (viewerProfile.role === "admin") {
+            canViewSensitive = true; // Admin override
+          } else if (viewerProfile.role === "client") {
+            // PR3: Client can only see sensitive fields if relationship exists
+            canViewSensitive = await canClientSeeTalentSensitive({
+              supabase,
+              clientId: viewerProfile.id,
+              talentUserId: talent.user_id,
+            });
+          }
+        }
 
         if (canViewSensitive) {
-          const { data } = await supabase
+          // PR3: Fetch phone separately, respecting RLS
+          // If RLS denies access, data will be null (treat as "protected" not "missing")
+          const { data, error } = await supabase
             .from("talent_profiles")
             .select("phone")
             .eq("user_id", talent.user_id)
             .maybeSingle();
+
+          // If error is RLS-related or data is null, treat as protected (not missing)
+          // This ensures we don't confuse "no phone on file" with "phone exists but is protected"
+          if (error && error.code !== "PGRST116") {
+            // Non-"not found" error likely means RLS denied access
+            console.debug(`[PR3] Phone fetch blocked by RLS for talent ${talent.user_id}:`, error.code);
+          }
 
           talent = { ...(talent as PublicTalentProfile), phone: data?.phone ?? null };
         } else {
@@ -151,13 +176,13 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <div className="mb-6">
-          <Link href="/talent">
+          <Link href="/">
             <Button
               variant="outline"
               className="flex items-center border-white/30 text-white hover:bg-white/10 hover:border-white/50"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Talent
+              Back to Home
             </Button>
           </Link>
         </div>

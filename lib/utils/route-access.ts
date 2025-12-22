@@ -35,9 +35,31 @@ export function needsClientAccess(path: string) {
 }
 
 export function needsTalentAccess(path: string) {
+  // Approach B + G1: /talent directory is disabled (not public, not talent-only)
   if (path === PATHS.TALENT_LANDING) return false;
 
-  // Public: /talent/[slug] (public profiles) should remain accessible while signed out.
+  // Public: /talent/[slug] (public marketing profiles) should remain accessible while signed out.
+  // Check if this is a public slug route (exactly one segment after /talent/)
+  if (path.startsWith(PREFIXES.TALENT)) {
+    const talentPath = path.slice(PREFIXES.TALENT.length);
+    const segments = talentPath.split("/").filter(Boolean);
+    
+    // If exactly one segment and not a protected route, it's public (no talent access needed)
+    if (segments.length === 1) {
+      const slug = segments[0];
+      const isTalentProtected =
+        slug === "dashboard" ||
+        slug === "profile" ||
+        slug.startsWith("settings") ||
+        slug.startsWith("subscribe") ||
+        slug === "signup";
+      
+      if (!isTalentProtected) {
+        return false; // Public marketing profile
+      }
+    }
+  }
+
   // Private: dashboard + profile editor + settings + subscribe flow.
   const privateTalentPrefixes = [
     PATHS.TALENT_DASHBOARD,

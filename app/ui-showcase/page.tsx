@@ -227,11 +227,8 @@ export default function UIShowcasePage() {
                 Back to Home
               </Button>
             </Link>
-            <Link href="/talent">
-              <Button className="button-glow border-0">
-                See It In Action
-              </Button>
-            </Link>
+            {/* Removed link to /talent per Approach B: no talent directory exists */}
+            {/* Note: This is a demo/showcase page. Consider gating to admin/dev-only. */}
           </section>
 
         </div>

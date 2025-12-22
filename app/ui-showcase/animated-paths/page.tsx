@@ -5,8 +5,8 @@ export default function AnimatedPathsDemo() {
     <BackgroundPaths 
       title="TOTL Agency" 
       subtitle="Premium talent booking with next-gen UI"
-      ctaText="Explore Talent"
-      ctaHref="/talent"
+      ctaText="Back to Home"
+      ctaHref="/"
     />
   );
 }
