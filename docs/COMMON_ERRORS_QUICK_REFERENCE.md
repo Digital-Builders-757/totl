@@ -57,6 +57,9 @@ npm run build
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.
+- **Client Component Reintroduces Access Leak:** Client components compute access client-side (e.g., `user.role === 'client'`) which bypasses server-side relationship checks.
+  - **Fix:** Remove client-side access logic. Accept safe prop types (public fields + optional phone). Render based on what server sends (if phone exists, show it; else show locked state). Server determines access, client only renders. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access must be server-side).
+  - **Prevention:** Never compute sensitive field access in client components. Server determines access and includes/excludes sensitive fields in props. Client components should only render what they receive.
 - **Non-idempotent application acceptance (duplicate bookings / double emails):** Clicking “Accept” twice (or retries) creates multiple bookings and/or sends duplicate acceptance emails.
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally

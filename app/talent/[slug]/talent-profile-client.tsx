@@ -7,86 +7,74 @@ import { FlagProfileDialog } from "@/components/moderation/flag-profile-dialog";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/types/supabase";
 
-type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type TalentProfileRow = Database["public"]["Tables"]["talent_profiles"]["Row"];
+
+// PR3: Only accept what server actually sends (public fields + optional phone)
+// This prevents accidental leakage if server ever includes sensitive fields
+type TalentPublicClientModel = Pick<
+  TalentProfileRow,
+  | "user_id"
+  | "height"
+  | "weight"
+  | "hair_color"
+  | "eye_color"
+  | "shoe_size"
+  | "measurements"
+  | "experience_years"
+  | "portfolio_url"
+> & { phone?: string | null };
 
 interface TalentProfileClientProps {
-  talent: TalentProfile;
+  talent: TalentPublicClientModel;
 }
 
 export function TalentProfileClient({ talent }: TalentProfileClientProps) {
   const { user: authUser, profile: authProfile } = useAuth();
-  
-  // Use profile from auth context to avoid duplicate queries
-  // Only need to check if user is authenticated and get their role
-  const user = authUser && authProfile ? {
-    id: authUser.id,
-    role: authProfile.role,
-  } as Database["public"]["Tables"]["profiles"]["Row"] | null : null;
-  
-  const isLoading = false; // Auth context already loaded
 
-  // PR3: Check if user can see sensitive information
-  // Note: Server-side relationship check already happened in page.tsx
-  // This component receives talent prop with phone already set (or null)
-  // We only check self/admin here; client relationship is handled server-side
-  const canViewSensitiveInfo = user && (
-    user.id === talent.user_id || 
-    user.role === 'admin' ||
-    (user.role === 'client' && talent.phone !== null) // Only show if server already determined relationship exists
-  );
-
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-          </div>
-        </div>
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-            <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const user =
+    authUser && authProfile
+      ? ({
+          id: authUser.id,
+          role: authProfile.role,
+        } as Database["public"]["Tables"]["profiles"]["Row"])
+      : null;
 
   const canReportProfile = !!user && user.id !== talent.user_id;
 
+  // PR3: Do NOT infer access client-side (Option B requirement)
+  // Server already determined relationship and included/excluded phone accordingly
+  // If phone exists, viewer is authorized (self/admin/relationship client)
+  // If phone is null/undefined, show locked state
+  const hasPhone = !!talent.phone;
+
   return (
     <div className="space-y-6">
-      {/* Contact Information - Conditional based on authentication */}
-      {canViewSensitiveInfo ? (
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+      {/* Contact Information */}
+      <div className="bg-white rounded-lg p-6 border border-gray-300">
+        <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+
+        {hasPhone ? (
           <div className="space-y-3">
-            {talent.phone && (
-              <div className="flex items-center text-black">
-                <Phone className="mr-3 h-4 w-4 text-black" />
-                {talent.phone}
-              </div>
-            )}
+            <div className="flex items-center text-black">
+              <Phone className="mr-3 h-4 w-4 text-black" />
+              {talent.phone}
+            </div>
             <div className="flex items-center text-black">
               <Mail className="mr-3 h-4 w-4 text-black" />
-              Contact through agency
+              Contact through TOTL
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+        ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500 mb-4">Contact details are only visible to registered Career Builders</p>
+            <p className="text-gray-600 mb-4">
+              Contact details unlock after you&apos;ve applied to or booked talent through TOTL.
+            </p>
             <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
               <Link href="/client/apply">Apply as Career Builder</Link>
             </Button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Physical Attributes */}
       <div className="bg-white rounded-lg p-6 border border-gray-300">
