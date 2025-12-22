@@ -8,7 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Approach B Policy Implementation (PR1 + PR2 + PR3 Complete)**
+## 🚑 **Latest Fix: Admin Profile Visibility (December 22, 2025)**
+
+**ADMIN DASHBOARD PROFILE VIEWING** - December 22, 2025  
+- ✅ Fixed admin dashboard unable to view "Talent Profile" or "Client Profile" pages (blocked/redirected state)
+- ✅ Added middleware exception for admin accessing `/client/profile?userId=<uuid>` (view-only, UUID validated)
+- ✅ Updated `/client/profile/page.tsx` to accept `userId` param and allow admin override
+- ✅ **CRITICAL SECURITY FIX**: Prevented non-admin clients from viewing other clients' profiles (data leak prevention)
+- ✅ Created read-only `ClientProfileDetails` component for admin viewing (prevents accidental edits)
+- ✅ Removed problematic `profiles` query for target user (avoids RLS recursion issue)
+- ✅ Added friendly empty state when client profile doesn't exist (no redirect loops)
+- ✅ Fixed admin link to include `userId` param in `/admin/users` dropdown
+- ✅ Admin can now view all user information needed for ops (email/contact/profile fields)
+- ✅ All changes respect RLS (no service role bypass), explicit selects, server components only
+- ✅ Created comprehensive audit report: `docs/ADMIN_VISIBILITY_AUDIT_REPORT.md`
+- ✅ Created implementation summary: `docs/ADMIN_VISIBILITY_IMPLEMENTATION_SUMMARY.md`
+
+**Next (Future Enhancements)**
+- [ ] Consider adding non-recursive admin read policy for `profiles` table (if direct queries needed)
+- [ ] Add Playwright tests for admin profile visibility (`tests/admin/admin-profile-visibility.spec.ts`)
+
+## 🚑 **Previous Fix: Approach B Policy Implementation (PR1 + PR2 + PR3 Complete)**
 
 **ACCESS/VISIBILITY POLICY ALIGNMENT** - December 21, 2025  
 - ✅ Locked **Approach B (Hybrid)** policy matrix: public talent marketing profiles at `/talent/[slug]` (no sensitive fields), no talent directory exists, clients see talent only via relationships (Applicants/Bookings), gigs list requires sign-in (G1).  

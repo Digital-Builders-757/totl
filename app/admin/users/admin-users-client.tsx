@@ -433,7 +433,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                                 {userProfile.role === "client" && (
                                   <DropdownMenuItem asChild>
                                     <Link
-                                      href={`/client/profile`}
+                                      href={`/client/profile?userId=${userProfile.id}`}
                                       className="text-gray-300 hover:bg-gray-700 flex items-center"
                                     >
                                       <Eye className="mr-2 h-4 w-4" />

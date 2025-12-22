@@ -28,6 +28,11 @@ npm run build
   - **Fix:** Add `import { createNameSlug } from "@/lib/utils/slug";` at top of file
   - **Prevention:** When using utility functions, always verify import exists
   - **Check:** Run `grep -r "createNameSlug" <file>` and verify import line exists
+- **Admin Profile Viewing Blocked:** Admin clicking "View Talent Profile" or "View Career Builder Profile" redirects to dashboard
+  - **Fix:** Ensure middleware exception allows `/client/profile?userId=<uuid>` for admins (UUID validated)
+  - **Fix:** Ensure `/client/profile/page.tsx` accepts `userId` param and allows admin override
+  - **Fix:** Ensure non-admin clients cannot view other clients (force `targetUserId = user.id` for non-admins)
+  - **Prevention:** See `docs/ADMIN_VISIBILITY_AUDIT_REPORT.md` for full audit and fixes
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
