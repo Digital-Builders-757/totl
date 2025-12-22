@@ -102,7 +102,7 @@ export default function ChooseRolePage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Apply to exclusive modeling opportunities</span>
+                    <span className="text-gray-300">Apply to exclusive opportunities</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
@@ -148,7 +148,7 @@ export default function ChooseRolePage() {
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Post modeling opportunities</span>
+                    <span className="text-gray-300">Post opportunities</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-400 mr-3 text-lg">✓</span>

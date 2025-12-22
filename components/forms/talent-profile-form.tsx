@@ -479,7 +479,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             </Label>
             <Textarea
               id="experience"
-              placeholder="Describe your modeling/acting experience..."
+              placeholder="Describe your professional experience..."
               {...register("experience")}
               className={
                 errors.experience

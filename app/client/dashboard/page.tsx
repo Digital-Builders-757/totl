@@ -973,8 +973,8 @@ export default function ClientDashboard() {
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">Create Your Next Gig</h2>
               <p className="text-gray-300 mb-8">
-                Post a new casting call or gig to find the perfect talent for your project. Our
-                platform connects you with qualified models, actors, and performers.
+                Post a new opportunity or gig to find the perfect talent for your project. Our
+                platform connects you with qualified talent and professionals.
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

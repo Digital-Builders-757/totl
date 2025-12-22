@@ -124,7 +124,7 @@ export default async function GigsPage({
                 Find Gigs
               </h1>
               <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
-                Browse through available casting opportunities and gigs. Filter by category,
+                Browse through available opportunities and gigs. Filter by category,
                 location, and more to find the perfect match for your talents.
               </p>
             </div>
@@ -229,7 +229,7 @@ export default async function GigsPage({
               Find Gigs
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
-              Browse through available casting opportunities and gigs. Filter by category, location,
+              Browse through available opportunities and gigs. Filter by category, location,
               and more to find the perfect match for your talents.
             </p>
           </div>

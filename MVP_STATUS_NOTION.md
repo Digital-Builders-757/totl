@@ -25,10 +25,13 @@
 - ✅ **PR3 Complete**: Locks + data shape (Option B - no migrations) - ensured `/gigs/[id]` only shows active gigs for all users, moved `/gigs` getUser() check to top (early return before DB query), implemented relationship-bound sensitive field access for clients (created `lib/utils/talent-access.ts` helper), fixed TalentProfileClient critical leak (removed client-side access logic, changed prop type to safe public shape with `phone: string | null` (not optional), explicit phone presence check, tightened CTA logic with role-aware messaging), added RLS-aware phone fetching, updated locked copy text to match Option B policy, removed links to `/talent` directory and made `/gigs` back link conditional.
 - ✅ **PR4 Complete**: Query strategy cleanup (no enumeration) - replaced "fetch all talent then find slug" pattern with bounded candidate queries (UUID path: `limit(1)`, name path: `limit(25)`), implemented ambiguity handling (duplicates return `notFound()`), preserved UUID backward compatibility, eliminated enumeration pattern completely (no `.order("created_at")` queries), no schema changes (Option B compliant).
 - ✅ **PR5 Complete**: Marketing page conversion + copy cleanup - converted `/talent` directory page to pure marketing explainer (no DB queries, no listings), updated middleware and route constants to allow `/talent` as public marketing page, fixed remaining copy violations (removed "browse roster" language from choose-role and homepage), compliance score: 100% ✅.
+- ✅ **PR1 Copy Migration Complete**: Tier A safe swaps - replaced modeling-specific language with generalized professional language in form labels, placeholders, and UI copy (10 replacements across 5 files: talent-professional-info-form.tsx, talent-profile-form.tsx, choose-role/page.tsx, client/dashboard/page.tsx, gigs/page.tsx), copy-only changes with no logic/database/routing modifications.
 
 **Next (Future Enhancements)**
 - [ ] Consider slug column migration (Option 4A from PR4 plan) if scale demands it
 - [ ] Monitor query performance as talent count grows
+- [ ] **PR2 Copy Migration**: Tier B product framing (homepage hero, onboarding narrative, dashboard empty states)
+- [ ] **PR3 Copy Migration**: Tier C platform positioning (marketing pages, platform description)
 
 ## 🚑 **Latest Fix: Schema truth alignment (stop signup/bootstrap DB failures)**
 

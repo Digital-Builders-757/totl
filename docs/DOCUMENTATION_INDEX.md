@@ -93,6 +93,8 @@ All other documentation has been organized into the `docs/` folder.
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 - `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory (must align with `POLICY_MATRIX_APPROACH_B.md`)
 - `APPROACH_B_IMPLEMENTATION.md` - ✅ **COMPLETE** - Implementation tracker for Approach B policy alignment (PR1-5 complete)
+- `COPY_MIGRATION_PLAN.md` - 📋 **NEW** - Copy migration plan: Modeling → Professional Talent Platform (3-tier PR strategy)
+- `PR1_COPY_MIGRATION_SUMMARY.md` - ✅ **COMPLETE** - PR1 summary: Tier A safe swaps (copy-only changes)
 - `PR1_SUMMARY.md` - ✅ **COMPLETE** - PR1 summary: Truthful UI surfaces (verification checklist + acceptance criteria)
 - `PR2_SUMMARY.md` - ✅ **COMPLETE** - PR2 summary: Control plane alignment (middleware + routing changes)
 - `PR3_SUMMARY.md` - ✅ **COMPLETE** - PR3 summary: Locks + data shape (Option B - no migrations, query discipline)
