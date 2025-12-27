@@ -8,7 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Sentry Error Fixes (December 27, 2025)**
+## 🚑 **Latest Fix: Redirect Error Handling Fix (December 27, 2025)**
+
+**REDIRECT ERROR HANDLING** - December 27, 2025  
+- ✅ Fixed redirect error handling in `app/talent/dashboard/page.tsx` - Added `isRedirectError()` check to properly re-throw redirect errors when `redirect()` is called inside try-catch blocks
+- ✅ Fixed import order lint warning in `app/admin/users/admin-users-client.tsx`
+- ✅ Updated docs/COMMON_ERRORS_QUICK_REFERENCE.md with Server Component redirect error handling pattern
+
+**Previous Fix: Sentry Error Fixes (December 27, 2025)**
 
 **SENTRY ERROR RESOLUTION** - December 27, 2025  
 - ✅ Fixed TOTLMODELAGENCY-1F: `specialties.map is not a function` - Added array normalization helper for specialties/languages fields

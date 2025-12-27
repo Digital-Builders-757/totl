@@ -45,8 +45,10 @@ npm run build
 - **Fix:** Do **not** widen queries to `select("*")`. Instead, **narrow the component prop type** to the columns it actually uses (e.g., `Pick<Profile, "role" | "subscription_status">`) and keep **explicit column selects** in the query.
 - **Subscription Plan Detection Errors:** Silent fallback to `'monthly'` when `subscription.items` missing or price IDs not matched
   - **Fix:** Check every subscription item, fall back to `subscription.metadata.plan`, and if still unknown retain the existing `profiles.subscription_plan` value to avoid data loss.
-- **Redirect Errors Intercepted in Client Components:** `redirect()` throws special error that gets swallowed by `try/catch`
+- **Redirect Errors Intercepted in try/catch Blocks:** `redirect()` throws special error that gets swallowed by `try/catch` in Server Components or Client Components
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
+  - **Example:** In Server Components with try-catch, check `if (isRedirectError(error)) throw error;` before handling other errors
+  - **Prevention:** Always check for redirect errors before handling other errors in catch blocks that contain `redirect()` calls
 - **Billing Portal Session URL Missing:** `redirect(undefined)` when session URL is absent
   - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
 - **Webhook Acknowledges Failure:** Stripe receives `{ received: true }` even when Supabase updates fail
