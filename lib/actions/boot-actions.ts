@@ -64,10 +64,16 @@ export async function getBootState(params?: {
 
   // Always ensure the profiles row exists (bootstrap gap repair). This is idempotent.
   // Note: this MUST remain server-side (Staff).
-  const ensured = await ensureProfileExists();
-  if (ensured?.error) {
-    // Fail closed to a safe terminal; dashboards will still protect themselves.
-    console.error("[boot] ensureProfileExists failed:", ensured.error);
+  try {
+    const ensured = await ensureProfileExists();
+    if (ensured?.error) {
+      // Fail closed to a safe terminal; dashboards will still protect themselves.
+      console.error("[boot] ensureProfileExists failed:", ensured.error);
+    }
+  } catch (error) {
+    // If ensureProfileExists throws an exception, log it but continue
+    // The profile query below will handle missing profiles gracefully
+    console.error("[boot] ensureProfileExists threw exception:", error);
   }
 
   const { data: profile } = await supabase

@@ -41,6 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { SafeDate } from "@/components/safe-date";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
 import { createNameSlug } from "@/lib/utils/slug";
 
@@ -404,7 +405,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                             )}
                           </td>
                           <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(userProfile.created_at).toLocaleDateString()}
+                            <SafeDate date={userProfile.created_at} />
                           </td>
                           <td className="py-4 px-6">
                             <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
@@ -545,7 +546,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                             )}
                           </td>
                           <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(userProfile.created_at).toLocaleDateString()}
+                            <SafeDate date={userProfile.created_at} />
                           </td>
                           <td className="py-4 px-6">
                             <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
@@ -672,7 +673,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                             )}
                           </td>
                           <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(userProfile.created_at).toLocaleDateString()}
+                            <SafeDate date={userProfile.created_at} />
                           </td>
                           <td className="py-4 px-6">
                             <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
@@ -798,7 +799,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                             )}
                           </td>
                           <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(userProfile.created_at).toLocaleDateString()}
+                            <SafeDate date={userProfile.created_at} />
                           </td>
                           <td className="py-4 px-6">
                             <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>

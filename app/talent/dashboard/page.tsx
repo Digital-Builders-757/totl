@@ -7,12 +7,19 @@ import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const boot = await getBootState();
-  if (!boot) redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.TALENT_DASHBOARD)}`);
+  try {
+    const boot = await getBootState();
+    if (!boot) redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.TALENT_DASHBOARD)}`);
 
-  if (boot.needsOnboarding) redirect(ONBOARDING_PATH);
-  if (boot.nextPath !== PATHS.TALENT_DASHBOARD) redirect(boot.nextPath);
+    if (boot.needsOnboarding) redirect(ONBOARDING_PATH);
+    if (boot.nextPath !== PATHS.TALENT_DASHBOARD) redirect(boot.nextPath);
 
-  return <DashboardClient />;
+    return <DashboardClient />;
+  } catch (error) {
+    // Log error for debugging but don't expose sensitive details
+    console.error("[talent/dashboard] Error in server component:", error);
+    // Redirect to login on error to prevent render failures
+    redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.TALENT_DASHBOARD)}`);
+  }
 }
 
