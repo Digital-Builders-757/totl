@@ -674,6 +674,114 @@ npm run build               # Verifies middleware + server actions compile
 # 4. Re-run build/lint so middleware sees the new columns
 ```
 
+### **16. TypeError: `specialties.map is not a function`**
+```bash
+# Error: TypeError: d.specialties.map is not a function
+# Root Cause: Migration conflict - specialties was added as TEXT in one migration and TEXT[] in another
+#             Existing data may be stored as string (JSON) or null instead of array
+
+# ❌ WRONG - Direct array access without normalization
+{talent.specialties.map((specialty, index) => (
+  <span key={index}>{specialty}</span>
+))}
+
+# ✅ FIX - Normalize to array before using .map()
+function normalizeToStringArray(value: string[] | string | null | undefined): string[] {
+  if (Array.isArray(value)) return value.filter(Boolean);
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch {
+      return value.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+const specialtiesArray = normalizeToStringArray(talent.specialties);
+{specialtiesArray.map((specialty, index) => (
+  <span key={index}>{specialty}</span>
+))}
+
+# Files fixed:
+# - app/talent/[slug]/page.tsx ✅ Fixed
+# Prevention: Always normalize array fields (specialties, languages) before using .map()
+```
+
+### **17. Error: `revalidatePath` during render**
+```bash
+# Error: Route /talent/dashboard used "revalidatePath /" during render which is unsupported
+# Root Cause: ensureProfileExists() calls revalidatePath() but is invoked during Server Component render
+
+# ❌ WRONG - Calling revalidatePath during render
+export async function ensureProfileExists() {
+  // ... create/update profile ...
+  revalidatePath("/", "layout");  # Called during render - ERROR
+}
+
+# ✅ FIX - Remove revalidatePath from functions called during render
+#          Let callers handle revalidation after mutations
+export async function ensureProfileExists() {
+  // ... create/update profile ...
+  // Note: revalidatePath removed - cannot be called during render.
+  // Callers should handle revalidation after mutations.
+}
+
+# Files fixed:
+# - lib/actions/auth-actions.ts ✅ Fixed (removed 7 revalidatePath calls)
+# Prevention: Only call revalidatePath in Server Actions or Route Handlers, not during render
+```
+
+### **18. Hydration Error on Admin Users Page**
+```bash
+# Error: Hydration Error - Server/client HTML mismatch
+# Root Cause: Using toLocaleDateString() directly in JSX causes locale-dependent formatting differences
+#             between server and client rendering
+
+# ❌ WRONG - Direct locale-dependent date formatting
+<td>{new Date(userProfile.created_at).toLocaleDateString()}</td>
+
+# ✅ FIX - Use SafeDate component (client-side only rendering)
+import { SafeDate } from "@/components/safe-date";
+
+<td><SafeDate date={userProfile.created_at} /></td>
+
+# Files fixed:
+# - app/admin/users/admin-users-client.tsx ✅ Fixed (4 instances)
+# Prevention: Always use SafeDate component for date rendering in client components
+```
+
+### **19. Browser Extension Errors (Firefox Detection)**
+```bash
+# Error: ReferenceError: Can't find variable: __firefox__
+# Error: TypeError: undefined is not an object (evaluating 'window.__firefox__.reader')
+# Root Cause: Browser extensions inject Firefox detection code that references __firefox__ variable
+#             These are non-actionable errors from third-party code
+
+# ✅ FIX - Filter in Sentry configuration
+# Add to ignoreErrors array:
+ignoreErrors: [
+  "__firefox__",
+  /__firefox__/,
+  /ReferenceError.*__firefox__/,
+  /TypeError.*__firefox__/,
+  /window\.__firefox__/,
+]
+
+# Add to beforeSend filter:
+if (errorObj.message?.includes('__firefox__') ||
+    errorObj.message?.includes('window.__firefox__') ||
+    (errorObj.name === 'ReferenceError' && errorObj.message?.includes('__firefox__')) ||
+    (errorObj.name === 'TypeError' && errorObj.message?.includes('__firefox__'))) {
+  return null; // Filter this error
+}
+
+# Files fixed:
+# - instrumentation-client.ts ✅ Fixed
+# Prevention: Filter browser extension errors in Sentry configuration
+```
+
 ---
 
 ## 🔍 **QUICK DIAGNOSIS**

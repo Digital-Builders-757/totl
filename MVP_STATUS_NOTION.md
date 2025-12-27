@@ -8,7 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Admin Profile Visibility (December 22, 2025)**
+## 🚑 **Latest Fix: Sentry Error Fixes (December 27, 2025)**
+
+**SENTRY ERROR RESOLUTION** - December 27, 2025  
+- ✅ Fixed TOTLMODELAGENCY-1F: `specialties.map is not a function` - Added array normalization helper for specialties/languages fields
+- ✅ Fixed TOTLMODELAGENCY-1E: `revalidatePath during render` - Removed revalidatePath calls from ensureProfileExists() when called during render
+- ✅ Fixed TOTLMODELAGENCY-1D: Server Components render error - Added error handling to talent dashboard server component and getBootState()
+- ✅ Fixed TOTLMODELAGENCY-1G: `__firefox__` ReferenceError - Added browser extension error filtering in Sentry
+- ✅ Fixed TOTLMODELAGENCY-1H: `window.__firefox__.reader` TypeError - Enhanced Firefox detection error filtering
+- ✅ Fixed TOTLMODELAGENCY-18: Hydration error on admin/users - Replaced toLocaleDateString() with SafeDate component
+- ✅ Updated docs/COMMON_ERRORS_QUICK_REFERENCE.md with new error patterns and fixes
+
+**Next (Future Enhancements)**
+- [ ] Monitor Sentry for any new error patterns
+- [ ] Consider adding more comprehensive error boundaries
+
+## 🚑 **Previous Fix: Admin Profile Visibility (December 22, 2025)**
 
 **ADMIN DASHBOARD PROFILE VIEWING** - December 22, 2025  
 - ✅ Fixed admin dashboard unable to view "Talent Profile" or "Client Profile" pages (blocked/redirected state)

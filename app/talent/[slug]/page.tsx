@@ -43,6 +43,28 @@ interface TalentProfilePageProps {
   }>;
 }
 
+/**
+ * Normalizes a value that might be an array, JSON string, comma-separated string, or null
+ * into a proper string array. Handles migration inconsistencies where specialties/languages
+ * might be stored as TEXT instead of TEXT[].
+ */
+function normalizeToStringArray(value: string[] | string | null | undefined): string[] {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean);
+  }
+  if (typeof value === 'string') {
+    try {
+      // Try parsing as JSON string first
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch {
+      // If not JSON, treat as comma-separated string
+      return value.split(',').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { slug } = await params;
   
@@ -271,38 +293,46 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                   </div>
 
                   {/* Specialties */}
-                  {talent.specialties && talent.specialties.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-2xl font-bold text-white mb-4">Specialties</h2>
-                      <div className="flex flex-wrap gap-2">
-                        {talent.specialties.map((specialty, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
-                          >
-                            {specialty}
-                          </span>
-                        ))}
+                  {(() => {
+                    const specialtiesArray = normalizeToStringArray(talent.specialties);
+                    if (specialtiesArray.length === 0) return null;
+                    return (
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-white mb-4">Specialties</h2>
+                        <div className="flex flex-wrap gap-2">
+                          {specialtiesArray.map((specialty, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                            >
+                              {specialty}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Languages */}
-                  {talent.languages && talent.languages.length > 0 && (
-                    <div className="mb-8">
-                      <h2 className="text-2xl font-bold text-white mb-4">Languages</h2>
-                      <div className="flex flex-wrap gap-2">
-                        {talent.languages.map((language, index) => (
-                          <span
-                            key={index}
-                            className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
-                          >
-                            {language}
-                          </span>
-                        ))}
+                  {(() => {
+                    const languagesArray = normalizeToStringArray(talent.languages);
+                    if (languagesArray.length === 0) return null;
+                    return (
+                      <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-white mb-4">Languages</h2>
+                        <div className="flex flex-wrap gap-2">
+                          {languagesArray.map((language, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                            >
+                              {language}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
 
                 {/* Sidebar - Client component handles authentication logic */}

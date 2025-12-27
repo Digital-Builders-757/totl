@@ -148,7 +148,8 @@ export async function ensureProfileExists() {
       console.error("[ensureProfileExists] email_verified sync failed (create path):", syncResult.error);
     }
 
-    revalidatePath("/", "layout");
+    // Note: revalidatePath removed - cannot be called during render.
+    // Callers should handle revalidation after mutations.
     // Return the created profile data to avoid duplicate queries
     return { 
       success: true, 
@@ -225,7 +226,8 @@ export async function ensureProfileExists() {
       console.error("[ensureProfileExists] email_verified sync failed (display_name update path):", syncResult.error);
     }
 
-    revalidatePath("/", "layout");
+    // Note: revalidatePath removed - cannot be called during render.
+    // Callers should handle revalidation after mutations.
     
     // Return updated profile data to avoid duplicate queries in auth-provider
     // Use fetched data (which has all fields) - don't fall back to profile since it's missing fields
@@ -329,7 +331,8 @@ export async function ensureProfileExists() {
       console.error("[ensureProfileExists] email_verified sync failed (role fix path):", syncResult.error);
     }
 
-    revalidatePath("/", "layout");
+    // Note: revalidatePath removed - cannot be called during render.
+    // Callers should handle revalidation after mutations.
     // Return updated profile data
     return { 
       success: true, 
@@ -492,10 +495,11 @@ export async function ensureProfilesAfterSignup() {
           console.error("Error creating talent profile after signup:", talentError);
           // Don't fail - profile was created
         }
+        }
       }
-    }
 
-    revalidatePath("/", "layout");
+    // Note: revalidatePath removed - cannot be called during render.
+    // Callers should handle revalidation after mutations.
     return { success: true, created: true };
   }
 
@@ -511,7 +515,8 @@ export async function ensureProfilesAfterSignup() {
       return { error: "Failed to update profile" };
     }
 
-    revalidatePath("/", "layout");
+    // Note: revalidatePath removed - cannot be called during render.
+    // Callers should handle revalidation after mutations.
     return { success: true, updated: true };
   }
 
@@ -534,7 +539,8 @@ export async function ensureProfilesAfterSignup() {
         console.error("Error creating talent profile after signup:", talentError);
         // Don't fail - profile exists
       } else {
-        revalidatePath("/", "layout");
+        // Note: revalidatePath removed - cannot be called during render.
+        // Callers should handle revalidation after mutations.
         return { success: true, talentProfileCreated: true };
       }
     } else if (
@@ -553,7 +559,8 @@ export async function ensureProfilesAfterSignup() {
       if (updateTalentError) {
         console.error("Error updating talent profile after signup:", updateTalentError);
       } else {
-        revalidatePath("/", "layout");
+        // Note: revalidatePath removed - cannot be called during render.
+        // Callers should handle revalidation after mutations.
         return { success: true, talentProfileUpdated: true };
       }
     }

@@ -105,6 +105,12 @@ Sentry.init({
     "bmi_SafeAddOnload",
     "EBCallBackMessageReceived",
     "conduitPage",
+    // Firefox detection variables from browser extensions
+    "__firefox__",
+    /__firefox__/,
+    /ReferenceError.*__firefox__/,
+    /TypeError.*__firefox__/,
+    /window\.__firefox__/,
     // Network errors that are often not actionable
     "Network request failed",
     "NetworkError",
@@ -194,6 +200,16 @@ Sentry.init({
           errorObj.name === 'ReferenceError' && 
           errorObj.message?.includes('is not defined')) {
         console.warn("Electron ReferenceError filtered - likely from Electron environment or external script");
+        return null; // Filter this error
+      }
+
+      // Filter Firefox detection variable errors (often from browser extensions)
+      if (errorObj.message === "Can't find variable: __firefox__" ||
+          errorObj.message?.includes('__firefox__') ||
+          errorObj.message?.includes('window.__firefox__') ||
+          (errorObj.name === 'ReferenceError' && errorObj.message?.includes('__firefox__')) ||
+          (errorObj.name === 'TypeError' && errorObj.message?.includes('__firefox__'))) {
+        console.warn("__firefox__ error filtered - likely from browser extension or external script");
         return null; // Filter this error
       }
       
