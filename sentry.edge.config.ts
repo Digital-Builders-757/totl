@@ -4,26 +4,24 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import {
+  currentDSN,
+  developmentDSN,
+  productionDSN,
+} from "@/lib/sentry/env";
+import { scrubEvent } from "@/lib/sentry/scrub";
 
-// Determine which Sentry DSN to use based on environment
-const isProduction = process.env.VERCEL_ENV === "production";
+const SENTRY_DSN = currentDSN;
 
-// Production DSN (from environment variable)
-const PRODUCTION_DSN = process.env.SENTRY_DSN_PROD;
-
-// Development DSN (fallback for local development)
-// Using sentry-yellow-notebook DSN for all environments
-const DEVELOPMENT_DSN = 
-  process.env.SENTRY_DSN_DEV ||
-  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
-
-// Select the appropriate DSN
-const SENTRY_DSN = isProduction && PRODUCTION_DSN 
-  ? PRODUCTION_DSN 
-  : DEVELOPMENT_DSN;
+// Fail loudly if DSN is missing (no silent failures, no hardcoded fallbacks)
+if (!SENTRY_DSN) {
+  console.warn(
+    "[Sentry Edge] ⚠️ SENTRY_DSN is missing - Sentry will be disabled. Set SENTRY_DSN_PROD or SENTRY_DSN_DEV in environment variables."
+  );
+}
 
 Sentry.init({
-  dsn: SENTRY_DSN,
+  dsn: SENTRY_DSN ?? undefined,
 
   // Adjust sample rate based on environment
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
@@ -39,16 +37,20 @@ Sentry.init({
   sendDefaultPii: false, // Set to false for privacy in production
 
   // Ignore common errors
+  // Keep this list minimal: only truly external/system noise
   ignoreErrors: [
     "NEXT_NOT_FOUND", 
     "NEXT_REDIRECT",
-    "EPIPE", // Ignore broken pipe errors from stdout/dev server
-    "write EPIPE", // Ignore write errors from dev server logging
+    // Note: EPIPE and dev-only errors are filtered in beforeSend
+    // to avoid accidentally filtering real production issues
   ],
 
   // Filter out non-critical system errors before sending to Sentry
   beforeSend(event, hint) {
     const error = hint.originalException;
+
+    // SECURITY: Scrub sensitive data from event (shared utility)
+    event = scrubEvent(event);
 
     // Filter out EPIPE errors (broken pipe from stdout/stderr)
     if (error && typeof error === 'object') {

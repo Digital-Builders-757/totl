@@ -15,8 +15,16 @@ import {
   productionDSN,
   projectIdMatches,
 } from "@/lib/sentry/env";
+import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
+
+// Fail loudly if DSN is missing (no silent failures)
+if (!SENTRY_DSN) {
+  console.warn(
+    "[Sentry Client] ⚠️ SENTRY_DSN is missing - Sentry will be disabled. Set SENTRY_DSN_PROD or SENTRY_DSN_DEV in environment variables."
+  );
+}
 
 // Log DSN status for debugging (only in development)
 if (nodeEnv === "development") {
@@ -51,7 +59,7 @@ if (nodeEnv === "development") {
 }
 
 Sentry.init({
-  dsn: SENTRY_DSN,
+  dsn: SENTRY_DSN ?? undefined,
   
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: isProduction ? 0.1 : 1.0,
@@ -67,10 +75,12 @@ Sentry.init({
     process.env.NODE_ENV ??
     "development",
 
-  replaysOnErrorSampleRate: 1.0,
+  // Replay sampling: lower in production to control costs and risk surface
+  // Dev: 100% of errors get replays (helpful for debugging)
+  // Prod: 10% of errors get replays (cost-effective, still captures critical issues)
+  replaysOnErrorSampleRate: isProduction ? 0.1 : 1.0,
 
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
+  // Session replay sampling: 10% of sessions in all environments
   replaysSessionSampleRate: 0.1,
 
   // Integrations: Supabase + Session Replay
@@ -92,10 +102,12 @@ Sentry.init({
   sendDefaultPii: false, // Set to false for privacy in production
 
   // Ignore common errors
+  // Keep this list minimal: only truly external/extension/known noise
+  // Dev-only errors should be filtered in beforeSend, not here (to avoid filtering real prod issues)
   ignoreErrors: [
     "NEXT_NOT_FOUND", 
     "NEXT_REDIRECT",
-    // Browser extensions
+    // Browser extensions (truly external, never actionable)
     "top.GLOBALS",
     "originalCreateNotification",
     "canvas.contentDocument",
@@ -111,43 +123,24 @@ Sentry.init({
     /ReferenceError.*__firefox__/,
     /TypeError.*__firefox__/,
     /window\.__firefox__/,
-    // Network errors that are often not actionable
-    "Network request failed",
-    "NetworkError",
-    "Failed to fetch",
-    "Load failed",
-    // Development-only React Server Component errors
-    /Event handlers cannot be passed to Client Component props/,
-    // Webpack chunk loading errors in dev
-    /Cannot find module '\.\/\d+\.js'/,
-    /Cannot read properties of undefined \(reading 'call'\)/,
-    // Webpack HMR module build errors (dev only)
-    /Module build failed/,
-    /Expected '<\//, // Matches "Expected '</'" and "Expected '</', got..."
-    /Syntax Error/, // Webpack SWC loader syntax errors
-    // Context provider HMR errors
-    /must be used within an? \w+Provider/i, // "must be used within an AuthProvider", etc.
-    // EPIPE errors from dev server (should be caught server-side, but just in case)
-    "EPIPE",
-    "write EPIPE",
-    /write EPIPE/,
-    // External script/browser extension errors
+    // External script/browser extension errors (truly external)
     "Particles is not defined",
     /Particles is not defined/,
     /ReferenceError.*Particles/,
-    // Lucide React icon import errors
+    // Lucide React icon import errors (known external issue)
     "UserPlus is not defined",
     /UserPlus is not defined/,
     /ReferenceError.*UserPlus/,
-    // Import path and module resolution errors
-    "Invalid or unexpected token",
-    /Invalid or unexpected token/,
-    /SyntaxError.*Invalid or unexpected token/,
+    // Note: Dev-only errors (webpack, HMR, etc.) are filtered in beforeSend
+    // to avoid accidentally filtering real production issues with broad regexes
   ],
 
   // Filter out development-only errors before sending
   beforeSend(event, hint) {
     const error = hint.originalException;
+
+    // SECURITY: Scrub sensitive data from event (shared utility)
+    event = scrubEvent(event);
 
       // Filter out hydration errors (often caused by browser extensions)
       if (error && typeof error === 'object') {
@@ -186,12 +179,16 @@ Sentry.init({
         return null; // Filter this error
       }
 
-      // Filter SyntaxError for invalid tokens (import path issues)
+      // Filter SyntaxError for invalid tokens (import path issues) - DEV ONLY
+      // In production, this could be a real issue, so only filter in dev
       if (errorObj.message === 'Invalid or unexpected token' ||
           errorObj.message?.includes('Invalid or unexpected token') ||
           (errorObj.name === 'SyntaxError' && errorObj.message?.includes('Invalid or unexpected token'))) {
-        console.warn("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
-        return null; // Filter this error
+        if (process.env.NODE_ENV === 'development') {
+          console.warn("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
+          return null; // Filter in dev only
+        }
+        // In production, let it through - could be a real issue
       }
 
       // Additional check for Electron-specific errors

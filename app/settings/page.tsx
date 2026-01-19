@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ProfileEditor } from "./profile-editor";
+import { SignOutButton } from "./sign-out-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
@@ -141,52 +142,57 @@ export default async function SettingsPage() {
             </nav>
           }
           actions={
-            profile?.role === "talent" ? (
-              <PrefetchLink
-                href={PATHS.TALENT_DASHBOARD}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                Back to Dashboard
-              </PrefetchLink>
-            ) : profile?.role === "client" ? (
-              <PrefetchLink
-                href={PATHS.CLIENT_DASHBOARD}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                Back to Dashboard
-              </PrefetchLink>
-            ) : (
-              <PrefetchLink
-                href={PATHS.ADMIN_DASHBOARD}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                Back to Admin
-              </PrefetchLink>
-            )
+            <div className="flex items-center gap-2">
+              {profile?.role === "talent" ? (
+                <PrefetchLink
+                  href={PATHS.TALENT_DASHBOARD}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  Back to Dashboard
+                </PrefetchLink>
+              ) : profile?.role === "client" ? (
+                <PrefetchLink
+                  href={PATHS.CLIENT_DASHBOARD}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
+                  </svg>
+                  Back to Dashboard
+                </PrefetchLink>
+              ) : (
+                <>
+                  <PrefetchLink
+                    href={PATHS.ADMIN_DASHBOARD}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                      />
+                    </svg>
+                    Back to Admin
+                  </PrefetchLink>
+                  <SignOutButton />
+                </>
+              )}
+            </div>
           }
         />
 

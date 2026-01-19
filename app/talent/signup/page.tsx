@@ -1,18 +1,8 @@
-﻿"use client";
+import TalentSignupClient from "./client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+// Force dynamic rendering to prevent build-time issues
+export const dynamic = "force-dynamic";
 
-export default function TalentSignupPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const returnUrl = searchParams?.get("returnUrl") ?? null;
-
-  useEffect(() => {
-    // Redirect to choose-role page to maintain consistent flow
-    const redirectUrl = returnUrl ? `/choose-role?returnUrl=${encodeURIComponent(returnUrl)}` : "/choose-role";
-    router.replace(redirectUrl);
-  }, [returnUrl, router]);
-
-  return null; // This page will redirect immediately
+export default function Page() {
+  return <TalentSignupClient />;
 }

@@ -8,7 +8,43 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Redirect Error Handling Fix (December 27, 2025)**
+## 🚑 **Latest Fix: Supabase API Key Diagnostics + Auth Timeout Recovery (January 20, 2025)**
+
+**SUPABASE API KEY DIAGNOSTICS + AUTH TIMEOUT RECOVERY** - January 20, 2025  
+- ✅ **Environment Presence Beacon**: Added truth beacon in `lib/supabase/supabase-browser.ts` that logs env var presence on client initialization with Sentry breadcrumbs and tags (`supabase_env_present`) for production debugging
+- ✅ **Enhanced Error Logging**: Added comprehensive Sentry integration for Supabase query errors in `app/gigs/[id]/apply/apply-to-gig-form.tsx` with full context (error codes, details, hints, gigId, userId, session state)
+- ✅ **Health Check Route**: Created `/api/health/supabase` endpoint to verify Supabase client initialization and environment variable presence
+- ✅ **Auth Timeout Recovery**: Implemented 8-second timeout guard in `components/auth/auth-provider.tsx` with recovery UI (`components/auth/auth-timeout-recovery.tsx`) to fix infinite loading spinner caused by stale auth tokens
+- ✅ **Enhanced Diagnostics**: Added breadcrumb logging at 5 critical auth checkpoints (`auth.init`, `auth.session_check`, `auth.profile_fetch`, `auth.complete`, `auth.timeout`) for production debugging
+- ✅ **Supabase Env Banner**: Created `components/supabase-env-banner.tsx` to display environment variable status in development
+- ✅ **Client Dashboard Improvements**: Enhanced error handling and loading states in client dashboard and applications pages
+- ✅ **Documentation**: Created comprehensive implementation guides:
+  - `docs/SUPABASE_API_KEY_FIX_IMPLEMENTATION.md`
+  - `docs/AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md`
+  - `docs/DEBUG_NETWORK_INITIATOR.md`
+  - `docs/INFINITE_LOADING_DEBUG_PLAN.md`
+
+**Next (Future Enhancements)**
+- [ ] Monitor Sentry for "No API key found" errors with enhanced diagnostics
+- [ ] Use Network tab Initiator column to identify any direct REST calls bypassing Supabase client
+- [ ] Consider adding client-side environment variable validation on app mount
+
+## 🚑 **Previous Fix: Talent Dashboard Infinite Loading + API Key Diagnostics (December 15, 2025)**
+
+**TALENT DASHBOARD RESILIENCE UPGRADES** - December 15, 2025  
+- ✅ **Upgrade 1**: Enforced single canonical browser client - `createSupabaseBrowser()` throws in production if env vars missing (no silent null states)
+- ✅ **Upgrade 2**: Decoupled applications loading from dashboard shell - separate `applicationsLoading`/`applicationsError` states keep dashboard functional even if applications query fails
+- ✅ **Upgrade 3**: Enhanced diagnostics - capture full session/auth context (hasSession, userId, userEmail, sessionExpiry) before queries for production debugging
+- ✅ Fixed infinite loading spinner by ensuring `setDataLoading(false)` always runs in `finally` blocks
+- ✅ Applications widget shows independent loading/error states with retry button (dashboard shell stays alive)
+- ✅ Enhanced Sentry error reporting with session context tags (`has_session`, `error_type`, `error_code`)
+- ✅ Created comprehensive implementation guide: `docs/TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md`
+
+**Next (Future Enhancements)**
+- [ ] Monitor Sentry for new error patterns with enhanced session context
+- [ ] Use Network tab Initiator column to identify any direct REST calls (if "No API key found" persists)
+
+## 🚑 **Previous Fix: Redirect Error Handling Fix (December 27, 2025)**
 
 **REDIRECT ERROR HANDLING** - December 27, 2025  
 - ✅ Fixed redirect error handling in `app/talent/dashboard/page.tsx` - Added `isRedirectError()` check to properly re-throw redirect errors when `redirect()` is called inside try-catch blocks

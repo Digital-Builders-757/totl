@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "prepare": "husky install",
     "verify-schema": "bash scripts/verify-schema-truth.sh",
-    "types:regen": "cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
+    "types:regen": "npm run types:regen:dev",
     "types:regen:dev": "cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id utvircuwknqzpnmvxidp --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
     "types:regen:prod": "if not defined SUPABASE_PROJECT_ID (echo SUPABASE_PROJECT_ID env var is required for prod regen && exit /b 1) else cmd /d /c \"set SUPABASE_INTERNAL_NO_DOTENV=1&& npx -y supabase@2.34.3 gen types typescript --project-id %SUPABASE_PROJECT_ID% --schema public > types\\database.ts && node scripts\\prepend-autogen-banner.mjs\"",
     "types:check": "node scripts/verify-types-fresh.mjs",
@@ -54,7 +54,13 @@
     "test:unit": "vitest run --config vitest.config.ts",
     "status:auto": "git add MVP_STATUS_NOTION.md && git commit -m 'docs: update MVP status (auto)' || exit 0",
     "status:update": "powershell -ExecutionPolicy Bypass -File scripts/update-mvp-status.ps1",
-    "rls:guard": "node scripts/check-rls-policy-recursion.mjs"
+    "rls:guard": "node scripts/check-rls-policy-recursion.mjs",
+    "audit:client-boundaries": "node scripts/audit-client-boundaries.mjs",
+    "audit:select-star": "node scripts/audit-select-star.mjs",
+    "audit:single-vs-maybe-single": "node scripts/audit-single-vs-maybe-single.mjs",
+    "audit:all": "node scripts/audit-all.mjs",
+    "audit:quick": "powershell -ExecutionPolicy Bypass -File scripts/quick-sanity-grep.ps1",
+    "pre-push:check": "npm run guard:select-star && npm run guard:client-writes && npm run guard:import-paths && npm run guard:no-npm-run-in-code && npm run schema:verify:comprehensive && npm run types:check && npm run build && npm run lint && npm run audit:all"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

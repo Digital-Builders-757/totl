@@ -29,7 +29,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useCallback, Suspense, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { SafeDate } from "@/components/safe-date";
@@ -46,7 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -88,19 +88,17 @@ function useTalentDashboardData({
   const [applications, setApplications] = useState<TalentApplication[]>([]);
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
-  const [fatalError, setFatalError] = useState<string | null>(null);
   const [dataError, setDataError] = useState<string | null>(null);
+  
+  // UPGRADE 2: Separate loading/error states for applications (decoupled from dashboard shell)
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsError, setApplicationsError] = useState<string | null>(null);
+  
   const [reloadToken, setReloadToken] = useState(0);
 
-  const isSupabaseConfigured =
-    typeof window !== "undefined" &&
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const supabase = useMemo(
-    () => (isSupabaseConfigured ? createSupabaseBrowser() : null),
-    [isSupabaseConfigured]
-  );
+  // HARDENING: Use hook instead of direct call - ensures browser-only execution
+  // Hook throws if env vars missing (fail-fast, no zombie state)
+  const supabase = useSupabase();
 
   const refetch = useCallback(() => {
     setReloadToken((t) => t + 1);
@@ -108,10 +106,9 @@ function useTalentDashboardData({
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isSupabaseConfigured) {
-      setFatalError("Supabase is not configured");
-      return;
-    }
+    
+    // HARDENING: Supabase client may be null during pre-mount/SSR
+    // After mount, returns non-null client or throws if env vars missing (fail-fast)
     if (!supabase || !user || !profile) return;
 
     let cancelled = false;
@@ -121,6 +118,8 @@ function useTalentDashboardData({
 
     const load = async () => {
       try {
+        // HARDENING: Supabase client is non-nullable - no guard needed
+        // If we reach here, client is guaranteed valid (throws on creation if env vars missing)
         const { data: talentProfileData, error: talentProfileError } = await supabase
           .from("talent_profiles")
           .select("first_name,last_name,location")
@@ -129,7 +128,11 @@ function useTalentDashboardData({
 
         if (!cancelled) {
           if (talentProfileError && talentProfileError.code !== "PGRST116") {
-            console.error("Error fetching talent profile:", talentProfileError);
+            console.error("[talent-dashboard] Error fetching talent profile:", {
+              code: talentProfileError.code,
+              message: talentProfileError.message,
+              details: talentProfileError.details,
+            });
             setDataError("There was a problem loading your talent profile.");
           }
           setTalentProfile(talentProfileData ?? null);
@@ -146,6 +149,7 @@ function useTalentDashboardData({
           // Client components must not write to the DB. Ensure setup via server action.
           await ensureProfileExists();
 
+          // HARDENING: Supabase client is non-nullable - no guard needed
           const { data: newTalentProfile, error: refetchTalentError } = await supabase
             .from("talent_profiles")
             .select("first_name,last_name,location")
@@ -154,32 +158,127 @@ function useTalentDashboardData({
 
           if (!cancelled) {
             if (refetchTalentError) {
-              console.error("Error refetching talent profile after ensureProfileExists:", refetchTalentError);
+              console.error("[talent-dashboard] Error refetching talent profile after ensureProfileExists:", {
+                code: refetchTalentError.code,
+                message: refetchTalentError.message,
+              });
             }
             setTalentProfile(newTalentProfile ?? null);
           }
         }
 
-        const {
-          data: applicationsData,
-          error: applicationsError,
-        } = await supabase
-          .from("applications")
-          .select(
-            "id,status,created_at,updated_at,message,gigs(title,description,category,location,compensation,image_url,date,client_profiles(company_name))"
-          )
-          .eq("talent_id", user.id)
-          .order("created_at", { ascending: false });
+        // UPGRADE 2: Applications query runs independently - doesn't break dashboard shell
+        // HARDENING: Supabase client is non-nullable - no guard needed
+        // CRITICAL: Wrap in try-finally to ensure loading state always clears
+        // This prevents infinite loading spinner if query fails or throws
+        try {
+          // UPGRADE 3: Capture session/auth context before query
+          let sessionContext: {
+            hasSession: boolean;
+            userId: string | null;
+            userEmail: string | null;
+            sessionExpiry: number | null;
+          } | null = null;
+          
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            sessionContext = {
+              hasSession: !!session,
+              userId: session?.user?.id || null,
+              userEmail: session?.user?.email || null,
+              sessionExpiry: session?.expires_at || null,
+            };
+          } catch (sessionError) {
+            console.warn("[talent-dashboard] Failed to get session context:", sessionError);
+          }
 
-        if (!cancelled) {
-        if (applicationsError) {
-          console.error("Error fetching applications:", applicationsError);
-          setDataError("There was a problem loading your applications.");
-        } else {
-          setApplications(((applicationsData ?? []) as unknown as TalentApplication[]) ?? []);
-        }
-        }
+            setApplicationsLoading(true);
+            setApplicationsError(null);
 
+            const {
+              data: applicationsData,
+              error: applicationsError,
+            } = await supabase
+              .from("applications")
+              .select(
+                "id,status,created_at,updated_at,message,gigs(title,description,category,location,compensation,image_url,date,client_profiles(company_name))"
+              )
+              .eq("talent_id", user.id)
+              .order("created_at", { ascending: false });
+
+            if (!cancelled) {
+              if (applicationsError) {
+                // UPGRADE 3: Enhanced error logging with full session/auth context
+                const errorContext = {
+                  code: applicationsError.code,
+                  message: applicationsError.message,
+                  details: applicationsError.details,
+                  hint: applicationsError.hint,
+                  hasSupabaseClient: !!supabase,
+                  sessionContext,
+                  requestHeaders: {
+                    hasApikey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+                    anonKeyLength: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0,
+                    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? `${process.env.NEXT_PUBLIC_SUPABASE_URL.substring(0, 30)}...` : "missing",
+                  },
+                };
+
+                console.error("[talent-dashboard] Error fetching applications:", errorContext);
+
+                // Send to Sentry for production debugging
+                try {
+                  const Sentry = await import("@sentry/nextjs");
+                  Sentry.captureException(applicationsError, {
+                    tags: {
+                      feature: "talent-dashboard",
+                      error_type: "applications_query_error",
+                      error_code: applicationsError.code || "UNKNOWN",
+                      supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+                      has_session: sessionContext?.hasSession ? "true" : "false",
+                    },
+                    extra: {
+                      ...errorContext,
+                      userId: user.id,
+                      userEmail: user.email,
+                    },
+                    level: "error",
+                  });
+                } catch {
+                  // Sentry not available, skip
+                }
+
+                // Check for missing API key error specifically
+                if (applicationsError.message?.includes("No API key found") || applicationsError.message?.includes("apikey")) {
+                  setApplicationsError(
+                    "Configuration error: Database connection failed. " +
+                    "Please refresh the page. If the problem persists, contact support."
+                  );
+                } else {
+                  setApplicationsError("There was a problem loading your applications.");
+                }
+              } else {
+                setApplications(((applicationsData ?? []) as unknown as TalentApplication[]) ?? []);
+                setApplicationsError(null);
+              }
+            }
+          } catch (err) {
+            // Catch any unexpected errors
+            if (!cancelled) {
+              const errorMessage = err instanceof Error ? err.message : String(err);
+              console.error("[talent-dashboard] Unexpected error in applications query:", {
+                error: err,
+                message: errorMessage,
+              });
+              setApplicationsError("Failed to load applications. Please refresh the page.");
+            }
+          } finally {
+            // CRITICAL: Always clear loading state, even on error or cancellation
+            if (!cancelled) {
+              setApplicationsLoading(false);
+            }
+          }
+
+        // HARDENING: Supabase client is non-nullable - no guard needed
         const {
           data: gigsData,
           error: gigsError,
@@ -194,7 +293,11 @@ function useTalentDashboardData({
 
         if (!cancelled) {
           if (gigsError) {
-            console.error("Error fetching gigs:", gigsError);
+            console.error("[talent-dashboard] Error fetching gigs:", {
+              code: gigsError.code,
+              message: gigsError.message,
+              details: gigsError.details,
+            });
             setDataError((prev) => prev ?? "There was a problem loading gigs.");
           } else {
             setGigs((gigsData as Gig[]) ?? []);
@@ -202,10 +305,37 @@ function useTalentDashboardData({
         }
       } catch (err) {
         if (!cancelled) {
-          console.error("Error fetching dashboard data:", err);
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          console.error("[talent-dashboard] Unexpected error fetching dashboard data:", {
+            error: err,
+            message: errorMessage,
+            stack: err instanceof Error ? err.stack : undefined,
+          });
+
+          // Send to Sentry
+          try {
+            const Sentry = await import("@sentry/nextjs");
+            Sentry.captureException(err instanceof Error ? err : new Error(errorMessage), {
+              tags: {
+                feature: "talent-dashboard",
+                error_type: "unexpected_error",
+                supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+              },
+              extra: {
+                message: errorMessage,
+                userId: user?.id,
+              },
+              level: "error",
+            });
+          } catch {
+            // Sentry not available, skip
+          }
+
           setDataError("Failed to load dashboard data. Please try refreshing the page.");
         }
       } finally {
+        // CRITICAL: Always set loading to false, even on error
+        // This prevents infinite spinner if query fails
         if (!cancelled) {
           if (watchdog) {
             clearTimeout(watchdog);
@@ -235,12 +365,13 @@ function useTalentDashboardData({
         watchdog = null;
       }
     };
+    // HARDENING: Intentionally exclude 'supabase', 'user', 'profile' from deps
+    // - supabase: memoized singleton, never changes
+    // - user/profile: using specific fields (user?.id, profile?.role) instead
+    // This prevents accidental re-fetch storms from object reference changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     authLoading,
-    isSupabaseConfigured,
-    supabase,
-    user,
-    profile,
     user?.id,
     profile?.role,
     profile?.account_type,
@@ -252,10 +383,11 @@ function useTalentDashboardData({
     applications,
     gigs,
     dataLoading,
-    fatalError,
     dataError,
+    // UPGRADE 2: Expose separate applications loading/error states
+    applicationsLoading,
+    applicationsError,
     refetch,
-    isSupabaseConfigured,
   };
 }
 
@@ -270,8 +402,9 @@ function TalentDashboardContent() {
     applications,
     gigs,
     dataLoading,
-    fatalError,
     dataError,
+    applicationsLoading,
+    applicationsError,
     refetch,
   } = useTalentDashboardData({ user, profile, authLoading });
 
@@ -473,21 +606,8 @@ function TalentDashboardContent() {
     }
   };
 
-  if (fatalError) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Configuration Error</h2>
-          <p className="text-gray-300 mb-4">{fatalError}</p>
-          <Button asChild>
-            <Link href="/login">Go to Login</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  // HARDENING: Supabase client is non-nullable - if env vars missing, component crashes on mount
+  // No fatalError check needed - component won't render if client creation fails
   if (authLoading || dataLoading || isInVerificationGracePeriodRef.current) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -1033,8 +1153,39 @@ function TalentDashboardContent() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {applications.map((app) => (
+                {/* UPGRADE 2: Show applications-specific loading/error states (dashboard shell stays alive) */}
+                {applicationsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-300">Loading your applications...</p>
+                  </div>
+                ) : applicationsError ? (
+                  <EmptyState
+                    icon={AlertCircle}
+                    title="Error Loading Applications"
+                    description={applicationsError}
+                    action={{
+                      label: "Try Again",
+                      onClick: () => {
+                        refetch();
+                      },
+                    }}
+                  />
+                ) : applications.length === 0 ? (
+                  <EmptyState
+                    icon={Briefcase}
+                    title="No Applications Yet"
+                    description="You haven't applied to any gigs yet. Browse available gigs to get started!"
+                    action={{
+                      label: "Browse Gigs",
+                      onClick: () => {
+                        router.push("/gigs");
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    {applications.map((app) => (
                     <div
                       key={app.id}
                       className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
@@ -1092,7 +1243,8 @@ function TalentDashboardContent() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

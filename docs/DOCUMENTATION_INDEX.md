@@ -53,10 +53,14 @@ All other documentation has been organized into the `docs/` folder.
 - `AUTH_STRATEGY.md` - Legacy strategy notes (superseded by contracts + journeys; keep for history only)
 - `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
 - `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
+- `AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` - **✅ NEW** - Auth timeout recovery implementation (8-second timeout guard + recovery UI, Jan 2025)
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 - `SUPABASE_MCP_QUICK_START.md` - **✅ NEW** - Quick start guide for Supabase MCP (Nov 2025)
+- `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)
+- `SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` - **✅ NEW** - Supabase API key diagnostics and environment variable detection implementation (Jan 2025)
+- `SUPABASE_API_KEY_FIX_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for Supabase API key diagnostics (Jan 2025)
 
 ### **💳 Payment & Subscription System**
 - `STRIPE_SUBSCRIPTION_PRD.md` - **💳 NEW** - Complete product requirements document for Stripe subscription system (Nov 2025)
@@ -68,6 +72,13 @@ All other documentation has been organized into the `docs/` folder.
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
 - `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors)
+- `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
+- `SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` - **✅ NEW** - Supabase API key diagnostics and environment variable detection implementation (Jan 2025)
+- `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)
+- `SUPABASE_API_KEY_FIX_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for Supabase API key diagnostics (Jan 2025)
+- `AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` - **✅ NEW** - Auth timeout recovery implementation (8-second timeout guard + recovery UI, Jan 2025)
+- `DEBUG_NETWORK_INITIATOR.md` - **✅ NEW** - Guide for using Network tab Initiator column to debug API calls (Jan 2025)
+- `INFINITE_LOADING_DEBUG_PLAN.md` - **✅ NEW** - Debug plan for infinite loading spinner issues (Jan 2025)
 
 ### **👨‍💼 Admin & User Management**
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
@@ -149,6 +160,8 @@ All other documentation has been organized into the `docs/` folder.
 - `SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md` - 🔴 **CRITICAL** - Database trigger signup error (Oct 23, 2025)
 - `USESEARCHPARAMS_SSR_GUIDE.md` - useSearchParams SSR best practices & fixes (Oct 23, 2025)
 - `AVATAR_UPLOAD_FIX.md` - Avatar upload RLS policy fix guide
+- `DEBUG_NETWORK_INITIATOR.md` - **✅ NEW** - Guide for using Network tab Initiator column to debug API calls (Jan 2025)
+- `INFINITE_LOADING_DEBUG_PLAN.md` - **✅ NEW** - Debug plan for infinite loading spinner issues (Jan 2025)
 
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (documentation spine)

@@ -18,6 +18,20 @@ import {
 } from "@/lib/utils/route-access";
 import type { Database } from "@/types/supabase";
 
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: {
+    domain?: string;
+    expires?: Date;
+    httpOnly?: boolean;
+    maxAge?: number;
+    path?: string;
+    sameSite?: "lax" | "strict" | "none";
+    secure?: boolean;
+  };
+};
+
 type AccountType = "unassigned" | "talent" | "client";
 type ProfileRow = {
   role: Database["public"]["Tables"]["profiles"]["Row"]["role"];
@@ -61,8 +75,8 @@ export async function middleware(req: NextRequest) {
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll: () => req.cookies.getAll(),
-      setAll: (cookies) => {
-        cookies.forEach(({ name, value, options }) => {
+      setAll: (cookiesToSet: CookieToSet[]) => {
+        cookiesToSet.forEach(({ name, value, options }) => {
           res.cookies.set(name, value, options);
         });
       },

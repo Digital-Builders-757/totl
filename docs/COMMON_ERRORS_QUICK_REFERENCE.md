@@ -48,7 +48,28 @@ npm run build
 - **Redirect Errors Intercepted in try/catch Blocks:** `redirect()` throws special error that gets swallowed by `try/catch` in Server Components or Client Components
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
   - **Example:** In Server Components with try-catch, check `if (isRedirectError(error)) throw error;` before handling other errors
+- **Infinite Loading Spinner on Dashboard:** Dashboard stuck in loading state when data queries fail
+  - **Fix:** Always call `setLoading(false)` in `finally` blocks to prevent infinite spinner
+  - **Fix:** Decouple widget loading states from dashboard shell (e.g., separate `applicationsLoading`/`applicationsError` states)
+  - **Fix:** Ensure `createSupabaseBrowser()` throws in production if env vars missing (no null returns)
+  - **Prevention:** See `docs/TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` for complete implementation guide
   - **Prevention:** Always check for redirect errors before handling other errors in catch blocks that contain `redirect()` calls
+- **Auth Timeout / Infinite Loading from Stale Tokens:** Dashboard shows infinite loading spinner in normal browser but works in incognito
+  - **Symptom:** Auth bootstrap never completes, loading spinner never stops, but incognito works fine
+  - **Root Cause:** Stale Supabase auth tokens in localStorage/cookies cause auth bootstrap to hang
+  - **Fix:** Implement 8-second timeout guard in `AuthProvider` that shows recovery UI with "Clear Session" button
+  - **Fix:** Recovery UI component (`auth-timeout-recovery.tsx`) clears localStorage and redirects to login
+  - **Prevention:** See `docs/AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` for complete implementation guide
+  - **Prevention:** Add breadcrumb logging at critical auth checkpoints for production debugging
+- **Supabase "No API key found" Errors:** Supabase client fails to initialize or queries fail with API key errors
+  - **Symptom:** Errors like "No API key found" or Supabase client returns null in production
+  - **Root Cause:** Environment variables missing at build time or runtime, or client created without env vars
+  - **Fix:** Add environment presence beacon in `lib/supabase/supabase-browser.ts` that logs env var status on initialization
+  - **Fix:** Use `/api/health/supabase` endpoint to verify Supabase client initialization and env var presence
+  - **Fix:** Ensure `createSupabaseBrowser()` throws in production if env vars missing (no silent null returns)
+  - **Fix:** Add comprehensive Sentry error logging with context (error codes, details, hints, session state)
+  - **Prevention:** See `docs/SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` for complete implementation guide
+  - **Prevention:** Use Network tab Initiator column to identify any direct REST calls bypassing Supabase client
 - **Billing Portal Session URL Missing:** `redirect(undefined)` when session URL is absent
   - **Fix:** Verify `session.url` exists before redirect and throw a descriptive error if Stripe fails to return a URL.
 - **Webhook Acknowledges Failure:** Stripe receives `{ received: true }` even when Supabase updates fail
