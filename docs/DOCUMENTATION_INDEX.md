@@ -71,7 +71,8 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors, Jan 2026 - added Bugbot fixes)
+- `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
 - `SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` - **✅ NEW** - Supabase API key diagnostics and environment variable detection implementation (Jan 2025)
 - `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)

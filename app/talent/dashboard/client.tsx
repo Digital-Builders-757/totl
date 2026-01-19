@@ -365,13 +365,16 @@ function useTalentDashboardData({
         watchdog = null;
       }
     };
-    // HARDENING: Intentionally exclude 'supabase', 'user', 'profile' from deps
-    // - supabase: memoized singleton, never changes
-    // - user/profile: using specific fields (user?.id, profile?.role) instead
-    // This prevents accidental re-fetch storms from object reference changes
+    // HARDENING: Include 'supabase' in deps to handle null → non-null transition
+    // - supabase: useSupabase() returns null initially, then non-null after mount
+    // - Effect must re-run when supabase becomes available to prevent infinite loading
+    // - user/profile: using specific fields (user?.id, profile?.role) instead of full objects
+    // This prevents accidental re-fetch storms from object reference changes while ensuring
+    // data loads when supabase client initializes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     authLoading,
+    supabase,
     user?.id,
     profile?.role,
     profile?.account_type,

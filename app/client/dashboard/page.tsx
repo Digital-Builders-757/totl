@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -452,6 +453,29 @@ export default function ClientDashboard() {
           missingFields={missingFields}
           profileUrl="/client/profile"
         />
+
+        {/* Error Display */}
+        {supabaseError && (
+          <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/20">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-red-300">
+              <div className="flex items-center justify-between">
+                <span>{supabaseError}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSupabaseError(null);
+                    fetchDashboardData();
+                  }}
+                  className="ml-4 border-red-500/50 text-red-300 hover:bg-red-500/20"
+                >
+                  Retry
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Welcome Section */}
 

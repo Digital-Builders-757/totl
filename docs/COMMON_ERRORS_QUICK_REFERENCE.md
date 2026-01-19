@@ -48,6 +48,18 @@ npm run build
 - **Redirect Errors Intercepted in try/catch Blocks:** `redirect()` throws special error that gets swallowed by `try/catch` in Server Components or Client Components
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
   - **Example:** In Server Components with try-catch, check `if (isRedirectError(error)) throw error;` before handling other errors
+- **Client Dashboard Error State Not Displayed:** Error state (`supabaseError`) is set but never rendered, leaving users with blank dashboard
+  - **Fix:** Add error display banner/alert component that shows when `supabaseError` is set, with retry button to call `fetchDashboardData()` again
+  - **Prevention:** Always render error states in UI, even if error handling exists in code
+  - **See:** `docs/BUGBOT_FIXES_PLAN.md` for full implementation details
+- **Form Stuck in Submitting State:** Dynamic Sentry import fails, blocking `setError()` and `setSubmitting(false)` execution
+  - **Fix:** Wrap dynamic Sentry import (`await import("@sentry/nextjs")`) in try-catch block to ensure error handling always completes
+  - **Prevention:** Always wrap dynamic imports in error handling, especially in catch blocks
+  - **See:** `docs/BUGBOT_FIXES_PLAN.md` for full implementation details
+- **Dashboard Infinite Loading:** `useSupabase()` hook excluded from useEffect dependencies, causing effect to run once with null client and never re-run when client initializes
+  - **Fix:** Include `supabase` in useEffect dependency array to handle null → non-null transition
+  - **Prevention:** Always include hooks that return null initially in dependencies, even if they're "memoized singletons"
+  - **See:** `docs/BUGBOT_FIXES_PLAN.md` for full implementation details
 - **Infinite Loading Spinner on Dashboard:** Dashboard stuck in loading state when data queries fail
   - **Fix:** Always call `setLoading(false)` in `finally` blocks to prevent infinite spinner
   - **Fix:** Decouple widget loading states from dashboard shell (e.g., separate `applicationsLoading`/`applicationsError` states)

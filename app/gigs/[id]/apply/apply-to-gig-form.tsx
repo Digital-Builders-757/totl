@@ -163,25 +163,32 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
         hasSupabase: !!supabase,
       });
 
-      // Send to Sentry with full context
-      const Sentry = await import("@sentry/nextjs");
-      Sentry.captureException(err instanceof Error ? err : new Error(errorMessage), {
-        tags: {
-          feature: "application-submission",
-          error_type: "unexpected_error",
-          supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        },
-        extra: {
-          message: errorMessage,
-          stack: errorStack,
-          gigId: gig.id,
-          hasSupabase: !!supabase,
-          release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "unknown",
-        },
-        level: "error",
-      });
+      // HARDENING: Wrap Sentry import in try-catch to ensure UI always recovers
+      // If Sentry import fails, form must still show error and clear submitting state
+      try {
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(err instanceof Error ? err : new Error(errorMessage), {
+          tags: {
+            feature: "application-submission",
+            error_type: "unexpected_error",
+            supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          },
+          extra: {
+            message: errorMessage,
+            stack: errorStack,
+            gigId: gig.id,
+            hasSupabase: !!supabase,
+            release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "unknown",
+          },
+          level: "error",
+        });
+      } catch (sentryError) {
+        // Sentry not available - log but don't block error handling
+        console.warn("[ApplyToGigForm] Failed to send error to Sentry:", sentryError);
+      }
       
       // User-friendly error message
+      // CRITICAL: Always execute these regardless of Sentry success/failure
       const userMessage = err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
         ? "Configuration error: Please refresh the page. If the problem persists, contact support."
         : "An unexpected error occurred. Please try again.";
