@@ -420,16 +420,12 @@ export default function ClientDashboard() {
                 variant="outline" 
                 size="sm" 
                 onClick={async () => {
-                  if (isSigningOut) return; // Prevent multiple clicks
+                  if (isSigningOut) return;
                   
                   setIsSigningOut(true);
                   try {
-                    // Call signOut and wait for it to complete
+                    // AuthProvider's signOut() owns redirect - trust it
                     await signOut();
-                    
-                    // Force immediate hard refresh to ensure clean state
-                    // This ensures cookies are cleared and page refreshes
-                    window.location.href = '/login';
                   } catch (error) {
                     console.error("Sign out error:", error);
                     setIsSigningOut(false);

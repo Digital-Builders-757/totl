@@ -65,6 +65,10 @@ function normalizeToStringArray(value: string[] | string | null | undefined): st
   return [];
 }
 
+// Public talent profile page - use ISR for CDN caching
+// Revalidate every 10 minutes (600 seconds) - profiles update infrequently
+export const revalidate = 600;
+
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { slug } = await params;
   

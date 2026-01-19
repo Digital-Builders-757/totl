@@ -1,64 +1,83 @@
-﻿import { cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export async function POST() {
-  const supabase = await createSupabaseServer();
+  let supabaseError: Error | null = null;
   
-  // Sign out from Supabase (clears server-side session)
-  await supabase.auth.signOut();
+  try {
+    const supabase = await createSupabaseServer();
+    
+    // Sign out from Supabase (clears server-side session)
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      supabaseError = signOutError;
+      console.error("Supabase sign-out error:", signOutError);
+      // Log to Sentry but don't fail the request (cookies still need to be cleared)
+      try {
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(signOutError, {
+          tags: { feature: "auth", error_type: "supabase_signout_error" },
+        });
+      } catch {
+        // Sentry not available, skip
+      }
+    }
+  } catch (error) {
+    console.error("Error creating Supabase server client:", error);
+    // Continue to clear cookies even if Supabase client creation fails
+  }
   
-  // Clear all Supabase-related cookies explicitly
+  // Clear all Supabase-related cookies by inspection (not guessing chunks)
   const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   
   // Create response early so we can set cookies in it
   const response = NextResponse.json({ success: true });
   
+  // Patterns to match Supabase cookies
+  const supabaseCookiePatterns: string[] = [];
+  
   if (supabaseUrl) {
     const projectRef = supabaseUrl.split("//")[1].split(".")[0];
     const cookieBaseName = `sb-${projectRef}-auth-token`;
+    supabaseCookiePatterns.push(cookieBaseName);
+  }
+  
+  // Add legacy patterns
+  supabaseCookiePatterns.push("sb-access-token", "sb-refresh-token", "sb-user-token");
+  
+  // Find and clear all cookies matching Supabase patterns
+  const cookiesToClear = new Set<string>();
+  
+  for (const cookie of allCookies) {
+    const cookieName = cookie.name;
     
-    // Clear all cookie chunks (up to 20 to be safe)
-    // Use both cookieStore.delete() AND response.cookies.delete() to ensure they're cleared
-    for (let i = 0; i < 20; i++) {
-      const chunkName = i === 0 ? cookieBaseName : `${cookieBaseName}.${i}`;
-      cookieStore.delete(chunkName);
-      // Also delete via response cookies to ensure browser clears them
-      response.cookies.delete(chunkName);
-      response.cookies.set(chunkName, "", {
-        expires: new Date(0),
-        path: "/",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
+    // Check if cookie matches any Supabase pattern
+    for (const pattern of supabaseCookiePatterns) {
+      if (cookieName === pattern || cookieName.startsWith(`${pattern}.`)) {
+        cookiesToClear.add(cookieName);
+        break;
+      }
     }
     
-    // Clear other Supabase cookie patterns
-    ["sb-access-token", "sb-refresh-token", "sb-user-token"].forEach((name) => {
-      cookieStore.delete(name);
-      response.cookies.delete(name);
-      response.cookies.set(name, "", {
-        expires: new Date(0),
-        path: "/",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
-      
-      for (let i = 0; i < 20; i += 1) {
-        const chunkName = i === 0 ? name : `${name}.${i}`;
-        cookieStore.delete(chunkName);
-        response.cookies.delete(chunkName);
-        response.cookies.set(chunkName, "", {
-          expires: new Date(0),
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-        });
-      }
+    // Also check for generic patterns
+    if (cookieName.startsWith("sb-") || cookieName.includes("auth-token")) {
+      cookiesToClear.add(cookieName);
+    }
+  }
+  
+  // Clear all matching cookies
+  for (const cookieName of cookiesToClear) {
+    cookieStore.delete(cookieName);
+    response.cookies.delete(cookieName);
+    response.cookies.set(cookieName, "", {
+      expires: new Date(0),
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
   }
   

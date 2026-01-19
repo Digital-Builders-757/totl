@@ -83,8 +83,14 @@ Sentry.init({
   // Session replay sampling: 10% of sessions in all environments
   replaysSessionSampleRate: 0.1,
 
-  // Integrations: Supabase + Session Replay
+  // Integrations: Supabase + Session Replay + Browser Tracing (Web Vitals)
   integrations: [
+    // Browser Tracing integration - enables Web Vitals (LCP, INP, CLS) and performance monitoring
+    Sentry.browserTracingIntegration({
+      // Enable Web Vitals tracking
+      enableInp: true,
+      enableLongTask: true,
+    }),
     // Supabase integration - automatically instruments Supabase queries
     // Note: SupabaseIntegration requires a client instance, which isn't available at init time
     // We'll instrument Supabase queries manually where needed

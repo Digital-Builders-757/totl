@@ -549,6 +549,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       manualSignOutInProgressRef.current = true;
+      // Reset in-memory state immediately (good UX)
       setIsLoading(true);
       setUser(null);
       setSession(null);
@@ -558,25 +559,46 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setHasHandledInitialSession(false);
       resetSupabaseBrowserClient();
 
-      // Try to clear HTTP-only cookies on the server first; ignore failures.
+      // Await server-side cookie clearing before client-side sign-out
+      // Add keepalive: true to prevent navigation from aborting the request
+      let serverSignOutError: Error | null = null;
       try {
-        await fetch("/api/auth/signout", {
+        const response = await fetch("/api/auth/signout", {
           method: "POST",
           credentials: "include",
           cache: "no-store",
+          keepalive: true, // Helps if browser begins navigating
         });
+        if (!response.ok) {
+          serverSignOutError = new Error(`Server sign-out failed: ${response.status}`);
+        }
       } catch (apiError) {
+        serverSignOutError = apiError instanceof Error ? apiError : new Error(String(apiError));
         console.warn("Server-side sign out API call failed:", apiError);
+        // Log to Sentry but don't block sign-out (telemetry never blocks cleanup)
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.captureException(serverSignOutError, {
+            tags: { feature: "auth", error_type: "signout_api_failure" },
+          });
+        } catch {
+          // Sentry not available or import failed - don't break sign-out
+        }
       }
 
+      // Then run supabase.auth.signOut() (clears localStorage + triggers events)
       const { error: clientError } = await supabase.auth.signOut();
 
+      // Then redirect
       const to = `${PATHS.LOGIN}?signedOut=true`;
+      setIsLoading(false);
+      
       if (typeof window !== "undefined") {
-        setIsLoading(false);
+        // Hard redirect bypasses RSC cache anyway, so router.refresh() is mostly wasted
+        // Keep it only for soft fallback path
         window.location.replace(to);
       } else {
-        setIsLoading(false);
+        // Soft redirect path - refresh router cache
         router.replace(to);
         router.refresh();
       }
