@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { AlertCircle } from "lucide-react";
 import type React from "react";
@@ -36,7 +36,6 @@ export default function AdminUserCreation() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const { toast } = useToast();
-  const supabase = createSupabaseBrowser();
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +44,8 @@ export default function AdminUserCreation() {
     setSuccess(null);
 
     try {
-      if (!supabase) {
-        setError("Database connection not available");
-        return;
-      }
+      // Create browser client only in event handler (impossible to run server-side)
+      const supabase = createSupabaseBrowser();
 
       // Try to create user with direct API call
       const { data, error } = await supabase.functions.invoke("create-user", {

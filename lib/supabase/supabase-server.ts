@@ -6,6 +6,20 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
 
+type CookieToSet = {
+  name: string;
+  value: string;
+  options?: {
+    domain?: string;
+    expires?: Date;
+    httpOnly?: boolean;
+    maxAge?: number;
+    path?: string;
+    sameSite?: "lax" | "strict" | "none";
+    secure?: boolean;
+  };
+};
+
 export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {
   const cookieStore = await cookies();
 
@@ -44,11 +58,11 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
+        setAll: (cookiesToSet: CookieToSet[]) => {
           try {
             // Attempt to set cookies - this will fail in Server Components but succeed in Server Actions/Route Handlers
             cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set({ name, value, ...options });
+              cookieStore.set(name, value, options);
             });
           } catch {
             // Cookies can only be modified in Server Actions or Route Handlers

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -19,7 +19,8 @@ export function UpdatePasswordForm() {
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
-  const supabase = createSupabaseBrowser();
+  // HARDENING: Use hook instead of direct call - ensures browser-only execution
+  const supabase = useSupabase();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,15 +46,18 @@ export function UpdatePasswordForm() {
     setIsSubmitting(true);
 
     try {
+      // Guard: supabase may be null during pre-mount/SSR
       if (!supabase) {
         toast({
           title: "Error",
-          description: "Database connection not available",
+          description: "Database connection not available. Please refresh the page.",
           variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
 
+      // HARDENING: After mount, supabase is non-null (or throws if env vars missing)
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {

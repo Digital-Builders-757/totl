@@ -36,8 +36,22 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
     setSubmitting(true);
     setError("");
 
+    // Hard guard: prevent any Supabase calls if client is null
+    // In production, this should never happen (client throws on init)
+    // In development, show clear error message
     if (!supabase) {
-      setError("Database connection not available. Please refresh the page.");
+      const errorMsg = 
+        process.env.NODE_ENV === "production"
+          ? "Application error: Database connection unavailable. Please contact support."
+          : "Database connection not available. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local";
+      
+      console.error("[ApplyToGigForm] Supabase client is null", {
+        nodeEnv: process.env.NODE_ENV,
+        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      });
+      
+      setError(errorMsg);
       setSubmitting(false);
       return;
     }
@@ -50,18 +64,71 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
+        console.error("[ApplyToGigForm] Auth error:", userError);
         setError("You must be logged in to apply for gigs.");
         setSubmitting(false);
         return;
       }
 
       // Double-check if already applied
-      const { data: existingApplication } = await supabase
+      // Guard: ensure supabase client is still valid before query
+      if (!supabase) {
+        setError("Session expired. Please refresh the page.");
+        setSubmitting(false);
+        return;
+      }
+
+      // Use maybeSingle() since application might not exist yet
+      const { data: existingApplication, error: queryError } = await supabase
         .from("applications")
         .select("id")
         .eq("gig_id", gig.id)
         .eq("talent_id", user.id)
-        .single();
+        .maybeSingle();
+
+      // Handle query errors (including missing apikey header)
+      if (queryError) {
+        const errorDetails = {
+          code: queryError.code,
+          message: queryError.message,
+          details: queryError.details,
+          hint: queryError.hint,
+          gigId: gig.id,
+        };
+
+        console.error("[ApplyToGigForm] Query error:", errorDetails);
+
+        // Send to Sentry with full context
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(queryError, {
+          tags: {
+            feature: "application-check",
+            error_type: "supabase_query_error",
+            error_code: queryError.code || "UNKNOWN",
+            supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          },
+          extra: {
+            ...errorDetails,
+            userId: user.id,
+            userEmail: user.email,
+            hasSupabaseClient: !!supabase,
+          },
+          level: "error",
+        });
+
+        // Check for missing API key error specifically
+        if (queryError.message?.includes("No API key found") || queryError.message?.includes("apikey")) {
+          setError(
+            "Configuration error: Database connection failed. " +
+            "Please refresh the page. If the problem persists, contact support."
+          );
+        } else {
+          setError("Failed to check application status. Please try again.");
+        }
+        
+        setSubmitting(false);
+        return;
+      }
 
       if (existingApplication) {
         setError("You have already applied for this gig.");
@@ -84,8 +151,49 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       // Success! Redirect to dashboard with success message
       router.push("/talent/dashboard?applied=success");
     } catch (err) {
-      console.error("Error submitting application:", err);
-      setError("An unexpected error occurred. Please try again.");
+      // Enhanced error logging for production debugging
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const errorStack = err instanceof Error ? err.stack : undefined;
+      
+      console.error("[ApplyToGigForm] Unexpected error:", {
+        error: err,
+        message: errorMessage,
+        stack: errorStack,
+        gigId: gig.id,
+        hasSupabase: !!supabase,
+      });
+
+      // HARDENING: Wrap Sentry import in try-catch to ensure UI always recovers
+      // If Sentry import fails, form must still show error and clear submitting state
+      try {
+        const Sentry = await import("@sentry/nextjs");
+        Sentry.captureException(err instanceof Error ? err : new Error(errorMessage), {
+          tags: {
+            feature: "application-submission",
+            error_type: "unexpected_error",
+            supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          },
+          extra: {
+            message: errorMessage,
+            stack: errorStack,
+            gigId: gig.id,
+            hasSupabase: !!supabase,
+            release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "unknown",
+          },
+          level: "error",
+        });
+      } catch (sentryError) {
+        // Sentry not available - log but don't block error handling
+        console.warn("[ApplyToGigForm] Failed to send error to Sentry:", sentryError);
+      }
+      
+      // User-friendly error message
+      // CRITICAL: Always execute these regardless of Sentry success/failure
+      const userMessage = err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
+        ? "Configuration error: Please refresh the page. If the problem persists, contact support."
+        : "An unexpected error occurred. Please try again.";
+      
+      setError(userMessage);
       setSubmitting(false);
     }
   }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   Calendar,
@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-b
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getBootState } from "@/lib/actions/boot-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 import type { Database } from "@/types/supabase";
 
@@ -103,13 +104,10 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [supabaseError, setSupabaseError] = useState<string | null>(null);
 
-  // Check if Supabase is configured
-  const isSupabaseConfigured =
-    typeof window !== "undefined" &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
+  // HARDENING: Use hook instead of direct call - ensures browser-only execution
+  // Hook returns null during pre-mount/SSR (prevents build crashes)
+  // After mount, returns non-null client or throws if env vars missing (fail-fast)
+  const supabase = useSupabase();
 
   // Canonical gating: ask the server-owned BootState once and redirect if this user
   // should not be on the client terminal (or needs onboarding).
@@ -171,6 +169,7 @@ export default function ClientDashboard() {
       // No need to fetch it again - this eliminates N+1 query issue
 
       // Fetch client profile
+      // Use maybeSingle() since client might not have profile yet (during onboarding)
       const { data: clientProfileData, error: clientProfileError } = await supabase
         .from("client_profiles")
         .select(`
@@ -187,7 +186,7 @@ export default function ClientDashboard() {
           updated_at
         `)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       if (clientProfileError) {
         console.error("Error fetching client profile:", clientProfileError);
@@ -255,13 +254,15 @@ export default function ClientDashboard() {
   useEffect(() => {
     if (user && supabase) {
       fetchDashboardData();
-    } else if (!isSupabaseConfigured) {
-      setSupabaseError("Supabase is not configured. Please check your environment variables.");
-      setLoading(false);
+    } else if (!supabase) {
+      // Keep loading true while supabase is null (pre-mount/SSR)
+      // Don't set loading to false until supabase is initialized
+      setLoading(true);
     } else {
+      // User is null but supabase exists - auth gate will handle this
       setLoading(false);
     }
-  }, [user, supabase, isSupabaseConfigured, fetchDashboardData]);
+  }, [user, supabase, fetchDashboardData]);
 
   // Check for incomplete profile
   const missingFields = [];
@@ -332,23 +333,9 @@ export default function ClientDashboard() {
     }
   };
 
-  // Show error state if Supabase is not configured
-  if (supabaseError) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">{supabaseError}</p>
-          <Button asChild>
-            <Link href="/login">Go to Login</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
+  // Show loading state if supabase is not initialized yet (pre-mount/SSR)
+  // This prevents SSR crashes when component renders before mount
+  if (!supabase || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -466,6 +453,29 @@ export default function ClientDashboard() {
           missingFields={missingFields}
           profileUrl="/client/profile"
         />
+
+        {/* Error Display */}
+        {supabaseError && (
+          <Alert variant="destructive" className="mb-6 bg-red-500/10 border-red-500/20">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-red-300">
+              <div className="flex items-center justify-between">
+                <span>{supabaseError}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSupabaseError(null);
+                    fetchDashboardData();
+                  }}
+                  className="ml-4 border-red-500/50 text-red-300 hover:bg-red-500/20"
+                >
+                  Retry
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Welcome Section */}
 

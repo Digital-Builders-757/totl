@@ -179,7 +179,7 @@ function createSupabaseMock(opts: {
 }
 
 const stripeForTests = new Stripe("sk_test_unit_tests", {
-  apiVersion: "2025-11-17.clover",
+  apiVersion: "2025-12-15.clover",
   typescript: true,
 });
 
@@ -202,7 +202,7 @@ function buildSubscriptionUpdatedEventPayload(args: {
   return JSON.stringify({
     id: args.eventId,
     object: "event",
-    api_version: "2025-11-17.clover",
+    api_version: "2025-12-15.clover",
     created: args.created,
     livemode: false,
     pending_webhooks: 1,

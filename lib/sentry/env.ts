@@ -1,6 +1,3 @@
-const FALLBACK_DSN =
-  "https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4510191108292609";
-
 const nodeEnv = process.env.NODE_ENV ?? "development";
 const clientVercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
 const serverVercelEnv = process.env.VERCEL_ENV;
@@ -22,9 +19,10 @@ const developmentDSN =
   sharedPublicDSN ??
   null;
 
+// No hardcoded fallback - require DSN via env vars (fail loudly, don't silently fail)
 const currentDSN = isProduction
-  ? productionDSN ?? developmentDSN ?? FALLBACK_DSN
-  : developmentDSN ?? productionDSN ?? FALLBACK_DSN;
+  ? productionDSN ?? developmentDSN ?? null
+  : developmentDSN ?? productionDSN ?? null;
 
 const expectedProjectId = "4510191108292609";
 const currentProjectId = currentDSN ? parseProjectId(currentDSN) : null;
@@ -46,6 +44,5 @@ export {
   nodeEnv,
   projectIdMatches,
   parseProjectId,
-  FALLBACK_DSN,
 };
 

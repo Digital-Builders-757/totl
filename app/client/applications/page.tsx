@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import { createNameSlug } from "@/lib/utils/slug";
 
 // Force dynamic rendering to prevent build-time issues
@@ -56,13 +56,9 @@ export default function ClientApplicationsPage() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
-  // Check if Supabase is configured
-  const isSupabaseConfigured =
-    typeof window !== "undefined" &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const supabase = isSupabaseConfigured ? createSupabaseBrowser() : null;
+  // HARDENING: Use hook instead of direct call - ensures browser-only execution
+  // Hook throws if env vars missing (fail-fast, no zombie state)
+  const supabase = useSupabase();
 
   const handleAcceptClick = (application: Application) => {
     setSelectedApplication(application);
@@ -141,13 +137,10 @@ export default function ClientApplicationsPage() {
   useEffect(() => {
     if (user && supabase) {
       fetchApplications();
-    } else if (!isSupabaseConfigured) {
-      setError("Supabase is not configured");
-      setLoading(false);
     } else {
       setLoading(false);
     }
-  }, [user, supabase, isSupabaseConfigured, fetchApplications]);
+  }, [user, supabase, fetchApplications]);
 
   // Removed getStatusColor and getStatusIcon - now using ApplicationStatusBadge component
 

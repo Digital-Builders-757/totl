@@ -7,6 +7,7 @@ import type React from "react";
 import { AuthProvider } from "@/components/auth/auth-provider";
 import { CommandPalette, useCommandPalette } from "@/components/command-palette";
 import Navbar from "@/components/navbar";
+import { SupabaseEnvBanner } from "@/components/supabase-env-banner";
 
 import "./globals.css";
 
@@ -31,6 +32,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   return (
     <AuthProvider>
       <Ga4Analytics />
+      <SupabaseEnvBanner />
       {showNavbar && <Navbar />}
       <CommandPalette open={open} onOpenChange={setOpen} />
       {children}

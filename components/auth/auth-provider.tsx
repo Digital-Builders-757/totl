@@ -6,6 +6,7 @@ import type React from "react";
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 
+import { AuthTimeoutRecovery } from "./auth-timeout-recovery";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { getBootState } from "@/lib/actions/boot-actions";
 import {
@@ -89,12 +90,36 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
+  const [showTimeoutRecovery, setShowTimeoutRecovery] = useState(false);
   const manualSignOutInProgressRef = useRef(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isLoadingRef = useRef(isLoading);
+
+  // Sync ref with state so timeout callback can read current value
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   const router = useRouter();
   const pathname = usePathname();
 
-  const supabase = createSupabaseBrowser();
+  // Browser client ref - initialized in useEffect (after mount, never during render)
+  const supabaseRef = useRef<SupabaseClient<Database> | null>(null);
+
+  // Accessor function - throws if accessed before initialization (fail-fast)
+  const getSupabase = useCallback((): SupabaseClient<Database> => {
+    if (!supabaseRef.current) {
+      throw new Error("Supabase client not initialized yet. This should only be called after mount in useEffect or event handlers.");
+    }
+    return supabaseRef.current;
+  }, []);
+
+  // Initialize browser client after mount (client-side only)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      supabaseRef.current = createSupabaseBrowser();
+    }
+  }, []);
 
   const mapProfileRow = (row: {
     role: UserRole;
@@ -121,7 +146,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string) => {
-      if (!supabase) return { profile: null as ProfileData };
+      // Only call after mount (in useEffect/handlers), so getSupabase() is safe
+      const supabase = getSupabase();
 
       const selectColumns =
         "role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end";
@@ -153,7 +179,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       return { profile: mapProfileRow(data as ProfileData) };
     },
-    [supabase]
+    [getSupabase]
   );
 
   const ensureAndHydrateProfile = useCallback(
@@ -238,29 +264,78 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Check if supabase is available
-    if (!supabase) {
+    // Check if supabase is available (after mount, so ref should be initialized)
+    if (!supabaseRef.current) {
       setIsLoading(false);
       setHasHandledInitialSession(true);
       return;
     }
 
+    const supabase = supabaseRef.current;
     let mounted = true;
 
     // Initial session check - only once on mount
     const initialSession = async () => {
       setIsLoading(true);
+      setShowTimeoutRecovery(false);
+      
+      // Breadcrumb: auth init
+      const breadcrumb = async (data: Record<string, unknown>) => {
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.addBreadcrumb({
+            category: "auth.bootstrap",
+            message: "auth.init",
+            level: "info",
+            data: { timestamp: new Date().toISOString(), ...data },
+          });
+        } catch {
+          // Sentry not available, skip
+        }
+      };
+      
+      console.log("[auth.init] Starting auth bootstrap");
+      await breadcrumb({ phase: "init_start" });
+
+      // Set 8-second timeout guard
+      timeoutRef.current = setTimeout(() => {
+        if (mounted && isLoadingRef.current) {
+          console.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
+          breadcrumb({ phase: "timeout", threshold: 8000 });
+          setShowTimeoutRecovery(true);
+        }
+      }, 8000);
+
       try {
-        if (!supabase) return;
+        // supabase is already checked above and assigned to const, this check is redundant but safe
+        if (!supabase) {
+          await breadcrumb({ phase: "no_supabase_client" });
+          if (mounted) {
+            setIsLoading(false);
+            setHasHandledInitialSession(true);
+          }
+          return;
+        }
+        
+        // Breadcrumb: session read start
+        await breadcrumb({ phase: "getSession_start" });
         
         const {
           data: { session },
         } = await supabase.auth.getSession();
 
+        // Breadcrumb: session read done
+        await breadcrumb({ 
+          phase: "getSession_done", 
+          hasSession: !!session,
+          userId: session?.user?.id || null,
+        });
+
         if (!mounted) return;
 
         // If there is no session on initial load, we can stop loading.
         if (!session) {
+          await breadcrumb({ phase: "no_session_exit" });
           setIsLoading(false);
           setHasHandledInitialSession(true);
           return;
@@ -269,13 +344,36 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // If there is a session, proceed to set user and fetch profile
         setUser(session.user);
         setSession(session);
+        
+        // Breadcrumb: profile hydration start
+        await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: session.user.id });
+        
         const hydratedProfile = await ensureAndHydrateProfile(session.user);
+        
+        // Breadcrumb: profile hydration done
+        await breadcrumb({ 
+          phase: "ensureAndHydrateProfile_done",
+          hasProfile: !!hydratedProfile,
+          profileRole: hydratedProfile?.role || null,
+        });
+        
         if (!mounted) return;
         applyProfileToState(hydratedProfile, session);
         setHasHandledInitialSession(true);
+        
+        // Breadcrumb: bootstrap complete
+        await breadcrumb({ phase: "bootstrap_complete" });
+        console.log("[auth.bootstrap.complete] Auth bootstrap finished successfully");
       } catch (error) {
-        console.error("Error in initial session check:", error);
+        console.error("[auth.init] Error in initial session check:", error);
+        await breadcrumb({ phase: "error", error: error instanceof Error ? error.message : String(error) });
       } finally {
+        // Clear timeout if bootstrap completed
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+        
         if (mounted) {
           setIsLoading(false);
           setHasHandledInitialSession(true);
@@ -290,6 +388,24 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       if (!mounted) return;
+
+      // Breadcrumb: auth state change
+      const breadcrumb = async (data: Record<string, unknown>) => {
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.addBreadcrumb({
+            category: "auth.bootstrap",
+            message: `auth.onAuthStateChange.${event}`,
+            level: "info",
+            data: { timestamp: new Date().toISOString(), ...data },
+          });
+        } catch {
+          // Sentry not available, skip
+        }
+      };
+      
+      console.log(`[auth.onAuthStateChange] Event: ${event}`, { hasSession: !!session, userId: session?.user?.id || null });
+      await breadcrumb({ event, hasSession: !!session, userId: session?.user?.id || null });
 
       setIsLoading(true);
       setSession(session);
@@ -393,11 +509,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      // Clear timeout on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
-  }, [supabase, router, pathname, hasHandledInitialSession, ensureAndHydrateProfile, applyProfileToState]);
+  }, [router, pathname, hasHandledInitialSession, ensureAndHydrateProfile, applyProfileToState, getSupabase]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
-    if (!supabase) return { error: null };
+    // Event handler - safe to call getSupabase() after mount
+    const supabase = getSupabase();
     
     // SIGNED_IN event handler owns hydration + redirect (BootState-driven).
     // Avoid split-brain profile fetch/sets here, which can race bootstrap and feel “random”.
@@ -410,7 +532,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     options?: SignUpOptions
   ): Promise<{ error: AuthError | null }> => {
-    if (!supabase) return { error: null };
+    // Event handler - safe to call getSupabase() after mount
+    const supabase = getSupabase();
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -421,7 +544,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async (): Promise<{ error: AuthError | null }> => {
-    if (!supabase) return { error: null };
+    // Event handler - safe to call getSupabase() after mount
+    const supabase = getSupabase();
 
     try {
       manualSignOutInProgressRef.current = true;
@@ -535,7 +659,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        supabase,
+        supabase: supabaseRef.current, // Expose ref value for backward compatibility (can be null during SSR)
         user,
         session,
         userRole,
@@ -549,6 +673,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         resetPassword,
       }}
     >
+      {showTimeoutRecovery && <AuthTimeoutRecovery />}
       {children}
     </AuthContext.Provider>
   );

@@ -14,8 +14,16 @@ import {
   nodeEnv,
   serverIsProduction,
 } from "@/lib/sentry/env";
+import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
+
+// Fail loudly if DSN is missing (no silent failures)
+if (!SENTRY_DSN) {
+  console.warn(
+    "[Sentry Server] ⚠️ SENTRY_DSN is missing - Sentry will be disabled. Set SENTRY_DSN_PROD or SENTRY_DSN_DEV in environment variables."
+  );
+}
 
 // Log DSN status for debugging (only in development)
 if (nodeEnv === "development") {
@@ -51,7 +59,7 @@ if (nodeEnv === "development") {
 }
 
 Sentry.init({
-  dsn: SENTRY_DSN,
+  dsn: SENTRY_DSN ?? undefined,
 
   // Adjust sample rate based on environment
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
@@ -82,24 +90,24 @@ Sentry.init({
   ],
 
   // Ignore common errors
+  // Keep this list minimal: only truly external/system noise
+  // Dev-only errors should be filtered in beforeSend, not here
   ignoreErrors: [
     "NEXT_NOT_FOUND", 
     "NEXT_REDIRECT",
-    "EPIPE", // Ignore broken pipe errors from stdout/dev server
-    "write EPIPE", // Ignore write errors from dev server logging
-    /write EPIPE/, // Regex pattern for write EPIPE errors
-    /EPIPE.*write/, // Pattern for EPIPE write errors
-    /Cannot read properties of undefined \(reading 'call'\)/, // Webpack HMR issues in dev
-    /Cannot find module '\.\/\d+\.js'/, // Webpack chunk loading errors in dev
-    /ENOENT.*\.next.*cache.*webpack/, // Webpack cache file errors in dev
-    /no such file or directory.*\.next/, // .next folder missing file errors in dev
-    "Cookies can only be modified in a Server Action or Route Handler", // Next.js 15 App Router cookies error
-    /Cookies can only be modified in a Server Action or Route Handler/, // Regex pattern for cookies error
+    // Next.js 15 App Router cookies error (architectural, not actionable)
+    "Cookies can only be modified in a Server Action or Route Handler",
+    /Cookies can only be modified in a Server Action or Route Handler/,
+    // Note: EPIPE, webpack, and dev-only errors are filtered in beforeSend
+    // to avoid accidentally filtering real production issues
   ],
 
   // Filter out non-critical system errors before sending to Sentry
   beforeSend(event, hint) {
     const error = hint.originalException;
+
+    // SECURITY: Scrub sensitive data from event (shared utility)
+    event = scrubEvent(event);
 
     // Filter out EPIPE errors (broken pipe from stdout/stderr)
     if (error && typeof error === 'object') {
