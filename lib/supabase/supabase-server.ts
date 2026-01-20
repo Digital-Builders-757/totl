@@ -64,10 +64,13 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options);
             });
-          } catch {
+          } catch (err) {
             // Cookies can only be modified in Server Actions or Route Handlers
             // In Server Components (pages), this will silently fail which is expected
             // The session will still work correctly with the cookies that are already set
+            if (process.env.NODE_ENV === "development") {
+              console.warn("[supabase-server] cookieStore.set failed", err);
+            }
           }
         },
       },

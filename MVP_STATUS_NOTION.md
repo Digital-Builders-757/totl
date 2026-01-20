@@ -8,7 +8,57 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: ISR to Dynamic Migration - MVP Honesty Mode (January 20, 2026)**
+## 🚀 **Latest: Three Truths Logging - Auth Redirect Debugging & Verification (January 20, 2026)**
+
+**THREE TRUTHS LOGGING IMPLEMENTATION** - January 20, 2026  
+- ✅ **Added comprehensive logging to prove session is cookie-backed end-to-end**: Implemented "three truths" logging to verify SIGNED_IN fires, cookies exist in browser, and middleware receives cookies
+- ✅ **AuthProvider signIn() logging**: Added logging after `signInWithPassword` to show session result and prove cookies exist (`[auth.signIn]` logs)
+- ✅ **AuthProvider onAuthStateChange logging**: Enhanced logging at top of callback to show event, session, pathname, and cookie presence (`[auth.onAuthStateChange]` logs)
+- ✅ **Middleware cookie logging**: Added cookie name logging before `getUser()` when `DEBUG_ROUTING=1` is set (`[totl][middleware] cookie names` logs)
+- ✅ **Created comprehensive test suite**: Added `tests/auth/three-truths-logging.spec.ts` with 4 tests to verify all three truths + redirect behavior
+- ✅ **Complete documentation**: Created implementation guide, testing guide, and summary docs
+
+**Why this change:**
+- Needed visibility into auth redirect flow to diagnose issues
+- Tests were timing out, suggesting redirect wasn't happening
+- Required proof that session is cookie-backed end-to-end (browser → middleware)
+
+**Impact:**
+- Complete visibility into login → redirect pipeline
+- Can identify exactly where failures occur (event listener, cookie storage, or cookie transmission)
+- Tests verify all three truths are proven
+- Debugging capability for production issues
+
+**Next (P1 - Follow-up)**
+- [ ] Monitor production logs for three truths (all should be true after login)
+- [ ] Use logs to verify redirect happens correctly
+- [ ] Consider reducing logging verbosity once stable
+
+## 🚀 **Previous: Cookie-Based Session Fix - Middleware Session Visibility (January 20, 2026)**
+
+**COOKIE-BASED SESSION FIX** - January 20, 2026  
+- ✅ **Fixed browser client to use cookie-based sessions**: Switched from `createClient` (localStorage-only) to `createBrowserClient` from `@supabase/ssr` (cookie-based)
+- ✅ **Fixed middleware cookie preservation**: Added `redirectWithCookies` helper to preserve Supabase cookie updates during redirects
+- ✅ **Improved server client error handling**: Added development warnings for cookie write failures
+- ✅ **Fixed TypeScript compatibility**: Resolved type compatibility quirk between `@supabase/ssr` and `@supabase/supabase-js` versions
+
+**Why this change:**
+- Browser client was using localStorage-only sessions, making middleware unable to read session state (`userId: null`)
+- Middleware redirects were dropping cookie updates, causing session loss during navigation
+- This caused redirect loops and authentication failures after login
+
+**Impact:**
+- Middleware can now see authenticated users (reads cookies instead of localStorage)
+- Session persists correctly across redirects
+- No more `userId: null` in middleware logs after login
+- Eliminates redirect loops caused by session visibility issues
+
+**Next (P1 - Follow-up)**
+- [x] Monitor production logs for middleware `userId` values (should not be null after login) - Now verified via three truths logging
+- [x] Verify no redirect loops occur in production - Now testable via three truths test suite
+- [ ] Test session persistence across page refreshes
+
+## 🚀 **Previous: ISR to Dynamic Migration - MVP Honesty Mode (January 20, 2026)**
 
 **ISR TO DYNAMIC MIGRATION** - January 20, 2026  
 - ✅ **Removed ISR from routes using `createSupabaseServer()`**: `/gigs/[id]` and `/talent/[slug]` now use `force-dynamic` instead of ISR

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
@@ -120,13 +120,23 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         return;
       }
 
-      // Ensure profiles are created after signup (backup to database trigger)
+      // CRITICAL FIX: Wait a bit for session cookie to be readable server-side
+      // Then ensure profiles are created after signup (backup to database trigger)
       // This ensures profiles exist even if the trigger fails or has timing issues
       try {
-        const profileResult = await ensureProfilesAfterSignup();
+        // Wait for cookie to be set/readable server-side
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        let profileResult = await ensureProfilesAfterSignup();
         if (profileResult.error) {
-          console.error("Error ensuring profiles after signup:", profileResult.error);
-          // Don't fail signup - user was created, profiles might be created by trigger
+          console.warn("Error ensuring profiles after signup (first attempt):", profileResult.error);
+          // Retry once more after additional delay
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          profileResult = await ensureProfilesAfterSignup();
+          if (profileResult.error) {
+            console.error("Error ensuring profiles after signup (retry failed):", profileResult.error);
+            // Don't fail signup - user was created, profiles might be created by trigger
+          }
         }
       } catch (profileError) {
         console.error("Unexpected error ensuring profiles after signup:", profileError);

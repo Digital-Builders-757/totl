@@ -282,6 +282,23 @@ Sentry.init({
           return null; // Filter in dev
         }
       }
+
+      // AbortError from Supabase auth-js locks during navigation (expected cancellation)
+      // Only filter if it's from the locks.js file to avoid suppressing unrelated aborts
+      if (errorObj.name === 'AbortError' && 
+          (errorObj.message === 'signal is aborted without reason' ||
+           errorObj.message?.includes('signal is aborted'))) {
+        const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
+        const isAuthLockError = frames.some(
+          frame => frame.filename?.includes('auth-js') && 
+                   frame.filename?.includes('locks')
+        );
+        
+        if (isAuthLockError) {
+          console.log("AbortError from Supabase auth locks filtered - expected during navigation/unmount");
+          return null; // Don't send to Sentry - this is expected behavior
+        }
+      }
     }
 
     return event;

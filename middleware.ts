@@ -49,8 +49,23 @@ const isAssetOrApi = (path: string) =>
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
-  const res = NextResponse.next();
+  // Cookie updates happen via setAll callback, so we need let for cookie mutations
+  // eslint-disable-next-line prefer-const
+  let res = NextResponse.next();
   const debugRouting = process.env.DEBUG_ROUTING === "1";
+
+  // Helper to redirect while preserving cookies set during this request
+  const redirectWithCookies = (url: URL) => {
+    const redirectRes = NextResponse.redirect(url);
+
+    // Carry over any cookies set on `res` during this request
+    res.cookies.getAll().forEach((c) => {
+      // NextResponse cookies support object form
+      redirectRes.cookies.set(c);
+    });
+
+    return redirectRes;
+  };
 
   if (isAssetOrApi(path)) {
     return res;
@@ -69,7 +84,7 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = new URL(PATHS.LOGIN, req.url);
     // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
     redirectUrl.searchParams.set("returnUrl", path);
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl);
   }
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -77,11 +92,24 @@ export async function middleware(req: NextRequest) {
       getAll: () => req.cookies.getAll(),
       setAll: (cookiesToSet: CookieToSet[]) => {
         cookiesToSet.forEach(({ name, value, options }) => {
+          // Keep request + response in sync (prevents weird edge cases within the same middleware run)
+          req.cookies.set(name, value);
           res.cookies.set(name, value, options);
         });
       },
     },
   });
+
+  // TRUTH #3: Prove middleware receives cookies before getUser()
+  if (debugRouting) {
+    const cookieNames = req.cookies.getAll().map((c) => c.name);
+    const hasSb = cookieNames.some((name) => name.startsWith("sb-"));
+    console.info("[totl][middleware] cookie names", {
+      path,
+      cookies: cookieNames,
+      hasSb,
+    });
+  }
 
   const {
     data: { user },
@@ -101,7 +129,7 @@ export async function middleware(req: NextRequest) {
     if (path === PATHS.GIGS) {
       const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
 
     // Signed-out allowlist: auth routes + public routes only.
@@ -114,7 +142,7 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = new URL(PATHS.LOGIN, req.url);
     // searchParams.set() automatically URL-encodes the value, so don't use encodeURIComponent()
     redirectUrl.searchParams.set("returnUrl", path);
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl);
   }
 
   const { data: profile, error: profileError } = await supabase
@@ -159,7 +187,7 @@ export async function middleware(req: NextRequest) {
 
     const redirectUrl = new URL(PATHS.LOGIN, req.url);
     redirectUrl.searchParams.set("returnUrl", path);
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithCookies(redirectUrl);
   }
 
   const isAdmin = profile?.role === "admin";
@@ -210,11 +238,11 @@ export async function middleware(req: NextRequest) {
         reason: "admin_on_non_admin_terminal",
       });
     }
-    return NextResponse.redirect(new URL(PATHS.ADMIN_DASHBOARD, req.url));
+    return redirectWithCookies(new URL(PATHS.ADMIN_DASHBOARD, req.url));
   }
 
   if (profile?.is_suspended && path !== PATHS.SUSPENDED) {
-    return NextResponse.redirect(new URL(PATHS.SUSPENDED, req.url));
+    return redirectWithCookies(new URL(PATHS.SUSPENDED, req.url));
   }
 
   // MVP: Default unassigned users to Talent Dashboard (all signups are talent)
@@ -228,13 +256,13 @@ export async function middleware(req: NextRequest) {
   if (needsOnboarding && profile?.role === "talent" && path !== PATHS.TALENT_DASHBOARD && !isPublicPath(path)) {
     // User has talent role but account_type is unassigned - redirect to Talent Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
-    return NextResponse.redirect(new URL(PATHS.TALENT_DASHBOARD, req.url));
+    return redirectWithCookies(new URL(PATHS.TALENT_DASHBOARD, req.url));
   }
 
   if (needsOnboarding && profile?.role === "client" && path !== PATHS.CLIENT_DASHBOARD && !isPublicPath(path)) {
     // User has client role but account_type is unassigned - redirect to Client Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
-    return NextResponse.redirect(new URL(PATHS.CLIENT_DASHBOARD, req.url));
+    return redirectWithCookies(new URL(PATHS.CLIENT_DASHBOARD, req.url));
   }
 
   // Only redirect to onboarding if user has no role at all (shouldn't happen with MVP flow)
@@ -249,7 +277,7 @@ export async function middleware(req: NextRequest) {
     !isPublicPath(path)
   ) {
     // Default to Talent Dashboard instead of onboarding page
-    return NextResponse.redirect(new URL(PATHS.TALENT_DASHBOARD, req.url));
+    return redirectWithCookies(new URL(PATHS.TALENT_DASHBOARD, req.url));
   }
 
   if (onAuthRoute && user) {
@@ -277,7 +305,7 @@ export async function middleware(req: NextRequest) {
     }
 
     if (decision.type === "redirect") {
-      return NextResponse.redirect(new URL(decision.to, req.url));
+      return redirectWithCookies(new URL(decision.to, req.url));
     }
     return res;
   }
@@ -293,7 +321,7 @@ export async function middleware(req: NextRequest) {
     });
 
     if (decision.type === "redirect") {
-      return NextResponse.redirect(new URL(decision.to, req.url));
+      return redirectWithCookies(new URL(decision.to, req.url));
     }
     return res;
   }
@@ -303,25 +331,25 @@ export async function middleware(req: NextRequest) {
       const destination = determineDestination(profile);
       // Prevent infinite redirect loop: don't redirect if already on destination
       if (destination !== path) {
-        return NextResponse.redirect(new URL(destination, req.url));
+        return redirectWithCookies(new URL(destination, req.url));
       }
       // Security: If user doesn't have admin access and is already on destination, redirect to login
       // This prevents unauthorized access when destination matches current path
       const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
     if (needsClientAccess(path) && !hasClientAccess(profile)) {
       const destination = determineDestination(profile);
       // Prevent infinite redirect loop: don't redirect if already on destination
       if (destination !== path) {
-        return NextResponse.redirect(new URL(destination, req.url));
+        return redirectWithCookies(new URL(destination, req.url));
       }
       // Security: If user doesn't have client access and is already on destination, redirect to login
       // This prevents unauthorized access when destination matches current path
       const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
     if (needsTalentAccess(path) && !hasTalentAccess(profile)) {
       const destination = determineDestination(profile);
@@ -329,12 +357,12 @@ export async function middleware(req: NextRequest) {
       // Security: If user doesn't have talent access and is already on destination, redirect to login
       // This prevents unauthorized access for users with null role and unassigned account_type
       if (destination !== path) {
-        return NextResponse.redirect(new URL(destination, req.url));
+        return redirectWithCookies(new URL(destination, req.url));
       }
       // User is already on destination but doesn't have access - redirect to login to force re-authentication
       const redirectUrl = new URL(PATHS.LOGIN, req.url);
       redirectUrl.searchParams.set("returnUrl", path);
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithCookies(redirectUrl);
     }
   }
 

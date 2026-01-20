@@ -8,13 +8,14 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 
 import { AuthTimeoutRecovery } from "./auth-timeout-recovery";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
-import { getBootState } from "@/lib/actions/boot-actions";
+import { getBootStateRedirect, type BootStateRedirectResult } from "@/lib/actions/boot-actions";
 import {
   PATHS,
   isAuthRoute,
   isPublicPath,
 } from "@/lib/constants/routes";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
+import { safeReturnUrl } from "@/lib/utils/return-url";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -91,9 +92,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
   const [showTimeoutRecovery, setShowTimeoutRecovery] = useState(false);
+  
+  // hasHandledInitialSession is set but not read - kept for debugging/future use
+  // Suppress linter warning
+  void hasHandledInitialSession;
   const manualSignOutInProgressRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isLoadingRef = useRef(isLoading);
+  // In-flight bootstrap guard: prevents concurrent bootstrap operations
+  const bootstrapPromiseRef = useRef<Promise<void> | null>(null);
+  // Redirect guard: prevents double navigation during SIGNED_IN
+  const redirectInFlightRef = useRef(false);
 
   // Sync ref with state so timeout callback can read current value
   useEffect(() => {
@@ -257,6 +266,130 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  // Helper: Perform redirect with router.replace() first, fallback to window.location.replace()
+  // This provides better testability and SPA navigation, while ensuring redirect always happens
+  // Uses Promise-based timeout instead of polling for cleaner implementation
+  const performRedirect = useCallback(
+    (routerInstance: ReturnType<typeof useRouter>, target: string, currentPathname: string) => {
+      if (!target || !target.startsWith("/")) {
+        console.error("[auth] Invalid redirect target:", target);
+        return;
+      }
+
+      const targetPathname = target.split("?")[0]; // Strip query params for comparison
+      const startPathname = currentPathname.split("?")[0];
+
+      console.log("[auth.onAuthStateChange] Attempting redirect via router.replace():", target, {
+        startPathname,
+        targetPathname,
+      });
+
+      // Try SPA navigation first (better for tests and UX)
+      try {
+        routerInstance.replace(target);
+
+        // Wait up to 500ms to see if navigation happens
+        // Use Promise-based timeout - check once after delay instead of polling
+        setTimeout(() => {
+          if (typeof window === "undefined") {
+            return; // SSR safety check
+          }
+
+          // Check if pathname changed to target (navigation succeeded)
+          const newPathname = window.location.pathname.split("?")[0];
+          const navigated = newPathname === targetPathname && newPathname !== startPathname;
+
+          if (navigated) {
+            console.log("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
+              expected: targetPathname,
+              actual: newPathname,
+            });
+          } else {
+            // Navigation didn't happen within timeout, fallback to hard reload
+            console.warn(
+              "[auth.onAuthStateChange] router.replace() didn't navigate within 500ms, using hard reload",
+              {
+                expected: targetPathname,
+                actual: newPathname,
+                startPathname,
+              }
+            );
+            try {
+              window.location.replace(target);
+              console.log("[auth.onAuthStateChange] window.location.replace() called as fallback");
+            } catch (hardReloadError) {
+              console.error("[auth.onAuthStateChange] Hard reload also failed:", hardReloadError);
+              window.location.assign(target);
+            }
+          }
+        }, 500);
+      } catch (routerError) {
+        // If router.replace() throws, immediately fallback to hard reload
+        console.error("[auth.onAuthStateChange] router.replace() threw, using hard reload:", routerError);
+        try {
+          window.location.replace(target);
+          console.log("[auth.onAuthStateChange] window.location.replace() called after router error");
+        } catch (hardReloadError) {
+          console.error("[auth.onAuthStateChange] Hard reload also failed:", hardReloadError);
+          window.location.assign(target);
+        }
+      }
+    },
+    []
+  );
+
+  // Helper: getBootStateRedirect with retry logic (handles cookie timing issues)
+  // Returns safe shape with reason for observability (never throws) - redirect uses fallback
+  // Preserves all reason types: "success" | "cookie_not_ready" | "no_profile" | "no_user" | "error"
+  const getBootStateWithRetry = useCallback(
+    async (returnUrlRaw: string | null, maxAttempts = 3): Promise<BootStateRedirectResult> => {
+      const backoffMs = [200, 400, 600]; // Progressive backoff
+      let lastReason: BootStateRedirectResult["reason"] = "cookie_not_ready";
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        try {
+          const result = await getBootStateRedirect({ postAuth: true, returnUrlRaw });
+          
+          // Preserve the reason from the result for observability
+          lastReason = result.reason;
+          
+          // If we got a successful redirect, return immediately
+          if (result.redirectTo) {
+            return result;
+          }
+          
+          // If redirectTo is null, log reason and retry (unless last attempt)
+          if (process.env.NODE_ENV === "development") {
+            console.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} returned null:`, result.reason);
+          }
+          
+          // Retry with backoff unless last attempt
+          if (attempt < maxAttempts - 1) {
+            await new Promise((resolve) => setTimeout(resolve, backoffMs[attempt] ?? 200));
+          }
+        } catch (error) {
+          // Log but don't throw - we'll use fallback
+          lastReason = "error";
+          if (process.env.NODE_ENV === "development") {
+            console.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} threw:`, error);
+          }
+          // Retry with backoff unless last attempt
+          if (attempt < maxAttempts - 1) {
+            await new Promise((resolve) => setTimeout(resolve, backoffMs[attempt] ?? 200));
+          }
+        }
+      }
+
+      // All attempts failed - return safe shape with preserved reason for observability
+      return {
+        redirectTo: null,
+        reason: lastReason,
+        bootState: null,
+      };
+    },
+    []
+  );
+
   useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {
@@ -275,110 +408,176 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     let mounted = true;
 
     // Initial session check - only once on mount
+    // Use in-flight guard to prevent concurrent bootstrap operations
     const initialSession = async () => {
-      setIsLoading(true);
-      setShowTimeoutRecovery(false);
-      
-      // Breadcrumb: auth init
-      const breadcrumb = async (data: Record<string, unknown>) => {
+      // If bootstrap is already in flight, await it instead of starting a new one
+      if (bootstrapPromiseRef.current) {
         try {
-          const Sentry = await import("@sentry/nextjs");
-          Sentry.addBreadcrumb({
-            category: "auth.bootstrap",
-            message: "auth.init",
-            level: "info",
-            data: { timestamp: new Date().toISOString(), ...data },
+          // Add timeout to prevent infinite waits if bootstrap gets stuck
+          await Promise.race([
+            bootstrapPromiseRef.current,
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Bootstrap guard timeout')), 10000)
+            )
+          ]);
+        } catch (error) {
+          // Bootstrap timed out or failed - clear ref and continue
+          console.warn("[auth.init] Bootstrap guard timeout or error, clearing ref:", error);
+          bootstrapPromiseRef.current = null;
+        }
+        return;
+      }
+
+      // Create bootstrap promise and store in ref
+      const bootstrapPromise = (async () => {
+        setIsLoading(true);
+        setShowTimeoutRecovery(false);
+        
+        // Breadcrumb: auth init
+        const breadcrumb = async (data: Record<string, unknown>) => {
+          try {
+            const Sentry = await import("@sentry/nextjs");
+            Sentry.addBreadcrumb({
+              category: "auth.bootstrap",
+              message: "auth.init",
+              level: "info",
+              data: { timestamp: new Date().toISOString(), ...data },
+            });
+          } catch {
+            // Sentry not available, skip
+          }
+        };
+        
+        console.log("[auth.init] Starting auth bootstrap");
+        await breadcrumb({ phase: "init_start" });
+
+        // Set 8-second timeout guard
+        timeoutRef.current = setTimeout(() => {
+          if (mounted && isLoadingRef.current) {
+            console.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
+            breadcrumb({ phase: "timeout", threshold: 8000 });
+            setShowTimeoutRecovery(true);
+          }
+        }, 8000);
+
+        try {
+          // supabase is already checked above and assigned to const, this check is redundant but safe
+          if (!supabase) {
+            await breadcrumb({ phase: "no_supabase_client" });
+            if (mounted) {
+              setIsLoading(false);
+              setHasHandledInitialSession(true);
+            }
+            return;
+          }
+          
+          // Breadcrumb: session read start
+          await breadcrumb({ phase: "getSession_start" });
+          
+          let session: Session | null = null;
+          try {
+            const {
+              data: { session: fetchedSession },
+            } = await supabase.auth.getSession();
+            session = fetchedSession;
+          } catch (error) {
+            // Gracefully handle AbortError during navigation/unmount
+            if (error instanceof Error && error.name === "AbortError") {
+              console.log("[auth.init] Bootstrap aborted during navigation (expected)");
+              await breadcrumb({ phase: "aborted", reason: "navigation" });
+              return; // Early return - don't update state if unmounted
+            }
+            throw error; // Re-throw non-abort errors
+          }
+
+          // Breadcrumb: session read done
+          await breadcrumb({ 
+            phase: "getSession_done", 
+            hasSession: !!session,
+            userId: session?.user?.id || null,
           });
-        } catch {
-          // Sentry not available, skip
-        }
-      };
-      
-      console.log("[auth.init] Starting auth bootstrap");
-      await breadcrumb({ phase: "init_start" });
 
-      // Set 8-second timeout guard
-      timeoutRef.current = setTimeout(() => {
-        if (mounted && isLoadingRef.current) {
-          console.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
-          breadcrumb({ phase: "timeout", threshold: 8000 });
-          setShowTimeoutRecovery(true);
-        }
-      }, 8000);
+          if (!mounted) return;
 
-      try {
-        // supabase is already checked above and assigned to const, this check is redundant but safe
-        if (!supabase) {
-          await breadcrumb({ phase: "no_supabase_client" });
-          if (mounted) {
+          // If there is no session on initial load, we can stop loading.
+          if (!session) {
+            await breadcrumb({ phase: "no_session_exit" });
             setIsLoading(false);
             setHasHandledInitialSession(true);
+            return;
           }
-          return;
-        }
-        
-        // Breadcrumb: session read start
-        await breadcrumb({ phase: "getSession_start" });
-        
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
 
-        // Breadcrumb: session read done
-        await breadcrumb({ 
-          phase: "getSession_done", 
-          hasSession: !!session,
-          userId: session?.user?.id || null,
-        });
-
-        if (!mounted) return;
-
-        // If there is no session on initial load, we can stop loading.
-        if (!session) {
-          await breadcrumb({ phase: "no_session_exit" });
+          // If there is a session, proceed to set user and session immediately
+          // This makes UI interactive faster - profile hydration happens async
+          setUser(session.user);
+          setSession(session);
+          
+          // CRITICAL FIX: Set isLoading = false immediately after session is set
+          // Profile hydration happens in background (non-blocking)
           setIsLoading(false);
           setHasHandledInitialSession(true);
-          return;
+          
+          // Breadcrumb: profile hydration start
+          await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: session.user.id });
+          
+          // Profile hydration happens async - doesn't block UI
+          // Use IIFE to handle async breadcrumbs properly
+          (async () => {
+            try {
+              const hydratedProfile = await ensureAndHydrateProfile(session.user);
+              
+              if (!mounted) return;
+              
+              // Breadcrumb: profile hydration done
+              await breadcrumb({ 
+                phase: "ensureAndHydrateProfile_done",
+                hasProfile: !!hydratedProfile,
+                profileRole: hydratedProfile?.role || null,
+              });
+              
+              applyProfileToState(hydratedProfile, session);
+              
+              // Breadcrumb: bootstrap complete
+              await breadcrumb({ phase: "bootstrap_complete" });
+              console.log("[auth.bootstrap.complete] Auth bootstrap finished successfully");
+            } catch (error) {
+              // Gracefully handle AbortError during profile fetch
+              if (error instanceof Error && error.name === "AbortError") {
+                console.log("[auth.init] Profile fetch aborted during navigation (expected)");
+                await breadcrumb({ phase: "profile_fetch_aborted", reason: "navigation" }).catch(() => {});
+                return; // Early return - don't update state if unmounted
+              }
+              // Log other errors but don't block UI
+              console.error("[auth.init] Profile hydration error (non-blocking):", error);
+              await breadcrumb({ phase: "profile_hydration_error", error: error instanceof Error ? error.message : String(error) }).catch(() => {});
+            }
+          })();
+        } catch (error) {
+          // Only log non-abort errors
+          if (!(error instanceof Error && error.name === "AbortError")) {
+            console.error("[auth.init] Error in initial session check:", error);
+            await breadcrumb({ phase: "error", error: error instanceof Error ? error.message : String(error) });
+          } else {
+            console.log("[auth.init] Bootstrap aborted (expected during navigation)");
+          }
+        } finally {
+          // Clear timeout if bootstrap completed
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+          }
+          
+          // Note: isLoading and hasHandledInitialSession are set earlier (after session check)
+          // This finally block only clears the promise ref
+          
+          // Clear bootstrap promise ref when done
+          bootstrapPromiseRef.current = null;
         }
+      })();
 
-        // If there is a session, proceed to set user and fetch profile
-        setUser(session.user);
-        setSession(session);
-        
-        // Breadcrumb: profile hydration start
-        await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: session.user.id });
-        
-        const hydratedProfile = await ensureAndHydrateProfile(session.user);
-        
-        // Breadcrumb: profile hydration done
-        await breadcrumb({ 
-          phase: "ensureAndHydrateProfile_done",
-          hasProfile: !!hydratedProfile,
-          profileRole: hydratedProfile?.role || null,
-        });
-        
-        if (!mounted) return;
-        applyProfileToState(hydratedProfile, session);
-        setHasHandledInitialSession(true);
-        
-        // Breadcrumb: bootstrap complete
-        await breadcrumb({ phase: "bootstrap_complete" });
-        console.log("[auth.bootstrap.complete] Auth bootstrap finished successfully");
-      } catch (error) {
-        console.error("[auth.init] Error in initial session check:", error);
-        await breadcrumb({ phase: "error", error: error instanceof Error ? error.message : String(error) });
-      } finally {
-        // Clear timeout if bootstrap completed
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-          timeoutRef.current = null;
-        }
-        
-        if (mounted) {
-          setIsLoading(false);
-          setHasHandledInitialSession(true);
-        }
-      }
+      // Store promise in ref so concurrent calls can await it
+      bootstrapPromiseRef.current = bootstrapPromise;
+      await bootstrapPromise;
     };
 
     initialSession();
@@ -404,7 +603,20 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
       
-      console.log(`[auth.onAuthStateChange] Event: ${event}`, { hasSession: !!session, userId: session?.user?.id || null });
+      // TRUTH #1: Prove SIGNED_IN fires + TRUTH #2: Prove cookies exist in browser
+      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : pathname;
+      const cookieSb = typeof window !== "undefined" 
+        ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
+        : false;
+      
+      console.log("[auth.onAuthStateChange]", {
+        event,
+        hasSession: !!session,
+        userId: session?.user?.id ?? null,
+        pathname: currentPathname,
+        cookieSb,
+      });
+      
       await breadcrumb({ event, hasSession: !!session, userId: session?.user?.id || null });
 
       setIsLoading(true);
@@ -412,37 +624,165 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
 
       if (event === "SIGNED_IN" && session) {
-        try {
-          const hydratedProfile = await ensureAndHydrateProfile(session.user);
-          if (!mounted) return;
-          applyProfileToState(hydratedProfile, session);
+        // CRITICAL: Redirect is the PRIMARY MISSION - everything else is best-effort, bounded, non-blocking
+        // Single redirect owner (SIGNED_IN):
+        // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
+        // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
+        // - Honor returnUrl only when safe (validated internal path).
+        // Redirect on SIGNED_IN when we are on an auth surface.
+        // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
+        // session check and we'd get "stuck on /login" flakes.
+        
+        console.log("[auth.onAuthStateChange] SIGNED_IN handler entered", {
+          hasSession: !!session,
+          userId: session?.user?.id,
+          pathname,
+        });
+        
+        const currentPath =
+          typeof window !== "undefined"
+            ? (pathname || window.location.pathname).split("?")[0]
+            : pathname;
 
-          // Single redirect owner (SIGNED_IN):
-          // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
-          // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
-          // - Honor returnUrl only when safe (BootState uses the shared routing brain).
-          // Redirect on SIGNED_IN when we are on an auth surface.
-          // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
-          // session check and we'd get "stuck on /login" flakes.
-          const currentPath =
-            typeof window !== "undefined"
-              ? (pathname || window.location.pathname).split("?")[0]
-              : pathname;
-
-          if (currentPath && isAuthRoute(currentPath)) {
-            const returnUrlRaw =
-              typeof window !== "undefined"
-                ? new URLSearchParams(window.location.search).get("returnUrl")
-                : null;
-
-            const boot = await getBootState({ postAuth: true, returnUrlRaw });
-            const bootTarget = boot?.nextPath ?? PATHS.TALENT_DASHBOARD;
-
-            router.push(bootTarget);
-          }
-        } catch (error) {
-          console.error("Error fetching profile on sign in:", error);
+        // Check if we should redirect (must be on auth route)
+        const shouldRedirect = currentPath && isAuthRoute(currentPath);
+        
+        console.log("[auth.onAuthStateChange] Redirect check", {
+          currentPath,
+          shouldRedirect,
+          isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
+        });
+        
+        // If not on auth route, skip redirect logic entirely
+        if (!shouldRedirect || typeof window === "undefined") {
+          // Still try to hydrate profile in background (best-effort)
+          ensureAndHydrateProfile(session.user)
+            .then((profile) => {
+              if (mounted && profile) {
+                applyProfileToState(profile, session);
+              }
+            })
+            .catch((error) => {
+              // Silently handle errors - profile hydration is non-blocking
+              if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
+                console.debug("[auth.onAuthStateChange] Background profile hydration failed:", error);
+              }
+            });
+          return;
         }
+
+        // CRITICAL: Prevent double navigation (multi-tab, rapid events)
+        if (redirectInFlightRef.current) {
+          console.log("[auth.onAuthStateChange] Redirect already in flight, skipping");
+          return;
+        }
+        redirectInFlightRef.current = true;
+
+        // CRITICAL: Compute fallback redirect IMMEDIATELY (before any async operations)
+        // This ensures redirect target is always available, even if everything fails
+        const returnUrlRaw =
+          typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("returnUrl")
+            : null;
+        
+        // Validate returnUrl is safe (internal path only)
+        const safeReturnUrlValue = safeReturnUrl(returnUrlRaw);
+        
+        // Compute fallback redirect target (safe default)
+        // CRITICAL: Always ensure fallbackRedirect is a valid internal path
+        const fallbackRedirect = safeReturnUrlValue ?? PATHS.TALENT_DASHBOARD;
+        
+          // Safety check: ensure fallbackRedirect is always valid
+          if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
+            console.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded:", fallbackRedirect);
+            const safeFallback = PATHS.TALENT_DASHBOARD;
+            performRedirect(router, safeFallback, currentPath);
+            return;
+          }
+        
+        console.log("[auth.onAuthStateChange] Starting redirect flow", {
+          returnUrlRaw,
+          safeReturnUrlValue,
+          fallbackRedirect,
+        });
+
+        // CRITICAL: Start all async operations in parallel (fire-and-forget pattern)
+        // Profile hydration is NON-BLOCKING - happens in background
+        const hydrationPromise = ensureAndHydrateProfile(session.user)
+          .catch((error) => {
+            // Silently handle all errors - hydration is best-effort
+            if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
+              console.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking):", error);
+            }
+            return null; // Return null on error
+          });
+
+        // BootState with retry (bounded, non-blocking)
+        // Race against timeout to ensure redirect happens quickly
+        const bootStatePromise = getBootStateWithRetry(returnUrlRaw);
+        
+        // CRITICAL: Race BootState against timeout (max 800ms wait)
+        // Redirect must happen quickly, even if BootState is slow
+        const redirectTimeout = 800; // ms
+        const redirectTargetPromise = Promise.race([
+          bootStatePromise.then(result => ({
+            redirectTo: result.redirectTo,
+            reason: result.reason,
+          })),
+          new Promise<{ redirectTo: string | null; reason: string }>((resolve) => 
+            setTimeout(() => resolve({ redirectTo: null, reason: "timeout" }), redirectTimeout)
+          ),
+        ]);
+
+        // CRITICAL: Redirect decision happens HERE (unavoidable)
+        // This block ALWAYS executes and ALWAYS redirects
+        redirectTargetPromise
+          .then((result) => {
+            // Determine final redirect target (CRITICAL: fallbackRedirect is always a valid path)
+            const finalTarget = result.redirectTo ?? fallbackRedirect;
+            
+            // Validate finalTarget is a valid internal path (safety check)
+            if (!finalTarget || !finalTarget.startsWith("/")) {
+              console.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback:", finalTarget);
+              const safeFallback = PATHS.TALENT_DASHBOARD;
+              performRedirect(router, safeFallback, currentPath);
+              return;
+            }
+            
+            // Log redirect decision with observability
+            console.log("[auth.onAuthStateChange] Redirect target resolved:", finalTarget, {
+              source: result.redirectTo ? "bootState" : "fallback",
+              reason: result.reason,
+              returnUrl: safeReturnUrlValue,
+              bootStateRedirectTo: result.redirectTo,
+              fallbackRedirect,
+            });
+            
+            // CRITICAL: Try router.replace() first (SPA navigation), then fallback to hard reload
+            performRedirect(router, finalTarget, currentPath);
+          })
+          .catch((error) => {
+            // Even if redirect decision fails, we MUST redirect
+            console.error("[auth.onAuthStateChange] Redirect decision failed, using fallback:", error);
+            performRedirect(router, fallbackRedirect, currentPath);
+          });
+
+        // CRITICAL: Profile hydration happens AFTER redirect (best-effort, non-blocking)
+        // This updates state quietly in the background
+        hydrationPromise
+          .then((hydratedProfile) => {
+            if (mounted && hydratedProfile) {
+              applyProfileToState(hydratedProfile, session);
+            }
+          })
+          .catch(() => {
+            // Silently ignore - hydration is best-effort
+          });
+
+        // Reset redirect guard after a delay (allows redirect to complete)
+        setTimeout(() => {
+          redirectInFlightRef.current = false;
+        }, 2000);
       } else if (event === "SIGNED_OUT") {
         const wasManualSignOut = manualSignOutInProgressRef.current;
         manualSignOutInProgressRef.current = false;
@@ -514,8 +854,12 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
+      // Clear bootstrap promise ref on unmount to allow fresh bootstrap on remount
+      bootstrapPromiseRef.current = null;
+      // Clear redirect guard on unmount
+      redirectInFlightRef.current = false;
     };
-  }, [router, pathname, hasHandledInitialSession, ensureAndHydrateProfile, applyProfileToState, getSupabase]);
+  }, [router, pathname, ensureAndHydrateProfile, applyProfileToState, getSupabase, getBootStateWithRetry, performRedirect]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     // Event handler - safe to call getSupabase() after mount
@@ -523,7 +867,28 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     
     // SIGNED_IN event handler owns hydration + redirect (BootState-driven).
     // Avoid split-brain profile fetch/sets here, which can race bootstrap and feel “random”.
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    // TRUTH #1: Prove signInWithPassword result
+    console.log("[auth.signIn] signInWithPassword result", {
+      hasError: !!error,
+      error: error?.message ?? null,
+      hasSession: !!data?.session,
+      userId: data?.session?.user?.id ?? null,
+    });
+
+    // TRUTH #2: Prove cookie storage wrote something *now*
+    // Use setTimeout to check cookies after browser has processed the response
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        const cookieSb = document.cookie
+          .split(";")
+          .map((s) => s.trim())
+          .filter((s) => s.startsWith("sb-") || s.includes("supabase"));
+        console.log("[auth.signIn] document.cookie sb*", cookieSb);
+      }, 0);
+    }
+    
     return { error };
   };
 

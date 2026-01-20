@@ -8,6 +8,7 @@ import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { determineDestination } from "@/lib/utils/determine-destination";
+import { safeReturnUrl } from "@/lib/utils/return-url";
 import type { Database } from "@/types/supabase";
 
 type UserRole = Database["public"]["Enums"]["user_role"] | null;
@@ -22,6 +23,12 @@ export type BootState = {
   hasDomainProfileRow: boolean;
   needsOnboarding: boolean;
   nextPath: string;
+};
+
+export type BootStateRedirectResult = {
+  redirectTo: string | null;
+  reason: "success" | "cookie_not_ready" | "no_profile" | "no_user" | "error";
+  bootState?: BootState | null;
 };
 
 function normalizeAccountType(value: AccountType): Exclude<AccountType, null> {
@@ -55,117 +62,276 @@ export async function getBootState(params?: {
   postAuth?: boolean;
   returnUrlRaw?: string | null;
 }): Promise<BootState | null> {
-  const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return null;
-
-  // Always ensure the profiles row exists (bootstrap gap repair). This is idempotent.
-  // Note: this MUST remain server-side (Staff).
+  // CRITICAL: Never throw - always return null on failure (caller uses fallback)
+  // Missing profile is a valid bootstrap state - return safe default
   try {
-    const ensured = await ensureProfileExists();
-    if (ensured?.error) {
-      // Fail closed to a safe terminal; dashboards will still protect themselves.
-      console.error("[boot] ensureProfileExists failed:", ensured.error);
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    // CRITICAL: Validate returnUrl is safe (internal path only, prevent open redirects)
+    const validatedReturnUrl = params?.returnUrlRaw ? safeReturnUrl(params.returnUrlRaw) : null;
+
+    // Always ensure the profiles row exists (bootstrap gap repair). This is idempotent.
+    // Note: this MUST remain server-side (Staff).
+    try {
+      const ensured = await ensureProfileExists();
+      if (ensured?.error) {
+        // Fail closed to a safe terminal; dashboards will still protect themselves.
+        console.error("[boot] ensureProfileExists failed:", ensured.error);
+      }
+    } catch (error) {
+      // If ensureProfileExists throws an exception, log it but continue
+      // The profile query below will handle missing profiles gracefully
+      console.error("[boot] ensureProfileExists threw exception:", error);
     }
-  } catch (error) {
-    // If ensureProfileExists throws an exception, log it but continue
-    // The profile query below will handle missing profiles gracefully
-    console.error("[boot] ensureProfileExists threw exception:", error);
-  }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, account_type, display_name")
-    .eq("id", user.id)
-    .maybeSingle<{
-      role: Database["public"]["Enums"]["user_role"] | null;
-      account_type: Database["public"]["Enums"]["account_type_enum"] | null;
-      display_name: string | null;
-    }>();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role, account_type, display_name")
+      .eq("id", user.id)
+      .maybeSingle<{
+        role: Database["public"]["Enums"]["user_role"] | null;
+        account_type: Database["public"]["Enums"]["account_type_enum"] | null;
+        display_name: string | null;
+      }>();
 
-  const role = (profile?.role ?? null) as UserRole;
-  const accountType = normalizeAccountType(profile?.account_type ?? "unassigned");
-  const isAdmin = role === "admin";
-  const isClient = role === "client" || accountType === "client";
+    const role = (profile?.role ?? null) as UserRole;
+    const accountType = normalizeAccountType(profile?.account_type ?? "unassigned");
+    const isAdmin = role === "admin";
+    const isClient = role === "client" || accountType === "client";
 
-  // Domain profile truth: depends on terminal.
-  let hasDomainProfileRow = false;
-  let needsOnboarding = false;
+    // Domain profile truth: depends on terminal.
+    let hasDomainProfileRow = false;
+    let needsOnboarding = false;
 
-  if (isAdmin) {
-    hasDomainProfileRow = true;
-    needsOnboarding = false;
-  } else if (isClient) {
-    const { data: clientProfile } = await supabase
-      .from("client_profiles")
-      .select("user_id, company_name")
-      .eq("user_id", user.id)
-      .maybeSingle<{ user_id: string; company_name: string }>();
+    if (isAdmin) {
+      hasDomainProfileRow = true;
+      needsOnboarding = false;
+    } else if (isClient) {
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id, company_name")
+        .eq("user_id", user.id)
+        .maybeSingle<{ user_id: string; company_name: string }>();
 
-    hasDomainProfileRow = Boolean(clientProfile);
-    // For promoted clients, consider "onboarding" complete once a company name is set.
-    // (We route them to /client/profile for completion, not to /onboarding.)
-    needsOnboarding = !isNonEmptyText(clientProfile?.company_name);
-  } else {
-    const { data: talentProfile } = await supabase
-      .from("talent_profiles")
-      .select("user_id, first_name, last_name")
-      .eq("user_id", user.id)
-      .maybeSingle<{ user_id: string; first_name: string; last_name: string }>();
+      hasDomainProfileRow = Boolean(clientProfile);
+      // For promoted clients, consider "onboarding" complete once a company name is set.
+      // (We route them to /client/profile for completion, not to /onboarding.)
+      needsOnboarding = !isNonEmptyText(clientProfile?.company_name);
+    } else {
+      const { data: talentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id, first_name, last_name")
+        .eq("user_id", user.id)
+        .maybeSingle<{ user_id: string; first_name: string; last_name: string }>();
 
-    hasDomainProfileRow = Boolean(talentProfile);
-    needsOnboarding = computeTalentNeedsOnboarding({
-      displayName: profile?.display_name ?? null,
-      talentFirstName: talentProfile?.first_name ?? null,
-      talentLastName: talentProfile?.last_name ?? null,
-    });
-  }
+      hasDomainProfileRow = Boolean(talentProfile);
+      needsOnboarding = computeTalentNeedsOnboarding({
+        displayName: profile?.display_name ?? null,
+        talentFirstName: talentProfile?.first_name ?? null,
+        talentLastName: talentProfile?.last_name ?? null,
+      });
+    }
 
-  // Compute nextPath (server-owned truth).
-  // - If onboarding required → go to onboarding entrypoint.
-  // - Otherwise route by canonical destination decision.
-  let nextPath: string;
-  if (!isAdmin && needsOnboarding && !isClient) {
-    nextPath = ONBOARDING_PATH;
-  } else if (!isAdmin && needsOnboarding && isClient) {
-    nextPath = "/client/profile";
-  } else if (params?.postAuth) {
-    const profileAccess = {
+    // Compute nextPath (server-owned truth).
+    // - If onboarding required → go to onboarding entrypoint.
+    // - Otherwise route by canonical destination decision.
+    let nextPath: string;
+    if (!isAdmin && needsOnboarding && !isClient) {
+      nextPath = ONBOARDING_PATH;
+    } else if (!isAdmin && needsOnboarding && isClient) {
+      nextPath = "/client/profile";
+    } else if (params?.postAuth) {
+      const profileAccess = {
+        role,
+        account_type: (accountType === "unassigned" ? null : accountType) as
+          | Database["public"]["Enums"]["account_type_enum"]
+          | null,
+      };
+      const decision = decidePostAuthRedirect({
+        pathname: PATHS.LOGIN,
+        returnUrlRaw: validatedReturnUrl, // Use validated returnUrl (safe internal path only)
+        signedOut: false,
+        profile: profileAccess,
+        fallback: PATHS.TALENT_DASHBOARD,
+      });
+      nextPath = decision.type === "redirect" ? decision.to : determineDestination(profileAccess);
+    } else {
+      nextPath = determineDestination({
+        role,
+        account_type: (accountType === "unassigned" ? null : accountType) as
+          | Database["public"]["Enums"]["account_type_enum"]
+          | null,
+      });
+    }
+
+    return {
+      userId: user.id,
+      email: user.email ?? null,
       role,
-      account_type: (accountType === "unassigned" ? null : accountType) as
-        | Database["public"]["Enums"]["account_type_enum"]
-        | null,
+      accountType,
+      hasProfilesRow: Boolean(profile),
+      hasDomainProfileRow,
+      needsOnboarding,
+      nextPath,
     };
-    const decision = decidePostAuthRedirect({
-      pathname: PATHS.LOGIN,
-      returnUrlRaw: params.returnUrlRaw ?? null,
-      signedOut: false,
-      profile: profileAccess,
-      fallback: PATHS.TALENT_DASHBOARD,
-    });
-    nextPath = decision.type === "redirect" ? decision.to : determineDestination(profileAccess);
-  } else {
-    nextPath = determineDestination({
-      role,
-      account_type: (accountType === "unassigned" ? null : accountType) as
-        | Database["public"]["Enums"]["account_type_enum"]
-        | null,
-    });
+  } catch (error) {
+    // CRITICAL: Never throw - return null on any error (caller uses fallback)
+    // Missing profile, cookie timing, RLS edge cases are all valid bootstrap states
+    console.error("[boot] getBootState error (returning null, caller will use fallback):", error);
+    return null;
   }
+}
 
-  return {
-    userId: user.id,
-    email: user.email ?? null,
-    role,
-    accountType,
-    hasProfilesRow: Boolean(profile),
-    hasDomainProfileRow,
-    needsOnboarding,
-    nextPath,
-  };
+/**
+ * Get boot state with redirect result (includes reason for observability).
+ * Returns safe shape even on failure - never throws.
+ */
+export async function getBootStateRedirect(params?: {
+  postAuth?: boolean;
+  returnUrlRaw?: string | null;
+}): Promise<BootStateRedirectResult> {
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        redirectTo: null,
+        reason: "no_user",
+        bootState: null,
+      };
+    }
+
+    // CRITICAL: Validate returnUrl is safe (internal path only, prevent open redirects)
+    const validatedReturnUrl = params?.returnUrlRaw ? safeReturnUrl(params.returnUrlRaw) : null;
+
+    // Always ensure the profiles row exists (bootstrap gap repair). This is idempotent.
+    try {
+      const ensured = await ensureProfileExists();
+      if (ensured?.error) {
+        console.error("[boot] ensureProfileExists failed:", ensured.error);
+      }
+    } catch (error) {
+      console.error("[boot] ensureProfileExists threw exception:", error);
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("role, account_type, display_name")
+      .eq("id", user.id)
+      .maybeSingle<{
+        role: Database["public"]["Enums"]["user_role"] | null;
+        account_type: Database["public"]["Enums"]["account_type_enum"] | null;
+        display_name: string | null;
+      }>();
+
+    // If profile query fails or profile missing, return with reason
+    if (profileError || !profile) {
+      return {
+        redirectTo: null,
+        reason: profileError ? "error" : "no_profile",
+        bootState: null,
+      };
+    }
+
+    const role = (profile.role ?? null) as UserRole;
+    const accountType = normalizeAccountType(profile.account_type ?? "unassigned");
+    const isAdmin = role === "admin";
+    const isClient = role === "client" || accountType === "client";
+
+    // Domain profile truth: depends on terminal.
+    let hasDomainProfileRow = false;
+    let needsOnboarding = false;
+
+    if (isAdmin) {
+      hasDomainProfileRow = true;
+      needsOnboarding = false;
+    } else if (isClient) {
+      const { data: clientProfile } = await supabase
+        .from("client_profiles")
+        .select("user_id, company_name")
+        .eq("user_id", user.id)
+        .maybeSingle<{ user_id: string; company_name: string }>();
+
+      hasDomainProfileRow = Boolean(clientProfile);
+      needsOnboarding = !isNonEmptyText(clientProfile?.company_name);
+    } else {
+      const { data: talentProfile } = await supabase
+        .from("talent_profiles")
+        .select("user_id, first_name, last_name")
+        .eq("user_id", user.id)
+        .maybeSingle<{ user_id: string; first_name: string; last_name: string }>();
+
+      hasDomainProfileRow = Boolean(talentProfile);
+      needsOnboarding = computeTalentNeedsOnboarding({
+        displayName: profile.display_name ?? null,
+        talentFirstName: talentProfile?.first_name ?? null,
+        talentLastName: talentProfile?.last_name ?? null,
+      });
+    }
+
+    // Compute nextPath (server-owned truth).
+    let nextPath: string;
+    if (!isAdmin && needsOnboarding && !isClient) {
+      nextPath = ONBOARDING_PATH;
+    } else if (!isAdmin && needsOnboarding && isClient) {
+      nextPath = "/client/profile";
+    } else if (params?.postAuth) {
+      const profileAccess = {
+        role,
+        account_type: (accountType === "unassigned" ? null : accountType) as
+          | Database["public"]["Enums"]["account_type_enum"]
+          | null,
+      };
+      const decision = decidePostAuthRedirect({
+        pathname: PATHS.LOGIN,
+        returnUrlRaw: validatedReturnUrl,
+        signedOut: false,
+        profile: profileAccess,
+        fallback: PATHS.TALENT_DASHBOARD,
+      });
+      nextPath = decision.type === "redirect" ? decision.to : determineDestination(profileAccess);
+    } else {
+      nextPath = determineDestination({
+        role,
+        account_type: (accountType === "unassigned" ? null : accountType) as
+          | Database["public"]["Enums"]["account_type_enum"]
+          | null,
+      });
+    }
+
+    const bootState: BootState = {
+      userId: user.id,
+      email: user.email ?? null,
+      role,
+      accountType,
+      hasProfilesRow: true,
+      hasDomainProfileRow,
+      needsOnboarding,
+      nextPath,
+    };
+
+    return {
+      redirectTo: nextPath,
+      reason: "success",
+      bootState,
+    };
+  } catch (error) {
+    // CRITICAL: Never throw - return safe shape on any error
+    console.error("[boot] getBootStateRedirect error:", error);
+    return {
+      redirectTo: null,
+      reason: "error",
+      bootState: null,
+    };
+  }
 }
 
 export async function finishOnboardingAction(params: {
