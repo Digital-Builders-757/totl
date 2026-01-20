@@ -3,81 +3,167 @@
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
-type TalentProfileLite = Pick<
-  Database["public"]["Tables"]["talent_profiles"]["Row"],
-  "first_name" | "last_name" | "location"
->;
+// Generated table row types
+type TalentProfileRow = Database["public"]["Tables"]["talent_profiles"]["Row"];
+type ApplicationRow = Database["public"]["Tables"]["applications"]["Row"];
+type GigRow = Database["public"]["Tables"]["gigs"]["Row"];
+type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
-type TalentApplication = Database["public"]["Tables"]["applications"]["Row"] & {
-  gigs?: Database["public"]["Tables"]["gigs"]["Row"] & {
-    client_profiles?: Pick<
-      Database["public"]["Tables"]["client_profiles"]["Row"],
-      "company_name"
-    > | null;
-  };
+// Lite shapes (explicit columns only)
+type TalentProfileLite = Pick<TalentProfileRow, "first_name" | "last_name" | "location">;
+
+type ApplicationWithGigRaw = Pick<
+  ApplicationRow,
+  "id" | "status" | "created_at" | "updated_at" | "message" | "gig_id" | "talent_id"
+> & {
+  gigs: Pick<
+    GigRow,
+    "id" | "title" | "description" | "category" | "location" | "compensation" | "image_url" | "date" | "client_id"
+  > | null;
 };
 
-type Gig = Database["public"]["Tables"]["gigs"]["Row"];
+type GigRaw = Pick<
+  GigRow,
+  "id" | "client_id" | "title" | "description" | "category" | "location" | "compensation" | "status" | "image_url" | "date" |
+  "application_deadline" | "created_at" | "updated_at"
+>;
+
+type ClientProfileLite = Pick<ClientProfileRow, "user_id" | "company_name">;
+
+// Final dashboard shapes (keeps `client_profiles` nested under gig)
+type GigWithCompany = GigRaw & {
+  client_profiles: { company_name: string } | null;
+};
+
+type ApplicationWithGigAndCompany = Omit<ApplicationWithGigRaw, "gigs"> & {
+  gigs: (ApplicationWithGigRaw["gigs"] & { client_profiles: { company_name: string } | null }) | null;
+};
 
 export type TalentDashboardData = {
   talentProfile: TalentProfileLite | null;
-  applications: TalentApplication[];
-  gigs: Gig[];
+  applications: ApplicationWithGigAndCompany[];
+  gigs: GigWithCompany[];
 };
 
 /**
  * Fetch all talent dashboard data in parallel (Server Component)
  * This eliminates sequential client-side fetches and reduces round trips
+ * 
+ * FIXES:
+ * - Removed invalid nested embed (gigs -> client_profiles has no direct FK)
+ * - Removed !inner join that drops rows
+ * - Throws on real query failures instead of silent empty arrays
+ * - Fetches client profiles separately and merges them
  */
 export async function getTalentDashboardData(
   userId: string
 ): Promise<TalentDashboardData> {
   const supabase = await createSupabaseServer();
 
-  // Fetch all data in parallel using Promise.all
   const [talentProfileResult, applicationsResult, gigsResult] = await Promise.all([
-    // Talent profile
     supabase
       .from("talent_profiles")
       .select("first_name,last_name,location")
       .eq("user_id", userId)
       .maybeSingle<TalentProfileLite>(),
 
-    // Applications with nested gig and client profile data
     supabase
       .from("applications")
       .select(
-        "id,status,created_at,updated_at,message,gig_id,talent_id,gigs(title,description,category,location,compensation,image_url,date,client_profiles!inner(company_name))"
+        "id,status,created_at,updated_at,message,gig_id,talent_id,gigs(id,title,description,category,location,compensation,image_url,date,client_id)"
       )
       .eq("talent_id", userId)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .returns<ApplicationWithGigRaw[]>(),
 
-    // Available gigs (active only)
     supabase
       .from("gigs")
-      .select("id,title,description,category,location,compensation,status,image_url,date,application_deadline,created_at,updated_at")
+      .select(
+        "id,client_id,title,description,category,location,compensation,status,image_url,date,application_deadline,created_at,updated_at"
+      )
       .eq("status", "active")
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .returns<GigRaw[]>(),
   ]);
 
-  // Handle errors gracefully
+  // Talent profile: allow "not found" (setup not finished), but hard-fail other errors
   if (talentProfileResult.error && talentProfileResult.error.code !== "PGRST116") {
-    console.error("[getTalentDashboardData] Error fetching talent profile:", talentProfileResult.error);
+    throw new Error(
+      `[getTalentDashboardData] Failed to fetch talent profile: ${talentProfileResult.error.message}`
+    );
   }
 
+  // Hard-fail real query errors (no silent empty dashboards)
   if (applicationsResult.error) {
-    console.error("[getTalentDashboardData] Error fetching applications:", applicationsResult.error);
+    throw new Error(
+      `[getTalentDashboardData] Failed to fetch applications: ${applicationsResult.error.message}`
+    );
+  }
+  if (gigsResult.error) {
+    throw new Error(
+      `[getTalentDashboardData] Failed to fetch gigs: ${gigsResult.error.message}`
+    );
   }
 
-  if (gigsResult.error) {
-    console.error("[getTalentDashboardData] Error fetching gigs:", gigsResult.error);
+  const applicationsRaw = applicationsResult.data ?? [];
+  const gigsRaw = gigsResult.data ?? [];
+
+  // Collect unique client ids from both apps + gigs
+  const clientIds = new Set<string>();
+  for (const app of applicationsRaw) {
+    if (app.gigs?.client_id) clientIds.add(app.gigs.client_id);
   }
+  for (const gig of gigsRaw) {
+    if (gig.client_id) clientIds.add(gig.client_id);
+  }
+
+  let companyByClientId = new Map<string, string>();
+
+  if (clientIds.size > 0) {
+    const clientProfilesResult = await supabase
+      .from("client_profiles")
+      .select("user_id,company_name")
+      .in("user_id", Array.from(clientIds))
+      .returns<ClientProfileLite[]>();
+
+    if (clientProfilesResult.error) {
+      throw new Error(
+        `[getTalentDashboardData] Failed to fetch client profiles: ${clientProfilesResult.error.message}`
+      );
+    }
+
+    companyByClientId = new Map(
+      (clientProfilesResult.data ?? []).map((cp) => [cp.user_id, cp.company_name])
+    );
+  }
+
+  const applications: ApplicationWithGigAndCompany[] = applicationsRaw.map((app) => {
+    const clientId = app.gigs?.client_id ?? null;
+    const companyName = clientId ? companyByClientId.get(clientId) ?? null : null;
+
+    return {
+      ...app,
+      gigs: app.gigs
+        ? {
+            ...app.gigs,
+            client_profiles: companyName ? { company_name: companyName } : null,
+          }
+        : null,
+    };
+  });
+
+  const gigs: GigWithCompany[] = gigsRaw.map((gig) => {
+    const companyName = companyByClientId.get(gig.client_id) ?? null;
+    return {
+      ...gig,
+      client_profiles: companyName ? { company_name: companyName } : null,
+    };
+  });
 
   return {
     talentProfile: talentProfileResult.data ?? null,
-    // Type assertion needed because Supabase select with nested relations returns a different shape
-    applications: (applicationsResult.data ?? []) as unknown as TalentApplication[],
-    gigs: (gigsResult.data ?? []) as Gig[],
+    applications,
+    gigs,
   };
 }
 

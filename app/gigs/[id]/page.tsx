@@ -14,10 +14,9 @@ import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } fro
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
-// Public gig detail page - use ISR for CDN caching
-// Revalidate every 5 minutes (300 seconds) - gigs may update but not frequently
-// Note: Only active gigs are shown (status = 'active'), so stale data is acceptable
-export const revalidate = 300;
+// Public gig detail page - dynamic rendering required due to createSupabaseServer() / cookies()
+// Cannot use ISR because route accesses request-bound values (cookies for session)
+export const dynamic = "force-dynamic";
 
 interface GigDetailsPageProps {
   params: Promise<{ id: string }>;

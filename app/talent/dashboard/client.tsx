@@ -57,10 +57,14 @@ type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 type TalentProfileLite = Pick<TalentProfile, "first_name" | "last_name" | "location">;
 
+// Match ApplicationWithGigAndCompany from dashboard-actions.ts
 interface TalentApplication extends ApplicationRow {
-  gigs?: GigRow & {
+  gigs?: (Pick<
+    GigRow,
+    "id" | "title" | "description" | "category" | "location" | "compensation" | "image_url" | "date" | "client_id"
+  > & {
     client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
-  };
+  }) | null;
 }
 
 interface Gig {

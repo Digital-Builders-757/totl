@@ -7,10 +7,13 @@
 
 ## Caching Principles
 
-- **Public pages:** Use ISR (Incremental Static Regeneration) for CDN caching
+- **Public pages:** Use ISR (Incremental Static Regeneration) for CDN caching **only if they don't use request-bound APIs** (`cookies()`, `headers()`, `searchParams`)
+- **Routes using `createSupabaseServer()`:** Always dynamic (uses `cookies()` which requires dynamic rendering)
 - **Auth pages:** Always dynamic (user-specific, session-dependent)
 - **Dashboards:** Always dynamic (user-specific data, real-time updates)
 - **Admin pages:** Always dynamic (sensitive, real-time data)
+
+**Critical Rule:** Any route using `createSupabaseServer()` (cookies/session) is treated as dynamic; ISR is not applied.
 
 ---
 
@@ -21,9 +24,14 @@
 | Route | Revalidate | Reason |
 |-------|------------|--------|
 | `/` (home) | 3600s (1 hour) | Static marketing content, changes infrequently |
-| `/gigs/[id]` | 300s (5 min) | Public gig details, only active gigs shown, acceptable staleness |
-| `/talent/[slug]` | 600s (10 min) | Public talent profiles, updates infrequently |
 | `/about` | 3600s (1 hour) | Static content |
+
+### Routes Using `createSupabaseServer()` (Always Dynamic)
+
+| Route | Config | Reason |
+|-------|--------|--------|
+| `/gigs/[id]` | `dynamic = "force-dynamic"` | Uses `createSupabaseServer()` for session checks and user-specific data (application status, client details visibility) |
+| `/talent/[slug]` | `dynamic = "force-dynamic"` | Uses `createSupabaseServer()` for session checks and sensitive field access control |
 
 ### Auth Routes (Always Dynamic)
 
@@ -59,8 +67,8 @@
 ## Implementation Status
 
 - ✅ Home page (`/`) - ISR with 1 hour revalidate
-- ✅ Public gig detail (`/gigs/[id]`) - ISR with 5 min revalidate
-- ✅ Public talent profile (`/talent/[slug]`) - ISR with 10 min revalidate
+- ✅ Public gig detail (`/gigs/[id]`) - Dynamic (`force-dynamic`) - uses `createSupabaseServer()`
+- ✅ Public talent profile (`/talent/[slug]`) - Dynamic (`force-dynamic`) - uses `createSupabaseServer()`
 - ✅ All auth routes - Explicit `dynamic = "force-dynamic"`
 - ✅ All dashboard routes - Explicit `dynamic = "force-dynamic"`
 - ✅ All protected routes - Explicit `dynamic = "force-dynamic"`
@@ -72,4 +80,6 @@
 - ISR pages are cached at CDN edge (Vercel) for faster global delivery
 - Revalidate times balance freshness vs. performance
 - Dynamic routes always fetch fresh data (no caching)
+- **Routes using `createSupabaseServer()` cannot use ISR** because they access `cookies()` which requires dynamic rendering
 - Dashboard routes will be optimized via Server Component data fetching (Phase 2)
+- Future optimization: Routes like `/gigs/[id]` and `/talent/[slug]` could be refactored to split public data (ISR) from user-specific data (dynamic client component) if performance becomes critical
