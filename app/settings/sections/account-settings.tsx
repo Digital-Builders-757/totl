@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@supabase/supabase-js";
 import { Eye, EyeOff, AlertTriangle, LogOut } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { changePassword } from "../actions";
@@ -48,7 +48,6 @@ interface AccountSettingsSectionProps {
 export function AccountSettingsSection({ user, profile }: AccountSettingsSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const signOutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -125,59 +124,14 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
 
   const passwordStrength = getPasswordStrength(newPassword);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (signOutTimeoutRef.current) {
-        clearTimeout(signOutTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const handleSignOut = async () => {
-    if (isSigningOut) return; // Prevent multiple clicks
-    
-    // Clear any existing timeout
-    if (signOutTimeoutRef.current) {
-      clearTimeout(signOutTimeoutRef.current);
-      signOutTimeoutRef.current = null;
-    }
+    if (isSigningOut) return;
     
     try {
       setIsSigningOut(true);
-      
-      // signOut() handles redirect internally in most cases
+      // AuthProvider's signOut() owns redirect - trust it
       await signOut();
-      
-      // Fallback redirect: if signOut() returns early (e.g., Supabase not configured)
-      // or fails to redirect, ensure user can still sign out
-      // Use a short delay to check if redirect happened
-      signOutTimeoutRef.current = setTimeout(() => {
-        signOutTimeoutRef.current = null;
-        // If we're still here after signOut(), redirect manually as fallback
-        // This handles edge cases where signOut() returns early without redirecting
-        // Always redirect to login unless already on an auth route (to avoid loops)
-        const currentPath = window.location.pathname;
-        const isAuthRoute = currentPath === "/login" || 
-                           currentPath === "/choose-role" || 
-                           currentPath.startsWith("/reset-password") ||
-                           currentPath.startsWith("/update-password") ||
-                           currentPath === "/verification-pending";
-        
-        if (!isAuthRoute) {
-          // Always redirect to login if signOut() didn't redirect and we're not already on an auth route
-          window.location.replace("/login?signedOut=true");
-        } else {
-          // If already on auth route, just reset state (signOut() may have cleared session but not redirected)
-          setIsSigningOut(false);
-        }
-      }, 100);
     } catch (error) {
-      // Clear timeout on error
-      if (signOutTimeoutRef.current) {
-        clearTimeout(signOutTimeoutRef.current);
-        signOutTimeoutRef.current = null;
-      }
       console.error("Sign out error:", error);
       toast({
         title: "Sign out error",

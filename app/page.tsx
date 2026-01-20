@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
-// Force dynamic rendering to prevent build-time Supabase access
-export const dynamic = "force-dynamic";
+// Note: Client components cannot use ISR/revalidate
+// This page is mostly static but requires client-side interactivity
+// For true ISR, would need to split into server component wrapper + client component
 
 import { ArrowRight, Star, MapPin, Search, Handshake, Sparkles } from "lucide-react";
 // import Image from "next/image";

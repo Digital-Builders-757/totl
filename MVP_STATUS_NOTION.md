@@ -8,7 +8,45 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚑 **Latest Fix: Bugbot Error Handling Fixes (January 19, 2026)**
+## 🚀 **Latest: ISR to Dynamic Migration - MVP Honesty Mode (January 20, 2026)**
+
+**ISR TO DYNAMIC MIGRATION** - January 20, 2026  
+- ✅ **Removed ISR from routes using `createSupabaseServer()`**: `/gigs/[id]` and `/talent/[slug]` now use `force-dynamic` instead of ISR
+- ✅ **Fixed TypeScript type mismatches**: Updated `TalentApplication` and `ApplicationDetailsModal` types to match `ApplicationWithGigAndCompany` structure from server actions
+- ✅ **Updated documentation**: `docs/ROUTE_CACHING_STRATEGY.md` now correctly documents that routes using `createSupabaseServer()` are always dynamic
+- ✅ **Created migration plan**: `docs/ISR_TO_DYNAMIC_MIGRATION_PLAN.md` documents the change rationale and approach
+- ✅ **Honest rendering behavior**: Routes now correctly declare dynamic rendering instead of claiming ISR/CDN caching when cookies are accessed
+
+**Why this change:**
+- Routes calling `createSupabaseServer()` use `cookies()` which requires dynamic rendering
+- ISR cannot work correctly when routes access request-bound values (cookies, headers, searchParams)
+- Previous ISR configuration was misleading - pages were effectively dynamic but claimed CDN caching
+
+**Next (P1 - Follow-up)**
+- [ ] Monitor performance impact (pages will be slower but honest about rendering mode)
+- [ ] Future optimization: Refactor routes to split public data (ISR) from user-specific data (dynamic client component) if performance becomes critical
+
+## 🚀 **Previous: Performance Optimization - "Snappy" Initiative (January 20, 2026)**
+
+**PERFORMANCE OPTIMIZATION - PHASE 1 COMPLETE** - January 20, 2026  
+- ✅ **Sentry Web Vitals Enabled**: Added `browserTracingIntegration` to track LCP, INP, CLS metrics automatically (10% production, 100% dev sampling)
+- ✅ **Performance Baseline Ledger**: Created `docs/PERFORMANCE_BASELINE.md` with target metrics for all key routes
+- ✅ **Route Caching Strategy**: Updated to correctly document dynamic routes (routes using `createSupabaseServer()` are always dynamic)
+- ✅ **Talent Dashboard Server Component Refactor**: Migrated to parallel server-side data fetching (`Promise.all`) eliminating sequential client-side queries
+- ✅ **Streaming UI**: Added `loading.tsx` with Suspense boundaries for progressive rendering
+- ✅ Created comprehensive implementation docs:
+  - `docs/PERFORMANCE_OPTIMIZATION_PLAN.md` - Complete optimization plan (Approach A+)
+  - `docs/PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - Implementation summary
+  - `docs/ROUTE_CACHING_STRATEGY.md` - Caching documentation (updated)
+  - `docs/PERFORMANCE_BASELINE.md` - Metrics tracking
+
+**Next (P1 - Follow-up)**
+- [ ] Complete client dashboard Server Component refactor (requires file restructuring)
+- [ ] Run Supabase Performance Advisor to verify RLS predicate indexes
+- [ ] Measure baseline metrics post-deployment via Sentry Web Vitals
+- [ ] Phase 3: Bundle optimization (dynamic imports, image/font optimization)
+
+## 🚑 **Previous Fix: Bugbot Error Handling Fixes (January 19, 2026)**
 
 **BUGBOT ERROR HANDLING FIXES** - January 19, 2026  
 - ✅ **Issue #1**: Fixed client dashboard error state not displayed - Added error banner with retry button when `fetchDashboardData` fails (users now see errors instead of blank dashboard)

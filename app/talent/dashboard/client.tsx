@@ -46,6 +46,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
+import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
@@ -56,10 +57,14 @@ type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 type TalentProfileLite = Pick<TalentProfile, "first_name" | "last_name" | "location">;
 
+// Match ApplicationWithGigAndCompany from dashboard-actions.ts
 interface TalentApplication extends ApplicationRow {
-  gigs?: GigRow & {
+  gigs?: (Pick<
+    GigRow,
+    "id" | "title" | "description" | "category" | "location" | "compensation" | "image_url" | "date" | "client_id"
+  > & {
     client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
-  };
+  }) | null;
 }
 
 interface Gig {
@@ -79,15 +84,22 @@ function useTalentDashboardData({
   user,
   profile,
   authLoading,
+  initialData,
 }: {
   user: ReturnType<typeof useAuth>["user"];
   profile: ReturnType<typeof useAuth>["profile"];
   authLoading: boolean;
+  initialData?: TalentDashboardData | null;
 }) {
-  const [talentProfile, setTalentProfile] = useState<TalentProfileLite | null>(null);
-  const [applications, setApplications] = useState<TalentApplication[]>([]);
-  const [gigs, setGigs] = useState<Gig[]>([]);
-  const [dataLoading, setDataLoading] = useState(false);
+  // Use initial data if provided (server-fetched), otherwise start empty for client-side fetch
+  const [talentProfile, setTalentProfile] = useState<TalentProfileLite | null>(
+    initialData?.talentProfile ?? null
+  );
+  const [applications, setApplications] = useState<TalentApplication[]>(
+    initialData?.applications ?? []
+  );
+  const [gigs, setGigs] = useState<Gig[]>(initialData?.gigs ?? []);
+  const [dataLoading, setDataLoading] = useState(!initialData); // Only load if no initial data
   const [dataError, setDataError] = useState<string | null>(null);
   
   // UPGRADE 2: Separate loading/error states for applications (decoupled from dashboard shell)
@@ -106,6 +118,12 @@ function useTalentDashboardData({
 
   useEffect(() => {
     if (authLoading) return;
+    
+    // If we have initial data from server, skip client-side fetch (unless refetch triggered)
+    if (initialData && reloadToken === 0) {
+      setDataLoading(false);
+      return;
+    }
     
     // HARDENING: Supabase client may be null during pre-mount/SSR
     // After mount, returns non-null client or throws if env vars missing (fail-fast)
@@ -379,6 +397,7 @@ function useTalentDashboardData({
     profile?.role,
     profile?.account_type,
     reloadToken,
+    initialData,
   ]);
 
   return {
@@ -394,7 +413,11 @@ function useTalentDashboardData({
   };
 }
 
-function TalentDashboardContent() {
+function TalentDashboardContent({
+  initialData,
+}: {
+  initialData?: TalentDashboardData | null;
+}) {
   const router = useRouter();
   const { user, signOut, profile, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -409,7 +432,7 @@ function TalentDashboardContent() {
     applicationsLoading,
     applicationsError,
     refetch,
-  } = useTalentDashboardData({ user, profile, authLoading });
+  } = useTalentDashboardData({ user, profile, authLoading, initialData });
 
   const subscriptionProfile =
     profile && profile.role === "talent"
@@ -422,7 +445,6 @@ function TalentDashboardContent() {
     subscriptionProfile && subscriptionProfile.subscription_status !== "active";
 
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const signOutTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedTalentApplication, setSelectedTalentApplication] = useState<TalentApplication | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasHandledVerificationRef = useRef<boolean>(false);
@@ -549,9 +571,6 @@ function TalentDashboardContent() {
 
   useEffect(() => {
     return () => {
-      if (signOutTimeoutRef.current) {
-        clearTimeout(signOutTimeoutRef.current);
-      }
       if (urlCleanupTimeoutRef.current) {
         clearTimeout(urlCleanupTimeoutRef.current);
       }
@@ -560,35 +579,12 @@ function TalentDashboardContent() {
 
   const handleSignOut = async () => {
     if (isSigningOut) return;
-
-    if (signOutTimeoutRef.current) {
-      clearTimeout(signOutTimeoutRef.current);
-      signOutTimeoutRef.current = null;
-    }
-
+    
     try {
       setIsSigningOut(true);
+      // AuthProvider's signOut() owns redirect - trust it
       await signOut();
-      signOutTimeoutRef.current = setTimeout(() => {
-        signOutTimeoutRef.current = null;
-        const currentPath = window.location.pathname;
-        const isAuthRoute = currentPath === "/login" ||
-          currentPath === "/choose-role" ||
-          currentPath.startsWith("/reset-password") ||
-          currentPath.startsWith("/update-password") ||
-          currentPath === "/verification-pending";
-
-        if (!isAuthRoute) {
-          window.location.replace("/login?signedOut=true");
-        } else {
-          setIsSigningOut(false);
-        }
-      }, 100);
     } catch (error) {
-      if (signOutTimeoutRef.current) {
-        clearTimeout(signOutTimeoutRef.current);
-        signOutTimeoutRef.current = null;
-      }
       console.error("Sign out error:", error);
       toast({
         title: "Sign out error",
@@ -1469,7 +1465,11 @@ function TalentDashboardContent() {
   );
 }
 
-export function DashboardClient() {
+export function DashboardClient({
+  initialData,
+}: {
+  initialData?: TalentDashboardData | null;
+}) {
   return (
     <Suspense
       fallback={
@@ -1478,7 +1478,7 @@ export function DashboardClient() {
         </div>
       }
     >
-      <TalentDashboardContent />
+      <TalentDashboardContent initialData={initialData} />
     </Suspense>
   );
 }

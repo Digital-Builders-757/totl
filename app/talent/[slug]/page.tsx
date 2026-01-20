@@ -65,6 +65,10 @@ function normalizeToStringArray(value: string[] | string | null | undefined): st
   return [];
 }
 
+// Public talent profile page - dynamic rendering required due to createSupabaseServer() / cookies()
+// Cannot use ISR because route accesses request-bound values (cookies for session)
+export const dynamic = "force-dynamic";
+
 export default async function TalentProfilePage({ params }: TalentProfilePageProps) {
   const { slug } = await params;
   

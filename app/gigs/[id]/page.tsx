@@ -14,7 +14,8 @@ import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } fro
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
-// Force dynamic rendering
+// Public gig detail page - dynamic rendering required due to createSupabaseServer() / cookies()
+// Cannot use ISR because route accesses request-bound values (cookies for session)
 export const dynamic = "force-dynamic";
 
 interface GigDetailsPageProps {

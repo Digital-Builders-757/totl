@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,18 +23,14 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
   const [error, setError] = useState<string | null>(null);
 
   const handleSignOut = async () => {
-    if (isLoading) return; // Prevent multiple clicks
+    if (isLoading) return;
     
     setIsLoading(true);
     setError(null);
 
     try {
-      // Call signOut from auth provider and wait for it to complete
+      // AuthProvider's signOut() owns redirect - trust it
       await signOut();
-      
-      // Force immediate hard refresh to ensure clean state
-      // This ensures cookies are cleared and page refreshes
-      window.location.href = PATHS.LOGIN;
     } catch (err) {
       console.error("Error signing out:", err);
       setError("Failed to sign out. Please try again.");

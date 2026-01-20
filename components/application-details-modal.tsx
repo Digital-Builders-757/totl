@@ -14,10 +14,14 @@ type GigRow = Database["public"]["Tables"]["gigs"]["Row"];
 type ClientProfileRow = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 // Type for the application with joined gig and client data
+// Matches ApplicationWithGigAndCompany structure from dashboard-actions.ts
 interface Application extends ApplicationRow {
-  gigs?: GigRow & {
+  gigs?: (Pick<
+    GigRow,
+    "id" | "title" | "description" | "category" | "location" | "compensation" | "image_url" | "date" | "client_id"
+  > & {
     client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
-  };
+  }) | null;
 }
 
 interface ApplicationDetailsModalProps {
