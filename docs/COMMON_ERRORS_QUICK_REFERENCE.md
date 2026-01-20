@@ -48,6 +48,12 @@ npm run build
 - **Redirect Errors Intercepted in try/catch Blocks:** `redirect()` throws special error that gets swallowed by `try/catch` in Server Components or Client Components
   - **Fix:** Use `isRedirectError(error)` helper from `@/lib/is-redirect-error` and rethrow when true so Next.js can continue the redirect
   - **Example:** In Server Components with try-catch, check `if (isRedirectError(error)) throw error;` before handling other errors
+- **Middleware Always Sees `userId: null` After Login:** Middleware logs show `userId: null` even after successful login, causing redirect loops
+  - **Root Cause:** Browser client was using `createClient` (localStorage-only) instead of `createBrowserClient` from `@supabase/ssr` (cookie-based). Middleware can't read localStorage.
+  - **Fix:** Switch browser client to `createBrowserClient` from `@supabase/ssr` in `lib/supabase/supabase-browser.ts`
+  - **Additional Fix:** Ensure middleware preserves cookies on redirects using `redirectWithCookies` helper (prevents cookie loss during navigation)
+  - **Prevention:** Always use `createBrowserClient` from `@supabase/ssr` for browser clients when middleware needs to read session state
+  - **Verification:** After login, check DevTools → Cookies → Should see `sb-*` cookies. Middleware logs should show `userId` not null.
 - **Client Dashboard Error State Not Displayed:** Error state (`supabaseError`) is set but never rendered, leaving users with blank dashboard
   - **Fix:** Add error display banner/alert component that shows when `supabaseError` is set, with retry button to call `fetchDashboardData()` again
   - **Prevention:** Always render error states in UI, even if error handling exists in code

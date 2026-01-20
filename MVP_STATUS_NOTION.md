@@ -8,7 +8,31 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: ISR to Dynamic Migration - MVP Honesty Mode (January 20, 2026)**
+## 🚀 **Latest: Cookie-Based Session Fix - Middleware Session Visibility (January 20, 2026)**
+
+**COOKIE-BASED SESSION FIX** - January 20, 2026  
+- ✅ **Fixed browser client to use cookie-based sessions**: Switched from `createClient` (localStorage-only) to `createBrowserClient` from `@supabase/ssr` (cookie-based)
+- ✅ **Fixed middleware cookie preservation**: Added `redirectWithCookies` helper to preserve Supabase cookie updates during redirects
+- ✅ **Improved server client error handling**: Added development warnings for cookie write failures
+- ✅ **Fixed TypeScript compatibility**: Resolved type compatibility quirk between `@supabase/ssr` and `@supabase/supabase-js` versions
+
+**Why this change:**
+- Browser client was using localStorage-only sessions, making middleware unable to read session state (`userId: null`)
+- Middleware redirects were dropping cookie updates, causing session loss during navigation
+- This caused redirect loops and authentication failures after login
+
+**Impact:**
+- Middleware can now see authenticated users (reads cookies instead of localStorage)
+- Session persists correctly across redirects
+- No more `userId: null` in middleware logs after login
+- Eliminates redirect loops caused by session visibility issues
+
+**Next (P1 - Follow-up)**
+- [ ] Monitor production logs for middleware `userId` values (should not be null after login)
+- [ ] Verify no redirect loops occur in production
+- [ ] Test session persistence across page refreshes
+
+## 🚀 **Previous: ISR to Dynamic Migration - MVP Honesty Mode (January 20, 2026)**
 
 **ISR TO DYNAMIC MIGRATION** - January 20, 2026  
 - ✅ **Removed ISR from routes using `createSupabaseServer()`**: `/gigs/[id]` and `/talent/[slug]` now use `force-dynamic` instead of ISR
