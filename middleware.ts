@@ -100,6 +100,17 @@ export async function middleware(req: NextRequest) {
     },
   });
 
+  // TRUTH #3: Prove middleware receives cookies before getUser()
+  if (debugRouting) {
+    const cookieNames = req.cookies.getAll().map((c) => c.name);
+    const hasSb = cookieNames.some((name) => name.startsWith("sb-"));
+    console.info("[totl][middleware] cookie names", {
+      path,
+      cookies: cookieNames,
+      hasSb,
+    });
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();

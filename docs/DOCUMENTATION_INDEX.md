@@ -54,6 +54,10 @@ All other documentation has been organized into the `docs/` folder.
 - `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
 - `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
 - `AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` - **✅ NEW** - Auth timeout recovery implementation (8-second timeout guard + recovery UI, Jan 2025)
+- `AUTH_REDIRECT_END_TO_END_AUDIT.md` - **✅ NEW** - Complete end-to-end audit of login → redirect pipeline (Jan 2026)
+- `AUTH_THREE_TRUTHS_LOGGING_IMPLEMENTATION.md` - **✅ NEW** - Three truths logging implementation (proves session is cookie-backed end-to-end, Jan 2026)
+- `THREE_TRUTHS_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for three truths logging (Jan 2026)
+- `THREE_TRUTHS_TEST_SUMMARY.md` - **✅ NEW** - Quick reference summary for three truths testing (Jan 2026)
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)

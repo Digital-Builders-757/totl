@@ -603,7 +603,20 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         }
       };
       
-      console.log(`[auth.onAuthStateChange] Event: ${event}`, { hasSession: !!session, userId: session?.user?.id || null });
+      // TRUTH #1: Prove SIGNED_IN fires + TRUTH #2: Prove cookies exist in browser
+      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : pathname;
+      const cookieSb = typeof window !== "undefined" 
+        ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
+        : false;
+      
+      console.log("[auth.onAuthStateChange]", {
+        event,
+        hasSession: !!session,
+        userId: session?.user?.id ?? null,
+        pathname: currentPathname,
+        cookieSb,
+      });
+      
       await breadcrumb({ event, hasSession: !!session, userId: session?.user?.id || null });
 
       setIsLoading(true);
@@ -854,7 +867,28 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     
     // SIGNED_IN event handler owns hydration + redirect (BootState-driven).
     // Avoid split-brain profile fetch/sets here, which can race bootstrap and feel “random”.
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    // TRUTH #1: Prove signInWithPassword result
+    console.log("[auth.signIn] signInWithPassword result", {
+      hasError: !!error,
+      error: error?.message ?? null,
+      hasSession: !!data?.session,
+      userId: data?.session?.user?.id ?? null,
+    });
+
+    // TRUTH #2: Prove cookie storage wrote something *now*
+    // Use setTimeout to check cookies after browser has processed the response
+    if (typeof window !== "undefined") {
+      setTimeout(() => {
+        const cookieSb = document.cookie
+          .split(";")
+          .map((s) => s.trim())
+          .filter((s) => s.startsWith("sb-") || s.includes("supabase"));
+        console.log("[auth.signIn] document.cookie sb*", cookieSb);
+      }, 0);
+    }
+    
     return { error };
   };
 
