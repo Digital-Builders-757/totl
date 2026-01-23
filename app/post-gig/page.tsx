@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft, AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -169,15 +170,11 @@ export default function PostGigPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="editorial">Editorial</SelectItem>
-                      <SelectItem value="commercial">Commercial</SelectItem>
-                      <SelectItem value="runway">Runway</SelectItem>
-                      <SelectItem value="print">Print</SelectItem>
-                      <SelectItem value="fitness">Fitness</SelectItem>
-                      <SelectItem value="beauty">Beauty</SelectItem>
-                      <SelectItem value="e-commerce">E-commerce</SelectItem>
-                      <SelectItem value="promotional">Promotional</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      {VISIBLE_GIG_CATEGORIES.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {getCategoryLabel(category)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

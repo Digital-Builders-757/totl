@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -31,7 +32,7 @@ function SubmitButton() {
 
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
-  const [category, setCategory] = useState<string>("commercial");
+  const [category, setCategory] = useState<string>("modeling");
   const router = useRouter();
   const [state, formAction] = useActionState(
     async (prevState: { error?: string; success?: boolean } | null, formData: FormData) => {
@@ -122,14 +123,11 @@ export function CreateGigForm() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                      <SelectItem value="editorial" className="text-white focus:bg-gray-700 focus:text-white">Editorial</SelectItem>
-                      <SelectItem value="commercial" className="text-white focus:bg-gray-700 focus:text-white">Commercial</SelectItem>
-                      <SelectItem value="runway" className="text-white focus:bg-gray-700 focus:text-white">Runway</SelectItem>
-                      <SelectItem value="print" className="text-white focus:bg-gray-700 focus:text-white">Print</SelectItem>
-                      <SelectItem value="fitness" className="text-white focus:bg-gray-700 focus:text-white">Fitness</SelectItem>
-                      <SelectItem value="beauty" className="text-white focus:bg-gray-700 focus:text-white">Beauty</SelectItem>
-                      <SelectItem value="promotional" className="text-white focus:bg-gray-700 focus:text-white">Promotional</SelectItem>
-                      <SelectItem value="other" className="text-white focus:bg-gray-700 focus:text-white">Other</SelectItem>
+                      {VISIBLE_GIG_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat} className="text-white focus:bg-gray-700 focus:text-white">
+                          {getCategoryLabel(cat)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <input type="hidden" name="category" value={category} />

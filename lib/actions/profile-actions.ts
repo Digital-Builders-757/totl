@@ -7,6 +7,7 @@ import type { Database } from "@/types/supabase";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
+// PATCH-safe schema: modeling fields are optional (may be omitted if hidden)
 const talentProfileSchema = z.object({
   first_name: z.string().min(1).max(50),
   last_name: z.string().min(1).max(50),
@@ -15,11 +16,12 @@ const talentProfileSchema = z.object({
   location: z.string().max(100).nullish(),
   experience: z.string().max(500).nullish(),
   portfolio_url: z.string().url().nullish(),
-  height: z.string().max(20).nullish(),
-  measurements: z.string().max(100).nullish(),
-  hair_color: z.string().max(30).nullish(),
-  eye_color: z.string().max(30).nullish(),
-  shoe_size: z.string().max(10).nullish(),
+  // Modeling fields are optional - if omitted, they won't be updated (preserves existing data)
+  height: z.string().max(20).nullish().optional(),
+  measurements: z.string().max(100).nullish().optional(),
+  hair_color: z.string().max(30).nullish().optional(),
+  eye_color: z.string().max(30).nullish().optional(),
+  shoe_size: z.string().max(10).nullish().optional(),
   languages: z.array(z.string().min(1).max(50)).nullish(),
 });
 
@@ -51,6 +53,8 @@ export async function upsertTalentProfileAction(
   } = await supabase.auth.getUser();
   if (authError || !user) return { ok: false, error: "Authentication error. Please log in again." };
 
+  // PATCH-safe: Only include modeling fields if they're present in the input
+  // This prevents wiping existing modeling data when fields are hidden
   const values: TalentProfilesInsert = {
     user_id: user.id,
     first_name: parsed.data.first_name,
@@ -60,12 +64,13 @@ export async function upsertTalentProfileAction(
     location: parsed.data.location ?? null,
     experience: parsed.data.experience ?? null,
     portfolio_url: parsed.data.portfolio_url ?? null,
-    height: parsed.data.height ?? null,
-    measurements: parsed.data.measurements ?? null,
-    hair_color: parsed.data.hair_color ?? null,
-    eye_color: parsed.data.eye_color ?? null,
-    shoe_size: parsed.data.shoe_size ?? null,
     languages: parsed.data.languages ?? null,
+    // Only include modeling fields if they're present in the input
+    ...(parsed.data.height !== undefined && { height: parsed.data.height ?? null }),
+    ...(parsed.data.measurements !== undefined && { measurements: parsed.data.measurements ?? null }),
+    ...(parsed.data.hair_color !== undefined && { hair_color: parsed.data.hair_color ?? null }),
+    ...(parsed.data.eye_color !== undefined && { eye_color: parsed.data.eye_color ?? null }),
+    ...(parsed.data.shoe_size !== undefined && { shoe_size: parsed.data.shoe_size ?? null }),
   };
 
   const { error } = await supabase.from("talent_profiles").upsert(values, { onConflict: "user_id" });
@@ -130,15 +135,17 @@ export async function upsertClientProfileAction(
   return { ok: true };
 }
 
+// PATCH-safe schema: modeling fields are optional (may be omitted if hidden)
 const talentPersonalInfoSchema = z.object({
   phone: z.string().min(1).max(50),
   age: z.number().int().min(16).max(100).nullable(),
   location: z.string().min(1).max(100),
-  height: z.string().max(20).nullable(),
-  measurements: z.string().max(100).nullable(),
-  hair_color: z.string().max(30).nullable(),
-  eye_color: z.string().max(30).nullable(),
-  shoe_size: z.string().max(10).nullable(),
+  // Modeling fields are optional - if omitted, they won't be updated (preserves existing data)
+  height: z.string().max(20).nullable().optional(),
+  measurements: z.string().max(100).nullable().optional(),
+  hair_color: z.string().max(30).nullable().optional(),
+  eye_color: z.string().max(30).nullable().optional(),
+  shoe_size: z.string().max(10).nullable().optional(),
   languages: z.array(z.string().min(1).max(50)).nullable(),
   instagram_handle: z.string().max(50).nullable(),
 });
@@ -157,17 +164,20 @@ export async function updateTalentPersonalInfoAction(
 
   if (authError || !user) return { ok: false, error: "Authentication error. Please log in again." };
 
+  // PATCH-safe: Only include fields that are present in the input
+  // This prevents wiping existing modeling data when fields are hidden
   const talentPatch: TalentProfilesUpdate = {
     phone: parsed.data.phone,
     age: parsed.data.age,
     location: parsed.data.location,
-    height: parsed.data.height,
-    measurements: parsed.data.measurements,
-    hair_color: parsed.data.hair_color,
-    eye_color: parsed.data.eye_color,
-    shoe_size: parsed.data.shoe_size,
     languages: parsed.data.languages,
     updated_at: new Date().toISOString(),
+    // Only include modeling fields if they're present in the input
+    ...(parsed.data.height !== undefined && { height: parsed.data.height }),
+    ...(parsed.data.measurements !== undefined && { measurements: parsed.data.measurements }),
+    ...(parsed.data.hair_color !== undefined && { hair_color: parsed.data.hair_color }),
+    ...(parsed.data.eye_color !== undefined && { eye_color: parsed.data.eye_color }),
+    ...(parsed.data.shoe_size !== undefined && { shoe_size: parsed.data.shoe_size }),
   };
 
   const { error: talentError } = await supabase

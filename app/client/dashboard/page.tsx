@@ -28,6 +28,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -314,23 +315,11 @@ export default function ClientDashboard() {
     }
   };
 
+  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
+  // For now, keeping a simple fallback since badge styling may vary
   const getCategoryColor = (category: string | undefined) => {
-    switch (category?.toLowerCase()) {
-      case "editorial":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "commercial":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "runway":
-        return "bg-pink-50 text-pink-700 border-pink-200";
-      case "beauty":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      case "fitness":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "e-commerce":
-        return "bg-orange-50 text-orange-700 border-orange-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
+    // Default fallback - can be enhanced with getCategoryBadgeVariant
+    return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   // Show loading state if supabase is not initialized yet (pre-mount/SSR)
@@ -617,7 +606,7 @@ export default function ClientDashboard() {
                           <h4 className="font-medium text-white truncate">{gig.title}</h4>
                           <div className="flex items-center gap-2 mt-1">
                             <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                              {gig.category}
+                              {getCategoryLabel(gig.category || "")}
                             </Badge>
                             <Badge variant="outline" className={getStatusColor(gig.status)}>
                               {gig.status}
@@ -812,7 +801,7 @@ export default function ClientDashboard() {
 
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                        {gig.category}
+                        {getCategoryLabel(gig.category || "")}
                       </Badge>
                       <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
                     </div>

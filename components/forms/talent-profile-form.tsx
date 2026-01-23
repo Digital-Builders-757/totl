@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Save, User, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertTalentProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { isModelingTalent } from "@/lib/utils/talent-type";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -33,6 +34,7 @@ type TalentProfileFormData = Pick<
   | "eye_color"
   | "shoe_size"
   | "languages"
+  | "specialties"
 >;
 
 // Define the form schema
@@ -90,11 +92,17 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   const router = useRouter();
   const { toast } = useToast();
 
+  // Determine if this is modeling talent based on specialties from initialData
+  // Note: Specialties are managed in a separate form (talent-professional-info-form),
+  // so visibility is based on current specialties, not dynamically changing here
+  const showModelingFields = isModelingTalent(initialData?.specialties);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
     reset,
+    unregister,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -112,7 +120,20 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       shoe_size: initialData?.shoe_size || "",
       languages: initialData?.languages?.join(", ") || "",
     },
+    shouldUnregister: true, // Unregister hidden fields so they don't submit
   });
+
+  // Unregister modeling fields if they're hidden
+  React.useEffect(() => {
+    if (!showModelingFields) {
+      // Fields are hidden - unregister them so they don't submit
+      unregister("height");
+      unregister("measurements");
+      unregister("hair_color");
+      unregister("eye_color");
+      unregister("shoe_size");
+    }
+  }, [showModelingFields, unregister]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     setIsSubmitting(true);
@@ -126,21 +147,25 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             .filter(Boolean)
         : null;
 
-      const result = await upsertTalentProfileAction({
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone: data.phone || null,
-        location: data.location || null,
-        age: data.age ? parseInt(data.age, 10) : null,
-        experience: data.experience || null,
-        portfolio_url: data.portfolio_url || null,
-        height: data.height || null,
-        measurements: data.measurements || null,
-        hair_color: data.hair_color || null,
-        eye_color: data.eye_color || null,
-        shoe_size: data.shoe_size || null,
-        languages,
-      });
+        // Only include modeling fields if they're visible (present in form data)
+        // Hidden fields will be undefined and won't be included in the payload
+        const result = await upsertTalentProfileAction({
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone: data.phone || null,
+          location: data.location || null,
+          age: data.age ? parseInt(data.age, 10) : null,
+          experience: data.experience || null,
+          portfolio_url: data.portfolio_url || null,
+          // Only include modeling fields if they exist in the form data (visible fields)
+          // If fields are hidden, they'll be undefined and won't be included
+          ...(showModelingFields && data.height !== undefined && { height: data.height || null }),
+          ...(showModelingFields && data.measurements !== undefined && { measurements: data.measurements || null }),
+          ...(showModelingFields && data.hair_color !== undefined && { hair_color: data.hair_color || null }),
+          ...(showModelingFields && data.eye_color !== undefined && { eye_color: data.eye_color || null }),
+          ...(showModelingFields && data.shoe_size !== undefined && { shoe_size: data.shoe_size || null }),
+          languages,
+        });
 
       if (!result.ok) {
         throw new Error(result.error);
@@ -347,116 +372,127 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               />
               {errors.age && <p className="text-sm text-red-400">{errors.age.message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="height" className={errors.height ? "text-red-400" : "text-gray-300"}>
-                Height
-              </Label>
-              <Input
-                id="height"
-                placeholder="5'8&quot;"
-                {...register("height")}
-                className={
-                  errors.height
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
-                }
-                disabled={isSubmitting}
-              />
-              {errors.height && <p className="text-sm text-red-400">{errors.height.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="shoe_size"
-                className={errors.shoe_size ? "text-red-400" : "text-gray-300"}
-              >
-                Shoe Size
-              </Label>
-              <Input
-                id="shoe_size"
-                placeholder="8"
-                {...register("shoe_size")}
-                className={
-                  errors.shoe_size
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
-                }
-                disabled={isSubmitting}
-              />
-              {errors.shoe_size && (
-                <p className="text-sm text-red-400">{errors.shoe_size.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label
-                htmlFor="hair_color"
-                className={errors.hair_color ? "text-red-400" : "text-gray-300"}
-              >
-                Hair Color
-              </Label>
-              <Input
-                id="hair_color"
-                placeholder="Brown"
-                {...register("hair_color")}
-                className={
-                  errors.hair_color
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
-                }
-                disabled={isSubmitting}
-              />
-              {errors.hair_color && (
-                <p className="text-sm text-red-400">{errors.hair_color.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label
-                htmlFor="eye_color"
-                className={errors.eye_color ? "text-red-400" : "text-gray-300"}
-              >
-                Eye Color
-              </Label>
-              <Input
-                id="eye_color"
-                placeholder="Blue"
-                {...register("eye_color")}
-                className={
-                  errors.eye_color
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
-                }
-                disabled={isSubmitting}
-              />
-              {errors.eye_color && (
-                <p className="text-sm text-red-400">{errors.eye_color.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label
-              htmlFor="measurements"
-              className={errors.measurements ? "text-red-400" : "text-gray-300"}
-            >
-              Measurements
-            </Label>
-            <Input
-              id="measurements"
-              placeholder="34-26-36"
-              {...register("measurements")}
-              className={
-                errors.measurements
-                  ? "border-red-500 bg-gray-800 text-white"
-                  : "bg-gray-800 border-gray-600 text-white"
-              }
-              disabled={isSubmitting}
-            />
-            {errors.measurements && (
-              <p className="text-sm text-red-400">{errors.measurements.message}</p>
+            {/* Modeling-only fields - conditionally rendered */}
+            {showModelingFields && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="height" className={errors.height ? "text-red-400" : "text-gray-300"}>
+                    Height
+                  </Label>
+                  <Input
+                    id="height"
+                    placeholder="5'8&quot;"
+                    {...register("height")}
+                    className={
+                      errors.height
+                        ? "border-red-500 bg-gray-800 text-white"
+                        : "bg-gray-800 border-gray-600 text-white"
+                    }
+                    disabled={isSubmitting}
+                  />
+                  {errors.height && <p className="text-sm text-red-400">{errors.height.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="shoe_size"
+                    className={errors.shoe_size ? "text-red-400" : "text-gray-300"}
+                  >
+                    Shoe Size
+                  </Label>
+                  <Input
+                    id="shoe_size"
+                    placeholder="8"
+                    {...register("shoe_size")}
+                    className={
+                      errors.shoe_size
+                        ? "border-red-500 bg-gray-800 text-white"
+                        : "bg-gray-800 border-gray-600 text-white"
+                    }
+                    disabled={isSubmitting}
+                  />
+                  {errors.shoe_size && (
+                    <p className="text-sm text-red-400">{errors.shoe_size.message}</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
+
+          {/* Modeling-only fields - conditionally rendered */}
+          {showModelingFields && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="hair_color"
+                  className={errors.hair_color ? "text-red-400" : "text-gray-300"}
+                >
+                  Hair Color
+                </Label>
+                <Input
+                  id="hair_color"
+                  placeholder="Brown"
+                  {...register("hair_color")}
+                  className={
+                    errors.hair_color
+                      ? "border-red-500 bg-gray-800 text-white"
+                      : "bg-gray-800 border-gray-600 text-white"
+                  }
+                  disabled={isSubmitting}
+                />
+                {errors.hair_color && (
+                  <p className="text-sm text-red-400">{errors.hair_color.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="eye_color"
+                  className={errors.eye_color ? "text-red-400" : "text-gray-300"}
+                >
+                  Eye Color
+                </Label>
+                <Input
+                  id="eye_color"
+                  placeholder="Blue"
+                  {...register("eye_color")}
+                  className={
+                    errors.eye_color
+                      ? "border-red-500 bg-gray-800 text-white"
+                      : "bg-gray-800 border-gray-600 text-white"
+                  }
+                  disabled={isSubmitting}
+                />
+                {errors.eye_color && (
+                  <p className="text-sm text-red-400">{errors.eye_color.message}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Modeling-only field - conditionally rendered */}
+          {showModelingFields && (
+            <div className="space-y-2">
+              <Label
+                htmlFor="measurements"
+                className={errors.measurements ? "text-red-400" : "text-gray-300"}
+              >
+                Measurements
+              </Label>
+              <Input
+                id="measurements"
+                placeholder="34-26-36"
+                {...register("measurements")}
+                className={
+                  errors.measurements
+                    ? "border-red-500 bg-gray-800 text-white"
+                    : "bg-gray-800 border-gray-600 text-white"
+                }
+                disabled={isSubmitting}
+              />
+              {errors.measurements && (
+                <p className="text-sm text-red-400">{errors.measurements.message}</p>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

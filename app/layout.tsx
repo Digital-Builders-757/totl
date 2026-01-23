@@ -1,4 +1,4 @@
-﻿import "./globals.css";
+import "./globals.css";
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -11,11 +11,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.thetotlagency.com"),
-  title: "TOTL Agency - Premium Modeling Agency",
-  description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+  title: "TOTL Agency - Premium Talent Agency",
+  description: "Representing exceptional talent worldwide. RISE ABOVE THE REST.",
   openGraph: {
-    title: "TOTL Agency - Premium Modeling Agency",
-    description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+    title: "TOTL Agency - Premium Talent Agency",
+    description: "Representing exceptional talent worldwide. RISE ABOVE THE REST.",
     url: "https://totlagency.com",
     siteName: "TOTL Agency",
     images: [
@@ -29,8 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TOTL Agency - Premium Modeling Agency",
-    description: "Representing exceptional modeling talent worldwide. RISE ABOVE THE REST.",
+    title: "TOTL Agency - Premium Talent Agency",
+    description: "Representing exceptional talent worldwide. RISE ABOVE THE REST.",
     images: ["/images/totl-logo-new.png"],
   },
   generator: "v0.dev",

@@ -47,6 +47,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
@@ -552,21 +553,11 @@ function TalentDashboardContent({
     setSelectedTalentApplication(null);
   };
 
+  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
+  // For now, keeping a simple fallback since badge styling may vary
   const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
-      case "editorial":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "commercial":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "runway":
-        return "bg-pink-50 text-pink-700 border-pink-200";
-      case "beauty":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      case "fitness":
-        return "bg-green-50 text-green-700 border-green-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
+    // Default fallback - can be enhanced with getCategoryBadgeVariant
+    return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   useEffect(() => {
@@ -1212,7 +1203,7 @@ function TalentDashboardContent({
                             variant="outline"
                             className={getCategoryColor(app.gigs?.category || "General")}
                           >
-                            {app.gigs?.category || "General"}
+                            {getCategoryLabel(app.gigs?.category || "")}
                           </Badge>
                           <span className="flex items-center gap-1">
                             <DollarSign className="h-4 w-4" />
@@ -1415,7 +1406,7 @@ function TalentDashboardContent({
                               variant="outline"
                               className={getCategoryColor(gig.category || "General")}
                             >
-                              {gig.category || "General"}
+                              {getCategoryLabel(gig.category || "")}
                             </Badge>
                             <div className="flex items-center text-sm text-gray-300">
                               <MapPin className="h-4 w-4 mr-1" />

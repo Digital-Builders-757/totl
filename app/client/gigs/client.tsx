@@ -24,6 +24,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import type { Database } from "@/types/supabase";
 
 interface Gig {
@@ -125,23 +126,11 @@ export default function ClientGigsClient() {
 
   // Removed getStatusColor - now using GigStatusBadge component
 
+  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
+  // For now, keeping a simple fallback since badge styling may vary
   const getCategoryColor = (category: string) => {
-    switch (category?.toLowerCase()) {
-      case "editorial":
-        return "bg-purple-50 text-purple-700 border-purple-200";
-      case "commercial":
-        return "bg-blue-50 text-blue-700 border-blue-200";
-      case "runway":
-        return "bg-pink-50 text-pink-700 border-pink-200";
-      case "beauty":
-        return "bg-rose-50 text-rose-700 border-rose-200";
-      case "fitness":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "e-commerce":
-        return "bg-orange-50 text-orange-700 border-orange-200";
-      default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
-    }
+    // Default fallback - can be enhanced with getCategoryBadgeVariant
+    return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   const filteredGigs = gigs.filter((gig) => {
@@ -374,7 +363,7 @@ export default function ClientGigsClient() {
 
                       <div className="flex items-center justify-between">
                         <Badge variant="outline" className={getCategoryColor(gig.category || "")}>
-                          {gig.category}
+                          {getCategoryLabel(gig.category || "")}
                         </Badge>
                         <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
                       </div>
