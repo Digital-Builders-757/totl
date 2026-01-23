@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -181,6 +181,7 @@ export default function TalentProfilePage() {
                     initialData={
                       profileData ? mapTalentProfileToPersonalInfo(profileData) : undefined
                     }
+                    specialties={profileData?.specialties || null}
                     onSaved={handleProfileUpdate}
                   />
                 )}

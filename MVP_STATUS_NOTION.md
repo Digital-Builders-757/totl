@@ -8,7 +8,36 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Three Truths Logging - Auth Redirect Debugging & Verification (January 20, 2026)**
+## 🚀 **Latest: Gig Categories & Performance Hardening (January 22, 2026)**
+
+**GIG CATEGORIES & PERFORMANCE HARDENING** - January 22, 2026  
+- ✅ **Hardened gig category filtering system**: Added `getCategoryFilterSet()` guard that returns `[]` for empty/null inputs, preventing accidental filtering when "All" is selected
+- ✅ **Added dev-only warnings for unknown categories**: Unknown categories now log warnings in development to catch data drift early
+- ✅ **Parallel query fetching in `/gigs` page**: Eliminated waterfall by fetching profile and gigs queries simultaneously using `Promise.all`
+- ✅ **Keyword sanitization**: Added input sanitization for search keywords to prevent query syntax errors from special characters
+- ✅ **Removed unsafe type casts**: Eliminated `as Database["public"]["Tables"]["gigs"]["Row"]` cast by ensuring `GigRow` type matches helper function requirements
+- ✅ **Updated obfuscation logic to use normalized categories**: Migrated from legacy category keys to canonical normalized categories, ensuring new and legacy categories work correctly
+- ✅ **Replaced "Career Builder" with generic terms**: Changed brand-specific terminology to "client"/"brand" throughout for better UX clarity
+
+**Why this change:**
+- Category filtering needed hardening to prevent accidental filtering when empty strings are passed
+- Performance optimization: Sequential queries were causing unnecessary latency
+- Type safety: Unsafe casts were hiding potential type mismatches
+- Obfuscation logic was only recognizing legacy categories, missing new canonical categories
+
+**Impact:**
+- More resilient category filtering (empty array = no constraint pattern)
+- Faster page loads due to parallel query execution
+- Full type safety without casts
+- Obfuscation works correctly for all categories (new and legacy)
+- Cleaner UX with generic terminology
+
+**Next (P1 - Follow-up)**
+- [ ] Monitor production for unknown category warnings (should be rare)
+- [ ] Consider migrating keyword search to full-text search (tsvector) when keyword search becomes a bottleneck
+- [ ] Consider estimated count or "hasNext" pagination strategy if exact counts become expensive
+
+## 🚀 **Previous: Three Truths Logging - Auth Redirect Debugging & Verification (January 20, 2026)**
 
 **THREE TRUTHS LOGGING IMPLEMENTATION** - January 20, 2026  
 - ✅ **Added comprehensive logging to prove session is cookie-backed end-to-end**: Implemented "three truths" logging to verify SIGNED_IN fires, cookies exist in browser, and middleware receives cookies

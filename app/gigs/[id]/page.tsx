@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SafeImage } from "@/components/ui/safe-image";
 import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from "@/lib/db/selects";
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -82,16 +83,11 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
       ? profile
       : null;
 
+  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
+  // For now, keeping a simple fallback since badge styling may vary
   const getCategoryColor = (category: string) => {
-    const colors = {
-      "e-commerce": "bg-blue-100 text-blue-800",
-      commercial: "bg-green-100 text-green-800",
-      editorial: "bg-purple-100 text-purple-800",
-      runway: "bg-pink-100 text-pink-800",
-      sportswear: "bg-orange-100 text-orange-800",
-      beauty: "bg-yellow-100 text-yellow-800",
-    };
-    return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800";
+    // Default fallback - can be enhanced with getCategoryBadgeVariant
+    return "bg-gray-100 text-gray-800";
   };
 
   return (
@@ -118,7 +114,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   <CardDescription className="text-lg mt-2">{displayDescription}</CardDescription>
                 </div>
                 <Badge className={getCategoryColor(gig.category || "general")}>
-                  {gig.category || "General"}
+                  {getCategoryLabel(gig.category || "")}
                 </Badge>
               </div>
             </CardHeader>
@@ -324,7 +320,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Category</span>
-                <span className="font-medium">{gig.category || "General"}</span>
+                <span className="font-medium">{getCategoryLabel(gig.category || "")}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Compensation</span>

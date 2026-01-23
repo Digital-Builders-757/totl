@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Info, Loader2 } from "lucide-react";
 import type React from "react";
@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { updateTalentPersonalInfoAction } from "@/lib/actions/profile-actions";
+import { isModelingTalent } from "@/lib/utils/talent-type";
 
 interface PersonalInfoFormData {
   phone: string;
@@ -35,13 +36,19 @@ interface PersonalInfoFormData {
 
 interface PersonalInfoFormProps {
   initialData?: Partial<PersonalInfoFormData>;
+  specialties?: string[] | null; // Optional: if provided, used to determine field visibility
   onSaved?: () => void;
 }
 
 export default function TalentPersonalInfoForm({
   initialData = {},
+  specialties,
   onSaved,
 }: PersonalInfoFormProps) {
+  // Determine if this is modeling talent based on specialties
+  // If specialties not provided, default to showing all fields (backward compatibility)
+  const showModelingFields = specialties !== undefined ? isModelingTalent(specialties) : true;
+
   const [formData, setFormData] = useState<PersonalInfoFormData>({
     phone: initialData.phone || "",
     age: initialData.age || "",
@@ -190,18 +197,28 @@ export default function TalentPersonalInfoForm({
     setIsSubmitting(true);
 
     try {
-      const result = await updateTalentPersonalInfoAction({
+      // Build payload - only include modeling fields if they're visible
+      // Hidden fields won't be in formData, so they won't be included (PATCH-safe)
+      const payload: Parameters<typeof updateTalentPersonalInfoAction>[0] = {
         phone: formData.phone,
         age: Number.parseInt(formData.age) || null,
         location: formData.location,
-        height: formData.height || null,
-        measurements: formData.measurements || null,
-        hair_color: formData.hairColor || null,
-        eye_color: formData.eyeColor || null,
-        shoe_size: formData.shoeSize || null,
         languages: formData.languages,
         instagram_handle: formData.instagram ? formData.instagram.replace(/^@/, "") : null,
-      });
+      };
+
+      // Only include modeling fields if they're visible (present in formData)
+      if (showModelingFields) {
+        payload.height = formData.height || null;
+        payload.measurements = formData.measurements || null;
+        payload.hair_color = formData.hairColor || null;
+        payload.eye_color = formData.eyeColor || null;
+        payload.shoe_size = formData.shoeSize || null;
+      }
+      // If showModelingFields is false, these fields are omitted from payload
+      // Server action will preserve existing values (PATCH-safe)
+
+      const result = await updateTalentPersonalInfoAction(payload);
 
       if (!result.ok) throw new Error(result.error);
 
@@ -276,105 +293,110 @@ export default function TalentPersonalInfoForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="height">
-            Height
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 ml-1 inline text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="w-[200px] text-xs">
-                    Enter your height in feet and inches (e.g., 5&apos;10&quot;) or centimeters
-                    (e.g., 178)
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </Label>
-          <Input
-            id="height"
-            placeholder="e.g., 5'10&quot; or 178"
-            value={formData.height}
-            onChange={handleChange}
-            className={formErrors.height ? "border-red-500" : ""}
-          />
-          {formErrors.height && <p className="text-sm text-red-500 mt-1">{formErrors.height}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="measurements">
-            Measurements
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 ml-1 inline text-gray-400" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="w-[200px] text-xs">
-                    Enter your measurements in the format: bust-waist-hips (e.g., 34-28-36)
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </Label>
-          <Input
-            id="measurements"
-            placeholder="e.g., 34-28-36"
-            value={formData.measurements}
-            onChange={handleChange}
-          />
-        </div>
-      </div>
+      {/* Modeling-only fields - conditionally rendered */}
+      {showModelingFields && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="height">
+                Height
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 ml-1 inline text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="w-[200px] text-xs">
+                        Enter your height in feet and inches (e.g., 5&apos;10&quot;) or centimeters
+                        (e.g., 178)
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Label>
+              <Input
+                id="height"
+                placeholder="e.g., 5'10&quot; or 178"
+                value={formData.height}
+                onChange={handleChange}
+                className={formErrors.height ? "border-red-500" : ""}
+              />
+              {formErrors.height && <p className="text-sm text-red-500 mt-1">{formErrors.height}</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="measurements">
+                Measurements
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="h-3.5 w-3.5 ml-1 inline text-gray-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="w-[200px] text-xs">
+                        Enter your measurements in the format: bust-waist-hips (e.g., 34-28-36)
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </Label>
+              <Input
+                id="measurements"
+                placeholder="e.g., 34-28-36"
+                value={formData.measurements}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="hairColor">Hair Color</Label>
-          <Select
-            value={formData.hairColor}
-            onValueChange={(value) => handleSelectChange("hairColor", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select hair color" />
-            </SelectTrigger>
-            <SelectContent>
-              {hairColorOptions.map((color) => (
-                <SelectItem key={color} value={color}>
-                  {color}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="eyeColor">Eye Color</Label>
-          <Select
-            value={formData.eyeColor}
-            onValueChange={(value) => handleSelectChange("eyeColor", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select eye color" />
-            </SelectTrigger>
-            <SelectContent>
-              {eyeColorOptions.map((color) => (
-                <SelectItem key={color} value={color}>
-                  {color}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="shoeSize">Shoe Size</Label>
-          <Input
-            id="shoeSize"
-            placeholder="e.g., 9 or 42"
-            value={formData.shoeSize}
-            onChange={handleChange}
-          />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="hairColor">Hair Color</Label>
+              <Select
+                value={formData.hairColor}
+                onValueChange={(value) => handleSelectChange("hairColor", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select hair color" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hairColorOptions.map((color) => (
+                    <SelectItem key={color} value={color}>
+                      {color}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="eyeColor">Eye Color</Label>
+              <Select
+                value={formData.eyeColor}
+                onValueChange={(value) => handleSelectChange("eyeColor", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select eye color" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eyeColorOptions.map((color) => (
+                    <SelectItem key={color} value={color}>
+                      {color}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="shoeSize">Shoe Size</Label>
+              <Input
+                id="shoeSize"
+                placeholder="e.g., 9 or 42"
+                value={formData.shoeSize}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="languages">Languages</Label>

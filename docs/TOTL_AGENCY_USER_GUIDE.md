@@ -130,7 +130,7 @@ As a **Talent user**, the platform helps you:
    - See grid of available opportunities
    - Each card shows:
      - Gig title and featured image
-     - Category badge (Editorial, Commercial, Runway, etc.)
+     - Category badge (Modeling, Acting, Photography, Video, Influencer, Dancer, Musician)
      - Location, compensation, and date
      - "View Details" button
    - Use filters: Search keywords, category, location, compensation
@@ -318,7 +318,7 @@ As a **Career Builder**, the platform helps you:
 1. **Fill Out Gig Details**
    - **Title**: Clear, descriptive (e.g., "NYC Editorial Shoot")
    - **Description**: Full details of the opportunity
-   - **Category**: Editorial, Commercial, Runway, Beauty, Fitness, etc.
+   - **Category**: Modeling, Acting, Photography, Video, Influencer, Dancer, Musician
    - **Location**: Where the gig takes place
    - **Date**: When talent is needed
    - **Compensation**: Pay range or rate

@@ -1,4 +1,4 @@
-﻿import { Instagram, Mail, MapPin, Phone, Users, Target, Award, Sparkles } from "lucide-react";
+import { Instagram, Mail, MapPin, Phone, Users, Target, Award, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,7 @@ export default function AboutPage() {
                 <span className="apple-text-gradient"> The Rest</span>
               </h1>
               <p className="text-2xl text-gray-300 leading-relaxed max-w-lg">
-                Representing exceptional modeling talent worldwide. We connect the right talent with
+                Representing exceptional talent worldwide. We connect the right talent with
                 the right opportunities through innovation and integrity.
               </p>
             </div>
@@ -75,7 +75,7 @@ export default function AboutPage() {
                   <div className="text-left">
                     <h3 className="text-xl font-bold text-white mb-2">The Vision</h3>
                     <p>
-                      Founded in 2020, TOTL Agency emerged from a vision to transform the modeling
+                      Founded in 2020, TOTL Agency emerged from a vision to transform the talent
                       industry. We recognized a gap between exceptional talent and quality
                       opportunities, and set out to bridge that divide with integrity and innovation.
                     </p>
@@ -108,7 +108,7 @@ export default function AboutPage() {
                   <div className="text-left">
                     <h3 className="text-xl font-bold text-white mb-2">Today & Beyond</h3>
                     <p>
-                      Today, we&apos;re proud to represent diverse talent across various modeling
+                      Today, we&apos;re proud to represent diverse talent across various
                       specialties, connecting them with brands that value authenticity and creativity as
                       much as we do. Our journey continues as we shape the future of talent representation.
                     </p>
@@ -154,7 +154,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-2xl font-bold mb-4 text-white">Empower Talent</h3>
               <p className="text-gray-300 leading-relaxed">
-                We empower models to take control of their careers through education, mentorship,
+                We empower talent to take control of their careers through education, mentorship,
                 and transparent business practices.
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function AboutPage() {
               <h3 className="text-2xl font-bold mb-4 text-white">Foster Diversity</h3>
               <p className="text-gray-300 leading-relaxed">
                 We celebrate diversity in all forms, actively working to create inclusive
-                opportunities in the modeling industry.
+                opportunities across industries.
               </p>
             </div>
             <div
@@ -222,7 +222,7 @@ export default function AboutPage() {
                 <div>
                   <h3 className="text-2xl font-bold mb-3 text-white">Talent Representation</h3>
                   <p className="text-gray-300 leading-relaxed">
-                    We provide comprehensive representation for models, including portfolio
+                    We provide comprehensive representation for talent, including portfolio
                     development, career guidance, and booking management.
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export default function AboutPage() {
                   <h3 className="text-2xl font-bold mb-3 text-white">Event Management</h3>
                   <p className="text-gray-300 leading-relaxed">
                     We coordinate fashion shows, promotional events, and brand activations with our
-                    roster of professional models.
+                    roster of professional talent.
                   </p>
                 </div>
               </div>
@@ -414,7 +414,7 @@ export default function AboutPage() {
             </Badge>
             <h2 className="text-5xl lg:text-6xl font-bold text-white">Ready to Work With Us?</h2>
             <p className="text-2xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
-              Whether you&apos;re a model looking for representation or a brand seeking talent,
+              Whether you&apos;re talent looking for representation or a brand seeking talent,
               we&apos;re here to help you succeed.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">

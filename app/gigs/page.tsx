@@ -1,4 +1,4 @@
-﻿export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 import * as Sentry from "@sentry/nextjs";
 import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { VISIBLE_GIG_CATEGORIES, getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
@@ -48,7 +49,10 @@ export default async function GigsPage({
   }
 
   const sp = await searchParams;
-  const keyword = typeof sp.q === "string" ? sp.q.trim() : "";
+  const rawKeyword = typeof sp.q === "string" ? sp.q.trim() : "";
+  // Sanitize keyword to prevent query injection via .or() string interpolation
+  // Remove characters that could break the filter expression
+  const keyword = rawKeyword.replace(/[,()]/g, " ").trim();
   const category = typeof sp.category === "string" ? sp.category.trim() : "";
   const location = typeof sp.location === "string" ? sp.location.trim() : "";
   const compensation =
@@ -82,8 +86,11 @@ export default async function GigsPage({
       `title.ilike.%${keyword}%,description.ilike.%${keyword}%,location.ilike.%${keyword}%`
     );
   }
-  if (category) {
-    query = query.eq("category", category);
+  // Use filter set to include legacy categories for backward compatibility
+  // getCategoryFilterSet returns [] for empty/null inputs, which we treat as "no filtering"
+  const filterSet = getCategoryFilterSet(category);
+  if (filterSet.length) {
+    query = query.in("category", filterSet);
   }
   if (location) {
     query = query.ilike("location", `%${location}%`);
@@ -96,10 +103,23 @@ export default async function GigsPage({
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  // Fetch data with count in a single query
-  const { data: gigs, error, count } = await query
+  // Build query promise (not executed yet)
+  const gigsPromise = query
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  // Fetch profile in parallel (no dependency on gigs query)
+  const profilePromise = supabase
+    .from("profiles")
+    .select("role, subscription_status")
+    .eq("id", user.id)
+    .maybeSingle<SubscriptionAwareProfile>();
+
+  // Execute both queries in parallel to eliminate waterfall
+  const [
+    { data: gigs, error, count },
+    { data: profileData },
+  ] = await Promise.all([gigsPromise, profilePromise]);
 
   // If we got a range error, it means the page is beyond available data
   // In this case, just show empty results instead of erroring
@@ -155,7 +175,7 @@ export default async function GigsPage({
   // Helper to preserve query params while changing page
   const buildPageHref = (targetPage: number) => {
     const params = new URLSearchParams();
-    if (keyword) params.set("q", keyword);
+    if (rawKeyword) params.set("q", rawKeyword); // Use original keyword for URL
     if (category) params.set("category", category);
     if (location) params.set("location", location);
     if (compensation) params.set("compensation", compensation);
@@ -163,15 +183,10 @@ export default async function GigsPage({
     return `/gigs?${params.toString()}`;
   };
 
-  // Get user role and profile (user is guaranteed to exist here due to early return above)
+  // Extract user role and profile from parallel fetch result
   let userRole: string | null = null;
   let profile: SubscriptionAwareProfile | null = null;
   
-  const { data: profileData } = await supabase
-    .from("profiles")
-    .select("role, subscription_status")
-    .eq("id", user.id)
-    .maybeSingle();
   if (profileData) {
     profile = {
       role: profileData.role,
@@ -249,7 +264,7 @@ export default async function GigsPage({
                   <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                   <Input
                     name="q"
-                    defaultValue={keyword}
+                    defaultValue={rawKeyword}
                     placeholder="Search keywords..."
                     className="input-glow pl-10 sm:pl-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
                   />
@@ -261,13 +276,11 @@ export default async function GigsPage({
                     className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
                   >
                     <option value="">All categories</option>
-                    <option value="editorial">Editorial</option>
-                    <option value="commercial">Commercial</option>
-                    <option value="runway">Runway</option>
-                    <option value="beauty">Beauty</option>
-                    <option value="fitness">Fitness</option>
-                    <option value="e-commerce">E-commerce</option>
-                    <option value="other">Other</option>
+                    {VISIBLE_GIG_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {getCategoryLabel(cat)}
+                      </option>
+                    ))}
                   </select>
                   <Input
                     name="location"
@@ -314,9 +327,10 @@ export default async function GigsPage({
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {gigsList.map((gig) => {
-                const typedGig = gig as Database["public"]["Tables"]["gigs"]["Row"];
-                const displayTitle = getGigDisplayTitle(typedGig, profile);
-                const displayDescription = getGigDisplayDescription(typedGig, profile);
+                // GigRow already includes title, description, category (all fields needed by helpers)
+                // No unsafe cast needed - types align perfectly
+                const displayTitle = getGigDisplayTitle(gig, profile);
+                const displayDescription = getGigDisplayDescription(gig, profile);
 
                 return (
                 <div
@@ -338,7 +352,7 @@ export default async function GigsPage({
                         variant="secondary"
                         className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
                       >
-                        {gig.category}
+                        {getCategoryLabel(gig.category)}
                       </Badge>
                     </div>
                     <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
