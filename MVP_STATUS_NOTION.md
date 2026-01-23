@@ -8,7 +8,38 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Gig Categories & Performance Hardening (January 22, 2026)**
+## 🚀 **Latest: Gig Image Upload Feature + Security Hardening (January 22, 2026)**
+
+**GIG IMAGE UPLOAD IMPLEMENTATION** - January 22, 2026  
+- ✅ **Complete gig image upload system**: Created reusable `GigImageUploader` component with drag & drop, validation, and preview
+- ✅ **Storage bucket migration**: Created `gig-images` public bucket with secure RLS policies (users can only manage their own images)
+- ✅ **Server-side upload logic**: Implemented `uploadGigImage()` helper with enhanced validation (MIME type, size, extension matching)
+- ✅ **Cleanup on failure**: Added `deleteGigImage()` helper that automatically cleans up orphaned images when gig creation fails
+- ✅ **Security hardening**: Replaced `Math.random()` with `crypto.randomUUID()` for stronger randomness
+- ✅ **Path ownership assertion**: Added early validation in delete operations to prevent noisy failed deletes
+- ✅ **Both create flows updated**: Client-facing (`/post-gig`) and admin (`/admin/gigs/create`) forms now support image upload
+- ✅ **Comprehensive documentation**: Created security audit, implementation summary, and hardening docs
+
+**Why this change:**
+- Users couldn't upload cover images when creating gigs (missing UI + server logic + storage setup)
+- Needed secure storage policies to prevent unauthorized access
+- Required cleanup logic to prevent orphaned images on failure
+- Needed production-grade security hardening
+
+**Impact:**
+- Users can now upload gig cover images during creation
+- Images are securely stored with proper RLS policies
+- Orphaned images are automatically cleaned up on failure
+- Stronger random ID generation prevents collisions
+- Complete end-to-end flow: UI → server → storage → DB
+
+**Next (P1 - Follow-up)**
+- [ ] Run migration: `npx supabase migration up --linked` to create storage bucket
+- [ ] Test image upload flow in production
+- [ ] Consider image replacement feature (delete old image when replacing)
+- [ ] Consider image compression/resizing for better performance
+
+## 🚀 **Previous: Gig Categories & Performance Hardening (January 22, 2026)**
 
 **GIG CATEGORIES & PERFORMANCE HARDENING** - January 22, 2026  
 - ✅ **Hardened gig category filtering system**: Added `getCategoryFilterSet()` guard that returns `[]` for empty/null inputs, preventing accidental filtering when "All" is selected

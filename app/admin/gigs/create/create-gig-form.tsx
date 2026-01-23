@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { createGig } from "./actions";
+import { GigImageUploader } from "@/components/gigs/gig-image-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,9 +34,14 @@ function SubmitButton() {
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [category, setCategory] = useState<string>("modeling");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const router = useRouter();
   const [state, formAction] = useActionState(
     async (prevState: { error?: string; success?: boolean } | null, formData: FormData) => {
+      // Add image file to FormData if present
+      if (imageFile) {
+        formData.append("gig_image", imageFile);
+      }
       const result = await createGig(formData);
       if (result?.success) {
         // Redirect to dashboard on success
@@ -263,6 +269,14 @@ export function CreateGigForm() {
                   className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-700"
                 />
                 <Label htmlFor="featured" className="text-white">Feature this gig</Label>
+              </div>
+
+              {/* Gig Cover Image Upload */}
+              <div className="space-y-2">
+                <GigImageUploader
+                  onFileSelect={setImageFile}
+                  disabled={state?.success === true}
+                />
               </div>
 
               <div className="flex justify-end space-x-4">

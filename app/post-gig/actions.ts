@@ -1,5 +1,6 @@
 "use server";
 
+import { uploadGigImage } from "@/lib/actions/gig-actions";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -14,6 +15,7 @@ export async function createGigAction(input: {
   duration: string;
   date: string;
   application_deadline?: string | null;
+  imageFile?: File | null;
 }): Promise<{ ok: true; gigId: string } | { ok: false; error: string }> {
   const supabase = await createSupabaseServer();
 
@@ -23,6 +25,16 @@ export async function createGigAction(input: {
   } = await supabase.auth.getUser();
 
   if (authError || !user) return { ok: false, error: "Not authenticated" };
+
+  // Upload image if provided (before DB insert to enable cleanup on failure)
+  let imageUrl: string | null = null;
+  if (input.imageFile) {
+    const uploadResult = await uploadGigImage(input.imageFile, user.id);
+    if ("error" in uploadResult) {
+      return { ok: false, error: uploadResult.error };
+    }
+    imageUrl = uploadResult.url;
+  }
 
   const payload: GigInsert = {
     client_id: user.id,
@@ -34,6 +46,7 @@ export async function createGigAction(input: {
     duration: input.duration,
     date: input.date,
     application_deadline: input.application_deadline ?? null,
+    image_url: imageUrl,
     status: "active",
   };
 
@@ -42,6 +55,13 @@ export async function createGigAction(input: {
     .insert(payload)
     .select("id")
     .single();
+
+  // If DB insert fails but image was uploaded, clean up orphaned image
+  if ((error || !data) && imageUrl) {
+    const { deleteGigImage } = await import("@/lib/actions/gig-actions");
+    await deleteGigImage(imageUrl, user.id);
+    return { ok: false, error: error?.message ?? "Failed to create gig" };
+  }
 
   if (error || !data) return { ok: false, error: error?.message ?? "Failed to create gig" };
 

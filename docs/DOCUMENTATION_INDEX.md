@@ -113,6 +113,10 @@ All other documentation has been organized into the `docs/` folder.
 - `COMMAND_PALETTE_IMPLEMENTATION.md` - Global command palette (⌘K) implementation (Oct 2025)
 - `FORM_INPUT_POLISH_IMPLEMENTATION.md` - Form input polish with floating labels & animations (Oct 2025)
 - `PROFILE_IMAGE_UPLOAD_SETUP.md` - Profile image upload system
+- `GIG_IMAGE_UPLOAD_FIX.md` - **✅ NEW** - Gig image upload implementation report (Jan 2026)
+- `GIG_IMAGE_UPLOAD_SECURITY_AUDIT.md` - **✅ NEW** - Complete security audit for gig image upload system (Jan 2026)
+- `GIG_IMAGE_UPLOAD_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Implementation summary and testing checklist (Jan 2026)
+- `GIG_IMAGE_UPLOAD_HARDENING.md` - **✅ NEW** - Security hardening improvements (crypto.randomUUID + path ownership assertion, Jan 2026)
 - `APPLICATION_SUBMISSION_406_ERROR_REPORT.md` - Application submission error fixes
 - `CLIENT_TALENT_VISIBILITY.md` - Clarifies which talent clients actually see and why there is no public directory (must align with `POLICY_MATRIX_APPROACH_B.md`)
 - `APPROACH_B_IMPLEMENTATION.md` - ✅ **COMPLETE** - Implementation tracker for Approach B policy alignment (PR1-5 complete)

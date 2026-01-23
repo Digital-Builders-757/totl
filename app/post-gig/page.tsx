@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { createGigAction } from "./actions";
 import { useAuth } from "@/components/auth/auth-provider";
+import { GigImageUploader } from "@/components/gigs/gig-image-uploader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +44,7 @@ export default function PostGigPage() {
     date: "",
     application_deadline: "",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -74,6 +76,7 @@ export default function PostGigPage() {
         duration: formData.duration,
         date: formData.date,
         application_deadline: formData.application_deadline || null,
+        imageFile: imageFile,
       });
 
       if (!result.ok) throw new Error(result.error);
@@ -233,6 +236,14 @@ export default function PostGigPage() {
                     onChange={handleChange}
                   />
                 </div>
+              </div>
+
+              {/* Gig Cover Image Upload */}
+              <div className="space-y-2">
+                <GigImageUploader
+                  onFileSelect={setImageFile}
+                  disabled={isSubmitting}
+                />
               </div>
 
               <div className="flex flex-col gap-4 pt-6 md:flex-row">

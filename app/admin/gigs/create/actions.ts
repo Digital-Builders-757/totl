@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -36,6 +37,7 @@ export async function createGig(formData: FormData) {
   const startDate = formData.get("start_date") as string;
   const compensationMin = formData.get("compensation_min") as string;
   const compensationMax = formData.get("compensation_max") as string;
+  const imageFile = formData.get("gig_image") as File | null;
 
   // Get requirements (they come as multiple form fields)
   const requirements: string[] = [];
@@ -55,6 +57,16 @@ export async function createGig(formData: FormData) {
   const maxComp = parseInt(compensationMax) || 0;
   const compensation = maxComp > minComp ? `$${minComp} - $${maxComp}` : `$${minComp}`;
 
+  // Upload image if provided (before DB insert to enable cleanup on failure)
+  let imageUrl: string | null = null;
+  if (imageFile && imageFile.size > 0) {
+    const uploadResult = await uploadGigImage(imageFile, user.id);
+    if ("error" in uploadResult) {
+      return { error: uploadResult.error };
+    }
+    imageUrl = uploadResult.url;
+  }
+
   // Insert gig into database (always active when created)
   const { data: gig, error: insertError } = await supabase
     .from("gigs")
@@ -67,10 +79,18 @@ export async function createGig(formData: FormData) {
       compensation,
       duration: "TBD", // Default duration
       date: startDate || new Date().toISOString().split("T")[0],
+      image_url: imageUrl,
       status: "active" as const,
     })
     .select()
     .single();
+
+  // If DB insert fails but image was uploaded, clean up orphaned image
+  if (insertError && imageUrl) {
+    console.error("Error creating gig:", insertError);
+    await deleteGigImage(imageUrl, user.id);
+    throw new Error(`Failed to create gig: ${insertError.message}`);
+  }
 
   if (insertError) {
     console.error("Error creating gig:", insertError);
