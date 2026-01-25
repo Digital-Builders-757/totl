@@ -3,6 +3,7 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 let client: SupabaseClient<Database> | null = null;
@@ -81,7 +82,7 @@ export function createSupabaseBrowser(): SupabaseClient<Database> {
 
       // HARDENING: Always throw - no null returns, even in dev
       // If env vars are missing, you want a hard crash—not a zombie dashboard
-      console.error("[Supabase Client] Fatal error:", errorMessage);
+      logger.error("[Supabase Client] Fatal error:", errorMessage);
       throw new Error(errorMessage);
     }
 
@@ -97,7 +98,7 @@ export function createSupabaseBrowser(): SupabaseClient<Database> {
     if (process.env.NODE_ENV === "development") {
       try {
         const urlHost = new URL(supabaseUrl).host;
-        console.log("[Supabase Client] Initializing browser client", {
+        logger.info("[Supabase Client] Initializing browser client", {
           urlHost,
           hasAnonKey: envPresent.anonKey,
           anonKeyLength: envPresent.anonKeyLength,
@@ -105,7 +106,7 @@ export function createSupabaseBrowser(): SupabaseClient<Database> {
         });
       } catch {
         // URL parsing failed, log minimal info
-        console.log("[Supabase Client] Initializing browser client", {
+        logger.info("[Supabase Client] Initializing browser client", {
           hasUrl: envPresent.url,
           hasAnonKey: envPresent.anonKey,
           envPresent: envPresent.url && envPresent.anonKey,

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { AdminUsersClient } from "./admin-users-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent static pre-rendering
@@ -49,7 +50,7 @@ export default async function AdminUsersPage() {
     .order("created_at", { ascending: false });
 
   if (profilesError) {
-    console.error("Error fetching profiles:", profilesError);
+    logger.error("Error fetching profiles", profilesError);
     return <AdminUsersClient users={[]} user={user} />;
   }
 
@@ -66,7 +67,7 @@ export default async function AdminUsersPage() {
     });
 
     if (listError) {
-      console.error("[AdminUsersPage] Error listing auth users:", listError);
+      logger.error("[AdminUsersPage] Error listing auth users", listError);
     } else if (data?.users) {
       const authUsers = data.users;
       const updates: Array<{ id: string; email_verified: boolean }> = [];
@@ -89,10 +90,10 @@ export default async function AdminUsersPage() {
             .eq("id", update.id);
 
           if (updateError) {
-            console.error(
+            logger.error(
               "[AdminUsersPage] Error updating email_verified for profile",
-              update.id,
-              updateError
+              updateError,
+              { profileId: update.id }
             );
           }
         }
@@ -114,8 +115,8 @@ export default async function AdminUsersPage() {
           .order("created_at", { ascending: false });
 
         if (refetchError) {
-          console.error(
-            "[AdminUsersPage] Error refetching profiles after sync:",
+          logger.error(
+            "[AdminUsersPage] Error refetching profiles after sync",
             refetchError
           );
         } else if (syncedProfiles) {

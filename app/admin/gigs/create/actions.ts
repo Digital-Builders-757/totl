@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/utils/logger";
+
 import { revalidatePath } from "next/cache";
 import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -87,13 +89,13 @@ export async function createGig(formData: FormData) {
 
   // If DB insert fails but image was uploaded, clean up orphaned image
   if (insertError && imageUrl) {
-    console.error("Error creating gig:", insertError);
+    logger.error("Error creating gig", insertError);
     await deleteGigImage(imageUrl, user.id);
     throw new Error(`Failed to create gig: ${insertError.message}`);
   }
 
   if (insertError) {
-    console.error("Error creating gig:", insertError);
+    logger.error("Error creating gig", insertError);
     throw new Error(`Failed to create gig: ${insertError.message}`);
   }
 

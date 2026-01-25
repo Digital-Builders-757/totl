@@ -247,6 +247,14 @@ If updating `SIGNED_OUT` handling in `onAuthStateChange`:
 
 ## 🚫 FORBIDDEN PATTERNS
 
+- **Console statements in production code:**
+  - ❌ `console.log()` / `console.debug()` - Use `logger.info()` / `logger.debug()` instead
+  - ✅ `console.warn()` / `console.error()` - Allowed only for critical errors before logger init
+  - ✅ Use `logger` utility (`lib/utils/logger.ts`) for all production logging
+  - ESLint will error on `console.log/debug` - this is intentional
+
+## 🚫 FORBIDDEN PATTERNS
+
 - Using `any` types for database results or DTOs.
 - Making database changes without updating `database_schema_audit.md`.
 - Updating `types/database.ts` by hand (must be generated).

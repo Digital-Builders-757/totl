@@ -18,5 +18,12 @@ module.exports = {
     "react/react-in-jsx-scope": "off",
     "@next/next/no-img-element": "warn",
     "import/order": ["warn", { alphabetize: { order: "asc" } }],
+    // Block console.log/debug in production code - use logger utility instead
+    "no-console": [
+      "error",
+      {
+        allow: ["warn", "error"], // Allow console.warn/error for critical errors before logger init
+      },
+    ],
   },
 };

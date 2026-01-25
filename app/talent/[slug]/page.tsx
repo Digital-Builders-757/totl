@@ -6,6 +6,7 @@ import { TalentProfileClient } from "./talent-profile-client";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import { createNameSlug, parseSlug } from "@/lib/utils/slug";
 import { canClientSeeTalentSensitive } from "@/lib/utils/talent-access";
 import type { Database } from "@/types/supabase";
@@ -218,7 +219,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         // This ensures we don't confuse "no phone on file" with "phone exists but is protected"
         if (phoneError && phoneError.code !== "PGRST116") {
           // Non-"not found" error likely means RLS denied access
-          console.debug(`[PR3] Phone fetch blocked by RLS for talent ${talent.user_id}:`, phoneError.code);
+          logger.debug(`[PR3] Phone fetch blocked by RLS for talent`, { talentId: talent.user_id, errorCode: phoneError.code });
         }
 
         talent = { ...(talent as PublicTalentProfile), phone: data?.phone ?? null };

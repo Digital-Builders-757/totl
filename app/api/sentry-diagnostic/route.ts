@@ -52,6 +52,7 @@ export async function GET() {
     // Flush to ensure it's sent immediately
     await Sentry.flush(2000);
     
+    // eslint-disable-next-line no-console
     console.log("[Sentry Diagnostic] Test error sent. Event ID:", testErrorId);
   } catch (error) {
     console.error("Failed to capture test error:", error);

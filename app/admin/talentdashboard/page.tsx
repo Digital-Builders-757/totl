@@ -1,4 +1,4 @@
-﻿import {
+import {
   Eye,
   CheckCircle,
   Settings,
@@ -14,6 +14,7 @@
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { logger } from "@/lib/utils/logger";
 import { TalentDashboardClient } from "./talent-dashboard-client";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -45,7 +46,7 @@ type TalentProfileLite = Pick<
 export default async function TalentDashboard() {
   // Check if Supabase environment variables are available
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.warn("Supabase environment variables not found - redirecting to login");
+    logger.warn("Supabase environment variables not found - redirecting to login");
     redirect("/login?returnUrl=/admin/talentdashboard");
   }
 
@@ -94,13 +95,13 @@ export default async function TalentDashboard() {
           .single(),
       ]);
 
-    if (profileResult.error) console.error("Error fetching talent profile:", profileResult.error);
+    if (profileResult.error) logger.error("Error fetching talent profile", profileResult.error);
     if (applicationsResult.error)
-      console.error("Error fetching applications:", applicationsResult.error);
-    if (bookingsResult.error) console.error("Error fetching bookings:", bookingsResult.error);
-    if (portfolioResult.error) console.error("Error fetching portfolio:", portfolioResult.error);
+      logger.error("Error fetching applications", applicationsResult.error);
+    if (bookingsResult.error) logger.error("Error fetching bookings", bookingsResult.error);
+    if (portfolioResult.error) logger.error("Error fetching portfolio", portfolioResult.error);
     if (mainProfileResult.error)
-      console.error("Error fetching main profile:", mainProfileResult.error);
+      logger.error("Error fetching main profile", mainProfileResult.error);
 
     if (profileResult.data) {
       profileData = profileResult.data as TalentProfileLite;

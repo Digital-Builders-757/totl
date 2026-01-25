@@ -1,4 +1,4 @@
-﻿// Error logging and analytics utility for production monitoring
+// Error logging and analytics utility for production monitoring
 
 export interface ErrorLogData {
   error: string;
@@ -47,6 +47,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your logging service
     if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
       console.error("🚨 Error Logged:", logData);
     }
 
@@ -75,6 +76,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your analytics service
     if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
       console.log("📊 Analytics Event:", analyticsData);
     }
   }

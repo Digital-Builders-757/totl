@@ -48,6 +48,7 @@ import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { logger } from "@/lib/utils/logger";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
@@ -147,7 +148,7 @@ function useTalentDashboardData({
 
         if (!cancelled) {
           if (talentProfileError && talentProfileError.code !== "PGRST116") {
-            console.error("[talent-dashboard] Error fetching talent profile:", {
+            logger.error("[talent-dashboard] Error fetching talent profile", talentProfileError, {
               code: talentProfileError.code,
               message: talentProfileError.message,
               details: talentProfileError.details,
@@ -177,7 +178,7 @@ function useTalentDashboardData({
 
           if (!cancelled) {
             if (refetchTalentError) {
-              console.error("[talent-dashboard] Error refetching talent profile after ensureProfileExists:", {
+              logger.error("[talent-dashboard] Error refetching talent profile after ensureProfileExists", refetchTalentError, {
                 code: refetchTalentError.code,
                 message: refetchTalentError.message,
               });
@@ -208,7 +209,7 @@ function useTalentDashboardData({
               sessionExpiry: session?.expires_at || null,
             };
           } catch (sessionError) {
-            console.warn("[talent-dashboard] Failed to get session context:", sessionError);
+            logger.warn("[talent-dashboard] Failed to get session context", { sessionError });
           }
 
             setApplicationsLoading(true);
@@ -242,7 +243,7 @@ function useTalentDashboardData({
                   },
                 };
 
-                console.error("[talent-dashboard] Error fetching applications:", errorContext);
+                logger.error("[talent-dashboard] Error fetching applications", undefined, errorContext);
 
                 // Send to Sentry for production debugging
                 try {
@@ -284,8 +285,7 @@ function useTalentDashboardData({
             // Catch any unexpected errors
             if (!cancelled) {
               const errorMessage = err instanceof Error ? err.message : String(err);
-              console.error("[talent-dashboard] Unexpected error in applications query:", {
-                error: err,
+              logger.error("[talent-dashboard] Unexpected error in applications query", err, {
                 message: errorMessage,
               });
               setApplicationsError("Failed to load applications. Please refresh the page.");
@@ -312,7 +312,7 @@ function useTalentDashboardData({
 
         if (!cancelled) {
           if (gigsError) {
-            console.error("[talent-dashboard] Error fetching gigs:", {
+            logger.error("[talent-dashboard] Error fetching gigs", gigsError, {
               code: gigsError.code,
               message: gigsError.message,
               details: gigsError.details,
@@ -325,8 +325,7 @@ function useTalentDashboardData({
       } catch (err) {
         if (!cancelled) {
           const errorMessage = err instanceof Error ? err.message : String(err);
-          console.error("[talent-dashboard] Unexpected error fetching dashboard data:", {
-            error: err,
+          logger.error("[talent-dashboard] Unexpected error fetching dashboard data", err, {
             message: errorMessage,
             stack: err instanceof Error ? err.stack : undefined,
           });
@@ -370,7 +369,7 @@ function useTalentDashboardData({
     watchdog = setTimeout(() => {
       if (cancelled) return;
       cancelled = true;
-      console.error("[talent-dashboard] data load timed out");
+      logger.error("[talent-dashboard] data load timed out");
       setDataError("Loading is taking longer than expected. Please refresh the page.");
       setDataLoading(false);
     }, 20_000);
@@ -492,7 +491,7 @@ function TalentDashboardContent({
           isInVerificationGracePeriodRef.current = false;
         }
       } catch (error) {
-        console.error("Error reading URL in cleanup:", error);
+        logger.error("Error reading URL in cleanup", error);
       }
     };
   }, [searchParams, router]);
@@ -576,7 +575,7 @@ function TalentDashboardContent({
       // AuthProvider's signOut() owns redirect - trust it
       await signOut();
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error", error);
       toast({
         title: "Sign out error",
         description: "There was an issue signing out. Please try again.",
@@ -592,7 +591,7 @@ function TalentDashboardContent({
       refetch();
       router.refresh();
     } catch (retryError) {
-      console.error("Retry setup error:", retryError);
+      logger.error("Retry setup error", retryError);
     }
   };
 

@@ -2,6 +2,7 @@ import "server-only";
 
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type Db = Database;
@@ -49,7 +50,7 @@ export async function syncEmailVerifiedForUser(params: {
       .maybeSingle<{ email_verified: boolean | null }>();
 
     if (error) {
-      console.error("Error reading email_verified for sync:", error);
+      logger.error("Error reading email_verified for sync", error);
       return { success: false as const, changed: false as const, error: error.message };
     }
     existing = data?.email_verified ?? null;
@@ -67,7 +68,7 @@ export async function syncEmailVerifiedForUser(params: {
   if (updateError) {
     // This should typically succeed under the user's RLS permissions.
     // If it fails (RLS, stale auth state, etc.), fall back to an admin write to guarantee convergence.
-    console.error("Error syncing email_verified with user session client:", updateError);
+    logger.error("Error syncing email_verified with user session client", updateError);
 
     // Only attempt admin fallback if the service role key exists (server-only env var).
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -82,12 +83,12 @@ export async function syncEmailVerifiedForUser(params: {
         .eq("id", user.id);
 
       if (adminError) {
-        console.error("Error syncing email_verified with admin client fallback:", adminError);
+        logger.error("Error syncing email_verified with admin client fallback", adminError);
         return { success: false as const, changed: false as const, error: adminError.message };
       }
 
       if (shouldDebugEmailVerifySync) {
-        console.info("[email-verify-sync] updated profiles.email_verified (admin fallback)", {
+        logger.info("[email-verify-sync] updated profiles.email_verified (admin fallback)", {
           userId: user.id,
           computed,
           previous: existing,
@@ -96,7 +97,7 @@ export async function syncEmailVerifiedForUser(params: {
 
       return { success: true as const, changed: true as const, email_verified: computed };
     } catch (e) {
-      console.error("Unexpected error during email_verified admin fallback:", e);
+      logger.error("Unexpected error during email_verified admin fallback", e);
       return {
         success: false as const,
         changed: false as const,
@@ -106,7 +107,7 @@ export async function syncEmailVerifiedForUser(params: {
   }
 
   if (shouldDebugEmailVerifySync) {
-    console.info("[email-verify-sync] updated profiles.email_verified", {
+    logger.info("[email-verify-sync] updated profiles.email_verified", {
       userId: user.id,
       computed,
       previous: existing,

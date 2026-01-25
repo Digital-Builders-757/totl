@@ -7,6 +7,7 @@ import { PATHS } from "@/lib/constants/routes";
 import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
 import { syncEmailVerifiedForUser } from "@/lib/server/sync-email-verified";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Ensures a profile exists for the current user and updates it with name from auth metadata if missing
@@ -38,7 +39,7 @@ export async function ensureProfileExists() {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileError) {
-    console.error("Error checking profile:", profileError);
+    logger.error("Error checking profile", profileError);
     Sentry.captureException(new Error(`Profile query error: ${profileError.message}`), {
       tags: {
         feature: "auth",
@@ -94,12 +95,12 @@ export async function ensureProfileExists() {
     });
 
     if (insertError) {
-      console.error("Error creating profile:", insertError);
+      logger.error("Error creating profile", insertError);
       return { error: "Failed to create profile" };
     }
 
     if (shouldDebugEnsureProfile) {
-      console.info("[ensureProfileExists] created profiles row", {
+      logger.info("[ensureProfileExists] created profiles row", {
         userId: user.id,
         role: "talent",
         account_type: "talent",
@@ -116,7 +117,7 @@ export async function ensureProfileExists() {
       });
 
       if (talentError) {
-        console.error("Error creating talent profile:", talentError);
+        logger.error("Error creating talent profile", talentError);
         // Don't fail - profile was created
       }
     }
@@ -145,7 +146,7 @@ export async function ensureProfileExists() {
       currentEmailVerified: createdProfile?.email_verified ?? null,
     });
     if (!syncResult.success) {
-      console.error("[ensureProfileExists] email_verified sync failed (create path):", syncResult.error);
+      logger.error("[ensureProfileExists] email_verified sync failed (create path)", syncResult.error);
     }
 
     // Note: revalidatePath removed - cannot be called during render.
@@ -189,12 +190,12 @@ export async function ensureProfileExists() {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("Error updating profile display_name:", updateError);
+      logger.error("Error updating profile display_name", updateError);
       return { error: "Failed to update profile" };
     }
 
     if (shouldDebugEnsureProfile) {
-      console.info("[ensureProfileExists] updated profiles.display_name", {
+      logger.info("[ensureProfileExists] updated profiles.display_name", {
         userId: user.id,
       });
     }
@@ -223,7 +224,7 @@ export async function ensureProfileExists() {
       currentEmailVerified: updatedProfile?.email_verified ?? null,
     });
     if (!syncResult.success) {
-      console.error("[ensureProfileExists] email_verified sync failed (display_name update path):", syncResult.error);
+      logger.error("[ensureProfileExists] email_verified sync failed (display_name update path)", syncResult.error);
     }
 
     // Note: revalidatePath removed - cannot be called during render.
@@ -271,12 +272,12 @@ export async function ensureProfileExists() {
       .eq("id", user.id);
 
     if (updateRoleError) {
-      console.error("Error updating profile role:", updateRoleError);
+      logger.error("Error updating profile role", updateRoleError);
       return { error: "Failed to update profile role" };
     }
 
     if (shouldDebugEnsureProfile) {
-      console.info("[ensureProfileExists] updated profiles.role/account_type (role was missing)", {
+      logger.info("[ensureProfileExists] updated profiles.role/account_type (role was missing)", {
         userId: user.id,
         role,
         account_type: accountType,
@@ -328,7 +329,7 @@ export async function ensureProfileExists() {
       currentEmailVerified: updatedRoleProfile?.email_verified ?? null,
     });
     if (!syncResult.success) {
-      console.error("[ensureProfileExists] email_verified sync failed (role fix path):", syncResult.error);
+      logger.error("[ensureProfileExists] email_verified sync failed (role fix path)", syncResult.error);
     }
 
     // Note: revalidatePath removed - cannot be called during render.
@@ -376,7 +377,7 @@ export async function ensureProfileExists() {
     currentEmailVerified: existingProfile?.email_verified ?? profile?.email_verified ?? null,
   });
   if (!syncResult.success) {
-    console.error("[ensureProfileExists] email_verified sync failed (final path):", syncResult.error);
+    logger.error("[ensureProfileExists] email_verified sync failed (final path)", syncResult.error);
   }
 
   return { 
@@ -437,7 +438,7 @@ export async function ensureProfilesAfterSignup() {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileCheckError) {
-    console.error("Error checking profile:", profileCheckError);
+    logger.error("Error checking profile", profileCheckError);
     Sentry.captureException(new Error(`Profile check error: ${profileCheckError.message}`), {
       tags: {
         feature: "auth",
@@ -471,7 +472,7 @@ export async function ensureProfilesAfterSignup() {
     });
 
     if (insertError) {
-      console.error("Error creating profile after signup:", insertError);
+      logger.error("Error creating profile after signup", insertError);
       return { error: "Failed to create profile" };
     }
 
@@ -511,7 +512,7 @@ export async function ensureProfilesAfterSignup() {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error("Error updating profile display_name after signup:", updateError);
+      logger.error("Error updating profile display_name after signup", updateError);
       return { error: "Failed to update profile" };
     }
 
@@ -557,7 +558,7 @@ export async function ensureProfilesAfterSignup() {
         .eq("user_id", user.id);
 
       if (updateTalentError) {
-        console.error("Error updating talent profile after signup:", updateTalentError);
+        logger.error("Error updating talent profile after signup", updateTalentError);
       } else {
         // Note: revalidatePath removed - cannot be called during render.
         // Callers should handle revalidation after mutations.
@@ -631,7 +632,7 @@ export async function handleLoginRedirect(returnUrl?: string) {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileError) {
-    console.error("Error checking profile:", profileError);
+    logger.error("Error checking profile", profileError);
     Sentry.captureException(new Error(`Login redirect profile query error: ${profileError.message}`), {
       tags: {
         feature: "auth",
@@ -688,7 +689,7 @@ export async function handleLoginRedirect(returnUrl?: string) {
       });
       
       if (createTalentError) {
-        console.error("Error creating talent profile during login redirect:", createTalentError);
+        logger.error("Error creating talent profile during login redirect", createTalentError);
         // Continue anyway - profile exists, talent_profile can be created later
       }
     }
@@ -705,7 +706,7 @@ export async function handleLoginRedirect(returnUrl?: string) {
       // Revalidate after sync completes
       revalidatePath("/", "layout");
     } catch (syncError) {
-      console.error("Error syncing account_type with role:", syncError);
+      logger.error("Error syncing account_type with role", syncError);
       // Continue anyway - effectiveAccountType will be used for routing
     }
   }
@@ -741,7 +742,7 @@ export async function handleLoginRedirect(returnUrl?: string) {
       
       revalidatePath("/", "layout");
     } catch (defaultError) {
-      console.error("Error setting default role:", defaultError);
+      logger.error("Error setting default role", defaultError);
       // Continue anyway - redirect to dashboard where profile can be created
     }
     
@@ -807,7 +808,7 @@ export async function handleLoginRedirect(returnUrl?: string) {
     
     revalidatePath("/", "layout");
   } catch (repairError) {
-    console.error("Error repairing profile role/account_type:", repairError);
+    logger.error("Error repairing profile role/account_type", repairError);
     // Continue anyway - redirect to dashboard
   }
 

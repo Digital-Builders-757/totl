@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Recovery UI shown when auth bootstrap exceeds timeout threshold
@@ -60,7 +61,7 @@ export function AuthTimeoutRecovery() {
           console.warn("[AuthTimeoutRecovery] Failed to clear sessionStorage:", err);
         }
 
-        console.log(`[AuthTimeoutRecovery] Cleared ${keysToRemove.length} storage keys`);
+        logger.debug(`[AuthTimeoutRecovery] Cleared ${keysToRemove.length} storage keys`);
       }
 
       // Step 4: Hard reload to login (ensures clean state)

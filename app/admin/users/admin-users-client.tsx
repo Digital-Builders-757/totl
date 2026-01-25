@@ -44,6 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
 import { createNameSlug } from "@/lib/utils/slug";
+import { logger } from "@/lib/utils/logger";
 
 type UserProfile = {
   id: string;
@@ -139,7 +140,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       setUserToDelete(null);
       router.refresh();
     } catch (error) {
-      console.error("Error deleting user:", error);
+      logger.error("Error deleting user", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete user",
@@ -178,7 +179,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       
       router.refresh();
     } catch (error) {
-      console.error("Error updating user role:", error);
+      logger.error("Error updating user role", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update user role",

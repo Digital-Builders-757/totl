@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { logger } from "@/lib/utils/logger";
 import { AdminTalentClient } from "./admin-talent-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { type ProfileRow } from "@/types/database-helpers";
@@ -57,7 +58,7 @@ export default async function AdminTalentPage() {
     .order("created_at", { ascending: false });
 
   if (talentError) {
-    console.error("Error fetching talent profiles:", talentError);
+    logger.error("Error fetching talent profiles", talentError);
     return <AdminTalentClient talent={[]} user={user} />;
   }
 

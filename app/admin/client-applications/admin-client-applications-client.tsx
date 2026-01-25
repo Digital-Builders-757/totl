@@ -47,6 +47,7 @@ import {
   rejectClientApplication,
   sendClientApplicationFollowUpReminders,
 } from "@/lib/actions/client-actions";
+import { logger } from "@/lib/utils/logger";
 import { Database } from "@/types/supabase";
 
 type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"] & {
@@ -179,7 +180,7 @@ export function AdminClientApplicationsClient({
         setAdminNotes("");
       }
     } catch (error) {
-      console.error("Error approving application:", error);
+      logger.error("Error approving application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -228,7 +229,7 @@ export function AdminClientApplicationsClient({
         setAdminNotes("");
       }
     } catch (error) {
-      console.error("Error rejecting application:", error);
+      logger.error("Error rejecting application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -275,7 +276,7 @@ export function AdminClientApplicationsClient({
         });
       }
     } catch (error) {
-      console.error("Error sending follow-up reminders:", error);
+      logger.error("Error sending follow-up reminders", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred while sending follow-ups.",

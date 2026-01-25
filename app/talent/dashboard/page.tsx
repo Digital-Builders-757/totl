@@ -6,6 +6,7 @@ import { getBootState } from "@/lib/actions/boot-actions";
 import { getTalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { isRedirectError } from "@/lib/is-redirect-error";
+import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
     }
 
     // Log error for debugging but don't expose sensitive details
-    console.error("[talent/dashboard] Error in server component:", error);
+    logger.error("[talent/dashboard] Error in server component", error);
     // Redirect to login on error to prevent render failures
     redirect(`${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.TALENT_DASHBOARD)}`);
   }

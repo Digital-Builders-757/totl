@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { logger } from "@/lib/utils/logger";
 import { AdminClientApplicationsClient } from "./admin-client-applications-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
@@ -39,7 +40,7 @@ export default async function AdminClientApplicationsPage() {
     .order("created_at", { ascending: false });
 
   if (applicationsError) {
-    console.error("Error fetching client applications:", applicationsError);
+    logger.error("Error fetching client applications", applicationsError);
     return <AdminClientApplicationsClient applications={[]} user={user} />;
   }
 
