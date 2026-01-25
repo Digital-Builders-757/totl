@@ -42,12 +42,12 @@ export function GigImageUploader({
       return;
     }
 
-    // Validate file size (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validate file size (4MB)
+    const maxSize = 4 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 10MB",
+        description: "Maximum file size is 4MB",
         variant: "destructive",
       });
       return;
@@ -180,14 +180,15 @@ export function GigImageUploader({
                 {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                JPEG, PNG, GIF, or WebP (max 10MB)
+                JPEG, PNG, GIF, or WebP (max 4MB)
               </p>
             </div>
           </div>
         )}
       </div>
       <p className="text-xs text-gray-400">
-        Optional: Add a cover image to make your gig stand out
+        Optional: Add a cover image to make your gig stand out. Tip: keep images under ~1MB for
+        faster uploads.
       </p>
     </div>
   );

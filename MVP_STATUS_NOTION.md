@@ -8,6 +8,30 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig Image Upload 400 Fix (January 25, 2026)**
+
+**SERVER ACTIONS BODY LIMIT FIX** - January 25, 2026  
+- ✅ **Raised Server Actions body limit**: `experimental.serverActions.bodySizeLimit` set to `4mb`
+- ✅ **Aligned validation caps**: Client + server image size validation now both enforce 4MB
+- ✅ **Runtime config moved to route segment**: `runtime = "nodejs"` lives on page segment (not server action file)
+- ✅ **Updated upload UX**: Helper text encourages ~1MB images for faster uploads
+- ✅ **Debug doc refreshed**: Error guide now matches new size limits and runtime placement
+
+**Why this change:**
+- Server Actions reject request bodies over 1MB with a 400 before action code runs
+- Logging and Supabase errors never surfaced because the request died upstream
+
+**Impact:**
+- Image uploads no longer fail early at ~1.5MB
+- Debug logging is now reachable for real storage/RLS errors
+
+**Next (P0 - Critical)**
+- [ ] Redeploy to ensure `next.config.mjs` changes take effect
+- [ ] Re-test with a 1–2MB image to confirm 400 is resolved
+
+**Next (P1 - Follow-up)**
+- [ ] Consider client-side compression to keep uploads small by default
+
 ## 🚀 **Latest: Database Table Count Reconciliation & CI Enforcement (January 25, 2026)**
 
 **DATABASE TABLE COUNT RECONCILIATION** - January 25, 2026  
@@ -1324,7 +1348,7 @@
 
 ---
 
-*Last Updated: December 21, 2025*
+*Last Updated: January 25, 2026*
 *Current Status: MVP Complete - BootState routing spine implemented + verify-all passing*
 *Codebase Rating: 8/10 - Production Ready, Auth/Onboarding + E2E Stability Improved*
 *Next Review: After performance optimizations (Priority 3 tasks)*

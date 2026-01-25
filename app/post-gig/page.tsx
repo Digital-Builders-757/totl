@@ -27,6 +27,10 @@ import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-ca
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
 
+// CRITICAL: Force Node.js runtime for server actions that handle file uploads
+// Runtime configs must be at route segment level to be honored by Next.js
+export const runtime = "nodejs";
+
 export default function PostGigPage() {
   const router = useRouter();
   const { user } = useAuth();

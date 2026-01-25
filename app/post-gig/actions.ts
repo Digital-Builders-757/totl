@@ -29,9 +29,13 @@ export async function createGigAction(input: {
   // Upload image if provided (before DB insert to enable cleanup on failure)
   let imageUrl: string | null = null;
   if (input.imageFile) {
-    const uploadResult = await uploadGigImage(input.imageFile, user.id);
-    if ("error" in uploadResult) {
-      return { ok: false, error: uploadResult.error };
+    const uploadResult = await uploadGigImage(input.imageFile);
+    if (!uploadResult.ok) {
+      // Include debug_id in error message for tracing
+      const errorMsg = uploadResult.debug_id
+        ? `${uploadResult.message} (Debug ID: ${uploadResult.debug_id})`
+        : uploadResult.message;
+      return { ok: false, error: errorMsg };
     }
     imageUrl = uploadResult.url;
   }
@@ -59,7 +63,7 @@ export async function createGigAction(input: {
   // If DB insert fails but image was uploaded, clean up orphaned image
   if ((error || !data) && imageUrl) {
     const { deleteGigImage } = await import("@/lib/actions/gig-actions");
-    await deleteGigImage(imageUrl, user.id);
+    await deleteGigImage(imageUrl);
     return { ok: false, error: error?.message ?? "Failed to create gig" };
   }
 

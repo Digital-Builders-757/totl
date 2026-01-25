@@ -43,7 +43,9 @@ const nextConfig = {
   // Note: serverActions configuration moved to experimental in Next.js 15
   experimental: {
     serverActions: {
-      bodySizeLimit: '1mb', // Match our client-side validation
+      // CRITICAL: Must be >= max file size + form data overhead
+      // If uploads fail before logs appear, this limit is likely the cause
+      bodySizeLimit: '4mb',
     },
   },
   
