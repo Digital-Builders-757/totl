@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AdminGigsClient } from "./admin-gigs-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent static pre-rendering
@@ -52,7 +53,7 @@ export default async function AdminGigsPage() {
     .order("created_at", { ascending: false });
 
   if (gigsError) {
-    console.error("Error fetching gigs:", gigsError);
+    logger.error("Error fetching gigs", gigsError);
     return <AdminGigsClient gigs={[]} user={user} />;
   }
 

@@ -97,6 +97,8 @@ All other documentation has been organized into the `docs/` folder.
 - `PERFORMANCE_OPTIMIZATION_PLAN.md` - **✅ NEW** - Complete performance optimization plan (Approach A+ - Measurement-First + Incremental Wins, Jan 2026)
 - `PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
 - `PERFORMANCE_BASELINE.md` - **✅ NEW** - Performance baseline metrics tracking and optimization phases (Jan 2026)
+- `PERFORMANCE_CLEANUP_PLAN.md` - **✅ NEW** - Performance cleanup plan: eliminate reloads, remove console logs, validate RSC architecture (Jan 2026)
+- `PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Performance cleanup implementation summary: logger utility, console replacement, client dashboard RSC conversion (Jan 2026)
 - `ROUTE_CACHING_STRATEGY.md` - **✅ UPDATED** - Route-by-route caching strategy documentation (ISR for public, dynamic for routes using createSupabaseServer(), Jan 2026)
 - `ISR_TO_DYNAMIC_MIGRATION_PLAN.md` - **✅ NEW** - ISR to dynamic migration plan (MVP honesty mode - routes using cookies must be dynamic, Jan 2026)
 - `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)

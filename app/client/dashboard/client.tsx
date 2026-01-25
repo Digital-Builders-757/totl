@@ -1,0 +1,852 @@
+"use client";
+
+import {
+  Calendar,
+  Clock,
+  DollarSign,
+  MapPin,
+  MoreVertical,
+  Users,
+  FileText,
+  CheckCircle,
+  Clock as ClockIcon,
+  UserCheck,
+  Briefcase,
+  BarChart3,
+  Plus,
+  User,
+  Bell,
+  Settings,
+  LogOut,
+  Activity,
+  Eye,
+  Filter,
+  Search,
+  Phone,
+} from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/components/auth/auth-provider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
+import { SafeImage } from "@/components/ui/safe-image";
+import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { ClientDashboardData } from "@/lib/actions/dashboard-actions";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
+import type { Database } from "@/types/supabase";
+
+// Use proper database types (unused but kept for type reference)
+type _ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
+
+interface Application {
+  id: string;
+  gig_id: string;
+  talent_id: string;
+  status: string;
+  message: string | null;
+  created_at: string;
+  updated_at: string;
+  gigs?: {
+    title: string;
+    category?: string;
+    location: string;
+    compensation: string;
+  };
+  talent_profiles?: {
+    first_name: string;
+    last_name: string;
+    location: string | null;
+    experience: string | null;
+  } | null;
+  profiles?: {
+    display_name: string | null;
+    email_verified: boolean;
+    role: string;
+    avatar_url: string | null;
+  };
+}
+
+interface Gig {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  compensation: string;
+  category?: string;
+  status?: string;
+  image_url?: string | null;
+  created_at: string;
+  applications_count?: number;
+  application_deadline?: string | null;
+}
+
+interface ClientDashboardProps {
+  initialData: ClientDashboardData | null;
+}
+
+export function ClientDashboard({ initialData }: ClientDashboardProps) {
+  const { user, signOut, profile } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Use initialData from server component (no client-side fetching)
+  const clientProfile = initialData?.clientProfile ?? null;
+  const applications = (initialData?.applications ?? []) as Application[];
+  const gigs = (initialData?.gigs ?? []) as Gig[];
+
+  // Memoize applications to prevent useEffect dependency changes
+  const applicationsLength = applications.length;
+
+  // Calculate dashboard stats from real data
+  const dashboardStats = {
+    totalGigs: gigs.length,
+    activeGigs: gigs.filter((gig) => gig.status === "active").length,
+    totalApplications: applications.length,
+    newApplications: applications.filter(
+      (app) => app.status === "new" || app.status === "under_review"
+    ).length,
+    completedGigs: gigs.filter((gig) => gig.status === "completed").length,
+    totalSpent: 0, // This would need to be calculated from bookings/payments
+  };
+
+  // Get upcoming deadlines (gigs with deadlines in the next 30 days)
+  const upcomingDeadlines = gigs
+    .filter((gig) => gig.status === "active" && gig.application_deadline)
+    .filter((gig) => {
+      if (!gig.application_deadline) return false;
+      const deadline = new Date(gig.application_deadline);
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      return deadline <= thirtyDaysFromNow;
+    })
+    .slice(0, 5);
+
+  // Check for incomplete profile
+  const missingFields = [];
+  if (!clientProfile?.company_name) missingFields.push("Company Name");
+  if (!clientProfile?.contact_name) missingFields.push("Contact Name");
+  if (!clientProfile?.contact_email) missingFields.push("Contact Email");
+
+  // Log empty states for analytics
+  useEffect(() => {
+    if (user) {
+      if (applicationsLength === 0) {
+        logEmptyState("client_applications", user.id);
+      }
+      if (gigs.length === 0) {
+        logEmptyState("client_gigs", user.id);
+      }
+    }
+  }, [applicationsLength, gigs.length, user]);
+
+  // Log fallback usage
+  useEffect(() => {
+    if (applicationsLength > 0 && user) {
+      applications.forEach((app) => {
+        if (!app.talent_profiles?.first_name && app.profiles?.display_name) {
+          logFallbackUsage("display_name", "talent_name", user.id);
+        }
+        if (!app.talent_profiles?.location) {
+          logFallbackUsage("location", "talent_location", user.id);
+        }
+        if (!app.talent_profiles?.experience) {
+          logFallbackUsage("experience", "talent_experience", user.id);
+        }
+      });
+    }
+  }, [applications, applicationsLength, user]);
+
+  const getStatusColor = (status: string | undefined) => {
+    switch (status?.toLowerCase()) {
+      case "active":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "completed":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "draft":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      case "expired":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
+  const getCategoryColor = (_category: string | undefined) => {
+    return "bg-gray-50 text-gray-700 border-gray-200";
+  };
+
+  // Show loading state if no initialData (server is fetching)
+  if (!initialData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if no user
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center relative overflow-hidden">
+        <div className="text-center max-w-md mx-auto p-8 relative z-10">
+          <div className="bg-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-3xl">
+            <div className="h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 rounded-full" />
+            <User className="h-16 w-16 text-white/80 mx-auto mb-6" />
+            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
+            <p className="text-gray-300 mb-6 text-lg">
+              You need to be logged in to access your Career Builder dashboard.
+            </p>
+            <Button
+              asChild
+              className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <Link href="/login">Sign In to Continue</Link>
+            </Button>
+            <div className="mt-6 pt-6 border-t border-gray-800">
+              <p className="text-sm text-gray-400 mb-3">New to TOTL?</p>
+              <Link href="/client/apply" className="text-blue-400 hover:text-blue-200 transition-colors text-sm font-medium">
+                Apply to become a Career Builder →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const quickStatCardClass =
+    "hover:shadow-xl transition-shadow bg-gray-900 border border-gray-800 text-white shadow-lg";
+  const panelCardClass = "bg-gray-900 border border-gray-800 shadow-sm text-white";
+  const tabTriggerClass =
+    "flex items-center gap-2 justify-center text-gray-200 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl border border-transparent hover:bg-gray-800 transition";
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-black text-white">
+      {/* Header */}
+      <div className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage
+                  src={profile?.avatar_url || "/images/totl-logo.png"}
+                  alt="Company"
+                />
+                <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-2xl font-bold text-white">
+                  Welcome back, {clientProfile?.contact_name || "Career Builder"}!
+                </h1>
+                <p className="text-gray-300">
+                  {clientProfile?.company_name || "Manage your gigs and applications"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+                <Bell className="h-4 w-4 mr-2" />
+                Notifications
+              </Button>
+              <Button variant="outline" size="sm" asChild className="border-gray-700 text-white hover:bg-gray-800">
+                <Link href="/settings">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={async () => {
+                  if (isSigningOut) return;
+                  
+                  setIsSigningOut(true);
+                  try {
+                    await signOut();
+                  } catch (error) {
+                    // Error handled by auth provider
+                    setIsSigningOut(false);
+                  }
+                }}
+                disabled={isSigningOut}
+                className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Profile Completion Banner */}
+        <ProfileCompletionBanner
+          userRole="client"
+          missingFields={missingFields}
+          profileUrl="/client/profile"
+        />
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Total Gigs</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</p>
+                </div>
+                <div className="bg-blue-500/20 p-2 rounded-full">
+                  <Briefcase className="h-4 w-4 text-blue-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Active Gigs</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</p>
+                </div>
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <Activity className="h-4 w-4 text-green-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Applications</p>
+                  <p className="text-2xl font-bold text-white">
+                    {dashboardStats.totalApplications}
+                  </p>
+                </div>
+                <div className="bg-purple-500/20 p-2 rounded-full">
+                  <Users className="h-4 w-4 text-purple-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">New</p>
+                  <p className="text-2xl font-bold text-white">
+                    {dashboardStats.newApplications}
+                  </p>
+                </div>
+                <div className="bg-yellow-500/20 p-2 rounded-full">
+                  <ClockIcon className="h-4 w-4 text-yellow-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Completed</p>
+                  <p className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</p>
+                </div>
+                <div className="bg-green-500/20 p-2 rounded-full">
+                  <CheckCircle className="h-4 w-4 text-green-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={quickStatCardClass}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-400">Total Spent</p>
+                  <p className="text-2xl font-bold text-white">
+                    ${dashboardStats.totalSpent.toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-emerald-500/20 p-2 rounded-full">
+                  <DollarSign className="h-4 w-4 text-emerald-300" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Dashboard Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 gap-2 bg-gray-900 border border-gray-800 rounded-2xl p-1">
+            <TabsTrigger value="overview" className={`${tabTriggerClass}`}>
+              <BarChart3 className="h-4 w-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="gigs" className={`${tabTriggerClass}`}>
+              <Briefcase className="h-4 w-4" />
+              My Gigs
+            </TabsTrigger>
+            <TabsTrigger value="applications" className={`${tabTriggerClass}`}>
+              <Users className="h-4 w-4" />
+              Applications
+            </TabsTrigger>
+            <TabsTrigger value="create" className={`${tabTriggerClass}`}>
+              <Plus className="h-4 w-4" />
+              Create Gig
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Recent Gigs */}
+              <Card className={`${panelCardClass}`}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Briefcase className="h-5 w-5 text-white" />
+                    Recent Gigs
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Your latest gig postings and their status</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {gigs.length > 0 ? (
+                    gigs.slice(0, 3).map((gig) => (
+                      <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
+                        <SafeImage
+                          src={gig.image_url || "/images/totl-logo.png"}
+                          alt={gig.title}
+                          width={48}
+                          height={48}
+                          className="rounded-md object-cover"
+                          fallbackSrc="/images/totl-logo-transparent.png"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white truncate">{gig.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className={getCategoryColor(gig.category)}>
+                              {getCategoryLabel(gig.category ?? "")}
+                            </Badge>
+                            <Badge variant="outline" className={getStatusColor(gig.status)}>
+                              {gig.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-400 mt-1">
+                            {gig.applications_count || 0} applications • {gig.location}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-white">{gig.compensation}</p>
+                          <p className="text-sm text-gray-400">{gig.created_at}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={FileText}
+                      title="No gigs posted yet"
+                      description="Start by creating your first gig to attract talent"
+                      action={{
+                        label: "Post Your First Gig",
+                        href: "/post-gig",
+                      }}
+                    />
+                  )}
+                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
+                    <Link href="/client/gigs">View All Gigs</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Recent Applications */}
+              <Card className={panelCardClass}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Users className="h-5 w-5 text-white" />
+                    Recent Applications
+                  </CardTitle>
+                  <CardDescription className="text-gray-400">Latest talent applications to review</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-xs text-gray-400">
+                    Clients only see talent who applied to their gigs—no public directory is exposed.
+                  </p>
+                  {applications.length > 0 ? (
+                    applications.slice(0, 3).map((application) => (
+                      <div key={application.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage
+                            src={
+                              application.profiles?.avatar_url ||
+                              "/images/totl-logo-transparent.png"
+                            }
+                            alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
+                          />
+                          <AvatarFallback>
+                            {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
+                            {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-white">
+                            {application.talent_profiles?.first_name}{" "}
+                            {application.talent_profiles?.last_name}
+                          </h4>
+                          <p className="text-sm text-gray-400 truncate">
+                            {application.gigs?.title}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <ApplicationStatusBadge status={application.status} showIcon={true} />
+                            <span className="text-sm text-gray-400">
+                              {application.talent_profiles?.location}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-400">
+                            {new Date(application.created_at).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {application.talent_profiles?.experience}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={Users}
+                      title="No applications yet"
+                      description="Applications will appear here once talent starts applying to your gigs"
+                    />
+                  )}
+                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
+                    <Link href="/client/applications">View All Applications</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Upcoming Deadlines */}
+            <Card className={`${panelCardClass}`}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Upcoming Deadlines
+                </CardTitle>
+                <CardDescription>Gigs with approaching application deadlines</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {upcomingDeadlines.length > 0 ? (
+                    upcomingDeadlines.map((deadline) => (
+                      <div
+                        key={deadline.id}
+                        className="flex items-center justify-between p-4 rounded-lg border border-gray-800"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-white">{deadline.title}</h4>
+                            <p className="text-sm text-gray-400">
+                              {deadline.applications_count || 0} applications received
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-white">
+                            Due {deadline.application_deadline}
+                          </p>
+                          <Badge variant="outline" className={getStatusColor(deadline.status)}>
+                            {deadline.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <EmptyState
+                      icon={Calendar}
+                      title="No upcoming deadlines"
+                      description="Deadlines will appear here for gigs with application deadlines"
+                    />
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* My Gigs Tab */}
+          <TabsContent value="gigs" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-white">My Gigs</h2>
+                <p className="text-gray-300">Manage your posted gigs and track their performance</p>
+              </div>
+              <Button
+                asChild
+                className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:opacity-90"
+              >
+                <Link href="/post-gig">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post New Gig
+                </Link>
+              </Button>
+            </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {gigs.map((gig) => (
+                <Card
+                  key={gig.id}
+                  className="hover:shadow-lg transition-shadow bg-gray-900/80 border border-gray-800 text-white"
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg text-white">{gig.title}</CardTitle>
+                        <CardDescription className="mt-1 text-gray-400">{gig.location}</CardDescription>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <SafeImage
+                      src={gig.image_url || "/images/totl-logo.png"}
+                      alt={gig.title}
+                      width={300}
+                      height={200}
+                      className="w-full h-32 md:h-48 object-cover rounded-lg"
+                      fallbackSrc="/images/totl-logo-transparent.png"
+                    />
+
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className={getCategoryColor(gig.category)}>
+                        {getCategoryLabel(gig.category || "")}
+                      </Badge>
+                      <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Compensation:</span>
+                        <span className="font-medium">{gig.compensation}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Applications:</span>
+                        <span className="font-medium">{gig.applications_count}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-400">Posted:</span>
+                        <span className="font-medium">{gig.created_at}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Applications
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Applications Tab */}
+          <TabsContent value="applications" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Applications</h2>
+                <p className="text-gray-300">Review and manage talent applications for your gigs</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Search className="h-4 w-4 mr-2" />
+                  Search
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {applications.length === 0 ? (
+                <EmptyState
+                  icon={FileText}
+                  title="No applications yet"
+                  description="Applications will appear here once talent starts applying to your gigs. Make sure your gigs are active and visible to talent."
+                  action={{
+                    label: "Create a Gig",
+                    onClick: () => setActiveTab("create"),
+                  }}
+                />
+              ) : (
+                applications.map((application) => (
+                  <Card
+                    key={application.id}
+                    className="hover:shadow-md transition-shadow bg-gray-900/80 border border-gray-800 text-white"
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-16 w-16">
+                          <AvatarImage
+                            src={
+                              application.profiles?.avatar_url ||
+                              "/images/totl-logo-transparent.png"
+                            }
+                            alt={
+                              application.talent_profiles?.first_name &&
+                              application.talent_profiles?.last_name
+                                ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                : application.profiles?.display_name || "Talent"
+                            }
+                          />
+                          <AvatarFallback className="text-lg">
+                            {application.talent_profiles?.first_name &&
+                            application.talent_profiles?.last_name
+                              ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
+                              : application.profiles?.display_name?.charAt(0) || "T"}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold text-white">
+                                {application.talent_profiles?.first_name &&
+                                application.talent_profiles?.last_name
+                                  ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
+                                  : application.profiles?.display_name || "Talent User"}
+                              </h3>
+                              <p className="text-gray-300">{application.gigs?.title}</p>
+                              <div className="flex items-center gap-4 mt-2">
+                                <span className="text-sm text-gray-400">
+                                  <MapPin className="h-4 w-4 inline mr-1" />
+                                  {application.talent_profiles?.location ||
+                                    "Location not specified"}
+                                </span>
+                                <span className="text-sm text-gray-400">
+                                  <Clock className="h-4 w-4 inline mr-1" />
+                                  {application.talent_profiles?.experience ||
+                                    "Experience not specified"}
+                                </span>
+                                <span className="text-sm text-gray-400">
+                                  Applied {new Date(application.created_at).toLocaleDateString()}
+                                </span>
+                                {application.profiles?.email_verified && (
+                                  <span className="text-sm text-green-600">
+                                    <CheckCircle className="h-4 w-4 inline mr-1" />
+                                    Verified
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Badge variant="outline" className={getStatusColor(application.status)}>
+                              {application.status}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                        <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
+                            <UserCheck className="h-4 w-4 mr-2" />
+                            Review
+                          </Button>
+                        <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
+                            <Phone className="h-4 w-4 mr-2" />
+                            Contact
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Create Gig Tab */}
+          <TabsContent value="create" className="space-y-6">
+            <div className="text-center max-w-2xl mx-auto">
+              <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
+                <Plus className="h-10 w-10 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4">Create Your Next Gig</h2>
+              <p className="text-gray-300 mb-8">
+                Post a new opportunity or gig to find the perfect talent for your project. Our
+                platform connects you with qualified talent and professionals.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-purple-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <FileText className="h-6 w-6 text-purple-300" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Easy Setup</h3>
+                  <p className="text-sm text-gray-400">
+                    Fill out a simple form with your project details
+                  </p>
+                </Card>
+
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-green-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <Users className="h-6 w-6 text-emerald-300" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Quality Applications</h3>
+                  <p className="text-sm text-gray-400">
+                    Receive applications from qualified talent
+                  </p>
+                </Card>
+
+                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
+                  <div className="bg-blue-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="h-6 w-6 text-sky-300" />
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">Quick Hiring</h3>
+                  <p className="text-sm text-gray-400">
+                    Review profiles and hire the perfect match
+                  </p>
+                </Card>
+              </div>
+
+              <Button size="lg" asChild>
+                <Link href="/post-gig">
+                  <Plus className="h-5 w-5 mr-2" />
+                  Start Creating Gig
+                </Link>
+              </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

@@ -1,6 +1,8 @@
 "use server";
 
+import * as Sentry from "@sentry/nextjs";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // Generated table row types
@@ -58,9 +60,15 @@ export type TalentDashboardData = {
 export async function getTalentDashboardData(
   userId: string
 ): Promise<TalentDashboardData> {
-  const supabase = await createSupabaseServer();
+  return Sentry.startSpan(
+    {
+      name: "getTalentDashboardData",
+      op: "db.query",
+    },
+    async () => {
+      const supabase = await createSupabaseServer();
 
-  const [talentProfileResult, applicationsResult, gigsResult] = await Promise.all([
+      const [talentProfileResult, applicationsResult, gigsResult] = await Promise.all([
     supabase
       .from("talent_profiles")
       .select("first_name,last_name,location")
@@ -160,21 +168,36 @@ export async function getTalentDashboardData(
     };
   });
 
-  return {
-    talentProfile: talentProfileResult.data ?? null,
-    applications,
-    gigs,
-  };
+      return {
+        talentProfile: talentProfileResult.data ?? null,
+        applications,
+        gigs,
+      };
+    }
+  );
 }
 
 type ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 
-type ClientApplication = Database["public"]["Tables"]["applications"]["Row"] & {
-  gigs?: Database["public"]["Tables"]["gigs"]["Row"];
-  profiles?: Pick<
+type ClientApplicationRaw = Pick<
+  Database["public"]["Tables"]["applications"]["Row"],
+  "id" | "gig_id" | "talent_id" | "status" | "message" | "created_at" | "updated_at"
+> & {
+  gigs: Pick<
+    Database["public"]["Tables"]["gigs"]["Row"],
+    "id" | "title" | "category" | "location" | "compensation"
+  > | null;
+};
+
+type ClientApplication = ClientApplicationRaw & {
+  talent_profiles: Pick<
+    Database["public"]["Tables"]["talent_profiles"]["Row"],
+    "first_name" | "last_name" | "location" | "experience"
+  > | null;
+  profiles: Pick<
     Database["public"]["Tables"]["profiles"]["Row"],
     "display_name" | "email_verified" | "role" | "avatar_url"
-  >;
+  > | null;
 };
 
 type ClientGig = Database["public"]["Tables"]["gigs"]["Row"];
@@ -188,14 +211,25 @@ export type ClientDashboardData = {
 /**
  * Fetch all client dashboard data in parallel (Server Component)
  * This eliminates sequential client-side fetches and reduces round trips
+ * 
+ * FIXES:
+ * - Fetches applications by joining to gigs (gigs.client_id = userId)
+ * - Fetches talent_profiles separately using in('user_id', talentIds) to avoid FK join pitfalls
+ * - Merges talent_profiles and profiles in memory (matches client/applications pattern)
  */
 export async function getClientDashboardData(
   userId: string
 ): Promise<ClientDashboardData> {
-  const supabase = await createSupabaseServer();
+  return Sentry.startSpan(
+    {
+      name: "getClientDashboardData",
+      op: "db.query",
+    },
+    async () => {
+      const supabase = await createSupabaseServer();
 
-  // Fetch all data in parallel using Promise.all
-  const [clientProfileResult, gigsResult, applicationsResult] = await Promise.all([
+      // Step 1: Fetch client profile + gigs in parallel
+      const [clientProfileResult, gigsResult] = await Promise.all([
     // Client profile
     supabase
       .from("client_profiles")
@@ -213,33 +247,98 @@ export async function getClientDashboardData(
       )
       .eq("client_id", userId)
       .order("created_at", { ascending: false }),
-
-    // Applications for client's gigs
-    supabase
-      .from("applications")
-      .select(
-        "id,gig_id,talent_id,status,message,created_at,updated_at,gigs!inner(title,category,location,compensation),profiles!talent_id(display_name,email_verified,role,avatar_url)"
-      )
-      .eq("gigs.client_id", userId)
-      .order("created_at", { ascending: false }),
   ]);
 
-  // Handle errors gracefully
+  // Handle errors
   if (clientProfileResult.error && clientProfileResult.error.code !== "PGRST116") {
-    console.error("[getClientDashboardData] Error fetching client profile:", clientProfileResult.error);
+    logger.error("[getClientDashboardData] Error fetching client profile", clientProfileResult.error);
   }
 
   if (gigsResult.error) {
-    console.error("[getClientDashboardData] Error fetching gigs:", gigsResult.error);
+    logger.error("[getClientDashboardData] Error fetching gigs", gigsResult.error);
+    throw new Error(`[getClientDashboardData] Failed to fetch gigs: ${gigsResult.error.message}`);
   }
 
-  if (applicationsResult.error) {
-    console.error("[getClientDashboardData] Error fetching applications:", applicationsResult.error);
+  const gigs = gigsResult.data ?? [];
+  const gigIds = gigs.map((gig) => gig.id);
+
+  // Step 2: Fetch applications for client's gigs (using gig_id filter)
+  let applicationsRaw: ClientApplicationRaw[] = [];
+  if (gigIds.length > 0) {
+    const applicationsResult = await supabase
+      .from("applications")
+      .select(
+        "id,gig_id,talent_id,status,message,created_at,updated_at,gigs(id,title,category,location,compensation)"
+      )
+      .in("gig_id", gigIds)
+      .order("created_at", { ascending: false })
+      .returns<ClientApplicationRaw[]>();
+
+    if (applicationsResult.error) {
+      logger.error("[getClientDashboardData] Error fetching applications", applicationsResult.error);
+      throw new Error(`[getClientDashboardData] Failed to fetch applications: ${applicationsResult.error.message}`);
+    }
+
+    applicationsRaw = applicationsResult.data ?? [];
   }
 
-  return {
-    clientProfile: clientProfileResult.data ?? null,
-    gigs: (gigsResult.data ?? []) as ClientGig[],
-    applications: (applicationsResult.data ?? []) as ClientApplication[],
-  };
+  // Step 3: Fetch talent_profiles separately (avoid FK join pitfalls)
+  const talentIds = Array.from(new Set(applicationsRaw.map((app) => app.talent_id).filter(Boolean)));
+  const talentProfilesMap = new Map<string, Pick<Database["public"]["Tables"]["talent_profiles"]["Row"], "first_name" | "last_name" | "location" | "experience">>();
+  const profilesMap = new Map<string, Pick<Database["public"]["Tables"]["profiles"]["Row"], "display_name" | "email_verified" | "role" | "avatar_url">>();
+
+  if (talentIds.length > 0) {
+    const [talentProfilesResult, profilesResult] = await Promise.all([
+      supabase
+        .from("talent_profiles")
+        .select("user_id,first_name,last_name,location,experience")
+        .in("user_id", talentIds),
+      
+      supabase
+        .from("profiles")
+        .select("id,display_name,email_verified,role,avatar_url")
+        .in("id", talentIds),
+    ]);
+
+    if (talentProfilesResult.error) {
+      logger.error("[getClientDashboardData] Error fetching talent_profiles", talentProfilesResult.error);
+    } else {
+      (talentProfilesResult.data ?? []).forEach((tp) => {
+        talentProfilesMap.set(tp.user_id, {
+          first_name: tp.first_name,
+          last_name: tp.last_name,
+          location: tp.location,
+          experience: tp.experience,
+        });
+      });
+    }
+
+    if (profilesResult.error) {
+      logger.error("[getClientDashboardData] Error fetching profiles", profilesResult.error);
+    } else {
+      (profilesResult.data ?? []).forEach((p) => {
+        profilesMap.set(p.id, {
+          display_name: p.display_name,
+          email_verified: p.email_verified,
+          role: p.role,
+          avatar_url: p.avatar_url,
+        });
+      });
+    }
+  }
+
+  // Step 4: Merge talent_profiles and profiles into applications
+  const applications: ClientApplication[] = applicationsRaw.map((app) => ({
+    ...app,
+    talent_profiles: app.talent_id ? talentProfilesMap.get(app.talent_id) ?? null : null,
+    profiles: app.talent_id ? profilesMap.get(app.talent_id) ?? null : null,
+  }));
+
+      return {
+        clientProfile: clientProfileResult.data ?? null,
+        gigs: gigs as ClientGig[],
+        applications,
+      };
+    }
+  );
 }

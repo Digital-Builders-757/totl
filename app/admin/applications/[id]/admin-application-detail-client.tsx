@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
 import { createNameSlug } from "@/lib/utils/slug";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {
@@ -119,7 +120,7 @@ export function AdminApplicationDetailClient({
         router.refresh();
       }
     } catch (error) {
-      console.error("Error approving application:", error);
+      logger.error("Error approving application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -163,7 +164,7 @@ export function AdminApplicationDetailClient({
         router.refresh();
       }
     } catch (error) {
-      console.error("Error rejecting application:", error);
+      logger.error("Error rejecting application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

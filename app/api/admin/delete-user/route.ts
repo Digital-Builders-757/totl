@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 type SupabaseLikeError = { message?: string; status?: number };
 
@@ -134,7 +135,7 @@ export const POST = async (request: Request) => {
     }
 
     // Audit breadcrumb (useful even without an audit table)
-    console.info("[AdminDeleteUser] Deleting user", {
+    logger.info("[AdminDeleteUser] Deleting user", {
       deleted_by: user.id,
       deleted_user_id: userId,
     });

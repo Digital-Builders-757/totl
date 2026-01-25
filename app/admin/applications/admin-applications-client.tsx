@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { User } from "@supabase/supabase-js";
 import {
@@ -36,6 +36,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // Type for the joined application data
@@ -128,7 +129,7 @@ export function AdminApplicationsClient({
         });
       }
     } catch (error) {
-      console.error("Error approving application:", error);
+      logger.error("Error approving application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -172,7 +173,7 @@ export function AdminApplicationsClient({
         });
       }
     } catch (error) {
-      console.error("Error rejecting application:", error);
+      logger.error("Error rejecting application", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

@@ -1,5 +1,7 @@
 "use server";
 
+import { logger } from "@/lib/utils/logger";
+
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import {
@@ -89,7 +91,7 @@ export async function acceptApplication(params: {
         return { error: "Cannot accept a rejected application" };
       }
 
-      console.error("accept_application_and_create_booking RPC error:", rpcError);
+      logger.error("accept_application_and_create_booking RPC error", rpcError);
       return { error: "Failed to create booking" };
     }
 
@@ -102,7 +104,7 @@ export async function acceptApplication(params: {
     if (row.did_accept) {
       const acceptedEventKey = `application-accepted:${params.applicationId}`;
       const bookingEventKey = `booking-confirmed:${bookingId}`;
-      console.log("[totl][applications] acceptance email events", {
+      logger.info("[totl][applications] acceptance email events", {
         acceptedEventKey,
         bookingEventKey,
       });
@@ -178,13 +180,13 @@ export async function acceptApplication(params: {
         }
       } catch (emailError) {
         // Best-effort: never fail the acceptance on email issues.
-        console.error("Failed to send acceptance emails:", emailError);
+        logger.error("Failed to send acceptance emails", emailError);
       }
     }
 
     return { success: true, bookingId };
   } catch (error) {
-    console.error("Accept application error:", error);
+    logger.error("Accept application error", error);
     return { error: "An unexpected error occurred" };
   }
 }
@@ -244,14 +246,14 @@ export async function rejectApplication(params: {
       .eq("id", params.applicationId);
 
     if (updateError) {
-      console.error("Application rejection error:", updateError);
+      logger.error("Application rejection error", updateError);
       return { error: "Failed to reject application" };
     }
 
     // Send email notification to talent
     try {
       const eventKey = `application-rejected:${params.applicationId}`;
-      console.log("[totl][applications] rejection email event", { eventKey });
+      logger.info("[totl][applications] rejection email event", { eventKey });
 
       // Get talent profile and gig details
       const { data: fullApplication } = await supabase
@@ -290,12 +292,12 @@ export async function rejectApplication(params: {
       }
     } catch (emailError) {
       // Log email errors but don't fail the rejection
-      console.error("Failed to send rejection email:", emailError);
+      logger.error("Failed to send rejection email", emailError);
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Reject application error:", error);
+    logger.error("Reject application error", error);
     return { error: "An unexpected error occurred" };
   }
 }
@@ -345,13 +347,13 @@ export async function updateApplicationStatus(params: {
       .eq("id", params.applicationId);
 
     if (updateError) {
-      console.error("Status update error:", updateError);
+      logger.error("Status update error", updateError);
       return { error: "Failed to update status" };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Update status error:", error);
+    logger.error("Update status error", error);
     return { error: "An unexpected error occurred" };
   }
 }
@@ -392,7 +394,7 @@ export async function getClientBookings() {
       .order("created_at", { ascending: false });
 
     if (bookingsError) {
-      console.error("Bookings fetch error:", bookingsError);
+      logger.error("Bookings fetch error", bookingsError);
       return { error: "Failed to load bookings" };
     }
 
@@ -425,7 +427,7 @@ export async function getClientBookings() {
 
     return { success: true, bookings: bookingsWithTalent };
   } catch (error) {
-    console.error("Get bookings error:", error);
+    logger.error("Get bookings error", error);
     return { error: "An unexpected error occurred" };
   }
 }
@@ -484,13 +486,13 @@ export async function updateBookingStatus(params: {
       .eq("id", params.bookingId);
 
     if (updateError) {
-      console.error("Booking update error:", updateError);
+      logger.error("Booking update error", updateError);
       return { error: "Failed to update booking" };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Update booking error:", error);
+    logger.error("Update booking error", error);
     return { error: "An unexpected error occurred" };
   }
 }
@@ -550,13 +552,13 @@ export async function cancelBooking(params: {
       .eq("id", params.bookingId);
 
     if (updateError) {
-      console.error("Booking cancellation error:", updateError);
+      logger.error("Booking cancellation error", updateError);
       return { error: "Failed to cancel booking" };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Cancel booking error:", error);
+    logger.error("Cancel booking error", error);
     return { error: "An unexpected error occurred" };
   }
 }

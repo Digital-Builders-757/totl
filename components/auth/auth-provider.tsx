@@ -16,6 +16,7 @@ import {
 } from "@/lib/constants/routes";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
 import { safeReturnUrl } from "@/lib/utils/return-url";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -220,7 +221,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         await breadcrumb({ phase: "attempt_start", attempt });
         const profileResult = await ensureProfileExists();
         if (profileResult?.error) {
-          console.error("Error ensuring profile exists:", profileResult.error);
+          logger.error("Error ensuring profile exists", profileResult.error, { attempt });
           await breadcrumb({ phase: "ensure_error", attempt, error: profileResult.error });
           return null;
         }
@@ -272,14 +273,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const performRedirect = useCallback(
     (routerInstance: ReturnType<typeof useRouter>, target: string, currentPathname: string) => {
       if (!target || !target.startsWith("/")) {
-        console.error("[auth] Invalid redirect target:", target);
+        logger.error("[auth] Invalid redirect target", undefined, { target });
         return;
       }
 
       const targetPathname = target.split("?")[0]; // Strip query params for comparison
       const startPathname = currentPathname.split("?")[0];
 
-      console.log("[auth.onAuthStateChange] Attempting redirect via router.replace():", target, {
+      logger.debug("[auth.onAuthStateChange] Attempting redirect via router.replace()", {
+        target,
         startPathname,
         targetPathname,
       });
@@ -300,37 +302,34 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           const navigated = newPathname === targetPathname && newPathname !== startPathname;
 
           if (navigated) {
-            console.log("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
+            logger.debug("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
               expected: targetPathname,
               actual: newPathname,
             });
           } else {
             // Navigation didn't happen within timeout, fallback to hard reload
-            console.warn(
-              "[auth.onAuthStateChange] router.replace() didn't navigate within 500ms, using hard reload",
-              {
-                expected: targetPathname,
-                actual: newPathname,
-                startPathname,
-              }
-            );
+            logger.warn("[auth.onAuthStateChange] router.replace() didn't navigate within 500ms, using hard reload", {
+              expected: targetPathname,
+              actual: newPathname,
+              startPathname,
+            });
             try {
               window.location.replace(target);
-              console.log("[auth.onAuthStateChange] window.location.replace() called as fallback");
+              logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
             } catch (hardReloadError) {
-              console.error("[auth.onAuthStateChange] Hard reload also failed:", hardReloadError);
+              logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
               window.location.assign(target);
             }
           }
         }, 500);
       } catch (routerError) {
         // If router.replace() throws, immediately fallback to hard reload
-        console.error("[auth.onAuthStateChange] router.replace() threw, using hard reload:", routerError);
+        logger.error("[auth.onAuthStateChange] router.replace() threw, using hard reload", routerError);
         try {
           window.location.replace(target);
-          console.log("[auth.onAuthStateChange] window.location.replace() called after router error");
+          logger.debug("[auth.onAuthStateChange] window.location.replace() called after router error");
         } catch (hardReloadError) {
-          console.error("[auth.onAuthStateChange] Hard reload also failed:", hardReloadError);
+          logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
           window.location.assign(target);
         }
       }
@@ -360,7 +359,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           
           // If redirectTo is null, log reason and retry (unless last attempt)
           if (process.env.NODE_ENV === "development") {
-            console.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} returned null:`, result.reason);
+            logger.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} returned null`, { reason: result.reason });
           }
           
           // Retry with backoff unless last attempt
@@ -371,7 +370,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Log but don't throw - we'll use fallback
           lastReason = "error";
           if (process.env.NODE_ENV === "development") {
-            console.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} threw:`, error);
+            logger.debug(`[auth] getBootStateRedirect attempt ${attempt + 1} threw`, { error });
           }
           // Retry with backoff unless last attempt
           if (attempt < maxAttempts - 1) {
@@ -422,7 +421,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           ]);
         } catch (error) {
           // Bootstrap timed out or failed - clear ref and continue
-          console.warn("[auth.init] Bootstrap guard timeout or error, clearing ref:", error);
+          logger.warn("[auth.init] Bootstrap guard timeout or error, clearing ref", { error });
           bootstrapPromiseRef.current = null;
         }
         return;
@@ -448,13 +447,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
         };
         
-        console.log("[auth.init] Starting auth bootstrap");
+        logger.debug("[auth.init] Starting auth bootstrap");
         await breadcrumb({ phase: "init_start" });
 
         // Set 8-second timeout guard
         timeoutRef.current = setTimeout(() => {
           if (mounted && isLoadingRef.current) {
-            console.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
+            logger.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
             breadcrumb({ phase: "timeout", threshold: 8000 });
             setShowTimeoutRecovery(true);
           }
@@ -483,7 +482,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           } catch (error) {
             // Gracefully handle AbortError during navigation/unmount
             if (error instanceof Error && error.name === "AbortError") {
-              console.log("[auth.init] Bootstrap aborted during navigation (expected)");
+              logger.debug("[auth.init] Bootstrap aborted during navigation (expected)");
               await breadcrumb({ phase: "aborted", reason: "navigation" });
               return; // Early return - don't update state if unmounted
             }
@@ -539,26 +538,26 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               
               // Breadcrumb: bootstrap complete
               await breadcrumb({ phase: "bootstrap_complete" });
-              console.log("[auth.bootstrap.complete] Auth bootstrap finished successfully");
+              logger.debug("[auth.bootstrap.complete] Auth bootstrap finished successfully");
             } catch (error) {
               // Gracefully handle AbortError during profile fetch
               if (error instanceof Error && error.name === "AbortError") {
-                console.log("[auth.init] Profile fetch aborted during navigation (expected)");
+                logger.debug("[auth.init] Profile fetch aborted during navigation (expected)");
                 await breadcrumb({ phase: "profile_fetch_aborted", reason: "navigation" }).catch(() => {});
                 return; // Early return - don't update state if unmounted
               }
               // Log other errors but don't block UI
-              console.error("[auth.init] Profile hydration error (non-blocking):", error);
+              logger.error("[auth.init] Profile hydration error (non-blocking)", error);
               await breadcrumb({ phase: "profile_hydration_error", error: error instanceof Error ? error.message : String(error) }).catch(() => {});
             }
           })();
         } catch (error) {
           // Only log non-abort errors
           if (!(error instanceof Error && error.name === "AbortError")) {
-            console.error("[auth.init] Error in initial session check:", error);
+            logger.error("[auth.init] Error in initial session check", error);
             await breadcrumb({ phase: "error", error: error instanceof Error ? error.message : String(error) });
           } else {
-            console.log("[auth.init] Bootstrap aborted (expected during navigation)");
+            logger.debug("[auth.init] Bootstrap aborted (expected during navigation)");
           }
         } finally {
           // Clear timeout if bootstrap completed
@@ -609,7 +608,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
         : false;
       
-      console.log("[auth.onAuthStateChange]", {
+      logger.debug("[auth.onAuthStateChange]", {
         event,
         hasSession: !!session,
         userId: session?.user?.id ?? null,
@@ -633,7 +632,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
         // session check and we'd get "stuck on /login" flakes.
         
-        console.log("[auth.onAuthStateChange] SIGNED_IN handler entered", {
+        logger.debug("[auth.onAuthStateChange] SIGNED_IN handler entered", {
           hasSession: !!session,
           userId: session?.user?.id,
           pathname,
@@ -647,7 +646,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         // Check if we should redirect (must be on auth route)
         const shouldRedirect = currentPath && isAuthRoute(currentPath);
         
-        console.log("[auth.onAuthStateChange] Redirect check", {
+        logger.debug("[auth.onAuthStateChange] Redirect check", {
           currentPath,
           shouldRedirect,
           isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
@@ -665,7 +664,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             .catch((error) => {
               // Silently handle errors - profile hydration is non-blocking
               if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
-                console.debug("[auth.onAuthStateChange] Background profile hydration failed:", error);
+                logger.debug("[auth.onAuthStateChange] Background profile hydration failed", { error });
               }
             });
           return;
@@ -673,7 +672,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
         // CRITICAL: Prevent double navigation (multi-tab, rapid events)
         if (redirectInFlightRef.current) {
-          console.log("[auth.onAuthStateChange] Redirect already in flight, skipping");
+          logger.debug("[auth.onAuthStateChange] Redirect already in flight, skipping");
           return;
         }
         redirectInFlightRef.current = true;
@@ -694,13 +693,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         
           // Safety check: ensure fallbackRedirect is always valid
           if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
-            console.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded:", fallbackRedirect);
+            logger.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded", undefined, { fallbackRedirect });
             const safeFallback = PATHS.TALENT_DASHBOARD;
             performRedirect(router, safeFallback, currentPath);
             return;
           }
         
-        console.log("[auth.onAuthStateChange] Starting redirect flow", {
+        logger.debug("[auth.onAuthStateChange] Starting redirect flow", {
           returnUrlRaw,
           safeReturnUrlValue,
           fallbackRedirect,
@@ -712,7 +711,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           .catch((error) => {
             // Silently handle all errors - hydration is best-effort
             if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
-              console.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking):", error);
+              logger.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking)", { error });
             }
             return null; // Return null on error
           });
@@ -743,14 +742,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             
             // Validate finalTarget is a valid internal path (safety check)
             if (!finalTarget || !finalTarget.startsWith("/")) {
-              console.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback:", finalTarget);
+              logger.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback", undefined, { finalTarget });
               const safeFallback = PATHS.TALENT_DASHBOARD;
               performRedirect(router, safeFallback, currentPath);
               return;
             }
             
             // Log redirect decision with observability
-            console.log("[auth.onAuthStateChange] Redirect target resolved:", finalTarget, {
+            logger.debug("[auth.onAuthStateChange] Redirect target resolved", {
+              finalTarget,
               source: result.redirectTo ? "bootState" : "fallback",
               reason: result.reason,
               returnUrl: safeReturnUrlValue,
@@ -763,7 +763,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           })
           .catch((error) => {
             // Even if redirect decision fails, we MUST redirect
-            console.error("[auth.onAuthStateChange] Redirect decision failed, using fallback:", error);
+            logger.error("[auth.onAuthStateChange] Redirect decision failed, using fallback", error);
             performRedirect(router, fallbackRedirect, currentPath);
           });
 
@@ -870,7 +870,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     
     // TRUTH #1: Prove signInWithPassword result
-    console.log("[auth.signIn] signInWithPassword result", {
+    logger.debug("[auth.signIn] signInWithPassword result", {
       hasError: !!error,
       error: error?.message ?? null,
       hasSession: !!data?.session,
@@ -885,7 +885,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           .split(";")
           .map((s) => s.trim())
           .filter((s) => s.startsWith("sb-") || s.includes("supabase"));
-        console.log("[auth.signIn] document.cookie sb*", cookieSb);
+        logger.debug("[auth.signIn] document.cookie sb*", { cookieSb });
       }, 0);
     }
     
@@ -939,7 +939,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (apiError) {
         serverSignOutError = apiError instanceof Error ? apiError : new Error(String(apiError));
-        console.warn("Server-side sign out API call failed:", apiError);
+        logger.warn("Server-side sign out API call failed", { apiError });
         // Log to Sentry but don't block sign-out (telemetry never blocks cleanup)
         try {
           const Sentry = await import("@sentry/nextjs");
@@ -970,7 +970,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error: clientError };
     } catch (error) {
-      console.error("Error during sign out:", error);
+      logger.error("Error during sign out", error);
       manualSignOutInProgressRef.current = false;
       resetSupabaseBrowserClient();
       setUser(null);
@@ -1017,7 +1017,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error: null };
     } catch (error) {
-      console.error("Error sending verification email:", error);
+      logger.error("Error sending verification email", error);
       return { error: error instanceof Error ? error : new Error("Unknown error") };
     }
   };
@@ -1038,7 +1038,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error: null };
     } catch (error) {
-      console.error("Password reset error:", error);
+      logger.error("Password reset error", error);
       return { error: { message: "Failed to send password reset email" } as AuthError };
     }
   };
@@ -1072,7 +1072,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn("Supabase not configured, using fallback auth provider");
+    logger.warn("Supabase not configured, using fallback auth provider");
     return <FallbackAuthProvider>{children}</FallbackAuthProvider>;
   }
 

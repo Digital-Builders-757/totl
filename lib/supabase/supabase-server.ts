@@ -29,6 +29,7 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
 
   // Debug logging for development
   if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
     console.log('Supabase Server Client Debug:', {
       has_SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
       has_SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY),

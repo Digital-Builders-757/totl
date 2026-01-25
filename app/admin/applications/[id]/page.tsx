@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { AdminApplicationDetailClient } from "./admin-application-detail-client";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
 export const dynamic = "force-dynamic";
@@ -143,7 +144,7 @@ export default async function AdminApplicationDetailPage({
     : null;
 
   if (applicationError || !applicationWithDetails) {
-    console.error("Error fetching application:", applicationError);
+    logger.error("Error fetching application", applicationError);
     notFound();
   }
 

@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { STRIPE_WEBHOOK_SECRET, stripe } from "@/lib/stripe";
 import { mapStripeStatusToLocal } from "@/lib/subscription";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 type SubscriptionPlan = 'monthly' | 'annual';
 type StripeWebhookLedgerStatus = "processing" | "processed" | "failed" | "ignored";
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
   const signature = req.headers.get("stripe-signature");
 
   if (!signature) {
-    console.error("No Stripe signature found");
+    logger.error("No Stripe signature found");
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    console.error("Webhook signature verification failed:", err);
+    logger.error("Webhook signature verification failed", err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -94,7 +95,7 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        console.log('Checkout session completed:', session.id);
+        logger.info('Checkout session completed', { sessionId: session.id });
         
         // Handle subscription checkout completion
         if (session.mode === 'subscription' && session.subscription) {
@@ -120,7 +121,7 @@ export async function POST(req: Request) {
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
-        console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
+        logger.info('Subscription updated', { subscriptionId: subscription.id, status: subscription.status });
         const success = await handleSubscriptionUpdate(supabase, subscription);
         if (!success) {
           await markStripeWebhookEventLedgerRow(supabase, {
@@ -135,14 +136,14 @@ export async function POST(req: Request) {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        console.log('Subscription deleted:', subscription.id);
+        logger.info('Subscription deleted', { subscriptionId: subscription.id });
         
         const customerId = typeof subscription.customer === 'string' 
           ? subscription.customer 
           : subscription.customer?.id;
 
         if (!customerId) {
-          console.error("No customer ID found for subscription deletion:", subscription.id);
+          logger.error("No customer ID found for subscription deletion", undefined, { subscriptionId: subscription.id });
           await markStripeWebhookEventLedgerRow(supabase, {
             eventId: event.id,
             status: "failed",
@@ -158,7 +159,7 @@ export async function POST(req: Request) {
           .maybeSingle();
 
         if (findError) {
-          console.error("Error finding profile for deleted subscription:", findError);
+          logger.error("Error finding profile for deleted subscription", findError);
           await markStripeWebhookEventLedgerRow(supabase, {
             eventId: event.id,
             status: "failed",
@@ -179,7 +180,7 @@ export async function POST(req: Request) {
             .eq("id", profile.id);
 
           if (updateError) {
-            console.error("Error updating profile for deleted subscription:", updateError);
+            logger.error("Error updating profile for deleted subscription", updateError);
             await markStripeWebhookEventLedgerRow(supabase, {
               eventId: event.id,
               status: "failed",
@@ -188,14 +189,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Failed to process subscription deletion" }, { status: 500 });
           }
 
-          console.log("Successfully canceled subscription for profile:", profile.id);
+          logger.info("Successfully canceled subscription for profile", { profileId: profile.id });
         }
         break;
       }
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
-        console.log('Payment failed for invoice:', invoice.id);
+        logger.warn('Payment failed for invoice', { invoiceId: invoice.id });
         // Note: Subscription status will be updated via customer.subscription.updated event
         // when payment fails, so we don't need to handle it here
         break;
@@ -204,13 +205,13 @@ export async function POST(req: Request) {
       default:
         // This should be unreachable because we short-circuit unhandled events above,
         // but keep as a defense-in-depth fallback.
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.warn(`Unhandled event type: ${event.type}`);
     }
 
     await markStripeWebhookEventLedgerRow(supabase, { eventId: event.id, status: "processed" });
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Webhook handler error:", error);
+    logger.error("Webhook handler error", error);
     await markStripeWebhookEventLedgerRow(supabase, {
       eventId: (event as Stripe.Event | undefined)?.id ?? null,
       status: "failed",
@@ -314,7 +315,7 @@ async function insertStripeWebhookEventLedgerRow(
       .maybeSingle();
 
     if (readError) {
-      console.error("Failed to read existing Stripe webhook ledger row:", readError);
+      logger.error("Failed to read existing Stripe webhook ledger row", readError);
       return { shouldShortCircuit: false, inFlight: false, error: readError };
     }
 
@@ -337,7 +338,7 @@ async function insertStripeWebhookEventLedgerRow(
     return { shouldShortCircuit: false, inFlight: false, error: null };
   }
 
-  console.error("Failed to insert Stripe webhook ledger row:", error);
+  logger.error("Failed to insert Stripe webhook ledger row", error);
   return { shouldShortCircuit: false, inFlight: false, error };
 }
 
@@ -357,7 +358,7 @@ async function markStripeWebhookEventLedgerRow(
     .eq("event_id", args.eventId);
 
   if (error) {
-    console.error("Failed to update Stripe webhook ledger row:", error);
+    logger.error("Failed to update Stripe webhook ledger row", error);
   }
 }
 
@@ -375,7 +376,7 @@ async function getLatestProcessedStripeCreatedForCustomer(
     .maybeSingle();
 
   if (error) {
-    console.error("Failed to read latest processed Stripe event for customer:", error);
+    logger.error("Failed to read latest processed Stripe event for customer", error);
     return null;
   }
 
@@ -392,7 +393,7 @@ async function handleSubscriptionUpdate(
     : subscription.customer?.id;
 
   if (!customerId) {
-    console.error("No customer ID found in subscription:", subscription.id);
+    logger.error("No customer ID found in subscription", undefined, { subscriptionId: subscription.id });
     return false;
   }
 
@@ -404,12 +405,12 @@ async function handleSubscriptionUpdate(
     .maybeSingle();
 
   if (findError) {
-    console.error("Error finding profile for subscription update:", findError);
+    logger.error("Error finding profile for subscription update", findError);
     return false;
   }
 
   if (!profile) {
-    console.error("No profile found for customer:", customerId);
+    logger.error("No profile found for customer", undefined, { customerId });
     return false;
   }
 
@@ -419,7 +420,8 @@ async function handleSubscriptionUpdate(
   // Determine plan from price ID or metadata
   const plan = determinePlanFromSubscription(subscription);
   if (!plan) {
-    console.warn("Unable to determine subscription plan for subscription:", subscription.id, {
+    logger.warn("Unable to determine subscription plan for subscription", {
+      subscriptionId: subscription.id,
       priceIds: subscription.items?.data.map(item => item.price?.id),
       metadataPlan: subscription.metadata?.plan,
     });
@@ -447,7 +449,7 @@ async function handleSubscriptionUpdate(
     return false;
   }
 
-  console.log(`Successfully updated subscription for profile ${profile.id}: ${subscriptionStatus}`);
+  logger.info(`Successfully updated subscription for profile`, { profileId: profile.id, subscriptionStatus });
   return true;
 }
 

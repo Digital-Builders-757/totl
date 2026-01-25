@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { logger } from "@/lib/utils/logger";
 
 // Initialize Resend with API key (only if available)
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -43,16 +44,16 @@ export async function sendEmail({
   text?: string;
 }) {
   if (process.env.DISABLE_EMAIL_SENDING === "1") {
-    console.warn("[totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)", { to, subject });
+    logger.warn("[totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)", { to, subject });
     return { success: true, messageId: "disabled" };
   }
 
   if (!resendApiKey || !resend) {
-    console.warn("RESEND_API_KEY is not defined - email sending disabled");
+    logger.warn("RESEND_API_KEY is not defined - email sending disabled");
     // In non-production (dev/test), no-op success to avoid blocking local workflows.
     // In production, we must fail loudly to avoid silent email loss.
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[DEV] Would send email to ${to}: ${subject}`);
+      logger.info(`[DEV] Would send email to ${to}: ${subject}`);
       return { success: true, messageId: "dev-mode" };
     }
     throw new Error("RESEND_API_KEY is not defined");
@@ -68,13 +69,13 @@ export async function sendEmail({
     });
 
     if (error) {
-      console.error("Error sending email:", error);
+      logger.error("Error sending email", error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
     return { success: true, messageId: data?.id };
   } catch (error) {
-    console.error("Error sending email:", error);
+    logger.error("Error sending email", error);
     throw error;
   }
 }
@@ -89,7 +90,7 @@ export async function logEmailSent(
   error?: string
 ) {
   // Log to your database or monitoring service
-  console.log(`Email ${success ? "sent" : "failed"} to ${to}, template: ${template}`, error || "");
+  logger.info(`Email ${success ? "sent" : "failed"} to ${to}, template: ${template}`, error || "");
 
   // You could also log to Supabase here
   // const supabase = createSupabaseClient();

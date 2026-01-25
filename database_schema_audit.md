@@ -22,7 +22,7 @@
 This audit provides a comprehensive overview of the TOTL Agency database schema, including all tables, columns, data types, constraints, indexes, and relationships. The database is well-structured with proper foreign key relationships, appropriate indexing, and custom enum types for status management.
 
 **Key Highlights:**
-- ✅ **14 tables** with proper relationships
+- ✅ **13 tables** with proper relationships (8 core business tables + 5 supporting tables)
 - ✅ **RLS enabled** on all tables for security
 - ✅ **Custom enums** for status management
 - ✅ **Automatic triggers** for profile creation
@@ -32,7 +32,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 14
+- **Total Tables:** 13 (8 core business tables + 5 supporting tables)
 - **Total Columns:** 85+
 - **Custom Types (Enums):** 5
 - **Foreign Key Relationships:** 10
