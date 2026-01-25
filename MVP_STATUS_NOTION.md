@@ -8,6 +8,29 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client Post-Gig Theme Alignment (January 25, 2026)**
+
+**TERMINAL UI CONSISTENCY FIX** - January 25, 2026  
+- ✅ **Added `/post-gig` surface wrapper**: New route layout enforces dashboard surface tokens without routing changes
+- ✅ **Semantic tokens applied**: Replaced hard-coded slate/gray classes with `bg-background`, `bg-card`, `text-foreground`, `text-muted-foreground`
+- ✅ **No opacity washout**: Card uses `bg-card/80` + `backdrop-blur` instead of container-level opacity
+- ✅ **Readable inputs**: Inputs/textareas/select trigger now use semantic placeholder + foreground classes
+- ✅ **Minimal contrast tune**: Slight bump to dark `--muted-foreground`, `--card`, and `--border` for legibility
+
+**Why this change:**
+- `/post-gig` rendered in a light surface while form components assumed dark mode
+- Muted/secondary text was too low-contrast on dark surfaces
+
+**Impact:**
+- Post-gig page now visually matches client dashboard terminal
+- Helper text and placeholders remain readable without affecting other surfaces
+
+**Next (P0 - Critical)**
+- [ ] Sanity-check dashboard empty states + muted copy for contrast
+
+**Next (P1 - Follow-up)**
+- [ ] Audit other client terminal pages for hard-coded light/dark classes
+
 ## 🚀 **Latest: Gig Image Upload 400 Fix (January 25, 2026)**
 
 **SERVER ACTIONS BODY LIMIT FIX** - January 25, 2026  
