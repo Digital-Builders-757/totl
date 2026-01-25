@@ -411,7 +411,25 @@ npm run verify-all
 
 - **`README.md`** - This comprehensive guide
 - **`database_schema_audit.md`** - Complete database reference
-- **`docs/`** - Additional documentation
+- **`docs/DOCUMENTATION_INDEX.md`** - Complete documentation index and navigation guide
+- **`docs/releasenotes/`** - Versioned release notes (see `docs/releasenotes/v1.0.0.md`)
+
+### 📁 **Documentation Structure**
+
+The documentation is organized into logical directories:
+
+- **`docs/releasenotes/`** - Versioned release notes (`v1.0.0.md`, `v1.1.0.md`, etc.)
+- **`docs/guides/`** - User guides, developer guides, setup instructions
+- **`docs/development/`** - Coding standards, type safety, development practices
+- **`docs/features/`** - Feature implementation documentation
+- **`docs/troubleshooting/`** - Error fixes, debugging guides, common issues
+- **`docs/performance/`** - Performance optimization documentation
+- **`docs/security/`** - Security configuration and standards
+- **`docs/audits/`** - Audit reports and implementation summaries
+- **`docs/contracts/`** - Domain contracts (Layer 2 source of truth)
+- **`docs/journeys/`** - User journeys (Layer 3 source of truth)
+
+See `docs/DOCUMENTATION_INDEX.md` for complete navigation guide.
 
 ### 🔗 **Useful Links**
 

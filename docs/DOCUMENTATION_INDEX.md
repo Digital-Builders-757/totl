@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** December 20, 2025
+**Last Updated:** January 25, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -18,11 +18,28 @@ These files remain in the project root for easy access:
 | `TOTL_PROJECT_CONTEXT_PROMPT.md` | **Mandatory** project rules, pitfalls, and pre-change checklist |
 | `database_schema_audit.md` | Schema audit (**must match** `supabase/migrations/**` + generated `types/database.ts`) |
 | `MVP_STATUS_NOTION.md` | Current MVP status and next priorities |
+| `PROJECT_STATUS_REPORT.md` | Roadmap position & functionality assessment |
 | `PAST_PROGRESS_HISTORY.md` | **NEW** 📚 - Complete history of all accomplishments and milestones |
 | `notion_update.md` | Notion update tracking |
 
 ### **docs/ Directory** (All Other Documentation)
-All other documentation has been organized into the `docs/` folder.
+All other documentation has been organized into the `docs/` folder with the following structure:
+
+| Directory | Purpose |
+|-----------|---------|
+| `docs/releasenotes/` | **📦 NEW** - Versioned release notes (see `releasenotes/README.md`) |
+| `docs/guides/` | User guides, developer guides, setup instructions |
+| `docs/development/` | Coding standards, type safety, development practices |
+| `docs/features/` | Feature implementation documentation |
+| `docs/troubleshooting/` | Error fixes, debugging guides, common issues |
+| `docs/performance/` | Performance optimization documentation |
+| `docs/security/` | Security configuration and standards |
+| `docs/audits/` | Audit reports and implementation summaries |
+| `docs/contracts/` | Domain contracts (Layer 2 source of truth) |
+| `docs/journeys/` | User journeys (Layer 3 source of truth) |
+| `docs/diagrams/` | Architecture diagrams and visual documentation |
+| `docs/tests/` | Test documentation and matrices |
+| `docs/archive/` | Historical / superseded documentation |
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
 
@@ -183,6 +200,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (documentation spine)
+- `RELEASE_NOTES.md` - Release notes for the MVP launch (v1.0)
 - `AUDIT_STATUS_REPORT.md` - Evidence-based repo audit snapshot (quality gates, foundation PR status, system map, journey QA, drift/duplicates)
 - `AUDIT_MASTER_BOARD.md` - Rolling one-screen audit queue (IDs + proof hooks + next actions)
 - `AUDIT_LOG.md` - Append-only audit proof ledger (timestamped command receipts)
@@ -197,25 +215,26 @@ All other documentation has been organized into the `docs/` folder.
 ## 🚀 Quick Start Guides
 
 ### **For New Developers**
-1. Start with `ONBOARDING.md`
-2. Review `DEVELOPER_QUICK_REFERENCE.md`
-3. Set up your environment using `ENV_SETUP_GUIDE.md` (and `ENV_VARIABLES_COMPLETE_LIST.md` for the full reference)
-4. Read `CODING_STANDARDS.md` to understand project conventions
+1. Start with `guides/ONBOARDING.md` or `guides/NEW_DEV_ONBOARDING.md`
+2. Review `guides/DEVELOPER_QUICK_REFERENCE.md`
+3. Set up your environment using `guides/ENV_SETUP_GUIDE.md` (and `guides/ENV_VARIABLES_COMPLETE_LIST.md` for the full reference)
+4. Read `development/CODING_STANDARDS.md` to understand project conventions
 
 ### **For Administrators**
 1. Start with `contracts/ADMIN_CONTRACT.md` for admin setup + capabilities
-2. Review `SECURITY_CONFIGURATION.md` for security best practices
+2. Review `security/SECURITY_CONFIGURATION.md` for security best practices
+3. See `guides/ADMIN_ACCOUNT_GUIDE.md` for admin account management
 
 ### **For Understanding the System**
 1. Start with `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` for authentication flow
 2. Review `DATABASE_REPORT.md` for database structure
-3. See feature-specific docs for implementation details
+3. See `features/` directory for feature-specific implementation details
 
 ### **When Troubleshooting**
-1. Check `TROUBLESHOOTING_GUIDE.md` first
-2. For SSR errors with useSearchParams, see `USESEARCHPARAMS_SSR_GUIDE.md`
-3. Review specific feature docs if relevant
-4. Check error-specific documentation
+1. Check `troubleshooting/TROUBLESHOOTING_GUIDE.md` first
+2. For SSR errors with useSearchParams, see `troubleshooting/USESEARCHPARAMS_SSR_GUIDE.md`
+3. Review `troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md` for quick fixes
+4. Check error-specific documentation in `troubleshooting/` directory
 
 ---
 
