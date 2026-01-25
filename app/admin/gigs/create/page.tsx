@@ -1,4 +1,4 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { CreateGigForm } from "./create-gig-form";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -6,6 +6,10 @@ import { type ProfileRow } from "@/types/database-helpers";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
+
+// CRITICAL: Force Node.js runtime for server actions that handle file uploads
+// Runtime configs must be at route segment level to be honored by Next.js
+export const runtime = "nodejs";
 
 export default async function CreateGigPage() {
   const supabase = await createSupabaseServer();
