@@ -11,12 +11,14 @@
 
 The TOTL Agency database is a well-architected PostgreSQL system hosted on Supabase, designed to support a talent booking platform connecting models/actors with casting directors and brands. The database features:
 
-- **8 core tables** with comprehensive relationships
+- **13 tables total** (8 core business tables + 5 supporting/infrastructure tables)
 - **4 custom enum types** for status management
 - **15+ RLS policies** enforcing secure data access
 - **20+ indexes** for optimized query performance
 - **8 triggers** for automatic data management
 - **Recent security hardening** (10/13 warnings fixed)
+
+> **Table Count Verification:** Count includes **public schema BASE TABLES only**; excludes views, materialized views, and Supabase-managed schemas. See `docs/DATABASE_TABLE_COUNT_RECONCILIATION.md` for verification details and canonical source.
 
 ---
 
@@ -74,6 +76,20 @@ The TOTL Agency database is a well-architected PostgreSQL system hosted on Supab
 **Total Columns**: 75+ across all tables  
 **Total Indexes**: 20+ (including composite and GIN indexes)  
 **Total Triggers**: 8 active triggers
+
+### **Supporting/Infrastructure Tables (5)**
+
+| # | Table Name | Purpose | RLS Enabled | Last Updated |
+|---|------------|---------|-------------|--------------|
+| 9 | `gig_notifications` | Email notification preferences | ✅ Yes | 2025-10-16 |
+| 10 | `client_applications` | Client signup applications (pre-account) | ✅ Yes | 2025-12-21 |
+| 11 | `content_flags` | Moderation reports | ✅ Yes | 2025-11-26 |
+| 12 | `stripe_webhook_events` | Stripe webhook event ledger | ✅ Yes | 2025-12-20 |
+| 13 | `email_send_ledger` | Email send throttle/idempotency | ✅ Yes | 2025-12-20 |
+
+**Total Tables**: **13** (8 core business tables + 5 supporting tables)
+
+> **Note:** Count includes **public schema BASE TABLES only**; excludes views, materialized views, and Supabase-managed schemas (auth, storage, etc.). See `docs/DATABASE_TABLE_COUNT_RECONCILIATION.md` for verification details.
 
 ---
 

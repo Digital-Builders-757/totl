@@ -32,7 +32,7 @@ This audit provides a comprehensive overview of the TOTL Agency database schema,
 
 ## 🗂️ Database Overview
 
-- **Total Tables:** 13 (8 core business tables + 5 supporting tables)
+- **Total Tables:** 13 (8 core business tables + 5 supporting tables) — see `docs/DATABASE_TABLE_COUNT_RECONCILIATION.md` for verification
 - **Total Columns:** 85+
 - **Custom Types (Enums):** 5
 - **Foreign Key Relationships:** 10

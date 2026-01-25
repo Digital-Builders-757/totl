@@ -93,6 +93,7 @@ All other documentation has been organized into the `docs/` folder.
 
 ### **🗄️ Database & Backend**
 - `DATABASE_REPORT.md` - Database structure and analysis
+- `DATABASE_TABLE_COUNT_RECONCILIATION.md` - **✅ NEW** - Canonical source of truth for table counts (13 tables: 8 core + 5 supporting) with CI enforcement
 - `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - **✅ UPDATED** - Performance optimization guide (database + application-level fixes, Jan 2025)
 - `PERFORMANCE_OPTIMIZATION_PLAN.md` - **✅ NEW** - Complete performance optimization plan (Approach A+ - Measurement-First + Incremental Wins, Jan 2026)
 - `PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
