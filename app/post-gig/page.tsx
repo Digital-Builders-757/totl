@@ -102,12 +102,12 @@ export default function PostGigPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 pt-24">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-md mx-auto text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">You must be logged in to post a gig.</p>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Authentication Required</h2>
+            <p className="text-muted-foreground mb-4">You must be logged in to post a gig.</p>
             <Button asChild>
               <Link href="/login">Log In</Link>
             </Button>
@@ -118,21 +118,21 @@ export default function PostGigPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 pt-24 text-slate-900">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-12">
         <Link
           href="/client/dashboard"
-          className="inline-flex items-center text-slate-600 hover:text-slate-900 mb-8 transition-colors"
+          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Dashboard
         </Link>
 
-        <div className="max-w-3xl mx-auto rounded-3xl panel-frosted border border-white/40 shadow-2xl shadow-slate-900/20 overflow-hidden">
+        <div className="max-w-3xl mx-auto rounded-3xl border border-border bg-card/80 shadow-2xl shadow-black/40 backdrop-blur overflow-hidden">
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <h1 className="text-3xl font-bold text-slate-900">Post a New Gig</h1>
-              <p className="text-slate-500">
+              <h1 className="text-3xl font-bold text-foreground">Post a New Gig</h1>
+              <p className="text-muted-foreground">
                 Fill out the form below to create a new casting call or gig. Be as detailed as
                 possible to attract the right talent.
               </p>
@@ -154,6 +154,7 @@ export default function PostGigPage() {
                   value={formData.title}
                   onChange={handleChange}
                   required
+                  className="bg-background text-foreground placeholder:text-muted-foreground/70"
                 />
               </div>
 
@@ -166,6 +167,7 @@ export default function PostGigPage() {
                   onChange={handleChange}
                   rows={4}
                   required
+                  className="bg-background text-foreground placeholder:text-muted-foreground/70"
                 />
               </div>
 
@@ -173,7 +175,10 @@ export default function PostGigPage() {
                 <div className="space-y-2">
                   <Label htmlFor="category">Category *</Label>
                   <Select value={formData.category} onValueChange={handleSelectChange}>
-                    <SelectTrigger id="category">
+                    <SelectTrigger
+                      id="category"
+                      className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                    >
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -193,6 +198,7 @@ export default function PostGigPage() {
                     value={formData.location}
                     onChange={handleChange}
                     required
+                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
                   />
                 </div>
               </div>
@@ -206,6 +212,7 @@ export default function PostGigPage() {
                     value={formData.duration}
                     onChange={handleChange}
                     required
+                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
                   />
                 </div>
                 <div className="space-y-2">
@@ -216,6 +223,7 @@ export default function PostGigPage() {
                     value={formData.compensation}
                     onChange={handleChange}
                     required
+                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
                   />
                 </div>
               </div>
@@ -229,6 +237,7 @@ export default function PostGigPage() {
                     value={formData.date}
                     onChange={handleChange}
                     required
+                    className="bg-background text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
@@ -238,6 +247,7 @@ export default function PostGigPage() {
                     type="datetime-local"
                     value={formData.application_deadline}
                     onChange={handleChange}
+                    className="bg-background text-foreground"
                   />
                 </div>
               </div>
