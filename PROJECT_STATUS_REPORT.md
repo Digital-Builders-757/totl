@@ -196,7 +196,7 @@ Based on `docs/TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md`, you are currently in:
 - **Lines of Code:** 50,000+ lines
 - **Components:** 75+ React components
 - **API Routes:** 24+ API endpoints
-- **Database Tables:** 13 tables (8 core business tables + 5 supporting tables)
+- **Database Tables:** 13 tables (8 core business tables + 5 supporting tables) — see `docs/DATABASE_TABLE_COUNT_RECONCILIATION.md` for verification
 - **Database Migrations:** 50+ migrations
 - **Documentation Files:** 140+ files
 - **Test Files:** 35+ test files

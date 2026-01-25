@@ -64,7 +64,7 @@
 - **Codebase:** 50,000+ lines of code
 - **Components:** 75+ React components
 - **API Routes:** 23+ endpoints
-- **Database Tables:** 13 tables (8 core business tables + 5 supporting tables)
+- **Database Tables:** 13 tables (8 core business tables + 5 supporting tables) — see `docs/DATABASE_TABLE_COUNT_RECONCILIATION.md` for verification
 - **Documentation:** 140+ files
 - **Tests:** 35+ test files
 - **TypeScript Errors:** 0
