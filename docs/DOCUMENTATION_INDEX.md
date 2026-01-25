@@ -200,7 +200,9 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (documentation spine)
-- `RELEASE_NOTES.md` - Release notes for the MVP launch (v1.0)
+- `releasenotes/v1.0.0.md` - Technical release notes for MVP launch (v1.0)
+- `releasenotes/v1.0.0-team.md` - **NEW** ✅ - Team-focused release notes for non-technical members (Jan 2026)
+- `releasenotes/README.md` - Release notes index and versioning guide
 - `AUDIT_STATUS_REPORT.md` - Evidence-based repo audit snapshot (quality gates, foundation PR status, system map, journey QA, drift/duplicates)
 - `AUDIT_MASTER_BOARD.md` - Rolling one-screen audit queue (IDs + proof hooks + next actions)
 - `AUDIT_LOG.md` - Append-only audit proof ledger (timestamped command receipts)

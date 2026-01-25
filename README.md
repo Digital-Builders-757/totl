@@ -412,7 +412,8 @@ npm run verify-all
 - **`README.md`** - This comprehensive guide
 - **`database_schema_audit.md`** - Complete database reference
 - **`docs/DOCUMENTATION_INDEX.md`** - Complete documentation index and navigation guide
-- **`docs/releasenotes/`** - Versioned release notes (see `docs/releasenotes/v1.0.0.md`)
+- **`docs/releasenotes/v1.0.0.md`** - Technical release notes for MVP launch
+- **`docs/releasenotes/v1.0.0-team.md`** - Team-focused release notes for non-technical members
 
 ### 📁 **Documentation Structure**
 

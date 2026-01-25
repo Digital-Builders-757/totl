@@ -18,9 +18,17 @@ Release notes are published on the **first business day of each month**, coverin
 
 ### [v1.0.0](./v1.0.0.md) - MVP Complete
 **Date:** January 25, 2026  
-**Status:** ✅ COMPLETE
+**Status:** ✅ COMPLETE  
+**Audience:** Technical stakeholders
 
 First production-ready MVP release with full role-based experiences, gig lifecycle management, portfolio gallery, subscription system, and admin operations suite.
+
+### [v1.0.0 - Team Version](./v1.0.0-team.md) - MVP Launch
+**Date:** January 25, 2026  
+**Status:** ✅ COMPLETE  
+**Audience:** Non-technical team members
+
+Non-technical release notes for team members covering what the app does, how to use it, what's included, and action items for testing.
 
 ---
 
