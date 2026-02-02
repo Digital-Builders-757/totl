@@ -954,12 +954,14 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 13. **`20251127173000_fix_query_stats_view.sql`** - Recreates `query_stats` using `relname`/`indexrelname` so it works against modern PostgreSQL catalog columns
 14. **`20251204150904_add_cascade_delete_constraints.sql`** - **🚨 CRITICAL** - Enforces ON DELETE CASCADE on all user-related foreign keys to ensure complete data cleanup when users are deleted
 15. **`20251217200615_drop_query_stats_view.sql`** - Drops `public.query_stats` (not needed) to eliminate security advisor warnings and reduce exposed monitoring surface
+16. **`20260202204142_recreate_content_flags.sql`** - Recreates moderation tooling (content flags table + policies) when drift is detected
 
 ### **Recent Updates**
 - ✅ **Extension alignment (Nov 27, 2025)** — Added migration `20251016160000_create_pg_trgm_extension.sql` so `pg_trgm` is always installed in the `extensions` schema before later security migrations run (prevents local resets from failing)
 - ✅ **Admin dashboard comment fix (Nov 27, 2025)** — Added migration `20251127162000_fix_admin_dashboard_comments.sql` to remove `'||'` concatenation from COMMENT statements that caused local resets to fail
 - ✅ **Query stats view fix (Nov 27, 2025)** — Added migration `20251127173000_fix_query_stats_view.sql` so the view aliases `relname`/`indexrelname` (Postgres 15 catalogs) and no longer references nonexistent `tablename` columns
 - ✅ **Query stats view removal (Dec 17, 2025)** — Added migration `20251217200615_drop_query_stats_view.sql` to remove `public.query_stats` entirely since it is not needed and was generating security advisor warnings
+- ✅ **Moderation tooling repair (Feb 2, 2026)** — Added migration `20260202204142_recreate_content_flags.sql` to recreate `public.content_flags` and its RLS policies when missing in production
 - ✅ **Cascading delete alignment (Nov 23, 2025)** — All user-centric foreign keys now use `ON DELETE CASCADE` with supporting indexes:
   - `profiles.id` → `auth.users.id`
   - `talent_profiles.user_id`, `client_profiles.user_id`, `gigs.client_id`, `applications.talent_id`, `bookings.talent_id`, `portfolio_items.talent_id` → `profiles.id`

@@ -33,6 +33,10 @@ npm run build
   - **Fix:** Ensure `/client/profile/page.tsx` accepts `userId` param and allows admin override
   - **Fix:** Ensure non-admin clients cannot view other clients (force `targetUserId = user.id` for non-admins)
   - **Prevention:** See `docs/ADMIN_VISIBILITY_AUDIT_REPORT.md` for full audit and fixes
+- **Moderation Queue Fails to Load:** `/admin/moderation` throws "relation content_flags does not exist"
+  - **Root Cause:** Missing `public.content_flags` table in the target Supabase project
+  - **Fix:** Apply the moderation migration (`supabase db push`) that creates `content_flags` + policies
+  - **Prevention:** Verify `to_regclass('public.content_flags')` returns non-null after deploy
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
