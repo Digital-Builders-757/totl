@@ -38,6 +38,23 @@ type ProfileData = {
   subscription_current_period_end: string | null;
 } | null;
 
+type AuthEventSnapshot = {
+  event: AuthChangeEvent;
+  session: Session | null;
+  pathname: string;
+  search: string;
+  ts: number;
+};
+
+type EnsureAndHydrateProfile = (user: User) => Promise<ProfileData | null>;
+type ApplyProfileToState = (nextProfile: ProfileData, currentSession: Session | null) => void;
+type GetBootStateWithRetry = (returnUrlRaw: string | null, maxAttempts?: number) => Promise<BootStateRedirectResult>;
+type PerformRedirect = (
+  routerInstance: ReturnType<typeof useRouter>,
+  target: string,
+  currentPathname: string
+) => void;
+
 type AuthContextType = {
   supabase: SupabaseClient<Database> | null;
   user: User | null;
@@ -93,13 +110,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
   const [showTimeoutRecovery, setShowTimeoutRecovery] = useState(false);
+  const [authTick, setAuthTick] = useState(0);
   
   // hasHandledInitialSession is set but not read - kept for debugging/future use
   // Suppress linter warning
   void hasHandledInitialSession;
   const manualSignOutInProgressRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const softTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasTimedOutRef = useRef(false);
   const isLoadingRef = useRef(isLoading);
+  const authQueueRef = useRef<AuthEventSnapshot[]>([]);
   // In-flight bootstrap guard: prevents concurrent bootstrap operations
   const bootstrapPromiseRef = useRef<Promise<void> | null>(null);
   // Redirect guard: prevents double navigation during SIGNED_IN
@@ -112,6 +133,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const router = useRouter();
   const pathname = usePathname();
+  const routerRef = useRef(router);
+  const ensureAndHydrateProfileRef = useRef<EnsureAndHydrateProfile | null>(null);
+  const applyProfileToStateRef = useRef<ApplyProfileToState | null>(null);
+  const getBootStateWithRetryRef = useRef<GetBootStateWithRetry | null>(null);
+  const performRedirectRef = useRef<PerformRedirect | null>(null);
+
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   // Browser client ref - initialized in useEffect (after mount, never during render)
   const supabaseRef = useRef<SupabaseClient<Database> | null>(null);
@@ -290,7 +320,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         routerInstance.replace(target);
 
-        // Wait up to 500ms to see if navigation happens
+        const navigationTimeoutMs = 1500;
+
+        // Wait up to navigationTimeoutMs to see if navigation happens
         // Use Promise-based timeout - check once after delay instead of polling
         setTimeout(() => {
           if (typeof window === "undefined") {
@@ -305,14 +337,25 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             logger.debug("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
               expected: targetPathname,
               actual: newPathname,
+              navigationTimeoutMs,
+            });
+          } else if (newPathname !== startPathname) {
+            logger.debug("[auth.onAuthStateChange] router.replace() navigated to a different route", {
+              expected: targetPathname,
+              actual: newPathname,
+              navigationTimeoutMs,
             });
           } else {
             // Navigation didn't happen within timeout, fallback to hard reload
-            logger.warn("[auth.onAuthStateChange] router.replace() didn't navigate within 500ms, using hard reload", {
+            logger.warn(
+              "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
+              {
               expected: targetPathname,
               actual: newPathname,
               startPathname,
-            });
+                navigationTimeoutMs,
+              }
+            );
             try {
               window.location.replace(target);
               logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
@@ -390,6 +433,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    ensureAndHydrateProfileRef.current = ensureAndHydrateProfile;
+  }, [ensureAndHydrateProfile]);
+
+  useEffect(() => {
+    applyProfileToStateRef.current = applyProfileToState;
+  }, [applyProfileToState]);
+
+  useEffect(() => {
+    getBootStateWithRetryRef.current = getBootStateWithRetry;
+  }, [getBootStateWithRetry]);
+
+  useEffect(() => {
+    performRedirectRef.current = performRedirect;
+  }, [performRedirect]);
+
+  useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {
       setIsLoading(false);
@@ -431,6 +490,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const bootstrapPromise = (async () => {
         setIsLoading(true);
         setShowTimeoutRecovery(false);
+        const bootstrapStartedAt = Date.now();
         
         // Breadcrumb: auth init
         const breadcrumb = async (data: Record<string, unknown>) => {
@@ -450,14 +510,33 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         logger.debug("[auth.init] Starting auth bootstrap");
         await breadcrumb({ phase: "init_start" });
 
-        // Set 8-second timeout guard
+        const softTimeoutMs = 8000;
+        const hardTimeoutMs = 12000;
+
+        hasTimedOutRef.current = false;
+
+        // Soft timeout: signal slow bootstrap without showing recovery UI
+        softTimeoutRef.current = setTimeout(() => {
+          if (mounted && isLoadingRef.current && !hasTimedOutRef.current) {
+            const elapsedMs = Date.now() - bootstrapStartedAt;
+            logger.info("[auth.timeout] Bootstrap slow", { thresholdMs: softTimeoutMs, elapsedMs });
+            breadcrumb({ phase: "timeout_soft", threshold: softTimeoutMs, elapsedMs });
+          }
+        }, softTimeoutMs);
+
+        // Hard timeout: show recovery UI and warn
         timeoutRef.current = setTimeout(() => {
-          if (mounted && isLoadingRef.current) {
-            logger.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
-            breadcrumb({ phase: "timeout", threshold: 8000 });
+          if (mounted && isLoadingRef.current && !hasTimedOutRef.current) {
+            const elapsedMs = Date.now() - bootstrapStartedAt;
+            hasTimedOutRef.current = true;
+            logger.warn("[auth.timeout] Bootstrap exceeded timeout threshold", {
+              thresholdMs: hardTimeoutMs,
+              elapsedMs,
+            });
+            breadcrumb({ phase: "timeout_hard", threshold: hardTimeoutMs, elapsedMs });
             setShowTimeoutRecovery(true);
           }
-        }, 8000);
+        }, hardTimeoutMs);
 
         try {
           // supabase is already checked above and assigned to const, this check is redundant but safe
@@ -470,46 +549,55 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
           
-          // Breadcrumb: session read start
-          await breadcrumb({ phase: "getSession_start" });
-          
-          let session: Session | null = null;
-          try {
-            const {
-              data: { session: fetchedSession },
-            } = await supabase.auth.getSession();
-            session = fetchedSession;
-          } catch (error) {
-            // Gracefully handle AbortError during navigation/unmount
-            if (error instanceof Error && error.name === "AbortError") {
-              logger.debug("[auth.init] Bootstrap aborted during navigation (expected)");
-              await breadcrumb({ phase: "aborted", reason: "navigation" });
-              return; // Early return - don't update state if unmounted
+          const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          // Breadcrumb: user read start
+          await breadcrumb({ phase: "getUser_start" });
+
+          let currentUser: User | null = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const { data, error } = await supabase.auth.getUser();
+              if (error) throw error;
+              currentUser = data.user ?? null;
+              break;
+            } catch (error) {
+              if (error instanceof Error && error.name === "AbortError" && attempt === 0) {
+                await breadcrumb({ phase: "getUser_abort_retry", attempt });
+                await sleep(100 + Math.floor(Math.random() * 200));
+                continue;
+              }
+              if (error instanceof Error && error.name === "AbortError") {
+                logger.debug("[auth.init] Bootstrap aborted during navigation (expected)");
+                await breadcrumb({ phase: "aborted", reason: "navigation" });
+                return;
+              }
+              await breadcrumb({ phase: "getUser_error", error: error instanceof Error ? error.message : String(error) });
+              throw error;
             }
-            throw error; // Re-throw non-abort errors
           }
 
-          // Breadcrumb: session read done
-          await breadcrumb({ 
-            phase: "getSession_done", 
-            hasSession: !!session,
-            userId: session?.user?.id || null,
+          await breadcrumb({
+            phase: "getUser_done",
+            hasUser: !!currentUser,
+            userId: currentUser?.id || null,
+            elapsedMs: Date.now() - bootstrapStartedAt,
           });
 
           if (!mounted) return;
 
-          // If there is no session on initial load, we can stop loading.
-          if (!session) {
-            await breadcrumb({ phase: "no_session_exit" });
+          // If there is no user on initial load, we can stop loading.
+          if (!currentUser) {
+            await breadcrumb({ phase: "no_user_exit" });
             setIsLoading(false);
             setHasHandledInitialSession(true);
             return;
           }
 
-          // If there is a session, proceed to set user and session immediately
+          // If there is a user, proceed to set user immediately
           // This makes UI interactive faster - profile hydration happens async
-          setUser(session.user);
-          setSession(session);
+          setUser(currentUser);
+          setSession(null);
           
           // CRITICAL FIX: Set isLoading = false immediately after session is set
           // Profile hydration happens in background (non-blocking)
@@ -517,13 +605,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           setHasHandledInitialSession(true);
           
           // Breadcrumb: profile hydration start
-          await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: session.user.id });
+          await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: currentUser.id });
           
           // Profile hydration happens async - doesn't block UI
           // Use IIFE to handle async breadcrumbs properly
           (async () => {
             try {
-              const hydratedProfile = await ensureAndHydrateProfile(session.user);
+              const hydratedProfile = await ensureAndHydrateProfile(currentUser);
               
               if (!mounted) return;
               
@@ -534,10 +622,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 profileRole: hydratedProfile?.role || null,
               });
               
-              applyProfileToState(hydratedProfile, session);
+              applyProfileToState(hydratedProfile, null);
               
               // Breadcrumb: bootstrap complete
-              await breadcrumb({ phase: "bootstrap_complete" });
+              await breadcrumb({
+                phase: "bootstrap_complete",
+                elapsedMs: Date.now() - bootstrapStartedAt,
+              });
               logger.debug("[auth.bootstrap.complete] Auth bootstrap finished successfully");
             } catch (error) {
               // Gracefully handle AbortError during profile fetch
@@ -560,10 +651,14 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             logger.debug("[auth.init] Bootstrap aborted (expected during navigation)");
           }
         } finally {
-          // Clear timeout if bootstrap completed
+          // Clear timeouts if bootstrap completed
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
+          }
+          if (softTimeoutRef.current) {
+            clearTimeout(softTimeoutRef.current);
+            softTimeoutRef.current = null;
           }
           
           // Note: isLoading and hasHandledInitialSession are set earlier (after session check)
@@ -584,10 +679,83 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener - this is the main way to handle auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (!mounted) return;
 
-      // Breadcrumb: auth state change
+      // TRUTH #1: Prove SIGNED_IN fires + TRUTH #2: Prove cookies exist in browser
+      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : (pathname ?? "");
+      const currentSearch = typeof window !== "undefined" ? window.location.search : "";
+      const cookieSb =
+        typeof window !== "undefined"
+          ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
+          : false;
+
+      logger.debug("[auth.onAuthStateChange]", {
+        event,
+        hasSession: !!session,
+        userId: session?.user?.id ?? null,
+        pathname: currentPathname,
+        cookieSb,
+      });
+
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        setIsLoading(true);
+      }
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      authQueueRef.current.push({
+        event,
+        session,
+        pathname: currentPathname,
+        search: currentSearch,
+        ts: Date.now(),
+      });
+      setAuthTick((tick) => tick + 1);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+      // Clear timeouts on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (softTimeoutRef.current) {
+        clearTimeout(softTimeoutRef.current);
+        softTimeoutRef.current = null;
+      }
+      // Clear bootstrap promise ref on unmount to allow fresh bootstrap on remount
+      bootstrapPromiseRef.current = null;
+      // Clear redirect guard on unmount
+      redirectInFlightRef.current = false;
+    };
+  }, [router, pathname, ensureAndHydrateProfile, applyProfileToState, getSupabase, getBootStateWithRetry, performRedirect]);
+
+  useEffect(() => {
+    const eventQueue = authQueueRef.current.splice(0);
+    if (eventQueue.length === 0) return;
+
+    const routerInstance = routerRef.current;
+    const ensureAndHydrateProfileSafe = ensureAndHydrateProfileRef.current;
+    const applyProfileToStateSafe = applyProfileToStateRef.current;
+    const getBootStateWithRetrySafe = getBootStateWithRetryRef.current;
+    const performRedirectSafe = performRedirectRef.current;
+
+    if (
+      !ensureAndHydrateProfileSafe ||
+      !applyProfileToStateSafe ||
+      !getBootStateWithRetrySafe ||
+      !performRedirectSafe
+    ) {
+      return;
+    }
+
+    for (const eventSnapshot of eventQueue) {
+      const { event, session: currentSession, pathname: currentPathname, search: currentSearch } = eventSnapshot;
+
+      // Breadcrumb: auth state change (async, outside the auth callback)
       const breadcrumb = async (data: Record<string, unknown>) => {
         try {
           const Sentry = await import("@sentry/nextjs");
@@ -601,64 +769,42 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Sentry not available, skip
         }
       };
-      
-      // TRUTH #1: Prove SIGNED_IN fires + TRUTH #2: Prove cookies exist in browser
-      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : pathname;
-      const cookieSb = typeof window !== "undefined" 
-        ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
-        : false;
-      
-      logger.debug("[auth.onAuthStateChange]", {
-        event,
-        hasSession: !!session,
-        userId: session?.user?.id ?? null,
-        pathname: currentPathname,
-        cookieSb,
-      });
-      
-      await breadcrumb({ event, hasSession: !!session, userId: session?.user?.id || null });
+      void breadcrumb({ event, hasSession: !!currentSession, userId: currentSession?.user?.id || null });
 
-      setIsLoading(true);
-      setSession(session);
-      setUser(session?.user ?? null);
+      if (event === "SIGNED_IN" && currentSession) {
+      // CRITICAL: Redirect is the PRIMARY MISSION - everything else is best-effort, bounded, non-blocking
+      // Single redirect owner (SIGNED_IN):
+      // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
+      // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
+      // - Honor returnUrl only when safe (validated internal path).
+      // Redirect on SIGNED_IN when we are on an auth surface.
+      // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
+      // session check and we'd get "stuck on /login" flakes.
 
-      if (event === "SIGNED_IN" && session) {
-        // CRITICAL: Redirect is the PRIMARY MISSION - everything else is best-effort, bounded, non-blocking
-        // Single redirect owner (SIGNED_IN):
-        // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
-        // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
-        // - Honor returnUrl only when safe (validated internal path).
-        // Redirect on SIGNED_IN when we are on an auth surface.
-        // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
-        // session check and we'd get "stuck on /login" flakes.
-        
         logger.debug("[auth.onAuthStateChange] SIGNED_IN handler entered", {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          pathname,
+          hasSession: !!currentSession,
+          userId: currentSession?.user?.id,
+          pathname: currentPathname,
         });
-        
-        const currentPath =
-          typeof window !== "undefined"
-            ? (pathname || window.location.pathname).split("?")[0]
-            : pathname;
+
+        const currentPath = currentPathname.split("?")[0];
 
         // Check if we should redirect (must be on auth route)
         const shouldRedirect = currentPath && isAuthRoute(currentPath);
-        
+
         logger.debug("[auth.onAuthStateChange] Redirect check", {
           currentPath,
           shouldRedirect,
           isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
         });
-        
+
         // If not on auth route, skip redirect logic entirely
         if (!shouldRedirect || typeof window === "undefined") {
           // Still try to hydrate profile in background (best-effort)
-          ensureAndHydrateProfile(session.user)
+          ensureAndHydrateProfileSafe(currentSession.user)
             .then((profile) => {
-              if (mounted && profile) {
-                applyProfileToState(profile, session);
+              if (profile) {
+                applyProfileToStateSafe(profile, currentSession);
               }
             })
             .catch((error) => {
@@ -667,38 +813,40 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 logger.debug("[auth.onAuthStateChange] Background profile hydration failed", { error });
               }
             });
-          return;
+          setIsLoading(false);
+          continue;
         }
 
         // CRITICAL: Prevent double navigation (multi-tab, rapid events)
         if (redirectInFlightRef.current) {
           logger.debug("[auth.onAuthStateChange] Redirect already in flight, skipping");
-          return;
+          setIsLoading(false);
+          continue;
         }
         redirectInFlightRef.current = true;
 
         // CRITICAL: Compute fallback redirect IMMEDIATELY (before any async operations)
         // This ensures redirect target is always available, even if everything fails
-        const returnUrlRaw =
-          typeof window !== "undefined"
-            ? new URLSearchParams(window.location.search).get("returnUrl")
-            : null;
-        
+        const returnUrlRaw = new URLSearchParams(currentSearch).get("returnUrl");
+
         // Validate returnUrl is safe (internal path only)
         const safeReturnUrlValue = safeReturnUrl(returnUrlRaw);
-        
+
         // Compute fallback redirect target (safe default)
         // CRITICAL: Always ensure fallbackRedirect is a valid internal path
         const fallbackRedirect = safeReturnUrlValue ?? PATHS.TALENT_DASHBOARD;
-        
-          // Safety check: ensure fallbackRedirect is always valid
-          if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
-            logger.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded", undefined, { fallbackRedirect });
-            const safeFallback = PATHS.TALENT_DASHBOARD;
-            performRedirect(router, safeFallback, currentPath);
-            return;
-          }
-        
+
+        // Safety check: ensure fallbackRedirect is always valid
+        if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
+          logger.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded", undefined, {
+            fallbackRedirect,
+          });
+          const safeFallback = PATHS.TALENT_DASHBOARD;
+          performRedirectSafe(routerInstance, safeFallback, currentPath);
+          setIsLoading(false);
+          continue;
+        }
+
         logger.debug("[auth.onAuthStateChange] Starting redirect flow", {
           returnUrlRaw,
           safeReturnUrlValue,
@@ -707,28 +855,27 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
         // CRITICAL: Start all async operations in parallel (fire-and-forget pattern)
         // Profile hydration is NON-BLOCKING - happens in background
-        const hydrationPromise = ensureAndHydrateProfile(session.user)
-          .catch((error) => {
-            // Silently handle all errors - hydration is best-effort
-            if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
-              logger.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking)", { error });
-            }
-            return null; // Return null on error
-          });
+        const hydrationPromise = ensureAndHydrateProfileSafe(currentSession.user).catch((error) => {
+          // Silently handle all errors - hydration is best-effort
+          if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
+            logger.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking)", { error });
+          }
+          return null; // Return null on error
+        });
 
         // BootState with retry (bounded, non-blocking)
         // Race against timeout to ensure redirect happens quickly
-        const bootStatePromise = getBootStateWithRetry(returnUrlRaw);
-        
+        const bootStatePromise = getBootStateWithRetrySafe(returnUrlRaw);
+
         // CRITICAL: Race BootState against timeout (max 800ms wait)
         // Redirect must happen quickly, even if BootState is slow
         const redirectTimeout = 800; // ms
         const redirectTargetPromise = Promise.race([
-          bootStatePromise.then(result => ({
+          bootStatePromise.then((result) => ({
             redirectTo: result.redirectTo,
             reason: result.reason,
           })),
-          new Promise<{ redirectTo: string | null; reason: string }>((resolve) => 
+          new Promise<{ redirectTo: string | null; reason: string }>((resolve) =>
             setTimeout(() => resolve({ redirectTo: null, reason: "timeout" }), redirectTimeout)
           ),
         ]);
@@ -739,15 +886,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           .then((result) => {
             // Determine final redirect target (CRITICAL: fallbackRedirect is always a valid path)
             const finalTarget = result.redirectTo ?? fallbackRedirect;
-            
+
             // Validate finalTarget is a valid internal path (safety check)
             if (!finalTarget || !finalTarget.startsWith("/")) {
-              logger.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback", undefined, { finalTarget });
+              logger.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback", undefined, {
+                finalTarget,
+              });
               const safeFallback = PATHS.TALENT_DASHBOARD;
-              performRedirect(router, safeFallback, currentPath);
+              performRedirectSafe(routerInstance, safeFallback, currentPath);
               return;
             }
-            
+
             // Log redirect decision with observability
             logger.debug("[auth.onAuthStateChange] Redirect target resolved", {
               finalTarget,
@@ -757,22 +906,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               bootStateRedirectTo: result.redirectTo,
               fallbackRedirect,
             });
-            
+
             // CRITICAL: Try router.replace() first (SPA navigation), then fallback to hard reload
-            performRedirect(router, finalTarget, currentPath);
+            performRedirectSafe(routerInstance, finalTarget, currentPath);
           })
           .catch((error) => {
             // Even if redirect decision fails, we MUST redirect
             logger.error("[auth.onAuthStateChange] Redirect decision failed, using fallback", error);
-            performRedirect(router, fallbackRedirect, currentPath);
+            performRedirectSafe(routerInstance, fallbackRedirect, currentPath);
           });
 
         // CRITICAL: Profile hydration happens AFTER redirect (best-effort, non-blocking)
         // This updates state quietly in the background
         hydrationPromise
           .then((hydratedProfile) => {
-            if (mounted && hydratedProfile) {
-              applyProfileToState(hydratedProfile, session);
+            if (hydratedProfile) {
+              applyProfileToStateSafe(hydratedProfile, currentSession);
             }
           })
           .catch(() => {
@@ -783,21 +932,26 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         setTimeout(() => {
           redirectInFlightRef.current = false;
         }, 2000);
-      } else if (event === "SIGNED_OUT") {
+
+        setIsLoading(false);
+        continue;
+      }
+
+      if (event === "SIGNED_OUT") {
         const wasManualSignOut = manualSignOutInProgressRef.current;
         manualSignOutInProgressRef.current = false;
 
         // Reset the browser client singleton to ensure clean state
         // This prevents the old authenticated client from being reused
         resetSupabaseBrowserClient();
-        
+
         setUser(null);
         setSession(null);
         setUserRole(null);
         setProfile(null);
         setIsEmailVerified(false);
         setHasHandledInitialSession(false);
-        
+
         // Redirect to login if we're on a protected route
         // SIGNED_OUT events fire independently when:
         // - Sessions expire naturally
@@ -812,54 +966,37 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             // signOut() will handle the canonical redirect (/login?signedOut=true).
             // Avoid competing redirects that can drop signedOut=true and trigger middleware bounce.
             setIsLoading(false);
-            return;
+            continue;
           }
 
-          // Get current pathname, stripping any query parameters
-          // pathname from usePathname() already excludes query params, but window.location.pathname is more reliable
-          const currentPath = (pathname || window.location.pathname).split("?")[0];
-          
           // Check if current path is an auth route
-          const isAuthRouteMatch = isAuthRoute(currentPath);
-          
+          const isAuthRouteMatch = isAuthRoute(currentPathname);
+
           // Only redirect if we're not already on a public or auth route
-          if (!isPublicPath(currentPath) && !isAuthRouteMatch) {
+          if (!isPublicPath(currentPathname) && !isAuthRouteMatch) {
             // Use hard redirect to ensure complete session clear
             // Always include signedOut=true to avoid middleware "helpful" redirects during auth-clearing window
             window.location.replace(`${PATHS.LOGIN}?signedOut=true`);
           }
         } else {
           // Fallback for server-side (shouldn't happen, but just in case)
-          router.push(PATHS.LOGIN);
+          routerInstance.push(PATHS.LOGIN);
         }
-      } else if (event === "TOKEN_REFRESHED") {
-        // Just update the session, no need to refetch profile
-        setSession(session);
-        if (session?.user) {
-          setUser(session.user);
-          setIsEmailVerified(session.user.email_confirmed_at !== null);
-        }
-      }
 
-      if (mounted) {
         setIsLoading(false);
+        continue;
       }
-    });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-      // Clear timeout on unmount
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
+      if (event === "TOKEN_REFRESHED") {
+        // Just update the session, no need to refetch profile
+        if (currentSession?.user) {
+          setIsEmailVerified(currentSession.user.email_confirmed_at !== null);
+        }
       }
-      // Clear bootstrap promise ref on unmount to allow fresh bootstrap on remount
-      bootstrapPromiseRef.current = null;
-      // Clear redirect guard on unmount
-      redirectInFlightRef.current = false;
-    };
-  }, [router, pathname, ensureAndHydrateProfile, applyProfileToState, getSupabase, getBootStateWithRetry, performRedirect]);
+
+      setIsLoading(false);
+    }
+  }, [authTick]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     // Event handler - safe to call getSupabase() after mount
