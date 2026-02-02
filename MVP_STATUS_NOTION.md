@@ -16,16 +16,19 @@
 - ✅ **Soft/hard timeout guard**: 8s soft signal + 12s recovery UI with dedupe to reduce false alarms
 - ✅ **Login prefetch throttling**: Disabled Link prefetch on auth routes to reduce RSC contention during redirects
 - ✅ **Sentry noise filter**: Filtered Supabase auth-js lock AbortError with breadcrumb for counting
+- ✅ **Tower-only auth callback**: Deferred onAuthStateChange handling to an effect queue to avoid heavy work in callback
 
 **Why this change:**
 - PostgREST embeds require direct FKs; the old query assumed a relationship that doesn't exist
 - Auth bootstrap timeouts and lock aborts were creating noisy warnings without clear diagnostics
 - App Router prefetching on `/login` was competing with redirect timing
+- Supabase auth callbacks can fire frequently; deferring work avoids lock contention
 
 **Impact:**
 - Talent dashboard applications no longer throw PGRST200 errors
 - Auth bootstrap is more deterministic with clearer timings and fewer false positives
 - Sentry now surfaces real auth failures while de-noising expected lock aborts
+- Auth redirects are handled outside the auth callback for better stability
 
 **Next (P0 - Critical)**
 - [ ] Deploy latest bundle to production and verify Sentry issue resolution for PGRST200 + auth timeouts

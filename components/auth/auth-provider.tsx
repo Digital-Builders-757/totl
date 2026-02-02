@@ -38,6 +38,23 @@ type ProfileData = {
   subscription_current_period_end: string | null;
 } | null;
 
+type AuthEventSnapshot = {
+  event: AuthChangeEvent;
+  session: Session | null;
+  pathname: string;
+  search: string;
+  ts: number;
+};
+
+type EnsureAndHydrateProfile = (user: User) => Promise<ProfileData | null>;
+type ApplyProfileToState = (nextProfile: ProfileData, currentSession: Session | null) => void;
+type GetBootStateWithRetry = (returnUrlRaw: string | null, maxAttempts?: number) => Promise<BootStateRedirectResult>;
+type PerformRedirect = (
+  routerInstance: ReturnType<typeof useRouter>,
+  target: string,
+  currentPathname: string
+) => void;
+
 type AuthContextType = {
   supabase: SupabaseClient<Database> | null;
   user: User | null;
@@ -93,6 +110,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [hasHandledInitialSession, setHasHandledInitialSession] = useState(false);
   const [showTimeoutRecovery, setShowTimeoutRecovery] = useState(false);
+  const [authTick, setAuthTick] = useState(0);
   
   // hasHandledInitialSession is set but not read - kept for debugging/future use
   // Suppress linter warning
@@ -102,6 +120,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const softTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasTimedOutRef = useRef(false);
   const isLoadingRef = useRef(isLoading);
+  const authQueueRef = useRef<AuthEventSnapshot[]>([]);
   // In-flight bootstrap guard: prevents concurrent bootstrap operations
   const bootstrapPromiseRef = useRef<Promise<void> | null>(null);
   // Redirect guard: prevents double navigation during SIGNED_IN
@@ -114,6 +133,15 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
   const router = useRouter();
   const pathname = usePathname();
+  const routerRef = useRef(router);
+  const ensureAndHydrateProfileRef = useRef<EnsureAndHydrateProfile | null>(null);
+  const applyProfileToStateRef = useRef<ApplyProfileToState | null>(null);
+  const getBootStateWithRetryRef = useRef<GetBootStateWithRetry | null>(null);
+  const performRedirectRef = useRef<PerformRedirect | null>(null);
+
+  useEffect(() => {
+    routerRef.current = router;
+  }, [router]);
 
   // Browser client ref - initialized in useEffect (after mount, never during render)
   const supabaseRef = useRef<SupabaseClient<Database> | null>(null);
@@ -405,6 +433,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
+    ensureAndHydrateProfileRef.current = ensureAndHydrateProfile;
+  }, [ensureAndHydrateProfile]);
+
+  useEffect(() => {
+    applyProfileToStateRef.current = applyProfileToState;
+  }, [applyProfileToState]);
+
+  useEffect(() => {
+    getBootStateWithRetryRef.current = getBootStateWithRetry;
+  }, [getBootStateWithRetry]);
+
+  useEffect(() => {
+    performRedirectRef.current = performRedirect;
+  }, [performRedirect]);
+
+  useEffect(() => {
     // Prevent initialization during static generation
     if (typeof window === "undefined") {
       setIsLoading(false);
@@ -635,30 +679,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state change listener - this is the main way to handle auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (!mounted) return;
 
-      // Breadcrumb: auth state change
-      const breadcrumb = async (data: Record<string, unknown>) => {
-        try {
-          const Sentry = await import("@sentry/nextjs");
-          Sentry.addBreadcrumb({
-            category: "auth.bootstrap",
-            message: `auth.onAuthStateChange.${event}`,
-            level: "info",
-            data: { timestamp: new Date().toISOString(), ...data },
-          });
-        } catch {
-          // Sentry not available, skip
-        }
-      };
-      
       // TRUTH #1: Prove SIGNED_IN fires + TRUTH #2: Prove cookies exist in browser
-      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : pathname;
-      const cookieSb = typeof window !== "undefined" 
-        ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
-        : false;
-      
+      const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : (pathname ?? "");
+      const currentSearch = typeof window !== "undefined" ? window.location.search : "";
+      const cookieSb =
+        typeof window !== "undefined"
+          ? document.cookie.split(";").some((c) => c.trim().startsWith("sb-"))
+          : false;
+
       logger.debug("[auth.onAuthStateChange]", {
         event,
         hasSession: !!session,
@@ -666,235 +697,21 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         pathname: currentPathname,
         cookieSb,
       });
-      
-      await breadcrumb({ event, hasSession: !!session, userId: session?.user?.id || null });
 
-      setIsLoading(true);
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+        setIsLoading(true);
+      }
       setSession(session);
       setUser(session?.user ?? null);
 
-      if (event === "SIGNED_IN" && session) {
-        // CRITICAL: Redirect is the PRIMARY MISSION - everything else is best-effort, bounded, non-blocking
-        // Single redirect owner (SIGNED_IN):
-        // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
-        // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
-        // - Honor returnUrl only when safe (validated internal path).
-        // Redirect on SIGNED_IN when we are on an auth surface.
-        // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
-        // session check and we'd get "stuck on /login" flakes.
-        
-        logger.debug("[auth.onAuthStateChange] SIGNED_IN handler entered", {
-          hasSession: !!session,
-          userId: session?.user?.id,
-          pathname,
-        });
-        
-        const currentPath =
-          typeof window !== "undefined"
-            ? (pathname || window.location.pathname).split("?")[0]
-            : pathname;
-
-        // Check if we should redirect (must be on auth route)
-        const shouldRedirect = currentPath && isAuthRoute(currentPath);
-        
-        logger.debug("[auth.onAuthStateChange] Redirect check", {
-          currentPath,
-          shouldRedirect,
-          isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
-        });
-        
-        // If not on auth route, skip redirect logic entirely
-        if (!shouldRedirect || typeof window === "undefined") {
-          // Still try to hydrate profile in background (best-effort)
-          ensureAndHydrateProfile(session.user)
-            .then((profile) => {
-              if (mounted && profile) {
-                applyProfileToState(profile, session);
-              }
-            })
-            .catch((error) => {
-              // Silently handle errors - profile hydration is non-blocking
-              if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
-                logger.debug("[auth.onAuthStateChange] Background profile hydration failed", { error });
-              }
-            });
-          return;
-        }
-
-        // CRITICAL: Prevent double navigation (multi-tab, rapid events)
-        if (redirectInFlightRef.current) {
-          logger.debug("[auth.onAuthStateChange] Redirect already in flight, skipping");
-          return;
-        }
-        redirectInFlightRef.current = true;
-
-        // CRITICAL: Compute fallback redirect IMMEDIATELY (before any async operations)
-        // This ensures redirect target is always available, even if everything fails
-        const returnUrlRaw =
-          typeof window !== "undefined"
-            ? new URLSearchParams(window.location.search).get("returnUrl")
-            : null;
-        
-        // Validate returnUrl is safe (internal path only)
-        const safeReturnUrlValue = safeReturnUrl(returnUrlRaw);
-        
-        // Compute fallback redirect target (safe default)
-        // CRITICAL: Always ensure fallbackRedirect is a valid internal path
-        const fallbackRedirect = safeReturnUrlValue ?? PATHS.TALENT_DASHBOARD;
-        
-          // Safety check: ensure fallbackRedirect is always valid
-          if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
-            logger.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded", undefined, { fallbackRedirect });
-            const safeFallback = PATHS.TALENT_DASHBOARD;
-            performRedirect(router, safeFallback, currentPath);
-            return;
-          }
-        
-        logger.debug("[auth.onAuthStateChange] Starting redirect flow", {
-          returnUrlRaw,
-          safeReturnUrlValue,
-          fallbackRedirect,
-        });
-
-        // CRITICAL: Start all async operations in parallel (fire-and-forget pattern)
-        // Profile hydration is NON-BLOCKING - happens in background
-        const hydrationPromise = ensureAndHydrateProfile(session.user)
-          .catch((error) => {
-            // Silently handle all errors - hydration is best-effort
-            if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
-              logger.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking)", { error });
-            }
-            return null; // Return null on error
-          });
-
-        // BootState with retry (bounded, non-blocking)
-        // Race against timeout to ensure redirect happens quickly
-        const bootStatePromise = getBootStateWithRetry(returnUrlRaw);
-        
-        // CRITICAL: Race BootState against timeout (max 800ms wait)
-        // Redirect must happen quickly, even if BootState is slow
-        const redirectTimeout = 800; // ms
-        const redirectTargetPromise = Promise.race([
-          bootStatePromise.then(result => ({
-            redirectTo: result.redirectTo,
-            reason: result.reason,
-          })),
-          new Promise<{ redirectTo: string | null; reason: string }>((resolve) => 
-            setTimeout(() => resolve({ redirectTo: null, reason: "timeout" }), redirectTimeout)
-          ),
-        ]);
-
-        // CRITICAL: Redirect decision happens HERE (unavoidable)
-        // This block ALWAYS executes and ALWAYS redirects
-        redirectTargetPromise
-          .then((result) => {
-            // Determine final redirect target (CRITICAL: fallbackRedirect is always a valid path)
-            const finalTarget = result.redirectTo ?? fallbackRedirect;
-            
-            // Validate finalTarget is a valid internal path (safety check)
-            if (!finalTarget || !finalTarget.startsWith("/")) {
-              logger.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback", undefined, { finalTarget });
-              const safeFallback = PATHS.TALENT_DASHBOARD;
-              performRedirect(router, safeFallback, currentPath);
-              return;
-            }
-            
-            // Log redirect decision with observability
-            logger.debug("[auth.onAuthStateChange] Redirect target resolved", {
-              finalTarget,
-              source: result.redirectTo ? "bootState" : "fallback",
-              reason: result.reason,
-              returnUrl: safeReturnUrlValue,
-              bootStateRedirectTo: result.redirectTo,
-              fallbackRedirect,
-            });
-            
-            // CRITICAL: Try router.replace() first (SPA navigation), then fallback to hard reload
-            performRedirect(router, finalTarget, currentPath);
-          })
-          .catch((error) => {
-            // Even if redirect decision fails, we MUST redirect
-            logger.error("[auth.onAuthStateChange] Redirect decision failed, using fallback", error);
-            performRedirect(router, fallbackRedirect, currentPath);
-          });
-
-        // CRITICAL: Profile hydration happens AFTER redirect (best-effort, non-blocking)
-        // This updates state quietly in the background
-        hydrationPromise
-          .then((hydratedProfile) => {
-            if (mounted && hydratedProfile) {
-              applyProfileToState(hydratedProfile, session);
-            }
-          })
-          .catch(() => {
-            // Silently ignore - hydration is best-effort
-          });
-
-        // Reset redirect guard after a delay (allows redirect to complete)
-        setTimeout(() => {
-          redirectInFlightRef.current = false;
-        }, 2000);
-      } else if (event === "SIGNED_OUT") {
-        const wasManualSignOut = manualSignOutInProgressRef.current;
-        manualSignOutInProgressRef.current = false;
-
-        // Reset the browser client singleton to ensure clean state
-        // This prevents the old authenticated client from being reused
-        resetSupabaseBrowserClient();
-        
-        setUser(null);
-        setSession(null);
-        setUserRole(null);
-        setProfile(null);
-        setIsEmailVerified(false);
-        setHasHandledInitialSession(false);
-        
-        // Redirect to login if we're on a protected route
-        // SIGNED_OUT events fire independently when:
-        // - Sessions expire naturally
-        // - Sessions are cleared externally (admin deletes user, etc.)
-        // - Other tabs sign out (cross-tab sync)
-        // In these cases, we need to redirect to prevent users from viewing protected content while logged out
-        //
-        // IMPORTANT: For user-initiated signOut(), the signOut() method is the single redirect owner.
-        // The SIGNED_OUT handler should act as a safety net only (expiry, admin deletion, cross-tab sync).
-        if (typeof window !== "undefined") {
-          if (wasManualSignOut) {
-            // signOut() will handle the canonical redirect (/login?signedOut=true).
-            // Avoid competing redirects that can drop signedOut=true and trigger middleware bounce.
-            setIsLoading(false);
-            return;
-          }
-
-          // Get current pathname, stripping any query parameters
-          // pathname from usePathname() already excludes query params, but window.location.pathname is more reliable
-          const currentPath = (pathname || window.location.pathname).split("?")[0];
-          
-          // Check if current path is an auth route
-          const isAuthRouteMatch = isAuthRoute(currentPath);
-          
-          // Only redirect if we're not already on a public or auth route
-          if (!isPublicPath(currentPath) && !isAuthRouteMatch) {
-            // Use hard redirect to ensure complete session clear
-            // Always include signedOut=true to avoid middleware "helpful" redirects during auth-clearing window
-            window.location.replace(`${PATHS.LOGIN}?signedOut=true`);
-          }
-        } else {
-          // Fallback for server-side (shouldn't happen, but just in case)
-          router.push(PATHS.LOGIN);
-        }
-      } else if (event === "TOKEN_REFRESHED") {
-        // Just update the session, no need to refetch profile
-        setSession(session);
-        if (session?.user) {
-          setUser(session.user);
-          setIsEmailVerified(session.user.email_confirmed_at !== null);
-        }
-      }
-
-      if (mounted) {
-        setIsLoading(false);
-      }
+      authQueueRef.current.push({
+        event,
+        session,
+        pathname: currentPathname,
+        search: currentSearch,
+        ts: Date.now(),
+      });
+      setAuthTick((tick) => tick + 1);
     });
 
     return () => {
@@ -915,6 +732,271 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       redirectInFlightRef.current = false;
     };
   }, [router, pathname, ensureAndHydrateProfile, applyProfileToState, getSupabase, getBootStateWithRetry, performRedirect]);
+
+  useEffect(() => {
+    const eventQueue = authQueueRef.current.splice(0);
+    if (eventQueue.length === 0) return;
+
+    const routerInstance = routerRef.current;
+    const ensureAndHydrateProfileSafe = ensureAndHydrateProfileRef.current;
+    const applyProfileToStateSafe = applyProfileToStateRef.current;
+    const getBootStateWithRetrySafe = getBootStateWithRetryRef.current;
+    const performRedirectSafe = performRedirectRef.current;
+
+    if (
+      !ensureAndHydrateProfileSafe ||
+      !applyProfileToStateSafe ||
+      !getBootStateWithRetrySafe ||
+      !performRedirectSafe
+    ) {
+      return;
+    }
+
+    for (const eventSnapshot of eventQueue) {
+      const { event, session: currentSession, pathname: currentPathname, search: currentSearch } = eventSnapshot;
+
+      // Breadcrumb: auth state change (async, outside the auth callback)
+      const breadcrumb = async (data: Record<string, unknown>) => {
+        try {
+          const Sentry = await import("@sentry/nextjs");
+          Sentry.addBreadcrumb({
+            category: "auth.bootstrap",
+            message: `auth.onAuthStateChange.${event}`,
+            level: "info",
+            data: { timestamp: new Date().toISOString(), ...data },
+          });
+        } catch {
+          // Sentry not available, skip
+        }
+      };
+      void breadcrumb({ event, hasSession: !!currentSession, userId: currentSession?.user?.id || null });
+
+      if (event === "SIGNED_IN" && currentSession) {
+      // CRITICAL: Redirect is the PRIMARY MISSION - everything else is best-effort, bounded, non-blocking
+      // Single redirect owner (SIGNED_IN):
+      // - Only redirect away when we're currently on an auth route (login/choose-role/reset/verification-pending).
+      // - Use server-owned BootState so redirects are consistent with middleware and remain loop-safe.
+      // - Honor returnUrl only when safe (validated internal path).
+      // Redirect on SIGNED_IN when we are on an auth surface.
+      // Do NOT gate on hasHandledInitialSession: under load, SIGNED_IN can race the initial
+      // session check and we'd get "stuck on /login" flakes.
+
+        logger.debug("[auth.onAuthStateChange] SIGNED_IN handler entered", {
+          hasSession: !!currentSession,
+          userId: currentSession?.user?.id,
+          pathname: currentPathname,
+        });
+
+        const currentPath = currentPathname.split("?")[0];
+
+        // Check if we should redirect (must be on auth route)
+        const shouldRedirect = currentPath && isAuthRoute(currentPath);
+
+        logger.debug("[auth.onAuthStateChange] Redirect check", {
+          currentPath,
+          shouldRedirect,
+          isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
+        });
+
+        // If not on auth route, skip redirect logic entirely
+        if (!shouldRedirect || typeof window === "undefined") {
+          // Still try to hydrate profile in background (best-effort)
+          ensureAndHydrateProfileSafe(currentSession.user)
+            .then((profile) => {
+              if (profile) {
+                applyProfileToStateSafe(profile, currentSession);
+              }
+            })
+            .catch((error) => {
+              // Silently handle errors - profile hydration is non-blocking
+              if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
+                logger.debug("[auth.onAuthStateChange] Background profile hydration failed", { error });
+              }
+            });
+          setIsLoading(false);
+          continue;
+        }
+
+        // CRITICAL: Prevent double navigation (multi-tab, rapid events)
+        if (redirectInFlightRef.current) {
+          logger.debug("[auth.onAuthStateChange] Redirect already in flight, skipping");
+          setIsLoading(false);
+          continue;
+        }
+        redirectInFlightRef.current = true;
+
+        // CRITICAL: Compute fallback redirect IMMEDIATELY (before any async operations)
+        // This ensures redirect target is always available, even if everything fails
+        const returnUrlRaw = new URLSearchParams(currentSearch).get("returnUrl");
+
+        // Validate returnUrl is safe (internal path only)
+        const safeReturnUrlValue = safeReturnUrl(returnUrlRaw);
+
+        // Compute fallback redirect target (safe default)
+        // CRITICAL: Always ensure fallbackRedirect is a valid internal path
+        const fallbackRedirect = safeReturnUrlValue ?? PATHS.TALENT_DASHBOARD;
+
+        // Safety check: ensure fallbackRedirect is always valid
+        if (!fallbackRedirect || !fallbackRedirect.startsWith("/")) {
+          logger.error("[auth.onAuthStateChange] Invalid fallbackRedirect, using hardcoded", undefined, {
+            fallbackRedirect,
+          });
+          const safeFallback = PATHS.TALENT_DASHBOARD;
+          performRedirectSafe(routerInstance, safeFallback, currentPath);
+          setIsLoading(false);
+          continue;
+        }
+
+        logger.debug("[auth.onAuthStateChange] Starting redirect flow", {
+          returnUrlRaw,
+          safeReturnUrlValue,
+          fallbackRedirect,
+        });
+
+        // CRITICAL: Start all async operations in parallel (fire-and-forget pattern)
+        // Profile hydration is NON-BLOCKING - happens in background
+        const hydrationPromise = ensureAndHydrateProfileSafe(currentSession.user).catch((error) => {
+          // Silently handle all errors - hydration is best-effort
+          if (process.env.NODE_ENV === "development" && error instanceof Error && error.name !== "AbortError") {
+            logger.debug("[auth.onAuthStateChange] Profile hydration failed (non-blocking)", { error });
+          }
+          return null; // Return null on error
+        });
+
+        // BootState with retry (bounded, non-blocking)
+        // Race against timeout to ensure redirect happens quickly
+        const bootStatePromise = getBootStateWithRetrySafe(returnUrlRaw);
+
+        // CRITICAL: Race BootState against timeout (max 800ms wait)
+        // Redirect must happen quickly, even if BootState is slow
+        const redirectTimeout = 800; // ms
+        const redirectTargetPromise = Promise.race([
+          bootStatePromise.then((result) => ({
+            redirectTo: result.redirectTo,
+            reason: result.reason,
+          })),
+          new Promise<{ redirectTo: string | null; reason: string }>((resolve) =>
+            setTimeout(() => resolve({ redirectTo: null, reason: "timeout" }), redirectTimeout)
+          ),
+        ]);
+
+        // CRITICAL: Redirect decision happens HERE (unavoidable)
+        // This block ALWAYS executes and ALWAYS redirects
+        redirectTargetPromise
+          .then((result) => {
+            // Determine final redirect target (CRITICAL: fallbackRedirect is always a valid path)
+            const finalTarget = result.redirectTo ?? fallbackRedirect;
+
+            // Validate finalTarget is a valid internal path (safety check)
+            if (!finalTarget || !finalTarget.startsWith("/")) {
+              logger.error("[auth.onAuthStateChange] Invalid redirect target, using hardcoded fallback", undefined, {
+                finalTarget,
+              });
+              const safeFallback = PATHS.TALENT_DASHBOARD;
+              performRedirectSafe(routerInstance, safeFallback, currentPath);
+              return;
+            }
+
+            // Log redirect decision with observability
+            logger.debug("[auth.onAuthStateChange] Redirect target resolved", {
+              finalTarget,
+              source: result.redirectTo ? "bootState" : "fallback",
+              reason: result.reason,
+              returnUrl: safeReturnUrlValue,
+              bootStateRedirectTo: result.redirectTo,
+              fallbackRedirect,
+            });
+
+            // CRITICAL: Try router.replace() first (SPA navigation), then fallback to hard reload
+            performRedirectSafe(routerInstance, finalTarget, currentPath);
+          })
+          .catch((error) => {
+            // Even if redirect decision fails, we MUST redirect
+            logger.error("[auth.onAuthStateChange] Redirect decision failed, using fallback", error);
+            performRedirectSafe(routerInstance, fallbackRedirect, currentPath);
+          });
+
+        // CRITICAL: Profile hydration happens AFTER redirect (best-effort, non-blocking)
+        // This updates state quietly in the background
+        hydrationPromise
+          .then((hydratedProfile) => {
+            if (hydratedProfile) {
+              applyProfileToStateSafe(hydratedProfile, currentSession);
+            }
+          })
+          .catch(() => {
+            // Silently ignore - hydration is best-effort
+          });
+
+        // Reset redirect guard after a delay (allows redirect to complete)
+        setTimeout(() => {
+          redirectInFlightRef.current = false;
+        }, 2000);
+
+        setIsLoading(false);
+        continue;
+      }
+
+      if (event === "SIGNED_OUT") {
+        const wasManualSignOut = manualSignOutInProgressRef.current;
+        manualSignOutInProgressRef.current = false;
+
+        // Reset the browser client singleton to ensure clean state
+        // This prevents the old authenticated client from being reused
+        resetSupabaseBrowserClient();
+
+        setUser(null);
+        setSession(null);
+        setUserRole(null);
+        setProfile(null);
+        setIsEmailVerified(false);
+        setHasHandledInitialSession(false);
+
+        // Redirect to login if we're on a protected route
+        // SIGNED_OUT events fire independently when:
+        // - Sessions expire naturally
+        // - Sessions are cleared externally (admin deletes user, etc.)
+        // - Other tabs sign out (cross-tab sync)
+        // In these cases, we need to redirect to prevent users from viewing protected content while logged out
+        //
+        // IMPORTANT: For user-initiated signOut(), the signOut() method is the single redirect owner.
+        // The SIGNED_OUT handler should act as a safety net only (expiry, admin deletion, cross-tab sync).
+        if (typeof window !== "undefined") {
+          if (wasManualSignOut) {
+            // signOut() will handle the canonical redirect (/login?signedOut=true).
+            // Avoid competing redirects that can drop signedOut=true and trigger middleware bounce.
+            setIsLoading(false);
+            continue;
+          }
+
+          // Check if current path is an auth route
+          const isAuthRouteMatch = isAuthRoute(currentPathname);
+
+          // Only redirect if we're not already on a public or auth route
+          if (!isPublicPath(currentPathname) && !isAuthRouteMatch) {
+            // Use hard redirect to ensure complete session clear
+            // Always include signedOut=true to avoid middleware "helpful" redirects during auth-clearing window
+            window.location.replace(`${PATHS.LOGIN}?signedOut=true`);
+          }
+        } else {
+          // Fallback for server-side (shouldn't happen, but just in case)
+          routerInstance.push(PATHS.LOGIN);
+        }
+
+        setIsLoading(false);
+        continue;
+      }
+
+      if (event === "TOKEN_REFRESHED") {
+        // Just update the session, no need to refetch profile
+        if (currentSession?.user) {
+          setIsEmailVerified(currentSession.user.email_confirmed_at !== null);
+        }
+      }
+
+      setIsLoading(false);
+    }
+  }, [authTick]);
 
   const signIn = async (email: string, password: string): Promise<{ error: AuthError | null }> => {
     // Event handler - safe to call getSupabase() after mount
