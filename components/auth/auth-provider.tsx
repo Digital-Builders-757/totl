@@ -99,6 +99,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   void hasHandledInitialSession;
   const manualSignOutInProgressRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const softTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const hasTimedOutRef = useRef(false);
   const isLoadingRef = useRef(isLoading);
   // In-flight bootstrap guard: prevents concurrent bootstrap operations
   const bootstrapPromiseRef = useRef<Promise<void> | null>(null);
@@ -290,7 +292,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         routerInstance.replace(target);
 
-        // Wait up to 500ms to see if navigation happens
+        const navigationTimeoutMs = 1500;
+
+        // Wait up to navigationTimeoutMs to see if navigation happens
         // Use Promise-based timeout - check once after delay instead of polling
         setTimeout(() => {
           if (typeof window === "undefined") {
@@ -305,14 +309,25 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             logger.debug("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
               expected: targetPathname,
               actual: newPathname,
+              navigationTimeoutMs,
+            });
+          } else if (newPathname !== startPathname) {
+            logger.debug("[auth.onAuthStateChange] router.replace() navigated to a different route", {
+              expected: targetPathname,
+              actual: newPathname,
+              navigationTimeoutMs,
             });
           } else {
             // Navigation didn't happen within timeout, fallback to hard reload
-            logger.warn("[auth.onAuthStateChange] router.replace() didn't navigate within 500ms, using hard reload", {
+            logger.warn(
+              "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
+              {
               expected: targetPathname,
               actual: newPathname,
               startPathname,
-            });
+                navigationTimeoutMs,
+              }
+            );
             try {
               window.location.replace(target);
               logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
@@ -431,6 +446,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const bootstrapPromise = (async () => {
         setIsLoading(true);
         setShowTimeoutRecovery(false);
+        const bootstrapStartedAt = Date.now();
         
         // Breadcrumb: auth init
         const breadcrumb = async (data: Record<string, unknown>) => {
@@ -450,14 +466,33 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         logger.debug("[auth.init] Starting auth bootstrap");
         await breadcrumb({ phase: "init_start" });
 
-        // Set 8-second timeout guard
+        const softTimeoutMs = 8000;
+        const hardTimeoutMs = 12000;
+
+        hasTimedOutRef.current = false;
+
+        // Soft timeout: signal slow bootstrap without showing recovery UI
+        softTimeoutRef.current = setTimeout(() => {
+          if (mounted && isLoadingRef.current && !hasTimedOutRef.current) {
+            const elapsedMs = Date.now() - bootstrapStartedAt;
+            logger.info("[auth.timeout] Bootstrap slow", { thresholdMs: softTimeoutMs, elapsedMs });
+            breadcrumb({ phase: "timeout_soft", threshold: softTimeoutMs, elapsedMs });
+          }
+        }, softTimeoutMs);
+
+        // Hard timeout: show recovery UI and warn
         timeoutRef.current = setTimeout(() => {
-          if (mounted && isLoadingRef.current) {
-            logger.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
-            breadcrumb({ phase: "timeout", threshold: 8000 });
+          if (mounted && isLoadingRef.current && !hasTimedOutRef.current) {
+            const elapsedMs = Date.now() - bootstrapStartedAt;
+            hasTimedOutRef.current = true;
+            logger.warn("[auth.timeout] Bootstrap exceeded timeout threshold", {
+              thresholdMs: hardTimeoutMs,
+              elapsedMs,
+            });
+            breadcrumb({ phase: "timeout_hard", threshold: hardTimeoutMs, elapsedMs });
             setShowTimeoutRecovery(true);
           }
-        }, 8000);
+        }, hardTimeoutMs);
 
         try {
           // supabase is already checked above and assigned to const, this check is redundant but safe
@@ -470,46 +505,55 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             return;
           }
           
-          // Breadcrumb: session read start
-          await breadcrumb({ phase: "getSession_start" });
-          
-          let session: Session | null = null;
-          try {
-            const {
-              data: { session: fetchedSession },
-            } = await supabase.auth.getSession();
-            session = fetchedSession;
-          } catch (error) {
-            // Gracefully handle AbortError during navigation/unmount
-            if (error instanceof Error && error.name === "AbortError") {
-              logger.debug("[auth.init] Bootstrap aborted during navigation (expected)");
-              await breadcrumb({ phase: "aborted", reason: "navigation" });
-              return; // Early return - don't update state if unmounted
+          const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          // Breadcrumb: user read start
+          await breadcrumb({ phase: "getUser_start" });
+
+          let currentUser: User | null = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+              const { data, error } = await supabase.auth.getUser();
+              if (error) throw error;
+              currentUser = data.user ?? null;
+              break;
+            } catch (error) {
+              if (error instanceof Error && error.name === "AbortError" && attempt === 0) {
+                await breadcrumb({ phase: "getUser_abort_retry", attempt });
+                await sleep(100 + Math.floor(Math.random() * 200));
+                continue;
+              }
+              if (error instanceof Error && error.name === "AbortError") {
+                logger.debug("[auth.init] Bootstrap aborted during navigation (expected)");
+                await breadcrumb({ phase: "aborted", reason: "navigation" });
+                return;
+              }
+              await breadcrumb({ phase: "getUser_error", error: error instanceof Error ? error.message : String(error) });
+              throw error;
             }
-            throw error; // Re-throw non-abort errors
           }
 
-          // Breadcrumb: session read done
-          await breadcrumb({ 
-            phase: "getSession_done", 
-            hasSession: !!session,
-            userId: session?.user?.id || null,
+          await breadcrumb({
+            phase: "getUser_done",
+            hasUser: !!currentUser,
+            userId: currentUser?.id || null,
+            elapsedMs: Date.now() - bootstrapStartedAt,
           });
 
           if (!mounted) return;
 
-          // If there is no session on initial load, we can stop loading.
-          if (!session) {
-            await breadcrumb({ phase: "no_session_exit" });
+          // If there is no user on initial load, we can stop loading.
+          if (!currentUser) {
+            await breadcrumb({ phase: "no_user_exit" });
             setIsLoading(false);
             setHasHandledInitialSession(true);
             return;
           }
 
-          // If there is a session, proceed to set user and session immediately
+          // If there is a user, proceed to set user immediately
           // This makes UI interactive faster - profile hydration happens async
-          setUser(session.user);
-          setSession(session);
+          setUser(currentUser);
+          setSession(null);
           
           // CRITICAL FIX: Set isLoading = false immediately after session is set
           // Profile hydration happens in background (non-blocking)
@@ -517,13 +561,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           setHasHandledInitialSession(true);
           
           // Breadcrumb: profile hydration start
-          await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: session.user.id });
+          await breadcrumb({ phase: "ensureAndHydrateProfile_start", userId: currentUser.id });
           
           // Profile hydration happens async - doesn't block UI
           // Use IIFE to handle async breadcrumbs properly
           (async () => {
             try {
-              const hydratedProfile = await ensureAndHydrateProfile(session.user);
+              const hydratedProfile = await ensureAndHydrateProfile(currentUser);
               
               if (!mounted) return;
               
@@ -534,10 +578,13 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 profileRole: hydratedProfile?.role || null,
               });
               
-              applyProfileToState(hydratedProfile, session);
+              applyProfileToState(hydratedProfile, null);
               
               // Breadcrumb: bootstrap complete
-              await breadcrumb({ phase: "bootstrap_complete" });
+              await breadcrumb({
+                phase: "bootstrap_complete",
+                elapsedMs: Date.now() - bootstrapStartedAt,
+              });
               logger.debug("[auth.bootstrap.complete] Auth bootstrap finished successfully");
             } catch (error) {
               // Gracefully handle AbortError during profile fetch
@@ -560,10 +607,14 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             logger.debug("[auth.init] Bootstrap aborted (expected during navigation)");
           }
         } finally {
-          // Clear timeout if bootstrap completed
+          // Clear timeouts if bootstrap completed
           if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
             timeoutRef.current = null;
+          }
+          if (softTimeoutRef.current) {
+            clearTimeout(softTimeoutRef.current);
+            softTimeoutRef.current = null;
           }
           
           // Note: isLoading and hasHandledInitialSession are set earlier (after session check)
@@ -849,10 +900,14 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       mounted = false;
       subscription.unsubscribe();
-      // Clear timeout on unmount
+      // Clear timeouts on unmount
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
+      }
+      if (softTimeoutRef.current) {
+        clearTimeout(softTimeoutRef.current);
+        softTimeoutRef.current = null;
       }
       // Clear bootstrap promise ref on unmount to allow fresh bootstrap on remount
       bootstrapPromiseRef.current = null;

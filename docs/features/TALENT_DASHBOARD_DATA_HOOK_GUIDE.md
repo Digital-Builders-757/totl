@@ -11,7 +11,7 @@
 - Server page: `app/talent/dashboard/page.tsx` exports `dynamic = "force-dynamic"` and renders `<DashboardClient />`.
 - Middleware: allows authenticated users without a profile to reach `/talent/dashboard`; still protects `/client/*` and `/admin/*`.
 - Data hook: `useTalentDashboardData({ user, profile, authLoading })` in `app/talent/dashboard/client.tsx` owns:
-  - `talentProfile`, `applications` (with `gigs(..., client_profiles(company_name))`), `gigs`
+  - `talentProfile`, `applications` (gigs + `client_id`, company name merged from `client_profiles`), `gigs`
   - `dataLoading`, `dataError`, `fatalError`, `refetch()` (reload token), cancellable effect (no timeouts)
   - Creates a minimal talent_profile when role/account_type indicates talent and none exists
 - Loading gate: `authLoading || dataLoading || isInVerificationGracePeriodRef.current`.

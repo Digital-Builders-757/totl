@@ -28,20 +28,24 @@
 ### 1. Timeout Guard (`components/auth/auth-provider.tsx`)
 
 **Added:**
-- 8-second timeout that triggers if `isLoading` remains `true`
+- 12-second timeout that triggers if `isLoading` remains `true`
 - Shows recovery UI when timeout triggers
 - Clears timeout when bootstrap completes
 
 **Key Code:**
 ```typescript
-// Set 8-second timeout guard
+const bootstrapTimeoutMs = 12000;
+
+// Set timeout guard
 timeoutRef.current = setTimeout(() => {
   if (mounted && isLoading) {
-    console.warn("[auth.timeout] Bootstrap exceeded 8s threshold");
-    breadcrumb({ phase: "timeout", threshold: 8000 });
+    console.warn("[auth.timeout] Bootstrap exceeded timeout threshold", {
+      thresholdMs: bootstrapTimeoutMs,
+    });
+    breadcrumb({ phase: "timeout", threshold: bootstrapTimeoutMs });
     setShowTimeoutRecovery(true);
   }
-}, 8000);
+}, bootstrapTimeoutMs);
 ```
 
 ### 2. Minimal Breadcrumbs

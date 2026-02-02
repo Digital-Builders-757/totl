@@ -221,10 +221,64 @@ function useTalentDashboardData({
             } = await supabase
               .from("applications")
               .select(
-                "id,status,created_at,updated_at,message,gigs(title,description,category,location,compensation,image_url,date,client_profiles(company_name))"
+                "id,status,created_at,updated_at,message,gigs(id,title,description,category,location,compensation,image_url,date,client_id)"
               )
               .eq("talent_id", user.id)
               .order("created_at", { ascending: false });
+
+            let applicationsWithCompany = (applicationsData ?? []) as TalentApplication[];
+            let companyMergeStatus: "skipped" | "none" | "merged" | "failed" = "skipped";
+            let clientIdsCount = 0;
+            const applicationsCount = applicationsWithCompany.length;
+
+            if (!applicationsError) {
+              const clientIds = Array.from(
+                new Set(
+                  applicationsWithCompany
+                    .map((app) => app.gigs?.client_id)
+                    .filter((clientId): clientId is string => !!clientId)
+                )
+              );
+              clientIdsCount = clientIds.length;
+
+              if (clientIds.length > 0) {
+                const { data: clientProfilesData, error: clientProfilesError } = await supabase
+                  .from("client_profiles")
+                  .select("user_id,company_name")
+                  .in("user_id", clientIds);
+
+                if (clientProfilesError) {
+                  companyMergeStatus = "failed";
+                  logger.error("[talent-dashboard] Error fetching client profiles for applications", clientProfilesError, {
+                    code: clientProfilesError.code,
+                    message: clientProfilesError.message,
+                    details: clientProfilesError.details,
+                  });
+                } else {
+                  companyMergeStatus = "merged";
+                  const companyByClientId = new Map(
+                    (clientProfilesData ?? []).map((profile) => [profile.user_id, profile.company_name])
+                  );
+
+                  applicationsWithCompany = applicationsWithCompany.map((app) => {
+                    const clientId = app.gigs?.client_id ?? null;
+                    const companyName = clientId ? companyByClientId.get(clientId) ?? null : null;
+
+                    return {
+                      ...app,
+                      gigs: app.gigs
+                        ? {
+                            ...app.gigs,
+                            client_profiles: companyName ? { company_name: companyName } : null,
+                          }
+                        : null,
+                    };
+                  });
+                }
+              } else {
+                companyMergeStatus = "none";
+              }
+            }
 
             if (!cancelled) {
               if (applicationsError) {
@@ -236,6 +290,11 @@ function useTalentDashboardData({
                   hint: applicationsError.hint,
                   hasSupabaseClient: !!supabase,
                   sessionContext,
+                  companyMergeStatus,
+                  clientIdsCount,
+                  applicationsCount,
+                  queryVersion: "v2",
+                  hasInvalidEmbed: false,
                   requestHeaders: {
                     hasApikey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
                     anonKeyLength: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.length || 0,
@@ -248,6 +307,18 @@ function useTalentDashboardData({
                 // Send to Sentry for production debugging
                 try {
                   const Sentry = await import("@sentry/nextjs");
+                  Sentry.addBreadcrumb({
+                    category: "talent-dashboard",
+                    message: "applications company name merge",
+                    level: "info",
+                    data: {
+                      companyMergeStatus,
+                      clientIdsCount,
+                      applicationsCount,
+                      queryVersion: "v2",
+                      hasInvalidEmbed: false,
+                    },
+                  });
                   Sentry.captureException(applicationsError, {
                     tags: {
                       feature: "talent-dashboard",
@@ -255,6 +326,9 @@ function useTalentDashboardData({
                       error_code: applicationsError.code || "UNKNOWN",
                       supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
                       has_session: sessionContext?.hasSession ? "true" : "false",
+                      talent_dashboard_query_version: "v2",
+                      company_name_merge: companyMergeStatus,
+                      has_invalid_embed: "false",
                     },
                     extra: {
                       ...errorContext,
@@ -277,7 +351,7 @@ function useTalentDashboardData({
                   setApplicationsError("There was a problem loading your applications.");
                 }
               } else {
-                setApplications(((applicationsData ?? []) as unknown as TalentApplication[]) ?? []);
+                  setApplications(applicationsWithCompany ?? []);
                 setApplicationsError(null);
               }
             }

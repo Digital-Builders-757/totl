@@ -740,6 +740,15 @@ export type Database = {
           did_accept: boolean
         }[]
       }
+      admin_set_talent_subscription: {
+        Args: {
+          p_email: string
+          p_period_end: string
+          p_plan: string
+          p_status: Database["public"]["Enums"]["subscription_status"]
+        }
+        Returns: Json
+      }
       analyze_tables: { Args: never; Returns: undefined }
       approve_client_application_and_promote: {
         Args: { p_admin_notes?: string; p_application_id: string }

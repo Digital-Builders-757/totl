@@ -89,6 +89,11 @@ npm run build
   - **Fix:** Recovery UI component (`auth-timeout-recovery.tsx`) clears localStorage and redirects to login
   - **Prevention:** See `docs/AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` for complete implementation guide
   - **Prevention:** Add breadcrumb logging at critical auth checkpoints for production debugging
+- **Supabase auth-js lock AbortError noise:** `AbortError: signal is aborted without reason` from `@supabase/auth-js/.../locks.js`
+  - **Symptom:** Sentry shows unhandled AbortError during navigation/redirects (often alongside `auth.bootstrap` abort breadcrumbs)
+  - **Root Cause:** Supabase auth lock is aborted during navigation; expected behavior, not a functional error
+  - **Fix:** Filter this specific AbortError in `instrumentation-client.ts` by stack frame (auth-js locks) and add a breadcrumb for counting
+  - **Prevention:** Keep auth bootstrap single-runner + avoid duplicate clients; rely on `getUser()` for bootstrap
 - **Supabase "No API key found" Errors:** Supabase client fails to initialize or queries fail with API key errors
   - **Symptom:** Errors like "No API key found" or Supabase client returns null in production
   - **Root Cause:** Environment variables missing at build time or runtime, or client created without env vars

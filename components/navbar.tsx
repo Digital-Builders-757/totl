@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
-import { PATHS } from "@/lib/constants/routes";
+import { PATHS, isAuthRoute } from "@/lib/constants/routes";
 import { getSubscriptionStatusText, needsSubscription } from "@/lib/subscription";
 
 export default function Navbar() {
@@ -41,6 +41,8 @@ export default function Navbar() {
   const isOnTalentDashboard = pathname?.startsWith(PATHS.TALENT_DASHBOARD);
   const showPersistentSubscribeCta =
     shouldPromptSubscription && !isOnTalentDashboard;
+  const isAuthSurface = pathname ? isAuthRoute(pathname) : false;
+  const shouldPrefetch = !isAuthSurface;
 
   // Determine if the current page is the homepage - safe for SSR
   const isHomepage = pathname === "/" || pathname === null;
@@ -109,6 +111,7 @@ export default function Navbar() {
             {user && (
               <Link
                 href="/gigs"
+                prefetch={shouldPrefetch}
                 className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
               >
                 Gigs
@@ -119,6 +122,7 @@ export default function Navbar() {
             {/* Admin-only: optional talent directory access via admin terminal */}
             <Link
               href="/about"
+              prefetch={shouldPrefetch}
               className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
             >
               About
@@ -127,6 +131,7 @@ export default function Navbar() {
             {userRole === "admin" && (
               <Link
                 href={PATHS.ADMIN_DASHBOARD}
+                prefetch={shouldPrefetch}
                 className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
               >
                 Admin
@@ -136,6 +141,7 @@ export default function Navbar() {
             {isTalentUser && (
               <Link
                 href="/client/apply"
+                prefetch={shouldPrefetch}
                 className="px-3 py-1 lg:px-4 rounded-full border border-white/30 text-xs font-semibold uppercase tracking-[0.25em] text-white hover:border-white"
               >
                 Apply to be a Career Builder
@@ -144,6 +150,7 @@ export default function Navbar() {
             {isTalentUser && (
               <Link
                 href="/talent/subscribe"
+                prefetch={shouldPrefetch}
                 data-testid="subscription-nav-pill"
                 className={`${textColor} hover:text-white font-medium transition-all duration-300 relative group flex items-center gap-2`}
               >
@@ -160,7 +167,7 @@ export default function Navbar() {
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {showPersistentSubscribeCta && (
-              <Link href="/talent/subscribe">
+              <Link href="/talent/subscribe" prefetch={shouldPrefetch}>
                 <Button
                   variant="default"
                   className="rounded-full bg-amber-400 text-black shadow-lg shadow-amber-400/30 hover:bg-amber-300"
@@ -182,6 +189,7 @@ export default function Navbar() {
                   {userRole === "talent" && (
                     <Link
                       href={PATHS.TALENT_DASHBOARD}
+                      prefetch={shouldPrefetch}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Talent Dashboard
@@ -190,6 +198,7 @@ export default function Navbar() {
                   {isTalentUser && (
                     <Link
                       href="/talent/subscribe"
+                      prefetch={shouldPrefetch}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Subscription
@@ -198,6 +207,7 @@ export default function Navbar() {
                   {isTalentUser && (
                     <Link
                       href="/client/apply"
+                      prefetch={shouldPrefetch}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Apply to be a Career Builder
@@ -206,6 +216,7 @@ export default function Navbar() {
                   {userRole === "client" && (
                     <Link
                       href={PATHS.CLIENT_DASHBOARD}
+                      prefetch={shouldPrefetch}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Career Builder Dashboard
@@ -214,6 +225,7 @@ export default function Navbar() {
                   {userRole === "admin" && (
                     <Link
                       href={PATHS.ADMIN_DASHBOARD}
+                      prefetch={shouldPrefetch}
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Admin Dashboard
@@ -221,6 +233,7 @@ export default function Navbar() {
                   )}
                   <Link
                     href="/settings"
+                    prefetch={shouldPrefetch}
                     className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                   >
                     Profile Settings
