@@ -72,7 +72,7 @@ export function AuthTimeoutRecovery() {
       console.error("[AuthTimeoutRecovery] Error clearing session:", err);
       // Fallback: just reload
       if (typeof window !== "undefined") {
-        window.location.reload();
+        window.location.replace("/login?cleared=1");
       }
     }
   };

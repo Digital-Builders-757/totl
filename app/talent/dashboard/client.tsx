@@ -201,12 +201,12 @@ function useTalentDashboardData({
           } | null = null;
           
           try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { user: sessionUser } } = await supabase.auth.getUser();
             sessionContext = {
-              hasSession: !!session,
-              userId: session?.user?.id || null,
-              userEmail: session?.user?.email || null,
-              sessionExpiry: session?.expires_at || null,
+              hasSession: !!sessionUser,
+              userId: sessionUser?.id ?? null,
+              userEmail: sessionUser?.email ?? null,
+              sessionExpiry: null,
             };
           } catch (sessionError) {
             logger.warn("[talent-dashboard] Failed to get session context", { sessionError });

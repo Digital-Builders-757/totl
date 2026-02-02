@@ -8,6 +8,29 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth Recovery + Session Context Hardening (February 2, 2026)**
+
+**AUTH RELIABILITY** - February 2, 2026  
+- ✅ **Auth timeout recovery redirect**: Recovery flow now returns to `/login?cleared=1` instead of a hard reload
+- ✅ **Talent dashboard session context**: Session capture uses `auth.getUser()` for consistent cookie-backed context
+- ✅ **Docker DB setup guide**: Added comprehensive local Docker + Supabase troubleshooting guide
+
+**Why this change:**
+- Hard reloads can re-trigger stale auth state; redirecting to login is more deterministic
+- `getUser()` aligns auth context with server-side session behavior
+- Local Docker setup issues were slowing down schema/migration validation
+
+**Impact:**
+- Auth recovery is more predictable and less noisy in redirects
+- Session context logging reflects actual authenticated user state
+- Faster onboarding and fewer local DB setup failures
+
+**Next (P0 - Critical)**
+- [ ] Verify auth recovery flow in production (cleared session → login)
+
+**Next (P1 - Follow-up)**
+- [ ] Add a short video/screenshot to Docker setup guide (optional)
+
 ## 🚀 **Latest: Moderation Queue Recovery (February 2, 2026)**
 
 **ADMIN MODERATION RELIABILITY** - February 2, 2026  
