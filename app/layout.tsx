@@ -1,5 +1,6 @@
 import "./globals.css";
 
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type React from "react";
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ClientLayout>{children}</ClientLayout>
           </Providers>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
