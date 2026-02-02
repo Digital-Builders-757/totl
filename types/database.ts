@@ -250,6 +250,93 @@ export type Database = {
           },
         ]
       }
+      content_flags: {
+        Row: {
+          admin_notes: string | null
+          assigned_admin_id: string | null
+          created_at: string
+          details: string | null
+          gig_id: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_action: string | null
+          resolved_at: string | null
+          resource_id: string
+          resource_type: Database["public"]["Enums"]["flag_resource_type"]
+          status: Database["public"]["Enums"]["flag_status"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
+          created_at?: string
+          details?: string | null
+          gig_id?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_action?: string | null
+          resolved_at?: string | null
+          resource_id: string
+          resource_type: Database["public"]["Enums"]["flag_resource_type"]
+          status?: Database["public"]["Enums"]["flag_status"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
+          created_at?: string
+          details?: string | null
+          gig_id?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_action?: string | null
+          resolved_at?: string | null
+          resource_id?: string
+          resource_type?: Database["public"]["Enums"]["flag_resource_type"]
+          status?: Database["public"]["Enums"]["flag_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_flags_assigned_admin_id_fkey"
+            columns: ["assigned_admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_flags_gig_id_fkey"
+            columns: ["gig_id"]
+            isOneToOne: false
+            referencedRelation: "admin_bookings_dashboard"
+            referencedColumns: ["gig_id"]
+          },
+          {
+            foreignKeyName: "content_flags_gig_id_fkey"
+            columns: ["gig_id"]
+            isOneToOne: false
+            referencedRelation: "admin_talent_dashboard"
+            referencedColumns: ["gig_id"]
+          },
+          {
+            foreignKeyName: "content_flags_gig_id_fkey"
+            columns: ["gig_id"]
+            isOneToOne: false
+            referencedRelation: "gigs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_flags_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_ledger: {
         Row: {
           cooldown_bucket: string
@@ -830,6 +917,13 @@ export type Database = {
         | "rejected"
         | "accepted"
       booking_status: "pending" | "confirmed" | "completed" | "cancelled"
+      flag_resource_type:
+        | "gig"
+        | "talent_profile"
+        | "client_profile"
+        | "application"
+        | "booking"
+      flag_status: "open" | "in_review" | "resolved" | "dismissed"
       gig_status: "draft" | "active" | "closed" | "featured" | "urgent"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
@@ -969,6 +1063,14 @@ export const Constants = {
         "accepted",
       ],
       booking_status: ["pending", "confirmed", "completed", "cancelled"],
+      flag_resource_type: [
+        "gig",
+        "talent_profile",
+        "client_profile",
+        "application",
+        "booking",
+      ],
+      flag_status: ["open", "in_review", "resolved", "dismissed"],
       gig_status: ["draft", "active", "closed", "featured", "urgent"],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],

@@ -60,9 +60,10 @@ const RESOURCE_META: Record<FlagResourceType, { label: string; badgeClass: strin
 type AdminModerationClientProps = {
   flags: FlagRecord[];
   user: User;
+  notice?: string;
 };
 
-export function AdminModerationClient({ flags, user }: AdminModerationClientProps) {
+export function AdminModerationClient({ flags, user, notice }: AdminModerationClientProps) {
   const [activeTab, setActiveTab] = useState<"all" | FlagStatus>("open");
   const [selectedFlag, setSelectedFlag] = useState<FlagRecord | null>(null);
   const [statusValue, setStatusValue] = useState<FlagStatus>("open");
@@ -144,6 +145,14 @@ export function AdminModerationClient({ flags, user }: AdminModerationClientProp
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen">
       <AdminHeader user={user} notificationCount={stats.byStatus.open} />
       <div className="container mx-auto px-4 py-8">
+        {notice && (
+          <Card className="mb-6 border-amber-500/40 bg-amber-500/10">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-amber-100">Moderation not configured</CardTitle>
+              <CardDescription className="text-amber-200/80">{notice}</CardDescription>
+            </CardHeader>
+          </Card>
+        )}
         <div className="grid gap-4 md:grid-cols-4 mb-8">
           <Card className="bg-gray-800/40 border-gray-700">
             <CardHeader className="pb-2">

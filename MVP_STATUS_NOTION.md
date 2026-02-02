@@ -8,6 +8,51 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth Recovery + Session Context Hardening (February 2, 2026)**
+
+**AUTH RELIABILITY** - February 2, 2026  
+- ✅ **Auth timeout recovery redirect**: Recovery flow now returns to `/login?cleared=1` instead of a hard reload
+- ✅ **Talent dashboard session context**: Session capture uses `auth.getUser()` for consistent cookie-backed context
+- ✅ **Docker DB setup guide**: Added comprehensive local Docker + Supabase troubleshooting guide
+
+**Why this change:**
+- Hard reloads can re-trigger stale auth state; redirecting to login is more deterministic
+- `getUser()` aligns auth context with server-side session behavior
+- Local Docker setup issues were slowing down schema/migration validation
+
+**Impact:**
+- Auth recovery is more predictable and less noisy in redirects
+- Session context logging reflects actual authenticated user state
+- Faster onboarding and fewer local DB setup failures
+
+**Next (P0 - Critical)**
+- [ ] Verify auth recovery flow in production (cleared session → login)
+
+**Next (P1 - Follow-up)**
+- [ ] Add a short video/screenshot to Docker setup guide (optional)
+
+## 🚀 **Latest: Moderation Queue Recovery (February 2, 2026)**
+
+**ADMIN MODERATION RELIABILITY** - February 2, 2026  
+- ✅ **Restored moderation schema in production**: Applied migration to recreate `public.content_flags` + RLS policies when missing
+- ✅ **Fixed moderation queue data fetch**: Removed invalid PostgREST embed on `resource_id` and assembled target profiles via safe split query
+- ✅ **Added missing-table safety net**: Explicit logging + admin notice when `content_flags` is absent in an environment
+- ✅ **Regenerated Supabase types**: `types/database.ts` now matches live schema with `content_flags`
+
+**Why this change:**
+- Production DB lacked `public.content_flags`, causing `/admin/moderation` to fail regardless of query quality
+- PostgREST embeds require real FKs; `resource_id` is polymorphic and cannot be embedded directly
+
+**Impact:**
+- Moderation queue can load for admins once the migration is applied
+- Missing-table failure mode is now self-identifying and faster to triage
+
+**Next (P0 - Critical)**
+- [ ] Verify `/admin/moderation` loads for admin in production without Sentry errors
+
+**Next (P1 - Follow-up)**
+- [ ] Rotate leaked Supabase keys and update Vercel env vars
+
 ## 🚀 **Latest: Auth Bootstrap Reliability + Sentry Noise Reduction (January 30, 2026)**
 
 **AUTH + DASHBOARD RELIABILITY** - January 30, 2026  

@@ -178,6 +178,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `ONBOARDING.md` - New developer onboarding guide
 - `TECH_STACK_BREAKDOWN.md` - Complete technical stack overview
 - `POWERSHELL_GIT_COMMIT_GUIDELINES.md` - PowerShell-safe git commit guidelines
+- `DOCKER_DATABASE_SETUP.md` - Local Docker + Supabase setup and troubleshooting (Feb 2026)
 - `MCP_PLAYWRIGHT_TROUBLESHOOTING.md` - 🔧 **NEW** - Complete Playwright MCP troubleshooting guide (Nov 2025)
 - `MCP_QUICK_FIX.md` - ⚡ **NEW** - Quick 2-step fix for Playwright MCP connection issues (Nov 2025)
 - `TEST_DATA_REFERENCE.md` - 🧪 **NEW** - Seeded QA personas, gigs, and auth creation tips (Nov 2025)
