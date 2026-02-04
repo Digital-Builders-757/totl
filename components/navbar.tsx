@@ -257,7 +257,7 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <Link href={PATHS.CHOOSE_ROLE}>
+                <Link href={PATHS.CHOOSE_ROLE} prefetch={false}>
                   <Button
                     variant="default"
                     className="bg-white text-black hover:bg-gray-200 font-semibold"
@@ -383,7 +383,7 @@ export default function Navbar() {
                       Sign In
                     </Link>
                     <div className="mt-4">
-                      <Link href={PATHS.CHOOSE_ROLE}>
+                      <Link href={PATHS.CHOOSE_ROLE} prefetch={false}>
                         <Button className="w-full bg-white text-black hover:bg-gray-200">
                           Create Account
                         </Button>

@@ -32,6 +32,9 @@ All other documentation has been organized into the `docs/` folder with the foll
 | `docs/development/` | Coding standards, type safety, development practices |
 | `docs/features/` | Feature implementation documentation |
 | `docs/troubleshooting/` | Error fixes, debugging guides, common issues |
+| | `AUTH_BREADCRUMB_ANALYSIS_REPORT.md` | Comprehensive analysis of auth breadcrumb strings and debugging infrastructure |
+| | `AUTH_SESSION_MISSING_ERROR_FIX.md` | Fix for AuthSessionMissingError Sentry noise (session gate + route-aware handling) |
+| | `AUTH_SESSION_MISSING_ERROR_FIX_SUMMARY.md` | Final implementation summary with acceptance criteria |
 | `docs/performance/` | Performance optimization documentation |
 | `docs/security/` | Security configuration and standards |
 | `docs/audits/` | Audit reports and implementation summaries |

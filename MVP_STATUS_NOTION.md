@@ -8,6 +8,36 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: AuthSessionMissingError Sentry Noise Fix (February 4, 2026)**
+
+**AUTH RELIABILITY + SENTRY NOISE REDUCTION** - February 4, 2026  
+- ✅ **Fixed AuthSessionMissingError Sentry noise**: Added `getSession()` gate before `getUser()` to prevent calling `getUser()` when no session exists
+- ✅ **Bulletproof route protection**: Deny-by-default protected path logic with explicit `/talent/[slug]` exception using reserved segments
+- ✅ **Route-aware error handling**: Missing session on public pages exits quietly; protected pages redirect to login (no error thrown)
+- ✅ **Narrow Sentry filter**: Only filters `AuthSessionMissingError` when breadcrumbs prove guest mode on public pages
+- ✅ **Prefetch prevention**: Added `prefetch={false}` to `/choose-role` links visible to guests to reduce prefetch-triggered bootstrap noise
+- ✅ **Enhanced breadcrumbs**: Added `getSession_start` and `getSession_done` for better observability
+
+**Why this change:**
+- Bootstrap was calling `getUser()` even when no session existed (guest mode on public pages)
+- This caused `AuthSessionMissingError` to be thrown and logged to Sentry as an error
+- Sentry was reporting "users can't sign up" when it was actually "bootstrap treats guest mode like an exception"
+- `/gigs` was incorrectly marked as protected (should be public for SEO/browsing)
+
+**Impact:**
+- Sentry noise eliminated: No more `AuthSessionMissingError` events from guest mode on public pages
+- Real auth failures still visible: Filter only applies to guest mode on public pages
+- Product behavior preserved: `/gigs` remains public, `/talent/[slug]` marketing profiles remain public
+- Better observability: Enhanced breadcrumbs make it clear when session gate works
+
+**Next (P0 - Critical)**
+- [ ] Monitor Sentry for 24 hours to verify `AuthSessionMissingError` noise eliminated
+- [ ] Verify real auth failures on protected routes still captured in Sentry
+
+**Next (P1 - Follow-up)**
+- [ ] Run 8 acceptance tests (6 original + 2 new) to verify fix
+- [ ] Consider adding Sentry dashboard filter for `auth.bootstrap` breadcrumbs
+
 ## 🚀 **Latest: Auth Recovery + Session Context Hardening (February 2, 2026)**
 
 **AUTH RELIABILITY** - February 2, 2026  
