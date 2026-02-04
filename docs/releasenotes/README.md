@@ -16,6 +16,20 @@ Release notes are published on the **first business day of each month**, coverin
 
 ## Current Releases
 
+### [v1.1.0](./v1.1.0.md) - UX Improvements & Architecture Hardening
+**Date:** February 4, 2026  
+**Status:** ✅ COMPLETE  
+**Audience:** Technical stakeholders
+
+UX improvements including avatar display on applications page, architecture compliance fixes, reset password contrast fix, and reduced log noise.
+
+### [v1.1.0 - Team Version](./v1.1.0-team.md) - UX Improvements
+**Date:** February 4, 2026  
+**Status:** ✅ COMPLETE  
+**Audience:** Non-technical team members
+
+Non-technical release notes covering avatar display improvements and reset password fix.
+
 ### [v1.0.0](./v1.0.0.md) - MVP Complete
 **Date:** January 25, 2026  
 **Status:** ✅ COMPLETE  
