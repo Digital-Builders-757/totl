@@ -52,7 +52,7 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
-                <Link href="/choose-role" className="w-full sm:w-auto">
+                <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
                   <Button
                     size="lg"
                     className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
@@ -286,7 +286,7 @@ export default function HomePage() {
               Join thousands of brands and creators who trust TOTL Agency for their talent needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/choose-role">
+              <Link href="/choose-role" prefetch={false}>
                 <Button
                   size="lg"
                   className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
@@ -364,6 +364,7 @@ export default function HomePage() {
               <div className="space-y-2">
                 <Link
                   href="/choose-role"
+                  prefetch={false}
                   className="block text-gray-400 hover:text-white transition-colors"
                 >
                   Apply as Talent

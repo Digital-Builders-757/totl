@@ -98,6 +98,14 @@ npm run build
   - **Root Cause:** Supabase auth lock is aborted during navigation; expected behavior, not a functional error
   - **Fix:** Filter this specific AbortError in `instrumentation-client.ts` by stack frame (auth-js locks) and add a breadcrumb for counting
   - **Prevention:** Keep auth bootstrap single-runner + avoid duplicate clients; rely on `getUser()` for bootstrap
+- **AuthSessionMissingError Sentry noise:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap
+  - **Symptom:** Sentry shows `AuthSessionMissingError` events from guest mode on public pages (like `/`)
+  - **Root Cause:** Bootstrap calls `getUser()` even when no session exists, causing `AuthSessionMissingError` to be thrown
+  - **Fix:** Add `getSession()` gate before `getUser()` to check for session existence first. Exit early if no session (normal on public pages)
+  - **Fix:** Handle `AuthSessionMissingError` gracefully without throwing (only on public pages)
+  - **Fix:** Narrow Sentry filter to only filter `AuthSessionMissingError` when breadcrumbs prove guest mode on public pages
+  - **Prevention:** See `docs/troubleshooting/AUTH_SESSION_MISSING_ERROR_FIX.md` for complete implementation guide
+  - **Prevention:** Always check `getSession()` before calling `getUser()` in auth bootstrap
 - **Supabase "No API key found" Errors:** Supabase client fails to initialize or queries fail with API key errors
   - **Symptom:** Errors like "No API key found" or Supabase client returns null in production
   - **Root Cause:** Environment variables missing at build time or runtime, or client created without env vars

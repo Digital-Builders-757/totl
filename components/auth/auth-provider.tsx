@@ -551,7 +551,124 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           
           const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-          // Breadcrumb: user read start
+          // CRITICAL FIX: Check for session before calling getUser()
+          // This prevents AuthSessionMissingError on public pages (guest mode)
+          const currentPathname = typeof window !== "undefined" ? (pathname || window.location.pathname) : (pathname ?? "");
+          
+          // Helper: Deny-by-default protected path check
+          // Protected if starts with /talent, /client, /admin (except public marketing profiles)
+          // Auth callback routes are special public (no redirect during exchange)
+          const isProtectedPath = (p: string): boolean => {
+            // Auth callback routes are special public (no redirect during exchange)
+            if (p.startsWith("/auth/callback") || p === PATHS.RESET_PASSWORD || p === PATHS.UPDATE_PASSWORD) {
+              return false;
+            }
+            
+            // /choose-role requires auth (protected)
+            if (p === PATHS.CHOOSE_ROLE) {
+              return true;
+            }
+            
+            // Protected prefixes
+            if (p.startsWith("/client") || p.startsWith("/admin")) {
+              return true;
+            }
+            
+            // /talent prefix: explicit allowlist for public marketing profiles
+            if (p.startsWith("/talent")) {
+              // /talent landing page is public
+              if (p === PATHS.TALENT_LANDING) {
+                return false;
+              }
+              
+              // Check if it's a public marketing profile: /talent/[slug] where slug is not reserved
+              const RESERVED_TALENT_SEGMENTS = new Set([
+                "dashboard",
+                "profile",
+                "settings",
+                "subscribe",
+                "signup",
+                "apply",
+                "portfolio",
+                "messages",
+                "applications",
+                "bookings",
+              ]);
+              
+              const isPublicTalentProfile = (path: string): boolean => {
+                // Must match pattern: /talent/[slug] (exactly one segment after /talent/)
+                const match = path.match(/^\/talent\/([^/]+)$/);
+                if (!match) return false;
+                const slug = match[1];
+                // Public only if slug is NOT in reserved set
+                return !RESERVED_TALENT_SEGMENTS.has(slug);
+              };
+              
+              // If it's a public marketing profile, it's not protected
+              if (isPublicTalentProfile(p)) {
+                return false;
+              }
+              
+              // Everything else under /talent is protected
+              return true;
+            }
+            
+            // /gigs is public (browsing + SEO)
+            // /gigs/[id] is public (gig detail pages)
+            // /gigs/[id]/apply is protected (talent-only, handled by middleware)
+            
+            // Default: public
+            return false;
+          };
+          
+          await breadcrumb({ phase: "getSession_start" });
+          const {
+            data: { session },
+            error: sessionError,
+          } = await supabase.auth.getSession();
+          
+          await breadcrumb({ 
+            phase: "getSession_done", 
+            hasSession: !!session,
+            hasError: !!sessionError,
+          });
+
+          if (sessionError) {
+            await breadcrumb({ phase: "getSession_error", error: sessionError.message });
+            logger.debug("[auth.init] getSession() error", { error: sessionError });
+            // Don't throw - treat as no session and continue
+          }
+
+          // If no session, exit early (this is normal on public pages)
+          if (!session) {
+            const isProtected = isProtectedPath(currentPathname);
+            await breadcrumb({ 
+              phase: "no_session_exit", 
+              pathname: currentPathname,
+              isProtectedPath: isProtected,
+            });
+            logger.debug("[auth.init] No session found - exiting bootstrap", { 
+              pathname: currentPathname,
+              isProtectedPath: isProtected,
+            });
+            
+            if (mounted) {
+              setSession(null);
+              setUser(null);
+              setProfile(null);
+              setIsLoading(false);
+              setHasHandledInitialSession(true);
+              
+              // Only redirect to login if on protected route (and not already on login)
+              if (isProtected && currentPathname !== PATHS.LOGIN) {
+                logger.debug("[auth.init] Redirecting to login from protected route", { pathname: currentPathname });
+                router.replace(PATHS.LOGIN);
+              }
+            }
+            return;
+          }
+
+          // Session exists - proceed with getUser() for server-validated user
           await breadcrumb({ phase: "getUser_start" });
 
           let currentUser: User | null = null;
@@ -572,7 +689,57 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 await breadcrumb({ phase: "aborted", reason: "navigation" });
                 return;
               }
-              await breadcrumb({ phase: "getUser_error", error: error instanceof Error ? error.message : String(error) });
+              
+              // CRITICAL FIX: Handle AuthSessionMissingError gracefully (expected on public pages)
+              // ONLY swallow AuthSessionMissingError - all other errors should be thrown
+              const errorMessage = error instanceof Error ? error.message : String(error);
+              const errorName = error instanceof Error ? error.name : undefined;
+              
+              // Check for session missing errors by name or message content
+              // Supabase may throw AuthSessionMissingError or similar errors
+              const isSessionMissingError = 
+                errorName === "AuthSessionMissingError" ||
+                (errorMessage?.includes("session") && 
+                 (errorMessage?.includes("missing") || 
+                  errorMessage?.includes("not found") || 
+                  errorMessage?.includes("invalid")) &&
+                 // Ensure it's not a different error that mentions "session" (e.g., "session expired")
+                 !errorMessage?.includes("expired") &&
+                 !errorMessage?.includes("refresh"));
+              
+              if (isSessionMissingError) {
+                const isProtected = isProtectedPath(currentPathname);
+                await breadcrumb({ 
+                  phase: "no_session_expected", 
+                  error: errorMessage,
+                  errorName: errorName || "unknown",
+                  pathname: currentPathname,
+                  isProtectedPath: isProtected,
+                });
+                logger.debug("[auth.init] AuthSessionMissingError - treating as no session (expected)", {
+                  pathname: currentPathname,
+                  isProtectedPath: isProtected,
+                  errorName,
+                });
+                
+                if (mounted) {
+                  setSession(null);
+                  setUser(null);
+                  setProfile(null);
+                  setIsLoading(false);
+                  setHasHandledInitialSession(true);
+                  
+                  // Only redirect to login if on protected route (and not already on login)
+                  if (isProtected && currentPathname !== PATHS.LOGIN) {
+                    logger.debug("[auth.init] Redirecting to login from protected route (session missing)", { pathname: currentPathname });
+                    router.replace(PATHS.LOGIN);
+                  }
+                }
+                return; // DO NOT throw - this is expected behavior
+              }
+              
+              // All other errors (network, CORS, invalid JWT, refresh token errors, etc.) should be thrown
+              await breadcrumb({ phase: "getUser_error", error: errorMessage, errorName: errorName || "unknown" });
               throw error;
             }
           }
@@ -643,12 +810,37 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             }
           })();
         } catch (error) {
-          // Only log non-abort errors
-          if (!(error instanceof Error && error.name === "AbortError")) {
+          // Only log non-abort errors and non-session-missing errors
+          // All other errors (network, CORS, invalid JWT, etc.) should be logged
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          const errorName = error instanceof Error ? error.name : undefined;
+          const isAbortError = errorName === "AbortError";
+          
+          // Only swallow AuthSessionMissingError - be precise to avoid hiding real problems
+          const isSessionMissingError = 
+            errorName === "AuthSessionMissingError" ||
+            (errorMessage?.includes("session") && 
+             (errorMessage?.includes("missing") || errorMessage?.includes("not found") || errorMessage?.includes("invalid")) &&
+             !errorMessage?.includes("expired") &&
+             !errorMessage?.includes("refresh"));
+          
+          if (!isAbortError && !isSessionMissingError) {
+            // Real errors: network failures, invalid JWT, refresh token errors, CORS, etc.
             logger.error("[auth.init] Error in initial session check", error);
-            await breadcrumb({ phase: "error", error: error instanceof Error ? error.message : String(error) });
-          } else {
+            await breadcrumb({ phase: "error", error: errorMessage, errorName: errorName || "unknown" });
+            // Don't throw here - let error bubble up naturally if needed
+          } else if (isAbortError) {
             logger.debug("[auth.init] Bootstrap aborted (expected during navigation)");
+          } else if (isSessionMissingError) {
+            // Session missing errors are already handled above, but catch here as safety net
+            logger.debug("[auth.init] Session missing error caught in outer catch (should be handled above)");
+            if (mounted) {
+              setSession(null);
+              setUser(null);
+              setProfile(null);
+              setIsLoading(false);
+              setHasHandledInitialSession(true);
+            }
           }
         } finally {
           // Clear timeouts if bootstrap completed

@@ -321,6 +321,57 @@ Sentry.init({
           return null; // Don't send to Sentry - this is expected behavior
         }
       }
+
+      // Filter AuthSessionMissingError when it's expected (guest mode on public pages)
+      // This prevents Sentry noise from bootstrap treating guest mode as an exception
+      // IMPORTANT: Only filter when breadcrumbs prove it's guest mode, not real auth failures
+      const isAuthSessionMissing = 
+        errorObj.name === 'AuthSessionMissingError' ||
+        (errorObj.message?.includes('session') && 
+         (errorObj.message?.includes('missing') || 
+          errorObj.message?.includes('not found') || 
+          errorObj.message?.includes('invalid')) &&
+         // Ensure it's not a different error that mentions "session" (e.g., "session expired")
+         !errorObj.message?.includes('expired') &&
+         !errorObj.message?.includes('refresh'));
+
+      if (isAuthSessionMissing) {
+        // Check breadcrumbs to see if this happened during INITIAL_SESSION with no session
+        const breadcrumbs = event.breadcrumbs || [];
+        const hasInitialSessionNoSession = breadcrumbs.some(
+          (b) =>
+            b.category === "auth.bootstrap" &&
+            (b.message === "auth.onAuthStateChange.INITIAL_SESSION" ||
+             b.data?.event === "INITIAL_SESSION") &&
+            b.data?.hasSession === false
+        );
+
+        // Also check for no_session_exit breadcrumb (our new gate)
+        // Use isProtectedPath: false to ensure it's a public page
+        const hasNoSessionExitPublic = breadcrumbs.some(
+          (b) =>
+            b.category === "auth.bootstrap" &&
+            b.data?.phase === "no_session_exit" &&
+            b.data?.isProtectedPath === false
+        );
+
+        // Also check for no_session_expected breadcrumb (getUser() caught AuthSessionMissingError)
+        const hasNoSessionExpected = breadcrumbs.some(
+          (b) =>
+            b.category === "auth.bootstrap" &&
+            b.data?.phase === "no_session_expected" &&
+            b.data?.isProtectedPath === false
+        );
+
+        // Filter if it's clearly guest mode (INITIAL_SESSION with no session OR no_session_exit/no_session_expected on public path)
+        // DO NOT filter if isProtectedPath is true - those are real auth failures
+        if (hasInitialSessionNoSession || hasNoSessionExitPublic || hasNoSessionExpected) {
+          console.log("AuthSessionMissingError filtered - expected guest mode on public page");
+          return null; // Don't send to Sentry - this is expected behavior
+        }
+        
+        // If we can't prove it's guest mode, let it through (better to over-report than hide real issues)
+      }
     }
 
     return event;
