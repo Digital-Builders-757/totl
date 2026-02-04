@@ -72,7 +72,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
   };
 
   return (
-    <PageShell topPadding={false} fullBleed className="bg-black">
+    <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} notificationCount={3} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
@@ -84,71 +84,106 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Total Gigs</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</p>
-                </div>
-                <div className="bg-blue-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Briefcase className="h-4 w-4 text-blue-400" />
+                  <span>Total Gigs</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  All time
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Review inventory
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Active Gigs</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</p>
-                </div>
-                <div className="bg-green-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Zap className="h-4 w-4 text-green-400" />
+                  <span>Active Gigs</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Live
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Monitor activity
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Applications</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</p>
-                </div>
-                <div className="bg-purple-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Users className="h-4 w-4 text-purple-400" />
+                  <span>Applications</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Total
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/applications" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Review queue
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Pending</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.pendingApplications}</p>
-                </div>
-                <div className="bg-yellow-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Clock className="h-4 w-4 text-yellow-400" />
+                  <span>Pending</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  New
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.pendingApplications}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/applications" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Triage now
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Accepted</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.acceptedApplications}</p>
-                </div>
-                <div className="bg-emerald-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <CheckCircle className="h-4 w-4 text-emerald-400" />
+                  <span>Accepted</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Closed
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.acceptedApplications}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/applications" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Audit decisions
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -157,31 +192,36 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800"
             data-testid="paid-talent-card"
           >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white" data-testid="paid-talent-card-title">
-                    Paid Talent (Subscriptions)
-                  </p>
-                  <p className="text-2xl font-bold text-white">
-                    <span data-testid="paid-talent-total">
-                      {paidTalentStats.monthlyCount + paidTalentStats.annualCount}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Monthly: <span data-testid="paid-talent-monthly">{paidTalentStats.monthlyCount}</span> · Annual:{" "}
-                    <span data-testid="paid-talent-annual">{paidTalentStats.annualCount}</span> · Unknown:{" "}
-                    <span data-testid="paid-talent-unknown">{paidTalentStats.unknownPlanCount}</span>
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    Est. MRR:{" "}
-                    <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span> · Est. ARR:{" "}
-                    <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
-                  </p>
-                </div>
-                <div className="bg-orange-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <DollarSign className="h-4 w-4 text-orange-400" />
+                  <span data-testid="paid-talent-card-title">Paid Talent</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Subscriptions
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">
+                <span data-testid="paid-talent-total">
+                  {paidTalentStats.monthlyCount + paidTalentStats.annualCount}
+                </span>
+              </div>
+              <div className="text-xs text-gray-400">
+                Monthly: <span data-testid="paid-talent-monthly">{paidTalentStats.monthlyCount}</span> · Annual:{" "}
+                <span data-testid="paid-talent-annual">{paidTalentStats.annualCount}</span> · Unknown:{" "}
+                <span data-testid="paid-talent-unknown">{paidTalentStats.unknownPlanCount}</span>
+              </div>
+              <div className="text-xs text-gray-400">
+                Est. MRR:{" "}
+                <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span> · Est. ARR:{" "}
+                <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
+              </div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/admin/talent" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Review subscribers
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -225,10 +265,15 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               {/* Quick Actions */}
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Zap className="h-5 w-5 text-blue-400" />
-                    Quick Actions
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Zap className="h-5 w-5 text-blue-400" />
+                      Quick Actions
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      Admin
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">
                     Manage your platform efficiently
                   </CardDescription>
@@ -258,10 +303,15 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               {/* Platform Health */}
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Shield className="h-5 w-5 text-green-400" />
-                    Platform Health
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Shield className="h-5 w-5 text-green-400" />
+                      Platform Health
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      Stable
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">
                     System status and performance
                   </CardDescription>
@@ -302,10 +352,15 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               {/* Recent Activity */}
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Activity className="h-5 w-5 text-purple-400" />
-                    Recent Activity
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Activity className="h-5 w-5 text-purple-400" />
+                      Recent Activity
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      Today
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">
                     Latest platform updates
                   </CardDescription>

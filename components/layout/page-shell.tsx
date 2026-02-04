@@ -28,7 +28,7 @@ export function PageShell({
   return (
     <div
       className={cn(
-        "min-h-screen bg-[var(--oklch-bg)] text-[var(--oklch-text-primary)]",
+        "min-h-screen bg-[var(--oklch-bg)] text-[var(--oklch-text-primary)] page-ambient",
         topPadding && "pt-20 sm:pt-24",
         className
       )}

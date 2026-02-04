@@ -9,7 +9,7 @@ export interface DataTableShellProps {
 
 export function DataTableShell({ children, className }: DataTableShellProps) {
   return (
-    <div className={cn("w-full overflow-x-auto rounded-xl border border-white/10 bg-white/5", className)}>
+    <div className={cn("w-full overflow-x-auto rounded-xl border border-white/10 elev-1", className)}>
       {children}
     </div>
   );

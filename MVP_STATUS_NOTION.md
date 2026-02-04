@@ -8,6 +8,32 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client Applications UX + Reset Password Fix (February 4, 2026)**
+
+**CLIENT APPLICATIONS + UI IMPROVEMENTS** - February 4, 2026  
+- ✅ **Server-side data fetching**: Moved all Supabase reads from client component to server `page.tsx` (compliance with architecture rules)
+- ✅ **Avatar support**: Added avatar display to applications page using `avatar_url`/`avatar_path` from profiles
+- ✅ **Storage URL utility**: Created `lib/utils/storage-urls.ts` for converting storage paths to public URLs
+- ✅ **Supabase server improvements**: Gated debug logging behind `DEBUG_SUPABASE` flag to reduce log noise
+- ✅ **Reset password contrast fix**: Fixed white-on-white text issue on reset password page (heading and labels now visible)
+
+**Why this change:**
+- Client components should not perform Supabase reads (architecture rule violation)
+- Applications page needed avatar images for better UX
+- Reset password page had poor contrast making text unreadable
+
+**Impact:**
+- Client applications page now follows server/client separation pattern
+- Better visual identification of talent in applications list
+- Reset password page is now readable with proper contrast
+- Reduced log noise in production (debug logs only when explicitly enabled)
+
+**Next (P0 - Critical)**
+- [ ] Manual smoke tests: mobile layout, search, filters, accept/reject flows
+
+**Next (P1 - Follow-up)**
+- [ ] Consider tightening `next.config.mjs` remotePatterns (remove `hostname: "**"` wildcard)
+
 ## 🚀 **Latest: AuthSessionMissingError Sentry Noise Fix (February 4, 2026)**
 
 **AUTH RELIABILITY + SENTRY NOISE REDUCTION** - February 4, 2026  
