@@ -32,6 +32,11 @@ If a file renders a full-screen page (not just a modal), it **MUST** use `PageSh
   - Canonical loading skeleton layout
 - `components/layout/empty-state.tsx` (`EmptyState`)
   - Canonical empty state (icon + title + optional action)
+- `components/ui/media-thumb.tsx` (`MediaThumb`)
+  - Presentational only (no data access or hooks)
+  - Variants: `talent` (aspect 4/5), `gig` (aspect-video), `avatar` (square)
+  - Row anatomy rule (applications): thumb → title/meta → status → one next action
+  - Accept/reject stays in overflow unless it is the primary action
 
 ## Spacing rhythm (defaults)
 

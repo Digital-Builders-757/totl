@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -73,7 +73,7 @@ export default function ResetPassword() {
                 height={50}
                 className="mx-auto mb-6"
               />
-              <h1 className="text-2xl font-bold mb-2">Reset Password</h1>
+              <h1 className="text-2xl font-bold mb-2 text-gray-900">Reset Password</h1>
               <p className="text-gray-600">
                 {isSubmitted
                   ? "Check your email for a link to reset your password."
@@ -84,7 +84,7 @@ export default function ResetPassword() {
             {!isSubmitted ? (
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-gray-900">Email</Label>
                   <Input
                     id="email"
                     type="email"

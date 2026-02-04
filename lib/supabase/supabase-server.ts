@@ -21,14 +21,15 @@ type CookieToSet = {
 };
 
 export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {
+  // cookies() returns a Promise in Next.js 15+
   const cookieStore = await cookies();
 
   // Prefer secure, non-public env vars on the server; fall back to NEXT_PUBLIC only if necessary
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Debug logging for development
-  if (process.env.NODE_ENV === 'development') {
+  // Debug logging for development (gated behind DEBUG_SUPABASE flag)
+  if (process.env.NODE_ENV === 'development' && process.env.DEBUG_SUPABASE === '1') {
     // eslint-disable-next-line no-console
     console.log('Supabase Server Client Debug:', {
       has_SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
@@ -69,8 +70,10 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
             // Cookies can only be modified in Server Actions or Route Handlers
             // In Server Components (pages), this will silently fail which is expected
             // The session will still work correctly with the cookies that are already set
-            if (process.env.NODE_ENV === "development") {
-              console.warn("[supabase-server] cookieStore.set failed", err);
+            // Only log in development when explicitly debugging
+            if (process.env.NODE_ENV === "development" && process.env.DEBUG_SUPABASE === "1") {
+              // eslint-disable-next-line no-console
+              console.warn("[supabase-server] cookieStore.set failed (expected in Server Components)", err);
             }
           }
         },

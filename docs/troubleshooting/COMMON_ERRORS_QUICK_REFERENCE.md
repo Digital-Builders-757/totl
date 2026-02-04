@@ -98,6 +98,11 @@ npm run build
   - **Root Cause:** Supabase auth lock is aborted during navigation; expected behavior, not a functional error
   - **Fix:** Filter this specific AbortError in `instrumentation-client.ts` by stack frame (auth-js locks) and add a breadcrumb for counting
   - **Prevention:** Keep auth bootstrap single-runner + avoid duplicate clients; rely on `getUser()` for bootstrap
+- **Reset Password Page White-on-White Text:** Reset password page heading and labels are invisible (white text on white background)
+  - **Symptom:** Users cannot read "Reset Password" heading or form labels on `/reset-password` page
+  - **Root Cause:** Missing text color classes on heading and Label components
+  - **Fix:** Add `text-gray-900` class to `<h1>` heading and `<Label>` components
+  - **Prevention:** Always specify text colors explicitly on white backgrounds, especially in form pages
 - **AuthSessionMissingError Sentry noise:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap
   - **Symptom:** Sentry shows `AuthSessionMissingError` events from guest mode on public pages (like `/`)
   - **Root Cause:** Bootstrap calls `getUser()` even when no session exists, causing `AuthSessionMissingError` to be thrown

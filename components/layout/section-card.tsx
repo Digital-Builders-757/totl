@@ -16,7 +16,7 @@ export function SectionCard({ children, className, paddingClassName = "p-4 sm:p-
   return (
     <section
       className={cn(
-        "panel-frosted card-backlit grain-texture relative overflow-hidden rounded-2xl border border-white/10",
+        "panel-frosted card-backlit grain-texture elev-2 relative overflow-hidden rounded-2xl border border-white/10",
         className
       )}
     >

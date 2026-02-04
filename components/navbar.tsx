@@ -43,6 +43,7 @@ export default function Navbar() {
     shouldPromptSubscription && !isOnTalentDashboard;
   const isAuthSurface = pathname ? isAuthRoute(pathname) : false;
   const shouldPrefetch = !isAuthSurface;
+  const isActive = (href: string) => (pathname ? pathname.startsWith(href) : false);
 
   // Determine if the current page is the homepage - safe for SSR
   const isHomepage = pathname === "/" || pathname === null;
@@ -84,13 +85,14 @@ export default function Navbar() {
     : isHomepage
       ? "apple-glass"
       : "bg-black";
+  const navbarBorder = isScrolled ? "border-b border-white/15" : "border-b border-transparent";
 
   // Determine text color based on scroll position and current page
   const textColor = isScrolled || !isHomepage ? "text-white" : "text-white";
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBg} backdrop-blur-md`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBg} ${navbarBorder} backdrop-blur-md`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -112,7 +114,9 @@ export default function Navbar() {
               <Link
                 href="/gigs"
                 prefetch={shouldPrefetch}
-                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
+                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group ${
+                  isActive("/gigs") ? "nav-active" : ""
+                }`}
               >
                 Gigs
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
@@ -123,7 +127,9 @@ export default function Navbar() {
             <Link
               href="/about"
               prefetch={shouldPrefetch}
-              className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
+              className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group ${
+                isActive("/about") ? "nav-active" : ""
+              }`}
             >
               About
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
@@ -132,7 +138,9 @@ export default function Navbar() {
               <Link
                 href={PATHS.ADMIN_DASHBOARD}
                 prefetch={shouldPrefetch}
-                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group`}
+                className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group ${
+                  isActive(PATHS.ADMIN_DASHBOARD) ? "nav-active" : ""
+                }`}
               >
                 Admin
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>

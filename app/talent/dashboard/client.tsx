@@ -26,12 +26,14 @@ import {
   Globe,
   MoreVertical,
   Heart,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -48,8 +50,8 @@ import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
-import { logger } from "@/lib/utils/logger";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -629,6 +631,7 @@ function TalentDashboardContent({
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
   // For now, keeping a simple fallback since badge styling may vary
   const getCategoryColor = (category: string) => {
+    void category;
     // Default fallback - can be enhanced with getCategoryBadgeVariant
     return "bg-gray-50 text-gray-700 border-gray-200";
   };
@@ -748,8 +751,8 @@ function TalentDashboardContent({
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      <div className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
+    <PageShell topPadding={false} fullBleed>
+      <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
@@ -843,87 +846,127 @@ function TalentDashboardContent({
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Profile Views</p>
-                  <p className="text-2xl font-bold text-white">0</p>
-                </div>
-                <div className="bg-blue-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Eye className="h-4 w-4 text-blue-400" />
+                  <span>Profile Views</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Total
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">0</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/talent/profile" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Improve profile
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Total Applications</p>
-                  <p className="text-2xl font-bold text-white">
-                    {dashboardStats.totalApplications}
-                  </p>
-                </div>
-                <div className="bg-green-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Users className="h-4 w-4 text-green-400" />
+                  <span>Total Applications</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  All time
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Apply to more gigs
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Accepted</p>
-                  <p className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</p>
-                </div>
-                <div className="bg-purple-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Calendar className="h-4 w-4 text-purple-400" />
+                  <span>Accepted</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Active
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Find new bookings
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Earnings</p>
-                  <p className="text-2xl font-bold text-white">${0}</p>
-                </div>
-                <div className="bg-yellow-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <DollarSign className="h-4 w-4 text-yellow-400" />
+                  <span>Earnings</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  To date
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">$0</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Browse gigs
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Rating</p>
-                  <p className="text-2xl font-bold text-white">0</p>
-                </div>
-                <div className="bg-orange-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Star className="h-4 w-4 text-orange-400" />
+                  <span>Rating</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Latest
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">0</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/settings" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Update profile
+                </Link>
               </div>
             </CardContent>
           </Card>
 
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-white">Success Rate</p>
-                  <p className="text-2xl font-bold text-white">0%</p>
-                </div>
-                <div className="bg-teal-900/30 p-2 rounded-full">
+            <CardContent className="p-4 space-y-3">
+              <div className="card-header-row">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <TrendingUp className="h-4 w-4 text-teal-400" />
+                  <span>Success Rate</span>
                 </div>
+                <Badge variant="outline" className="status-chip">
+                  Rolling
+                </Badge>
+              </div>
+              <div className="text-2xl font-bold text-white">0%</div>
+              <div className="card-footer-row">
+                <span>Next action</span>
+                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                  Apply to more gigs
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -965,10 +1008,15 @@ function TalentDashboardContent({
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Award className="h-5 w-5 text-blue-400" />
-                    Profile Strength
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Award className="h-5 w-5 text-blue-400" />
+                      Profile Strength
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      {needsProfileCompletion ? "Needs work" : "Strong"}
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">
                     Complete your profile to get more opportunities
                   </CardDescription>
@@ -1050,10 +1098,15 @@ function TalentDashboardContent({
 
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Briefcase className="h-5 w-5 text-green-400" />
-                    Available Gigs
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <Briefcase className="h-5 w-5 text-green-400" />
+                      Available Gigs
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      Live
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">
                     Discover new opportunities
                   </CardDescription>
@@ -1074,10 +1127,15 @@ function TalentDashboardContent({
 
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <BarChart3 className="h-5 w-5 text-purple-400" />
-                    Quick Stats
-                  </CardTitle>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2 text-white">
+                      <BarChart3 className="h-5 w-5 text-purple-400" />
+                      Quick Stats
+                    </CardTitle>
+                    <Badge variant="outline" className="status-chip">
+                      Snapshot
+                    </Badge>
+                  </div>
                   <CardDescription className="text-gray-300">Your activity summary</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1101,78 +1159,138 @@ function TalentDashboardContent({
 
             <Card className="lg:col-span-2 bg-gray-900 border-gray-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Clock className="h-5 w-5 text-purple-400" />
-                  Upcoming Gigs
-                </CardTitle>
+                <div className="card-header-row">
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Clock className="h-5 w-5 text-purple-400" />
+                    Upcoming Gigs
+                  </CardTitle>
+                  <Badge variant="outline" className="status-chip">
+                    Confirmed
+                  </Badge>
+                </div>
                 <CardDescription className="text-gray-300">
                   Your confirmed and pending bookings
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {applications.filter((app) => app.status === "accepted").length > 0 ? (
-                  <div className="space-y-4">
-                    {applications
-                      .filter((app) => app.status === "accepted")
-                      .map((app) => (
-                        <div
-                          key={app.id}
-                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                        >
-                          <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
-                            <SafeImage
-                              src={app.gigs?.image_url}
-                              alt={app.gigs?.title || "Unknown Gig"}
-                              fallbackSrc="/images/totl-logo-transparent.png"
-                              fill
-                              className="object-cover"
-                              placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
-                            />
-                          </div>
-                          <div className="flex-grow space-y-2">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <h4 className="font-semibold text-lg text-white">
-                                {app.gigs?.title}
-                              </h4>
-                              <ApplicationStatusBadge status={app.status} showIcon={true} />
+                  <>
+                    <div className="md:hidden space-y-3">
+                      {applications
+                        .filter((app) => app.status === "accepted")
+                        .map((app) => (
+                          <div
+                            key={`${app.id}-upcoming-mobile`}
+                            className="elev-1 rounded-xl border border-white/10 p-3"
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
+                                <SafeImage
+                                  src={app.gigs?.image_url}
+                                  alt={app.gigs?.title || "Unknown Gig"}
+                                  fallbackSrc="/images/totl-logo-transparent.png"
+                                  fill
+                                  className="object-cover"
+                                  placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 space-y-1">
+                                <p className="text-sm font-semibold text-white truncate">
+                                  {app.gigs?.title}
+                                </p>
+                                <p className="text-xs text-gray-300">
+                                  {app.gigs?.client_profiles?.company_name || "Private Client"}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-gray-400">
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-3 w-3" />
+                                    <SafeDate date={app.created_at} />
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {app.gigs?.location}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-2">
+                                <ApplicationStatusBadge status={app.status} showIcon={false} />
+                                <Button variant="ghost" size="icon" className="text-gray-400">
+                                  <ChevronRight className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-gray-300 font-medium">
-                              {app.gigs?.client_profiles?.company_name || "Private Client"}
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-4 w-4" />
-                                <SafeDate date={app.created_at} />
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                {app.gigs?.compensation || "TBD"}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-4 w-4" />
-                                {app.gigs?.location}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="h-4 w-4" />
-                                {app.gigs?.compensation || "TBD"}
-                              </div>
+                            <div className="card-footer-row">
+                              <span>Next action</span>
+                              <button type="button" className="text-[var(--oklch-text-primary)] hover:underline">
+                                View details
+                              </button>
                             </div>
                           </div>
-                          <div className="flex md:flex-col gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1 md:flex-none bg-transparent"
-                            >
-                              View Details
-                            </Button>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
+                        ))}
+                    </div>
+                    <div className="hidden md:block space-y-4">
+                      {applications
+                        .filter((app) => app.status === "accepted")
+                        .map((app) => (
+                          <div
+                            key={app.id}
+                            className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
+                              <SafeImage
+                                src={app.gigs?.image_url}
+                                alt={app.gigs?.title || "Unknown Gig"}
+                                fallbackSrc="/images/totl-logo-transparent.png"
+                                fill
+                                className="object-cover"
+                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                              />
+                            </div>
+                            <div className="flex-grow space-y-2">
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                                <h4 className="font-semibold text-lg text-white">
+                                  {app.gigs?.title}
+                                </h4>
+                                <ApplicationStatusBadge status={app.status} showIcon={true} />
+                              </div>
+                              <p className="text-gray-300 font-medium">
+                                {app.gigs?.client_profiles?.company_name || "Private Client"}
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  <SafeDate date={app.created_at} />
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-4 w-4" />
+                                  {app.gigs?.location}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex md:flex-col gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 md:flex-none bg-transparent"
+                              >
+                                View Details
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                  </div>
+                        ))}
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -1190,8 +1308,13 @@ function TalentDashboardContent({
             <Card className="bg-gray-900 border-gray-800">
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div>
-                    <CardTitle className="text-white">My TalentApplications</CardTitle>
+                  <div className="space-y-2">
+                    <div className="card-header-row">
+                      <CardTitle className="text-white">My TalentApplications</CardTitle>
+                      <Badge variant="outline" className="status-chip">
+                        Active
+                      </Badge>
+                    </div>
                     <CardDescription className="text-gray-300">
                       Track all your gig applications and their status
                     </CardDescription>
@@ -1247,66 +1370,128 @@ function TalentDashboardContent({
                     }}
                   />
                 ) : (
-                  <div className="space-y-4">
-                    {applications.map((app) => (
-                    <div
-                      key={app.id}
-                      className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
-                    >
-                      <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
-                        <SafeImage
-                          src={app.gigs?.image_url}
-                          alt={app.gigs?.title || "Unknown Gig"}
-                          fallbackSrc="/images/totl-logo-transparent.png"
-                          fill
-                          className="object-cover"
-                          placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
-                        />
-                      </div>
-                      <div className="flex-grow space-y-2">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <h4 className="font-semibold text-lg text-white">{app.gigs?.title}</h4>
-                          <ApplicationStatusBadge status={app.status} showIcon={true} />
-                        </div>
-                        <p className="text-gray-300 font-medium">
-                          {app.gigs?.client_profiles?.company_name || "Private Client"}
-                        </p>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                          <Badge
-                            variant="outline"
-                            className={getCategoryColor(app.gigs?.category || "General")}
-                          >
-                            {getCategoryLabel(app.gigs?.category || "")}
-                          </Badge>
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
-                            {app.gigs?.compensation || "TBD"}
-                          </span>
-                          <span>
-                            Applied: <SafeDate date={app.created_at} />
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex md:flex-col gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
-                          onClick={() => handleViewDetails(app)}
+                  <>
+                    <div className="md:hidden space-y-3">
+                      {applications.map((app) => (
+                        <div
+                          key={`${app.id}-mobile`}
+                          className="elev-1 rounded-xl border border-white/10 p-3"
                         >
-                          View Details
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:bg-gray-700"
-                        >
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </div>
+                          <div className="flex items-start gap-3">
+                            <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
+                              <SafeImage
+                                src={app.gigs?.image_url}
+                                alt={app.gigs?.title || "Unknown Gig"}
+                                fallbackSrc="/images/totl-logo-transparent.png"
+                                fill
+                                className="object-cover"
+                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="text-sm font-semibold text-white truncate">
+                                {app.gigs?.title}
+                              </p>
+                              <p className="text-xs text-gray-300">
+                                {app.gigs?.client_profiles?.company_name || "Private Client"}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <SafeDate date={app.created_at} />
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <ApplicationStatusBadge status={app.status} showIcon={false} />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-gray-400 hover:bg-gray-700"
+                                onClick={() => handleViewDetails(app)}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="card-footer-row">
+                            <span>Next action</span>
+                            <button
+                              type="button"
+                              className="text-[var(--oklch-text-primary)] hover:underline"
+                              onClick={() => handleViewDetails(app)}
+                            >
+                              View details
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                  </div>
+                    <div className="hidden md:block space-y-4">
+                      {applications.map((app) => (
+                        <div
+                          key={app.id}
+                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
+                        >
+                          <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
+                            <SafeImage
+                              src={app.gigs?.image_url}
+                              alt={app.gigs?.title || "Unknown Gig"}
+                              fallbackSrc="/images/totl-logo-transparent.png"
+                              fill
+                              className="object-cover"
+                              placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                            />
+                          </div>
+                          <div className="flex-grow space-y-2">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                              <h4 className="font-semibold text-lg text-white">{app.gigs?.title}</h4>
+                              <ApplicationStatusBadge status={app.status} showIcon={true} />
+                            </div>
+                            <p className="text-gray-300 font-medium">
+                              {app.gigs?.client_profiles?.company_name || "Private Client"}
+                            </p>
+                            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                              <Badge
+                                variant="outline"
+                                className={getCategoryColor(app.gigs?.category || "General")}
+                              >
+                                {getCategoryLabel(app.gigs?.category || "")}
+                              </Badge>
+                              <span className="flex items-center gap-1">
+                                <DollarSign className="h-4 w-4" />
+                                {app.gigs?.compensation || "TBD"}
+                              </span>
+                              <span>
+                                Applied: <SafeDate date={app.created_at} />
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex md:flex-col gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                              onClick={() => handleViewDetails(app)}
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-400 hover:bg-gray-700"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -1315,73 +1500,142 @@ function TalentDashboardContent({
           <TabsContent value="bookings" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>My Bookings</CardTitle>
+                <div className="card-header-row">
+                  <CardTitle>My Bookings</CardTitle>
+                  <Badge variant="outline" className="status-chip">
+                    Upcoming
+                  </Badge>
+                </div>
                 <CardDescription>Your confirmed and upcoming gigs</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {applications
-                    .filter((app) => app.status === "accepted")
-                    .map((app) => (
-                      <div
-                        key={app.id}
-                        className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-                      >
-                        <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
-                          <SafeImage
-                            src={app.gigs?.image_url}
-                            alt={app.gigs?.title || "Unknown Gig"}
-                            fallbackSrc="/images/totl-logo-transparent.png"
-                            fill
-                            className="object-cover"
-                            placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
-                          />
-                        </div>
-                        <div className="flex-grow space-y-2">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                            <h4 className="font-semibold text-lg text-white">
-                              {app.gigs?.title}
-                            </h4>
-                            <ApplicationStatusBadge status={app.status} showIcon={true} />
+                <>
+                  <div className="md:hidden space-y-3">
+                    {applications
+                      .filter((app) => app.status === "accepted")
+                      .map((app) => (
+                        <div
+                          key={`${app.id}-bookings-mobile`}
+                          className="elev-1 rounded-xl border border-white/10 p-3"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
+                              <SafeImage
+                                src={app.gigs?.image_url}
+                                alt={app.gigs?.title || "Unknown Gig"}
+                                fallbackSrc="/images/totl-logo-transparent.png"
+                                fill
+                                className="object-cover"
+                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0 space-y-1">
+                              <p className="text-sm font-semibold text-white truncate">
+                                {app.gigs?.title}
+                              </p>
+                              <p className="text-xs text-gray-300">
+                                {app.gigs?.client_profiles?.company_name || "Private Client"}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <SafeDate date={app.created_at} />
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  {app.gigs?.compensation || "TBD"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <ApplicationStatusBadge status={app.status} showIcon={false} />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="text-gray-400 hover:bg-gray-700"
+                                onClick={() => handleViewDetails(app)}
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <p className="text-gray-300 font-medium">
-                            {app.gigs?.client_profiles?.company_name || "Private Client"}
-                          </p>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <SafeDate date={app.created_at} />
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              {app.gigs?.compensation || "TBD"}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <MapPin className="h-4 w-4" />
-                              {app.gigs?.location}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <DollarSign className="h-4 w-4" />
-                              {app.gigs?.compensation || "TBD"}
-                            </div>
+                          <div className="card-footer-row">
+                            <span>Next action</span>
+                            <button
+                              type="button"
+                              className="text-[var(--oklch-text-primary)] hover:underline"
+                              onClick={() => handleViewDetails(app)}
+                            >
+                              View details
+                            </button>
                           </div>
                         </div>
-                        <div className="flex md:flex-col gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 md:flex-none bg-transparent"
-                            onClick={() => handleViewDetails(app)}
-                          >
-                            View Details
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
+                      ))}
+                  </div>
+                  <div className="hidden md:block space-y-4">
+                    {applications
+                      .filter((app) => app.status === "accepted")
+                      .map((app) => (
+                        <div
+                          key={app.id}
+                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                        >
+                          <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
+                            <SafeImage
+                              src={app.gigs?.image_url}
+                              alt={app.gigs?.title || "Unknown Gig"}
+                              fallbackSrc="/images/totl-logo-transparent.png"
+                              fill
+                              className="object-cover"
+                              placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                            />
+                          </div>
+                          <div className="flex-grow space-y-2">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                              <h4 className="font-semibold text-lg text-white">
+                                {app.gigs?.title}
+                              </h4>
+                              <ApplicationStatusBadge status={app.status} showIcon={true} />
+                            </div>
+                            <p className="text-gray-300 font-medium">
+                              {app.gigs?.client_profiles?.company_name || "Private Client"}
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                <SafeDate date={app.created_at} />
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {app.gigs?.compensation || "TBD"}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-4 w-4" />
+                                {app.gigs?.location}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="h-4 w-4" />
+                                {app.gigs?.compensation || "TBD"}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex md:flex-col gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 md:flex-none bg-transparent"
+                              onClick={() => handleViewDetails(app)}
+                            >
+                              View Details
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                </div>
+                      ))}
+                  </div>
+                </>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1390,8 +1644,13 @@ function TalentDashboardContent({
             <Card>
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div>
-                    <CardTitle>Available Gigs</CardTitle>
+                  <div className="space-y-2">
+                    <div className="card-header-row">
+                      <CardTitle>Available Gigs</CardTitle>
+                      <Badge variant="outline" className="status-chip">
+                        Live
+                      </Badge>
+                    </div>
                     <CardDescription>
                       Discover new opportunities that match your profile
                     </CardDescription>
@@ -1525,7 +1784,7 @@ function TalentDashboardContent({
         isOpen={isModalOpen}
         onClose={closeModal}
       />
-    </div>
+    </PageShell>
   );
 }
 
