@@ -142,6 +142,19 @@
     --oklch-accent-soft: hsla(210, 100%, 70%, 0.2);
     --oklch-accent-glow: hsla(210, 100%, 70%, 0.45);
 
+    /* TOTL Electric Violet accents */
+    --totl-violet: #8b5cf6;
+    --totl-violet-light: #a78bfa;
+    --totl-indigo-support: #6366f1;
+    --totl-violet-glow-strong: rgba(139, 92, 246, 0.18);
+    --totl-violet-glow-soft: rgba(139, 92, 246, 0.1);
+    --totl-violet-border: rgba(167, 139, 250, 0.18);
+
+    /* Surface ladder (Electric Violet polish) */
+    --totl-surface-bg: hsl(255 20% 14%);
+    --totl-surface-card: hsla(255, 22%, 18%, 0.7);
+    --totl-surface-panel: hsla(255, 24%, 20%, 0.75);
+
     /* Semantic Status Colors - Consistent Lightness */
     --oklch-success: hsl(145 60% 45%);
     --oklch-warning: hsl(40 90% 55%);
@@ -475,6 +488,62 @@
   background: var(--oklch-accent);
   border-radius: 999px;
   box-shadow: 0 0 12px var(--oklch-accent-glow);
+}
+
+@layer utilities {
+  .totl-surface-card {
+    background: var(--totl-surface-card);
+    border: 1px solid var(--oklch-border-alpha);
+    border-radius: 1.25rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .totl-border-violet {
+    position: relative;
+    padding: 1px;
+    border-radius: 1.25rem;
+    background: linear-gradient(
+      135deg,
+      var(--totl-violet-glow-soft),
+      transparent 55%,
+      rgba(99, 102, 241, 0.12)
+    );
+  }
+
+  .totl-border-violet > .totl-border-violet-inner {
+    border-radius: inherit;
+    background: var(--totl-surface-card);
+    border: 1px solid var(--totl-violet-border);
+    backdrop-filter: blur(10px);
+  }
+
+  .totl-hover-glow {
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+
+  .totl-hover-glow:hover,
+  .totl-hover-glow:focus-within {
+    box-shadow:
+      0 0 0 1px var(--totl-violet-glow-soft),
+      0 16px 32px var(--totl-violet-glow-strong);
+  }
+
+  .totl-icon-glow {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .totl-icon-glow::before {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 999px;
+    background: radial-gradient(circle, var(--totl-violet-glow-soft), transparent 70%);
+    filter: blur(6px);
+    z-index: -1;
+  }
 }
 
 /* Sophisticated Animations */
