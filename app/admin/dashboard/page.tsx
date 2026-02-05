@@ -5,6 +5,10 @@ import { AdminDashboardClient } from "./admin-dashboard-client";
 import { getBootState } from "@/lib/actions/boot-actions";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import type { Database } from "@/types/supabase";
+
+type Gig = Database["public"]["Tables"]["gigs"]["Row"];
+type Application = Database["public"]["Tables"]["applications"]["Row"];
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -83,8 +87,8 @@ export default async function AdminDashboard() {
   return (
     <AdminDashboardClient
       user={user}
-      gigs={(gigs || []) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
-      applications={(applications || []) as any} // eslint-disable-line @typescript-eslint/no-explicit-any
+      gigs={(gigs || []) as Gig[]}
+      applications={(applications || []) as Application[]}
       paidTalentStats={paidTalentStats}
     />
   );

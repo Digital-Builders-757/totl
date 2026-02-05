@@ -81,7 +81,7 @@ export async function uploadPortfolioImage(formData: FormData) {
         caption: caption?.trim() || null,
         image_url: path,
       })
-      .select()
+      .select("id,talent_id,title,description,caption,image_url,created_at,updated_at")
       .single();
 
     if (insertError) {

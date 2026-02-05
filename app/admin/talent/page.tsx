@@ -4,6 +4,28 @@ import { AdminTalentClient } from "./admin-talent-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { type ProfileRow } from "@/types/database-helpers";
 
+type TalentProfile = {
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  location: string | null;
+  experience: string | null;
+  experience_years: number | null;
+  specialties: string[] | null;
+  portfolio_url: string | null;
+  created_at: string;
+  updated_at: string;
+  profiles: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+    avatar_path: string | null;
+    email_verified: boolean;
+    created_at: string;
+  };
+};
+
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
@@ -62,8 +84,6 @@ export default async function AdminTalentPage() {
     return <AdminTalentClient talent={[]} user={user} />;
   }
 
-  // Type assertion needed because Supabase join types don't match exactly
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <AdminTalentClient talent={(talentProfiles || []) as any} user={user} />;
+  return <AdminTalentClient talent={(talentProfiles || []) as TalentProfile[]} user={user} />;
 }
 

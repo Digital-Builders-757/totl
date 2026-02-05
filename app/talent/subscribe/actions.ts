@@ -70,6 +70,7 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: customerId,
+    client_reference_id: user.id, // Additional resolution strategy for webhook
     line_items: [{ price: priceId, quantity: 1 }],
     success_url: `${appUrl}/talent/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/talent/subscribe/cancelled`,
