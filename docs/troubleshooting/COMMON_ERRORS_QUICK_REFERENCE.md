@@ -151,6 +151,15 @@ npm run build
   - **Symptom:** `guard:no-select-star` fails (pre-commit or CI)
   - **Fix:** Replace `.select("*")` or `*, relation(...)` selects with explicit column lists.
   - **Command:** `npm run guard:select-star`
+- **Schema verification fails: `any` type usage or `select('*')` violations**
+  - **Symptom:** `npm run schema:verify` fails with errors about `any` types or `select('*')` usage
+  - **Fix for `any` types:** Replace `as any` casts with proper Database types:
+    - Use `Database["public"]["Tables"]["table_name"]["Update"]` for updates
+    - Use `Database["public"]["Tables"]["table_name"]["Insert"]` for inserts
+    - Use proper type definitions instead of `any` for component props
+  - **Fix for `select('*')`:** Replace `.select()` without arguments or `.select('*')` with explicit column lists
+  - **Example:** Change `.select()` to `.select("id,title,status")` with explicit columns
+  - **Prevention:** Run `npm run schema:verify` before committing to catch violations early
 - **Guard failure: client-side DB write**
   - **Symptom:** `guard:no-client-writes` fails on a `"use client"` file
   - **Fix:** Move the mutation into a **Server Action** or **API route** and call that from the client component.

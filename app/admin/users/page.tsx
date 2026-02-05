@@ -5,6 +5,21 @@ import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
+type UserProfile = {
+  id: string;
+  role: "talent" | "client" | "admin";
+  display_name: string | null;
+  avatar_url: string | null;
+  avatar_path: string | null;
+  email_verified: boolean | null;
+  created_at: string;
+  updated_at: string;
+  talent_profiles?: {
+    first_name: string;
+    last_name: string;
+  } | null;
+};
+
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
@@ -120,15 +135,12 @@ export default async function AdminUsersPage() {
             refetchError
           );
         } else if (syncedProfiles) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return <AdminUsersClient users={syncedProfiles as any} user={user} />;
+          return <AdminUsersClient users={syncedProfiles as UserProfile[]} user={user} />;
         }
       }
     }
   }
 
-  // Type assertion needed because Supabase join types don't match exactly  
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return <AdminUsersClient users={(profiles || []) as any} user={user} />;
+  return <AdminUsersClient users={(profiles || []) as UserProfile[]} user={user} />;
 }
 

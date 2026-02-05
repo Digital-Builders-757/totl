@@ -92,6 +92,8 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `STRIPE_TROUBLESHOOTING.md` - **💳 UPDATED** - Living log of common Stripe integration issues and fixes (Nov 2025)
 - `STRIPE_WEBHOOKS_RUNBOOK.md` - **✅ NEW** - Operational runbook for Stripe webhook debugging (Dec 2025)
 - `STRIPE_LIVE_SUBSCRIPTIONS_PRD.md` - **NEW** - Live-mode migration and subscription launch plan (Nov 2025)
+- `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_PLAN.md` - **✅ NEW** - Design plan for handling orphaned Stripe webhook events (Feb 2026)
+- `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_IMPLEMENTATION.md` - **✅ NEW** - Implementation summary for orphaned customer webhook handling (Feb 2026)
 
 ### **🚨 Critical Error Prevention**
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)

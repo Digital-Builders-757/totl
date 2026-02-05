@@ -2,7 +2,7 @@
  * Canonical column-selection constants for public-ish / auth-critical surfaces.
  *
  * Why this file exists:
- * - Constitution: no `select('*')`
+ * - Constitution: no wildcard selects (must use explicit columns)
  * - RLS does not protect against over-fetching columns that are readable
  * - These selects are intentionally small and UI-driven
  */

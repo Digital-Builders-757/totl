@@ -626,11 +626,14 @@ export type Database = {
       }
       stripe_webhook_events: {
         Row: {
+          attempt_count: number
           checkout_session_id: string | null
+          customer_email: string | null
           customer_id: string | null
           error: string | null
           event_id: string
           id: string
+          last_error: string | null
           livemode: boolean | null
           processed_at: string | null
           received_at: string
@@ -640,11 +643,14 @@ export type Database = {
           type: string
         }
         Insert: {
+          attempt_count?: number
           checkout_session_id?: string | null
+          customer_email?: string | null
           customer_id?: string | null
           error?: string | null
           event_id: string
           id?: string
+          last_error?: string | null
           livemode?: boolean | null
           processed_at?: string | null
           received_at?: string
@@ -654,11 +660,14 @@ export type Database = {
           type: string
         }
         Update: {
+          attempt_count?: number
           checkout_session_id?: string | null
+          customer_email?: string | null
           customer_id?: string | null
           error?: string | null
           event_id?: string
           id?: string
+          last_error?: string | null
           livemode?: boolean | null
           processed_at?: string | null
           received_at?: string
