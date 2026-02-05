@@ -21,8 +21,8 @@ export function EmptyState({ icon: Icon, title, description, action, className }
         </div>
       ) : null}
 
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--oklch-text-primary)]">{title}</h3>
-      {description ? <p className="mt-2 text-sm text-[var(--oklch-text-secondary)]">{description}</p> : null}
+      <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground/90">{title}</h3>
+      {description ? <p className="mt-2 text-sm text-muted-foreground">{description}</p> : null}
 
       {action ? (
         <div className="mt-6 flex justify-center">

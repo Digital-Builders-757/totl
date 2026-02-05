@@ -28,12 +28,13 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClientStatCard } from "@/components/dashboard/client-stat-card";
+import { EmptyState } from "@/components/layout/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
@@ -226,9 +227,8 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     );
   }
 
-  const quickStatCardClass =
-    "hover:shadow-xl transition-shadow bg-gray-900 border border-gray-800 text-white shadow-lg";
-  const panelCardClass = "bg-gray-900 border border-gray-800 shadow-sm text-white";
+  const quickStatCardClass = "text-white";
+  const panelCardClass = "text-white";
   const tabTriggerClass =
     "flex items-center gap-2 justify-center text-gray-200 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl border border-transparent hover:bg-gray-800 transition";
 
@@ -301,133 +301,71 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Briefcase className="h-4 w-4 text-blue-300" />
-                  <span>Total Gigs</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  All time
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.totalGigs}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/post-gig" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Post a gig
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="Total Gigs"
+            icon={<Briefcase className="h-4 w-4 text-blue-300" />}
+            badgeLabel="All time"
+            value={dashboardStats.totalGigs}
+            footerLabel="Next action"
+            footerActionText="Post a gig"
+            footerActionHref="/post-gig"
+          />
 
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Activity className="h-4 w-4 text-green-300" />
-                  <span>Active Gigs</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Live
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.activeGigs}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/client/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Manage gigs
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="Active Gigs"
+            icon={<Activity className="h-4 w-4 text-green-300" />}
+            badgeLabel="Live"
+            value={dashboardStats.activeGigs}
+            footerLabel="Next action"
+            footerActionText="Manage gigs"
+            footerActionHref="/client/gigs"
+          />
 
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Users className="h-4 w-4 text-purple-300" />
-                  <span>Applications</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Total
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/client/applications" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Review applicants
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="Applications"
+            icon={<Users className="h-4 w-4 text-purple-300" />}
+            badgeLabel="Total"
+            value={dashboardStats.totalApplications}
+            footerLabel="Next action"
+            footerActionText="Review applicants"
+            footerActionHref="/client/applications"
+          />
 
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <ClockIcon className="h-4 w-4 text-yellow-300" />
-                  <span>New</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Incoming
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.newApplications}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/client/applications" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Triage now
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="New"
+            icon={<ClockIcon className="h-4 w-4 text-yellow-300" />}
+            badgeLabel="Incoming"
+            value={dashboardStats.newApplications}
+            footerLabel="Next action"
+            footerActionText="Triage now"
+            footerActionHref="/client/applications"
+          />
 
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <CheckCircle className="h-4 w-4 text-green-300" />
-                  <span>Completed</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Closed
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.completedGigs}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/client/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  View history
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="Completed"
+            icon={<CheckCircle className="h-4 w-4 text-green-300" />}
+            badgeLabel="Closed"
+            value={dashboardStats.completedGigs}
+            footerLabel="Next action"
+            footerActionText="View history"
+            footerActionHref="/client/gigs"
+          />
 
-          <Card className={quickStatCardClass}>
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <DollarSign className="h-4 w-4 text-emerald-300" />
-                  <span>Total Spent</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  To date
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">
-                ${dashboardStats.totalSpent.toLocaleString()}
-              </div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/client/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Review budgets
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <ClientStatCard
+            className={quickStatCardClass}
+            title="Total Spent"
+            icon={<DollarSign className="h-4 w-4 text-emerald-300" />}
+            badgeLabel="To date"
+            value={`$${dashboardStats.totalSpent.toLocaleString()}`}
+            footerLabel="Next action"
+            footerActionText="Review budgets"
+            footerActionHref="/client/gigs"
+          />
         </div>
 
         {/* Main Dashboard Content */}
@@ -455,14 +393,18 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Gigs */}
-              <Card className={`${panelCardClass}`}>
-                <CardHeader>
-                  <div className="card-header-row">
-                    <CardTitle className="flex items-center gap-2 text-white">
+              <div className="totl-border-violet totl-hover-glow">
+                <Card className={`${panelCardClass} totl-border-violet-inner`}>
+                  <CardHeader>
+                    <div className="card-header-row">
+                      <CardTitle className="flex items-center gap-2 text-white">
                       <Briefcase className="h-5 w-5 text-white" />
                       Recent Gigs
                     </CardTitle>
-                    <Badge variant="outline" className="status-chip">
+                    <Badge
+                      variant="outline"
+                      className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
+                    >
                       Live
                     </Badge>
                   </div>
@@ -546,6 +488,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                       icon={FileText}
                       title="No gigs posted yet"
                       description="Start by creating your first gig to attract talent"
+                      className="totl-surface-card"
                       action={{
                         label: "Post Your First Gig",
                         href: "/post-gig",
@@ -556,17 +499,22 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                     <Link href="/client/gigs">View All Gigs</Link>
                   </Button>
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
 
               {/* Recent Applications */}
-              <Card className={panelCardClass}>
-                <CardHeader>
-                  <div className="card-header-row">
-                    <CardTitle className="flex items-center gap-2 text-white">
+              <div className="totl-border-violet totl-hover-glow">
+                <Card className={`${panelCardClass} totl-border-violet-inner`}>
+                  <CardHeader>
+                    <div className="card-header-row">
+                      <CardTitle className="flex items-center gap-2 text-white">
                       <Users className="h-5 w-5 text-white" />
                       Recent Applications
                     </CardTitle>
-                    <Badge variant="outline" className="status-chip">
+                    <Badge
+                      variant="outline"
+                      className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
+                    >
                       New
                     </Badge>
                   </div>
@@ -672,24 +620,30 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                       icon={Users}
                       title="No applications yet"
                       description="Applications will appear here once talent starts applying to your gigs"
+                      className="totl-surface-card"
                     />
                   )}
                   <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
                     <Link href="/client/applications">View All Applications</Link>
                   </Button>
                 </CardContent>
-              </Card>
+                </Card>
+              </div>
             </div>
 
             {/* Upcoming Deadlines */}
-            <Card className={`${panelCardClass}`}>
-              <CardHeader>
-                <div className="card-header-row">
-                  <CardTitle className="flex items-center gap-2">
+            <div className="totl-border-violet totl-hover-glow">
+              <Card className={`${panelCardClass} totl-border-violet-inner`}>
+                <CardHeader>
+                  <div className="card-header-row">
+                    <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
                     Upcoming Deadlines
                   </CardTitle>
-                  <Badge variant="outline" className="status-chip">
+                  <Badge
+                    variant="outline"
+                    className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
+                  >
                     Next 30d
                   </Badge>
                 </div>
@@ -759,11 +713,13 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                       icon={Calendar}
                       title="No upcoming deadlines"
                       description="Deadlines will appear here for gigs with application deadlines"
+                      className="totl-surface-card"
                     />
                   )}
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* My Gigs Tab */}
@@ -882,6 +838,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                   icon={FileText}
                   title="No applications yet"
                   description="Applications will appear here once talent starts applying to your gigs. Make sure your gigs are active and visible to talent."
+                  className="totl-surface-card"
                   action={{
                     label: "Create a Gig",
                     onClick: () => setActiveTab("create"),
