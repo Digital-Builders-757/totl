@@ -361,7 +361,7 @@ export default async function TalentDashboard() {
                               ? `/talent/${createNameSlug(profileData.first_name, profileData.last_name)}`
                               : profileData?.id
                                 ? `/talent/${profileData.id}`
-                                : "/talent"
+                                : "/admin/talentdashboard/profile"
                           }
                         >
                           <Eye className="mr-2 h-4 w-4" /> View Public Profile
