@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import type { CookieOptions, SetAllCookies } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
@@ -18,19 +19,7 @@ import {
 } from "@/lib/utils/route-access";
 import type { Database } from "@/types/supabase";
 
-type CookieToSet = {
-  name: string;
-  value: string;
-  options?: {
-    domain?: string;
-    expires?: Date;
-    httpOnly?: boolean;
-    maxAge?: number;
-    path?: string;
-    sameSite?: "lax" | "strict" | "none";
-    secure?: boolean;
-  };
-};
+// CookieToSet type removed: use @supabase/ssr CookieOptions instead.
 
 type AccountType = "unassigned" | "talent" | "client";
 type ProfileRow = {
@@ -89,14 +78,16 @@ export async function middleware(req: NextRequest) {
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
-      getAll: () => req.cookies.getAll(),
-      setAll: (cookiesToSet: CookieToSet[]) => {
+      getAll: () => req.cookies.getAll().map(({ name, value }) => ({ name, value })),
+      setAll: ((cookiesToSet) => {
         cookiesToSet.forEach(({ name, value, options }) => {
+          const cookieOptions: CookieOptions = options ?? {};
+
           // Keep request + response in sync (prevents weird edge cases within the same middleware run)
           req.cookies.set(name, value);
-          res.cookies.set(name, value, options);
+          res.cookies.set(name, value, cookieOptions);
         });
-      },
+      }) satisfies SetAllCookies,
     },
   });
 

@@ -2,23 +2,10 @@
 import "server-only";
 import * as Sentry from "@sentry/nextjs";
 import { createServerClient } from "@supabase/ssr";
+import type { SetAllCookies } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/supabase";
-
-type CookieToSet = {
-  name: string;
-  value: string;
-  options?: {
-    domain?: string;
-    expires?: Date;
-    httpOnly?: boolean;
-    maxAge?: number;
-    path?: string;
-    sameSite?: "lax" | "strict" | "none";
-    secure?: boolean;
-  };
-};
 
 export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {
   // cookies() returns a Promise in Next.js 15+
@@ -59,24 +46,24 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
     supabaseAnonKey,
     {
       cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet: CookieToSet[]) => {
+        getAll: () => cookieStore.getAll().map(({ name, value }) => ({ name, value })),
+        setAll: ((cookiesToSet) => {
           try {
             // Attempt to set cookies - this will fail in Server Components but succeed in Server Actions/Route Handlers
             cookiesToSet.forEach(({ name, value, options }) => {
               cookieStore.set(name, value, options);
             });
           } catch (err) {
-            // Cookies can only be modified in Server Actions or Route Handlers
-            // In Server Components (pages), this will silently fail which is expected
-            // The session will still work correctly with the cookies that are already set
-            // Only log in development when explicitly debugging
+            // Cookies can only be modified in Server Actions or Route Handlers.
+            // In Server Components (pages), this will silently fail which is expected.
+            // The session will still work correctly with the cookies that are already set.
+            // Only log in development when explicitly debugging.
             if (process.env.NODE_ENV === "development" && process.env.DEBUG_SUPABASE === "1") {
               // eslint-disable-next-line no-console
               console.warn("[supabase-server] cookieStore.set failed (expected in Server Components)", err);
             }
           }
-        },
+        }) satisfies SetAllCookies,
       },
     }
   ) as unknown as SupabaseClient<Database>;
