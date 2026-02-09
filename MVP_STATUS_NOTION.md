@@ -8,6 +8,26 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Disable /talent public route (gigs-only discovery) (February 9, 2026)**
+
+**PRODUCT DIRECTION UPDATE** - February 9, 2026
+- ✅ **`/talent` now returns a true 404** (route kept reserved for future re-enablement)
+- ✅ **Removed/adjusted internal entry points** that were linking to `/talent` as a public surface
+- ✅ **Preserved public profile links** (`/talent/[slug]`) and authenticated talent surfaces (`/talent/dashboard`, etc.)
+
+**Why this change:**
+- Product direction is **gigs-first discovery** with **no public talent directory**.
+
+**Impact:**
+- Public browsing of talent via `/talent` is disabled.
+- Individual profile links remain accessible where applicable.
+
+**Next (P0 - Critical)**
+- [ ] Manual QA: verify `/talent` is 404 when logged out + logged in
+- [ ] Manual QA: verify `/talent/[slug]` still renders as expected
+
+---
+
 ## 🚀 **Latest: Client Dashboard Electric Violet Polish (February 5, 2026)**
 
 **CLIENT DASHBOARD UI POLISH** - February 5, 2026  
