@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client dashboard status chips + skeleton loading polish (February 9, 2026)**
+
+**CLIENT DASHBOARD UX** - February 9, 2026
+- ✅ **Standardized status chips** by using the centralized typed badges (`components/ui/status-badge.tsx`) instead of local color helpers
+- ✅ **Reduced layout shift** by replacing the spinner with a layout-matching skeleton for `/client/dashboard` loading
+- ✅ **Schema doc correction**: reconciled `gig_status` in `database_schema_audit.md` to match the real enum
+
+**Why this change:**
+- Mixed badge implementations reduce scanability and cause inconsistent semantics.
+- Spinner → full layout swap created noticeable CLS.
+
+**Impact:**
+- Dashboard feels more premium and consistent; statuses are scannable.
+
+---
+
 ## 🚀 **Latest: Image fallback-first fix for 403 hotlinks (February 9, 2026)**
 
 **UI RESILIENCE FIX** - February 9, 2026

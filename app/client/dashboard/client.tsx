@@ -28,11 +28,13 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
@@ -110,11 +112,13 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   const dashboardStats = {
     totalGigs: gigs.length,
     activeGigs: gigs.filter((gig) => gig.status === "active").length,
+    closedGigs: gigs.filter((gig) => gig.status === "closed").length,
     totalApplications: applications.length,
     newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
-    completedGigs: gigs.filter((gig) => gig.status === "completed").length,
+    // NOTE: `gig_status` enum is draft|active|closed|featured|urgent (no "completed").
+    // If/when a completion concept exists, derive it from bookings/payment state instead.
     totalSpent: 0, // This would need to be calculated from bookings/payments
   };
 
@@ -165,7 +169,8 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     }
   }, [applications, applicationsLength, user]);
 
-  const getStatusColor = (status: string | undefined) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _getStatusColor = (status: string | undefined) => {
     switch (status?.toLowerCase()) {
       case "active":
         return "bg-green-100 text-green-800 border-green-200";
@@ -187,14 +192,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
 
   // Show loading state if no initialData (server is fetching)
   if (!initialData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
-      </div>
-    );
+    return <ClientDashboardSkeleton />;
   }
 
   // Show login prompt if no user
@@ -350,7 +348,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             title="Completed"
             icon={<CheckCircle className="h-4 w-4 text-green-300" />}
             badgeLabel="Closed"
-            value={dashboardStats.completedGigs}
+            value={dashboardStats.closedGigs}
             footerLabel="Next action"
             footerActionText="View history"
             footerActionHref="/client/gigs"
@@ -401,12 +399,10 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                       <Briefcase className="h-5 w-5 text-white" />
                       Recent Gigs
                     </CardTitle>
-                    <Badge
-                      variant="outline"
+                    <GigStatusBadge
+                      status="active"
                       className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
-                    >
-                      Live
-                    </Badge>
+                    />
                   </div>
                   <CardDescription className="text-gray-400">Your latest gig postings and their status</CardDescription>
                 </CardHeader>
@@ -428,9 +424,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                               <div className="flex-1 min-w-0 space-y-1">
                                 <p className="text-sm font-semibold text-white truncate">{gig.title}</p>
                                 <div className="flex items-center gap-2 text-xs text-gray-400">
-                                  <Badge variant="outline" className={getStatusColor(gig.status)}>
-                                    {gig.status}
-                                  </Badge>
+                                  <GigStatusBadge status={gig.status ?? "draft"} />
                                   <span>{gig.location}</span>
                                 </div>
                                 <p className="text-xs text-gray-400">
@@ -467,9 +461,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                                 <Badge variant="outline" className={getCategoryColor(gig.category)}>
                                   {getCategoryLabel(gig.category ?? "")}
                                 </Badge>
-                                <Badge variant="outline" className={getStatusColor(gig.status)}>
-                                  {gig.status}
-                                </Badge>
+                                <GigStatusBadge status={gig.status ?? "draft"} />
                               </div>
                               <p className="text-sm text-gray-400 mt-1">
                                 {gig.applications_count || 0} applications • {gig.location}
@@ -669,9 +661,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                                   Due {deadline.application_deadline}
                                 </p>
                               </div>
-                              <Badge variant="outline" className={getStatusColor(deadline.status)}>
-                                {deadline.status}
-                              </Badge>
+                              <GigStatusBadge status={deadline.status ?? "draft"} />
                             </div>
                             <div className="card-footer-row">
                               <span>Next action</span>
@@ -700,9 +690,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                               <p className="font-medium text-white">
                                 Due {deadline.application_deadline}
                               </p>
-                              <Badge variant="outline" className={getStatusColor(deadline.status)}>
-                                {deadline.status}
-                              </Badge>
+                              <GigStatusBadge status={deadline.status ?? "draft"} />
                             </div>
                           </div>
                         ))}
@@ -893,9 +881,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                             </div>
                           </div>
                           <div className="flex flex-col items-end gap-2">
-                            <Badge variant="outline" className={getStatusColor(application.status)}>
-                              {application.status}
-                            </Badge>
+                            <ApplicationStatusBadge status={application.status} />
                             <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700">
                               <ChevronRight className="h-4 w-4" />
                             </Button>
@@ -971,9 +957,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                                     )}
                                   </div>
                                 </div>
-                                <Badge variant="outline" className={getStatusColor(application.status)}>
-                                  {application.status}
-                                </Badge>
+                                <ApplicationStatusBadge status={application.status} />
                               </div>
                             </div>
 

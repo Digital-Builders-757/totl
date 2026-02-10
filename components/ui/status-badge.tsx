@@ -13,7 +13,8 @@ const Icons = {
   draft: "📝",
   active: "✨",
   closed: "🔒",
-  completed: "✅",
+  // completed removed: not in current gig_status enum
+  // completed: "✅",
   featured: "⭐",
   urgent: "⚡",
   new: "🆕",
@@ -38,7 +39,8 @@ const StatusLabels = {
   draft: "Draft",
   active: "Active",
   closed: "Closed",
-  completed: "Completed",
+  // completed removed: not in current gig_status enum
+  // completed: "Completed",
   featured: "Featured",
   urgent: "Urgent",
   
@@ -185,7 +187,7 @@ export function StatusBadge({
   // Auto-detect status type if not specified
   if (type === "auto") {
     // Gig statuses
-    if (["draft", "active", "closed", "completed", "featured", "urgent"].includes(normalizedStatus)) {
+    if (["draft", "active", "closed", "featured", "urgent"].includes(normalizedStatus)) {
       return <GigStatusBadge status={status} showIcon={showIcon} {...props} />;
     }
     // Application statuses
