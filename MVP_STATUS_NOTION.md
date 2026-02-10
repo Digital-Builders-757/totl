@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Image fallback-first fix for 403 hotlinks (February 9, 2026)**
+
+**UI RESILIENCE FIX** - February 9, 2026
+- ✅ **SafeImage now uses fallback-first** for missing/invalid/known-blocked upstream hosts (prevents blank/black cards)
+- ✅ **Resets error/loading state when `src` changes** (prevents “stale broken image” after filtering/tab switches)
+
+**Why this change:**
+- Remote hosts like Instagram/Pixieset frequently block hotlinking (403), which can cause Next/Image to render empty/black frames.
+
+**Impact:**
+- Cards/avatars reliably render a visible fallback instead of broken frames.
+
+---
+
 ## 🚀 **Latest: Disable /talent public route (gigs-only discovery) (February 9, 2026)**
 
 **PRODUCT DIRECTION UPDATE** - February 9, 2026

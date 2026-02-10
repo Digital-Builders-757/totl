@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { logImageFallback } from "@/lib/utils/error-logger";
@@ -18,6 +18,11 @@ interface SafeImageProps {
   context?: string;
   showSkeleton?: boolean;
   priority?: boolean;
+  /**
+   * If true (default), treat known-blocked upstream hosts as fallback-first.
+   * This prevents blank/black cards caused by predictable 403 hotlink blocks.
+   */
+  fallbackFirstOnBlockedHosts?: boolean;
   /** @deprecated Do not use. Ignored internally and blocked by ESLint. */
   placeholderQuery?: string;
 }
@@ -33,10 +38,10 @@ export function SafeImage({
   context = "unknown",
   showSkeleton = true,
   priority = false,
+  fallbackFirstOnBlockedHosts = true,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placeholderQuery: _placeholderQuery,
 }: SafeImageProps) {
-  // Validate URL format before using it
   const isValidUrl = (url: string): boolean => {
     try {
       new URL(url);
@@ -46,27 +51,67 @@ export function SafeImage({
     }
   };
 
-  // Handle empty strings, null values, and invalid URLs by using fallback immediately
-  const shouldUseFallback = !src || 
-    src.trim() === "" || 
-    (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ||
-    (src.startsWith('http') && !isValidUrl(src));
-  
-  // Debug logging for invalid URLs
+  const isProbablyBlockedUpstream = (url: string): boolean => {
+    // These hosts commonly block Next/Image optimizer hotlinking (403).
+    // We treat them as fallback-first to avoid black/blank cards.
+    const blockedHostSubstrings = [
+      "instagram.com",
+      "cdninstagram.com",
+      "fbcdn.net",
+      "pixieset.com",
+    ];
+
+    try {
+      const host = new URL(url).host.toLowerCase();
+      return blockedHostSubstrings.some((s) => host.includes(s));
+    } catch {
+      return false;
+    }
+  };
+
+  // Fallback-first cases: missing/empty/invalid/blocked upstream.
+  const shouldUseFallback =
+    !src ||
+    src.trim() === "" ||
+    (!src.startsWith("/") && !src.startsWith("http") && !src.startsWith("data:")) ||
+    (src.startsWith("http") && !isValidUrl(src)) ||
+    (fallbackFirstOnBlockedHosts && src.startsWith("http") && isProbablyBlockedUpstream(src));
+
   if (src && shouldUseFallback && src !== fallbackSrc) {
-    console.warn(`SafeImage: Invalid URL detected in ${context}:`, {
+    // eslint-disable-next-line no-console
+    console.warn(`SafeImage: fallback-first in ${context}`, {
       src,
-      reason: !src ? 'null/undefined' : 
-              src.trim() === "" ? 'empty string' :
-              (!src.startsWith('/') && !src.startsWith('http') && !src.startsWith('data:')) ? 'invalid protocol' :
-              'invalid URL format'
+      reason: !src
+        ? "null/undefined"
+        : src.trim() === ""
+          ? "empty string"
+          : (!src.startsWith("/") && !src.startsWith("http") && !src.startsWith("data:"))
+            ? "invalid protocol"
+            : src.startsWith("http") && !isValidUrl(src)
+              ? "invalid URL format"
+              : "blocked upstream host",
     });
   }
-  
+
   const initialSrc = shouldUseFallback ? fallbackSrc : src;
   const [imgSrc, setImgSrc] = useState(initialSrc);
   const [hasError, setHasError] = useState(shouldUseFallback);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!shouldUseFallback);
+
+  useEffect(() => {
+    const nextShouldUseFallback =
+      !src ||
+      src.trim() === "" ||
+      (!src.startsWith("/") && !src.startsWith("http") && !src.startsWith("data:")) ||
+      (src.startsWith("http") && !isValidUrl(src)) ||
+      (fallbackFirstOnBlockedHosts && src.startsWith("http") && isProbablyBlockedUpstream(src));
+
+    const nextSrc = nextShouldUseFallback ? fallbackSrc : src;
+
+    setHasError(nextShouldUseFallback);
+    setImgSrc(nextSrc);
+    setIsLoading(!nextShouldUseFallback);
+  }, [src, fallbackSrc, fallbackFirstOnBlockedHosts]);
 
   const handleError = () => {
     if (!hasError) {
