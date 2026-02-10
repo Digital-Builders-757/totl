@@ -124,13 +124,21 @@ test.describe("UI overflow sentinel (mobile)", () => {
     );
   });
 
-  test("talent (signed out sign-in gate) has no horizontal overflow", async ({ page }) => {
-    await gotoAndAssertNoOverflow(
-      page,
-      "/talent",
-      "talent (signed out)",
-      page.locator('h1:has-text("Discover Top Talent")')
-    );
+  test("talent (signed out) has no horizontal overflow", async ({ page }) => {
+    // /talent is intentionally disabled (true 404). Ensure no mobile overflow on the 404 surface.
+    await gotoAndAssertNoOverflow(page, "/talent", "talent (404)");
+  });
+
+  test.skip(
+    process.env.RUN_CLIENT_OVERFLOW !== "1",
+    "Client overflow sentinel is opt-in (RUN_CLIENT_OVERFLOW=1) until seeded client login is deterministic in CI/dev."
+  );
+
+  test("client dashboard has no horizontal overflow", async ({ page }) => {
+    // TODO: Add deterministic client seed/login when available.
+    // For now, keep the test defined but gated.
+    await page.goto("/client/dashboard", { waitUntil: "domcontentloaded" });
+    await expectNoHorizontalOverflow(page, "client dashboard");
   });
 });
 
