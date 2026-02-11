@@ -59,7 +59,7 @@ CREATE TYPE public.user_role AS ENUM ('talent', 'client', 'admin');
 
 ### 2. `gig_status`
 ```sql
-CREATE TYPE public.gig_status AS ENUM ('draft', 'active', 'closed', 'completed');
+CREATE TYPE public.gig_status AS ENUM ('draft', 'active', 'closed', 'featured', 'urgent');
 ```
 - **Purpose:** Tracks gig lifecycle
 - **Default:** `'draft'`

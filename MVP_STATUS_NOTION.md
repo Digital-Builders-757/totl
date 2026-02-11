@@ -8,6 +8,35 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile overflow sentinel updated for /talent 404 (February 9, 2026)**
+
+**QA / REGRESSION** - February 9, 2026
+- ✅ Updated the mobile overflow sentinel to reflect the new `/talent` behavior (true 404) so the test stays meaningful.
+
+**Why this change:**
+- The overflow sentinel previously expected the old `/talent` signed-out gate content.
+
+**Impact:**
+- Prevents false failures and keeps the regression suite aligned with product direction.
+
+---
+
+## 🚀 **Latest: Client dashboard status chips + skeleton loading polish (February 9, 2026)**
+
+**CLIENT DASHBOARD UX** - February 9, 2026
+- ✅ **Standardized status chips** by using the centralized typed badges (`components/ui/status-badge.tsx`) instead of local color helpers
+- ✅ **Reduced layout shift** by replacing the spinner with a layout-matching skeleton for `/client/dashboard` loading
+- ✅ **Schema doc correction**: reconciled `gig_status` in `database_schema_audit.md` to match the real enum
+
+**Why this change:**
+- Mixed badge implementations reduce scanability and cause inconsistent semantics.
+- Spinner → full layout swap created noticeable CLS.
+
+**Impact:**
+- Dashboard feels more premium and consistent; statuses are scannable.
+
+---
+
 ## 🚀 **Latest: Image fallback-first fix for 403 hotlinks (February 9, 2026)**
 
 **UI RESILIENCE FIX** - February 9, 2026
