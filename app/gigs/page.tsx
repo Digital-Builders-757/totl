@@ -236,14 +236,14 @@ export default async function GigsPage({
             <span className="text-white font-medium">Find Gigs</span>
           </div>
 
-          <div className="mb-12 sm:mb-16 text-center px-4 sm:px-0">
-            <div className="panel-frosted w-fit mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
+          <div className="mb-12 sm:mb-16 text-left md:text-center px-4 sm:px-0">
+            <div className="panel-frosted w-fit mx-0 md:mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-gradient-glow animate-apple-fade-in">
               Find Gigs
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
+            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed animate-apple-slide-up">
               Browse through available opportunities and gigs. Filter by category, location,
               and more to find the perfect match for your talents.
             </p>

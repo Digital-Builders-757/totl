@@ -56,7 +56,7 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 motion-safe:animate-pulse" />
           
           {/* Content */}
-          <div className="relative z-10 p-6 text-center sm:p-8">
+          <div className="relative z-10 p-6 text-left sm:text-center sm:p-8">
             {/* Icon with subtle glow */}
             <div className="mb-4 flex justify-center sm:mb-6">
               <div className="rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 p-3 backdrop-blur-sm sm:p-4">
