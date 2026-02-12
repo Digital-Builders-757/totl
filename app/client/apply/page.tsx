@@ -235,7 +235,7 @@ export default function ClientApplicationPage() {
               </div>
 
               {showStatusPanel ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center shadow-inner shadow-black/30">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-inner shadow-black/30">
                   <p className="text-white font-semibold mb-2">Application Under Review</p>
                   <p className="text-white/70 text-sm">
                     {applicationStatus.status === 'pending'
@@ -395,7 +395,7 @@ export default function ClientApplicationPage() {
                     >
                       {isSubmitting ? "Submitting..." : "Submit Application"}
                     </Button>
-                    <p className="text-sm text-white/60 mt-4 text-center">
+                    <p className="text-sm text-white/60 mt-4 text-left">
                       By submitting this form, you agree to our{" "}
                       <Link href="/terms" className="underline text-white/70">
                         Terms of Service
