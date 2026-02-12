@@ -30,7 +30,7 @@ export default async function ClientApplicationStatusPage({
 
         <div className="max-w-4xl mx-auto space-y-8">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-            <div className="space-y-3 text-center md:text-left">
+            <div className="space-y-3 text-left">
               <p className="text-sm font-semibold uppercase tracking-wide text-gray-500">
                 Client Applications
               </p>

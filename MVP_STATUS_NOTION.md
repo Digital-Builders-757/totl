@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile text alignment polish (February 12, 2026)**
+
+**UI / MOBILE READABILITY** - February 12, 2026
+- ✅ Left-aligned key multi-line text blocks on mobile (sign-in gate, gigs header, client apply status, client application status) while preserving centered layout on larger screens where appropriate.
+
+**Why this change:**
+- Left-aligned paragraphs scan faster and feel more “product” on mobile.
+
+**Impact:**
+- Cleaner, more business-like mobile reading experience.
+
+---
+
 ## 🚀 **Latest: BugBot QA fixes (February 11, 2026)**
 
 **QA / POLISH** - February 11, 2026
