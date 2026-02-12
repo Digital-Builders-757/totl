@@ -169,21 +169,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     }
   }, [applications, applicationsLength, user]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _getStatusColor = (status: string | undefined) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "completed":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "expired":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  // Status color helper removed: dashboard uses StatusBadge components instead.
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
   const getCategoryColor = (_category: string | undefined) => {
@@ -345,7 +331,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
 
           <ClientStatCard
             className={quickStatCardClass}
-            title="Completed"
+            title="Closed"
             icon={<CheckCircle className="h-4 w-4 text-green-300" />}
             badgeLabel="Closed"
             value={dashboardStats.closedGigs}

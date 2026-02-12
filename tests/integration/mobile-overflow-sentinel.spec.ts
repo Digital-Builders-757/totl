@@ -129,15 +129,18 @@ test.describe("UI overflow sentinel (mobile)", () => {
     await gotoAndAssertNoOverflow(page, "/talent", "talent (404)");
   });
 
-  test.skip(
-    process.env.RUN_CLIENT_OVERFLOW !== "1",
-    "Client overflow sentinel is opt-in (RUN_CLIENT_OVERFLOW=1) until seeded client login is deterministic in CI/dev."
-  );
-
   test("client dashboard has no horizontal overflow", async ({ page }) => {
-    // TODO: Add deterministic client seed/login when available.
-    // For now, keep the test defined but gated.
+    test.skip(
+      process.env.RUN_CLIENT_OVERFLOW !== "1",
+      "Client overflow sentinel is opt-in (RUN_CLIENT_OVERFLOW=1) until seeded client login is deterministic in CI/dev."
+    );
+
+    // NOTE: This test assumes the runner is already authenticated.
     await page.goto("/client/dashboard", { waitUntil: "domcontentloaded" });
+
+    // If auth isn't present, Next will redirect to /login; fail fast to avoid false confidence.
+    await expect(page).toHaveURL(/\/client\/dashboard/);
+
     await expectNoHorizontalOverflow(page, "client dashboard");
   });
 });
