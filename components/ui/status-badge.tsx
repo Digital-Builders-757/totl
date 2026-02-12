@@ -13,8 +13,8 @@ const Icons = {
   draft: "📝",
   active: "✨",
   closed: "🔒",
-  // completed removed: not in current gig_status enum
-  // completed: "✅",
+  // NOTE: gig_status has no "completed", but booking_status can be "completed".
+  completed: "✅",
   featured: "⭐",
   urgent: "⚡",
   new: "🆕",
@@ -39,8 +39,8 @@ const StatusLabels = {
   draft: "Draft",
   active: "Active",
   closed: "Closed",
-  // completed removed: not in current gig_status enum
-  // completed: "Completed",
+  // NOTE: gig_status has no "completed", but booking_status can be "completed".
+  completed: "Completed",
   featured: "Featured",
   urgent: "Urgent",
   
@@ -197,7 +197,7 @@ export function StatusBadge({
       return <ApplicationStatusBadge status={status} showIcon={showIcon} {...props} />;
     }
     // Booking statuses
-    if (["pending", "confirmed", "cancelled"].includes(normalizedStatus)) {
+    if (["pending", "confirmed", "cancelled", "completed"].includes(normalizedStatus)) {
       return <BookingStatusBadge status={status} showIcon={showIcon} {...props} />;
     }
     // User roles

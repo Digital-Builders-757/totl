@@ -8,6 +8,36 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: BugBot QA fixes (February 11, 2026)**
+
+**QA / POLISH** - February 11, 2026
+- ✅ Restored booking `completed` badge icon/label mapping (booking_status still uses it)
+- ✅ Removed unused client dashboard status-color helper + lint suppression
+- ✅ Fixed client dashboard stat semantics ("Completed" → "Closed")
+- ✅ Fixed overflow sentinel gating so it doesn’t skip the whole suite; added guard against false positives on redirected /login
+
+**Why this change:**
+- Keeps the UI semantics consistent and prevents regression tests from giving false confidence.
+
+**Impact:**
+- Bookings display correctly; sentinel remains meaningful; dashboard reads accurately.
+
+---
+
+## 🚀 **Latest: Stripe webhook resilience fix (February 10, 2026)**
+
+**STRIPE WEBHOOK RELIABILITY** - February 10, 2026
+- ✅ Prevent false “orphaned” marking when the webhook ledger row cannot be read (e.g., transient DB error)
+- ✅ Return 500 on ledger read failure so Stripe retries instead of silently dropping events
+
+**Why this change:**
+- A temporary DB/read error must never cause live Stripe events to be treated as terminal/orphaned.
+
+**Impact:**
+- Protects subscription state from drifting due to transient infra/DB issues.
+
+---
+
 ## 🚀 **Latest: Mobile overflow sentinel updated for /talent 404 (February 9, 2026)**
 
 **QA / REGRESSION** - February 9, 2026

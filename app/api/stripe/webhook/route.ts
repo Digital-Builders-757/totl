@@ -142,14 +142,25 @@ export async function POST(req: Request) {
         
         if (!result.success) {
           // Check if this is a retryable failure or truly orphaned
-          const { data: ledgerRow } = await supabase
+          const { data: ledgerRow, error: ledgerError } = await supabase
             .from("stripe_webhook_events")
             .select("attempt_count, livemode")
             .eq("event_id", event.id)
             .maybeSingle();
 
+          if (ledgerError) {
+            // If we can't read the ledger row, do NOT mark orphaned.
+            // Return 500 so Stripe retries rather than silently dropping a live event.
+            await markStripeWebhookEventLedgerRow(supabase, {
+              eventId: event.id,
+              status: "failed",
+              error: `Failed to read webhook ledger row: ${ledgerError.message}`,
+            });
+            return NextResponse.json({ error: "Failed to process subscription update" }, { status: 500 });
+          }
+
           const attemptCount = (ledgerRow?.attempt_count as number | undefined) ?? 0;
-          const livemode = ledgerRow?.livemode ?? false;
+          const livemode = ledgerRow?.livemode ?? true;
 
           // If test mode or too many attempts, mark as orphaned and return 200
           if (!livemode || attemptCount >= 5) {
