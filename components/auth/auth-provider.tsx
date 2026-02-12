@@ -192,28 +192,78 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const selectColumns =
         "role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end";
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(selectColumns)
-        .eq("id", userId)
-        .maybeSingle();
+      const isLikelyNetworkError = (message: string | undefined) => {
+        const m = (message || "").toLowerCase();
+        return (
+          m.includes("load failed") ||
+          m.includes("failed to fetch") ||
+          m.includes("networkerror") ||
+          m.includes("network error")
+        );
+      };
 
-      if (error && error.code !== "PGRST116") {
+      // Bounded retry: transient network failures (Safari especially) can produce "Load failed"
+      // even when the request would succeed shortly after.
+      const maxAttempts = 3;
+      const backoffMs = [0, 250, 600];
+
+      let lastError: { message?: string; code?: string | null; details?: string | null } | null = null;
+      let data: unknown = null;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        if (attempt > 0) {
+          const delay = backoffMs[attempt] ?? 250;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        const res = await supabase
+          .from("profiles")
+          .select(selectColumns)
+          .eq("id", userId)
+          .maybeSingle();
+
+        data = res.data;
+        const error = res.error;
+
+        if (!error || error.code === "PGRST116") {
+          lastError = null;
+          break;
+        }
+
+        lastError = { message: error.message, code: error.code, details: error.details };
+
+        // Only retry likely network errors.
+        if (!isLikelyNetworkError(error.message)) {
+          break;
+        }
+
+        // If offline, don't spin.
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          break;
+        }
+      }
+
+      if (lastError && lastError.code !== "PGRST116") {
         const Sentry = await import("@sentry/nextjs");
-        Sentry.captureException(new Error(`Auth provider profile query error: ${error.message}`), {
+
+        const level = isLikelyNetworkError(lastError.message) ? "warning" : "error";
+
+        Sentry.captureException(new Error(`Auth provider profile query error: ${lastError.message}`), {
           tags: {
             feature: "auth",
             error_type: "auth_provider_profile_error",
-            error_code: error.code || "unknown",
+            error_code: lastError.code || "unknown",
           },
           extra: {
             userId,
-            errorCode: error.code,
-            errorDetails: error.details,
-            errorMessage: error.message,
+            errorCode: lastError.code,
+            errorDetails: lastError.details,
+            errorMessage: lastError.message,
+            attempts: maxAttempts,
             timestamp: new Date().toISOString(),
+            navigatorOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
           },
-          level: "error",
+          level,
         });
       }
 
