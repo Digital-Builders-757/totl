@@ -321,15 +321,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         routerInstance.replace(target);
 
         const navigationTimeoutMs = 1500;
+        const navigationPollMs = 150;
 
-        // Wait up to navigationTimeoutMs to see if navigation happens
-        // Use Promise-based timeout - check once after delay instead of polling
-        setTimeout(() => {
+        // Wait up to navigationTimeoutMs to see if navigation happens.
+        // In production (and on slower devices), route transitions can take longer than a single 500ms tick.
+        const startedAt = Date.now();
+
+        const checkNavigation = () => {
           if (typeof window === "undefined") {
             return; // SSR safety check
           }
 
-          // Check if pathname changed to target (navigation succeeded)
           const newPathname = window.location.pathname.split("?")[0];
           const navigated = newPathname === targetPathname && newPathname !== startPathname;
 
@@ -339,32 +341,46 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               actual: newPathname,
               navigationTimeoutMs,
             });
-          } else if (newPathname !== startPathname) {
+            return;
+          }
+
+          if (newPathname !== startPathname) {
             logger.debug("[auth.onAuthStateChange] router.replace() navigated to a different route", {
               expected: targetPathname,
               actual: newPathname,
               navigationTimeoutMs,
             });
-          } else {
-            // Navigation didn't happen within timeout, fallback to hard reload
-            logger.warn(
-              "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
-              {
+            return;
+          }
+
+          const elapsedMs = Date.now() - startedAt;
+          if (elapsedMs < navigationTimeoutMs) {
+            setTimeout(checkNavigation, navigationPollMs);
+            return;
+          }
+
+          // Navigation didn't happen within timeout, fallback to hard reload
+          logger.warn(
+            "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
+            {
               expected: targetPathname,
               actual: newPathname,
               startPathname,
-                navigationTimeoutMs,
-              }
-            );
-            try {
-              window.location.replace(target);
-              logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
-            } catch (hardReloadError) {
-              logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
-              window.location.assign(target);
+              navigationTimeoutMs,
             }
+          );
+
+          try {
+            window.location.replace(target);
+            logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
+          } catch (hardReloadError) {
+            logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
+            window.location.assign(target);
           }
-        }, 500);
+        };
+
+        // Give router.replace() a tick to schedule before we start checking.
+        setTimeout(checkNavigation, 50);
       } catch (routerError) {
         // If router.replace() throws, immediately fallback to hard reload
         logger.error("[auth.onAuthStateChange] router.replace() threw, using hard reload", routerError);
