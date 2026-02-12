@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth redirect navigation timeout noise reduction (February 12, 2026)**
+
+**AUTH / RELIABILITY** - February 12, 2026
+- ✅ Reduced false-positive auth redirect warnings by waiting up to the configured timeout before falling back to hard reload.
+
+**Why this change:**
+- Some route transitions (especially in production / on slower devices) can take longer than a single tick, which was generating noisy Sentry warnings.
+
+**Impact:**
+- Fewer misleading warnings; redirects still reliably complete via hard reload fallback when needed.
+
+---
+
 ## 🚀 **Latest: Mobile text alignment polish (February 12, 2026)**
 
 **UI / MOBILE READABILITY** - February 12, 2026
