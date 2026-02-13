@@ -738,7 +738,26 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           await breadcrumb({ phase: "getUser_start" });
 
           let currentUser: User | null = null;
-          for (let attempt = 0; attempt < 2; attempt++) {
+
+          const isLikelyNetworkError = (message: string | undefined) => {
+            const m = (message || "").toLowerCase();
+            return (
+              m.includes("load failed") ||
+              m.includes("failed to fetch") ||
+              m.includes("networkerror") ||
+              m.includes("network error")
+            );
+          };
+
+          // Bounded retry: Safari and some networks can produce transient "Load failed" errors.
+          const maxGetUserAttempts = 3;
+          const getUserBackoffMs = [0, 250, 600];
+
+          for (let attempt = 0; attempt < maxGetUserAttempts; attempt++) {
+            if (attempt > 0) {
+              await sleep(getUserBackoffMs[attempt] ?? 250);
+            }
+
             try {
               const { data, error } = await supabase.auth.getUser();
               if (error) throw error;
@@ -755,28 +774,25 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 await breadcrumb({ phase: "aborted", reason: "navigation" });
                 return;
               }
-              
-              // CRITICAL FIX: Handle AuthSessionMissingError gracefully (expected on public pages)
-              // ONLY swallow AuthSessionMissingError - all other errors should be thrown
+
               const errorMessage = error instanceof Error ? error.message : String(error);
               const errorName = error instanceof Error ? error.name : undefined;
-              
-              // Check for session missing errors by name or message content
-              // Supabase may throw AuthSessionMissingError or similar errors
-              const isSessionMissingError = 
+
+              // Handle session missing errors by name or message content.
+              // Supabase may throw AuthSessionMissingError or similar errors.
+              const isSessionMissingError =
                 errorName === "AuthSessionMissingError" ||
-                (errorMessage?.includes("session") && 
-                 (errorMessage?.includes("missing") || 
-                  errorMessage?.includes("not found") || 
-                  errorMessage?.includes("invalid")) &&
-                 // Ensure it's not a different error that mentions "session" (e.g., "session expired")
-                 !errorMessage?.includes("expired") &&
-                 !errorMessage?.includes("refresh"));
-              
+                (errorMessage?.includes("session") &&
+                  (errorMessage?.includes("missing") ||
+                    errorMessage?.includes("not found") ||
+                    errorMessage?.includes("invalid")) &&
+                  !errorMessage?.includes("expired") &&
+                  !errorMessage?.includes("refresh"));
+
               if (isSessionMissingError) {
                 const isProtected = isProtectedPath(currentPathname);
-                await breadcrumb({ 
-                  phase: "no_session_expected", 
+                await breadcrumb({
+                  phase: "no_session_expected",
                   error: errorMessage,
                   errorName: errorName || "unknown",
                   pathname: currentPathname,
@@ -787,26 +803,54 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                   isProtectedPath: isProtected,
                   errorName,
                 });
-                
+
                 if (mounted) {
                   setSession(null);
                   setUser(null);
                   setProfile(null);
                   setIsLoading(false);
                   setHasHandledInitialSession(true);
-                  
+
                   // Only redirect to login if on protected route (and not already on login)
                   if (isProtected && currentPathname !== PATHS.LOGIN) {
-                    logger.debug("[auth.init] Redirecting to login from protected route (session missing)", { pathname: currentPathname });
+                    logger.debug("[auth.init] Redirecting to login from protected route (session missing)", {
+                      pathname: currentPathname,
+                    });
                     router.replace(PATHS.LOGIN);
                   }
                 }
-                return; // DO NOT throw - this is expected behavior
+                return;
               }
-              
-              // All other errors (network, CORS, invalid JWT, refresh token errors, etc.) should be thrown
+
+              // Retry only likely network errors (and don't spin if offline).
+              const shouldRetryNetwork =
+                isLikelyNetworkError(errorMessage) &&
+                !(typeof navigator !== "undefined" && navigator.onLine === false) &&
+                attempt < maxGetUserAttempts - 1;
+
+              if (shouldRetryNetwork) {
+                await breadcrumb({
+                  phase: "getUser_network_retry",
+                  attempt,
+                  error: errorMessage,
+                  errorName: errorName || "unknown",
+                });
+                continue;
+              }
+
+              // Final failure: record breadcrumb + exit bootstrap without throwing (avoid noisy unhandled errors).
               await breadcrumb({ phase: "getUser_error", error: errorMessage, errorName: errorName || "unknown" });
-              throw error;
+              logger.warn("[auth.init] getUser() failed; ending bootstrap", {
+                errorName,
+                navigatorOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
+              });
+
+              if (mounted) {
+                setIsLoading(false);
+                setHasHandledInitialSession(true);
+              }
+
+              return;
             }
           }
 

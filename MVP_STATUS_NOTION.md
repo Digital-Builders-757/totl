@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth getUser transient network retry (February 12, 2026)**
+
+**AUTH / RELIABILITY** - February 12, 2026
+- ✅ Added bounded retry around `supabase.auth.getUser()` for transient network failures (e.g. Safari "Load failed")
+- ✅ Avoids bubbling noisy unhandled errors when the network blips during onboarding/bootstrap
+
+**Why this change:**
+- Some browsers/networks intermittently fail the auth-js fetch even when the session is valid.
+
+**Impact:**
+- Fewer onboarding boot failures and fewer high-priority Sentry errors from transient fetch issues.
+
+---
+
 ## 🚀 **Latest: Auth profile query retry + Sentry noise reduction (February 12, 2026)**
 
 **AUTH / RELIABILITY** - February 12, 2026
