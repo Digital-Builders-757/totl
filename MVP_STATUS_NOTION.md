@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Dashboard guardrails (screenshot + auth reset helper) (February 13, 2026)**
+
+**QA / RELIABILITY** - February 13, 2026
+- ✅ Added opt-in screenshot regression for `/client/dashboard` (mobile) to catch layout/theme flashes early.
+- ✅ Introduced a centralized `resetAuthState()` helper and improved auth bootstrap error observability (non-network `getUser` failures captured to Sentry).
+
+**Why this change:**
+- Prevents polish regressions from shipping and keeps auth failures visible without spamming on transient network issues.
+
+**Impact:**
+- More consistent dashboard UX and more trustworthy auth telemetry.
+
+---
+
 ## 🚀 **Latest: Client dashboard skeleton background match (February 12, 2026)**
 
 **CLIENT DASHBOARD UX** - February 12, 2026
