@@ -8,16 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Client dashboard loading flash fix (February 12, 2026)**
+## 🚀 **Latest: Client dashboard skeleton background match (February 12, 2026)**
 
 **CLIENT DASHBOARD UX** - February 12, 2026
-- ✅ Updated the `/client/dashboard` loading skeleton to use the same dark background + surface styling as the real dashboard.
+- ✅ Matched the loading skeleton background to PageShell (`bg-[var(--oklch-bg)]`) to avoid subtle gradient → solid background shift.
 
 **Why this change:**
-- Prevents a white-page flash (light skeleton) during RSC/route loading on repeated navigations.
+- Eliminates remaining visual shift between skeleton and hydrated dashboard.
 
 **Impact:**
-- Cleaner, more stable perceived load and fewer “weird white background” flashes.
+- Cleaner perceived load; no corner darkening / gradient flash.
 
 ---
 
