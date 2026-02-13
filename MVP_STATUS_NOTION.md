@@ -13,6 +13,7 @@
 **AUTH / RELIABILITY** - February 12, 2026
 - ✅ Added bounded retry around `supabase.auth.getUser()` for transient network failures (e.g. Safari "Load failed")
 - ✅ Avoids bubbling noisy unhandled errors when the network blips during onboarding/bootstrap
+- ✅ Clears auth state on final getUser failure (prevents appearing authenticated without server-side verification)
 
 **Why this change:**
 - Some browsers/networks intermittently fail the auth-js fetch even when the session is valid.

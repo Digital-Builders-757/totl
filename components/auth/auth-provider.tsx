@@ -161,6 +161,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const isLikelyNetworkErrorMessage = (message: string | undefined) => {
+    const m = (message || "").toLowerCase();
+    return (
+      m.includes("load failed") ||
+      m.includes("failed to fetch") ||
+      m.includes("networkerror") ||
+      m.includes("network error")
+    );
+  };
+
   const mapProfileRow = (row: {
     role: UserRole;
     account_type: AccountType | null;
@@ -192,15 +202,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const selectColumns =
         "role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end";
 
-      const isLikelyNetworkError = (message: string | undefined) => {
-        const m = (message || "").toLowerCase();
-        return (
-          m.includes("load failed") ||
-          m.includes("failed to fetch") ||
-          m.includes("networkerror") ||
-          m.includes("network error")
-        );
-      };
+      // shared helper: isLikelyNetworkErrorMessage
 
       // Bounded retry: transient network failures (Safari especially) can produce "Load failed"
       // even when the request would succeed shortly after.
@@ -209,8 +211,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
       let lastError: { message?: string; code?: string | null; details?: string | null } | null = null;
       let data: unknown = null;
+      let attemptsUsed = 0;
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        attemptsUsed = attempt + 1;
         if (attempt > 0) {
           const delay = backoffMs[attempt] ?? 250;
           await new Promise((resolve) => setTimeout(resolve, delay));
@@ -233,7 +237,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         lastError = { message: error.message, code: error.code, details: error.details };
 
         // Only retry likely network errors.
-        if (!isLikelyNetworkError(error.message)) {
+        if (!isLikelyNetworkErrorMessage(error.message)) {
           break;
         }
 
@@ -246,7 +250,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       if (lastError && lastError.code !== "PGRST116") {
         const Sentry = await import("@sentry/nextjs");
 
-        const level = isLikelyNetworkError(lastError.message) ? "warning" : "error";
+        const level = isLikelyNetworkErrorMessage(lastError.message) ? "warning" : "error";
 
         Sentry.captureException(new Error(`Auth provider profile query error: ${lastError.message}`), {
           tags: {
@@ -259,7 +263,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             errorCode: lastError.code,
             errorDetails: lastError.details,
             errorMessage: lastError.message,
-            attempts: maxAttempts,
+            attempts: attemptsUsed,
+            maxAttempts,
             timestamp: new Date().toISOString(),
             navigatorOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
           },
@@ -739,24 +744,18 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           let currentUser: User | null = null;
 
-          const isLikelyNetworkError = (message: string | undefined) => {
-            const m = (message || "").toLowerCase();
-            return (
-              m.includes("load failed") ||
-              m.includes("failed to fetch") ||
-              m.includes("networkerror") ||
-              m.includes("network error")
-            );
-          };
+          // shared helper: isLikelyNetworkErrorMessage
 
           // Bounded retry: Safari and some networks can produce transient "Load failed" errors.
           const maxGetUserAttempts = 3;
           const getUserBackoffMs = [0, 250, 600];
+          let skipNextBackoff = false;
 
           for (let attempt = 0; attempt < maxGetUserAttempts; attempt++) {
-            if (attempt > 0) {
+            if (attempt > 0 && !skipNextBackoff) {
               await sleep(getUserBackoffMs[attempt] ?? 250);
             }
+            skipNextBackoff = false;
 
             try {
               const { data, error } = await supabase.auth.getUser();
@@ -767,6 +766,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               if (error instanceof Error && error.name === "AbortError" && attempt === 0) {
                 await breadcrumb({ phase: "getUser_abort_retry", attempt });
                 await sleep(100 + Math.floor(Math.random() * 200));
+                // Avoid unintended extra backoff on the next iteration.
+                skipNextBackoff = true;
                 continue;
               }
               if (error instanceof Error && error.name === "AbortError") {
@@ -824,7 +825,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
               // Retry only likely network errors (and don't spin if offline).
               const shouldRetryNetwork =
-                isLikelyNetworkError(errorMessage) &&
+                isLikelyNetworkErrorMessage(errorMessage) &&
                 !(typeof navigator !== "undefined" && navigator.onLine === false) &&
                 attempt < maxGetUserAttempts - 1;
 
@@ -838,16 +839,27 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 continue;
               }
 
-              // Final failure: record breadcrumb + exit bootstrap without throwing (avoid noisy unhandled errors).
+              // Final failure: record breadcrumb + clear auth state to avoid appearing authenticated without verification.
               await breadcrumb({ phase: "getUser_error", error: errorMessage, errorName: errorName || "unknown" });
-              logger.warn("[auth.init] getUser() failed; ending bootstrap", {
+              logger.warn("[auth.init] getUser() failed; clearing auth state", {
                 errorName,
                 navigatorOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
               });
 
               if (mounted) {
+                setSession(null);
+                setUser(null);
+                setProfile(null);
                 setIsLoading(false);
                 setHasHandledInitialSession(true);
+
+                const isProtected = isProtectedPath(currentPathname);
+                if (isProtected && currentPathname !== PATHS.LOGIN) {
+                  logger.debug("[auth.init] Redirecting to login from protected route (getUser failed)", {
+                    pathname: currentPathname,
+                  });
+                  router.replace(PATHS.LOGIN);
+                }
               }
 
               return;
