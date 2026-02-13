@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ClientDashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] text-white">
+    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient text-white">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

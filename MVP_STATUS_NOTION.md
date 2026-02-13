@@ -12,6 +12,7 @@
 
 **CLIENT DASHBOARD UX** - February 12, 2026
 - ✅ Matched the loading skeleton background to PageShell (`bg-[var(--oklch-bg)]`) to avoid subtle gradient → solid background shift.
+- ✅ Added `page-ambient` to the skeleton wrapper to match PageShell’s ambient spotlight overlay (prevents remaining flash).
 
 **Why this change:**
 - Eliminates remaining visual shift between skeleton and hydrated dashboard.
