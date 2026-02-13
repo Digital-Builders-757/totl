@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client dashboard skeleton background match (February 12, 2026)**
+
+**CLIENT DASHBOARD UX** - February 12, 2026
+- ✅ Matched the loading skeleton background to PageShell (`bg-[var(--oklch-bg)]`) to avoid subtle gradient → solid background shift.
+
+**Why this change:**
+- Eliminates remaining visual shift between skeleton and hydrated dashboard.
+
+**Impact:**
+- Cleaner perceived load; no corner darkening / gradient flash.
+
+---
+
 ## 🚀 **Latest: Auth getUser transient network retry (February 12, 2026)**
 
 **AUTH / RELIABILITY** - February 12, 2026
