@@ -8,6 +8,33 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth profile query retry + Sentry noise reduction (February 12, 2026)**
+
+**AUTH / RELIABILITY** - February 12, 2026
+- ✅ Added bounded retry for transient network failures when querying the profile row (addresses Safari "Load failed" fetch errors)
+- ✅ Downgraded likely-network profile fetch failures to Sentry warning (still errors for non-network failures)
+
+**Why this change:**
+- Safari and some network conditions can throw transient fetch failures even when the endpoint is healthy; retry avoids spurious auth breaks and reduces Sentry noise.
+
+**Impact:**
+- More resilient onboarding/dashboard bootstrap; fewer high-priority false alarms.
+
+---
+
+## 🚀 **Latest: Auth redirect navigation timeout noise reduction (February 12, 2026)**
+
+**AUTH / RELIABILITY** - February 12, 2026
+- ✅ Reduced false-positive auth redirect warnings by waiting up to the configured timeout before falling back to hard reload.
+
+**Why this change:**
+- Some route transitions (especially in production / on slower devices) can take longer than a single tick, which was generating noisy Sentry warnings.
+
+**Impact:**
+- Fewer misleading warnings; redirects still reliably complete via hard reload fallback when needed.
+
+---
+
 ## 🚀 **Latest: Mobile text alignment polish (February 12, 2026)**
 
 **UI / MOBILE READABILITY** - February 12, 2026

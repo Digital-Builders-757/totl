@@ -192,28 +192,78 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       const selectColumns =
         "role, account_type, avatar_url, avatar_path, display_name, subscription_status, subscription_plan, subscription_current_period_end";
 
-      const { data, error } = await supabase
-        .from("profiles")
-        .select(selectColumns)
-        .eq("id", userId)
-        .maybeSingle();
+      const isLikelyNetworkError = (message: string | undefined) => {
+        const m = (message || "").toLowerCase();
+        return (
+          m.includes("load failed") ||
+          m.includes("failed to fetch") ||
+          m.includes("networkerror") ||
+          m.includes("network error")
+        );
+      };
 
-      if (error && error.code !== "PGRST116") {
+      // Bounded retry: transient network failures (Safari especially) can produce "Load failed"
+      // even when the request would succeed shortly after.
+      const maxAttempts = 3;
+      const backoffMs = [0, 250, 600];
+
+      let lastError: { message?: string; code?: string | null; details?: string | null } | null = null;
+      let data: unknown = null;
+
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        if (attempt > 0) {
+          const delay = backoffMs[attempt] ?? 250;
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+
+        const res = await supabase
+          .from("profiles")
+          .select(selectColumns)
+          .eq("id", userId)
+          .maybeSingle();
+
+        data = res.data;
+        const error = res.error;
+
+        if (!error || error.code === "PGRST116") {
+          lastError = null;
+          break;
+        }
+
+        lastError = { message: error.message, code: error.code, details: error.details };
+
+        // Only retry likely network errors.
+        if (!isLikelyNetworkError(error.message)) {
+          break;
+        }
+
+        // If offline, don't spin.
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          break;
+        }
+      }
+
+      if (lastError && lastError.code !== "PGRST116") {
         const Sentry = await import("@sentry/nextjs");
-        Sentry.captureException(new Error(`Auth provider profile query error: ${error.message}`), {
+
+        const level = isLikelyNetworkError(lastError.message) ? "warning" : "error";
+
+        Sentry.captureException(new Error(`Auth provider profile query error: ${lastError.message}`), {
           tags: {
             feature: "auth",
             error_type: "auth_provider_profile_error",
-            error_code: error.code || "unknown",
+            error_code: lastError.code || "unknown",
           },
           extra: {
             userId,
-            errorCode: error.code,
-            errorDetails: error.details,
-            errorMessage: error.message,
+            errorCode: lastError.code,
+            errorDetails: lastError.details,
+            errorMessage: lastError.message,
+            attempts: maxAttempts,
             timestamp: new Date().toISOString(),
+            navigatorOnline: typeof navigator !== "undefined" ? navigator.onLine : null,
           },
-          level: "error",
+          level,
         });
       }
 
@@ -321,15 +371,17 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         routerInstance.replace(target);
 
         const navigationTimeoutMs = 1500;
+        const navigationPollMs = 150;
 
-        // Wait up to navigationTimeoutMs to see if navigation happens
-        // Use Promise-based timeout - check once after delay instead of polling
-        setTimeout(() => {
+        // Wait up to navigationTimeoutMs to see if navigation happens.
+        // In production (and on slower devices), route transitions can take longer than a single 500ms tick.
+        const startedAt = Date.now();
+
+        const checkNavigation = () => {
           if (typeof window === "undefined") {
             return; // SSR safety check
           }
 
-          // Check if pathname changed to target (navigation succeeded)
           const newPathname = window.location.pathname.split("?")[0];
           const navigated = newPathname === targetPathname && newPathname !== startPathname;
 
@@ -339,32 +391,46 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               actual: newPathname,
               navigationTimeoutMs,
             });
-          } else if (newPathname !== startPathname) {
+            return;
+          }
+
+          if (newPathname !== startPathname) {
             logger.debug("[auth.onAuthStateChange] router.replace() navigated to a different route", {
               expected: targetPathname,
               actual: newPathname,
               navigationTimeoutMs,
             });
-          } else {
-            // Navigation didn't happen within timeout, fallback to hard reload
-            logger.warn(
-              "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
-              {
+            return;
+          }
+
+          const elapsedMs = Date.now() - startedAt;
+          if (elapsedMs < navigationTimeoutMs) {
+            setTimeout(checkNavigation, navigationPollMs);
+            return;
+          }
+
+          // Navigation didn't happen within timeout, fallback to hard reload
+          logger.warn(
+            "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
+            {
               expected: targetPathname,
               actual: newPathname,
               startPathname,
-                navigationTimeoutMs,
-              }
-            );
-            try {
-              window.location.replace(target);
-              logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
-            } catch (hardReloadError) {
-              logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
-              window.location.assign(target);
+              navigationTimeoutMs,
             }
+          );
+
+          try {
+            window.location.replace(target);
+            logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
+          } catch (hardReloadError) {
+            logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
+            window.location.assign(target);
           }
-        }, 500);
+        };
+
+        // Give router.replace() a tick to schedule before we start checking.
+        setTimeout(checkNavigation, 50);
       } catch (routerError) {
         // If router.replace() throws, immediately fallback to hard reload
         logger.error("[auth.onAuthStateChange] router.replace() threw, using hard reload", routerError);
