@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Marketing homepage gigs-first coherence (February 14, 2026)**
+
+**MARKETING / POSITIONING** - February 14, 2026
+- ✅ Updated homepage to align with gigs-first discovery (no public talent directory messaging).
+- ✅ Replaced the “Featured Talent” section with a “Featured Opportunities” section to match current product direction.
+
+**Why this change:**
+- Keeps public positioning consistent with Approach B: discovery via gigs + shared links only.
+
+**Impact:**
+- Cleaner narrative on the homepage; reduces user confusion and prevents accidental “directory” expectations.
+
+---
+
 ## 🚀 **Latest: Dashboard guardrails (screenshot + auth reset helper) (February 13, 2026)**
 
 **QA / RELIABILITY** - February 13, 2026

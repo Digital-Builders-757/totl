@@ -4,7 +4,7 @@
 // This page is mostly static but requires client-side interactivity
 // For true ISR, would need to split into server component wrapper + client component
 
-import { ArrowRight, Star, MapPin, Search, Handshake, Sparkles } from "lucide-react";
+import { ArrowRight, MapPin, Search, Handshake, Sparkles, Calendar, DollarSign } from "lucide-react";
 // import Image from "next/image";
 import Link from "next/link";
 import { PostGigFooterLink } from "@/components/post-gig-footer-link";
@@ -42,13 +42,13 @@ export default function HomePage() {
                 </div>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
                   Connect with
-                  <span className="apple-text-gradient"> Top Talent</span>
+                  <span className="apple-text-gradient"> Great Talent</span>
                   <br />
                   <span className="text-gray-200">Instantly</span>
                 </h1>
                 <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                  TOTL Agency is the fastest way to discover, book, and work with exceptional
-                  talent. From models to influencers, find the perfect match for your next project.
+                  TOTL Agency is the fastest way to post gigs, book talent, and manage projects end-to-end.
+                  No public directory — discovery happens through gigs and invite-only links.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
@@ -97,100 +97,87 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Talent Section */}
+      {/* Featured Opportunities Section (Gigs-only discovery) */}
       <section className="py-32 bg-seamless-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
             <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto mb-8">
-              <span className="text-white font-medium text-sm">Featured Talent</span>
+              <span className="text-white font-medium text-sm">Featured Opportunities</span>
             </div>
             <h2 className="text-5xl lg:text-6xl font-bold text-white mb-6 font-display">
-              Meet Our
-              <span className="apple-text-gradient"> Stars</span>
+              Book Faster.
+              <span className="apple-text-gradient"> Manage Cleaner.</span>
             </h2>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Discover exceptional talent ready to bring your vision to life. From fashion to
-              fitness, our curated selection represents the best in the industry.
+              TOTL is gigs-first: brands post opportunities, talent applies, and booking stays organized.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                name: "Marcus Rodriguez",
-                role: "Fitness Model",
+                title: "Fitness Campaign — 2 Day Shoot",
+                category: "Campaign",
                 location: "Los Angeles",
-                rating: 4.8,
-                price: "$450/day",
-                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Fitness", "Lifestyle", "Commercial"],
+                compensation: "$450/day",
+                date: "Mar 10–11",
               },
               {
-                name: "Isabella Martinez",
-                role: "Beauty Model",
+                title: "Beauty Editorial — Studio Session",
+                category: "Editorial",
                 location: "Miami",
-                rating: 4.9,
-                price: "$400/day",
-                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Beauty", "Fashion", "Editorial"],
+                compensation: "$400/day",
+                date: "Mar 18",
               },
               {
-                name: "Alex Thompson",
-                role: "Commercial Model",
+                title: "Commercial Lifestyle — On Location",
+                category: "Commercial",
                 location: "Chicago",
-                rating: 4.7,
-                price: "$350/day",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Commercial", "Corporate", "Lifestyle"],
+                compensation: "$350/day",
+                date: "Apr 2",
               },
-            ].map((talent, index) => (
+            ].map((gig, index) => (
               <Card
-                key={talent.name}
-                className="group apple-card hover-lift cursor-pointer overflow-hidden"
+                key={gig.title}
+                className="group apple-card hover-lift overflow-hidden"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
-                  <div className="relative overflow-hidden">
-                    <SafeImage
-                      src={talent.image}
-                      alt={talent.name}
-                      width={400}
-                      height={500}
-                      className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-500"
-                      fallbackSrc="/images/solo_logo.png"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div className="absolute top-4 right-4">
+                  <div className="p-6 sm:p-7 md:p-8">
+                    <div className="flex items-center justify-between gap-4">
+                      <Badge className="bg-white/10 text-white border-white/15">
+                        {gig.category}
+                      </Badge>
                       <Badge className="bg-white/95 text-black font-semibold shadow-soft backdrop-blur-sm">
-                        {talent.price}
+                        {gig.compensation}
                       </Badge>
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white text-xl font-bold mb-1">{talent.name}</h3>
-                      <p className="text-gray-300 text-sm font-medium">{talent.role}</p>
-                    </div>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-semibold text-white">{talent.rating}</span>
+
+                    <h3 className="mt-5 text-white text-2xl font-bold leading-tight">
+                      {gig.title}
+                    </h3>
+
+                    <div className="mt-5 grid gap-2 text-sm text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-white/80" />
+                        <span>{gig.location}</span>
                       </div>
-                      <div className="flex items-center text-sm text-gray-300">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {talent.location}
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-white/80" />
+                        <span>{gig.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-white/80" />
+                        <span>Flat + usage details in brief</span>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {talent.specialties.map((specialty, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="text-xs bg-white/10 text-white border-white/20"
-                        >
-                          {specialty}
-                        </Badge>
-                      ))}
+
+                    <div className="mt-7">
+                      <Link href="/choose-role" prefetch={false}>
+                        <Button className="w-full button-glow border-0 min-h-[48px]">
+                          View gigs (sign in)
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
@@ -224,7 +211,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Discover</h3>
               <p className="text-gray-300 leading-relaxed">
-                Connect with verified talent across all categories and specialties through intentional matching.
+                Browse opportunities and apply quickly — gigs are the discovery layer.
               </p>
             </div>
             <div className="text-center space-y-6">
@@ -256,7 +243,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-12 text-center">
             <div className="space-y-4">
               <div className="text-5xl font-bold text-white font-display">500+</div>
-              <div className="text-gray-300 text-lg">Verified Talent</div>
+              <div className="text-gray-300 text-lg">Verified Professionals</div>
             </div>
             <div className="space-y-4">
               <div className="text-5xl font-bold text-white font-display">1000+</div>
@@ -314,7 +301,7 @@ export default function HomePage() {
                 className="h-8 w-auto brightness-0 invert"
               />
               <p className="text-gray-400 leading-relaxed">
-                The future of talent booking. Connect with exceptional talent instantly.
+                The gigs-first way to book talent and run clean projects.
               </p>
             </div>
             <div className="space-y-4">
