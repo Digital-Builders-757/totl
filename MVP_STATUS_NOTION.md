@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Marketing UI system pass (mobile left-align + gigs spacing) (February 14, 2026)**
+
+**UI / MARKETING COHERENCE** - February 14, 2026
+- ✅ Shifted key homepage hero + section headers to **left-aligned on mobile** for a more product-like feel (keeps centered layout on md).
+- ✅ Tightened `/gigs` spacing rhythm (container + section spacing) and updated copy to be more product/booking oriented.
+
+**Why this change:**
+- Reduces “marketing center-justified blocks” on mobile and improves scanability.
+
+**Impact:**
+- More intentional typography + layout rhythm across the two most visible public-facing surfaces.
+
+---
+
 ## 🚀 **Latest: Marketing homepage gigs-first coherence (February 14, 2026)**
 
 **MARKETING / POSITIONING** - February 14, 2026
