@@ -10,7 +10,6 @@ import Link from "next/link";
 import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { SafeImage } from "@/components/ui/safe-image";
 
@@ -113,7 +112,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[
               {
                 title: "Fitness Campaign — 2 Day Shoot",
@@ -121,6 +120,8 @@ export default function HomePage() {
                 location: "Los Angeles",
                 compensation: "$450/day",
                 date: "Mar 10–11",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=800&fit=crop",
               },
               {
                 title: "Beauty Editorial — Studio Session",
@@ -128,6 +129,8 @@ export default function HomePage() {
                 location: "Miami",
                 compensation: "$400/day",
                 date: "Mar 18",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop",
               },
               {
                 title: "Commercial Lifestyle — On Location",
@@ -135,53 +138,62 @@ export default function HomePage() {
                 location: "Chicago",
                 compensation: "$350/day",
                 date: "Apr 2",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop",
               },
-            ].map((gig, index) => (
-              <Card
+            ].map((gig) => (
+              <div
                 key={gig.title}
-                className="group apple-card hover-lift overflow-hidden"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="card-backlit overflow-hidden group active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
               >
-                <CardContent className="p-0">
-                  <div className="p-6 sm:p-7 md:p-8">
-                    <div className="flex items-center justify-between gap-4">
-                      <Badge className="bg-white/10 text-white border-white/15">
-                        {gig.category}
-                      </Badge>
-                      <Badge className="bg-white/95 text-black font-semibold shadow-soft backdrop-blur-sm">
-                        {gig.compensation}
-                      </Badge>
-                    </div>
-
-                    <h3 className="mt-5 text-white text-2xl font-bold leading-tight">
+                <div className="relative aspect-4-3 overflow-hidden">
+                  <SafeImage
+                    src={gig.imageUrl}
+                    alt={gig.title}
+                    fill
+                    className="transition-transform duration-500 group-hover:scale-110 object-cover"
+                    context="marketing-featured-gig"
+                    fallbackSrc="/images/solo_logo.png"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
+                    >
+                      {gig.category}
+                    </Badge>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2">
                       {gig.title}
                     </h3>
+                  </div>
+                </div>
 
-                    <div className="mt-5 grid gap-2 text-sm text-gray-300">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-white/80" />
-                        <span>{gig.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-white/80" />
-                        <span>{gig.date}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-white/80" />
-                        <span>Flat + usage details in brief</span>
-                      </div>
+                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{gig.location}</span>
                     </div>
-
-                    <div className="mt-7">
-                      <Link href="/choose-role" prefetch={false}>
-                        <Button className="w-full button-glow border-0 min-h-[48px]">
-                          View gigs (sign in)
-                        </Button>
-                      </Link>
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <DollarSign className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="text-white font-semibold">{gig.compensation}</span>
+                    </div>
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{gig.date}</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+
+                  <Button className="w-full button-glow border-0 mt-3 sm:mt-4 min-h-[48px]" asChild>
+                    <Link href="/choose-role" prefetch={false}>
+                      View gigs (sign in) <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
