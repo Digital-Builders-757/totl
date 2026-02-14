@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Homepage featured opportunities (real gig-card style) (February 14, 2026)**
+
+**UI / MARKETING COHERENCE** - February 14, 2026
+- ✅ Updated the homepage “Featured Opportunities” section to use the same **gig-card visual recipe** as `/gigs` (image header, category badge, metadata rows, CTA).
+- ✅ Keeps marketing honest and product-feeling while still routing signed-out users to sign-in.
+
+**Why this change:**
+- Reduces the “placeholder marketing cards” feel and makes the public site look like a real product.
+
+**Impact:**
+- Higher trust + stronger visual consistency between homepage and gigs.
+
+---
+
 ## 🚀 **Latest: Marketing UI system pass (mobile left-align + gigs spacing) (February 14, 2026)**
 
 **UI / MARKETING COHERENCE** - February 14, 2026
