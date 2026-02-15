@@ -24,7 +24,7 @@ export function PostGigFooterLink() {
   return (
     <button
       onClick={handleClick}
-      className="hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 text-inherit font-inherit"
+      className="focus-hint hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 text-inherit font-inherit"
     >
       Post a Gig
     </button>

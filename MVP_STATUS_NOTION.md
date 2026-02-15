@@ -13,6 +13,7 @@
 **UI / INTERACTION** - February 14, 2026
 - ✅ Standardized marketing + gigs card hover timing (snappier, consistent durations).
 - ✅ Added consistent `focus-hint` rings to key interactive elements (home CTAs, footer links, gigs breadcrumbs) for a premium keyboard UX.
+- ✅ Ensured the footer “Post a Gig” button uses the same focus ring behavior as neighboring links.
 
 **Why this change:**
 - Interaction consistency is one of the biggest giveaways of “default UI”. Tight focus + hover behavior makes the product feel intentional.
