@@ -8,6 +8,76 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Marketing interaction polish (focus rings + hover timing) (February 14, 2026)**
+
+**UI / INTERACTION** - February 14, 2026
+- ✅ Standardized marketing + gigs card hover timing (snappier, consistent durations).
+- ✅ Added consistent `focus-hint` rings to key interactive elements (home CTAs, footer links, gigs breadcrumbs) for a premium keyboard UX.
+
+**Why this change:**
+- Interaction consistency is one of the biggest giveaways of “default UI”. Tight focus + hover behavior makes the product feel intentional.
+
+**Impact:**
+- Better accessibility, cleaner feel, and more consistent motion across the highest-traffic surfaces.
+
+---
+
+## 🚀 **Latest: Marketing typography hierarchy polish (February 14, 2026)**
+
+**UI / TYPOGRAPHY** - February 14, 2026
+- ✅ Smoothed marketing headline scale (reduced overly-jumpy sizes; consistent tracking/leading on hero + section headers).
+- ✅ Standardized body copy scale for better scanability (especially on mobile) across `/` and `/gigs`.
+
+**Why this change:**
+- Makes the public surfaces feel more deliberate and “product”, less like assorted landing-page blocks.
+
+**Impact:**
+- Cleaner hierarchy, better readability, and tighter visual consistency across marketing → gigs.
+
+---
+
+## 🚀 **Latest: Homepage featured opportunities (real gig-card style) (February 14, 2026)**
+
+**UI / MARKETING COHERENCE** - February 14, 2026
+- ✅ Updated the homepage “Featured Opportunities” section to use the same **gig-card visual recipe** as `/gigs` (image header, category badge, metadata rows, CTA).
+- ✅ Keeps marketing honest and product-feeling while still routing signed-out users to sign-in.
+
+**Why this change:**
+- Reduces the “placeholder marketing cards” feel and makes the public site look like a real product.
+
+**Impact:**
+- Higher trust + stronger visual consistency between homepage and gigs.
+
+---
+
+## 🚀 **Latest: Marketing UI system pass (mobile left-align + gigs spacing) (February 14, 2026)**
+
+**UI / MARKETING COHERENCE** - February 14, 2026
+- ✅ Shifted key homepage hero + section headers to **left-aligned on mobile** for a more product-like feel (keeps centered layout on md).
+- ✅ Tightened `/gigs` spacing rhythm (container + section spacing) and updated copy to be more product/booking oriented.
+
+**Why this change:**
+- Reduces “marketing center-justified blocks” on mobile and improves scanability.
+
+**Impact:**
+- More intentional typography + layout rhythm across the two most visible public-facing surfaces.
+
+---
+
+## 🚀 **Latest: Marketing homepage gigs-first coherence (February 14, 2026)**
+
+**MARKETING / POSITIONING** - February 14, 2026
+- ✅ Updated homepage to align with gigs-first discovery (no public talent directory messaging).
+- ✅ Replaced the “Featured Talent” section with a “Featured Opportunities” section to match current product direction.
+
+**Why this change:**
+- Keeps public positioning consistent with Approach B: discovery via gigs + shared links only.
+
+**Impact:**
+- Cleaner narrative on the homepage; reduces user confusion and prevents accidental “directory” expectations.
+
+---
+
 ## 🚀 **Latest: Dashboard guardrails (screenshot + auth reset helper) (February 13, 2026)**
 
 **QA / RELIABILITY** - February 13, 2026

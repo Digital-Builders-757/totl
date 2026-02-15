@@ -4,13 +4,12 @@
 // This page is mostly static but requires client-side interactivity
 // For true ISR, would need to split into server component wrapper + client component
 
-import { ArrowRight, Star, MapPin, Search, Handshake, Sparkles } from "lucide-react";
+import { ArrowRight, MapPin, Search, Handshake, Sparkles, Calendar, DollarSign } from "lucide-react";
 // import Image from "next/image";
 import Link from "next/link";
 import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { SafeImage } from "@/components/ui/safe-image";
 
@@ -33,29 +32,29 @@ export default function HomePage() {
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
-            <div className="space-y-6 pt-4 text-center lg:text-left">
+            <div className="space-y-6 pt-4 text-left md:text-center lg:text-left">
               <div className="space-y-6">
-                <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto lg:mx-0">
+                <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto lg:mx-0">
                   <span className="text-white font-medium text-sm">
                     The Future of Talent Booking
                   </span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.02] tracking-[-0.03em] font-display">
                   Connect with
-                  <span className="apple-text-gradient"> Top Talent</span>
+                  <span className="apple-text-gradient"> Great Talent</span>
                   <br />
                   <span className="text-gray-200">Instantly</span>
                 </h1>
-                <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg mx-auto lg:mx-0">
-                  TOTL Agency is the fastest way to discover, book, and work with exceptional
-                  talent. From models to influencers, find the perfect match for your next project.
+                <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg mx-0 md:mx-auto lg:mx-0">
+                  TOTL Agency is the fastest way to post gigs, book talent, and manage projects end-to-end.
+                  No public directory — discovery happens through gigs and invite-only links.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-start md:justify-center lg:justify-start">
                 <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
+                    className="focus-hint button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
                   >
                     Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
@@ -63,10 +62,10 @@ export default function HomePage() {
                 {/* Removed "Browse Talent" CTA per Approach B: no talent directory exists */}
                 {/* Public users can discover talent only via shared profile links (/talent/[slug]) */}
               </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-8 md:gap-12 text-xs sm:text-sm text-gray-400">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center lg:justify-start gap-4 sm:gap-8 md:gap-12 text-xs sm:text-sm text-gray-400">
                 <div className="flex items-center space-x-3">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-apple-glow"></div>
-                  <span className="font-medium">500+ Verified Talent</span>
+                  <span className="font-medium">500+ Verified Professionals</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div
@@ -97,104 +96,104 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Talent Section */}
+      {/* Featured Opportunities Section (Gigs-only discovery) */}
       <section className="py-32 bg-seamless-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto mb-8">
-              <span className="text-white font-medium text-sm">Featured Talent</span>
+          <div className="text-left md:text-center mb-12 sm:mb-16">
+            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
+              <span className="text-white font-medium text-sm">Featured Opportunities</span>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-bold text-white mb-6 font-display">
-              Meet Our
-              <span className="apple-text-gradient"> Stars</span>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
+              Book Faster.
+              <span className="apple-text-gradient"> Manage Cleaner.</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-              Discover exceptional talent ready to bring your vision to life. From fashion to
-              fitness, our curated selection represents the best in the industry.
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
+              TOTL is gigs-first: brands post opportunities, talent applies, and booking stays organized.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {[
               {
-                name: "Marcus Rodriguez",
-                role: "Fitness Model",
+                title: "Fitness Campaign — 2 Day Shoot",
+                category: "Campaign",
                 location: "Los Angeles",
-                rating: 4.8,
-                price: "$450/day",
-                image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Fitness", "Lifestyle", "Commercial"],
+                compensation: "$450/day",
+                date: "Mar 10–11",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=800&fit=crop",
               },
               {
-                name: "Isabella Martinez",
-                role: "Beauty Model",
+                title: "Beauty Editorial — Studio Session",
+                category: "Editorial",
                 location: "Miami",
-                rating: 4.9,
-                price: "$400/day",
-                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Beauty", "Fashion", "Editorial"],
+                compensation: "$400/day",
+                date: "Mar 18",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop",
               },
               {
-                name: "Alex Thompson",
-                role: "Commercial Model",
+                title: "Commercial Lifestyle — On Location",
+                category: "Commercial",
                 location: "Chicago",
-                rating: 4.7,
-                price: "$350/day",
-                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop&crop=face",
-                specialties: ["Commercial", "Corporate", "Lifestyle"],
+                compensation: "$350/day",
+                date: "Apr 2",
+                imageUrl:
+                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop",
               },
-            ].map((talent, index) => (
-              <Card
-                key={talent.name}
-                className="group apple-card hover-lift cursor-pointer overflow-hidden"
-                style={{ animationDelay: `${index * 0.1}s` }}
+            ].map((gig) => (
+              <div
+                key={gig.title}
+                className="card-backlit overflow-hidden group active:scale-95 sm:hover:scale-[1.02] transition-all duration-200"
               >
-                <CardContent className="p-0">
-                  <div className="relative overflow-hidden">
-                    <SafeImage
-                      src={talent.image}
-                      alt={talent.name}
-                      width={400}
-                      height={500}
-                      className="w-full h-80 object-cover group-hover:scale-110 transition-transform duration-500"
-                      fallbackSrc="/images/solo_logo.png"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    <div className="absolute top-4 right-4">
-                      <Badge className="bg-white/95 text-black font-semibold shadow-soft backdrop-blur-sm">
-                        {talent.price}
-                      </Badge>
+                <div className="relative aspect-4-3 overflow-hidden">
+                  <SafeImage
+                    src={gig.imageUrl}
+                    alt={gig.title}
+                    fill
+                    className="transition-transform duration-300 group-hover:scale-110 object-cover"
+                    context="marketing-featured-gig"
+                    fallbackSrc="/images/solo_logo.png"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
+                    >
+                      {gig.category}
+                    </Badge>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-white mb-2 line-clamp-2">
+                      {gig.title}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{gig.location}</span>
                     </div>
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-white text-xl font-bold mb-1">{talent.name}</h3>
-                      <p className="text-gray-300 text-sm font-medium">{talent.role}</p>
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <DollarSign className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="text-white font-semibold">{gig.compensation}</span>
+                    </div>
+                    <div className="flex items-center text-xs sm:text-sm text-white/80">
+                      <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
+                      <span className="truncate">{gig.date}</span>
                     </div>
                   </div>
-                  <div className="p-6 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm font-semibold text-white">{talent.rating}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-gray-300">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {talent.location}
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {talent.specialties.map((specialty, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="secondary"
-                          className="text-xs bg-white/10 text-white border-white/20"
-                        >
-                          {specialty}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
+                  <Button className="w-full button-glow border-0 mt-3 sm:mt-4 min-h-[48px]" asChild>
+                    <Link href="/choose-role" prefetch={false}>
+                      View gigs (sign in) <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -203,15 +202,15 @@ export default function HomePage() {
       {/* How It Works Section */}
       <section className="py-32 bg-seamless-accent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto mb-8">
+          <div className="text-left md:text-center mb-12 sm:mb-16">
+            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
               <span className="text-white font-medium text-sm">How It Works</span>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-bold text-white mb-6 font-display">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
               Simple
               <span className="apple-text-gradient"> Process</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
               From discovery to booking, we&apos;ve streamlined the entire process to make talent
               acquisition effortless and efficient.
             </p>
@@ -224,7 +223,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl font-bold text-white">Discover</h3>
               <p className="text-gray-300 leading-relaxed">
-                Connect with verified talent across all categories and specialties through intentional matching.
+                Browse opportunities and apply quickly — gigs are the discovery layer.
               </p>
             </div>
             <div className="text-center space-y-6">
@@ -256,7 +255,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-12 text-center">
             <div className="space-y-4">
               <div className="text-5xl font-bold text-white font-display">500+</div>
-              <div className="text-gray-300 text-lg">Verified Talent</div>
+              <div className="text-gray-300 text-lg">Verified Professionals</div>
             </div>
             <div className="space-y-4">
               <div className="text-5xl font-bold text-white font-display">1000+</div>
@@ -289,7 +288,7 @@ export default function HomePage() {
               <Link href="/choose-role" prefetch={false}>
                 <Button
                   size="lg"
-                  className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
+                  className="focus-hint button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
                 >
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
@@ -314,7 +313,7 @@ export default function HomePage() {
                 className="h-8 w-auto brightness-0 invert"
               />
               <p className="text-gray-400 leading-relaxed">
-                The future of talent booking. Connect with exceptional talent instantly.
+                The gigs-first way to book talent and run clean projects.
               </p>
             </div>
             <div className="space-y-4">
@@ -324,7 +323,7 @@ export default function HomePage() {
                 {/* Removed "Find Gigs" per G1: gig list requires sign-in (not discoverable for signed-out) */}
                 <Link
                   href="/about"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -335,25 +334,25 @@ export default function HomePage() {
               <div className="space-y-2">
                 <Link
                   href="/help"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Help Center
                 </Link>
                 <Link
                   href="/contact"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Contact Us
                 </Link>
                 <Link
                   href="/terms"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Terms of Service
                 </Link>
                 <Link
                   href="/privacy"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
@@ -365,7 +364,7 @@ export default function HomePage() {
                 <Link
                   href="/choose-role"
                   prefetch={false}
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Apply as Talent
                 </Link>
@@ -376,9 +375,9 @@ export default function HomePage() {
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2025 TOTL Agency. All rights reserved.</p>
             <p className="mt-2 text-sm">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/terms" className="focus-hint hover:text-white transition-colors">Terms of Service</Link>
               {" · "}
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="focus-hint hover:text-white transition-colors">Privacy Policy</Link>
             </p>
           </div>
         </div>

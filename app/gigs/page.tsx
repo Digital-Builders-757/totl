@@ -197,13 +197,13 @@ export default async function GigsPage({
 
   return (
     <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-10 sm:py-14 md:py-16">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb Navigation */}
           <div className="mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm px-2 sm:px-0">
             <Link 
               href="/" 
-              className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+              className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
             >
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Home</span>
@@ -213,7 +213,7 @@ export default async function GigsPage({
               <>
                 <Link 
                   href="/talent/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -225,7 +225,7 @@ export default async function GigsPage({
               <>
                 <Link 
                   href="/client/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -236,16 +236,16 @@ export default async function GigsPage({
             <span className="text-white font-medium">Find Gigs</span>
           </div>
 
-          <div className="mb-12 sm:mb-16 text-left md:text-center px-4 sm:px-0">
+          <div className="mb-10 sm:mb-14 text-left md:text-center px-4 sm:px-0">
             <div className="panel-frosted w-fit mx-0 md:mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-gradient-glow animate-apple-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-5 sm:mb-7 text-gradient-glow tracking-[-0.03em] animate-apple-fade-in">
               Find Gigs
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed animate-apple-slide-up">
-              Browse through available opportunities and gigs. Filter by category, location,
-              and more to find the perfect match for your talents.
+            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed">
+              Browse available opportunities and filter by category, location, and compensation
+              to find the right fit for your next booking.
             </p>
           </div>
 
@@ -257,7 +257,7 @@ export default async function GigsPage({
           )}
 
           {/* Search and Filter */}
-          <div className="max-w-4xl mx-auto mb-12 sm:mb-16">
+          <div className="max-w-4xl mx-auto mb-10 sm:mb-14">
             <div className="panel-frosted grain-texture relative p-4 sm:p-6 md:p-8 shadow-lg">
               <form className="flex flex-col gap-4 sm:gap-5 md:gap-6 relative z-10" method="get">
                 <div className="relative flex-grow">
@@ -335,14 +335,14 @@ export default async function GigsPage({
                 return (
                 <div
                   key={gig.id}
-                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
+                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-200"
                 >
                   <div className="relative aspect-4-3 overflow-hidden">
                     <SafeImage
                       src={gig.image_url}
                       alt={gig.title}
                       fill
-                      className="transition-transform duration-500 group-hover:scale-110 object-cover"
+                      className="transition-transform duration-300 group-hover:scale-110 object-cover"
                       context="gig-card"
                       fallbackSrc="https://picsum.photos/800/600?random"
                     />
