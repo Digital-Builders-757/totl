@@ -54,7 +54,7 @@ export default function HomePage() {
                 <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
+                    className="focus-hint button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
                   >
                     Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
@@ -144,14 +144,14 @@ export default function HomePage() {
             ].map((gig) => (
               <div
                 key={gig.title}
-                className="card-backlit overflow-hidden group active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
+                className="card-backlit overflow-hidden group active:scale-95 sm:hover:scale-[1.02] transition-all duration-200"
               >
                 <div className="relative aspect-4-3 overflow-hidden">
                   <SafeImage
                     src={gig.imageUrl}
                     alt={gig.title}
                     fill
-                    className="transition-transform duration-500 group-hover:scale-110 object-cover"
+                    className="transition-transform duration-300 group-hover:scale-110 object-cover"
                     context="marketing-featured-gig"
                     fallbackSrc="/images/solo_logo.png"
                   />
@@ -288,7 +288,7 @@ export default function HomePage() {
               <Link href="/choose-role" prefetch={false}>
                 <Button
                   size="lg"
-                  className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
+                  className="focus-hint button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
                 >
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
@@ -323,7 +323,7 @@ export default function HomePage() {
                 {/* Removed "Find Gigs" per G1: gig list requires sign-in (not discoverable for signed-out) */}
                 <Link
                   href="/about"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -334,25 +334,25 @@ export default function HomePage() {
               <div className="space-y-2">
                 <Link
                   href="/help"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Help Center
                 </Link>
                 <Link
                   href="/contact"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Contact Us
                 </Link>
                 <Link
                   href="/terms"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Terms of Service
                 </Link>
                 <Link
                   href="/privacy"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
@@ -364,7 +364,7 @@ export default function HomePage() {
                 <Link
                   href="/choose-role"
                   prefetch={false}
-                  className="block text-gray-400 hover:text-white transition-colors"
+                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
                 >
                   Apply as Talent
                 </Link>
@@ -375,9 +375,9 @@ export default function HomePage() {
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
             <p>&copy; 2025 TOTL Agency. All rights reserved.</p>
             <p className="mt-2 text-sm">
-              <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/terms" className="focus-hint hover:text-white transition-colors">Terms of Service</Link>
               {" · "}
-              <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="focus-hint hover:text-white transition-colors">Privacy Policy</Link>
             </p>
           </div>
         </div>

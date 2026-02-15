@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Marketing interaction polish (focus rings + hover timing) (February 14, 2026)**
+
+**UI / INTERACTION** - February 14, 2026
+- ✅ Standardized marketing + gigs card hover timing (snappier, consistent durations).
+- ✅ Added consistent `focus-hint` rings to key interactive elements (home CTAs, footer links, gigs breadcrumbs) for a premium keyboard UX.
+
+**Why this change:**
+- Interaction consistency is one of the biggest giveaways of “default UI”. Tight focus + hover behavior makes the product feel intentional.
+
+**Impact:**
+- Better accessibility, cleaner feel, and more consistent motion across the highest-traffic surfaces.
+
+---
+
 ## 🚀 **Latest: Marketing typography hierarchy polish (February 14, 2026)**
 
 **UI / TYPOGRAPHY** - February 14, 2026

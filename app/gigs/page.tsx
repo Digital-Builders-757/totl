@@ -203,7 +203,7 @@ export default async function GigsPage({
           <div className="mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm px-2 sm:px-0">
             <Link 
               href="/" 
-              className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+              className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
             >
               <Home className="h-4 w-4" />
               <span className="hidden sm:inline">Home</span>
@@ -213,7 +213,7 @@ export default async function GigsPage({
               <>
                 <Link 
                   href="/talent/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -225,7 +225,7 @@ export default async function GigsPage({
               <>
                 <Link 
                   href="/client/dashboard" 
-                  className="text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   <span className="hidden sm:inline">Dashboard</span>
@@ -335,14 +335,14 @@ export default async function GigsPage({
                 return (
                 <div
                   key={gig.id}
-                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-300"
+                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-200"
                 >
                   <div className="relative aspect-4-3 overflow-hidden">
                     <SafeImage
                       src={gig.image_url}
                       alt={gig.title}
                       fill
-                      className="transition-transform duration-500 group-hover:scale-110 object-cover"
+                      className="transition-transform duration-300 group-hover:scale-110 object-cover"
                       context="gig-card"
                       fallbackSrc="https://picsum.photos/800/600?random"
                     />
