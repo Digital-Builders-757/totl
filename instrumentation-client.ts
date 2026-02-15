@@ -148,6 +148,27 @@ Sentry.init({
     // SECURITY: Scrub sensitive data from event (shared utility)
     event = scrubEvent(event);
 
+    // Filter non-actionable Safari/network noise:
+    // Some browsers surface transient fetch failures as a bare "TypeError: Load failed" with no stack.
+    // Only suppress when handled=yes and we have no stack frames.
+    const errorMessage =
+      error && typeof error === "object" && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : "";
+
+    if (errorMessage && errorMessage.includes("Load failed")) {
+      const hasStack = Boolean(
+        event.exception?.values?.[0]?.stacktrace?.frames &&
+          event.exception.values[0].stacktrace.frames.length
+      );
+
+      const isHandled = event.tags?.handled === "yes";
+
+      if (isHandled && !hasStack) {
+        return null;
+      }
+    }
+
       // Filter out hydration errors (often caused by browser extensions)
       if (error && typeof error === 'object') {
         const errorObj = error as any;
