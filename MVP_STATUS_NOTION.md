@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth redirect reliability (router.replace timeout hard reload) (February 15, 2026)**
+
+**AUTH / RELIABILITY** - February 15, 2026
+- ✅ Reduced false-positive navigation timeouts on iOS Safari by increasing the router.replace observation window in production.
+- ✅ Added hard-reload de-dupe (10s) to avoid reload loops + Sentry warning spam when navigation is genuinely stalled.
+
+---
+
 ## 🚀 **Latest: Sentry noise filter (TypeError: Load failed) (February 15, 2026)**
 
 **SENTRY / RELIABILITY** - February 15, 2026
