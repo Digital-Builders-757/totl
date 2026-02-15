@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Marketing typography hierarchy polish (February 14, 2026)**
+
+**UI / TYPOGRAPHY** - February 14, 2026
+- ✅ Smoothed marketing headline scale (reduced overly-jumpy sizes; consistent tracking/leading on hero + section headers).
+- ✅ Standardized body copy scale for better scanability (especially on mobile) across `/` and `/gigs`.
+
+**Why this change:**
+- Makes the public surfaces feel more deliberate and “product”, less like assorted landing-page blocks.
+
+**Impact:**
+- Cleaner hierarchy, better readability, and tighter visual consistency across marketing → gigs.
+
+---
+
 ## 🚀 **Latest: Homepage featured opportunities (real gig-card style) (February 14, 2026)**
 
 **UI / MARKETING COHERENCE** - February 14, 2026

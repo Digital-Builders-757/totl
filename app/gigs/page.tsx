@@ -240,10 +240,10 @@ export default async function GigsPage({
             <div className="panel-frosted w-fit mx-0 md:mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 text-gradient-glow animate-apple-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-5 sm:mb-7 text-gradient-glow tracking-[-0.03em] animate-apple-fade-in">
               Find Gigs
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed animate-apple-slide-up">
+            <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed">
               Browse available opportunities and filter by category, location, and compensation
               to find the right fit for your next booking.
             </p>

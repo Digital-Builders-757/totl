@@ -39,13 +39,13 @@ export default function HomePage() {
                     The Future of Talent Booking
                   </span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white leading-tight font-display">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.02] tracking-[-0.03em] font-display">
                   Connect with
                   <span className="apple-text-gradient"> Great Talent</span>
                   <br />
                   <span className="text-gray-200">Instantly</span>
                 </h1>
-                <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed max-w-lg mx-0 md:mx-auto lg:mx-0">
+                <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg mx-0 md:mx-auto lg:mx-0">
                   TOTL Agency is the fastest way to post gigs, book talent, and manage projects end-to-end.
                   No public directory — discovery happens through gigs and invite-only links.
                 </p>
@@ -99,15 +99,15 @@ export default function HomePage() {
       {/* Featured Opportunities Section (Gigs-only discovery) */}
       <section className="py-32 bg-seamless-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left md:text-center mb-20">
+          <div className="text-left md:text-center mb-12 sm:mb-16">
             <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
               <span className="text-white font-medium text-sm">Featured Opportunities</span>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-bold text-white mb-6 font-display">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
               Book Faster.
               <span className="apple-text-gradient"> Manage Cleaner.</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
               TOTL is gigs-first: brands post opportunities, talent applies, and booking stays organized.
             </p>
           </div>
@@ -202,15 +202,15 @@ export default function HomePage() {
       {/* How It Works Section */}
       <section className="py-32 bg-seamless-accent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left md:text-center mb-20">
+          <div className="text-left md:text-center mb-12 sm:mb-16">
             <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
               <span className="text-white font-medium text-sm">How It Works</span>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-bold text-white mb-6 font-display">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
               Simple
               <span className="apple-text-gradient"> Process</span>
             </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
               From discovery to booking, we&apos;ve streamlined the entire process to make talent
               acquisition effortless and efficient.
             </p>
