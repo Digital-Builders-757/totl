@@ -126,6 +126,9 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   // Redirect guard: prevents double navigation during SIGNED_IN
   const redirectInFlightRef = useRef(false);
 
+  // Hard reload de-dupe: avoid spamming Sentry + avoid reload loops when navigation is slow/flaky.
+  const lastHardReloadRef = useRef<{ ts: number; target: string } | null>(null);
+
   // Sync ref with state so timeout callback can read current value
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -378,8 +381,18 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       try {
         routerInstance.replace(target);
 
-        const navigationTimeoutMs = 1500;
         const navigationPollMs = 150;
+
+        const isMobileSafari =
+          typeof navigator !== "undefined" &&
+          /iP(hone|ad|od)/.test(navigator.userAgent) &&
+          /Safari/.test(navigator.userAgent) &&
+          !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+
+        // Safari + slow networks can legitimately exceed 1.5s between replace() and the URL reflecting.
+        // Use a longer timeout in production to avoid false-positive hard reloads.
+        const navigationTimeoutMs =
+          process.env.NODE_ENV === "production" ? (isMobileSafari ? 4500 : 3000) : 2000;
 
         // Wait up to navigationTimeoutMs to see if navigation happens.
         // In production (and on slower devices), route transitions can take longer than a single 500ms tick.
@@ -418,6 +431,26 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           // Navigation didn't happen within timeout, fallback to hard reload
+          // De-dupe: avoid spamming Sentry and avoid reload loops.
+          const now = Date.now();
+          const last = lastHardReloadRef.current;
+          const dedupeWindowMs = 10_000;
+          if (last && last.target === target && now - last.ts < dedupeWindowMs) {
+            logger.info(
+              "[auth.onAuthStateChange] router.replace() still not navigated; skipping repeat hard reload",
+              {
+                expected: targetPathname,
+                actual: newPathname,
+                startPathname,
+                navigationTimeoutMs,
+                dedupeWindowMs,
+              }
+            );
+            return;
+          }
+
+          lastHardReloadRef.current = { ts: now, target };
+
           logger.warn(
             "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
             {
