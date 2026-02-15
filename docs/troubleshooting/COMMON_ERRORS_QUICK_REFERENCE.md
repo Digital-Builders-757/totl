@@ -218,6 +218,40 @@ npm run build
   - **Root Cause:** `.env.local` saved as UTF-8 **with BOM**; the hidden BOM bytes (`ï»¿`) confuse the CLI dotenv parser.
   - **Fix:** In VS Code choose “File → Save with Encoding → UTF-8” (no BOM) for `.env.local`. Before running CLI commands also set `SUPABASE_INTERNAL_NO_DOTENV=1` or temporarily rename `.env.local` to keep smart quotes/BOM characters from breaking the parser.
   - **Prevention:** Keep `.env.local` plain UTF-8, avoid smart quotes, and always pass through the `cmd /d /c "set SUPABASE_INTERNAL_NO_DOTENV=1 && …"` wrapper already baked into the npm scripts.
+- **Seed fails: `duplicate key value violates unique constraint "talent_profiles_user_id_key"` (SQLSTATE 23505)**
+  - **Root Cause:** The `on_auth_user_created` trigger creates `profiles` and `talent_profiles` when users are inserted into `auth.users`. The seed then inserts into `talent_profiles` for the same users, causing a duplicate key error.
+  - **Fix:** The seed uses `ON CONFLICT (user_id) DO NOTHING` on `talent_profiles` inserts — idempotent. If you see this error, ensure `supabase/seed.sql` has that clause. Run `npm run db:reset` again.
+- **403 Unauthorized / "alg" (Algorithm) Header Parameter value not allowed**
+  - **Symptom:** Supabase local stack fails at "Restarting containers…" or requests fail with `403 Unauthorized` / JWT error about algorithm header not allowed.
+  - **Root Cause (primary):** Supabase CLI **v2.71.1+** changed the default JWT signing algorithm for local dev from **HS256 → ES256**. Kong/auth/anything expecting the legacy HS256 flow rejects ES256 tokens. ([GitHub #4726](https://github.com/supabase/cli/issues/4726))
+  - **Root Cause (secondary):** Keys/env mismatch — local URL with prod keys, or system env vars (`JWT_SECRET`, `SUPABASE_AUTH_JWT_SECRET`, `GOTRUE_JWT_*`) leaking into the process.
+  - **Absolute Rule:** Local URL must pair with **local keys**. Prod URL must pair with **prod keys**.
+  - **Step 1 — Confirm algorithm:** Run `supabase status`, copy the anon key, then decode the JWT header:
+    ```powershell
+    $token = "<PASTE_ANON_KEY_HERE>"
+    $h = $token.Split('.')[0].Replace('-','+').Replace('_','/')
+    switch ($h.Length % 4) { 2 {$h+='=='} 3 {$h+='='} }
+    [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($h))
+    ```
+    You'll see `{"alg":"ES256",...}` or `{"alg":"HS256",...}`.
+  - **Step 2 — Fix (recommended): Pin CLI to 2.71.0 (HS256 legacy)** so `db:reset` stops breaking:
+    - **Scoop:** `scoop uninstall supabase` → `scoop install supabase@2.71.0`
+    - **Chocolatey:** `choco uninstall supabase-cli` → `choco install supabase-cli --version=2.71.0`
+    - Then hard reset:
+    ```powershell
+    supabase stop
+    Remove-Item -Recurse -Force .supabase, supabase\.temp -ErrorAction SilentlyContinue
+    supabase start
+    npm run db:reset
+    ```
+  - **Alternative (Option B):** Stay on latest CLI and migrate everything that expects HS256 to support ES256. See [GitHub #4726](https://github.com/supabase/cli/issues/4726).
+  - **Trap — env leak:** Even with `SUPABASE_INTERNAL_NO_DOTENV=1`, system env vars can leak. Check and clear:
+    ```powershell
+    Get-ChildItem Env: | Where-Object { $_.Name -match "SUPABASE|GOTRUE|JWT" } | Format-Table -Auto
+    Remove-Item Env:JWT_SECRET -ErrorAction SilentlyContinue
+    Remove-Item Env:SUPABASE_AUTH_JWT_SECRET -ErrorAction SilentlyContinue
+    ```
+    Then retry `supabase stop` → `supabase start` → `npm run db:reset`.
 
 ## **4. BRANCH-SPECIFIC REQUIREMENTS**
 - **DEVELOP Branch:** Use `npm run types:regen:dev` if needed

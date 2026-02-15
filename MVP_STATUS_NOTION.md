@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Sentry + auth follow-ups (duplicate init + redirect loop protection) (February 15, 2026)**
+
+**SENTRY / AUTH / RELIABILITY** - February 15, 2026
+- ✅ Removed duplicate client Sentry initialization by moving the `Load failed` filter into `instrumentation-client.ts` and deleting `sentry.client.config.ts`.
+- ✅ Made auth hard-reload de-dupe persist across reloads via `sessionStorage` (prevents reload loops + warning spam when navigation is genuinely stalled).
+- ✅ Kept the longer production observation window for `router.replace()` (especially iOS Safari).
+
+**Impact:**
+- Single source of truth for client Sentry init.
+- Cleaner auth redirect behavior under slow/flaky navigation.
+
+---
+
 ## 🚀 **Latest: Auth redirect reliability (router.replace timeout hard reload) (February 15, 2026)**
 
 **AUTH / RELIABILITY** - February 15, 2026

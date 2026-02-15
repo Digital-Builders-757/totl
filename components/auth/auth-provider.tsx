@@ -433,9 +433,28 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Navigation didn't happen within timeout, fallback to hard reload
           // De-dupe: avoid spamming Sentry and avoid reload loops.
           const now = Date.now();
-          const last = lastHardReloadRef.current;
           const dedupeWindowMs = 10_000;
-          if (last && last.target === target && now - last.ts < dedupeWindowMs) {
+
+          // Persist across hard reloads using sessionStorage.
+          // Keyed by target to prevent repeated reload attempts in the same session.
+          const sessionKey = `totl:auth:hard_reload:${encodeURIComponent(target)}`;
+          let hasRecentReload = false;
+
+          try {
+            const raw = window.sessionStorage.getItem(sessionKey);
+            const lastTs = raw ? Number(raw) : 0;
+            if (Number.isFinite(lastTs) && lastTs > 0 && now - lastTs < dedupeWindowMs) {
+              hasRecentReload = true;
+            }
+          } catch {
+            // sessionStorage may be unavailable; fall back to in-memory ref.
+          }
+
+          const last = lastHardReloadRef.current;
+          if (
+            hasRecentReload ||
+            (last && last.target === target && now - last.ts < dedupeWindowMs)
+          ) {
             logger.info(
               "[auth.onAuthStateChange] router.replace() still not navigated; skipping repeat hard reload",
               {
@@ -450,6 +469,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           lastHardReloadRef.current = { ts: now, target };
+          try {
+            window.sessionStorage.setItem(sessionKey, String(now));
+          } catch {
+            // ignore
+          }
 
           logger.warn(
             "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
