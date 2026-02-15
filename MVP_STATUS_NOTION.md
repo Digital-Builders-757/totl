@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Sentry noise filter (TypeError: Load failed) (February 15, 2026)**
+
+**SENTRY / RELIABILITY** - February 15, 2026
+- ✅ Added `sentry.client.config.ts` and filtered the non-actionable Safari/network noise case: `TypeError: Load failed` with no stack (handled=yes).
+
+**Why this change:**
+- This error often represents transient fetch failures with no actionable stack trace; it burns attention without improving reliability.
+
+**Impact:**
+- Cleaner Sentry signal while keeping real errors (with stack traces) visible.
+
+---
+
 ## 🚀 **Latest: BugBot follow-up (footer focus ring + redundant focus-hint) (February 15, 2026)**
 
 **UI / QA** - February 15, 2026
