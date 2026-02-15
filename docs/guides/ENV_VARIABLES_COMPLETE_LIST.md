@@ -5,6 +5,22 @@
 
 ---
 
+## ⚠️ **Local vs Prod Key Separation (CRITICAL)**
+
+**Absolute rule:** Keys must never cross streams.
+
+| Environment | URL | Keys |
+|-------------|-----|------|
+| **Local** (Docker Supabase) | `http://127.0.0.1:54321` | From `supabase status` after `supabase start` |
+| **Prod/Dev** (hosted Supabase) | `https://<project-ref>.supabase.co` | From Supabase Dashboard → Settings → API |
+
+- **Local URL must pair with local keys.** Prod URL must pair with prod keys.
+- Mixing them causes `403 Unauthorized` and JWT "alg" (Algorithm) header errors.
+- When running locally: use keys from `supabase status`, not from `.env.local` if that file has prod keys.
+- The `npm run db:reset`, `db:push`, `db:pull`, `db:status`, and `db:new` scripts set `SUPABASE_INTERNAL_NO_DOTENV=1` so the Supabase CLI does not parse `.env.local` — preventing key bleed between environments.
+
+---
+
 ## 📋 **REQUIRED Variables (Must Have)**
 
 ### 🔐 **Supabase Configuration** (REQUIRED)

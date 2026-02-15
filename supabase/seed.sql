@@ -62,7 +62,8 @@ WHERE user_id IN (
   '88888888-8888-8888-8888-888888888888',
   '99999999-9999-9999-9999-999999999999',
   'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
 );
 
 DELETE FROM client_profiles
@@ -86,7 +87,8 @@ WHERE id IN (
   'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
   'ca1a1a1a-1111-4444-aaaa-000000000001',
   'cb2b2b2b-2222-4444-bbbb-000000000002',
-  'cc3c3c3c-3333-4444-cccc-000000000003'
+  'cc3c3c3c-3333-4444-cccc-000000000003',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
 );
 
 DELETE FROM auth.users
@@ -104,7 +106,8 @@ WHERE id IN (
   'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
   'ca1a1a1a-1111-4444-aaaa-000000000001',
   'cb2b2b2b-2222-4444-bbbb-000000000002',
-  'cc3c3c3c-3333-4444-cccc-000000000003'
+  'cc3c3c3c-3333-4444-cccc-000000000003',
+  'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee'
 );
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
@@ -125,7 +128,8 @@ WITH user_seeds AS (
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'mia.seed@thetotlagency.local', 'Mia', 'Taylor', 'talent'),
     ('ca1a1a1a-1111-4444-aaaa-000000000001', 'qa.admin@thetotlagency.local', 'QA', 'Admin', 'admin'),
     ('cb2b2b2b-2222-4444-bbbb-000000000002', 'lumen.media@thetotlagency.local', 'Lumen', 'Media', 'client'),
-    ('cc3c3c3c-3333-4444-cccc-000000000003', 'northwind.events@thetotlagency.local', 'Northwind', 'Events', 'client')
+    ('cc3c3c3c-3333-4444-cccc-000000000003', 'northwind.events@thetotlagency.local', 'Northwind', 'Events', 'client'),
+    ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'test@totl.local', 'Test', 'User', 'talent')
   ) AS t(id, email, first_name, last_name, profile_role)
 )
 INSERT INTO auth.users (
@@ -193,7 +197,9 @@ INSERT INTO profiles (id, role, display_name, email_verified, created_at, update
 ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'talent', 'Liam Anderson', true, NOW() - INTERVAL '4 days', NOW() - INTERVAL '2 days'),
 
 -- Talent 11: Mia Taylor
-('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'talent', 'Mia Taylor', true, NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day')
+('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'talent', 'Mia Taylor', true, NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day'),
+-- Test User: simple memorable test account
+('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'talent', 'Test User', true, NOW(), NOW())
 ON CONFLICT (id) DO NOTHING;
 
 -- Now, let's create detailed talent profiles
@@ -267,7 +273,15 @@ INSERT INTO talent_profiles (
 ('fd54ead8-8392-48c5-b183-8102cd6dff90', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'Mia', 'Taylor', '+1-555-0111', 19, 'Nashville, TN',
  'Fresh new face with natural beauty and potential. Eager to learn and grow in the modeling industry.',
  'https://miataylor.new', '5''8"', '34-24-36', 'Auburn', 'Green', '8',
- ARRAY['English'], 1, ARRAY['New Face', 'Natural', 'Fresh'], 120, NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day');
+ ARRAY['English'], 1, ARRAY['New Face', 'Natural', 'Fresh'], 120, NOW() - INTERVAL '2 days', NOW() - INTERVAL '1 day'),
+
+-- Test User - Simple test account for quick login
+('ee000000-eeee-eeee-eeee-eeeeeeeeeeee', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'Test', 'User', '+1-555-0999', 25, 'Test City',
+ 'Test account for development and QA.',
+ NULL, '5''10"', '38-30-36', 'Brown', 'Brown', '9',
+ ARRAY['English'], 2, ARRAY['Commercial', 'Lifestyle'], 150, NOW(), NOW())
+-- handle_new_user trigger already creates minimal talent_profiles; idempotent: skip if exists
+ON CONFLICT (user_id) DO NOTHING;
 
 -- Update the display names in profiles to match the talent names
 UPDATE profiles SET display_name = 'Emma Rodriguez' WHERE id = '11111111-1111-1111-1111-111111111111';
