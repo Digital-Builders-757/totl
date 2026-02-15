@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: BugBot follow-up (footer focus ring + redundant focus-hint) (February 15, 2026)**
+
+**UI / QA** - February 15, 2026
+- ✅ Removed redundant `focus-hint` usage on homepage CTA Buttons (already included in Button base styles).
+- ✅ Added `focus-hint` to the footer “Post a Gig” button for consistent keyboard focus rings.
+
+---
+
 ## 🚀 **Latest: Marketing interaction polish (focus rings + hover timing) (February 14, 2026)**
 
 **UI / INTERACTION** - February 14, 2026

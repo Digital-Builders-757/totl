@@ -54,7 +54,7 @@ export default function HomePage() {
                 <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
                   <Button
                     size="lg"
-                    className="focus-hint button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
+                    className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
                   >
                     Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
@@ -288,7 +288,7 @@ export default function HomePage() {
               <Link href="/choose-role" prefetch={false}>
                 <Button
                   size="lg"
-                  className="focus-hint button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
+                  className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
                 >
                   Start Booking <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
