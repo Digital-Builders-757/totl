@@ -692,14 +692,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           const isProtectedPath = (p: string): boolean => {
             // Auth routes should never be treated as protected by the client bootstrap.
             // Middleware handles access control; client-side redirects here should be a last-resort safety net.
-            if (
-              p.startsWith("/auth/callback") ||
-              p === PATHS.LOGIN ||
-              p === PATHS.RESET_PASSWORD ||
-              p === PATHS.UPDATE_PASSWORD ||
-              p === PATHS.VERIFICATION_PENDING ||
-              p === PATHS.CHOOSE_ROLE
-            ) {
+            if (p.startsWith("/auth/callback") || isAuthRoute(p)) {
               return false;
             }
             
