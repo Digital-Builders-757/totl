@@ -690,14 +690,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           // Protected if starts with /talent, /client, /admin (except public marketing profiles)
           // Auth callback routes are special public (no redirect during exchange)
           const isProtectedPath = (p: string): boolean => {
-            // Auth callback routes are special public (no redirect during exchange)
-            if (p.startsWith("/auth/callback") || p === PATHS.RESET_PASSWORD || p === PATHS.UPDATE_PASSWORD) {
+            // Auth routes should never be treated as protected by the client bootstrap.
+            // Middleware handles access control; client-side redirects here should be a last-resort safety net.
+            if (p.startsWith("/auth/callback") || isAuthRoute(p)) {
               return false;
-            }
-            
-            // /choose-role requires auth (protected)
-            if (p === PATHS.CHOOSE_ROLE) {
-              return true;
             }
             
             // Protected prefixes
