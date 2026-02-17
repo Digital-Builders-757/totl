@@ -8,6 +8,10 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Password reset link fix (missing_token) (February 17, 2026)**
+
+**AUTH / PASSWORD RESET** - February 17, 2026
+- ✅ Fixed `/update-password` incorrectly redirecting to `/login?error=missing_token` when Supabase recovery links provide tokens in the URL hash.
 ## 🚀 **Latest: Signup route bounce fix (/choose-role → /login) (February 17, 2026)**
 
 **AUTH / CODE HEALTH** - February 17, 2026

@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UpdatePasswordForm } from "./update-password-form";
+import { UpdatePasswordClientGate } from "./update-password-client-gate";
 import { Button } from "@/components/ui/button";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -155,6 +156,45 @@ export default async function UpdatePasswordPage({
     }
   }
 
-  // No valid token provided - redirect to login
-  redirect("/login?error=missing_token");
+  // No valid query token provided.
+  // Supabase recovery links may use URL hash tokens, which server components cannot access.
+  // Render a client gate to exchange/store session from the hash and only show an error if it fails.
+  return (
+    <div className="min-h-screen bg-gray-50 pt-24">
+      <div className="container mx-auto px-4 py-12">
+        <Link
+          href="/login"
+          className="inline-flex items-center text-gray-600 hover:text-black mb-8"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to login
+        </Link>
+
+        <div className="max-w-md mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <Image
+                src="/images/totl-logo-transparent.png"
+                alt="TOTL Agency"
+                width={120}
+                height={50}
+                className="mx-auto mb-6"
+              />
+              <h1 className="text-2xl font-bold mb-2">Update Password</h1>
+              <p className="text-gray-600">We&apos;re preparing your reset link…</p>
+            </div>
+
+            <UpdatePasswordClientGate />
+
+            {/* If the gate succeeds, the session is stored and the user can refresh to continue.
+                Most clients will proceed without needing a refresh. */}
+            <div className="mt-6">
+              <UpdatePasswordForm />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
