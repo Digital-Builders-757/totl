@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Signup route bounce fix (/choose-role → /login) (February 17, 2026)**
+
+**AUTH / SIGNUP** - February 17, 2026
+- ✅ Fixed a client bootstrap bug that incorrectly treated `/choose-role` as a protected route and redirected signed-out users back to `/login`, breaking the create-account flow.
+
+---
+
 ## 🚀 **Latest: Sentry + auth follow-ups (duplicate init + redirect loop protection) (February 15, 2026)**
 
 **SENTRY / AUTH / RELIABILITY** - February 15, 2026
