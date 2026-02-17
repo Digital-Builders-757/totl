@@ -12,6 +12,14 @@
 
 **AUTH / PASSWORD RESET** - February 17, 2026
 - ✅ Fixed `/update-password` incorrectly redirecting to `/login?error=missing_token` when Supabase recovery links provide tokens in the URL hash.
+## 🚀 **Latest: Signup route bounce fix (/choose-role → /login) (February 17, 2026)**
+
+**AUTH / CODE HEALTH** - February 17, 2026
+- ✅ Refactor: use canonical `isAuthRoute()` in AuthProvider bootstrap guard (avoids duplicated route lists drifting over time).
+
+
+**AUTH / SIGNUP** - February 17, 2026
+- ✅ Fixed a client bootstrap bug that incorrectly treated `/choose-role` as a protected route and redirected signed-out users back to `/login`, breaking the create-account flow.
 
 ---
 
