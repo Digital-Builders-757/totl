@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Password reset link fix (missing_token) (February 17, 2026)**
+
+**AUTH / PASSWORD RESET** - February 17, 2026
+- ✅ Fixed `/update-password` incorrectly redirecting to `/login?error=missing_token` when Supabase recovery links provide tokens in the URL hash.
+
+---
+
 ## 🚀 **Latest: Sentry + auth follow-ups (duplicate init + redirect loop protection) (February 15, 2026)**
 
 **SENTRY / AUTH / RELIABILITY** - February 15, 2026
