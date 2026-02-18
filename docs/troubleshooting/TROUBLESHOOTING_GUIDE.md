@@ -713,7 +713,7 @@ useEffect(() => {
 
 **Impact:** Reduced 5+ profile queries to 1 query per session (cached in auth context).
 
-**See:** `docs/AUTH_STRATEGY.md` for complete auth provider documentation.
+**See:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` for current auth provider and routing invariants.
 
 ---
 

@@ -77,15 +77,17 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 ### **🔐 Authentication & Security**
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
-- `AUTH_BOOTSTRAP_CONTRACT.md` - Legacy notes (superseded by `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
-- `AUTH_STRATEGY.md` - Legacy strategy notes (superseded by contracts + journeys; keep for history only)
-- `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - **✅ NEW** - Complete audit of `.maybeSingle()` query pattern fixes (Nov 2025)
-- `AUTH_REDIRECT_FIX_NOV_2025.md` - **✅ NEW** - Login redirect fixes and profile creation improvements (Nov 2025)
-- `AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` - **✅ NEW** - Auth timeout recovery implementation (8-second timeout guard + recovery UI, Jan 2025)
-- `AUTH_REDIRECT_END_TO_END_AUDIT.md` - **✅ NEW** - Complete end-to-end audit of login → redirect pipeline (Jan 2026)
+- `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - **✅ CANONICAL** - Auth bootstrap, routing-safe states, and recovery invariants
+- `tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` - **✅ CANONICAL** - Scenario-to-proof ledger for auth/bootstrap coverage
+- `AUTH_QUERY_PATTERN_FIX_NOV_2025.md` - Query discipline migration (`.single()` vs `.maybeSingle()`) and remediation notes
+- `archive/AUTH_REDIRECT_FIX_NOV_2025.md` - Historical redirect fix notes (Nov 2025)
+- `archive/AUTH_LEGACY_INDEX.md` - Legacy auth doc map (historical analyses/summaries)
+- `troubleshooting/AUTH_TIMEOUT_RECOVERY_IMPLEMENTATION.md` - Auth timeout recovery implementation (8-second timeout guard + recovery UI)
+- `audits/AUTH_REDIRECT_END_TO_END_AUDIT.md` - Complete end-to-end audit of login -> redirect pipeline (Jan 2026)
 - `AUTH_THREE_TRUTHS_LOGGING_IMPLEMENTATION.md` - **✅ NEW** - Three truths logging implementation (proves session is cookie-backed end-to-end, Jan 2026)
 - `THREE_TRUTHS_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for three truths logging (Jan 2026)
 - `THREE_TRUTHS_TEST_SUMMARY.md` - **✅ NEW** - Quick reference summary for three truths testing (Jan 2026)
+- `AUTH_*.md` stubs - Stable links that forward to archived auth history in `docs/archive/`
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)

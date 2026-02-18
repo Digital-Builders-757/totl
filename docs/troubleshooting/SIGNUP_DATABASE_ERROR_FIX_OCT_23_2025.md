@@ -166,7 +166,7 @@ Created proper migration files for version control:
    - PowerShell commands for verification
    - SQL verification queries
 
-2. **Updated `docs/AUTH_STRATEGY.md`**
+2. **Updated `docs/AUTH_STRATEGY.md` (now a legacy stub)**
    - Added critical warning about missing `email` column
    - Updated schema documentation
    - Added reference to new checklist
@@ -184,7 +184,7 @@ Created proper migration files for version control:
 ### **Immediate Actions Taken**
 
 1. ✅ Created `AUTH_DATABASE_TRIGGER_CHECKLIST.md` with mandatory pre-flight checks
-2. ✅ Updated `AUTH_STRATEGY.md` with schema warnings
+2. ✅ Updated `AUTH_STRATEGY.md` (legacy at that time; now stubbed to archive) with schema warnings
 3. ✅ Added production incident notes to prevent recurrence
 4. ✅ Created `EMERGENCY_FIX_SIGNUP.sql` for future reference
 
@@ -238,7 +238,7 @@ Created proper migration files for version control:
 - `docs/SIGNUP_DATABASE_ERROR_FIX_OCT_23_2025.md` - This document
 
 ### **Modified Files**
-- `docs/AUTH_STRATEGY.md` - Added warnings and schema clarifications
+- `docs/AUTH_STRATEGY.md` - Added warnings and schema clarifications (now preserved in archive via stub)
 - `docs/DOCUMENTATION_INDEX.md` - Added new checklist reference
 
 ---

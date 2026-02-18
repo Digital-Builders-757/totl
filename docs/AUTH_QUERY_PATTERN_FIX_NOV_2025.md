@@ -143,21 +143,21 @@ if (!profile || (profileError && profileError.code === "PGRST116")) {
 ## 📚 Documentation Updates
 
 ### **Updated Files**
-1. **`docs/AUTH_STRATEGY.md`** ✅
+1. **`docs/AUTH_STRATEGY.md`** ✅ (historical; now stubbed to archive)
    - Added "Query Pattern Best Practices" section
    - Documented when to use `.maybeSingle()` vs `.single()`
    - Added code examples and migration patterns
    - Listed all updated files
 
-2. **`docs/CODING_STANDARDS.md`** ✅
+2. **`docs/development/CODING_STANDARDS.md`** ✅
    - Added "Query Pattern Guidelines" section
    - Documented critical rules for profile queries
    - Added examples and best practices
 
 ### **Related Documentation**
 - `docs/SENTRY_ERROR_TRACKING_ENHANCEMENT.md` - Original 406 error fix documentation
-- `docs/AUTH_STRATEGY.md` - Complete authentication strategy
-- `docs/CODING_STANDARDS.md` - General coding standards
+- `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - Current canonical auth bootstrap contract
+- `docs/development/CODING_STANDARDS.md` - General coding standards
 
 ---
 
@@ -227,8 +227,8 @@ if (!profile || (profileError && profileError.code === "PGRST116")) {
 
 ## 🔗 Related Documentation
 
-- [`docs/AUTH_STRATEGY.md`](./AUTH_STRATEGY.md) - Complete authentication strategy
-- [`docs/CODING_STANDARDS.md`](./CODING_STANDARDS.md) - Coding standards with query patterns
+- [`docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`](./contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md) - Current canonical auth contract
+- [`docs/development/CODING_STANDARDS.md`](./development/CODING_STANDARDS.md) - Coding standards with query patterns
 - [`docs/SENTRY_ERROR_TRACKING_ENHANCEMENT.md`](./SENTRY_ERROR_TRACKING_ENHANCEMENT.md) - Original 406 error fix
 
 ---

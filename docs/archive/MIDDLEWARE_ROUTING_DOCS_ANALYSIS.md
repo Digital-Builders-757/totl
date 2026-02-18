@@ -238,7 +238,7 @@
    ## Related Documentation
    
    - **Historical Fixes:** See `docs/archive/AUTH_REDIRECT_FIX_NOV_2025.md` for past redirect bug fixes
-   - **Auth Architecture:** See `docs/AUTH_STRATEGY.md` for authentication strategy and database schema
+   - **Auth Architecture:** See `docs/AUTH_STRATEGY.md` (legacy stub) or canonical `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`
    - **Query Patterns:** See `docs/AUTH_QUERY_PATTERN_FIX_NOV_2025.md` for `.maybeSingle()` usage patterns
    - **Sign Out Flow:** See `docs/SIGN_OUT_IMPROVEMENTS.md` for sign out functionality
    ```

@@ -100,7 +100,7 @@
 |-----------|----------------|
 | **Any code change** | `TOTL_PROJECT_CONTEXT_PROMPT.md` |
 | **Database changes** | `database_schema_audit.md` + `docs/SQL_RLS_POLICY_CREATION_GUIDE.md` |
-| **Auth changes** | `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` + `docs/AUTH_STRATEGY.md` |
+| **Auth changes** | `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` + `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` |
 | **Security changes** | `docs/SECURITY_CONFIGURATION.md` |
 | **Stripe/subscriptions** | `docs/STRIPE_SUBSCRIPTION_PRD.md` + `docs/STRIPE_TROUBLESHOOTING.md` |
 | **New features** | `docs/DOCUMENTATION_INDEX.md` → find relevant feature docs |
@@ -257,7 +257,7 @@ npm run lint
 - **Feature docs:** Check `docs/DOCUMENTATION_INDEX.md` → find category → read relevant docs
 - **Error messages:** Check `docs/COMMON_ERRORS_QUICK_REFERENCE.md` first
 - **Database questions:** Check `database_schema_audit.md` + `docs/DATABASE_REPORT.md`
-- **Auth questions:** Check `docs/AUTH_STRATEGY.md` + `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
+- **Auth questions:** Check `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` + `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
 
 ---
 
@@ -375,7 +375,7 @@ import type { Database } from "@/types/supabase";
 ### **For Specific Tasks:**
 
 - **Database work:** `database_schema_audit.md` + `docs/SQL_RLS_POLICY_CREATION_GUIDE.md`
-- **Auth work:** `docs/AUTH_STRATEGY.md` + `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
+- **Auth work:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` + `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`
 - **Stripe work:** `docs/STRIPE_SUBSCRIPTION_PRD.md` + `docs/STRIPE_TROUBLESHOOTING.md`
 - **Admin work:** `docs/ADMIN_ACCOUNT_GUIDE.md`
 - **UI work:** `docs/UI_VISUAL_LANGUAGE.md` + `docs/CSS_BEST_PRACTICES.md`

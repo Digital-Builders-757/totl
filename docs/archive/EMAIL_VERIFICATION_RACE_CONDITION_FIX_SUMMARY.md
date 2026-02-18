@@ -630,7 +630,7 @@ const { data: user } = useQuery({
 - [React useRef Hook](https://react.dev/reference/react/useRef)
 - [Next.js Navigation](https://nextjs.org/docs/app/building-your-application/routing/linking-and-navigating)
 - Project Coding Standards: `docs/CODING_STANDARDS.md`
-- Auth Strategy: `docs/AUTH_STRATEGY.md`
+- Auth Strategy: `docs/AUTH_STRATEGY.md` (legacy stub; canonical auth contract is `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
 
 ---
 

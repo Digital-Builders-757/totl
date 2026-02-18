@@ -64,7 +64,7 @@ These files control **auth, routing, and schema truth**. They must **never** be 
 - `app/api/auth/*`
 - `app/api/stripe/webhook/route.ts` (must be idempotent)
 - `docs/SIGN_OUT_IMPROVEMENTS.md`
-- `docs/AUTH_STRATEGY.md`
+- `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`
 - `docs/TALENT_DASHBOARD_FLOW.md` (if present)
 
 **Red Zone – Schema & Types**
@@ -88,7 +88,7 @@ When modifying ANY Red Zone file:
 2. **Summarize the existing behavior** in plain language.
 3. **Propose a small, explicit change** (minimal diff) – not a full rewrite.
 4. **Apply only that change**, preserving existing working logic.
-5. **Re-read** `docs/AUTH_STRATEGY.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`, and `database_schema_audit.md` if the change touches:
+5. **Re-read** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`, `docs/SIGN_OUT_IMPROVEMENTS.md`, and `database_schema_audit.md` if the change touches:
    - auth state
    - middleware behavior
    - dashboards
@@ -165,7 +165,7 @@ Before writing or editing any code, confirm:
 
 ## 🔐 AUTHENTICATION & AUTHORIZATION
 
-- **BEFORE ANY AUTH CHANGES:** Read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` and `docs/AUTH_STRATEGY.md`.
+- **BEFORE ANY AUTH CHANGES:** Read `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` and `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`.
 - Use `@supabase/auth-helpers-nextjs` patterns for session management.
 - Check user roles before privileged actions.
 - Use `middleware.ts` for route protection.

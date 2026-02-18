@@ -1234,7 +1234,7 @@
 - ✅ Added helpful redirect page explaining Career Builder requires approval through application process  
 - ✅ Improved choose-role page dialog messaging with clearer explanation of approval workflow  
 - ✅ Added conditional "Apply as Career Builder" button for logged-in users in choose-role dialog  
-- ✅ Updated documentation (`docs/AUTH_STRATEGY.md`) with complete Career Builder application flow  
+- ✅ Updated documentation (`docs/AUTH_STRATEGY.md` legacy stub -> archived strategy) with complete Career Builder application flow  
 - ✅ Created comprehensive analysis document (`docs/CAREER_BUILDER_LOGIN_SIGNUP_ANALYSIS.md`)  
 - ✅ Created implementation plan document (`docs/CAREER_BUILDER_SIGNUP_FIX_PLAN.md`)  
 - ✅ Fixed import order warnings in `app/choose-role/page.tsx` and `app/client/signup/page.tsx`  

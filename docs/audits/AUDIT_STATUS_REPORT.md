@@ -611,7 +611,7 @@ docs/DOCUMENTATION_INDEX.md
 - **Admin**: `docs/contracts/ADMIN_CONTRACT.md`
 
 **Candidate duplicates to merge/archive (do not delete blindly):**
-- `docs/AUTH_STRATEGY.md` → keep as “historical”, but add a loud header pointing to the contract + journeys (already described as legacy in index).
+- `docs/AUTH_STRATEGY.md` → now a legacy stub that points to archive + canonical contract.
 
 ### 6.4 BUG: `client_applications` RLS policy references `auth.users` (breaks authenticated submit/status)
 
