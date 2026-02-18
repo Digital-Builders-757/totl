@@ -6,6 +6,27 @@
 
 ---
 
+## Feb 17, 2026 Post-Incident Addendum (must read)
+
+Two auth regressions occurred after this document was written. This addendum is authoritative for current behavior:
+
+1. **`/choose-role` must be auth-safe for signed-out users**
+   - Regression cause: client bootstrap maintained a hardcoded auth-route list and treated `/choose-role` as protected.
+   - Fix landed: use `isAuthRoute()` in `components/auth/auth-provider.tsx` protected-path logic to mirror middleware.
+   - Rule: never hardcode a second auth route list outside `lib/constants/routes.ts`.
+
+2. **`/update-password` must support hash-token recovery links**
+   - Regression cause: server page redirected to `/login` when query tokens were missing, ignoring valid hash tokens.
+   - Fix landed: `app/update-password/update-password-client-gate.tsx` processes hash tokens client-side and establishes session.
+   - Rule: when dealing with reset links, test both query-token and hash-token modes before merge.
+
+**Timeline (UTC-5):**
+- Feb 4, 2026 (`2405fa3`): session gate + deny-by-default helper introduced the `/choose-role` protected-route drift.
+- Feb 17, 2026 (`8a08777`, `46462f5`): `/choose-role` redirect loop fixed by aligning to `isAuthRoute()`.
+- Feb 17, 2026 (`79dbd43`): `/update-password` hash-token flow support added.
+
+---
+
 ## Problem Summary
 
 **Symptom:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap.
@@ -240,6 +261,8 @@ const isPublicTalentProfile = (path: string): boolean => {
 
 **Why:** These routes can briefly have "no session" during the exchange. Redirecting would break the flow.
 
+> **Update:** `/choose-role` is also in `AUTH_ROUTES` and must be handled via `isAuthRoute()` so client and middleware cannot drift.
+
 ### 3. Precise Error Handling
 
 **Only swallows:** `AuthSessionMissingError` (by name or message pattern)
@@ -396,7 +419,7 @@ const isPublicTalentProfile = (path: string): boolean => {
 ### Test 3: Sign Up → Land on Choose-Role Flow
 **Expected:**
 - ✅ No missing-session errors during the transition
-- ✅ `/choose-role` treated as protected (requires auth)
+- ✅ `/choose-role` treated as auth-safe for signed-out create-account entry (no forced bounce to `/login`)
 - ✅ No redirect loop
 
 ### Test 4: Hard Refresh on `/talent/dashboard` While Logged In

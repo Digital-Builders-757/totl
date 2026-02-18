@@ -103,6 +103,13 @@ npm run build
   - **Root Cause:** Missing text color classes on heading and Label components
   - **Fix:** Add `text-gray-900` class to `<h1>` heading and `<Label>` components
   - **Prevention:** Always specify text colors explicitly on white backgrounds, especially in form pages
+- **Password reset link lands in broken `/update-password` state (`missing credentials`):**
+  - **Symptom:** User opens reset link and sees "missing credentials" while still seeing a password form, or gets redirected away unexpectedly.
+  - **Root Cause:** Recovery tokens can arrive in URL hash with different shapes (`access_token` + `refresh_token` OR `token_hash`), and the gate handled only one shape or rendered the form before token readiness.
+  - **Fix:** In `app/update-password/update-password-client-gate.tsx`, implement a strict gate state machine (`checking`/`ready`/`failed`) and support both hash token modes:
+    - `setSession({ access_token, refresh_token })` when both are present
+    - `verifyOtp({ type: "recovery", token_hash })` when only `token_hash` is present
+  - **Prevention:** Keep `/update-password` form rendering behind token-readiness gate only; never render form during failed token validation.
 - **AuthSessionMissingError Sentry noise:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap
   - **Symptom:** Sentry shows `AuthSessionMissingError` events from guest mode on public pages (like `/`)
   - **Root Cause:** Bootstrap calls `getUser()` even when no session exists, causing `AuthSessionMissingError` to be thrown

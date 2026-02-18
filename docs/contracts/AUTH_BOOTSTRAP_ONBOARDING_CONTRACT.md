@@ -45,6 +45,20 @@
 - `lib/utils/route-access.ts`: `needsTalentAccess()`
 - `middleware.ts`: signed-out allowlist uses `isAuthRoute`, `isPublicPath`, `ONBOARDING_PATH`
 
+### Non-negotiable auth-route source of truth (added Feb 17, 2026)
+- `AUTH_ROUTES` + `isAuthRoute()` in `lib/constants/routes.ts` are the **only** source of truth for auth-safe routes.
+- Client bootstrap logic in `components/auth/auth-provider.tsx` **must not hardcode** auth route lists.
+- Required invariant:
+  - If middleware uses `isAuthRoute(path)` for signed-out allowlist, client bootstrap must mirror that via `isAuthRoute(path)` for no-session handling.
+- Reason: two diverging route lists caused `/choose-role` to be treated as protected in client bootstrap and created `/choose-role -> /login` bounce loops.
+
+### Password-reset token transport modes (added Feb 17, 2026)
+- `/update-password` must support both token delivery formats:
+  1. Query params (for example: `?token_hash=...&type=recovery`)
+  2. URL hash fragments (for example: `#access_token=...&refresh_token=...&type=recovery`)
+- Server components cannot read URL hash fragments; any hash-token recovery path must include a client-side gate that exchanges/stores the session before rendering the reset form.
+- Do not redirect immediately to `/login` just because query tokens are missing; this breaks valid hash-token links.
+
 ---
 
 ## Canonical code paths (winners)
@@ -226,6 +240,16 @@
 - Likely cause: multiple independent layers “guess” destination from partial data.
 - Canonical fix: server-owned **BootState** determines `needsOnboarding` + `nextPath` in one place, and callers redirect to that.
 
+4) **Create-account bounce (`/choose-role` -> `/login`)**
+- Symptom: clicking “Create an account” lands on `/choose-role` then immediately returns to `/login`.
+- Likely cause: client bootstrap `isProtectedPath()` hardcoded auth routes and treated `/choose-role` as protected while middleware allowed it as auth-safe.
+- Canonical fix: use `isAuthRoute(path)` in client bootstrap and middleware, never duplicate auth route lists.
+
+5) **Reset link lands on login instead of password form**
+- Symptom: clicking password reset email goes to login instead of allowing password update.
+- Likely cause: `/update-password` expected query token only and redirected on missing query params even when valid hash tokens were present.
+- Canonical fix: support hash-token recovery with client-side gate before rendering `UpdatePasswordForm`.
+
 ---
 
 ## BootState (server-owned routing truth) — ✅ IMPLEMENTED
@@ -325,6 +349,8 @@ WHERE user_id = auth.uid();
 - Create a talent account → confirm email flow → reach talent dashboard.
 - Delete `public.profiles` row for a user (dev-only) → log in → confirm repair path creates it.
 - Submit Career Builder application → approve as admin → confirm role/account_type promoted.
+- From `/login`, click **Create an account** and verify `/choose-role` does not bounce back to `/login`.
+- Trigger password reset email and verify both query-token and hash-token recovery links reach `/update-password` without forced redirect to `/login`.
 
 ### Automated tests
 - Playwright coverage is tracked in: `docs/tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` (this removes ambiguity and explicitly marks gaps).
