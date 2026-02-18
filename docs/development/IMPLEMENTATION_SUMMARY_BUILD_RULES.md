@@ -69,8 +69,8 @@ Comprehensive guide covering:
 ### 5. ✅ Reference Documentation
 
 **Created:**
-- `BUILD_PRERENDER_FIX_REFERENCE.md` - Quick reference pointing to master docs
-- `docs/IMPLEMENTATION_SUMMARY_BUILD_RULES.md` - This file
+- `docs/archive/BUILD_PRERENDER_FIX_REFERENCE.md` - Quick reference pointing to master docs
+- `docs/development/IMPLEMENTATION_SUMMARY_BUILD_RULES.md` - This file
 
 ---
 

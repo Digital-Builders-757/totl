@@ -61,7 +61,7 @@
 
 ## 4. Authentication & Authorization
 
-- **Profile creation**: Follow `ensureProfileExists` patterns; check `docs/AUTH_STRATEGY.md`.  
+- **Profile creation**: Follow `ensureProfileExists` patterns; check `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`.  
 - **Role-based routing**: Middleware + server actions must redirect by `profiles.role` (`talent`, `client`, `admin`) using data already fetched.  
 - **maybeSingle() everywhere** a row might not exist; never check for `PGRST116` when using it.  
 - **Signup/Login flows**: Mirror trigger logic in `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md` before editing Supabase functions or triggers.  
@@ -112,7 +112,7 @@
 - **Schema Truth:** `database_schema_audit.md`, `supabase/migrations/`, `scripts/verify-schema-sync.ps1` (historical: `docs/archive/SCHEMA_TYPES_VERIFICATION.md`)  
 - **Common Errors:** `docs/COMMON_ERRORS_QUICK_REFERENCE.md`, `docs/TYPESCRIPT_COMMON_ERRORS.md`  
 - **Type Safety:** `docs/TYPE_SAFETY_IMPROVEMENTS.md` (historical: `docs/archive/TYPE_SAFETY_COMPLETE.md`)  
-- **Security/Auth:** `docs/SECURITY_CONFIGURATION.md`, `docs/AUTH_STRATEGY.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`  
+- **Security/Auth:** `docs/SECURITY_CONFIGURATION.md`, `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`  
 - **Stripe:** `docs/STRIPE_SUBSCRIPTION_PRD.md`, `docs/STRIPE_IMPLEMENTATION_PLAN.md`, `docs/STRIPE_TROUBLESHOOTING.md`  
 - **Testing/QA:** `docs/COMPREHENSIVE_QA_CHECKLIST.md`, `docs/UI_UX_TESTING_GUIDE.md`
 

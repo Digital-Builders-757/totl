@@ -412,7 +412,7 @@ After fixes, test:
 - `app/auth/callback/page.tsx` - Email verification callback
 - `app/verification-pending/page.tsx` - Email verification pending page
 - `middleware.ts` - Route protection
-- `docs/AUTH_STRATEGY.md` - Authentication documentation
+- `docs/AUTH_STRATEGY.md` - Authentication documentation (legacy stub; canonical auth contract lives in `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
 - `lib/actions/auth-actions.ts` - Auth helper functions
 
 ---

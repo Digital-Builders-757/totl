@@ -284,7 +284,7 @@ LIMIT 10;
 ## 📚 Related Documentation
 
 - `database_schema_audit.md` - Database schema single source of truth
-- `docs/AUTH_STRATEGY.md` - Authentication implementation strategy
+- `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - Authentication bootstrap/onboarding contract
 - `docs/SECURITY_CONFIGURATION.md` - Security setup and RLS policies
 - `docs/TROUBLESHOOTING_GUIDE.md` - General troubleshooting
 - `EMERGENCY_FIX_SIGNUP.sql` - Emergency fix for signup errors

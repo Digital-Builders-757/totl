@@ -110,6 +110,14 @@ npm run build
     - `setSession({ access_token, refresh_token })` when both are present
     - `verifyOtp({ type: "recovery", token_hash })` when only `token_hash` is present
   - **Prevention:** Keep `/update-password` form rendering behind token-readiness gate only; never render form during failed token validation.
+- **Password recovery bounces off `/update-password` after `SIGNED_IN`:**
+  - **Symptom:** User clicks a valid reset link, page briefly loads `/update-password`, then gets redirected to login/dashboard before they can submit a new password.
+  - **Root Cause:** `/update-password` is intentionally in `AUTH_ROUTES`; once `setSession()`/`verifyOtp()` emits `SIGNED_IN`, generic auth-route redirect logic can treat the page as a normal signed-in redirect surface.
+  - **Fix:** Add a narrow, intent-scoped exception in both redirect owners:
+    - `components/auth/auth-provider.tsx`: skip signed-in auth-route redirect only when `pathname === "/update-password"` and active recovery intent exists.
+    - `middleware.ts`: allow signed-in `/update-password` requests through (refresh/hard-nav path).
+    - Scope the exception using `sessionStorage` recovery marker + `?recovery=1`, and clear marker on successful password update.
+  - **Prevention:** Keep `/update-password` in `AUTH_ROUTES` (semantic correctness), but gate exceptions by explicit recovery intent and short TTL to avoid broad redirect bypass.
 - **AuthSessionMissingError Sentry noise:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap
   - **Symptom:** Sentry shows `AuthSessionMissingError` events from guest mode on public pages (like `/`)
   - **Root Cause:** Bootstrap calls `getUser()` even when no session exists, causing `AuthSessionMissingError` to be thrown

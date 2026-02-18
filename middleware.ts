@@ -136,6 +136,12 @@ export async function middleware(req: NextRequest) {
     return redirectWithCookies(redirectUrl);
   }
 
+  // Password recovery is a terminal-like auth exception:
+  // signed-in users must be able to remain on /update-password during recovery.
+  if (path === PATHS.UPDATE_PASSWORD) {
+    return res;
+  }
+
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, account_type, is_suspended")

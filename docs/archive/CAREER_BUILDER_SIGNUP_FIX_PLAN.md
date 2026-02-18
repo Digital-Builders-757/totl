@@ -233,7 +233,7 @@ export default function ClientSignup() {
 
 ### Step 5: Update Documentation
 
-**File:** `docs/AUTH_STRATEGY.md`
+**File:** `docs/AUTH_STRATEGY.md` (legacy stub; canonical auth contract is `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
 
 **Add Career Builder Application Flow:**
 
@@ -324,7 +324,7 @@ After implementation, verify:
 ### Modified Files
 1. `app/client/signup/page.tsx` - Redirect to `/client/apply` (or delete)
 2. `app/choose-role/page.tsx` - Improve dialog messaging
-3. `docs/AUTH_STRATEGY.md` - Document application flow
+3. `docs/AUTH_STRATEGY.md` - Document application flow (historical; now stubbed to archive)
 4. `docs/CAREER_BUILDER_LOGIN_SIGNUP_ANALYSIS.md` - Update with correct flow
 
 ### Files to Check/Update

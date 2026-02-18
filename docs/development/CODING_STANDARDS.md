@@ -366,7 +366,7 @@ const { data: profile } = await supabase
   .single(); // This throws 406 if profile doesn't exist!
 ```
 
-**See:** `docs/AUTH_STRATEGY.md` for complete query pattern best practices.
+**See:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` for current auth/bootstrap query and routing guardrails.
 
 ### **Supabase Client Usage**
 

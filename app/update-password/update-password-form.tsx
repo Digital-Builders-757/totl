@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { PASSWORD_RECOVERY_INTENT_KEY } from "@/lib/constants/password-recovery";
 import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 
@@ -67,6 +68,11 @@ export function UpdatePasswordForm() {
           variant: "destructive",
         });
       } else {
+        try {
+          window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+        } catch {
+          // ignore
+        }
         setIsSuccess(true);
         toast({
           title: "Password updated",

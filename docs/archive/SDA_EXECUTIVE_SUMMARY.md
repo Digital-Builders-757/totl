@@ -129,4 +129,4 @@ The platform is **100% production-ready** with:
 
 ---
 
-**For detailed breakdown, see:** `SDA_DELIVERABLES_REPORT.md`
+**For detailed breakdown, see:** `docs/archive/SDA_DELIVERABLES_REPORT.md`

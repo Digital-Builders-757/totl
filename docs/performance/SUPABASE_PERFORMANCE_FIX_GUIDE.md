@@ -263,7 +263,7 @@ const { user, profile } = useAuth();
 - ✅ `app/client/dashboard/page.tsx` - Uses cached profile
 - ✅ `app/talent/[slug]/talent-profile-client.tsx` - Uses cached profile
 
-**See:** `docs/AUTH_STRATEGY.md` for complete documentation on using auth provider profile.
+**See:** `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` for current auth provider profile and routing-safe behavior (`docs/AUTH_STRATEGY.md` is legacy/stubbed).
 
 ---
 

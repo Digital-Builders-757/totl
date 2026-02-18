@@ -376,7 +376,7 @@ $$ LANGUAGE plpgsql;
 
 ## 📚 Related Documentation
 
-- `docs/AUTH_STRATEGY.md` - Authentication implementation
+- `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - Authentication bootstrap and onboarding contract (replace legacy `docs/AUTH_STRATEGY.md`)
 - `docs/DATABASE_REPORT.md` - Current database structure
 - `docs/SECURITY_CONFIGURATION.md` - Security best practices
 - `docs/COMPREHENSIVE_QA_CHECKLIST.md` - Quality assurance

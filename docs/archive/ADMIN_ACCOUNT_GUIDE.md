@@ -381,7 +381,7 @@ WHERE id = (SELECT id FROM auth.users WHERE email = 'email@example.com');
 ## 📚 Additional Resources
 
 - **Database Schema:** `database_schema_audit.md`
-- **Auth Strategy:** `docs/AUTH_STRATEGY.md`
+- **Auth Strategy:** `docs/AUTH_STRATEGY.md` (legacy stub; canonical auth contract lives in `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`)
 - **Middleware Logic:** `middleware.ts`
 - **Admin Routes:** `app/admin/`
 - **User Creation API:** `app/api/admin/create-user/route.ts`
@@ -402,7 +402,7 @@ WHERE id = (SELECT id FROM auth.users WHERE email = 'email@example.com');
 
 ---
 
-**Need Help?** Check the troubleshooting section or review the authentication documentation in `docs/AUTH_STRATEGY.md`.
+**Need Help?** Check the troubleshooting section or review canonical auth guidance in `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` (`docs/AUTH_STRATEGY.md` is legacy/stubbed).
 
 
 
