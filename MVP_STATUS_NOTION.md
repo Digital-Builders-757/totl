@@ -8,6 +8,30 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Password reset recovery hardening + auth UX consistency (February 17, 2026)**
+
+**AUTH / PASSWORD RESET / UX** - February 17, 2026
+- ✅ Fixed reset recovery state-machine contradiction on `/update-password` (no more "failed credentials" + active form at the same time).
+- ✅ Expanded recovery token handling in the hash gate to support both:
+  - `#access_token + #refresh_token` session hydration, and
+  - `#token_hash` verification fallback.
+- ✅ Unified reset and update-password visual treatment with the dark app shell (removed white-on-white experience drift).
+- ✅ Added one-time email-verification confirmation on client dashboard (`verified=true`) with immediate URL cleanup.
+
+**Checks run before ship:**
+- ✅ `npm run schema:verify:comprehensive`
+- ✅ `npm run types:check`
+- ✅ `npm run build`
+- ✅ `npm run lint`
+
+**Next (P0 - Critical)**
+- [ ] Validate in production with fresh reset emails (signed-out and signed-in edge cases), including full redirect-chain capture for one real link.
+- [ ] Add/extend Playwright auth regression coverage for hash recovery modes to prevent reset-link regressions.
+
+**Next (P1 - Follow-up)**
+- [ ] Normalize import-order warnings in touched auth files to reduce lint noise and keep red-zone surfaces clean.
+- [ ] Consolidate reset/update-password shared shell styles into reusable auth surface primitives to prevent future UI drift.
+
 ## 🚀 **Latest: Password reset link fix (missing_token) (February 17, 2026)**
 
 **AUTH / PASSWORD RESET** - February 17, 2026

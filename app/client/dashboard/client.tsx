@@ -26,12 +26,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -97,8 +99,12 @@ interface ClientDashboardProps {
 
 export function ClientDashboard({ initialData }: ClientDashboardProps) {
   const { user, signOut, profile } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showVerifiedMessage, setShowVerifiedMessage] = useState(false);
+  const hasHandledVerificationRef = useRef(false);
 
   // Use initialData from server component (no client-side fetching)
   const clientProfile = initialData?.clientProfile ?? null;
@@ -168,6 +174,24 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
       });
     }
   }, [applications, applicationsLength, user]);
+
+  useEffect(() => {
+    const verifiedParam = searchParams.get("verified");
+    if (verifiedParam !== "true" || hasHandledVerificationRef.current) {
+      return;
+    }
+
+    hasHandledVerificationRef.current = true;
+    setShowVerifiedMessage(true);
+
+    try {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete("verified");
+      router.replace(`${currentUrl.pathname}${currentUrl.search}`);
+    } catch {
+      // Non-blocking cleanup failure should never break dashboard rendering.
+    }
+  }, [searchParams, router]);
 
   // Status color helper removed: dashboard uses StatusBadge components instead.
 
@@ -276,6 +300,16 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {showVerifiedMessage && (
+          <Alert className="bg-green-900/30 border-green-700 mb-6">
+            <CheckCircle className="h-4 w-4 text-green-400" />
+            <AlertTitle className="text-green-300">Email verified successfully!</AlertTitle>
+            <AlertDescription className="text-green-400">
+              Your account is confirmed and ready to use.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Profile Completion Banner */}
         <ProfileCompletionBanner
           userRole="client"
