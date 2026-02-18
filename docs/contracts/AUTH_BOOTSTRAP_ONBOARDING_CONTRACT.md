@@ -361,6 +361,8 @@ WHERE user_id = auth.uid();
 - Submit Career Builder application → approve as admin → confirm role/account_type promoted.
 - From `/login`, click **Create an account** and verify `/choose-role` does not bounce back to `/login`.
 - Trigger password reset email and verify both query-token and hash-token recovery links reach `/update-password` without forced redirect to `/login`.
+- While processing a valid hash recovery link, verify `SIGNED_IN` does not bounce `/update-password` to a dashboard/login before password submission.
+- Refresh on `/update-password` during active recovery intent and verify middleware allows page continuity (no auth-route bounce).
 
 ### Automated tests
 - Playwright coverage is tracked in: `docs/tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` (this removes ambiguity and explicitly marks gaps).

@@ -1,12 +1,12 @@
 # Build Prerender Fix Reference
 
-**See the master documentation:** [`docs/MASTER_BUILD_AND_DEPLOYMENT_RULES.md`](./docs/MASTER_BUILD_AND_DEPLOYMENT_RULES.md)
+**See the master documentation:** [`docs/development/MASTER_BUILD_AND_DEPLOYMENT_RULES.md`](../development/MASTER_BUILD_AND_DEPLOYMENT_RULES.md)
 
 This file serves as a quick reference for the prerender/browser-client fix patterns.
 
 ## Quick Links
 
-- **Master Rules:** [`docs/MASTER_BUILD_AND_DEPLOYMENT_RULES.md`](./docs/MASTER_BUILD_AND_DEPLOYMENT_RULES.md)
+- **Master Rules:** [`docs/development/MASTER_BUILD_AND_DEPLOYMENT_RULES.md`](../development/MASTER_BUILD_AND_DEPLOYMENT_RULES.md)
 - **Audit Scripts:**
   - `npm run audit:client-boundaries` - Find browser client in server files
   - `npm run audit:single-vs-maybe-single` - Find risky .single() calls

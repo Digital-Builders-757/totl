@@ -165,7 +165,7 @@ If you still see "No API key found" errors:
 1. ✅ `lib/supabase/supabase-browser.ts` - Hard failure in production
 2. ✅ `lib/hooks/use-supabase.ts` - Enhanced error handling
 3. ✅ `app/gigs/[id]/apply/apply-to-gig-form.tsx` - Hard guards + error messages
-4. ✅ `plan.md` - Updated with implementation details
+4. ✅ `docs/archive/DEBUG_MISSING_API_KEY_PLAN_JAN_2025.md` - Updated with implementation details
 
 ---
 

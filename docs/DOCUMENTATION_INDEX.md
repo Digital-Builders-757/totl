@@ -46,6 +46,14 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
 
+**Root hygiene note (Feb 18, 2026):** non-canonical root docs were consolidated into `docs/archive/`:
+- `docs/archive/BUILD_AND_AUDIT_REFERENCE.md`
+- `docs/archive/BUILD_PRERENDER_FIX_REFERENCE.md`
+- `docs/archive/INSTRUMENTATION_AND_SCRIPTS_REFERENCE.md`
+- `docs/archive/DEBUG_MISSING_API_KEY_PLAN_JAN_2025.md`
+- `docs/archive/SDA_DELIVERABLES_REPORT.md`
+- `docs/archive/SDA_EXECUTIVE_SUMMARY.md`
+
 ---
 
 ## 🧠 Source of Truth Spine (3 layers)

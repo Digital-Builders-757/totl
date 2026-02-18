@@ -334,7 +334,7 @@ Error: createSupabaseBrowser() can only be called in the browser
 
 4. **Update Documentation**
    - Update `docs/MASTER_BUILD_AND_DEPLOYMENT_RULES.md`
-   - Update `BUILD_AND_AUDIT_REFERENCE.md`
+   - Update `docs/archive/BUILD_AND_AUDIT_REFERENCE.md`
    - Update `docs/ARCHITECTURE_CONSTITUTION.md`
    - Update `lib/supabase/supabase-browser.ts` JSDoc
 
@@ -345,7 +345,7 @@ Error: createSupabaseBrowser() can only be called in the browser
    - Update fix pattern to show ref + accessor pattern
    - Add SSR/RSC render vs runtime distinction
 
-2. **`BUILD_AND_AUDIT_REFERENCE.md`**
+2. **`docs/archive/BUILD_AND_AUDIT_REFERENCE.md`**
    - Same updates as above
 
 3. **`docs/ARCHITECTURE_CONSTITUTION.md`**

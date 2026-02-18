@@ -79,8 +79,8 @@ These support operational needs but aren't core business logic:
 Updated all status reports to use accurate counts:
 
 1. ✅ `PROJECT_STATUS_REPORT.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
-2. ✅ `SDA_DELIVERABLES_REPORT.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
-3. ✅ `SDA_EXECUTIVE_SUMMARY.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
+2. ✅ `docs/archive/SDA_DELIVERABLES_REPORT.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
+3. ✅ `docs/archive/SDA_EXECUTIVE_SUMMARY.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
 4. ✅ `database_schema_audit.md` - Changed "14 tables" → "13 tables (8 core business tables + 5 supporting tables)"
 
 ---
