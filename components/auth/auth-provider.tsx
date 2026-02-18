@@ -10,13 +10,18 @@ import { AuthTimeoutRecovery } from "./auth-timeout-recovery";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { getBootStateRedirect, type BootStateRedirectResult } from "@/lib/actions/boot-actions";
 import {
+  PASSWORD_RECOVERY_INTENT_KEY,
+  PASSWORD_RECOVERY_INTENT_TTL_MS,
+  PASSWORD_RECOVERY_QUERY_PARAM,
+} from "@/lib/constants/password-recovery";
+import {
   PATHS,
   isAuthRoute,
   isPublicPath,
 } from "@/lib/constants/routes";
 import { createSupabaseBrowser, resetSupabaseBrowserClient } from "@/lib/supabase/supabase-browser";
-import { safeReturnUrl } from "@/lib/utils/return-url";
 import { logger } from "@/lib/utils/logger";
+import { safeReturnUrl } from "@/lib/utils/return-url";
 import type { Database } from "@/types/supabase";
 
 type UserRole = "talent" | "client" | "admin" | null;
@@ -1171,14 +1176,44 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         const currentPath = currentPathname.split("?")[0];
+        const searchParams = new URLSearchParams(currentSearch);
+
+        const hasActiveRecoveryIntent = () => {
+          if (typeof window === "undefined") return false;
+          try {
+            const raw = window.sessionStorage.getItem(PASSWORD_RECOVERY_INTENT_KEY);
+            if (!raw) return false;
+            const ts = Number(raw);
+            if (!Number.isFinite(ts)) {
+              window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+              return false;
+            }
+            if (Date.now() - ts > PASSWORD_RECOVERY_INTENT_TTL_MS) {
+              window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+              return false;
+            }
+            return true;
+          } catch {
+            return false;
+          }
+        };
+
+        const isUpdatePasswordPath = currentPath === PATHS.UPDATE_PASSWORD;
+        const hasRecoveryQuery = searchParams.get(PASSWORD_RECOVERY_QUERY_PARAM) === "1";
+        const hasRecoveryIntent = isUpdatePasswordPath && (hasRecoveryQuery || hasActiveRecoveryIntent());
 
         // Check if we should redirect (must be on auth route)
-        const shouldRedirect = currentPath && isAuthRoute(currentPath);
+        const shouldRedirect =
+          Boolean(currentPath && isAuthRoute(currentPath)) &&
+          !(isUpdatePasswordPath && hasRecoveryIntent);
 
         logger.debug("[auth.onAuthStateChange] Redirect check", {
           currentPath,
           shouldRedirect,
           isAuthRoute: currentPath ? isAuthRoute(currentPath) : false,
+          isUpdatePasswordPath,
+          hasRecoveryIntent,
+          hasRecoveryQuery,
         });
 
         // If not on auth route, skip redirect logic entirely

@@ -59,6 +59,16 @@
 - Server components cannot read URL hash fragments; any hash-token recovery path must include a client-side gate that exchanges/stores the session before rendering the reset form.
 - Do not redirect immediately to `/login` just because query tokens are missing; this breaks valid hash-token links.
 
+### Signed-in recovery exception for `/update-password` (added Feb 18, 2026)
+- `/update-password` remains in `AUTH_ROUTES` and is still an auth route by policy.
+- During active password recovery intent, redirect owners must treat `/update-password` as a terminal-like exception and allow the page to remain in place after `SIGNED_IN`.
+- Recovery intent is intentionally scoped and short-lived:
+  - client gate sets a timestamped sessionStorage marker before `setSession()` / `verifyOtp()`
+  - URL is normalized to include `?recovery=1` after successful hash exchange
+  - marker is cleared on successful password update (and expired by TTL in auth provider)
+- Required invariant:
+  - AuthProvider and middleware must preserve this exception narrowly for `/update-password` recovery only; they must not relax signed-in auth-route redirects globally.
+
 ---
 
 ## Canonical code paths (winners)

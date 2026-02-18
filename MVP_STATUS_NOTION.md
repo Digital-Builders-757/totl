@@ -8,6 +8,33 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Update-password SIGNED_IN bounce prevention + scoped recovery intent (February 18, 2026)**
+
+**AUTH / PASSWORD RESET / REDIRECT CONVERGENCE** - February 18, 2026
+- ✅ Kept Pattern B gate ownership for `/update-password` (gate is the state-machine UI; form renders only in `ready` state).
+- ✅ Added scoped recovery intent markers (`sessionStorage` timestamp + `?recovery=1`) so auth convergence can distinguish active reset recovery from normal signed-in auth-route redirects.
+- ✅ Hardened `SIGNED_IN` redirect owner in `components/auth/auth-provider.tsx` to skip auth-route redirect only for `/update-password` with active recovery intent.
+- ✅ Hardened server redirect owner in `middleware.ts` with signed-in allow-through for `/update-password`, preventing refresh/hard-nav bounce during recovery.
+- ✅ Added cleanup of recovery intent on successful password update to keep the exception short-lived.
+- ✅ Verified with regression checks:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+  - `npx playwright test tests/auth/auth-regressions.spec.ts`
+
+**Problems discovered and resolved this session:**
+- ✅ Root cause confirmed: `/update-password` is in `AUTH_ROUTES`, so generic signed-in convergence can eject recovery users after `setSession()` emits `SIGNED_IN`.
+- ✅ Resolved by intent-scoped exception (not broad route bypass), preserving normal auth-route redirect behavior elsewhere.
+
+**Next (P0 - Critical)**
+- [ ] Validate one production password-reset flow end-to-end with a real email link and capture full redirect chain (hash token + refresh path).
+- [ ] Add one signed-in recovery regression assertion that specifically proves no `/update-password -> dashboard/login` bounce after `SIGNED_IN`.
+
+**Next (P1 - Follow-up)**
+- [ ] Centralize recovery-intent lifecycle constants/cleanup into a single auth utility to avoid drift between gate, provider, and form.
+- [ ] Triage existing global lint warnings unrelated to this fix so red-zone auth diffs stay easier to review.
+
 ## 🚀 **Latest: Password reset recovery hardening + auth UX consistency (February 17, 2026)**
 
 **AUTH / PASSWORD RESET / UX** - February 17, 2026

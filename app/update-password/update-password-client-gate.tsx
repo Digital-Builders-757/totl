@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { PATHS } from "@/lib/constants/routes";
 import { UpdatePasswordForm } from "./update-password-form";
-import { useSupabase } from "@/lib/hooks/use-supabase";
 import { Button } from "@/components/ui/button";
+import {
+  PASSWORD_RECOVERY_INTENT_KEY,
+  PASSWORD_RECOVERY_QUERY_PARAM,
+} from "@/lib/constants/password-recovery";
+import { PATHS } from "@/lib/constants/routes";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 
 type GateState =
   | { kind: "checking" }
@@ -46,6 +50,13 @@ export function UpdatePasswordClientGate() {
         const refresh_token = params.get("refresh_token");
         const token_hash = params.get("token_hash");
 
+        // Mark recovery intent before any auth call that can emit SIGNED_IN.
+        try {
+          window.sessionStorage.setItem(PASSWORD_RECOVERY_INTENT_KEY, String(Date.now()));
+        } catch {
+          // ignore
+        }
+
         // Mode A: hash contains session pair -> hydrate session directly.
         if (access_token && refresh_token) {
           const { data, error } = await supabase.auth.setSession({
@@ -73,19 +84,33 @@ export function UpdatePasswordClientGate() {
             return;
           }
         } else {
+          try {
+            window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+          } catch {
+            // ignore
+          }
           setState({ kind: "failed", reason: "missing_token" });
           return;
         }
 
         // Clean up URL (remove hash tokens) to avoid reprocessing on refresh.
         try {
-          window.history.replaceState({}, "", PATHS.UPDATE_PASSWORD);
+          window.history.replaceState(
+            {},
+            "",
+            `${PATHS.UPDATE_PASSWORD}?${PASSWORD_RECOVERY_QUERY_PARAM}=1`
+          );
         } catch {
           // ignore
         }
 
         setState({ kind: "ready" });
       } catch {
+        try {
+          window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+        } catch {
+          // ignore
+        }
         if (!cancelled) {
           setState({ kind: "failed", reason: "invalid_token" });
         }
