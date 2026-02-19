@@ -77,11 +77,12 @@ Sentry.init({
 
   // Replay sampling: lower in production to control costs and risk surface
   // Dev: 100% of errors get replays (helpful for debugging)
-  // Prod: 10% of errors get replays (cost-effective, still captures critical issues)
-  replaysOnErrorSampleRate: isProduction ? 0.1 : 1.0,
+  // Prod: 5% of errors get replays (cost-effective, still captures critical issues)
+  replaysOnErrorSampleRate: isProduction ? 0.05 : 1.0,
 
-  // Session replay sampling: 10% of sessions in all environments
-  replaysSessionSampleRate: 0.1,
+  // Session replay sampling:
+  // Prod: disabled (capture mostly on error); Dev: 10% for local debugging
+  replaysSessionSampleRate: isProduction ? 0.0 : 0.1,
 
   // Integrations: Supabase + Session Replay + Browser Tracing (Web Vitals)
   integrations: [
@@ -155,6 +156,11 @@ Sentry.init({
       error && typeof error === "object" && "message" in error
         ? String((error as { message?: unknown }).message)
         : "";
+
+    // Instagram Android WebView + Sentry Replay flake (not actionable, not app code).
+    if (errorMessage.includes("enableDidUserTypeOnKeyboardLogging")) {
+      return null;
+    }
 
     if (errorMessage && errorMessage.includes("Load failed")) {
       const hasStack = Boolean(

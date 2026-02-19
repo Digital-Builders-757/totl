@@ -1961,12 +1961,19 @@
 
 ## 🎯 **Next Session Priorities**
 
-### **Immediate Actions (This Week):**
-1. **Onboarding spine polish (P0)** - Verify BootState routing in preview/prod (auth callback → onboarding → dashboard) and watch for redirect loops.
-2. **Fix Playwright admin test helper env (P0)** - Align `SUPABASE_SERVICE_ROLE_KEY` with `NEXT_PUBLIC_SUPABASE_URL` so e2e user-creation helpers work (current error: invalid JWT signature).
-3. **Playwright stability (P0)** - Ensure tests do not import `server-only` guarded modules; load `.env.local` in Playwright config so admin helpers work consistently.
-4. **Performance Optimization** - Eliminate page reloads (Priority 3, Task 1)
-5. **Enhanced Loading States** - Add proper skeletons (Priority 3, Task 3)
+### **Session Update (Feb 19, 2026)**
+
+**Done (P0):**
+1. **Reduced Sentry Replay volume in production** - Updated client Replay sampling to be mostly error-triggered (`replaysOnErrorSampleRate: 0.05`) and disabled always-on session sampling in prod (`replaysSessionSampleRate: 0.0`).
+2. **Stopped known Instagram/WebView Replay noise** - Added a targeted `beforeSend` filter for `enableDidUserTypeOnKeyboardLogging` in `instrumentation-client.ts` to drop that non-actionable event.
+
+**Next (P0 - Critical):**
+1. **Deploy + verify Sentry issue suppression** - Confirm `TOTLMODELAGENCY-25` no longer reopens after deploy.
+2. **Replay health validation** - Confirm real production app errors still attach Replay data for triage.
+
+**Next (P1 - Follow-up):**
+1. **Monitor Sentry volume trend** - Compare Replay/event volume and signal quality after the sample-rate reduction.
+2. **Tighten filter if needed** - If required, gate the keyboard-logging filter by Instagram user agent for stricter scope.
 
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle
@@ -1982,7 +1989,7 @@
 
 ---
 
-*Last Updated: January 25, 2026*
+*Last Updated: February 19, 2026*
 *Current Status: MVP Complete - BootState routing spine implemented + verify-all passing*
 *Codebase Rating: 8/10 - Production Ready, Auth/Onboarding + E2E Stability Improved*
 *Next Review: After performance optimizations (Priority 3 tasks)*
