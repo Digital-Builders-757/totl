@@ -8,6 +8,26 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Suspended-user recovery gate hardening (February 18, 2026)**
+
+**AUTH / MIDDLEWARE / RECOVERY SAFETY** - February 18, 2026
+- ✅ Fixed middleware ordering bug where signed-in `/update-password` exception could bypass suspension enforcement.
+- ✅ Moved `/update-password` allow-through to execute only after profile load + `is_suspended` redirect gate.
+- ✅ Hardened recovery gate cleanup in `app/update-password/update-password-client-gate.tsx`: recovery intent now clears on all failure paths (`missing_token`, `invalid_token`, and outer catch).
+- ✅ Re-ran required pre-ship checks successfully:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Next (P0 - Critical)**
+- [ ] Add/extend auth regression coverage to explicitly prove suspended users cannot access `/update-password`.
+- [ ] Validate one production reset-link flow for a suspended account to confirm `/suspended` routing is enforced on refresh/hard-nav.
+
+**Next (P1 - Follow-up)**
+- [ ] Keep docs-only auth cleanup in a separate follow-up when needed (legacy pointer stubs + index hygiene), without coupling behavior changes.
+- [ ] Reduce repo-wide lint warnings so red-zone auth fixes stay easy to review.
+
 ## 🚀 **Latest: Update-password SIGNED_IN bounce prevention + scoped recovery intent (February 18, 2026)**
 
 **AUTH / PASSWORD RESET / REDIRECT CONVERGENCE** - February 18, 2026

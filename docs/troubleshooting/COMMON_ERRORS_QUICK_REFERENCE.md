@@ -118,6 +118,19 @@ npm run build
     - `middleware.ts`: allow signed-in `/update-password` requests through (refresh/hard-nav path).
     - Scope the exception using `sessionStorage` recovery marker + `?recovery=1`, and clear marker on successful password update.
   - **Prevention:** Keep `/update-password` in `AUTH_ROUTES` (semantic correctness), but gate exceptions by explicit recovery intent and short TTL to avoid broad redirect bypass.
+- **Suspended users can access `/update-password` due to middleware check ordering:**
+  - **Symptom:** A suspended signed-in user reaches `/update-password` instead of being redirected to `/suspended`.
+  - **Root Cause:** An early middleware return for `PATHS.UPDATE_PASSWORD` runs before profile fetch and `is_suspended` enforcement.
+  - **Fix:** In `middleware.ts`, keep `/update-password` allow-through only after:
+    - `auth.getUser()` confirms signed-in user
+    - profile query fetches `role, account_type, is_suspended`
+    - suspension redirect check runs (`is_suspended -> /suspended`)
+  - **Prevention:** Treat `/update-password` as a terminal-like exception only after security gates; never place this exception before suspension enforcement.
+- **Stale password recovery intent suppresses expected auth-route redirects after failed token exchange:**
+  - **Symptom:** User hits invalid/expired reset link, but stale recovery intent can linger and alter auth-route behavior for the TTL window.
+  - **Root Cause:** Recovery intent marker is set before token exchange and not cleared on all failure branches.
+  - **Fix:** In `app/update-password/update-password-client-gate.tsx`, clear `PASSWORD_RECOVERY_INTENT_KEY` on all failure paths (`missing_token`, `invalid_token`, and outer catch); only keep intent when gate reaches `ready`.
+  - **Prevention:** Use one cleanup helper in the recovery gate and call it on every non-ready exit path.
 - **AuthSessionMissingError Sentry noise:** Sentry reports many `AuthSessionMissingError` events from authentication bootstrap
   - **Symptom:** Sentry shows `AuthSessionMissingError` events from guest mode on public pages (like `/`)
   - **Root Cause:** Bootstrap calls `getUser()` even when no session exists, causing `AuthSessionMissingError` to be thrown
