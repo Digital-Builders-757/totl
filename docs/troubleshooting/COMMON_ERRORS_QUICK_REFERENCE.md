@@ -929,6 +929,25 @@ if (errorObj.message?.includes('__firefox__') ||
 # Prevention: Filter browser extension errors in Sentry configuration
 ```
 
+### **20. Sentry Replay Noise: Instagram/WebView Keyboard Logging**
+```bash
+# Error: TypeError with "enableDidUserTypeOnKeyboardLogging" in Sentry (often from Instagram in-app browser / Android WebView)
+# Root Cause: Non-actionable third-party WebView + Replay interaction, not app business logic
+
+# ✅ FIX - Keep Replay mostly "on error" in production and drop only this exact noise string
+# instrumentation-client.ts
+replaysOnErrorSampleRate: isProduction ? 0.05 : 1.0,
+replaysSessionSampleRate: isProduction ? 0.0 : 0.1,
+
+if (errorMessage.includes("enableDidUserTypeOnKeyboardLogging")) {
+  return null;
+}
+
+# Files fixed:
+# - instrumentation-client.ts ✅ Fixed
+# Prevention: Use exact-string filtering for this error to avoid muting real production issues
+```
+
 ---
 
 ## 🔍 **QUICK DIAGNOSIS**
@@ -957,6 +976,7 @@ if (errorObj.message?.includes('__firefox__') ||
 | Logic error: Checking PGRST116 with `.maybeSingle()` | PGRST116 only occurs with `.single()`, not `.maybeSingle()` | Handle errors first, then check `!profile` - no PGRST116 check needed |
 | `Property 'is_suspended' does not exist on type 'profiles'` | Types out of sync after suspension migration | Run new migration locally, then `npm run types:regen` |
 | Errors not in Sentry | Wrong DSN or project ID | Check `/api/sentry-diagnostic`, verify DSN ends in `4510191108292609` |
+| `enableDidUserTypeOnKeyboardLogging` (Sentry Replay) | Instagram in-app browser / Android WebView Replay flake | Set prod Replay to mostly on-error and filter this exact message in `beforeSend` |
 
 ---
 
