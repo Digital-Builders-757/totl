@@ -136,12 +136,6 @@ export async function middleware(req: NextRequest) {
     return redirectWithCookies(redirectUrl);
   }
 
-  // Password recovery is a terminal-like auth exception:
-  // signed-in users must be able to remain on /update-password during recovery.
-  if (path === PATHS.UPDATE_PASSWORD) {
-    return res;
-  }
-
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("role, account_type, is_suspended")
@@ -240,6 +234,13 @@ export async function middleware(req: NextRequest) {
 
   if (profile?.is_suspended && path !== PATHS.SUSPENDED) {
     return redirectWithCookies(new URL(PATHS.SUSPENDED, req.url));
+  }
+
+  // Password recovery is a terminal-like auth exception:
+  // signed-in users must be able to remain on /update-password during recovery.
+  // IMPORTANT: this must remain after profile + suspension enforcement.
+  if (path === PATHS.UPDATE_PASSWORD) {
+    return res;
   }
 
   // MVP: Default unassigned users to Talent Dashboard (all signups are talent)

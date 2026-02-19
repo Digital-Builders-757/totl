@@ -65,9 +65,11 @@
 - Recovery intent is intentionally scoped and short-lived:
   - client gate sets a timestamped sessionStorage marker before `setSession()` / `verifyOtp()`
   - URL is normalized to include `?recovery=1` after successful hash exchange
+  - marker is cleared on all token-failure paths in the client gate (`missing_token` / `invalid_token` / catch)
   - marker is cleared on successful password update (and expired by TTL in auth provider)
 - Required invariant:
   - AuthProvider and middleware must preserve this exception narrowly for `/update-password` recovery only; they must not relax signed-in auth-route redirects globally.
+  - In `middleware.ts`, `/update-password` allow-through must run only **after** profile fetch and suspension enforcement (`profiles.is_suspended`).
 
 ---
 

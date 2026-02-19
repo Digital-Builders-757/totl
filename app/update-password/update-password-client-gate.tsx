@@ -31,6 +31,14 @@ export function UpdatePasswordClientGate() {
     let cancelled = false;
 
     async function run() {
+      const clearRecoveryIntent = () => {
+        try {
+          window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
+        } catch {
+          // ignore
+        }
+      };
+
       // If we don't have a client yet, wait for mount.
       if (!supabase) return;
 
@@ -39,6 +47,7 @@ export function UpdatePasswordClientGate() {
 
       // Nothing to do if there's no hash to process.
       if (!hasHashTokens) {
+        clearRecoveryIntent();
         setState({ kind: "failed", reason: "missing_token" });
         return;
       }
@@ -67,6 +76,7 @@ export function UpdatePasswordClientGate() {
           if (cancelled) return;
 
           if (error || !data?.session) {
+            clearRecoveryIntent();
             setState({ kind: "failed", reason: "invalid_token" });
             return;
           }
@@ -80,15 +90,12 @@ export function UpdatePasswordClientGate() {
           if (cancelled) return;
 
           if (error || !data?.session) {
+            clearRecoveryIntent();
             setState({ kind: "failed", reason: "invalid_token" });
             return;
           }
         } else {
-          try {
-            window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
-          } catch {
-            // ignore
-          }
+          clearRecoveryIntent();
           setState({ kind: "failed", reason: "missing_token" });
           return;
         }
@@ -106,11 +113,7 @@ export function UpdatePasswordClientGate() {
 
         setState({ kind: "ready" });
       } catch {
-        try {
-          window.sessionStorage.removeItem(PASSWORD_RECOVERY_INTENT_KEY);
-        } catch {
-          // ignore
-        }
+        clearRecoveryIntent();
         if (!cancelled) {
           setState({ kind: "failed", reason: "invalid_token" });
         }
