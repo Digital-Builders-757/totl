@@ -8,6 +8,30 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Stripe webhook signature-failure diagnostics hardening (February 22, 2026)**
+
+**STRIPE / WEBHOOK OBSERVABILITY / PROD TRIAGE** - February 22, 2026
+- ✅ Investigated Sentry issue `TOTLMODELAGENCY-26` and confirmed the failure is real signature verification (`POST /api/stripe/webhook`), while `my-v0-project/...` stack prefixes are non-actionable sourcemap/build path labels.
+- ✅ Verified webhook route already uses raw-body verification (`req.text()` passed directly to `stripe.webhooks.constructEvent(...)`), ruling out the common parsed-body regression.
+- ✅ Added safe diagnostics in `app/api/stripe/webhook/route.ts` on verification failure to log: signature presence, parsed `t=` timestamp, body length, `content-length`, `content-type`, `user-agent`, and `request-id` (without logging signature value or webhook secret).
+- ✅ Re-ran required pre-ship checks successfully:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered and resolved this session:**
+- ✅ Discovered the production error was not caused by route body parsing logic; current implementation already follows Stripe raw-body requirements.
+- ✅ Resolved observability gap by adding non-sensitive failure telemetry so future incidents can quickly distinguish non-Stripe callers vs secret/environment mismatches vs replay/timestamp anomalies.
+
+**Next (P0 - Critical)**
+- [ ] Verify one production retry event in Sentry with the new context fields and confirm caller/source + timestamp behavior.
+- [ ] If failures persist with Stripe-originated traffic, rotate/regenerate the production webhook endpoint secret and validate endpoint-to-secret pairing in Stripe Dashboard + Vercel.
+
+**Next (P1 - Follow-up)**
+- [ ] Add a focused webhook integration test/assertion for failure-path diagnostics (ensuring no raw signature value is ever logged).
+- [ ] Reduce existing repo-wide lint warnings so future production hotfix diffs remain easy to review.
+
 ## 🚀 **Latest: Suspended-user recovery gate hardening (February 18, 2026)**
 
 **AUTH / MIDDLEWARE / RECOVERY SAFETY** - February 18, 2026
