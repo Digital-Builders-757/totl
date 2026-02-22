@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth redirect timeout fallback hardening + telemetry (February 22, 2026)**
+
+**AUTH / REDIRECT CONVERGENCE / PRODUCTION DIAGNOSTICS** - February 22, 2026
+- ✅ Hardened `components/auth/auth-provider.tsx` redirect timeout polling to always clear prior timers before starting a new redirect attempt.
+- ✅ Added cleanup for redirect timeout handles on success paths, catch paths, and unmount to prevent stale timer overlap.
+- ✅ Narrowed hard-reload fallback so it only fires when still stuck on the same auth surface; skips fallback when routing has already progressed.
+- ✅ Added production-only Sentry telemetry for redirect timeout fallback outcomes (`skipped` vs `hard_reload`) with route context for triage.
+
+**Next (P0 - Critical)**
+- [ ] Validate one production auth redirect timeout incident in Sentry and confirm fallback tags/context are emitted as expected.
+- [ ] Run focused auth regression checks for signed-in redirect convergence under slower network conditions.
+
+**Next (P1 - Follow-up)**
+- [ ] Consolidate redirect timeout constants and fallback telemetry helpers into a shared auth utility to prevent drift.
+- [ ] Continue reducing unrelated global lint warnings so auth hotfix diffs remain high-signal.
+
 ## 🚀 **Latest: Stripe webhook signature-failure diagnostics hardening (February 22, 2026)**
 
 **STRIPE / WEBHOOK OBSERVABILITY / PROD TRIAGE** - February 22, 2026
