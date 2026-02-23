@@ -69,6 +69,31 @@
 
 ---
 
+## Incident: “Signature verification fails but env vars look correct”
+
+### What to check
+- In Sentry for `POST /api/stripe/webhook`, inspect failure context fields logged by the route:
+  - `signatureTimestamp` (parsed from `stripe-signature` `t=...`)
+  - `signatureHeaderLength`
+  - `webhookSecretPresent`
+  - `bodyLength`
+  - `contentLengthHeader`
+  - `contentType`
+  - `userAgent`
+- Confirm request origin:
+  - Stripe deliveries should have Stripe-like `userAgent`/headers.
+  - Non-Stripe probes/forwarders often fail signature verification by design.
+- Confirm endpoint secret pairing:
+  - Stripe Dashboard webhook endpoint for production URL must match production `STRIPE_WEBHOOK_SECRET` exactly.
+  - Ensure test-mode secret is not used for live deliveries (or vice versa).
+
+### Interpretation tips
+- `webhookSecretPresent = false` → runtime env is missing `STRIPE_WEBHOOK_SECRET`; signature verification cannot succeed.
+- Valid-looking `signatureTimestamp` + Stripe-like caller + repeated failures + `webhookSecretPresent = true` → secret mismatch is still most likely.
+- `bodyLength` significantly different from `contentLengthHeader` → investigate upstream body mutation/proxying.
+
+---
+
 ## Quick notes (guardrails)
 - Entitlement fields are **DB-locked**: user-level PostgREST updates to Stripe/subscription fields are blocked by trigger.
 - The webhook handler must remain **truthful**: do not return 2xx if DB writes failed.

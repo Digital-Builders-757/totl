@@ -8,6 +8,46 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Auth redirect timeout fallback hardening + telemetry (February 22, 2026)**
+
+**AUTH / REDIRECT CONVERGENCE / PRODUCTION DIAGNOSTICS** - February 22, 2026
+- ✅ Hardened `components/auth/auth-provider.tsx` redirect timeout polling to always clear prior timers before starting a new redirect attempt.
+- ✅ Added cleanup for redirect timeout handles on success paths, catch paths, and unmount to prevent stale timer overlap.
+- ✅ Narrowed hard-reload fallback so it only fires when still stuck on the same auth surface; skips fallback when routing has already progressed.
+- ✅ Added production-only Sentry telemetry for redirect timeout fallback outcomes (`skipped` vs `hard_reload`) with route context for triage.
+
+**Next (P0 - Critical)**
+- [ ] Validate one production auth redirect timeout incident in Sentry and confirm fallback tags/context are emitted as expected.
+- [ ] Run focused auth regression checks for signed-in redirect convergence under slower network conditions.
+
+**Next (P1 - Follow-up)**
+- [ ] Consolidate redirect timeout constants and fallback telemetry helpers into a shared auth utility to prevent drift.
+- [ ] Continue reducing unrelated global lint warnings so auth hotfix diffs remain high-signal.
+
+## 🚀 **Latest: Stripe webhook signature-failure diagnostics hardening (February 22, 2026)**
+
+**STRIPE / WEBHOOK OBSERVABILITY / PROD TRIAGE** - February 22, 2026
+- ✅ Investigated Sentry issue `TOTLMODELAGENCY-26` and confirmed the failure is real signature verification (`POST /api/stripe/webhook`), while `my-v0-project/...` stack prefixes are non-actionable sourcemap/build path labels.
+- ✅ Verified webhook route already uses raw-body verification (`req.text()` passed directly to `stripe.webhooks.constructEvent(...)`), ruling out the common parsed-body regression.
+- ✅ Added safe diagnostics in `app/api/stripe/webhook/route.ts` on verification failure to log: parsed `t=` timestamp, signature header length, webhook-secret presence, body length, `content-length`, `content-type`, and `user-agent` (without logging signature value or webhook secret), and log `event.id` / `event.request?.id` after successful verification.
+- ✅ Re-ran required pre-ship checks successfully:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered and resolved this session:**
+- ✅ Discovered the production error was not caused by route body parsing logic; current implementation already follows Stripe raw-body requirements.
+- ✅ Resolved observability gap by adding non-sensitive failure telemetry so future incidents can quickly distinguish non-Stripe callers vs secret/environment mismatches vs replay/timestamp anomalies.
+
+**Next (P0 - Critical)**
+- [ ] Verify one production retry event in Sentry with the new context fields and confirm caller/source + timestamp behavior.
+- [ ] If failures persist with Stripe-originated traffic, rotate/regenerate the production webhook endpoint secret and validate endpoint-to-secret pairing in Stripe Dashboard + Vercel.
+
+**Next (P1 - Follow-up)**
+- [ ] Add a focused webhook integration test/assertion for failure-path diagnostics (ensuring no raw signature value is ever logged).
+- [ ] Reduce existing repo-wide lint warnings so future production hotfix diffs remain easy to review.
+
 ## 🚀 **Latest: Suspended-user recovery gate hardening (February 18, 2026)**
 
 **AUTH / MIDDLEWARE / RECOVERY SAFETY** - February 18, 2026

@@ -49,6 +49,19 @@ function determinePlanFromSubscription(subscription: Stripe.Subscription): Subsc
   return null;
 }
 
+function parseStripeSignatureTimestamp(signature: string | null): number | null {
+  if (!signature) return null;
+  const parts = signature.split(",");
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed.startsWith("t=")) continue;
+    const raw = trimmed.slice(2);
+    const parsed = Number.parseInt(raw, 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
@@ -62,9 +75,22 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    logger.error("Webhook signature verification failed", err);
+    logger.error("Webhook signature verification failed", err, {
+      signatureTimestamp: parseStripeSignatureTimestamp(signature),
+      signatureHeaderLength: signature.length,
+      webhookSecretPresent: Boolean(STRIPE_WEBHOOK_SECRET),
+      bodyLength: body.length,
+      contentLengthHeader: req.headers.get("content-length"),
+      contentType: req.headers.get("content-type"),
+      userAgent: req.headers.get("user-agent"),
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
+
+  logger.info("Stripe webhook event verified", {
+    stripeEventId: event.id,
+    stripeEventRequestId: event.request?.id ?? null,
+  });
 
   const supabase = createSupabaseAdminClient();
 

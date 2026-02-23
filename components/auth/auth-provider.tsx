@@ -130,6 +130,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
   const bootstrapPromiseRef = useRef<Promise<void> | null>(null);
   // Redirect guard: prevents double navigation during SIGNED_IN
   const redirectInFlightRef = useRef(false);
+  // Redirect timer guard: ensures timeout polling is cleaned up between attempts/unmount.
+  const redirectTimeoutHandleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hard reload de-dupe: avoid spamming Sentry + avoid reload loops when navigation is slow/flaky.
   const lastHardReloadRef = useRef<{ ts: number; target: string } | null>(null);
@@ -373,8 +375,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      if (redirectTimeoutHandleRef.current) {
+        clearTimeout(redirectTimeoutHandleRef.current);
+        redirectTimeoutHandleRef.current = null;
+      }
+
       const targetPathname = target.split("?")[0]; // Strip query params for comparison
       const startPathname = currentPathname.split("?")[0];
+      const startLocationPathname =
+        typeof window !== "undefined" ? window.location.pathname.split("?")[0] : startPathname;
+      const startLocationSearch = typeof window !== "undefined" ? window.location.search : "";
 
       logger.debug("[auth.onAuthStateChange] Attempting redirect via router.replace()", {
         target,
@@ -399,6 +409,28 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
         const navigationTimeoutMs =
           process.env.NODE_ENV === "production" ? (isMobileSafari ? 4500 : 3000) : 2000;
 
+        const captureRedirectFallbackTelemetry = (
+          outcome: "skipped" | "hard_reload",
+          context: Record<string, unknown>
+        ) => {
+          if (process.env.NODE_ENV !== "production") return;
+          void import("@sentry/nextjs")
+            .then((Sentry) => {
+              Sentry.withScope((scope) => {
+                scope.setTag("auth_redirect_fallback", outcome);
+                scope.setTag("auth_redirect_timeout_ms", String(navigationTimeoutMs));
+                scope.setContext("auth_redirect_fallback", context);
+                Sentry.captureMessage(
+                  "[auth.onAuthStateChange] redirect timeout fallback telemetry",
+                  "info"
+                );
+              });
+            })
+            .catch(() => {
+              // Ignore telemetry failures; redirect flow must remain non-blocking.
+            });
+        };
+
         // Wait up to navigationTimeoutMs to see if navigation happens.
         // In production (and on slower devices), route transitions can take longer than a single 500ms tick.
         const startedAt = Date.now();
@@ -409,9 +441,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           const newPathname = window.location.pathname.split("?")[0];
+          const newSearch = window.location.search;
           const navigated = newPathname === targetPathname && newPathname !== startPathname;
 
           if (navigated) {
+            redirectTimeoutHandleRef.current = null;
             logger.debug("[auth.onAuthStateChange] router.replace() succeeded, navigation detected", {
               expected: targetPathname,
               actual: newPathname,
@@ -421,6 +455,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           }
 
           if (newPathname !== startPathname) {
+            redirectTimeoutHandleRef.current = null;
             logger.debug("[auth.onAuthStateChange] router.replace() navigated to a different route", {
               expected: targetPathname,
               actual: newPathname,
@@ -431,12 +466,45 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
 
           const elapsedMs = Date.now() - startedAt;
           if (elapsedMs < navigationTimeoutMs) {
-            setTimeout(checkNavigation, navigationPollMs);
+            redirectTimeoutHandleRef.current = setTimeout(checkNavigation, navigationPollMs);
             return;
           }
 
-          // Navigation didn't happen within timeout, fallback to hard reload
-          // De-dupe: avoid spamming Sentry and avoid reload loops.
+          const onAuthSurface = isAuthRoute(newPathname);
+          const unchangedSinceStart =
+            newPathname === startLocationPathname && newSearch === startLocationSearch;
+
+          // Guarded fallback: only hard-reload if we're still stuck on the same auth surface.
+          // If location already changed in any way, treat as recovered and avoid noisy alerts.
+          if (!onAuthSurface || !unchangedSinceStart) {
+            captureRedirectFallbackTelemetry("skipped", {
+              expected: targetPathname,
+              actual: newPathname,
+              startPathname,
+              startLocationPathname,
+              startLocationSearch,
+              currentSearch: newSearch,
+            });
+            redirectTimeoutHandleRef.current = null;
+            logger.info(
+              "[auth.onAuthStateChange] router.replace() timeout observed; skipping hard reload (route already progressed)",
+              {
+                expected: targetPathname,
+                actual: newPathname,
+                startPathname,
+                startLocationPathname,
+                startLocationSearch,
+                currentSearch: newSearch,
+                navigationTimeoutMs,
+                onAuthSurface,
+                unchangedSinceStart,
+              }
+            );
+            return;
+          }
+
+          // Navigation didn't happen within timeout on auth surface, fallback to hard reload.
+          // De-dupe: avoid repeated reload attempts and loop risk.
           const now = Date.now();
           const dedupeWindowMs = 10_000;
 
@@ -470,6 +538,7 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 dedupeWindowMs,
               }
             );
+            redirectTimeoutHandleRef.current = null;
             return;
           }
 
@@ -480,8 +549,8 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
             // ignore
           }
 
-          logger.warn(
-            "[auth.onAuthStateChange] router.replace() didn't navigate within timeout, using hard reload",
+          logger.info(
+            "[auth.onAuthStateChange] router.replace() didn't navigate within timeout on auth route, invoking hard reload fallback",
             {
               expected: targetPathname,
               actual: newPathname,
@@ -489,19 +558,33 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
               navigationTimeoutMs,
             }
           );
+          captureRedirectFallbackTelemetry("hard_reload", {
+            expected: targetPathname,
+            actual: newPathname,
+            startPathname,
+            startLocationPathname,
+            startLocationSearch,
+            currentSearch: newSearch,
+          });
 
           try {
             window.location.replace(target);
+            redirectTimeoutHandleRef.current = null;
             logger.debug("[auth.onAuthStateChange] window.location.replace() called as fallback");
           } catch (hardReloadError) {
             logger.error("[auth.onAuthStateChange] Hard reload also failed", hardReloadError);
+            redirectTimeoutHandleRef.current = null;
             window.location.assign(target);
           }
         };
 
         // Give router.replace() a tick to schedule before we start checking.
-        setTimeout(checkNavigation, 50);
+        redirectTimeoutHandleRef.current = setTimeout(checkNavigation, 50);
       } catch (routerError) {
+        if (redirectTimeoutHandleRef.current) {
+          clearTimeout(redirectTimeoutHandleRef.current);
+          redirectTimeoutHandleRef.current = null;
+        }
         // If router.replace() throws, immediately fallback to hard reload
         logger.error("[auth.onAuthStateChange] router.replace() threw, using hard reload", routerError);
         try {
@@ -1113,6 +1196,10 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       if (softTimeoutRef.current) {
         clearTimeout(softTimeoutRef.current);
         softTimeoutRef.current = null;
+      }
+      if (redirectTimeoutHandleRef.current) {
+        clearTimeout(redirectTimeoutHandleRef.current);
+        redirectTimeoutHandleRef.current = null;
       }
       // Clear bootstrap promise ref on unmount to allow fresh bootstrap on remount
       bootstrapPromiseRef.current = null;
