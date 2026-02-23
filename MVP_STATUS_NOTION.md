@@ -29,7 +29,7 @@
 **STRIPE / WEBHOOK OBSERVABILITY / PROD TRIAGE** - February 22, 2026
 - ✅ Investigated Sentry issue `TOTLMODELAGENCY-26` and confirmed the failure is real signature verification (`POST /api/stripe/webhook`), while `my-v0-project/...` stack prefixes are non-actionable sourcemap/build path labels.
 - ✅ Verified webhook route already uses raw-body verification (`req.text()` passed directly to `stripe.webhooks.constructEvent(...)`), ruling out the common parsed-body regression.
-- ✅ Added safe diagnostics in `app/api/stripe/webhook/route.ts` on verification failure to log: signature presence, parsed `t=` timestamp, body length, `content-length`, `content-type`, `user-agent`, and `request-id` (without logging signature value or webhook secret).
+- ✅ Added safe diagnostics in `app/api/stripe/webhook/route.ts` on verification failure to log: parsed `t=` timestamp, signature header length, webhook-secret presence, body length, `content-length`, `content-type`, and `user-agent` (without logging signature value or webhook secret), and log `event.id` / `event.request?.id` after successful verification.
 - ✅ Re-ran required pre-ship checks successfully:
   - `npm run schema:verify:comprehensive`
   - `npm run types:check`

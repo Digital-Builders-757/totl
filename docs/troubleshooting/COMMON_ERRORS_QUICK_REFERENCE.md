@@ -156,7 +156,7 @@ npm run build
   - **Fix:** Use a DB-backed webhook ledger with a unique constraint on `event_id`, and **short-circuit** when the existing ledger row status is `processing` (treat as in-flight duplicate). Ensure the handler still returns **500** on failures so Stripe retries safely.
 - **Stripe Signature Verification Fails Even Though Env Vars Look Correct:** Sentry reports `No signatures found matching the expected signature for payload` for `/api/stripe/webhook`.
   - **Root Cause (common):** request not sent directly by Stripe, wrong endpoint/secret pairing (test vs live), or payload mutation by a forwarder.
-  - **Fix:** Use route failure telemetry (`signaturePresent`, `signatureTimestamp`, `bodyLength`, `contentLengthHeader`, `contentType`, `userAgent`, `stripeRequestId`) to classify origin and mismatch cause, then verify Stripe dashboard endpoint secret matches production `STRIPE_WEBHOOK_SECRET`.
+  - **Fix:** Use route failure telemetry (`signatureTimestamp`, `signatureHeaderLength`, `webhookSecretPresent`, `bodyLength`, `contentLengthHeader`, `contentType`, `userAgent`) to classify origin and mismatch cause, then verify Stripe dashboard endpoint secret matches production `STRIPE_WEBHOOK_SECRET`.
   - **Prevention:** Keep webhook verification on raw `req.text()` only, never log raw signature/secret values, and maintain endpoint-secret parity during rotations.
 - **Navigation/Discoverability Surfaces Violate Policy:** UI surfaces advertise "Browse Talent Directory" or "Browse Gigs" when policy requires sign-in or no directory exists.
   - **Fix:** Remove directory links from signed-out navigation, update CTAs to reflect sign-in requirements, align footer links with policy matrix. Reference: `docs/POLICY_MATRIX_APPROACH_B.md`

@@ -76,16 +76,21 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     logger.error("Webhook signature verification failed", err, {
-      signaturePresent: Boolean(signature),
       signatureTimestamp: parseStripeSignatureTimestamp(signature),
+      signatureHeaderLength: signature.length,
+      webhookSecretPresent: Boolean(STRIPE_WEBHOOK_SECRET),
       bodyLength: body.length,
       contentLengthHeader: req.headers.get("content-length"),
       contentType: req.headers.get("content-type"),
       userAgent: req.headers.get("user-agent"),
-      stripeRequestId: req.headers.get("request-id"),
     });
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
+
+  logger.info("Stripe webhook event verified", {
+    stripeEventId: event.id,
+    stripeEventRequestId: event.request?.id ?? null,
+  });
 
   const supabase = createSupabaseAdminClient();
 

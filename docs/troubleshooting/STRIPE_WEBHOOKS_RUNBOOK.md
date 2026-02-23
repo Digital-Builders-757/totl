@@ -73,13 +73,13 @@
 
 ### What to check
 - In Sentry for `POST /api/stripe/webhook`, inspect failure context fields logged by the route:
-  - `signaturePresent`
   - `signatureTimestamp` (parsed from `stripe-signature` `t=...`)
+  - `signatureHeaderLength`
+  - `webhookSecretPresent`
   - `bodyLength`
   - `contentLengthHeader`
   - `contentType`
   - `userAgent`
-  - `stripeRequestId`
 - Confirm request origin:
   - Stripe deliveries should have Stripe-like `userAgent`/headers.
   - Non-Stripe probes/forwarders often fail signature verification by design.
@@ -88,8 +88,8 @@
   - Ensure test-mode secret is not used for live deliveries (or vice versa).
 
 ### Interpretation tips
-- `signaturePresent = false` → request likely did not originate from Stripe webhook delivery.
-- `signaturePresent = true` + Stripe-like caller + repeated failures → secret mismatch is still most likely.
+- `webhookSecretPresent = false` → runtime env is missing `STRIPE_WEBHOOK_SECRET`; signature verification cannot succeed.
+- Valid-looking `signatureTimestamp` + Stripe-like caller + repeated failures + `webhookSecretPresent = true` → secret mismatch is still most likely.
 - `bodyLength` significantly different from `contentLengthHeader` → investigate upstream body mutation/proxying.
 
 ---
