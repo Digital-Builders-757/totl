@@ -8,6 +8,37 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin dashboard mobile-first chrome + density trims (February 25, 2026)**
+
+**MOBILE UI/UX / ADMIN DASHBOARD POLISH** — February 25, 2026
+- ✅ Implemented **Approach A (Header First)** to reclaim above-the-fold space on mobile.
+- ✅ Rebuilt admin header into compact mobile-first chrome in `components/admin/admin-header.tsx`:
+  - safe-area aware header padding (header-only)
+  - 56px mobile row (`h-14`)
+  - hamburger trigger + drawer-style nav panel
+  - centered route title (truncate)
+  - notifications icon + overflow actions
+  - removed emoji nav icons → consistent Lucide icons
+  - added stable test hooks (`data-testid`): `admin-header`, `admin-drawer-trigger`, `admin-drawer-panel`, `admin-overflow-trigger`
+- ✅ Per-page density trims (spacing/hierarchy only) applied across admin screens:
+  - `app/admin/dashboard/admin-dashboard-client.tsx`
+  - `app/admin/users/admin-users-client.tsx`
+  - `app/admin/gigs/admin-gigs-client.tsx`
+  - `app/admin/applications/admin-applications-client.tsx`
+  - `app/admin/client-applications/admin-client-applications-client.tsx`
+  - `app/admin/talent/admin-talent-client.tsx`
+  - `app/admin/moderation/admin-moderation-client.tsx`
+- ✅ Updated admin mobile overflow sentinel test expectations:
+  - `tests/admin/admin-dashboard-overflow-sentinel.spec.ts`
+- ✅ Added reusable dashboard polish guidance:
+  - `docs/development/DASHBOARD_MOBILE_DENSITY_GUIDE.md`
+- ✅ Added canonical route inventory for mobile audit across the entire app:
+  - `docs/development/MOBILE_UX_AUDIT_SCREEN_INVENTORY.md`
+
+**Next (P0 - Launch polish)**
+- [ ] Apply the same mobile-first chrome + density contract to **Client** and **Talent** dashboards.
+- [ ] Replace table-first mobile views with card/row patterns + overflow actions on key admin screens.
+
 ## 🚀 **Latest: Auth redirect timeout fallback hardening + telemetry (February 22, 2026)**
 
 **AUTH / REDIRECT CONVERGENCE / PRODUCTION DIAGNOSTICS** - February 22, 2026

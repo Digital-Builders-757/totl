@@ -347,19 +347,19 @@ export function AdminClientApplicationsClient({
     >
       <AdminHeader user={user} notificationCount={3} />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageHeader
           title="Career Builder Applications"
           subtitle="Manage companies applying to become Career Builders on the platform"
           actions={
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-4 py-2 rounded-lg font-medium">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-r from-yellow-500 to-amber-500 px-3 py-2 text-sm font-medium text-white">
                 {pendingApplications.length} Pending
               </div>
-              <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium">
+              <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
                 {approvedApplications.length} Approved
               </div>
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
+              <div className="rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
                 {rejectedApplications.length} Rejected
               </div>
               <Button
@@ -385,7 +385,7 @@ export function AdminClientApplicationsClient({
 
         {/* Applications Section */}
         <SectionCard className="border-gray-700 bg-gray-800/50" paddingClassName="p-0">
-          <div className="p-6 border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80">
+          <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
               <div className="flex items-center space-x-3">
@@ -409,7 +409,7 @@ export function AdminClientApplicationsClient({
           </div>
 
           <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
-            <div className="px-6 border-b border-gray-700">
+            <div className="border-b border-gray-700 px-4 sm:px-6">
               <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
                 <TabsTrigger
                   value="pending"

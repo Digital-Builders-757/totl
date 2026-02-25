@@ -74,15 +74,15 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
   return (
     <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} notificationCount={3} />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="space-y-5">
           <PageHeader
             title="Overview"
             subtitle="Platform performance, activity, and quick actions."
           />
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 md:gap-4 mb-6">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">

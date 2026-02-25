@@ -191,31 +191,31 @@ export function AdminApplicationsClient({
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
       <AdminHeader user={user} notificationCount={3} />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {/* Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
+        <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-transparent">
+            <h1 className="mb-1 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
               Talent Applications
             </h1>
-            <p className="text-gray-400 text-lg">Review and manage talent applications for gigs</p>
+            <p className="text-sm text-gray-400 sm:text-base">Review and manage talent applications for gigs</p>
           </div>
-          <div className="mt-4 md:mt-0 flex items-center space-x-4">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium">
+          <div className="mt-1 flex flex-wrap items-center gap-2 md:mt-0">
+            <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
               {applications.filter(app => app.status === 'new').length} New
             </div>
-            <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-lg font-medium">
+            <div className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-medium text-white">
               {applications.filter(app => app.status === 'accepted').length} Approved
             </div>
-            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-lg font-medium">
+            <div className="rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
               {applications.filter(app => app.status === 'rejected').length} Rejected
             </div>
           </div>
         </div>
 
         {/* Applications Section */}
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-700 overflow-hidden mb-8">
-          <div className="p-6 border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80">
+        <div className="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 shadow-2xl backdrop-blur-sm">
+          <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
               <div className="flex items-center space-x-3">
@@ -239,7 +239,7 @@ export function AdminApplicationsClient({
           </div>
 
           <Tabs defaultValue="new" className="w-full" onValueChange={setActiveTab}>
-            <div className="px-6 border-b border-gray-700">
+            <div className="border-b border-gray-700 px-4 sm:px-6">
               <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
                 <TabsTrigger
                   value="new"

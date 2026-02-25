@@ -144,7 +144,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen">
       <AdminHeader user={user} notificationCount={stats.byStatus.open} />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {notice && (
           <Card className="mb-6 border-amber-500/40 bg-amber-500/10">
             <CardHeader className="pb-2">
@@ -153,7 +153,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
             </CardHeader>
           </Card>
         )}
-        <div className="grid gap-4 md:grid-cols-4 mb-8">
+        <div className="mb-6 grid gap-3 md:mb-8 md:grid-cols-4 md:gap-4">
           <Card className="bg-gray-800/40 border-gray-700">
             <CardHeader className="pb-2">
               <CardDescription>Total Reports</CardDescription>
@@ -180,9 +180,9 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
           </Card>
         </div>
 
-        <Card className="bg-gray-800/60 border-gray-700">
+          <Card className="border-gray-700 bg-gray-800/60">
           <CardHeader>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
               <div>
                 <CardTitle className="text-white">Moderation Queue</CardTitle>
                 <CardDescription>Review reported gigs and take action</CardDescription>
