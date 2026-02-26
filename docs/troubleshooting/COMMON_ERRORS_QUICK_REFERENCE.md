@@ -174,6 +174,9 @@ npm run build
   - **Fix:** Move acceptance into a single DB primitive `public.accept_application_and_create_booking(...)` + enforce uniqueness on `bookings(gig_id, talent_id)` and only send “accepted” emails when the RPC returns `did_accept=true`.
 - **Build Failures:** Any build that doesn't pass locally
   - **Fix:** Never push code that doesn't build locally
+- **`no-console` build blocker in client utilities/components:** `next build` fails on `Error: Unexpected console statement. no-console`
+  - **Fix:** Replace `console.log/debug` with `logger.info/debug` from `@/lib/utils/logger` (or remove log if unnecessary).
+  - **Prevention:** If temporary diagnostics are needed, use project logger utilities instead of direct console calls.
 - **Server Action 400 on File Upload:** Upload request fails before action runs (Network shows 400, no server logs)
   - **Root Cause:** Server Actions body limit defaults to 1MB
   - **Fix:** Set `experimental.serverActions.bodySizeLimit` in `next.config.mjs` (e.g., `4mb`), align client/server validation caps, and redeploy

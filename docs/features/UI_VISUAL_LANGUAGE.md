@@ -1,5 +1,7 @@
 # UI Visual Language & Component Guidelines
 
+**Scope Note:** This document defines visual language and styling patterns. For UX contracts, role-surface separation, responsive behavior rules, and enforcement, see `docs/UI_CONSTITUTION.md`.
+
 ## Overview
 
 This document outlines the visual design system and component patterns used throughout the TOTL Agency platform, focusing on our premium, back-lit minimalism aesthetic.

@@ -24,13 +24,17 @@ import {
   Search,
   Phone,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -39,6 +43,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
@@ -100,8 +105,10 @@ interface ClientDashboardProps {
 export function ClientDashboard({ initialData }: ClientDashboardProps) {
   const { user, signOut, profile } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [showVerifiedMessage, setShowVerifiedMessage] = useState(false);
   const hasHandledVerificationRef = useRef(false);
@@ -193,6 +200,10 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     }
   }, [searchParams, router]);
 
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [pathname]);
+
   // Status color helper removed: dashboard uses StatusBadge components instead.
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
@@ -238,20 +249,55 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   const quickStatCardClass = "text-white";
   const panelCardClass = "text-white";
   const tabTriggerClass =
-    "flex items-center gap-2 justify-center text-gray-200 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl border border-transparent hover:bg-gray-800 transition";
+    "flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-transparent px-3 py-2 text-xs text-gray-200 transition hover:bg-gray-800 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg sm:text-sm";
+  const mobileDrawerLinks = [
+    { label: "Overview", href: "/client/dashboard" },
+    { label: "My Gigs", href: "/client/gigs" },
+    { label: "Applications", href: "/client/applications" },
+    { label: "Bookings", href: "/client/bookings" },
+    { label: "Settings", href: "/settings" },
+  ];
 
   return (
     <PageShell topPadding={false} fullBleed>
       {/* Header */}
-      <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div data-testid="client-header-root" className="elev-2 border-b border-white/10 sticky top-0 z-40">
+        <div className="container mx-auto px-4 pt-[env(safe-area-inset-top)] py-2 md:py-4">
+          <div className="flex items-center justify-between md:hidden h-14">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              data-testid="client-drawer-trigger"
+              aria-label="Open client navigation menu"
+              className="h-11 w-11 text-white hover:bg-white/10"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="min-w-0 text-center px-3">
+              <p className="text-base font-semibold text-white truncate">Career Builder Dashboard</p>
+              <p className="text-xs text-gray-300 truncate">
+                {clientProfile?.company_name || "Manage gigs and applications"}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Go to settings"
+              className="h-11 w-11 text-white hover:bg-white/10"
+              asChild
+            >
+              <Link href="/settings">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+
+          <div className="hidden md:flex md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
-                <AvatarImage
-                  src={profile?.avatar_url || "/images/totl-logo.png"}
-                  alt="Company"
-                />
+                <AvatarImage src={profile?.avatar_url || "/images/totl-logo.png"} alt="Company" />
                 <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
               </Avatar>
               <div>
@@ -274,16 +320,16 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                   Settings
                 </Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={async () => {
                   if (isSigningOut) return;
-                  
+
                   setIsSigningOut(true);
                   try {
                     await signOut();
-                  } catch (error) {
+                  } catch {
                     // Error handled by auth provider
                     setIsSigningOut(false);
                   }
@@ -299,7 +345,67 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DialogContent
+          data-testid="client-drawer-panel"
+          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 rounded-none border-r border-white/10 bg-black p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] text-white"
+        >
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-sm text-gray-300">Menu</p>
+                <p className="truncate text-base font-semibold">
+                  {clientProfile?.company_name || "Career Builder"}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                data-testid="client-drawer-close"
+                aria-label="Close client navigation menu"
+                className="h-11 w-11 text-white hover:bg-white/10"
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <nav className="flex-1 space-y-1 px-2 py-3">
+              {mobileDrawerLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="flex min-h-11 items-center rounded-lg px-3 py-3 text-base text-white hover:bg-white/10"
+                  onClick={() => setIsDrawerOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="border-t border-white/10 px-3 py-3">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (isSigningOut) return;
+                  setIsDrawerOpen(false);
+                  setIsSigningOut(true);
+                  try {
+                    await signOut();
+                  } catch {
+                    setIsSigningOut(false);
+                  }
+                }}
+                disabled={isSigningOut}
+                className="flex min-h-11 w-full items-center rounded-lg px-3 py-3 text-left text-base text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSigningOut ? "Signing Out..." : "Sign Out"}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         {showVerifiedMessage && (
           <Alert className="bg-green-900/30 border-green-700 mb-6">
             <CheckCircle className="h-4 w-4 text-green-400" />
@@ -318,90 +424,146 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
         />
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="Total Gigs"
-            icon={<Briefcase className="h-4 w-4 text-blue-300" />}
-            badgeLabel="All time"
-            value={dashboardStats.totalGigs}
-            footerLabel="Next action"
-            footerActionText="Post a gig"
-            footerActionHref="/post-gig"
-          />
+        <div className="mb-8">
+          <div className="md:hidden space-y-2">
+            <details>
+              <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+                <span className="inline-flex items-center gap-2">
+                  Show stats
+                  <span className="text-xs text-gray-500">({dashboardStats.totalApplications} applications)</span>
+                </span>
+              </summary>
+              <div className="mt-2">
+                <MobileSummaryRow
+                  items={[
+                    { label: "Active gigs", value: dashboardStats.activeGigs, icon: Activity },
+                    { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+                    { label: "New", value: dashboardStats.newApplications, icon: ClockIcon },
+                    { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
+                    { label: "Closed", value: dashboardStats.closedGigs, icon: CheckCircle },
+                    {
+                      label: "Total spent",
+                      value: `$${dashboardStats.totalSpent.toLocaleString()}`,
+                      icon: DollarSign,
+                    },
+                  ]}
+                />
+                <div className="mt-2 px-1">
+                  <SecondaryActionLink href="/post-gig">Post a gig →</SecondaryActionLink>
+                </div>
+              </div>
+            </details>
+          </div>
 
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="Active Gigs"
-            icon={<Activity className="h-4 w-4 text-green-300" />}
-            badgeLabel="Live"
-            value={dashboardStats.activeGigs}
-            footerLabel="Next action"
-            footerActionText="Manage gigs"
-            footerActionHref="/client/gigs"
-          />
+          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="Total Gigs"
+              icon={<Briefcase className="h-4 w-4 text-blue-300" />}
+              badgeLabel="All time"
+              value={dashboardStats.totalGigs}
+              footerLabel="Next action"
+              footerActionText="Post a gig"
+              footerActionHref="/post-gig"
+            />
 
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="Applications"
-            icon={<Users className="h-4 w-4 text-purple-300" />}
-            badgeLabel="Total"
-            value={dashboardStats.totalApplications}
-            footerLabel="Next action"
-            footerActionText="Review applicants"
-            footerActionHref="/client/applications"
-          />
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="Active Gigs"
+              icon={<Activity className="h-4 w-4 text-green-300" />}
+              badgeLabel="Live"
+              value={dashboardStats.activeGigs}
+              footerLabel="Next action"
+              footerActionText="Manage gigs"
+              footerActionHref="/client/gigs"
+            />
 
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="New"
-            icon={<ClockIcon className="h-4 w-4 text-yellow-300" />}
-            badgeLabel="Incoming"
-            value={dashboardStats.newApplications}
-            footerLabel="Next action"
-            footerActionText="Triage now"
-            footerActionHref="/client/applications"
-          />
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="Applications"
+              icon={<Users className="h-4 w-4 text-purple-300" />}
+              badgeLabel="Total"
+              value={dashboardStats.totalApplications}
+              footerLabel="Next action"
+              footerActionText="Review applicants"
+              footerActionHref="/client/applications"
+            />
 
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="Closed"
-            icon={<CheckCircle className="h-4 w-4 text-green-300" />}
-            badgeLabel="Closed"
-            value={dashboardStats.closedGigs}
-            footerLabel="Next action"
-            footerActionText="View history"
-            footerActionHref="/client/gigs"
-          />
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="New"
+              icon={<ClockIcon className="h-4 w-4 text-yellow-300" />}
+              badgeLabel="Incoming"
+              value={dashboardStats.newApplications}
+              footerLabel="Next action"
+              footerActionText="Triage now"
+              footerActionHref="/client/applications"
+            />
 
-          <ClientStatCard
-            className={quickStatCardClass}
-            title="Total Spent"
-            icon={<DollarSign className="h-4 w-4 text-emerald-300" />}
-            badgeLabel="To date"
-            value={`$${dashboardStats.totalSpent.toLocaleString()}`}
-            footerLabel="Next action"
-            footerActionText="Review budgets"
-            footerActionHref="/client/gigs"
-          />
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="Closed"
+              icon={<CheckCircle className="h-4 w-4 text-green-300" />}
+              badgeLabel="Closed"
+              value={dashboardStats.closedGigs}
+              footerLabel="Next action"
+              footerActionText="View history"
+              footerActionHref="/client/gigs"
+            />
+
+            <ClientStatCard
+              className={quickStatCardClass}
+              title="Total Spent"
+              icon={<DollarSign className="h-4 w-4 text-emerald-300" />}
+              badgeLabel="To date"
+              value={`$${dashboardStats.totalSpent.toLocaleString()}`}
+              footerLabel="Next action"
+              footerActionText="Review budgets"
+              footerActionHref="/client/gigs"
+            />
+          </div>
         </div>
 
         {/* Main Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 gap-2 bg-gray-900 border border-gray-800 rounded-2xl p-1">
-            <TabsTrigger value="overview" className={`${tabTriggerClass}`}>
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger value="overview" className={tabTriggerClass}>
+                  <BarChart3 className="h-3.5 w-3.5" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="gigs" className={tabTriggerClass}>
+                  <Briefcase className="h-3.5 w-3.5" />
+                  My Gigs
+                </TabsTrigger>
+                <TabsTrigger value="applications" className={tabTriggerClass}>
+                  <Users className="h-3.5 w-3.5" />
+                  Applications
+                </TabsTrigger>
+                <TabsTrigger value="create" className={tabTriggerClass}>
+                  <Plus className="h-3.5 w-3.5" />
+                  Create Gig
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-4 gap-2 rounded-2xl border border-gray-800 bg-gray-900 p-1 md:grid">
+            <TabsTrigger value="overview" className={tabTriggerClass}>
               <BarChart3 className="h-4 w-4" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="gigs" className={`${tabTriggerClass}`}>
+            <TabsTrigger value="gigs" className={tabTriggerClass}>
               <Briefcase className="h-4 w-4" />
               My Gigs
             </TabsTrigger>
-            <TabsTrigger value="applications" className={`${tabTriggerClass}`}>
+            <TabsTrigger value="applications" className={tabTriggerClass}>
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
-            <TabsTrigger value="create" className={`${tabTriggerClass}`}>
+            <TabsTrigger value="create" className={tabTriggerClass}>
               <Plus className="h-4 w-4" />
               Create Gig
             </TabsTrigger>
@@ -507,9 +669,15 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
                       }}
                     />
                   )}
-                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
-                    <Link href="/client/gigs">View All Gigs</Link>
-                  </Button>
+                  {gigs.length > 0 ? (
+                    <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
+                      <Link href="/client/gigs">View All Gigs</Link>
+                    </Button>
+                  ) : (
+                    <div className="px-1">
+                      <SecondaryActionLink href="/client/gigs">Open gigs workspace →</SecondaryActionLink>
+                    </div>
+                  )}
                 </CardContent>
                 </Card>
               </div>

@@ -13,3 +13,8 @@ it is likely mis-scoped.
 - Staff → Server Actions / API Routes
 - Terminals → Dashboards
 - Control Tower → Admin, DB Triggers, Webhooks
+
+## Related Governance Docs
+- `docs/UI_CONSTITUTION.md`
+- `docs/ARCHITECTURE_CONSTITUTION.md`
+- `docs/diagrams/role-surfaces.md`

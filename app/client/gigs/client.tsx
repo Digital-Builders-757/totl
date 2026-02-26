@@ -16,6 +16,9 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -23,8 +26,8 @@ import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSupabase } from "@/lib/hooks/use-supabase";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { useSupabase } from "@/lib/hooks/use-supabase";
 import type { Database } from "@/types/supabase";
 
 interface Gig {
@@ -47,7 +50,6 @@ export default function ClientGigsClient() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
 
   // HARDENING: Use hook instead of direct call - ensures browser-only execution
@@ -139,16 +141,13 @@ export default function ClientGigsClient() {
       gig.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       gig.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      statusFilter === "all" || gig.status?.toLowerCase() === statusFilter.toLowerCase();
-
     const matchesTab =
       activeTab === "all" ||
       (activeTab === "active" && gig.status === "Active") ||
       (activeTab === "completed" && gig.status === "Completed") ||
       (activeTab === "draft" && gig.status === "Draft");
 
-    return matchesSearch && matchesStatus && matchesTab;
+    return matchesSearch && matchesTab;
   });
 
   // Removed getStatusIcon - now using GigStatusBadge component
@@ -182,30 +181,48 @@ export default function ClientGigsClient() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <Building className="h-8 w-8 text-blue-600" />
-              <div>
-                <h1 className="text-2xl font-bold text-white">My Gigs</h1>
-                <p className="text-gray-300">Manage your posted gigs and track applications</p>
-              </div>
-            </div>
-            <Button asChild>
-              <Link href="/post-gig">
-                <Plus className="h-4 w-4 mr-2" />
-                Post New Gig
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ClientTerminalHeader
+        title="My Gigs"
+        subtitle="Manage your posted gigs and track applications"
+        desktopPrimaryAction={
+          <Button asChild>
+            <Link href="/post-gig">
+              <Plus className="h-4 w-4 mr-2" />
+              Post New Gig
+            </Link>
+          </Button>
+        }
+        mobileSecondaryAction={<SecondaryActionLink href="/post-gig">Post new gig →</SecondaryActionLink>}
+      />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="mb-4 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">({gigs.length} total)</span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow
+                items={[
+                  { label: "Total gigs", value: gigs.length, icon: Building },
+                  { label: "Active", value: gigs.filter((g) => g.status === "Active").length, icon: CheckCircle },
+                  {
+                    label: "Applications",
+                    value: gigs.reduce((sum, gig) => sum + (gig.applications_count || 0), 0),
+                    icon: Users,
+                  },
+                  { label: "Completed", value: gigs.filter((g) => g.status === "Completed").length, icon: CheckCircle },
+                ]}
+              />
+            </div>
+          </details>
+        </div>
+
+        <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -280,24 +297,31 @@ export default function ClientGigsClient() {
               className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
             />
           </div>
-          <div className="flex gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="draft">Draft</option>
-              <option value="expired">Expired</option>
-            </select>
-          </div>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  All Gigs ({gigs.length})
+                </TabsTrigger>
+                <TabsTrigger value="active" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Active ({gigs.filter((g) => g.status === "Active").length})
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Completed ({gigs.filter((g) => g.status === "Completed").length})
+                </TabsTrigger>
+                <TabsTrigger value="draft" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Draft ({gigs.filter((g) => g.status === "Draft").length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-4 md:grid">
             <TabsTrigger value="all">All Gigs ({gigs.length})</TabsTrigger>
             <TabsTrigger value="active">
               Active ({gigs.filter((g) => g.status === "Active").length})
@@ -317,11 +341,11 @@ export default function ClientGigsClient() {
                   <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-white mb-2">No gigs found</h3>
                   <p className="text-gray-300 mb-6">
-                    {searchTerm || statusFilter !== "all"
+                    {searchTerm
                       ? "Try adjusting your search or filters"
                       : "Get started by posting your first gig"}
                   </p>
-                  {!searchTerm && statusFilter === "all" && (
+                  {!searchTerm && (
                     <Button asChild>
                       <Link href="/post-gig">
                         <Plus className="h-4 w-4 mr-2" />

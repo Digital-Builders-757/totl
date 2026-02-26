@@ -49,3 +49,9 @@ Apply this guide to all dashboard-like terminals (`/admin/*`, `/talent/*`, `/cli
 - `data-testid` hooks exist for critical chrome controls on auth-protected dashboards.
 - First content module appears above the fold on common iPhone viewport.
 
+## Related Governance Docs
+
+- `docs/UI_CONSTITUTION.md`
+- `docs/ARCHITECTURE_CONSTITUTION.md`
+- `docs/features/UI_VISUAL_LANGUAGE.md`
+

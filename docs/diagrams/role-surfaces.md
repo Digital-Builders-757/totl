@@ -19,3 +19,8 @@ Use when:
 - A feature being implemented in the wrong terminal
 - Permissions drifting (“client can see talent-only page”)
 - Admin controls leaking into non-admin routes
+
+## Related Governance Docs
+- `docs/UI_CONSTITUTION.md`
+- `docs/ARCHITECTURE_CONSTITUTION.md`
+- `docs/diagrams/airport-model.md`

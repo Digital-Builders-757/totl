@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import type React from "react";
 
+import { ChunkLoadErrorHandler } from "@/components/chunk-load-error-handler";
 import { CommandPalette, useCommandPalette } from "@/components/command-palette";
 import Navbar from "@/components/navbar";
 import { SupabaseEnvBanner } from "@/components/supabase-env-banner";
@@ -25,12 +26,21 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const { open, setOpen } = useCommandPalette();
 
-  // Hide the main navbar on admin and talent dashboard pages
-  const showNavbar = !pathname?.startsWith("/admin") && !pathname?.startsWith("/talent/dashboard");
+  // Hide the main navbar on terminal dashboard routes that own their own header chrome.
+  const isClientTerminalRoute =
+    pathname?.startsWith("/client/dashboard") ||
+    pathname?.startsWith("/client/applications") ||
+    pathname?.startsWith("/client/gigs");
+
+  const showNavbar =
+    !pathname?.startsWith("/admin") &&
+    !pathname?.startsWith("/talent/dashboard") &&
+    !isClientTerminalRoute;
 
   // AuthProvider moved to root Providers component to prevent remounts on navigation
   return (
     <>
+      <ChunkLoadErrorHandler />
       <Ga4Analytics />
       <SupabaseEnvBanner />
       {showNavbar && <Navbar />}
