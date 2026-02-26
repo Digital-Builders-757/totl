@@ -8,6 +8,126 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Full route-list consistency sweep + terminal chrome alignment (February 26, 2026)**
+
+**UI/UX / END-TO-END CONSISTENCY PASS** — February 26, 2026
+- ✅ Completed additional repo-wide route sweep against launch route inventory (`tmp_routes.txt`) with focus on terminal density/chrome parity.
+- ✅ Extended client terminal chrome ownership to `/client/bookings` and `/client/profile` in `app/client-layout.tsx` so the global navbar no longer stacks on terminal-owned pages.
+- ✅ Upgraded `/client/bookings` to the same mobile contract already used on dashboard/applications/gigs:
+  - `ClientTerminalHeader`
+  - collapsed mobile stats (`Show stats` + `MobileSummaryRow`)
+  - horizontal tab rail with fade edges
+  - compact top spacing baseline
+- ✅ Upgraded `/admin/dashboard` mobile density:
+  - collapsed mobile stats summary
+  - horizontal tab rail with fade edges
+- ✅ Upgraded legacy `/admin/talentdashboard` tab density behavior for mobile consistency.
+
+**Problems discovered and resolved this session:**
+- ✅ `/client/bookings` still used pre-constitution top-heavy mobile layout and dense 5-tab row.
+- ✅ `/admin/dashboard` still rendered a dense mobile stat grid and heavy fixed tab row.
+- ✅ Client terminal chrome suppression was incomplete (profile/bookings parity gap).
+
+**Next (P0 - Launch polish)**
+- [ ] Manually validate drawer contract on physical/mobile emulation for all client terminal routes.
+- [ ] Complete remaining Wave tracker TODO routes in `docs/development/MOBILE_UX_QA_CHECKLIST.md` with screenshot evidence at 360×800 and 390×844.
+
+**Next (P1 - Follow-up)**
+- [ ] Continue sweep on remaining admin/talent list/detail surfaces to converge all tabs/filters onto the same mobile rail + sheet patterns.
+- [ ] Reduce repository-wide lint warnings to keep pre-commit signals tight.
+
+## 🚀 **Latest: Client/Talent terminal mobile-density sweep + ship hardening (February 26, 2026)**
+
+**MOBILE UI/UX / SHIP READINESS** — February 26, 2026
+- ✅ Completed a full Wave 1 + Talent dashboard alignment sweep on:
+  - `app/client/dashboard/client.tsx`
+  - `app/client/applications/client-applications-client.tsx`
+  - `app/client/gigs/client.tsx`
+  - `app/talent/dashboard/client.tsx`
+- ✅ Fixed remaining mobile tab density issues by converting heavy 4-up tab rows to horizontally scrollable rails with fade-edge affordance on `<md`.
+- ✅ Reduced above-the-fold chrome pressure by tightening container spacing (`py-4 sm:py-6`) and keeping desktop layouts unchanged.
+- ✅ Removed redundant CTA stacking in empty dashboard card states (primary button + secondary text link pattern).
+- ✅ Resolved ship blocker discovered during build:
+  - `components/chunk-load-error-handler.tsx` contained `console.log` (fails `no-console` in production build); replaced with project `logger`.
+
+**Problems discovered and resolved this session:**
+- ✅ Build initially failed due to one hard lint error (`no-console`) in chunk recovery handler.
+- ✅ Drawer/tab density drift remained on mobile in key terminal routes; normalized via shared interaction pattern.
+
+**Next (P0 - Launch polish)**
+- [ ] Manually verify drawer behavior on mobile for client terminal routes (open, inert backdrop, close on route change, role-scoped links).
+- [ ] Run screenshot pass at 360×800 and 390×844 for updated routes and attach evidence to PR.
+
+**Next (P1 - Follow-up)**
+- [ ] Apply same mobile tab-rail pattern to remaining high-traffic terminal routes (remaining `/talent/*` list surfaces).
+- [ ] Burn down repository-wide lint warnings so future ship runs stay high-signal.
+
+## 🚀 **Latest: Mobile density standardization (B-core primitives + QA checklist) (February 26, 2026)**
+
+**MOBILE UI/UX / DENSITY CONTRACT ROLLOUT** — February 26, 2026
+- ✅ Introduced shared presentational primitives (no data reads/writes) to standardize mobile information density:
+  - `MobileSummaryRow`
+  - `FiltersSheet`
+  - `MobileListRowCard`
+  - `SecondaryActionLink`
+- ✅ Began rollout discipline across terminals (Wave 1 client, Wave 2 talent starter).
+- ✅ Added route-by-route QA enforcement doc:
+  - `docs/development/MOBILE_UX_QA_CHECKLIST.md` (cross-references `DASHBOARD_MOBILE_DENSITY_GUIDE.md` + `MOBILE_UX_AUDIT_SCREEN_INVENTORY.md`)
+
+**Next (P0 - Launch polish)**
+- [ ] Complete Wave QA passes at 360×800 + 390×844 for Client/Talent/Admin critical routes.
+- [ ] Expand adoption of the same primitives to remaining `/talent/*` and `/admin/*` list surfaces.
+
+## 🚀 **Latest: Canonical UI constitution + governance doc linking (February 26, 2026)**
+
+**DOCUMENTATION / UI GOVERNANCE** — February 26, 2026
+- ✅ Added canonical UI governance constitution:
+  - `docs/UI_CONSTITUTION.md`
+- ✅ Linked architecture constitution to UI governance chain:
+  - `docs/ARCHITECTURE_CONSTITUTION.md`
+- ✅ Linked architecture diagrams to UI governance docs:
+  - `docs/diagrams/airport-model.md`
+  - `docs/diagrams/role-surfaces.md`
+- ✅ Added scope boundary note in visual language doc (visuals vs behavior/governance):
+  - `docs/features/UI_VISUAL_LANGUAGE.md`
+- ✅ Linked mobile density guide to constitution + architecture:
+  - `docs/development/DASHBOARD_MOBILE_DENSITY_GUIDE.md`
+
+**Next (P1 - Documentation hygiene)**
+- [ ] Add `docs/UI_CONSTITUTION.md` to any doc index pages that list canonical constitutions/contracts.
+- [ ] Keep future UI PRs aligned with the linked governance chain (architecture + role surfaces + mobile density + visual language scope).
+
+## 🚀 **Previous: Admin dashboard mobile-first chrome + density trims (February 25, 2026)**
+
+**MOBILE UI/UX / ADMIN DASHBOARD POLISH** — February 25, 2026
+- ✅ Implemented **Approach A (Header First)** to reclaim above-the-fold space on mobile.
+- ✅ Rebuilt admin header into compact mobile-first chrome in `components/admin/admin-header.tsx`:
+  - safe-area aware header padding (header-only)
+  - 56px mobile row (`h-14`)
+  - hamburger trigger + drawer-style nav panel
+  - centered route title (truncate)
+  - notifications icon + overflow actions
+  - removed emoji nav icons → consistent Lucide icons
+  - added stable test hooks (`data-testid`): `admin-header`, `admin-drawer-trigger`, `admin-drawer-panel`, `admin-overflow-trigger`
+- ✅ Per-page density trims (spacing/hierarchy only) applied across admin screens:
+  - `app/admin/dashboard/admin-dashboard-client.tsx`
+  - `app/admin/users/admin-users-client.tsx`
+  - `app/admin/gigs/admin-gigs-client.tsx`
+  - `app/admin/applications/admin-applications-client.tsx`
+  - `app/admin/client-applications/admin-client-applications-client.tsx`
+  - `app/admin/talent/admin-talent-client.tsx`
+  - `app/admin/moderation/admin-moderation-client.tsx`
+- ✅ Updated admin mobile overflow sentinel test expectations:
+  - `tests/admin/admin-dashboard-overflow-sentinel.spec.ts`
+- ✅ Added reusable dashboard polish guidance:
+  - `docs/development/DASHBOARD_MOBILE_DENSITY_GUIDE.md`
+- ✅ Added canonical route inventory for mobile audit across the entire app:
+  - `docs/development/MOBILE_UX_AUDIT_SCREEN_INVENTORY.md`
+
+**Next (P0 - Launch polish)**
+- [ ] Apply the same mobile-first chrome + density contract to **Client** and **Talent** dashboards.
+- [ ] Replace table-first mobile views with card/row patterns + overflow actions on key admin screens.
+
 ## 🚀 **Latest: Auth redirect timeout fallback hardening + telemetry (February 22, 2026)**
 
 **AUTH / REDIRECT CONVERGENCE / PRODUCTION DIAGNOSTICS** - February 22, 2026

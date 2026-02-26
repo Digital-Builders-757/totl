@@ -87,3 +87,11 @@ If your change touches **auth, middleware, redirects, profiles, onboarding, Stri
 - **RLS-first mindset**: design queries/mutations that succeed under least privilege.
 - **Prefer small diffs**: especially in red flag files.
 - **Browser client initialization**: `createSupabaseBrowser()` must be initialized in `useEffect`, `useLayoutEffect`, or event handlers, never during render (component body, module scope). Client Components may render on the server for initial HTML (RSC pipeline).
+
+---
+
+## Related UI Governance
+
+- UI behavior and enforcement laws: `docs/UI_CONSTITUTION.md`
+- Visual styling and component language: `docs/features/UI_VISUAL_LANGUAGE.md`
+- Mobile dashboard density rules: `docs/development/DASHBOARD_MOBILE_DENSITY_GUIDE.md`

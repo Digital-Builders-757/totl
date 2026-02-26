@@ -33,6 +33,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
@@ -821,7 +822,7 @@ function TalentDashboardContent({
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {showSubscriptionBanner && (
           <SubscriptionPrompt profile={subscriptionProfile} variant="banner" context="general" />
         )}
@@ -844,7 +845,32 @@ function TalentDashboardContent({
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        <div className="mb-4 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">
+                  ({dashboardStats.totalApplications} applications)
+                </span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow
+                items={[
+                  { label: "Profile views", value: 0, icon: Eye },
+                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+                  { label: "Accepted", value: dashboardStats.acceptedTalentApplications, icon: Calendar },
+                  { label: "Earnings", value: "$0", icon: DollarSign },
+                  { label: "Rating", value: 0, icon: Star },
+                  { label: "Success rate", value: "0%", icon: TrendingUp },
+                ]}
+              />
+            </div>
+          </details>
+        </div>
+
+        <div className="hidden md:grid md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
@@ -973,7 +999,43 @@ function TalentDashboardContent({
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gray-900 border-gray-800">
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger
+                  value="overview"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Activity className="h-3.5 w-3.5" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="applications"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Target className="h-3.5 w-3.5" />
+                  Applications
+                </TabsTrigger>
+                <TabsTrigger
+                  value="bookings"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Calendar className="h-3.5 w-3.5" />
+                  Bookings
+                </TabsTrigger>
+                <TabsTrigger
+                  value="discover"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  Discover
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-4 border-gray-800 bg-gray-900 md:grid lg:w-auto lg:grid-cols-4">
             <TabsTrigger
               value="overview"
               className="flex items-center gap-2 text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
@@ -983,21 +1045,21 @@ function TalentDashboardContent({
             </TabsTrigger>
             <TabsTrigger
               value="applications"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Target className="h-4 w-4" />
-              TalentApplications
+              Applications
             </TabsTrigger>
             <TabsTrigger
               value="bookings"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Calendar className="h-4 w-4" />
               Bookings
             </TabsTrigger>
             <TabsTrigger
               value="discover"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Search className="h-4 w-4" />
               Discover

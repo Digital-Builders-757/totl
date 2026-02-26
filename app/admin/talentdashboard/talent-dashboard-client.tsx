@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Search, MoreVertical, Filter } from "lucide-react";
 import Link from "next/link";
@@ -74,7 +74,24 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
       </div>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList className="grid w-full grid-cols-3">
+        <div className="relative md:hidden">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-white to-transparent" />
+          <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-200 bg-white p-1">
+              <TabsTrigger value="active" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Active ({gigs.active.length})
+              </TabsTrigger>
+              <TabsTrigger value="accepted" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Accepted ({gigs.accepted.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Rejected ({gigs.rejected.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
+        </div>
+        <TabsList className="hidden w-full grid-cols-3 md:grid">
           <TabsTrigger value="active">Active ({gigs.active.length})</TabsTrigger>
           <TabsTrigger value="accepted">Accepted ({gigs.accepted.length})</TabsTrigger>
           <TabsTrigger value="rejected">Rejected ({gigs.rejected.length})</TabsTrigger>

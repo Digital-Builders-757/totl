@@ -62,6 +62,10 @@ test.describe("Admin overflow sentinel (mobile)", () => {
   test("admin dashboard has no horizontal overflow", async ({ page }) => {
     await loginAsAdmin(page);
     await expect(page.locator('[data-testid="admin-header"]')).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-testid="admin-drawer-trigger"]')).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator('[data-testid="admin-overflow-trigger"]')).toBeVisible({ timeout: 60_000 });
+    await page.locator('[data-testid="admin-drawer-trigger"]').click();
+    await expect(page.locator('[data-testid="admin-drawer-panel"]')).toBeVisible({ timeout: 60_000 });
     await expectNoHorizontalOverflow(page, "admin dashboard");
   });
 });

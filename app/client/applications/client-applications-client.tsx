@@ -1,11 +1,16 @@
 "use client";
 
-import { Clock, MapPin, DollarSign, CheckCircle2, XCircle, MoreVertical } from "lucide-react";
+import { Clock, MapPin, DollarSign, CheckCircle2, XCircle, MoreVertical, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { AcceptApplicationDialog } from "@/components/client/accept-application-dialog";
+import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { RejectApplicationDialog } from "@/components/client/reject-application-dialog";
+import { FiltersSheet } from "@/components/dashboard/filters-sheet";
+import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -59,6 +64,7 @@ export default function ClientApplicationsClient({
   const [statusFilter, setStatusFilter] = useState("all");
   const [gigFilter, setGigFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("all");
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -101,6 +107,17 @@ export default function ClientApplicationsClient({
   }, [applications, searchTerm, statusFilter, gigFilter, activeTab]);
 
   const uniqueGigs = Array.from(new Set(applications.map((app) => app.gig_id)));
+  const activeFilterCount = gigFilter !== "all" ? 1 : 0;
+  const selectedGigLabel =
+    gigFilter === "all"
+      ? null
+      : applications.find((app) => app.gig_id === gigFilter)?.gigs?.title || "Selected gig";
+  const summaryItems = [
+    { label: "All", value: applications.length, icon: Briefcase },
+    { label: "New", value: applications.filter((app) => app.status === "new").length, icon: Clock },
+    { label: "Interviews", value: applications.filter((app) => app.status === "shortlisted").length, icon: Clock },
+    { label: "Hired", value: applications.filter((app) => app.status === "accepted").length, icon: CheckCircle2 },
+  ];
 
   const getTalentName = (application: Application) => {
     if (application.talent_profiles?.first_name || application.talent_profiles?.last_name) {
@@ -123,24 +140,33 @@ export default function ClientApplicationsClient({
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <div>
-                <h1 className="text-2xl font-bold text-white">Applications</h1>
-                <p className="text-gray-300">Review and manage talent applications for your gigs</p>
-              </div>
-            </div>
-            <Button variant="outline" asChild>
-              <Link href="/client/gigs">View My Gigs</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ClientTerminalHeader
+        title="Applications"
+        subtitle="Review and manage talent applications for your gigs"
+        desktopPrimaryAction={
+          <Button variant="outline" asChild>
+            <Link href="/client/gigs">View My Gigs</Link>
+          </Button>
+        }
+        mobileSecondaryAction={<SecondaryActionLink href="/client/gigs">My gigs →</SecondaryActionLink>}
+      />
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
+        <div className="mb-4 md:mb-8 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">({applications.length} total)</span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow items={summaryItems} />
+            </div>
+          </details>
+        </div>
+
+        <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -201,7 +227,7 @@ export default function ClientApplicationsClient({
           </Card>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
           <div className="flex-1 relative">
             <input
               placeholder="Search by talent name, gig title, or location..."
@@ -210,7 +236,7 @@ export default function ClientApplicationsClient({
               className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400 rounded-md px-3 py-2 border"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="hidden md:flex gap-2">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
@@ -239,10 +265,79 @@ export default function ClientApplicationsClient({
               })}
             </select>
           </div>
+          <div className="md:hidden">
+            <FiltersSheet
+              open={isFiltersOpen}
+              onOpenChange={setIsFiltersOpen}
+              activeCount={activeFilterCount}
+              className="border-gray-700 text-white hover:bg-white/5"
+            >
+              <div className="space-y-2">
+                <label htmlFor="mobile-gig-filter" className="text-sm text-gray-300">
+                  Gig
+                </label>
+                <select
+                  id="mobile-gig-filter"
+                  value={gigFilter}
+                  onChange={(event) => setGigFilter(event.target.value)}
+                  className="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Gigs</option>
+                  {uniqueGigs.map((gigId) => {
+                    const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
+                    return (
+                      <option key={gigId} value={gigId}>
+                        {gig?.title || `Gig ${gigId}`}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-gray-700 text-white hover:bg-white/5"
+                onClick={() => {
+                  setGigFilter("all");
+                  setIsFiltersOpen(false);
+                }}
+              >
+                Clear filters
+              </Button>
+            </FiltersSheet>
+          </div>
         </div>
 
+        {selectedGigLabel ? (
+          <div className="mb-3 flex flex-wrap gap-2 md:hidden">
+            <span className="rounded-full border border-white/15 bg-gray-800 px-3 py-1 text-xs text-gray-200">
+              Gig: {selectedGigLabel}
+            </span>
+          </div>
+        ) : null}
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  All ({applications.length})
+                </TabsTrigger>
+                <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  New ({applications.filter((app) => app.status === "new").length})
+                </TabsTrigger>
+                <TabsTrigger value="interview" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Interviews ({applications.filter((app) => app.status === "shortlisted").length})
+                </TabsTrigger>
+                <TabsTrigger value="hired" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Hired ({applications.filter((app) => app.status === "accepted").length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-4 md:grid">
             <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
             <TabsTrigger value="new">
               New ({applications.filter((app) => app.status === "new").length})
@@ -278,103 +373,182 @@ export default function ClientApplicationsClient({
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-4">
-                {filteredApplications.map((application) => {
-                  const talentName = getTalentName(application);
-                  const talentInitials = getInitials(talentName);
-                  const profileHref = getTalentProfileHref(application);
-                  const appliedDate = new Date(application.created_at).toLocaleDateString();
-                  const showDecisionMenu =
-                    application.status === "new" || application.status === "under_review";
-                  
-                  // Compute avatar URL from avatar_url or avatar_path
-                  const avatarSrc =
-                    application.profiles?.avatar_url ||
-                    publicBucketUrl("avatars", application.profiles?.avatar_path);
+              <>
+                <div className="space-y-3 md:hidden">
+                  {filteredApplications.map((application) => {
+                    const talentName = getTalentName(application);
+                    const profileHref = getTalentProfileHref(application);
+                    const appliedDate = new Date(application.created_at).toLocaleDateString();
+                    const showDecisionMenu =
+                      application.status === "new" || application.status === "under_review";
 
-                  return (
-                    <Card key={application.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start">
-                          <MediaThumb
-                            src={avatarSrc}
-                            alt={`${talentName} profile`}
-                            variant="talent"
-                            fallbackText={talentInitials}
-                            className="w-16 md:w-20"
-                          />
-                          <div className="flex-1 space-y-3">
-                            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                              <div className="space-y-1">
-                                <h3 className="text-lg font-semibold text-white">{talentName}</h3>
-                                <p className="text-sm text-gray-300">{application.gigs?.title || "Gig"}</p>
-                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="h-3 w-3" />
-                                    {application.gigs?.location || "Location TBD"}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <DollarSign className="h-3 w-3" />
-                                    {application.gigs?.compensation || "Comp TBD"}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    Applied {appliedDate}
-                                  </span>
+                    return (
+                      <MobileListRowCard
+                        key={`${application.id}-mobile`}
+                        title={talentName}
+                        subtitle={application.gigs?.title || "Gig"}
+                        badge={<ApplicationStatusBadge status={application.status} showIcon={false} />}
+                        meta={[
+                          {
+                            label: "Location",
+                            value: application.gigs?.location || "Location TBD",
+                          },
+                          {
+                            label: "Comp",
+                            value: application.gigs?.compensation || "Comp TBD",
+                          },
+                          {
+                            label: "Applied",
+                            value: appliedDate,
+                          },
+                        ]}
+                        trailing={
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="More actions"
+                                className="h-11 w-11 text-gray-400 hover:bg-gray-700"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                              <DropdownMenuItem asChild className="text-gray-200 focus:text-white">
+                                <Link href={profileHref}>Review profile</Link>
+                              </DropdownMenuItem>
+                              {showDecisionMenu ? (
+                                <>
+                                  <DropdownMenuItem
+                                    data-test="accept-application"
+                                    onClick={() => handleAcceptClick(application)}
+                                    className="text-gray-200 focus:text-white"
+                                  >
+                                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
+                                    Accept
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleRejectClick(application)}
+                                    className="text-gray-200 focus:text-white"
+                                  >
+                                    <XCircle className="mr-2 h-4 w-4 text-red-400" />
+                                    Reject
+                                  </DropdownMenuItem>
+                                </>
+                              ) : null}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        }
+                        footer={
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-400">Next action</span>
+                            <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
+                              Review profile
+                            </Link>
+                          </div>
+                        }
+                      />
+                    );
+                  })}
+                </div>
+                <div className="hidden space-y-4 md:block">
+                  {filteredApplications.map((application) => {
+                    const talentName = getTalentName(application);
+                    const talentInitials = getInitials(talentName);
+                    const profileHref = getTalentProfileHref(application);
+                    const appliedDate = new Date(application.created_at).toLocaleDateString();
+                    const showDecisionMenu =
+                      application.status === "new" || application.status === "under_review";
+
+                    const avatarSrc =
+                      application.profiles?.avatar_url ||
+                      publicBucketUrl("avatars", application.profiles?.avatar_path);
+
+                    return (
+                      <Card key={application.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+                        <CardContent className="p-4 sm:p-6">
+                          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+                            <MediaThumb
+                              src={avatarSrc}
+                              alt={`${talentName} profile`}
+                              variant="talent"
+                              fallbackText={talentInitials}
+                              className="w-16 md:w-20"
+                            />
+                            <div className="flex-1 space-y-3">
+                              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                <div className="space-y-1">
+                                  <h3 className="text-lg font-semibold text-white">{talentName}</h3>
+                                  <p className="text-sm text-gray-300">{application.gigs?.title || "Gig"}</p>
+                                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="h-3 w-3" />
+                                      {application.gigs?.location || "Location TBD"}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <DollarSign className="h-3 w-3" />
+                                      {application.gigs?.compensation || "Comp TBD"}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      Applied {appliedDate}
+                                    </span>
+                                  </div>
                                 </div>
+                                <ApplicationStatusBadge status={application.status} showIcon={true} />
                               </div>
-                              <ApplicationStatusBadge status={application.status} showIcon={true} />
-                            </div>
-                            <div className="flex items-center justify-between border-t border-white/10 pt-3 text-sm">
-                              <span className="text-xs text-gray-400">Next action</span>
-                              <div className="flex items-center gap-2">
-                                <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
-                                  Review profile
-                                </Link>
-                                {showDecisionMenu ? (
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        aria-label="More actions"
-                                        className="h-10 w-10 text-gray-400 hover:bg-gray-700"
-                                      >
-                                        <MoreVertical className="h-4 w-4" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                                      <DropdownMenuItem
-                                        data-test="accept-application"
-                                        onClick={() => handleAcceptClick(application)}
-                                        className="text-gray-200 focus:text-white"
-                                      >
-                                        <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
-                                        Accept
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handleRejectClick(application)}
-                                        className="text-gray-200 focus:text-white"
-                                      >
-                                        <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                                        Reject
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                ) : (
-                                  <span className="text-xs text-gray-400">
-                                    {application.status === "accepted" ? "✓ Accepted" : "✗ Rejected"}
-                                  </span>
-                                )}
+                              <div className="flex items-center justify-between border-t border-white/10 pt-3 text-sm">
+                                <span className="text-xs text-gray-400">Next action</span>
+                                <div className="flex items-center gap-2">
+                                  <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
+                                    Review profile
+                                  </Link>
+                                  {showDecisionMenu ? (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          aria-label="More actions"
+                                          className="h-11 w-11 text-gray-400 hover:bg-gray-700"
+                                        >
+                                          <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                                        <DropdownMenuItem
+                                          data-test="accept-application"
+                                          onClick={() => handleAcceptClick(application)}
+                                          className="text-gray-200 focus:text-white"
+                                        >
+                                          <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
+                                          Accept
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                          onClick={() => handleRejectClick(application)}
+                                          className="text-gray-200 focus:text-white"
+                                        >
+                                          <XCircle className="mr-2 h-4 w-4 text-red-400" />
+                                          Reject
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  ) : (
+                                    <span className="text-xs text-gray-400">
+                                      {application.status === "accepted" ? "Accepted" : "Rejected"}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </TabsContent>
         </Tabs>

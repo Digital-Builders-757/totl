@@ -23,6 +23,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AdminHeader } from "@/components/admin/admin-header";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
@@ -74,15 +75,42 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
   return (
     <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} notificationCount={3} />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <div className="space-y-5">
           <PageHeader
             title="Overview"
             subtitle="Platform performance, activity, and quick actions."
           />
 
+        <div className="mb-4 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">({dashboardStats.totalApplications} applications)</span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow
+                items={[
+                  { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
+                  { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
+                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+                  { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
+                  { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
+                  {
+                    label: "Paid talent",
+                    value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
+                    icon: DollarSign,
+                  },
+                ]}
+              />
+            </div>
+          </details>
+        </div>
+
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+        <div className="hidden md:grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 md:gap-4 mb-6">
           <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
@@ -229,7 +257,43 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4 bg-gray-900 border-gray-800">
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger
+                  value="overview"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Activity className="h-3.5 w-3.5" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="gigs"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Briefcase className="h-3.5 w-3.5" />
+                  Gigs
+                </TabsTrigger>
+                <TabsTrigger
+                  value="applications"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Applications
+                </TabsTrigger>
+                <TabsTrigger
+                  value="analytics"
+                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                >
+                  <BarChart className="h-3.5 w-3.5" />
+                  Analytics
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-4 border-gray-800 bg-gray-900 md:grid lg:w-auto lg:grid-cols-4">
             <TabsTrigger
               value="overview"
               className="flex items-center gap-2 text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"

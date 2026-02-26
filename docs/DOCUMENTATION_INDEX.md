@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** February 18, 2026
+**Last Updated:** February 26, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -177,6 +177,9 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `CSS_BEST_PRACTICES.md` - 🚨 **CRITICAL** - CSS best practices to prevent build failures (Oct 24, 2025)
 - `NEXTJS_15_COOKIES_ERROR_FIX.md` - 🚨 **CRITICAL** - Next.js 15 App Router cookies error fix (Oct 24, 2025)
 - `IMPORT_PATH_BEST_PRACTICES.md` - **NEW** ✅ - Import path best practices and error prevention (Oct 23, 2025)
+- `DASHBOARD_MOBILE_DENSITY_GUIDE.md` - **✅ NEW** - Shared mobile-first dashboard chrome and density contract (Feb 2026)
+- `development/MOBILE_UX_AUDIT_SCREEN_INVENTORY.md` - **✅ NEW** - Canonical list of screens/routes to audit for mobile launch polish (Admin/Client/Talent/User/Auth) (Feb 2026)
+- `development/MOBILE_UX_QA_CHECKLIST.md` - **✅ NEW** - Route-by-route mobile QA checklist enforcing the dashboard density contract (Feb 2026)
 - `CODING_STANDARDS.md` - Coding standards and best practices
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AlertCircle,
   Calendar,
   Clock,
   DollarSign,
@@ -13,6 +14,9 @@ import {
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/ui/status-badge";
@@ -124,7 +128,7 @@ export default function ClientBookingsPage() {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
-          <div className="h-12 w-12 text-red-500 mx-auto mb-4">⚠️</div>
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">Error</h2>
           <p className="text-gray-300 mb-4">{error}</p>
           <Button onClick={loadBookings}>Try Again</Button>
@@ -135,32 +139,48 @@ export default function ClientBookingsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="apple-glass border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <Calendar className="h-8 w-8 text-blue-400" />
-              <div>
-                <h1 className="text-2xl font-bold text-white">Bookings</h1>
-                <p className="text-gray-300">Manage your confirmed talent bookings</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
-                <Link href="/client/applications">View Applications</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/client/gigs">My Gigs</Link>
-              </Button>
-            </div>
+      <ClientTerminalHeader
+        title="Bookings"
+        subtitle="Manage your confirmed talent bookings"
+        desktopPrimaryAction={
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link href="/client/applications">View Applications</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/client/gigs">My Gigs</Link>
+            </Button>
           </div>
-        </div>
-      </div>
+        }
+        mobileSecondaryAction={
+          <SecondaryActionLink href="/client/applications">View applications →</SecondaryActionLink>
+        }
+      />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-6">
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="mb-4 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">({bookingStats.total} total)</span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow
+                items={[
+                  { label: "Total", value: bookingStats.total, icon: Calendar },
+                  { label: "Pending", value: bookingStats.pending, icon: Clock },
+                  { label: "Confirmed", value: bookingStats.confirmed, icon: CheckCircle2 },
+                  { label: "Completed", value: bookingStats.completed, icon: CheckCircle2 },
+                  { label: "Cancelled", value: bookingStats.cancelled, icon: XCircle },
+                ]}
+              />
+            </div>
+          </details>
+        </div>
+        <div className="hidden md:grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card className="bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -224,7 +244,30 @@ export default function ClientBookingsPage() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <div className="relative md:hidden">
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
+            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+                <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  All ({bookingStats.total})
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Pending ({bookingStats.pending})
+                </TabsTrigger>
+                <TabsTrigger value="confirmed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Confirmed ({bookingStats.confirmed})
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Completed ({bookingStats.completed})
+                </TabsTrigger>
+                <TabsTrigger value="cancelled" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Cancelled ({bookingStats.cancelled})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
+          <TabsList className="hidden w-full grid-cols-5 md:grid">
             <TabsTrigger value="all">All ({bookingStats.total})</TabsTrigger>
             <TabsTrigger value="pending">Pending ({bookingStats.pending})</TabsTrigger>
             <TabsTrigger value="confirmed">Confirmed ({bookingStats.confirmed})</TabsTrigger>

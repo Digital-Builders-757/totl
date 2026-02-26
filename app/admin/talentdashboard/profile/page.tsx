@@ -165,7 +165,7 @@ export default function TalentProfilePage() {
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2">
                 <TabsTrigger value="personal">Personal Information</TabsTrigger>
                 <TabsTrigger value="professional">Professional Information</TabsTrigger>
               </TabsList>
