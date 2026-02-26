@@ -30,7 +30,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const isClientTerminalRoute =
     pathname?.startsWith("/client/dashboard") ||
     pathname?.startsWith("/client/applications") ||
-    pathname?.startsWith("/client/gigs");
+    pathname?.startsWith("/client/gigs") ||
+    pathname?.startsWith("/client/bookings") ||
+    pathname?.startsWith("/client/profile");
 
   const showNavbar =
     !pathname?.startsWith("/admin") &&

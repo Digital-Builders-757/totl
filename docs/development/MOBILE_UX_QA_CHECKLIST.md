@@ -147,7 +147,7 @@ For any PR that touches dashboard/list chrome:
 - [x] `/client/dashboard` — PASS — Code sweep complete (mobile tab rail + CTA hierarchy); manual drawer behavior check pending
 - [x] `/client/applications` — PASS — Code sweep complete (deduplicated mobile filtering + tab rail density)
 - [x] `/client/gigs` — PASS — Code sweep complete (tab rail density + compact top spacing)
-- [ ] `/client/bookings` — TODO —
+- [x] `/client/bookings` — PASS — Code sweep complete (terminal header + collapsed mobile stats + tab rail + compact spacing)
 - [ ] `/client/profile` — TODO —
 
 ### Wave 2 — Talent terminal (`/talent/*`)
@@ -157,7 +157,7 @@ For any PR that touches dashboard/list chrome:
 - [ ] `/talent/subscribe` — TODO —
 
 ### Wave 3 — Admin terminal (`/admin/*`)
-- [ ] `/admin/dashboard` — TODO —
+- [x] `/admin/dashboard` — PASS — Code sweep complete (collapsed mobile stats + tab rail density)
 - [ ] `/admin/applications` — TODO —
 - [ ] `/admin/users` — TODO —
 - [ ] `/admin/gigs` — TODO —

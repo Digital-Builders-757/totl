@@ -8,6 +8,34 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Full route-list consistency sweep + terminal chrome alignment (February 26, 2026)**
+
+**UI/UX / END-TO-END CONSISTENCY PASS** — February 26, 2026
+- ✅ Completed additional repo-wide route sweep against launch route inventory (`tmp_routes.txt`) with focus on terminal density/chrome parity.
+- ✅ Extended client terminal chrome ownership to `/client/bookings` and `/client/profile` in `app/client-layout.tsx` so the global navbar no longer stacks on terminal-owned pages.
+- ✅ Upgraded `/client/bookings` to the same mobile contract already used on dashboard/applications/gigs:
+  - `ClientTerminalHeader`
+  - collapsed mobile stats (`Show stats` + `MobileSummaryRow`)
+  - horizontal tab rail with fade edges
+  - compact top spacing baseline
+- ✅ Upgraded `/admin/dashboard` mobile density:
+  - collapsed mobile stats summary
+  - horizontal tab rail with fade edges
+- ✅ Upgraded legacy `/admin/talentdashboard` tab density behavior for mobile consistency.
+
+**Problems discovered and resolved this session:**
+- ✅ `/client/bookings` still used pre-constitution top-heavy mobile layout and dense 5-tab row.
+- ✅ `/admin/dashboard` still rendered a dense mobile stat grid and heavy fixed tab row.
+- ✅ Client terminal chrome suppression was incomplete (profile/bookings parity gap).
+
+**Next (P0 - Launch polish)**
+- [ ] Manually validate drawer contract on physical/mobile emulation for all client terminal routes.
+- [ ] Complete remaining Wave tracker TODO routes in `docs/development/MOBILE_UX_QA_CHECKLIST.md` with screenshot evidence at 360×800 and 390×844.
+
+**Next (P1 - Follow-up)**
+- [ ] Continue sweep on remaining admin/talent list/detail surfaces to converge all tabs/filters onto the same mobile rail + sheet patterns.
+- [ ] Reduce repository-wide lint warnings to keep pre-commit signals tight.
+
 ## 🚀 **Latest: Client/Talent terminal mobile-density sweep + ship hardening (February 26, 2026)**
 
 **MOBILE UI/UX / SHIP READINESS** — February 26, 2026
@@ -31,7 +59,7 @@
 - [ ] Run screenshot pass at 360×800 and 390×844 for updated routes and attach evidence to PR.
 
 **Next (P1 - Follow-up)**
-- [ ] Apply same mobile tab-rail pattern to remaining high-traffic terminal routes (`/client/bookings`, `/client/profile`, remaining `/talent/*` list surfaces).
+- [ ] Apply same mobile tab-rail pattern to remaining high-traffic terminal routes (remaining `/talent/*` list surfaces).
 - [ ] Burn down repository-wide lint warnings so future ship runs stay high-signal.
 
 ## 🚀 **Latest: Mobile density standardization (B-core primitives + QA checklist) (February 26, 2026)**
