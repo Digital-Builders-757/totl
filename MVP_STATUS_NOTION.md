@@ -127,6 +127,24 @@
 - [ ] Apply same mobile tab-rail pattern to remaining high-traffic terminal routes (remaining `/talent/*` list surfaces).
 - [ ] Burn down repository-wide lint warnings so future ship runs stay high-signal.
 
+## 🚀 **Latest: Integration test hardening (Block 1: deterministic fixtures/login) (March 2, 2026)**
+
+**INTEGRATION TEST HARDENING — Block 1 (fixture/login determinism)** — March 2, 2026
+- ✅ Migrated Playwright seeded user creation from random `Date.now()`/`Math.random()` email generation → **deterministic per-test** email identities (run id + worker + title) via `createDeterministicTestEmail()`.
+- ✅ Updated specs to pass `testInfo` into seeded user builders, preventing collision + non-reproducible flakes.
+- ✅ Relaxed local client credential requirement: client login tests now support **seeded local fallback** while CI still requires explicit env vars.
+
+**Targeted specs rerun**
+- `tests/e2e/sign-in-gate.spec.ts`: **7/7 passed**
+- `tests/auth/auth-provider-performance.spec.ts`: **11/11 passed** (after `next build`)
+
+**Root-cause buckets (so far)**
+- ✅ Non-deterministic fixtures/data: addressed
+- ⚠️ Build/server readiness: build required when `.next/BUILD_ID` missing (ensure `npm run build` before Playwright in this mode)
+
+**Next (Block 2)**
+- Refresh selectors/copy contract to match current UI chrome (prefer role/label/aria; avoid stale `data-testid` where it drifted).
+
 ## 🚀 **Latest: Mobile density standardization (B-core primitives + QA checklist) (February 26, 2026)**
 
 **MOBILE UI/UX / DENSITY CONTRACT ROLLOUT** — February 26, 2026
