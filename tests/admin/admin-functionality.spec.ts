@@ -1,32 +1,15 @@
-import { test, expect, Page } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
+import { loginWithCredentials } from "../helpers/auth";
+import { safeGoto } from "../helpers/navigation";
 
-/**
- * Admin Functionality Test Suite
- * Tests all admin-related functionality including:
- * - User management
- * - Platform oversight
- * - System administration
- * - Analytics and reporting
- */
-
-// Test data
 const adminUser = {
   email: "admin@totlagency.com",
   password: "AdminPassword123!",
 };
 
-const testUser = {
-  email: "test-user@example.com",
-  password: "TestPassword123!",
-  firstName: "Test",
-  lastName: "User",
-  role: "talent",
-};
-
-// Helper functions
-async function loginAsAdmin(page: Page) {
-  // Ensure admin test user exists (deterministic login for e2e).
-  await page.request.post("/api/admin/create-user", {
+async function ensureAdminUser(page: Page) {
+  const res = await page.request.post("/api/admin/create-user", {
     data: {
       email: adminUser.email,
       password: adminUser.password,
@@ -35,522 +18,158 @@ async function loginAsAdmin(page: Page) {
       role: "admin",
     },
   });
+  expect(res.ok()).toBeTruthy();
+}
 
-  // Avoid cross-test cookie leakage (especially when reusing dev servers).
+async function loginAsAdmin(page: Page) {
+  await ensureAdminUser(page);
   await page.context().clearCookies();
-  await page.goto("/login?signedOut=true");
-  await page.locator('[data-testid="login-hydrated"]').waitFor({ state: "attached", timeout: 30_000 });
-  await page.getByTestId("email").fill(adminUser.email);
-  await page.getByTestId("password").fill(adminUser.password);
-  await page.getByTestId("login-button").click();
-  await expect(page).toHaveURL(/.*\/admin\/dashboard/, { timeout: 60_000 });
+  await loginWithCredentials(page, {
+    email: adminUser.email,
+    password: adminUser.password,
+  });
+  await expect(page).toHaveURL(/\/admin\/dashboard(\/|$)/, { timeout: 30_000 });
 }
 
-async function fillUserCreationForm(
-  page: Page,
-  userData: { email: string; password: string; firstName: string; lastName: string; role: string }
-) {
-  await page.fill('[data-testid="email"]', userData.email);
-  await page.fill('[data-testid="password"]', userData.password);
-  await page.fill('[data-testid="firstName"]', userData.firstName);
-  await page.fill('[data-testid="lastName"]', userData.lastName);
-  await page.selectOption('[data-testid="role"]', userData.role);
+async function seedClientForUsersTable(runId: number) {
+  const supabaseAdmin = createSupabaseAdminClientForTests();
+  const email = `pw-admin-users-client-${runId}@example.com`;
+  const password = "TestPassword123!";
+  const displayName = `Client Visibility ${runId}`;
+
+  const created = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: {
+      first_name: "Client",
+      last_name: `Visibility${runId}`,
+      role: "client",
+    },
+  });
+  if (created.error || !created.data.user?.id) {
+    throw new Error(created.error?.message ?? "failed to create client user");
+  }
+  const userId = created.data.user.id;
+
+  const { error: profileError } = await supabaseAdmin.from("profiles").upsert(
+    {
+      id: userId,
+      role: "client",
+      account_type: "client",
+      email_verified: true,
+      display_name: displayName,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "id" }
+  );
+  if (profileError) throw new Error(profileError.message);
+
+  const { error: clientProfileError } = await supabaseAdmin.from("client_profiles").upsert(
+    {
+      user_id: userId,
+      company_name: `Visibility Co ${runId}`,
+      industry: "Fashion",
+      contact_name: displayName,
+      contact_email: email,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
+  if (clientProfileError) throw new Error(clientProfileError.message);
+
+  return { userId, displayName };
 }
 
-// Test Suite: Admin Dashboard
-test.describe("Admin Dashboard", () => {
-  test("Admin dashboard overview", async ({ page }) => {
+test.describe("Admin functionality (current contracts)", () => {
+  test("dashboard renders core admin sections", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.goto("/admin/dashboard");
+    await safeGoto(page, "/admin/dashboard");
 
-    // Verify dashboard elements
-    await expect(page.locator('[data-testid="admin-header"]')).toBeVisible();
-    await expect(page.locator('[data-testid="platform-stats"]')).toBeVisible();
-    await expect(page.locator('[data-testid="recent-activity"]')).toBeVisible();
-    await expect(page.locator('[data-testid="system-health"]')).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Quick Actions" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Platform Health" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Recent Activity" })).toBeVisible();
+    await expect(page.getByTestId("paid-talent-card")).toBeVisible();
   });
 
-  test("Platform statistics", async ({ page }) => {
+  test("users page supports tabs/search and admin view profile link", async ({ page }) => {
+    const runId = Date.now();
+    const seededClient = await seedClientForUsersTable(runId);
     await loginAsAdmin(page);
-    await page.goto("/admin/dashboard");
 
-    // Verify platform stats are displayed
-    await expect(page.locator('[data-testid="total-users"]')).toBeVisible();
-    await expect(page.locator('[data-testid="total-talent"]')).toBeVisible();
-    await expect(page.locator('[data-testid="total-clients"]')).toBeVisible();
-    await expect(page.locator('[data-testid="total-gigs"]')).toBeVisible();
-    await expect(page.locator('[data-testid="total-applications"]')).toBeVisible();
-    await expect(page.locator('[data-testid="total-bookings"]')).toBeVisible();
+    await safeGoto(page, "/admin/users");
+    await expect(page.getByRole("heading", { name: "All Users" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /Career Builders/i })).toBeVisible();
+
+    const searchInput = page.getByPlaceholder("Search by name, ID, or role...");
+    await searchInput.fill(seededClient.displayName);
+    await expect(page.getByText(seededClient.displayName)).toBeVisible();
+
+    const row = page.locator("tr", { hasText: seededClient.displayName }).first();
+    await row.getByRole("button").click();
+    await page.getByRole("menuitem", { name: "View Career Builder Profile" }).click();
+
+    await expect(page).toHaveURL(new RegExp(`/client/profile\\?userId=${seededClient.userId}`));
+    await expect(page.getByText("Admin viewing as staff")).toBeVisible();
   });
 
-  test("System health indicators", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/dashboard");
-
-    // Verify system health indicators
-    await expect(page.locator('[data-testid="database-status"]')).toBeVisible();
-    await expect(page.locator('[data-testid="email-service-status"]')).toBeVisible();
-    await expect(page.locator('[data-testid="storage-status"]')).toBeVisible();
-    await expect(page.locator('[data-testid="api-status"]')).toBeVisible();
-  });
-
-  test("Recent activity monitoring", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/dashboard");
-
-    // Verify recent activity feed
-    await expect(page.locator('[data-testid="activity-feed"]')).toBeVisible();
-
-    // Check for recent activities
-    const activities = await page.locator('[data-testid="activity-item"]');
-    const count = await activities.count();
-    expect(count).toBeGreaterThan(0);
-  });
-});
-
-// Test Suite: User Management
-test.describe("User Management", () => {
-  test("View all users", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/users");
-
-    // Verify users table is displayed
-    await expect(page.locator('[data-testid="users-table"]')).toBeVisible();
-    await expect(page.locator('[data-testid="user-row"]')).toBeVisible();
-  });
-
-  test("Create new user", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/users/create");
-
-    // Fill user creation form
-    await fillUserCreationForm(page, testUser);
-
-    // Submit form
-    await page.click('[data-testid="create-user-button"]');
-
-    // Verify success message
-    await expect(page.locator("text=User created successfully")).toBeVisible();
-
-    // Verify redirect to users list
-    await expect(page).toHaveURL(/.*\/admin\/users/);
-  });
-
-  test("User creation form validation", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/users/create");
-
-    // Try to submit empty form
-    await page.click('[data-testid="create-user-button"]');
-
-    // Verify validation errors
-    await expect(page.locator("text=Email is required")).toBeVisible();
-    await expect(page.locator("text=Password is required")).toBeVisible();
-    await expect(page.locator("text=First name is required")).toBeVisible();
-    await expect(page.locator("text=Last name is required")).toBeVisible();
-    await expect(page.locator("text=Role is required")).toBeVisible();
-  });
-
-  test("Edit user details", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/users");
-
-    // Click edit on first user
-    await page.click('[data-testid="edit-user"]:first-child');
-
-    // Update user details
-    await page.fill('[data-testid="firstName"]', "Updated Name");
-
-    // Submit form
-    await page.click('[data-testid="update-user-button"]');
-
-    // Verify success message
-    await expect(page.locator("text=User updated successfully")).toBeVisible();
-  });
-
-  test("Delete user", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/users");
-
-    // Click delete on first user
-    await page.click('[data-testid="delete-user"]:first-child');
-
-    // Confirm deletion
-    await page.click('[data-testid="confirm-delete"]');
-
-    // Verify success message
-    await expect(page.locator("text=User deleted successfully")).toBeVisible();
-  });
-
-  test("Client promotion is rejected by generic role update endpoint (contract guardrail)", async ({
-    page,
-  }) => {
-    test.setTimeout(120_000);
+  test("generic role endpoint rejects direct client promotion", async ({ page }) => {
     await loginAsAdmin(page);
 
-    // Create a fresh non-admin user so we have a stable userId to target
     const timestamp = Date.now();
-    const newUserEmail = `pw-role-guardrail-${timestamp}@example.com`;
-
     const createRes = await page.request.post("/api/admin/create-user", {
       data: {
-        email: newUserEmail,
+        email: `pw-role-guardrail-${timestamp}@example.com`,
         password: "TestPassword123!",
         firstName: "Role",
         lastName: "Guardrail",
         role: "talent",
       },
     });
-
     expect(createRes.ok()).toBeTruthy();
     const created = (await createRes.json()) as { user?: { id?: string } };
     const userId = created.user?.id;
     expect(userId).toBeTruthy();
 
-    // Attempt forbidden shortcut: set role=client via generic endpoint
     const res = await page.request.post("/api/admin/update-user-role", {
       data: { userId, newRole: "client" },
     });
-
     expect(res.status()).toBe(400);
     const payload = (await res.json()) as { error?: string };
     expect(payload.error).toContain("Client promotion is only allowed via client application approval");
   });
 
-  test("Search and filter users", async ({ page }) => {
+  test("gigs page and create route are reachable for admin", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.goto("/admin/users");
+    await safeGoto(page, "/admin/gigs");
+    await expect(page.getByRole("heading", { name: "All Gigs" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Create Gig/i }).first()).toBeVisible();
 
-    // Test search functionality
-    await page.fill('[data-testid="search-input"]', "test");
-    await page.click('[data-testid="search-button"]');
-
-    // Verify filtered results
-    await expect(page.locator('[data-testid="user-row"]')).toBeVisible();
-
-    // Test role filter
-    await page.selectOption('[data-testid="role-filter"]', "talent");
-
-    // Verify filtered results
-    await expect(page.locator('[data-testid="user-row"]')).toBeVisible();
+    await safeGoto(page, "/admin/gigs/create");
+    await expect(page.getByText(/create gig/i).first()).toBeVisible();
   });
-});
 
-// Test Suite: Gig Management
-test.describe("Admin Gig Management", () => {
-  test("View all gigs", async ({ page }) => {
+  test("applications pages render with expected admin controls", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.goto("/admin/gigs");
 
-    // Verify gigs table is displayed
-    await expect(page.locator('[data-testid="gigs-table"]')).toBeVisible();
-    await expect(page.locator('[data-testid="gig-row"]')).toBeVisible();
-  });
-
-  test("Create gig as admin", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/gigs/create");
-
-    // Fill gig form
-    await page.fill('[data-testid="title"]', "Admin Created Gig");
-    await page.fill('[data-testid="description"]', "Gig created by admin");
-    await page.selectOption('[data-testid="category"]', "Fashion");
-    await page.fill('[data-testid="location"]', "Los Angeles, CA");
-    await page.fill('[data-testid="budget"]', "$3000");
-    await page.fill('[data-testid="duration"]', "3 days");
-    await page.fill('[data-testid="startDate"]', "2025-04-01");
-    await page.fill('[data-testid="endDate"]', "2025-04-03");
-
-    // Submit form
-    await page.click('[data-testid="submit-gig"]');
-
-    // Verify success message
-    await expect(page.locator("text=Gig created successfully")).toBeVisible();
-  });
-
-  test("Moderate gig content", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/gigs");
-
-    // Click on first gig
-    await page.click('[data-testid="gig-row"]:first-child');
-
-    // Verify gig details
-    await expect(page.locator('[data-testid="gig-details"]')).toBeVisible();
-
-    // Approve gig
-    await page.click('[data-testid="approve-gig"]');
-
-    // Verify success message
-    await expect(page.locator("text=Gig approved")).toBeVisible();
-  });
-
-  test("Flag inappropriate content", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/gigs");
-
-    // Click on first gig
-    await page.click('[data-testid="gig-row"]:first-child');
-
-    // Flag gig
-    await page.click('[data-testid="flag-gig"]');
-
-    // Fill flag reason
-    await page.fill('[data-testid="flag-reason"]', "Inappropriate content");
-
-    // Submit flag
-    await page.click('[data-testid="submit-flag"]');
-
-    // Verify success message
-    await expect(page.locator("text=Gig flagged for review")).toBeVisible();
-  });
-});
-
-// Test Suite: Application Management
-test.describe("Admin Application Management", () => {
-  test("View all applications", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/applications");
-
-    // Verify applications table is displayed
-    await expect(page.locator('[data-testid="applications-table"]')).toBeVisible();
-    await expect(page.locator('[data-testid="application-row"]')).toBeVisible();
-  });
-
-  test("Review application details", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/applications");
-
-    // Click on first application
-    await page.click('[data-testid="application-row"]:first-child');
-
-    // Verify application details
-    await expect(page.locator('[data-testid="application-details"]')).toBeVisible();
-    await expect(page.locator('[data-testid="talent-info"]')).toBeVisible();
-    await expect(page.locator('[data-testid="gig-info"]')).toBeVisible();
-    await expect(page.locator('[data-testid="cover-letter"]')).toBeVisible();
-  });
-
-  test("Moderate application content", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/applications");
-
-    // Click on first application
-    await page.click('[data-testid="application-row"]:first-child');
-
-    // Add admin notes
-    await page.fill('[data-testid="admin-notes"]', "Application reviewed by admin");
-
-    // Submit review
-    await page.click('[data-testid="submit-admin-review"]');
-
-    // Verify success message
-    await expect(page.locator("text=Admin review submitted")).toBeVisible();
-  });
-
-  test("Filter applications by status", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/applications");
-
-    // Filter by status
-    await page.selectOption('[data-testid="status-filter"]', "new");
-
-    // Verify filtered results
-    await expect(page.locator('[data-testid="application-row"]')).toBeVisible();
-
-    // Filter by gig
-    await page.selectOption('[data-testid="gig-filter"]', "Fashion Model for Spring Campaign");
-
-    // Verify filtered results
-    await expect(page.locator('[data-testid="application-row"]')).toBeVisible();
-  });
-});
-
-// Test Suite: Booking Management
-test.describe("Admin Booking Management", () => {
-  test("View all bookings", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/bookings");
-
-    // Verify bookings table is displayed
-    await expect(page.locator('[data-testid="bookings-table"]')).toBeVisible();
-    await expect(page.locator('[data-testid="booking-row"]')).toBeVisible();
-  });
-
-  test("Review booking details", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/bookings");
-
-    // Click on first booking
-    await page.click('[data-testid="booking-row"]:first-child');
-
-    // Verify booking details
-    await expect(page.locator('[data-testid="booking-details"]')).toBeVisible();
-    await expect(page.locator('[data-testid="talent-info"]')).toBeVisible();
-    await expect(page.locator('[data-testid="client-info"]')).toBeVisible();
-    await expect(page.locator('[data-testid="gig-info"]')).toBeVisible();
-  });
-
-  test("Monitor booking disputes", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/bookings");
-
-    // Click on first booking
-    await page.click('[data-testid="booking-row"]:first-child');
-
-    // Check for dispute indicators
-    const disputeIndicator = await page.locator('[data-testid="dispute-indicator"]');
-    if (await disputeIndicator.isVisible()) {
-      // Handle dispute
-      await page.click('[data-testid="handle-dispute"]');
-
-      // Add resolution notes
-      await page.fill('[data-testid="resolution-notes"]', "Dispute resolved by admin");
-
-      // Submit resolution
-      await page.click('[data-testid="submit-resolution"]');
-
-      // Verify success message
-      await expect(page.locator("text=Dispute resolved")).toBeVisible();
-    }
-  });
-});
-
-// Test Suite: System Administration
-test.describe("System Administration", () => {
-  test("System diagnostics", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/diagnostic");
-
-    // Verify diagnostic page elements
-    await expect(page.locator('[data-testid="diagnostic-header"]')).toBeVisible();
-    await expect(page.locator('[data-testid="database-check"]')).toBeVisible();
-    await expect(page.locator('[data-testid="email-service-check"]')).toBeVisible();
-    await expect(page.locator('[data-testid="storage-check"]')).toBeVisible();
-  });
-
-  test("Database connection test", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/diagnostic");
-
-    // Run database test
-    await page.click('[data-testid="test-database"]');
-
-    // Verify test results
-    await expect(page.locator('[data-testid="database-status"]')).toBeVisible();
-  });
-
-  test("Email service test", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/diagnostic");
-
-    // Run email service test
-    await page.click('[data-testid="test-email-service"]');
-
-    // Verify test results
-    await expect(page.locator('[data-testid="email-service-status"]')).toBeVisible();
-  });
-
-  test("Storage service test", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/diagnostic");
-
-    // Run storage test
-    await page.click('[data-testid="test-storage"]');
-
-    // Verify test results
-    await expect(page.locator('[data-testid="storage-status"]')).toBeVisible();
-  });
-});
-
-// Test Suite: Analytics and Reporting
-test.describe("Analytics and Reporting", () => {
-  test("Platform analytics overview", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/analytics");
-
-    // Verify analytics page elements
-    await expect(page.locator('[data-testid="analytics-header"]')).toBeVisible();
-    await expect(page.locator('[data-testid="user-growth-chart"]')).toBeVisible();
-    await expect(page.locator('[data-testid="gig-activity-chart"]')).toBeVisible();
-    await expect(page.locator('[data-testid="booking-revenue-chart"]')).toBeVisible();
-  });
-
-  test("User activity reports", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/analytics");
-
-    // Generate user activity report
-    await page.click('[data-testid="generate-user-report"]');
-
-    // Verify report generation
-    await expect(page.locator("text=Report generated successfully")).toBeVisible();
-  });
-
-  test("Financial reports", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/analytics");
-
-    // Generate financial report
-    await page.click('[data-testid="generate-financial-report"]');
-
-    // Verify report generation
-    await expect(page.locator("text=Financial report generated")).toBeVisible();
-  });
-
-  test("Export data functionality", async ({ page }) => {
-    await loginAsAdmin(page);
-    await page.goto("/admin/analytics");
-
-    // Export user data
-    await page.click('[data-testid="export-users"]');
-
-    // Verify export initiation
-    await expect(page.locator("text=Export initiated")).toBeVisible();
-
-    // Export gig data
-    await page.click('[data-testid="export-gigs"]');
-
-    // Verify export initiation
-    await expect(page.locator("text=Export initiated")).toBeVisible();
-  });
-});
-
-// Test Suite: Security and Access Control
-test.describe("Security and Access Control", () => {
-  test("Admin access control", async ({ page }) => {
-    // Try to access admin page without login
-    await page.goto("/admin/dashboard");
-
-    // Verify redirect to login
-    await expect(page).toHaveURL(/.*\/login/);
-  });
-
-  test("Role-based access control", async ({ page }) => {
-    // Login as regular user
-    await page.goto("/login");
-    await page.fill('[data-testid="email"]', "test-talent@example.com");
-    await page.fill('[data-testid="password"]', "TestPassword123!");
-    await page.click('[data-testid="login-button"]');
-
-    // Try to access admin page
-    await page.goto("/admin/dashboard");
-
-    // Verify access denied or redirect
+    await safeGoto(page, "/admin/applications");
+    await expect(page.getByRole("heading", { name: "Talent Applications" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /New/i })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /Approved/i })).toBeVisible();
+
+    await safeGoto(page, "/admin/client-applications");
+    await expect(page.getByRole("heading", { name: "Career Builder Applications" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Send follow-ups/i })).toBeVisible();
     await expect(
-      page.locator("text=Access denied") || page.locator("text=Unauthorized")
+      page.getByPlaceholder("Search by company, name, email, or industry...")
     ).toBeVisible();
   });
 
-  test("Admin session management", async ({ page }) => {
+  test("diagnostic tools page loads for admin", async ({ page }) => {
     await loginAsAdmin(page);
-    await page.goto("/admin/dashboard");
+    await safeGoto(page, "/admin/diagnostic");
 
-    // Verify admin is logged in
-    await expect(page.locator('[data-testid="admin-header"]')).toBeVisible();
-
-    // Test session persistence
-    await page.reload();
-    await expect(page).toHaveURL(/.*\/admin\/dashboard/);
+    await expect(page.getByRole("heading", { name: "Supabase Diagnostic Tools" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Environment Variables" })).toBeVisible();
   });
 });

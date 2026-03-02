@@ -240,6 +240,12 @@ npm run build
   - `npm run build`
   - then `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
 
+### **Playwright strict-mode locator violations after UI copy/layout refresh**
+- **Symptom:** Assertions fail with strict mode errors like “locator resolved to multiple elements” or hidden duplicate matches.
+- **Root cause:** Broad text locators (`getByText("...")`) match subtitles, hidden tab labels, or repeated counters after UI refreshes.
+- **Fix:** Use role-scoped and semantic locators (`getByRole("heading", { name: ... })`, `getByRole("link", { name: ... })`) or container-scoped locators tied to stable page sections.
+- **Prevention:** When modernizing specs, avoid legacy global text-only selectors; prefer contract-level locators aligned with current route/page ownership.
+
 ### **CRLF ↔ LF warnings / noisy diffs on Windows**
 - **Symptom:** Git warns about line endings or shows whitespace-only diffs.
 - **Fix:** Ensure `.gitattributes` is present (repo enforces LF for code/docs and CRLF for Windows scripts).
