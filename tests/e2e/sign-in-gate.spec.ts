@@ -1,181 +1,97 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
+import { loginWithCredentials, waitForLoginHydrated } from "../helpers/auth";
+import { createTalentTestUser } from "../helpers/test-data";
+import { safeGoto } from "../helpers/navigation";
 
-test.describe('Sign-In Gate', () => {
+test.describe("Sign-In Gate", () => {
   test.beforeEach(async ({ page }) => {
-    // Ensure we're logged out
-    await page.goto('/auth/signout');
-    await page.waitForLoadState('networkidle');
+    await safeGoto(page, "/auth/signout");
   });
 
-  test.describe('Gigs Page', () => {
-    test('shows sign-in gate when logged out', async ({ page }) => {
-      await page.goto('/gigs');
-      
-      // Check that the gate is visible
-      await expect(page.locator('h1')).toContainText('Sign in to view gigs');
-      
-      // Check that the icon is present
-      await expect(page.locator('[data-testid="lock-icon"]')).toBeVisible();
-      
-      // Check that CTAs are visible
-      await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Create an account' })).toBeVisible();
-      
-      // Check that learn more link is present
-      await expect(page.getByRole('link', { name: 'Learn more about TOTL' })).toBeVisible();
+  test.describe("Gigs route auth gate", () => {
+    test("logged out /gigs redirects to /login with returnUrl", async ({ page }) => {
+      await safeGoto(page, "/gigs");
+      await expect(page).toHaveURL(/\/login(\?|$)/);
+      await waitForLoginHydrated(page);
+      await expect(page.locator("h1")).toContainText(/welcome back/i);
+      await expect(page.getByTestId("email")).toBeVisible();
+      await expect(page.getByTestId("password")).toBeVisible();
+      await expect(page.getByTestId("login-button")).toBeVisible();
     });
 
-    test('CTAs navigate to correct routes', async ({ page }) => {
-      await page.goto('/gigs');
-      
-      // Test primary CTA
-      await page.getByRole('button', { name: 'Sign in' }).click();
-      await expect(page).toHaveURL('/login');
-      
-      // Go back and test secondary CTA
-      await page.goBack();
-      await page.getByRole('button', { name: 'Create an account' }).click();
-      await expect(page).toHaveURL('/choose-role');
-      
-      // Go back and test learn more link
-      await page.goBack();
-      await page.getByRole('link', { name: 'Learn more about TOTL' }).click();
-      await expect(page).toHaveURL('/about');
-    });
-
-    test('keyboard navigation works correctly', async ({ page }) => {
-      await page.goto('/gigs');
-      
-      // Tab through the elements
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('button', { name: 'Create an account' })).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('link', { name: 'Learn more about TOTL' })).toBeFocused();
-    });
-
-    test('does not show gate when logged in', async ({ page }) => {
-      // Login as a test user (you'll need to implement this based on your auth setup)
-      // This is a placeholder - you'll need to implement actual login
-      await page.goto('/login');
-      // Add login logic here based on your test user setup
-      
-      // After login, visit gigs page
-      await page.goto('/gigs');
-      
-      // Should not show the gate
-      await expect(page.locator('h1')).not.toContainText('Sign in to view gigs');
-      
-      // Should show the actual gigs content
-      await expect(page.locator('h1')).toContainText('Gigs');
-    });
-  });
-
-  test.describe('Talent Page', () => {
-    test('shows sign-in gate when logged out', async ({ page }) => {
-      await page.goto('/talent');
-      
-      // Check that the gate is visible
-      await expect(page.locator('h1')).toContainText('Sign in to explore talent');
-      
-      // Check that the icon is present
-      await expect(page.locator('[data-testid="users-icon"]')).toBeVisible();
-      
-      // Check that CTAs are visible
-      await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Create an account' })).toBeVisible();
-      
-      // Check that learn more link is present
-      await expect(page.getByRole('link', { name: 'Learn more about TOTL' })).toBeVisible();
-    });
-
-    test('CTAs navigate to correct routes', async ({ page }) => {
-      await page.goto('/talent');
-      
-      // Test primary CTA
-      await page.getByRole('button', { name: 'Sign in' }).click();
-      await expect(page).toHaveURL('/login');
-      
-      // Go back and test secondary CTA
-      await page.goBack();
-      await page.getByRole('button', { name: 'Create an account' }).click();
-      await expect(page).toHaveURL('/choose-role');
-      
-      // Go back and test learn more link
-      await page.goBack();
-      await page.getByRole('link', { name: 'Learn more about TOTL' }).click();
-      await expect(page).toHaveURL('/about');
-    });
-
-    test('keyboard navigation works correctly', async ({ page }) => {
-      await page.goto('/talent');
-      
-      // Tab through the elements
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('button', { name: 'Create an account' })).toBeFocused();
-      
-      await page.keyboard.press('Tab');
-      await expect(page.getByRole('link', { name: 'Learn more about TOTL' })).toBeFocused();
-    });
-
-    test('does not show gate when logged in', async ({ page }) => {
-      // Login as a test user (you'll need to implement this based on your auth setup)
-      // This is a placeholder - you'll need to implement actual login
-      await page.goto('/login');
-      // Add login logic here based on your test user setup
-      
-      // After login, visit talent page
-      await page.goto('/talent');
-      
-      // Should not show the gate
-      await expect(page.locator('h1')).not.toContainText('Sign in to explore talent');
-      
-      // Should show the actual talent content
-      await expect(page.locator('h1')).toContainText('Discover Amazing Talent');
-    });
-  });
-
-  test.describe('Accessibility', () => {
-    test('has proper heading structure', async ({ page }) => {
-      await page.goto('/gigs');
-      
-      // Check that h1 is used for the main heading
-      const heading = page.locator('h1');
-      await expect(heading).toBeVisible();
-      await expect(heading).toHaveText('Sign in to view gigs');
-    });
-
-    test('has proper focus indicators', async ({ page }) => {
-      await page.goto('/gigs');
-      
-      // Focus on the primary button
-      await page.getByRole('button', { name: 'Sign in' }).focus();
-      
-      // Check that focus is visible (this might need adjustment based on your CSS)
-      await expect(page.getByRole('button', { name: 'Sign in' })).toBeFocused();
-    });
-
-    test('respects prefers-reduced-motion', async ({ page }) => {
-      // Set prefers-reduced-motion
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      
-      await page.goto('/gigs');
-      
-      // Check that animations are disabled
-      // This test might need adjustment based on your specific animation implementation
-      const animatedElement = page.locator('.motion-safe\\:animate-pulse');
-      const computedStyle = await animatedElement.evaluate((el) => {
-        return window.getComputedStyle(el).animation;
+    test("logged in talent can access /gigs", async ({ page, request }, testInfo) => {
+      const user = createTalentTestUser("pw-signin-gate", testInfo, {
+        firstName: "Gate",
+        variant: "gigs-access",
       });
-      
-      // Animation should be disabled
-      expect(computedStyle).toBe('none');
+      const createRes = await request.post("/api/admin/create-user", {
+        data: {
+          email: user.email,
+          password: user.password,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: "talent",
+        },
+      });
+      expect(createRes.ok()).toBeTruthy();
+
+      await loginWithCredentials(page, { email: user.email, password: user.password });
+      await safeGoto(page, "/gigs");
+      await expect(page).toHaveURL(/\/gigs(\/|$)/);
+      await expect(page.locator("h1")).not.toContainText(/welcome back/i);
+    });
+  });
+
+  test.describe("Talent route contract", () => {
+    test("logged out /talent resolves to 404", async ({ page }) => {
+      await safeGoto(page, "/talent");
+      await expect(page.locator("h1")).toHaveText("404");
+    });
+
+    test("logged in /talent still resolves to 404", async ({ page, request }, testInfo) => {
+      const user = createTalentTestUser("pw-signin-gate-talent", testInfo, {
+        firstName: "Gate",
+        variant: "talent-404",
+      });
+      const createRes = await request.post("/api/admin/create-user", {
+        data: {
+          email: user.email,
+          password: user.password,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: "talent",
+        },
+      });
+      expect(createRes.ok()).toBeTruthy();
+
+      await loginWithCredentials(page, { email: user.email, password: user.password });
+      await safeGoto(page, "/talent");
+      await expect(page.locator("h1")).toHaveText("404");
+    });
+  });
+
+  test.describe("Accessibility sanity", () => {
+    test("login surface has visible heading", async ({ page }) => {
+      await safeGoto(page, "/gigs");
+      const heading = page.locator("h1");
+      await expect(heading).toBeVisible();
+      await expect(heading).toContainText(/welcome back/i);
+    });
+
+    test("login button is keyboard focusable", async ({ page }) => {
+      await safeGoto(page, "/gigs");
+      const loginButton = page.getByTestId("login-button");
+      await loginButton.focus();
+      await expect(loginButton).toBeFocused();
+    });
+
+    test("reduced-motion preference does not break auth gate rendering", async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await safeGoto(page, "/gigs");
+      await expect(page).toHaveURL(/\/login(\?|$)/);
+      await expect(page.getByTestId("login-button")).toBeVisible();
     });
   });
 });

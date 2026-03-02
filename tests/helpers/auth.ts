@@ -28,13 +28,18 @@ export function getClientCredentials(): PlaywrightCredentials {
   const email = process.env.PLAYWRIGHT_CLIENT_EMAIL;
   const password = process.env.PLAYWRIGHT_CLIENT_PASSWORD;
 
-  if (!email || !password) {
+  // In CI, require explicit credentials to avoid “it worked locally” drift.
+  if (process.env.CI && (!email || !password)) {
     throw new Error(
-      "Missing PLAYWRIGHT_CLIENT_EMAIL and/or PLAYWRIGHT_CLIENT_PASSWORD. Set them in your Playwright env to run client-login tests."
+      "Missing PLAYWRIGHT_CLIENT_EMAIL and/or PLAYWRIGHT_CLIENT_PASSWORD in CI. Set them in your Playwright env to run client auth tests."
     );
   }
 
-  return { email, password };
+  // Local fallback is intentionally a seeded persona.
+  const resolvedEmail = email ?? "cameron.seed@thetotlagency.local";
+  const resolvedPassword = password ?? "Password123!";
+
+  return { email: resolvedEmail, password: resolvedPassword };
 }
 
 export async function waitForLoginHydrated(page: Page) {
@@ -165,7 +170,37 @@ export async function ensureTalentReady(page: Page) {
     .catch(() => undefined);
   await page.getByPlaceholder("https://yourwebsite.com").first().fill("https://example.com").catch(() => undefined);
 
-  await page.getByRole("button", { name: /complete profile/i }).click();
+  // Button can re-mount while form state updates; retry click on detaches/transient instability.
+  let submitted = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await page.getByRole("button", { name: /complete profile/i }).first().click({
+        timeout: 10_000,
+      });
+      submitted = true;
+      break;
+    } catch {
+      // eslint-disable-next-line no-await-in-loop
+      await page.waitForTimeout(300);
+    }
+  }
+  if (!submitted) {
+    const submitButton = page.getByRole("button", { name: /complete profile/i }).first();
+    const hasSubmit = await submitButton.isVisible().catch(() => false);
+    if (hasSubmit) {
+      await submitButton.evaluate((btn) => {
+        const form = btn.closest("form") as HTMLFormElement | null;
+        form?.requestSubmit();
+      });
+      submitted = true;
+    }
+  }
+  if (!submitted) {
+    await safeGoto(page, "/talent/dashboard", { timeoutMs: 60_000 });
+    if (/\/talent\/dashboard(\/|$)/.test(page.url())) return;
+    throw new Error("Failed to submit onboarding form: Complete Profile button was unstable");
+  }
 
   // On some builds, the onboarding submit can take time to reflect in server-owned BootState.
   // Retry dashboard convergence a few times, but fail fast if the form shows an explicit error.

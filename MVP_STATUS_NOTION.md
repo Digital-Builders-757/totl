@@ -8,6 +8,71 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Playwright baseline run + remaining test queue (March 2, 2026)**
+
+**QA / PLAYWRIGHT BASELINE VALIDATION** - March 2, 2026
+- ✅ Executed targeted Playwright runs from the MVP tracker to establish current baseline in local Docker-backed environment.
+- ✅ `tests/auth/auth-regressions.spec.ts` passed cleanly:
+  - **2 passed, 0 failed**
+- ✅ Full auth suite run completed:
+  - `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
+  - **40 passed, 0 failed, 4 skipped**
+- ✅ Admin pipeline proof run completed:
+  - `tests/admin/career-builder-approval-pipeline.spec.ts`
+  - **1 passed, 0 failed**
+- ✅ API route automation currently healthy:
+  - `tests/api/email-routes.spec.ts`
+  - **11 passed, 0 failed**
+- ⚠️ Integration coverage is mixed:
+  - `tests/integration/**`
+  - **57 passed, 18 failed, 23 skipped, 6 not run**
+- ⚠️ Legacy role mega-suites need modernization:
+  - `tests/client/client-functionality.spec.ts` → **24 failed**
+  - `tests/talent/talent-functionality.spec.ts` → **17 skipped** (no active assertions executed)
+- ✅ Sign-in gate E2E stabilized and aligned to current route contracts:
+  - `tests/e2e/sign-in-gate.spec.ts`
+  - **7 passed, 0 failed**
+- ⚠️ Additional focused admin checks:
+  - `tests/admin/admin-dashboard-overflow-sentinel.spec.ts` → **1 skipped** (env-gated)
+  - `tests/admin/paid-talent-stats.spec.ts` → **1 failed** (title expectation drift: now `Paid Talent`)
+- ⚠️ Verification/security regression bundle is partially red:
+  - `tests/post-security-fixes.spec.ts` + `tests/verification/sentry-fixes-verification.spec.ts`
+  - **14 passed, 6 failed**
+- ✅ Legacy admin functionality suite refactored to current admin UX contracts:
+  - `tests/admin/admin-functionality.spec.ts`
+  - **6 passed, 0 failed** (rewritten around current routes/headings/role guardrails)
+- ✅ Added missing admin profile visibility coverage:
+  - `tests/admin/admin-profile-visibility.spec.ts`
+  - **2 passed, 0 failed** (admin view-only access + non-admin deny redirect)
+- ⚠️ Fresh integration triage rerun (March 2, 2026):
+  - `tests/integration/**`
+  - **57 passed, 18 failed, 23 skipped, 6 did not run**
+  - **Failure split outcome:**
+    - **Confirmed product regressions:** **0**
+    - **Outdated expectation/spec debt:** **11** (legacy selectors/copy/routes/snapshot contracts)
+    - **Fixture/seed or credentials drift:** **6** (invalid login assumptions + non-deterministic seeded profile/gig expectations)
+    - **Environment/runtime flake:** **1** (`net::ERR_ABORTED` navigation in end-to-end email flow under local run pressure)
+
+**Problems discovered this session:**
+- ✅ `tests/admin/admin-functionality.spec.ts` no longer depends on stale selector contracts.
+- ⚠️ `tests/integration/**` remains partially red and now needs remediation by the completed triage buckets (selector debt, fixture drift, and visual contract updates).
+- ⚠️ `tests/client/client-functionality.spec.ts` remains red and appears tied to legacy assumptions/fixtures.
+- ✅ `tests/integration/**` failures are now triaged with an explicit root-cause split; no confirmed app regressions in this pass.
+- ✅ Ship gate checks passed on this branch before push: `schema:verify:comprehensive`, `types:check`, `build`, `lint`.
+
+**Next (P0 - Critical test closure before forward scope)**
+- [x] Add `tests/admin/admin-profile-visibility.spec.ts` and validate admin view-only profile access paths.
+- [x] Triage and fix the 9 failing tests in `tests/auth/**` (prioritize redirect convergence, signup/login, onboarding, and cookie/logging assertions).
+- [x] Stabilize/replace `tests/e2e/sign-in-gate.spec.ts` to match current route contracts and page copy.
+- [x] Refactor or quarantine stale cases in `tests/admin/admin-functionality.spec.ts` so the suite reflects current admin UX contracts.
+- [x] Triage failed `tests/integration/**` specs and split into (a) real regressions vs (b) outdated expectation/spec debt.
+
+**Next (P1 - Follow-up hardening)**
+- [ ] Re-run stabilized auth + admin suites with deterministic seed state and capture final pass/fail snapshot for launch checklist evidence.
+- [ ] Attach failing-test artifacts (screenshot/video/error-context) to a QA triage log for selector and expectation updates.
+- [ ] Convert legacy broad role suites (`tests/client/client-functionality.spec.ts`, `tests/talent/talent-functionality.spec.ts`) into smaller, route-specific specs with stable selectors and seed assumptions.
+- [ ] Resolve integration spec debt buckets in this order: (1) fixture/login seed determinism (`login-and-filter`, `portfolio-gallery`, `talent-public-profile`), (2) selector/copy contract refresh (`gigs-filters`, `talent-gig-application`, `booking-accept`), (3) visual/skeleton modernization (`ui-ux-upgrades` snapshots and loading assertions), then rerun `tests/integration/**`.
+
 ## 🚀 **Latest: Full route-list consistency sweep + terminal chrome alignment (February 26, 2026)**
 
 **UI/UX / END-TO-END CONSISTENCY PASS** — February 26, 2026

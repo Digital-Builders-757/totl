@@ -74,7 +74,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
 
   return (
     <PageShell topPadding={false} fullBleed>
-      <AdminHeader user={user} notificationCount={3} />
+      <AdminHeader user={user} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="space-y-5">
           <PageHeader
