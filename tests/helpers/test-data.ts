@@ -41,15 +41,42 @@ export function createDeterministicTestEmail(prefix: string, testInfo: TestInfo,
   return `${slugify(prefix)}-${runId}-${scope}@example.com`;
 }
 
+function isTestInfo(x: unknown): x is TestInfo {
+  return Boolean(
+    x &&
+      typeof x === "object" &&
+      "title" in x &&
+      "workerIndex" in x &&
+      "project" in x
+  );
+}
+
+let legacyCounter = 0;
+
+function getFallbackTestInfo(prefix: string, variant?: string): TestInfo {
+  // NOTE: Only used as a transitional fallback for older specs.
+  // Prefer passing `testInfo` so identities are deterministic per spec.
+  const title = `${prefix}-${variant ?? "default"}-${legacyCounter++}`;
+  return {
+    // minimal shape for our email builder
+    title,
+    workerIndex: 0,
+    project: { name: "chromium" },
+  } as unknown as TestInfo;
+}
+
 export function createTalentTestUser(
   prefix: string,
-  testInfo: TestInfo,
-  overrides?: Partial<TestUserIdentity> & { variant?: string }
+  testInfoOrOverrides: TestInfo | (Partial<TestUserIdentity> & { variant?: string }),
+  overridesMaybe?: Partial<TestUserIdentity> & { variant?: string }
 ): TestUserIdentity {
-  const email =
-    overrides?.email ??
-    createDeterministicTestEmail(prefix, testInfo, overrides?.variant);
+  const testInfo = isTestInfo(testInfoOrOverrides)
+    ? testInfoOrOverrides
+    : getFallbackTestInfo(prefix, testInfoOrOverrides?.variant);
 
+  const overrides = (isTestInfo(testInfoOrOverrides) ? overridesMaybe : testInfoOrOverrides) ?? undefined;
+
+  const email = overrides?.email ?? createDeterministicTestEmail(prefix, testInfo, overrides?.variant);
   const password = overrides?.password ?? getTestPassword();
   const firstName = overrides?.firstName ?? "Playwright";
   const lastName = overrides?.lastName ?? `Talent W${testInfo.workerIndex}`;

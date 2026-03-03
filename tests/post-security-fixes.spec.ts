@@ -88,8 +88,8 @@ test.describe('TOTL Agency - Post-Security Fix Tests', () => {
     
     expect(authErrors).toHaveLength(0);
     
-    // Verify login page loaded
-    await expect(page.locator('h1')).toContainText(/sign in/i);
+    // Verify login page loaded (copy may vary across UI refreshes)
+    await expect(page.locator('h1')).toContainText(/sign in|welcome back/i);
   });
 
   test('Gigs page loads without Supabase errors', async ({ page }) => {

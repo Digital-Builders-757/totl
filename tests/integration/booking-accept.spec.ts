@@ -150,23 +150,20 @@ test("client accepts an application and creates booking", async ({ page }) => {
   await loginWithCredentials(page, { email: applicantEmail, password }, { returnUrl: "/client/applications" });
   await page.goto("/client/applications");
 
-  // Wait for applications list to load (auth + fetchApplications convergence).
-  const totalAppsCard = page.locator("div", { hasText: "Total Applications" }).first();
-  await expect(totalAppsCard.getByText("1", { exact: true })).toBeVisible({ timeout: 30_000 });
-
-  // Click Accept in the application card that contains our gig title.
-  // (Avoid ambiguous matches against hidden select options.)
+  // Wait for the specific application card to appear (more stable than dashboard stat cards).
   const applicationCard = page
     .locator("div", { hasText: gigTitle })
-    .filter({ has: page.locator('[data-test="accept-application"]') })
+    .filter({ has: page.getByRole("button", { name: /more actions/i }) })
     .first();
-  const acceptButton = applicationCard.locator('[data-test="accept-application"]').first();
-  await expect(acceptButton).toBeVisible({ timeout: 20_000 });
-  await acceptButton.click();
+  await expect(applicationCard).toBeVisible({ timeout: 30_000 });
 
-  // Confirm in the Accept Application dialog (the card "Accept" button opens the dialog).
-  await expect(page.getByRole("dialog", { name: "Accept Application" })).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("button", { name: "Accept & Create Booking" }).click();
+  // Open More actions → Accept (current UI contract)
+  await applicationCard.getByRole("button", { name: /more actions/i }).click();
+  await page.getByRole("menuitem", { name: /accept/i }).click();
+
+  // Confirm in the Accept Application dialog.
+  await expect(page.getByRole("dialog", { name: /accept application/i })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: /accept & create booking/i }).click();
   await expect(page.getByRole("dialog", { name: "Accept Application" })).toBeHidden({ timeout: 30_000 });
 
   // 9) Verify booking created in DB (idempotent accept primitive should create exactly one booking).

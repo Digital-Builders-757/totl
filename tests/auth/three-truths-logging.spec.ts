@@ -15,12 +15,12 @@ import { safeGoto } from "../helpers/navigation";
 test.describe("Three Truths Logging", () => {
   test.describe.configure({ timeout: 180_000 });
 
-  test("Verify three truths logging during login", async ({ page, request }) => {
+  test("Verify three truths logging during login", async ({ page, request }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-three-truths", {
+    const user = createTalentTestUser("pw-three-truths", testInfo, {
       firstName: "Three",
-      lastName: `Truths${Date.now()}`,
+      variant: "logging",
     });
 
     // Create verified user
@@ -124,12 +124,12 @@ test.describe("Three Truths Logging", () => {
   test("Verify redirect happens after three truths", async ({
     page,
     request,
-  }) => {
+  }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-three-truths-redirect", {
+    const user = createTalentTestUser("pw-three-truths-redirect", testInfo, {
       firstName: "Redirect",
-      lastName: `Test${Date.now()}`,
+      variant: "redirect",
     });
 
     // Create verified user
@@ -178,12 +178,12 @@ test.describe("Three Truths Logging", () => {
   test("Verify no redirect loops with three truths", async ({
     page,
     request,
-  }) => {
+  }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-three-truths-no-loop", {
+    const user = createTalentTestUser("pw-three-truths-no-loop", testInfo, {
       firstName: "NoLoop",
-      lastName: `Test${Date.now()}`,
+      variant: "no-loop",
     });
 
     // Create verified user
@@ -232,12 +232,12 @@ test.describe("Three Truths Logging", () => {
     console.log("[TEST] URL history:", urlHistory);
   });
 
-  test("Verify cookies persist after redirect", async ({ page, request }) => {
+  test("Verify cookies persist after redirect", async ({ page, request }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-three-truths-cookies", {
+    const user = createTalentTestUser("pw-three-truths-cookies", testInfo, {
       firstName: "Cookies",
-      lastName: `Test${Date.now()}`,
+      variant: "persist",
     });
 
     // Create verified user

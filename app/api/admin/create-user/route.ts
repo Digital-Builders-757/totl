@@ -35,6 +35,19 @@ export async function POST(request: Request) {
       // If user already exists, that's fine for testing - user was created via UI
       // Just return success (the user exists and can be used for login)
       if (authError.message.includes("already been registered") || authError.code === "email_exists") {
+        // For test determinism, return the existing user so callers can still access `user.id`.
+        // NOTE: Supabase JS doesn't provide a direct getUserByEmail helper; use listUsers as a fallback.
+        const { data: usersData, error: listError } = await supabase.auth.admin.listUsers({ perPage: 200 });
+        if (!listError) {
+          const existing = usersData?.users?.find((u) => u.email?.toLowerCase() === String(email).toLowerCase());
+          if (existing) {
+            return NextResponse.json(
+              { success: true, message: "User already exists", user: existing },
+              { status: 200 }
+            );
+          }
+        }
+
         return NextResponse.json(
           { success: true, message: "User already exists" },
           { status: 200 }

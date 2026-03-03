@@ -12,12 +12,12 @@ import { createTalentTestUser } from "../helpers/test-data";
  * - Submitting onboarding form updates server truth and routes to the correct dashboard
  */
 test.describe("BootState: finish onboarding", () => {
-  test("blanked name fields force onboarding; submit completes and redirects", async ({ page, request }) => {
+  test("blanked name fields force onboarding; submit completes and redirects", async ({ page, request }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-onboarding", {
+    const user = createTalentTestUser("pw-onboarding", testInfo, {
       firstName: "Onboarding",
-      lastName: `User${Date.now()}`,
+      variant: "blanked-fields",
     });
 
     // Warm server
@@ -34,8 +34,19 @@ test.describe("BootState: finish onboarding", () => {
       },
     });
     expect(createRes.ok()).toBeTruthy();
-    const created = (await createRes.json()) as { user?: { id?: string } };
-    const userId = created.user?.id;
+    const created = (await createRes.json()) as { user?: { id?: string; email?: string } };
+    let userId = created.user?.id;
+
+    // If the user already existed, the admin endpoint may return success without a user payload.
+    // Resolve id via Supabase admin as a fallback.
+    if (!userId) {
+      const supabaseAdmin = createSupabaseAdminClientForTests();
+      const { data: usersData, error: usersError } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
+      if (usersError) throw new Error(`create-user did not return a user id, and listUsers failed: ${usersError.message}`);
+      const existing = usersData.users.find((u) => u.email?.toLowerCase() === user.email.toLowerCase());
+      userId = existing?.id;
+    }
+
     if (!userId) throw new Error("create-user did not return a user id");
 
     // Blank required onboarding fields.

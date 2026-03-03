@@ -39,6 +39,10 @@ npm run build
   - **Prevention:** Verify `to_regclass('public.content_flags')` returns non-null after deploy
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
+- **MVP tracker date is stale despite new updates:** `MVP_STATUS_NOTION.md` footer still shows an old "Last Updated" date
+  - **Root Cause:** Session updates were added in-body, but the footer metadata block was not updated in the same commit
+  - **Fix:** Whenever `MVP_STATUS_NOTION.md` changes, update the footer lines at the end of the file (`Last Updated`, `Current Status`, `Next Review`) before ship
+  - **Prevention:** Treat footer metadata sync as a required pre-push checklist item for all MVP doc edits
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
 - **Stripe API Version Errors:** `Invalid Stripe API version format with unsupported '.clover' suffix`
