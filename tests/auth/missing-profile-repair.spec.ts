@@ -14,12 +14,12 @@ import { createTalentTestUser } from "../helpers/test-data";
  */
 
 test.describe("Auth Bootstrap: Missing profile repair", () => {
-  test("deleting profiles row then re-login repairs profile", async ({ page, request }) => {
+  test("deleting profiles row then re-login repairs profile", async ({ page, request }, testInfo) => {
     test.setTimeout(180_000);
 
-    const user = createTalentTestUser("pw-missing-profile", {
+    const user = createTalentTestUser("pw-missing-profile", testInfo, {
       firstName: "Missing",
-      lastName: `Profile${Date.now()}`,
+      variant: "repair",
     });
 
     // Warm server (dev server can be compiling on first hit)
@@ -38,7 +38,16 @@ test.describe("Auth Bootstrap: Missing profile repair", () => {
     expect(createRes.ok()).toBeTruthy();
 
     const created = (await createRes.json()) as { user?: { id?: string } };
-    const userId = created.user?.id;
+    let userId = created.user?.id;
+
+    if (!userId) {
+      const supabaseAdmin = createSupabaseAdminClientForTests();
+      const { data: usersData, error: usersError } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
+      if (usersError) throw new Error(`create-user did not return a user id, and listUsers failed: ${usersError.message}`);
+      const existing = usersData.users.find((u) => u.email?.toLowerCase() === user.email.toLowerCase());
+      userId = existing?.id;
+    }
+
     if (!userId) throw new Error("create-user did not return a user id");
 
     // Login once to establish session and confirm baseline dashboard access
