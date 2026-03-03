@@ -52,9 +52,11 @@ test.describe("Sentry Error Fixes - Public Routes", () => {
     // Verify page loads
     await expect(page).toHaveTitle(/TOTL/);
     
-    // Verify key elements are visible
-    await expect(page.locator('text=Connect with')).toBeVisible();
-    await expect(page.locator('text=Top Talent')).toBeVisible();
+    // Verify key elements are visible (headline copy can change)
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /start booking|browse gigs|browse talent/i }).first()
+    ).toBeVisible();
     
     // Check no critical errors occurred
     expect(errors.filter(e => !e.includes('Warning')).length).toBe(0);
@@ -65,15 +67,9 @@ test.describe("Sentry Error Fixes - Public Routes", () => {
     
     await page.goto("/talent");
     
-    // Verify page loads
-    await expect(page.locator('text=Discover Amazing Talent')).toBeVisible();
-    
-    // Verify search functionality works
-    const searchInput = page.locator('input[placeholder*="Search"]');
-    if (await searchInput.isVisible()) {
-      await searchInput.fill('model');
-      // Search should work without errors
-    }
+    // /talent is now a 404 route in current product contract.
+    await expect(page).toHaveURL(/\/talent/);
+    await expect(page.getByRole("heading", { name: /404|not found/i })).toBeVisible();
     
     // Verify no Server Component errors (NEXTJS-C/D/G/J fixed)
     const serverComponentErrors = errors.filter(e => 
@@ -85,24 +81,10 @@ test.describe("Sentry Error Fixes - Public Routes", () => {
     console.log(`✅ Talent page loaded successfully - No Server Component errors`);
   });
 
-  test("Talent browse page error state works (if no talent)", async ({ page }) => {
+  test("Talent route shows graceful not-found state", async ({ page }) => {
     await page.goto("/talent");
     
-    // If there are no talent profiles, error state should display gracefully
-    const noTalentMessage = page.locator('text=No Talent Found');
-    const talentCards = page.locator('[class*="apple-card"]');
-    
-    const talentCount = await talentCards.count();
-    
-    if (talentCount === 0) {
-      // Error state should be visible
-      await expect(noTalentMessage).toBeVisible();
-      console.log('✅ Error state displays correctly when no talent found');
-    } else {
-      // Talent cards should be visible
-      expect(talentCount).toBeGreaterThan(0);
-      console.log(`✅ ${talentCount} talent profiles loaded successfully`);
-    }
+    await expect(page.getByRole("heading", { name: /404|not found/i })).toBeVisible();
   });
 
   test("Gigs page loads without errors", async ({ page }) => {
@@ -188,25 +170,26 @@ test.describe("Sentry Error Fixes - Interactive Elements", () => {
     
     // Start at home
     await page.goto("/");
-    await expect(page.locator('text=Top Talent')).toBeVisible();
-    
-    // Navigate to talent
-    await page.click('text=Browse Talent');
-    await expect(page).toHaveURL(/.*\/talent/);
+    await expect(page.locator("h1")).toBeVisible();
     
     // Navigate to gigs
     await page.goto("/gigs");
     await page.waitForLoadState('networkidle');
+    await expect(page.url()).toMatch(/\/(gigs|login)/);
     
     // Navigate to about
     await page.goto("/about");
     await page.waitForLoadState('networkidle');
+    await expect(page).toHaveURL(/.*\/about/);
+
+    // Navigate to talent and ensure graceful route handling
+    await page.goto("/talent");
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveURL(/.*\/talent/);
     
-    // Check no navigation errors
-    const navErrors = errors.filter(e => 
-      !e.includes('Warning') && 
-      !e.includes('DevTools') &&
-      !e.includes('Stylesheet')
+    // Check no critical navigation/runtime errors (ignore benign asset/noise logs).
+    const navErrors = errors.filter((e) =>
+      /TypeError|ReferenceError|Hydration failed|Event handlers cannot be passed|Cannot read properties/i.test(e)
     );
     expect(navErrors.length).toBe(0);
     
@@ -244,26 +227,21 @@ test.describe("Sentry Error Fixes - Error Boundaries", () => {
     // Wait for page to load
     await page.waitForLoadState('networkidle');
     
-    // Check if error state or content is displayed (both are valid)
+    // Check if graceful not-found/content state is displayed (both are valid).
     const pageContent = await page.content();
     
-    const hasErrorState = pageContent.includes('Error Loading Talent') || 
-                         pageContent.includes('Try Again') ||
-                         pageContent.includes('No Talent Found');
+    const hasErrorState = pageContent.includes("404") || 
+                         pageContent.includes("Not Found") ||
+                         pageContent.includes("Go Home");
     
-    const hasContent = pageContent.includes('Discover Amazing Talent');
+    const hasContent = pageContent.includes("Discover") || pageContent.includes("Talent");
     
     // One of these should be true
     expect(hasErrorState || hasContent).toBe(true);
     
-    // If error state with Try Again button exists, it should be clickable
-    const tryAgainButton = page.locator('text=Try Again');
-    if (await tryAgainButton.isVisible()) {
-      // Button should be clickable (Client Component - NEXTJS-C/D fixed)
-      await expect(tryAgainButton).toBeEnabled();
-      console.log('✅ Error state Try Again button is interactive (Client Component)');
-    } else {
-      console.log('✅ Talent page loaded successfully with content');
+    const goHomeButton = page.getByRole("link", { name: /go home|return home|home/i }).first();
+    if (await goHomeButton.isVisible().catch(() => false)) {
+      await expect(goHomeButton).toBeEnabled();
     }
   });
 

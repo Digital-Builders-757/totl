@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Admin Dashboard: Paid Talent stats", () => {
-  test("shows Paid Talent (Subscriptions) stats", async ({ page }) => {
+  test("shows Paid Talent stats", async ({ page }) => {
     test.setTimeout(120_000);
 
     const safeGoto = async (url: string) => {
@@ -50,7 +50,7 @@ test.describe("Admin Dashboard: Paid Talent stats", () => {
 
     // Smoke: card renders and contains numeric values.
     await expect(page.getByTestId("paid-talent-card")).toBeVisible();
-    await expect(page.getByTestId("paid-talent-card-title")).toHaveText("Paid Talent (Subscriptions)");
+    await expect(page.getByTestId("paid-talent-card-title")).toHaveText("Paid Talent");
 
     // Stable selectors for metrics
     await expect(page.getByTestId("paid-talent-total")).toBeVisible();
