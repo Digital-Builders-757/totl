@@ -153,6 +153,21 @@
 **Next (Block 2)**
 - Refresh selectors/copy contract to match current UI chrome (prefer role/label/aria; avoid stale `data-testid` where it drifted).
 
+**Block 2 progress (selector/copy contract refresh) — in progress**
+- ✅ Updated integration specs to align with current UI + auth gating behaviors:
+  - `tests/integration/booking-accept.spec.ts` (accept flow now uses "More actions" menu → "Accept" → dialog)
+  - `tests/integration/gigs-filters.spec.ts` (handles sign-in gate `/login?returnUrl=/gigs` and returns to `/gigs`)
+  - `tests/integration/login-and-filter.spec.ts` (migrated off legacy seeded creds; deterministic user + explicit login return)
+  - `tests/integration/portfolio-gallery.spec.ts` (migrated off legacy creds; tolerates missing seeded portfolio fixtures)
+  - `tests/integration/mobile-overflow-sentinel.spec.ts` (handles auth-gated redirects to `/login` for `/talent/signup`, `/client/apply*`, and `/gigs`)
+- ✅ Reruns:
+  - `tests/integration/mobile-overflow-sentinel.spec.ts`: **10 passed, 1 skipped**
+  - targeted reruns for the specs above now passing locally.
+
+**Block 2 next targets (queued)**
+- `tests/integration/portfolio-gallery.spec.ts` follow-up: decide whether to seed portfolio fixtures or keep optional assertion.
+- Continue `npx playwright test tests/integration --max-failures=1` loop to identify the next failing spec and update selectors/contracts.
+
 ## 🚀 **Latest: Mobile density standardization (B-core primitives + QA checklist) (February 26, 2026)**
 
 **MOBILE UI/UX / DENSITY CONTRACT ROLLOUT** — February 26, 2026
