@@ -64,34 +64,38 @@ test.describe("Talent gig application experience", () => {
     await expect(signInLink).toBeVisible();
     await expect(signInLink).toHaveAttribute("href", /\/login\?returnUrl=%2Fgigs%2F/);
 
-    // Sign in.
-    await safeGoto(page, "/login", { timeoutMs: 60_000 });
+    // Sign in (return to gig path) and ensure we are authenticated.
+    await safeGoto(page, `/login?returnUrl=${encodeURIComponent(gigPath)}`, { timeoutMs: 60_000 });
     await waitForLoginHydrated(page);
     await page.getByTestId("email").fill(user.email);
     await page.getByTestId("password").fill(user.password);
     await page.getByTestId("login-button").click();
+
+    // Post-login can converge to dashboard/onboarding OR returnUrl.
+    await page.waitForURL(/\/(talent\/dashboard|onboarding|gigs\/)/, { timeout: 60_000 });
     await ensureTalentReady(page);
 
-    // Current contract: signed-in but unsubscribed can still view gig details;
-    // applying should show a subscription gate (may be inline in the Apply module).
     await safeGoto(page, gigPath, { timeoutMs: 60_000 });
 
-    // If an Apply button exists, clicking it should reveal the subscription gate.
+    // Auth should be present: top nav should no longer show Sign In / Create Account.
+    await expect(page.getByRole("button", { name: /^sign in$/i })).toBeHidden({ timeout: 10_000 });
+    await expect(page.getByRole("button", { name: /create account/i })).toBeHidden({ timeout: 10_000 });
+
+    // Current contract: signed-in but unsubscribed should see a subscription gate when attempting to apply.
     const applyButton = page.getByRole("button", { name: /apply/i }).first();
     if (await applyButton.isVisible().catch(() => false)) {
       await applyButton.click();
     }
 
     const gate = page.getByTestId("subscription-apply-gate");
-    const gateVisible = await gate.isVisible().catch(() => false);
-    if (gateVisible) {
+    if (await gate.isVisible().catch(() => false)) {
       const viewPlansLink = gate.getByRole("link", { name: /view plans.*subscribe/i });
       await expect(viewPlansLink).toBeVisible();
       await expect(viewPlansLink).toHaveAttribute("href", "/talent/subscribe");
       return;
     }
 
-    // Fallback: accept copy drift but still ensure we're not seeing the anonymous CTA.
+    // If gating UI changes, at least ensure we don't still see the anonymous CTA.
     await expect(page.getByText(/sign in to apply/i)).toBeHidden({ timeout: 10_000 });
   });
 });

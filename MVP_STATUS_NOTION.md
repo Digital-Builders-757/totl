@@ -171,6 +171,7 @@
 - ✅ `tests/integration/talent-gig-application.spec.ts`
   - Removed hardcoded non-existent gig UUID.
   - Creates a deterministic gig via Supabase admin + validates anonymous sign-in CTA and signed-in apply gating (best-effort).
+  - Hardened login returnUrl + auth assertion to avoid false “still signed out” flakes.
 - ✅ `tests/integration/talent-public-profile.spec.ts`
   - Public profile route currently **404s** in this environment; marked profile gating assertions as skipped until fixture contract returns.
 - ✅ `tests/integration/ui-ux-upgrades.spec.ts`
