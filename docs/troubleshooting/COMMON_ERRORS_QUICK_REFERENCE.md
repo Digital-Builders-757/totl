@@ -297,6 +297,13 @@ npm run build
     Remove-Item Env:SUPABASE_AUTH_JWT_SECRET -ErrorAction SilentlyContinue
     ```
     Then retry `supabase stop` → `supabase start` → `npm run db:reset`.
+- **UI audit screenshots mislabeled by viewport (false evidence risk)**
+  - **Symptom:** screenshot filenames say `390x844` / `360x800`, but actual image dimensions are `1600x900`.
+  - **Root Cause:** browser automation captures with default viewport while filenames are generated from intended viewport labels.
+  - **Fix:** enforce explicit viewport before capture and validate files before merge:
+    - `await page.setViewportSize({ width, height })`
+    - run a dimension check script (Pillow/ImageMagick) to compare filename label vs actual file dimensions.
+  - **Prevention:** treat screenshot evidence as invalid unless filename labels and pixel dimensions match exactly.
 
 ## **4. BRANCH-SPECIFIC REQUIREMENTS**
 - **DEVELOP Branch:** Use `npm run types:regen:dev` if needed

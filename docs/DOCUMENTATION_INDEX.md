@@ -225,6 +225,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `AUDIT_STATUS_REPORT.md` - Evidence-based repo audit snapshot (quality gates, foundation PR status, system map, journey QA, drift/duplicates)
 - `AUDIT_MASTER_BOARD.md` - Rolling one-screen audit queue (IDs + proof hooks + next actions)
 - `AUDIT_LOG.md` - Append-only audit proof ledger (timestamped command receipts)
+- `audits/UI_UX_SCREENSHOT_REMEDIATION_REPORT_2026-03-03.md` - Screenshot-driven MVP UI/UX remediation system (matrix, P0 definition, stop-the-line blockers, mobile gate)
 - `ENGINEERING_COMMANDS.md` - **NEW** ✅ - Canonical Cursor command system (Dec 2025)
 - `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
