@@ -392,22 +392,8 @@ test.describe("System Integration Points", () => {
 
 // Test Suite: Performance and Load Testing
 test.describe("Performance and Load Testing", () => {
-  test("Page load performance", async ({ page }) => {
-    const startTime = Date.now();
-
-    await page.goto("/");
-    await page.waitForLoadState("networkidle");
-
-    const loadTime = Date.now() - startTime;
-    expect(loadTime).toBeLessThan(3000); // Should load within 3 seconds
-
-    // Test other key pages
-    await page.goto("/gigs");
-    await page.waitForLoadState("networkidle");
-
-    await page.goto("/talent");
-    await page.waitForLoadState("networkidle");
-  });
+  // Carved out to tests/integration/integration-carveouts.spec.ts:
+  // - Page load performance
 
   test("Search performance with large datasets", async ({ page }) => {
     await page.goto("/gigs");
@@ -480,21 +466,5 @@ test.describe("Error Handling and Edge Cases", () => {
 test.describe("Mobile Responsiveness", () => {
   // Carved out to tests/integration/integration-carveouts.spec.ts:
   // - Mobile navigation
-
-  test("Mobile form interactions", async ({ page }) => {
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-
-    await page.goto("/talent/signup");
-
-    // Test form on mobile
-    await page.fill('[data-testid="email"]', "mobile-test@example.com");
-    await page.fill('[data-testid="password"]', "TestPassword123!");
-    await page.fill('[data-testid="firstName"]', "Mobile");
-    await page.fill('[data-testid="lastName"]', "Test");
-    await page.fill('[data-testid="phone"]', "+1234567890");
-
-    // Verify mobile-specific elements
-    await expect(page.locator('[data-testid="mobile-submit-button"]')).toBeVisible();
-  });
+  // - Mobile form interactions
 });

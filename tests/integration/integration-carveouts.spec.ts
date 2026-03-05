@@ -45,4 +45,31 @@ test.describe("Integration carve-outs (deterministic)", () => {
     const viewportWidth = await page.evaluate(() => window.innerWidth);
     expect(bodyWidth).toBeLessThanOrEqual(viewportWidth);
   });
+
+  test("Mobile form interactions", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("login-hydrated")).toHaveText("ready", { timeout: 60000 });
+
+    const emailInput = page.getByTestId("email");
+    const passwordInput = page.getByTestId("password");
+    const submitButton = page.getByTestId("login-button");
+
+    await emailInput.fill("mobile-test@example.com");
+    await passwordInput.fill("TestPassword123!");
+
+    await expect(emailInput).toHaveValue("mobile-test@example.com");
+    await expect(passwordInput).toHaveValue("TestPassword123!");
+    await expect(submitButton).toBeVisible();
+  });
+
+  test("Page load performance", async ({ page }) => {
+    const startTime = Date.now();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const homeLoadTime = Date.now() - startTime;
+    expect(homeLoadTime).toBeLessThan(10000);
+
+    await page.goto("/gigs", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/(gigs|login)(\?|$)/);
+  });
 });

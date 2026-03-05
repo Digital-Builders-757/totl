@@ -3202,6 +3202,37 @@ Use this as the active operating board. Historical sections below remain the aud
 - Continued minimal-diff approach; no snapshot/provider-dependent expansion.
 - Legacy scaffold remains quarantined while deterministic coverage is incrementally extracted.
 
+### **Session Update (March 5, 2026 - legacy scaffold carve-out pass (wave 3))**
+
+**Done (deterministic carve-out expansion):**
+1. **Extended `integration-carveouts` with 2 more stable scenarios**
+   - Updated `tests/integration/integration-carveouts.spec.ts`
+   - Added:
+     - `Mobile form interactions` (mobile viewport login form contract using stable `data-testid` fields)
+     - `Page load performance` (lightweight deterministic contract: homepage load-time budget + `/gigs` route/auth-gate contract)
+2. **Removed corresponding scenario bodies from legacy scaffold**
+   - Updated `tests/integration/integration-tests.spec.ts`
+   - Removed in-file scenario bodies for:
+     - `Mobile form interactions`
+     - `Page load performance`
+   - Left carve-out ownership comments.
+3. **Fail-loop rerun (wave 3 stability)**
+   - Command:
+     - `npx playwright test tests/integration --reporter=line --max-failures=1`
+   - Before wave 3:
+     - **87 passed, 12 skipped**
+   - After wave 3:
+     - **89 passed, 10 skipped**
+   - Net:
+     - **+2 passed / -2 skipped** with fail-loop green.
+4. **Skip declaration status in `tests/integration/*.spec.ts`**
+   - Still reduced to one intentional quarantine declaration:
+     - `tests/integration/integration-tests.spec.ts` (`test.skip(true, ...)`)
+
+**Operational notes:**
+- Route-contract style maintained to avoid introducing timing-sensitive flake.
+- Provider-constrained email endpoints remain tolerated as existing expected behavior.
+
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle
 2. **Security Audit** - Re-run security checks
