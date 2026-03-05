@@ -8,6 +8,41 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Integration skip burn-down (March 5, 2026)**
+
+**PLAYWRIGHT INTEGRATION HARDENING CONTINUATION** - March 5, 2026
+- ✅ Ran fail-loop baseline:
+  - `npx playwright test tests/integration --reporter=line --max-failures=1`
+  - Initial snapshot: **25 passed, 25 skipped, 48 did not run, 1 failed**
+  - First failure fixed: `tests/integration/talent-gig-application.spec.ts` auth fixture lookup drift.
+- ✅ Converted easy-win skips to deterministic seeded passes (no external providers, no snapshot expansion):
+  - `tests/integration/subscription-flow.spec.ts`
+    - removed env-gated skips and seeded deterministic talent+client+gig fixtures per test.
+  - `tests/integration/talent-public-profile.spec.ts`
+    - unskipped 2 tests by seeding deterministic talent/client identities and slug-safe profile fixtures.
+  - `tests/integration/mobile-overflow-sentinel.spec.ts`
+    - unskipped client dashboard overflow sentinel by seeding+authing deterministic client fixture.
+- ✅ Added shared integration fixture utilities:
+  - `tests/helpers/integration-fixtures.ts`
+    - `ensureAuthUser`, `ensureTalentFixture`, `ensureClientFixture`
+    - `ensureTalentUserViaAdminApi`
+    - `createActiveGigForClient`
+    - `createNameSlug`
+- ✅ Re-ran updated block:
+  - `npx playwright test tests/integration/talent-gig-application.spec.ts tests/integration/subscription-flow.spec.ts tests/integration/talent-public-profile.spec.ts tests/integration/mobile-overflow-sentinel.spec.ts --reporter=line`
+  - Result: **17 passed, 0 failed**
+- ✅ Re-ran full fail-loop gate:
+  - `npx playwright test tests/integration --reporter=line --max-failures=1`
+  - Current snapshot: **77 passed, 23 skipped, 0 failed**
+- ✅ Skip burn-down delta (declaration-level):
+  - `tests/integration` skip declarations reduced **13 -> 7** (**-6**).
+
+**Remaining intentional integration skips (current):**
+- `tests/integration/application-email-workflow.spec.ts` (full E2E send flow; external email-provider behavior still env-constrained despite API-contract coverage)
+- `tests/integration/client-dashboard-screenshot.spec.ts` (opt-in visual baseline; snapshot-sensitive)
+- `tests/integration/integration-tests.spec.ts` (legacy scaffold mega-suite; intentionally quarantined)
+- `tests/integration/ui-ux-upgrades.spec.ts` (4 snapshot/visual-flake-prone cases: hover/toast/snapshot blocks)
+
 ## 🚀 **Latest: UI/UX screenshot audit + full app remediation plan (March 3, 2026)**
 
 **UI/UX / SCREENSHOT-DRIVEN MVP REMEDIATION** - March 3, 2026
