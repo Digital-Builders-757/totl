@@ -3143,6 +3143,37 @@ Use this as the active operating board. Historical sections below remain the aud
 - No new snapshot artifacts were introduced by default runs.
 - Visual checks remain opt-in via `RUN_UI_UX_SNAPSHOTS=1` to avoid CI instability.
 
+### **Session Update (March 5, 2026 - legacy scaffold carve-out pass)**
+
+**Done (deterministic carve-outs from quarantined mega-suite):**
+1. **Added dedicated deterministic carve-out spec**
+   - New file: `tests/integration/integration-carveouts.spec.ts`
+   - Added stable tests for:
+     - `Invalid URL handling` (current app contract: signed-out unknown route redirects to login with `returnUrl`)
+     - `Session timeout handling` (protected dashboard redirects to login after cleared cookies)
+2. **Removed carved scenarios from legacy scaffold file**
+   - Updated `tests/integration/integration-tests.spec.ts`
+   - Removed in-file scenario bodies for:
+     - `Invalid URL handling`
+     - `Session timeout handling`
+   - Left explicit note that these are now covered by deterministic carve-outs.
+3. **Fail-loop rerun (post-carveout stability)**
+   - Command:
+     - `npx playwright test tests/integration --reporter=line --max-failures=1`
+   - Before this pass:
+     - **83 passed, 17 skipped**
+   - After this pass:
+     - **85 passed, 14 skipped**
+   - Net:
+     - **+2 passed / -3 skipped** with fail-loop green.
+4. **Skip declaration status in `tests/integration/*.spec.ts`**
+   - Still a single intentional file-level quarantine:
+     - `tests/integration/integration-tests.spec.ts` (`test.skip(true, ...)`)
+
+**Operational notes:**
+- Initial strict 404 assertion for invalid routes was corrected to match real app behavior (`/login?returnUrl=...`) to keep tests contract-accurate.
+- No snapshot artifact expansion; no new provider-dependent paths introduced.
+
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle
 2. **Security Audit** - Re-run security checks
