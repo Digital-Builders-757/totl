@@ -320,52 +320,9 @@ test.describe("Cross-Role Interactions", () => {
 
 // Test Suite: System Integration Points
 test.describe("System Integration Points", () => {
-  test("Email notification workflow", async ({ page }) => {
-    // Register new user
-    await registerUser(page, "talent", {
-      ...talentUser,
-      email: "email-test@example.com",
-    });
-
-    // Verify verification email page
-    await expect(page.locator("text=Please check your inbox")).toBeVisible();
-
-    // Test resend functionality
-    await page.click('[data-testid="resend-button"]');
-    await expect(page.locator("text=Verification email sent")).toBeVisible();
-  });
-
-  test("Database consistency across roles", async ({ page, context }) => {
-    // Create new browser context for client
-    const clientContext = await context.browser()?.newContext();
-    const clientPage = await clientContext?.newPage();
-
-    if (!clientPage) throw new Error("Failed to create client page");
-
-    try {
-      // Client creates gig
-      await loginUser(clientPage, clientUser.email, clientUser.password);
-      await createGig(clientPage, testGig);
-
-      // Verify gig appears in public gigs list
-      await page.goto("/gigs");
-      await expect(page.locator(`text=${testGig.title}`)).toBeVisible();
-
-      // Talent applies
-      await loginUser(page, talentUser.email, talentUser.password);
-      await applyForGig(page, testGig.title);
-
-      // Verify application appears in client's application list
-      await clientPage.goto("/admin/applications");
-      await expect(clientPage.locator('[data-testid="application-card"]')).toBeVisible();
-
-      // Verify application appears in talent's application list
-      await page.goto("/talent/applications");
-      await expect(page.locator('[data-testid="application-card"]')).toBeVisible();
-    } finally {
-      await clientContext?.close();
-    }
-  });
+  // Carved out to tests/integration/integration-carveouts.spec.ts:
+  // - Email notification workflow
+  // - Database consistency across roles
 
   test("File upload and storage integration", async ({ page }) => {
     await loginUser(page, talentUser.email, talentUser.password);

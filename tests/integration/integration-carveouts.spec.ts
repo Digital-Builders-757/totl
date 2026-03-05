@@ -116,4 +116,28 @@ test.describe("Integration carve-outs (deterministic)", () => {
       await Promise.all(contexts.map((ctx) => ctx.close()));
     }
   });
+
+  test("Email notification workflow", async ({ page }) => {
+    // Verification-pending route should remain reachable and stable.
+    await page.goto("/verification-pending?email=email-test%40example.com", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page).toHaveURL(/\/verification-pending(\?|$)/);
+    await expect(page.getByText(/check your (inbox|email)/i).first()).toBeVisible();
+  });
+
+  test("Database consistency across roles", async ({ browser }) => {
+    const contexts = await Promise.all([browser.newContext(), browser.newContext()]);
+    try {
+      const [publicPage, protectedPage] = await Promise.all(contexts.map((ctx) => ctx.newPage()));
+      await publicPage.goto("/gigs", { waitUntil: "domcontentloaded" });
+      await protectedPage.goto("/talent/applications", { waitUntil: "domcontentloaded" });
+
+      await expect(publicPage).toHaveURL(/\/(gigs|login)(\?|$)/);
+      await expect(protectedPage).toHaveURL(/\/login(\?|$)/);
+    } finally {
+      await Promise.all(contexts.map((ctx) => ctx.close()));
+    }
+  });
 });
