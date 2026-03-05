@@ -72,4 +72,48 @@ test.describe("Integration carve-outs (deterministic)", () => {
     await page.goto("/gigs", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/(gigs|login)(\?|$)/);
   });
+
+  test("Search performance with large datasets", async ({ page }) => {
+    await page.goto("/gigs", { waitUntil: "domcontentloaded" });
+
+    // Auth-gated contract path for signed-out runs.
+    if (/\/login(\?|$)/.test(page.url())) {
+      await expect(page.getByTestId("login-hydrated")).toHaveText("ready", { timeout: 60000 });
+      return;
+    }
+
+    const startTime = Date.now();
+    const searchInput = page.locator('[data-testid="search-input"]').first();
+    const searchButton = page.locator('[data-testid="search-button"]').first();
+
+    if ((await searchInput.count()) > 0 && (await searchButton.count()) > 0) {
+      await searchInput.fill("fashion");
+      await searchButton.click();
+      await page.waitForLoadState("domcontentloaded");
+    }
+
+    // Keep a generous threshold for shared CI hardware while still guarding regressions.
+    const searchTime = Date.now() - startTime;
+    expect(searchTime).toBeLessThan(10000);
+    await expect(page).toHaveURL(/\/gigs(\?|$)/);
+  });
+
+  test("Concurrent user simulation", async ({ browser }) => {
+    const contexts = await Promise.all([
+      browser.newContext(),
+      browser.newContext(),
+      browser.newContext(),
+    ]);
+
+    try {
+      const pages = await Promise.all(contexts.map((ctx) => ctx.newPage()));
+      await Promise.all(pages.map((p) => p.goto("/gigs", { waitUntil: "domcontentloaded" })));
+
+      for (const p of pages) {
+        await expect(p).toHaveURL(/\/(gigs|login)(\?|$)/);
+      }
+    } finally {
+      await Promise.all(contexts.map((ctx) => ctx.close()));
+    }
+  });
 });

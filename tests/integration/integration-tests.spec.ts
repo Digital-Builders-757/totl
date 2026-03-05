@@ -394,62 +394,8 @@ test.describe("System Integration Points", () => {
 test.describe("Performance and Load Testing", () => {
   // Carved out to tests/integration/integration-carveouts.spec.ts:
   // - Page load performance
-
-  test("Search performance with large datasets", async ({ page }) => {
-    await page.goto("/gigs");
-
-    const startTime = Date.now();
-
-    // Perform search
-    await page.fill('[data-testid="search-input"]', "fashion");
-    await page.click('[data-testid="search-button"]');
-    await page.waitForLoadState("networkidle");
-
-    const searchTime = Date.now() - startTime;
-    expect(searchTime).toBeLessThan(2000); // Search should complete within 2 seconds
-
-    // Verify results are displayed
-    await expect(page.locator('[data-testid="gig-card"]')).toBeVisible();
-  });
-
-  test("Concurrent user simulation", async ({ page, context }) => {
-    // Create multiple browser contexts to simulate concurrent users
-    const contexts = [];
-    const pages = [];
-
-    for (let i = 0; i < 5; i++) {
-      const newContext = await context.browser()?.newContext();
-      const newPage = await newContext?.newPage();
-
-      if (newContext && newPage) {
-        contexts.push(newContext);
-        pages.push(newPage);
-      }
-    }
-
-    try {
-      // All users browse gigs simultaneously
-      const promises = pages.map(async (p) => {
-        await p.goto("/gigs");
-        await p.waitForLoadState("networkidle");
-        return p.locator('[data-testid="gig-card"]').count();
-      });
-
-      const results = await Promise.all(promises);
-
-      // Verify all users can access the page
-      results.forEach((count) => {
-        expect(count).toBeGreaterThan(0);
-      });
-    } finally {
-      // Clean up contexts
-      await Promise.all(contexts.map((ctx) => ctx.close()));
-    }
-
-    // Ensure the primary page fixture is considered used (this file is currently skipped,
-    // but we keep it lint-clean for when it is re-enabled).
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-  });
+  // - Search performance with large datasets
+  // - Concurrent user simulation
 });
 
 // Test Suite: Error Handling and Edge Cases
