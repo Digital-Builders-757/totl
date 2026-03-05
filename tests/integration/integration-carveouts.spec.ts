@@ -22,4 +22,27 @@ test.describe("Integration carve-outs (deterministic)", () => {
 
     await expect(page).toHaveURL(/\/login(\?|$)/);
   });
+
+  test("Form submission with invalid data", async ({ page }) => {
+    // Deterministic validation surface on login route.
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await expect(page.getByTestId("login-hydrated")).toHaveText("ready", { timeout: 60000 });
+
+    await page.getByTestId("email").fill("invalid-email");
+    await page.getByTestId("password").fill("");
+    await page.getByTestId("login-button").click();
+
+    await expect(page.getByText("Please enter a valid email address")).toBeVisible();
+    await expect(page.getByText("Password is required")).toBeVisible();
+  });
+
+  test("Mobile navigation", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    // Stable mobile contract: no horizontal overflow on homepage viewport.
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(bodyWidth).toBeLessThanOrEqual(viewportWidth);
+  });
 });

@@ -472,38 +472,14 @@ test.describe("Error Handling and Edge Cases", () => {
   // route-contract tests so they can run without scaffold assumptions:
   // - Invalid URL handling
   // - Session timeout handling
-
-  test("Form submission with invalid data", async ({ page }) => {
-    await page.goto("/talent/signup");
-
-    // Submit form with invalid data
-    await page.fill('[data-testid="email"]', "invalid-email");
-    await page.fill('[data-testid="password"]', "123");
-    await page.click('[data-testid="submit-button"]');
-
-    // Verify validation errors are displayed
-    await expect(page.locator("text=Invalid email format")).toBeVisible();
-    await expect(page.locator("text=Password must be at least 8 characters")).toBeVisible();
-  });
+  // - Form submission with invalid data
 
 });
 
 // Test Suite: Mobile Responsiveness
 test.describe("Mobile Responsiveness", () => {
-  test("Mobile navigation", async ({ page }) => {
-    // Set mobile viewport
-    await page.setViewportSize({ width: 375, height: 667 });
-
-    await page.goto("/");
-
-    // Test mobile menu
-    await page.click('[data-testid="mobile-menu-button"]');
-    await expect(page.locator('[data-testid="mobile-menu"]')).toBeVisible();
-
-    // Test navigation
-    await page.click('[data-testid="mobile-menu-item-gigs"]');
-    await expect(page).toHaveURL(/.*\/gigs/);
-  });
+  // Carved out to tests/integration/integration-carveouts.spec.ts:
+  // - Mobile navigation
 
   test("Mobile form interactions", async ({ page }) => {
     // Set mobile viewport

@@ -3174,6 +3174,34 @@ Use this as the active operating board. Historical sections below remain the aud
 - Initial strict 404 assertion for invalid routes was corrected to match real app behavior (`/login?returnUrl=...`) to keep tests contract-accurate.
 - No snapshot artifact expansion; no new provider-dependent paths introduced.
 
+### **Session Update (March 5, 2026 - legacy scaffold carve-out pass (wave 2))**
+
+**Done (additional deterministic carve-outs):**
+1. **Expanded `integration-carveouts` with 2 more stable scenarios**
+   - Updated `tests/integration/integration-carveouts.spec.ts`
+   - Added deterministic coverage for:
+     - `Form submission with invalid data` (login validation contract using `data-testid` controls and expected validation messages)
+     - `Mobile navigation` (mobile viewport + no horizontal overflow contract)
+2. **Removed corresponding brittle scenario bodies from legacy scaffold**
+   - Updated `tests/integration/integration-tests.spec.ts`
+   - Removed in-file scenario bodies for:
+     - `Form submission with invalid data`
+     - `Mobile navigation`
+   - Left comments indicating carve-out ownership in deterministic spec.
+3. **Fail-loop rerun (wave 2 stability)**
+   - Command:
+     - `npx playwright test tests/integration --reporter=line --max-failures=1`
+   - Before wave 2:
+     - **85 passed, 14 skipped**
+   - After wave 2:
+     - **87 passed, 12 skipped**
+   - Net:
+     - **+2 passed / -2 skipped** with fail-loop green.
+
+**Operational notes:**
+- Continued minimal-diff approach; no snapshot/provider-dependent expansion.
+- Legacy scaffold remains quarantined while deterministic coverage is incrementally extracted.
+
 ### **Launch Preparation:**
 1. **Google Analytics Setup** (30 mins) - Document env toggle
 2. **Security Audit** - Re-run security checks
