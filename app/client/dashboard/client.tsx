@@ -16,7 +16,6 @@ import {
   Plus,
   User,
   Bell,
-  Settings,
   LogOut,
   Activity,
   Eye,
@@ -24,13 +23,12 @@ import {
   Search,
   Phone,
   ChevronRight,
-  Menu,
-  X,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
@@ -43,7 +41,6 @@ import { Badge } from "@/components/ui/badge";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
 import { SafeImage } from "@/components/ui/safe-image";
 import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
@@ -51,10 +48,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ClientDashboardData } from "@/lib/actions/dashboard-actions";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
-import type { Database } from "@/types/supabase";
-
-// Use proper database types (unused but kept for type reference)
-type _ClientProfile = Database["public"]["Tables"]["client_profiles"]["Row"];
 
 interface Application {
   id: string;
@@ -103,12 +96,10 @@ interface ClientDashboardProps {
 }
 
 export function ClientDashboard({ initialData }: ClientDashboardProps) {
-  const { user, signOut, profile } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [showVerifiedMessage, setShowVerifiedMessage] = useState(false);
   const hasHandledVerificationRef = useRef(false);
@@ -200,10 +191,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     }
   }, [searchParams, router]);
 
-  useEffect(() => {
-    setIsDrawerOpen(false);
-  }, [pathname]);
-
   // Status color helper removed: dashboard uses StatusBadge components instead.
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
@@ -250,162 +237,40 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   const panelCardClass = "text-white";
   const tabTriggerClass =
     "flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-transparent px-3 py-2 text-xs text-gray-200 transition hover:bg-gray-800 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg sm:text-sm";
-  const mobileDrawerLinks = [
-    { label: "Overview", href: "/client/dashboard" },
-    { label: "My Gigs", href: "/client/gigs" },
-    { label: "Applications", href: "/client/applications" },
-    { label: "Bookings", href: "/client/bookings" },
-    { label: "Settings", href: "/settings" },
-  ];
-
   return (
     <PageShell topPadding={false} fullBleed>
-      {/* Header */}
-      <div data-testid="client-header-root" className="elev-2 border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 pt-[env(safe-area-inset-top)] py-2 md:py-4">
-          <div className="flex items-center justify-between md:hidden h-14">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              data-testid="client-drawer-trigger"
-              aria-label="Open client navigation menu"
-              className="h-11 w-11 text-white hover:bg-white/10"
-              onClick={() => setIsDrawerOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
+      <ClientTerminalHeader
+        title="Career Builder Dashboard"
+        subtitle={clientProfile?.company_name || "Manage gigs and applications"}
+        desktopPrimaryAction={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+              <Bell className="h-4 w-4 mr-2" />
+              Notifications
             </Button>
-            <div className="min-w-0 text-center px-3">
-              <p className="text-base font-semibold text-white truncate">Career Builder Dashboard</p>
-              <p className="text-xs text-gray-300 truncate">
-                {clientProfile?.company_name || "Manage gigs and applications"}
-              </p>
-            </div>
             <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Go to settings"
-              className="h-11 w-11 text-white hover:bg-white/10"
-              asChild
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                if (isSigningOut) return;
+                setIsSigningOut(true);
+                try {
+                  await signOut();
+                } catch {
+                  setIsSigningOut(false);
+                }
+              }}
+              disabled={isSigningOut}
+              className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Link href="/settings">
-                <Settings className="h-5 w-5" />
-              </Link>
+              <LogOut className="h-4 w-4 mr-2" />
+              {isSigningOut ? "Signing Out..." : "Sign Out"}
             </Button>
           </div>
+        }
+      />
 
-          <div className="hidden md:flex md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={profile?.avatar_url || "/images/totl-logo.png"} alt="Company" />
-                <AvatarFallback>{clientProfile?.company_name?.charAt(0) || "C"}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  Welcome back, {clientProfile?.contact_name || "Career Builder"}!
-                </h1>
-                <p className="text-gray-300">
-                  {clientProfile?.company_name || "Manage your gigs and applications"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
-              <Button variant="outline" size="sm" asChild className="border-gray-700 text-white hover:bg-gray-800">
-                <Link href="/settings">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Settings
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  if (isSigningOut) return;
-
-                  setIsSigningOut(true);
-                  try {
-                    await signOut();
-                  } catch {
-                    // Error handled by auth provider
-                    setIsSigningOut(false);
-                  }
-                }}
-                disabled={isSigningOut}
-                className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                {isSigningOut ? "Signing Out..." : "Sign Out"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DialogContent
-          data-testid="client-drawer-panel"
-          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 rounded-none border-r border-white/10 bg-black p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] text-white"
-        >
-          <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-sm text-gray-300">Menu</p>
-                <p className="truncate text-base font-semibold">
-                  {clientProfile?.company_name || "Career Builder"}
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                data-testid="client-drawer-close"
-                aria-label="Close client navigation menu"
-                className="h-11 w-11 text-white hover:bg-white/10"
-                onClick={() => setIsDrawerOpen(false)}
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            <nav className="flex-1 space-y-1 px-2 py-3">
-              {mobileDrawerLinks.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex min-h-11 items-center rounded-lg px-3 py-3 text-base text-white hover:bg-white/10"
-                  onClick={() => setIsDrawerOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="border-t border-white/10 px-3 py-3">
-              <button
-                type="button"
-                onClick={async () => {
-                  if (isSigningOut) return;
-                  setIsDrawerOpen(false);
-                  setIsSigningOut(true);
-                  try {
-                    await signOut();
-                  } catch {
-                    setIsSigningOut(false);
-                  }
-                }}
-                disabled={isSigningOut}
-                className="flex min-h-11 w-full items-center rounded-lg px-3 py-3 text-left text-base text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSigningOut ? "Signing Out..." : "Sign Out"}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <div className="container mx-auto px-4 py-3 sm:px-6 sm:py-6 lg:px-8">
         {showVerifiedMessage && (
           <Alert className="bg-green-900/30 border-green-700 mb-6">
             <CheckCircle className="h-4 w-4 text-green-400" />
@@ -416,45 +281,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
           </Alert>
         )}
 
-        {/* Profile Completion Banner */}
-        <ProfileCompletionBanner
-          userRole="client"
-          missingFields={missingFields}
-          profileUrl="/client/profile"
-        />
-
-        {/* Quick Stats */}
-        <div className="mb-8">
-          <div className="md:hidden space-y-2">
-            <details>
-              <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
-                <span className="inline-flex items-center gap-2">
-                  Show stats
-                  <span className="text-xs text-gray-500">({dashboardStats.totalApplications} applications)</span>
-                </span>
-              </summary>
-              <div className="mt-2">
-                <MobileSummaryRow
-                  items={[
-                    { label: "Active gigs", value: dashboardStats.activeGigs, icon: Activity },
-                    { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
-                    { label: "New", value: dashboardStats.newApplications, icon: ClockIcon },
-                    { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
-                    { label: "Closed", value: dashboardStats.closedGigs, icon: CheckCircle },
-                    {
-                      label: "Total spent",
-                      value: `$${dashboardStats.totalSpent.toLocaleString()}`,
-                      icon: DollarSign,
-                    },
-                  ]}
-                />
-                <div className="mt-2 px-1">
-                  <SecondaryActionLink href="/post-gig">Post a gig →</SecondaryActionLink>
-                </div>
-              </div>
-            </details>
-          </div>
-
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-4">
             <ClientStatCard
               className={quickStatCardClass}
@@ -522,10 +349,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               footerActionHref="/client/gigs"
             />
           </div>
-        </div>
-
-        {/* Main Dashboard Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="relative md:hidden">
             <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
             <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
@@ -571,6 +394,24 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            <ProfileCompletionBanner
+              userRole="client"
+              missingFields={missingFields}
+              profileUrl="/client/profile"
+            />
+            <div className="space-y-2 md:hidden">
+              <MobileSummaryRow
+                items={[
+                  { label: "Active gigs", value: dashboardStats.activeGigs, icon: Activity },
+                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+                  { label: "New", value: dashboardStats.newApplications, icon: ClockIcon },
+                  { label: "Closed", value: dashboardStats.closedGigs, icon: CheckCircle },
+                ]}
+              />
+              <div className="px-1">
+                <SecondaryActionLink href="/post-gig">Post a gig</SecondaryActionLink>
+              </div>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Gigs */}
               <div className="totl-border-violet totl-hover-glow">

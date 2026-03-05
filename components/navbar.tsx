@@ -148,15 +148,6 @@ export default function Navbar() {
             )}
             {isTalentUser && (
               <Link
-                href="/client/apply"
-                prefetch={shouldPrefetch}
-                className="px-3 py-1 lg:px-4 rounded-full border border-white/30 text-xs font-semibold uppercase tracking-[0.25em] text-white hover:border-white"
-              >
-                Apply to be a Career Builder
-              </Link>
-            )}
-            {isTalentUser && (
-              <Link
                 href="/talent/subscribe"
                 prefetch={shouldPrefetch}
                 data-testid="subscription-nav-pill"
@@ -210,15 +201,6 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Subscription
-                    </Link>
-                  )}
-                  {isTalentUser && (
-                    <Link
-                      href="/client/apply"
-                      prefetch={shouldPrefetch}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                    >
-                      Apply to be a Career Builder
                     </Link>
                   )}
                   {userRole === "client" && (
@@ -328,14 +310,6 @@ export default function Navbar() {
               <div className="border-t border-white/10 pt-4 mt-2">
                 {user ? (
                   <>
-                    {isTalentUser && (
-                      <Link
-                        href="/client/apply"
-                        className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
-                      >
-                        Apply to be a Career Builder
-                      </Link>
-                    )}
                     {userRole === "talent" && (
                       <Link
                         href={PATHS.TALENT_DASHBOARD}

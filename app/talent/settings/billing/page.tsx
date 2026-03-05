@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { BillingSettings } from "./billing-settings";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 export default async function BillingPage() {
@@ -25,16 +27,14 @@ export default async function BillingPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Billing Settings</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your subscription and billing information
-          </p>
-        </div>
+    <PageShell className="bg-black" containerClassName="max-w-3xl py-4 sm:py-6">
+      <div className="space-y-6">
+        <PageHeader
+          title="Billing Settings"
+          subtitle="Manage your subscription, payment details, and premium access."
+        />
         <BillingSettings profile={profile} />
       </div>
-    </div>
+    </PageShell>
   );
 }

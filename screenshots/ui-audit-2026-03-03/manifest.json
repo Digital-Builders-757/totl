@@ -1,0 +1,416 @@
+[
+  {
+    "filename": "(probe)",
+    "route": "/",
+    "viewport": "390x844",
+    "role": "anonymous",
+    "status": "success",
+    "path": "",
+    "reason": "ok"
+  },
+  {
+    "filename": "admin__admin-dashboard__390x844__loaded.png",
+    "route": "/admin/dashboard",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-gigs__390x844__loaded.png",
+    "route": "/admin/gigs",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-users__390x844__loaded.png",
+    "route": "/admin/users",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-applications__390x844__loaded.png",
+    "route": "/admin/applications",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-client-applications__390x844__loaded.png",
+    "route": "/admin/client-applications",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-talent__390x844__loaded.png",
+    "route": "/admin/talent",
+    "viewport": "390x844",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-dashboard__360x800__loaded.png",
+    "route": "/admin/dashboard",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-gigs__360x800__loaded.png",
+    "route": "/admin/gigs",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-users__360x800__loaded.png",
+    "route": "/admin/users",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-applications__360x800__loaded.png",
+    "route": "/admin/applications",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-client-applications__360x800__loaded.png",
+    "route": "/admin/client-applications",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-talent__360x800__loaded.png",
+    "route": "/admin/talent",
+    "viewport": "360x800",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "admin__admin-dashboard__1440x900__loaded.png",
+    "route": "/admin/dashboard",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "admin__admin-gigs__1440x900__loaded.png",
+    "route": "/admin/gigs",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "admin__admin-users__1440x900__loaded.png",
+    "route": "/admin/users",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "admin__admin-applications__1440x900__loaded.png",
+    "route": "/admin/applications",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "admin__admin-client-applications__1440x900__loaded.png",
+    "route": "/admin/client-applications",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "admin__admin-talent__1440x900__loaded.png",
+    "route": "/admin/talent",
+    "viewport": "1440x900",
+    "role": "admin",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "client__client-dashboard__390x844__loaded.png",
+    "route": "/client/dashboard",
+    "viewport": "390x844",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-gigs__390x844__loaded.png",
+    "route": "/client/gigs",
+    "viewport": "390x844",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-applications__390x844__loaded.png",
+    "route": "/client/applications",
+    "viewport": "390x844",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-bookings__390x844__loaded.png",
+    "route": "/client/bookings",
+    "viewport": "390x844",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-profile__390x844__loaded.png",
+    "route": "/client/profile",
+    "viewport": "390x844",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-dashboard__360x800__loaded.png",
+    "route": "/client/dashboard",
+    "viewport": "360x800",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-gigs__360x800__loaded.png",
+    "route": "/client/gigs",
+    "viewport": "360x800",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-applications__360x800__loaded.png",
+    "route": "/client/applications",
+    "viewport": "360x800",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-bookings__360x800__loaded.png",
+    "route": "/client/bookings",
+    "viewport": "360x800",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-profile__360x800__loaded.png",
+    "route": "/client/profile",
+    "viewport": "360x800",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "client__client-dashboard__1440x900__loaded.png",
+    "route": "/client/dashboard",
+    "viewport": "1440x900",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "client__client-gigs__1440x900__loaded.png",
+    "route": "/client/gigs",
+    "viewport": "1440x900",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "client__client-applications__1440x900__loaded.png",
+    "route": "/client/applications",
+    "viewport": "1440x900",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "client__client-bookings__1440x900__loaded.png",
+    "route": "/client/bookings",
+    "viewport": "1440x900",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "client__client-profile__1440x900__loaded.png",
+    "route": "/client/profile",
+    "viewport": "1440x900",
+    "role": "client",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "talent__talent-dashboard__390x844__loaded.png",
+    "route": "/talent/dashboard",
+    "viewport": "390x844",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-profile__390x844__loaded.png",
+    "route": "/talent/profile",
+    "viewport": "390x844",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-subscribe__390x844__loaded.png",
+    "route": "/talent/subscribe",
+    "viewport": "390x844",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-settings-billing__390x844__loaded.png",
+    "route": "/talent/settings/billing",
+    "viewport": "390x844",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-dashboard__360x800__loaded.png",
+    "route": "/talent/dashboard",
+    "viewport": "360x800",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-profile__360x800__loaded.png",
+    "route": "/talent/profile",
+    "viewport": "360x800",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-subscribe__360x800__loaded.png",
+    "route": "/talent/subscribe",
+    "viewport": "360x800",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-settings-billing__360x800__loaded.png",
+    "route": "/talent/settings/billing",
+    "viewport": "360x800",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-testid=\"login-button\"], button:has-text(\"Sign In\"), button:has-text(\"Log In\"), button[type=\"submit\"]').first()\n    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm ring-offset-background duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50 hover:bg-accent active:scale-[0.98] h-10 px-4 py-2 text-white hover:text-gray-300 font-medium transition-colors\">Sign In</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action\n      - waiting 100ms\n    57 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action\n       - waiting 500ms\n"
+  },
+  {
+    "filename": "talent__talent-dashboard__1440x900__loaded.png",
+    "route": "/talent/dashboard",
+    "viewport": "1440x900",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "talent__talent-profile__1440x900__loaded.png",
+    "route": "/talent/profile",
+    "viewport": "1440x900",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "talent__talent-subscribe__1440x900__loaded.png",
+    "route": "/talent/subscribe",
+    "viewport": "1440x900",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  },
+  {
+    "filename": "talent__talent-settings-billing__1440x900__loaded.png",
+    "route": "/talent/settings/billing",
+    "viewport": "1440x900",
+    "role": "talent",
+    "status": "fail",
+    "path": "",
+    "reason": "login_failed:remained_on_login"
+  }
+]

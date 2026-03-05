@@ -30,27 +30,272 @@ jobs:
         run: npm ci
         
       - name: Run linting
-        run: npm run lint
+        id: lint
+        run: |
+          set -o pipefail
+          npm run lint | tee lint.log
         
       - name: Run type checking
         run: npm run typecheck || echo "Type checking failed but continuing build"
         continue-on-error: true
         
       - name: Build application
-        run: npm run build
+        id: build_app
+        run: |
+          set -o pipefail
+          npm run build | tee build.log
+
+      - name: Verify table count matches reconciliation doc
+        id: table_count
+        run: |
+          set -o pipefail
+          npm run table-count:verify | tee table-count.log
+
+      - name: Run Stripe webhook safety unit tests
+        id: stripe_unit
+        run: |
+          set -o pipefail
+          npm run test:unit:stripe-webhook | tee stripe-unit.log
+
+      - name: Run Stripe webhook failure-path integration contract
+        id: stripe_integration
+        run: |
+          set -o pipefail
+          npm run test:qa:stripe-webhook-route | tee stripe-integration.log
         
       - name: Verify no server-only imports in client code
+        id: static_guard_server_imports
         run: |
-          if grep -r "from [\"']next/headers[\"']" components app/**/*.tsx 2>/dev/null; then
-            echo "❌ Found next/headers import in client code!"
+          if grep -r "from [\"']next/headers[\"']" components app/**/*.tsx 2>/dev/null | tee static-guard-server-imports.log; then
+            echo "❌ Found next/headers import in client code!" | tee -a static-guard-server-imports.log
             exit 1
           fi
-          echo "✅ No server-only imports in client code"
+          echo "✅ No server-only imports in client code" | tee -a static-guard-server-imports.log
         
       - name: Verify AuthProvider is client-only
+        id: static_guard_auth_provider
         run: |
           if ! head -1 components/auth/auth-provider.tsx | grep -q "use client"; then
-            echo "❌ AuthProvider missing 'use client' directive!"
+            echo "❌ AuthProvider missing 'use client' directive!" | tee auth-provider-client-only.log
             exit 1
           fi
-          echo "✅ AuthProvider is properly client-only"
+          echo "✅ AuthProvider is properly client-only" | tee auth-provider-client-only.log
+
+      - name: Publish build safety-gate summary
+        if: always()
+        run: |
+          {
+            echo "## Build Safety Gates Summary"
+            echo ""
+            echo "- Lint: ${{ steps.lint.outcome }}"
+            echo "- Build: ${{ steps.build_app.outcome }}"
+            echo "- Table Count Verify: ${{ steps.table_count.outcome }}"
+            echo "- Stripe Unit: ${{ steps.stripe_unit.outcome }}"
+            echo "- Stripe Integration Contract: ${{ steps.stripe_integration.outcome }}"
+            echo "- Static Guard (no server-only imports): ${{ steps.static_guard_server_imports.outcome }}"
+            echo "- Static Guard (AuthProvider client-only): ${{ steps.static_guard_auth_provider.outcome }}"
+            echo "- Artifact Index: \`build-safety-summary\` (always, retention 7 days)"
+            echo "- Artifact Index: \`build-failure-artifacts\` (on failure, retention 14 days)"
+            echo "- Governance Docs: \`docs/qa/PLAYWRIGHT_TRIAGE_LOG_2026-03-04.md\`, \`docs/qa/PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md\`"
+            echo "- Run Metadata: \`${{ github.workflow }}\` @ \`${{ github.sha }}\`"
+            echo "- First-Response Triage Checklist:"
+            echo "  - Open \`build-safety-summary\` first, then \`build-failure-artifacts\` if present"
+            echo "  - Identify first failing gate from outcome lines above"
+            echo "  - Inspect matching gate log (\`*.log\`) before rerun"
+            echo "  - If Stripe integration failed, inspect \`test-results/**\` + \`playwright-report/**\`"
+            echo "- Recommended Rerun Commands:"
+            echo "  - \`npm run lint\`"
+            echo "  - \`npm run build\`"
+            echo "  - \`npm run table-count:verify\`"
+            echo "  - \`npm run test:unit:stripe-webhook\`"
+            echo "  - \`npm run test:qa:stripe-webhook-route\`"
+            echo "  - \`npm run test:qa:critical-auto\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          {
+            echo "Build Safety Gates Summary"
+            echo "Lint=${{ steps.lint.outcome }}"
+            echo "Build=${{ steps.build_app.outcome }}"
+            echo "TableCount=${{ steps.table_count.outcome }}"
+            echo "StripeUnit=${{ steps.stripe_unit.outcome }}"
+            echo "StripeIntegration=${{ steps.stripe_integration.outcome }}"
+            echo "StaticGuardServerImports=${{ steps.static_guard_server_imports.outcome }}"
+            echo "StaticGuardAuthProvider=${{ steps.static_guard_auth_provider.outcome }}"
+          } > build-safety-summary.txt
+
+          generated_at_utc="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          cat <<EOF > build-safety-summary.json
+          {
+            "schemaVersion": "1",
+            "generatedAtUtc": "$generated_at_utc",
+            "workflow": "${{ github.workflow }}",
+            "sha": "${{ github.sha }}",
+            "repository": "${{ github.repository }}",
+            "refName": "${{ github.ref_name }}",
+            "runId": "${{ github.run_id }}",
+            "runAttempt": "${{ github.run_attempt }}",
+            "lint": "${{ steps.lint.outcome }}",
+            "build": "${{ steps.build_app.outcome }}",
+            "tableCount": "${{ steps.table_count.outcome }}",
+            "stripeUnit": "${{ steps.stripe_unit.outcome }}",
+            "stripeIntegration": "${{ steps.stripe_integration.outcome }}",
+            "staticGuardServerImports": "${{ steps.static_guard_server_imports.outcome }}",
+            "staticGuardAuthProvider": "${{ steps.static_guard_auth_provider.outcome }}"
+          }
+          EOF
+
+      - name: Validate build safety summary JSON
+        if: always()
+        run: node -e "JSON.parse(require('node:fs').readFileSync('build-safety-summary.json','utf8'))"
+
+      - name: Upload build safety summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-safety-summary
+          path: |
+            build-safety-summary.txt
+            build-safety-summary.json
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload build failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-failure-artifacts
+          path: |
+            build-safety-summary.txt
+            lint.log
+            build.log
+            table-count.log
+            stripe-unit.log
+            stripe-integration.log
+            static-guard-server-imports.log
+            auth-provider-client-only.log
+            test-results/**
+            playwright-report/**
+          retention-days: 14
+          if-no-files-found: warn
+
+  mobile-guardrails:
+    runs-on: ubuntu-latest
+    environment: develop
+    env:
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      STRIPE_PRICE_TALENT_MONTHLY: ${{ secrets.STRIPE_PRICE_TALENT_MONTHLY }}
+      STRIPE_PRICE_TALENT_ANNUAL: ${{ secrets.STRIPE_PRICE_TALENT_ANNUAL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run mobile route contract guardrails
+        run: |
+          set -o pipefail
+          npm run test:qa:mobile-guardrails:ci | tee mobile-guardrails.log
+
+      - name: Publish mobile guardrail summary
+        if: always()
+        run: |
+          total_line="$(grep -E '[0-9]+ (passed|failed)' mobile-guardrails.log | tail -n 1 || true)"
+          passed_count="$(echo "$total_line" | grep -oE '[0-9]+ passed' | awk '{print $1}' || true)"
+          failed_count="$(echo "$total_line" | grep -oE '[0-9]+ failed' | awk '{print $1}' || true)"
+
+          if [ -z "$passed_count" ]; then
+            passed_count=0
+          fi
+          if [ -z "$failed_count" ]; then
+            failed_count=0
+          fi
+
+          {
+            echo "## Mobile Guardrails Summary"
+            echo ""
+            echo "- Passed: $passed_count"
+            echo "- Failed: $failed_count"
+            echo "- Command: \`npm run test:qa:mobile-guardrails:ci\`"
+            echo "- Artifact Index: \`mobile-guardrails-summary\` (always, retention 7 days)"
+            echo "- Artifact Index: \`mobile-guardrails-log\` (always, retention 7 days)"
+            echo "- Artifact Index: \`mobile-guardrails-failure-artifacts\` (on failure, retention 14 days)"
+            echo "- Governance Docs: \`docs/qa/PLAYWRIGHT_TRIAGE_LOG_2026-03-04.md\`, \`docs/qa/PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md\`"
+            echo "- Run Metadata: \`${{ github.workflow }}\` @ \`${{ github.sha }}\`"
+            echo "- First-Response Triage Checklist:"
+            echo "  - Open \`mobile-guardrails-summary\` and \`mobile-guardrails-log\` first"
+            echo "  - If failed, open \`mobile-guardrails-failure-artifacts\` next"
+            echo "  - Review \`test-results/**\` screenshot/video/error-context for first failure"
+            echo "  - Confirm route ownership in \`PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md\` before edits"
+            echo "- Recommended Rerun Commands:"
+            echo "  - \`npm run test:qa:mobile-guardrails\`"
+            echo "  - \`npm run test:qa:mobile-guardrails:ci\`"
+            echo "  - \`npm run test:qa:critical-auto\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          {
+            echo "Mobile Guardrails Summary"
+            echo "Passed=$passed_count"
+            echo "Failed=$failed_count"
+            echo "Command=npm run test:qa:mobile-guardrails:ci"
+          } > mobile-guardrails-summary.txt
+
+          generated_at_utc="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          cat <<EOF > mobile-guardrails-summary.json
+          {
+            "schemaVersion": "1",
+            "generatedAtUtc": "$generated_at_utc",
+            "workflow": "${{ github.workflow }}",
+            "sha": "${{ github.sha }}",
+            "repository": "${{ github.repository }}",
+            "refName": "${{ github.ref_name }}",
+            "runId": "${{ github.run_id }}",
+            "runAttempt": "${{ github.run_attempt }}",
+            "command": "npm run test:qa:mobile-guardrails:ci",
+            "passed": $passed_count,
+            "failed": $failed_count
+          }
+          EOF
+
+      - name: Validate mobile guardrail summary JSON
+        if: always()
+        run: node -e "JSON.parse(require('node:fs').readFileSync('mobile-guardrails-summary.json','utf8'))"
+
+      - name: Upload mobile guardrail summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-guardrails-summary
+          path: |
+            mobile-guardrails-summary.txt
+            mobile-guardrails-summary.json
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload mobile guardrail log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-guardrails-log
+          path: mobile-guardrails.log
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload mobile guardrail failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-guardrails-failure-artifacts
+          path: |
+            test-results/**
+            playwright-report/**
+          retention-days: 14
+          if-no-files-found: warn

@@ -10,6 +10,21 @@ import { test, expect, Page } from "@playwright/test";
  * - Dashboard functionality
  */
 
+/**
+ * NOTE: This legacy mega-suite was scaffolded against many non-existent
+ * `data-testid` contracts and currently produces noisy, low-signal failures.
+ * Route-level replacements are being introduced incrementally under
+ * `tests/client/*-route.spec.ts`.
+ *
+ * Active replacements:
+ * - `tests/client/client-dashboard-route.spec.ts`
+ * - `tests/client/client-profile-route.spec.ts`
+ * - `tests/client/client-applications-route.spec.ts`
+ * - `tests/client/client-bookings-route.spec.ts`
+ * - `tests/client/client-gigs-route.spec.ts`
+ */
+test.skip(true, "Legacy scaffold suite replaced by route-level client route contracts");
+
 // Test data
 const clientProfile = {
   personalInfo: {

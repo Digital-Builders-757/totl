@@ -8,14 +8,17 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Filter,
   Download,
   Eye,
   Building2,
   Mail,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { FiltersSheet } from "@/components/dashboard/filters-sheet";
+import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { DataTableShell } from "@/components/layout/data-table-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
@@ -73,6 +76,8 @@ export function AdminClientApplicationsClient({
   const [adminNotes, setAdminNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSendingFollowUps, setIsSendingFollowUps] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [followUpFilter, setFollowUpFilter] = useState<"all" | "sent" | "not_sent">("all");
   const { toast } = useToast();
 
   // Filter applications by status and search
@@ -101,13 +106,22 @@ export function AdminClientApplicationsClient({
       );
     }
 
+    if (followUpFilter === "sent") {
+      filtered = filtered.filter((app) => Boolean(app.follow_up_sent_at));
+    } else if (followUpFilter === "not_sent") {
+      filtered = filtered.filter((app) => !app.follow_up_sent_at);
+    }
+
     return filtered;
-  }, [applications, searchQuery, activeTab]);
+  }, [applications, searchQuery, activeTab, followUpFilter]);
 
   // Group by status for stats
   const pendingApplications = applications.filter((app) => app.status === "pending");
   const approvedApplications = applications.filter((app) => app.status === "approved");
   const rejectedApplications = applications.filter((app) => app.status === "rejected");
+  const followUpSentCount = applications.filter((app) => Boolean(app.follow_up_sent_at)).length;
+  const followUpNotSentCount = applications.length - followUpSentCount;
+  const activeFilterCount = followUpFilter === "all" ? 0 : 1;
 
   const formatFollowUpDate = (value: string | null) => {
     if (!value) {
@@ -140,6 +154,169 @@ export function AdminClientApplicationsClient({
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const renderApplicationActions = (application: ClientApplication) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+          <MoreVertical size={16} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+        <DropdownMenuItem
+          onClick={() => {
+            setSelectedApplication(application);
+            setIsDetailsDialogOpen(true);
+          }}
+          className="text-gray-300 hover:bg-gray-700"
+        >
+          <Eye className="mr-2 h-4 w-4" />
+          View Details
+        </DropdownMenuItem>
+        {application.status === "pending" && (
+          <>
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedApplication(application);
+                setAdminNotes("");
+                setIsApproveDialogOpen(true);
+              }}
+              className="text-gray-300 hover:bg-gray-700"
+            >
+              <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
+              Approve
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                setSelectedApplication(application);
+                setAdminNotes("");
+                setIsRejectDialogOpen(true);
+              }}
+              className="text-gray-300 hover:bg-gray-700"
+            >
+              <XCircle className="mr-2 h-4 w-4 text-red-400" />
+              Reject
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderApplicationsContent = (
+    emptyTitle: string,
+    emptyDescription: string
+  ) => {
+    if (filteredApplications.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-yellow-500/20 to-amber-500/20">
+            <Clock className="h-7 w-7 text-yellow-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">{emptyTitle}</h3>
+          <p className="mt-2 text-sm text-gray-400">{emptyDescription}</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="space-y-3 md:hidden">
+          {filteredApplications.map((application) => (
+            <MobileListRowCard
+              key={`mobile-${application.id}`}
+              title={application.company_name}
+              subtitle={`${application.first_name} ${application.last_name}`}
+              meta={[
+                { label: "Email", value: application.email },
+                { label: "Industry", value: application.industry || "N/A" },
+                {
+                  label: "Follow-up",
+                  value: application.follow_up_sent_at
+                    ? `Sent ${formatFollowUpDate(application.follow_up_sent_at)}`
+                    : "Not sent",
+                },
+              ]}
+              badge={getStatusBadge(application.status)}
+              trailing={renderApplicationActions(application)}
+            />
+          ))}
+        </div>
+        <DataTableShell className="hidden md:block">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Company Name
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Contact
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Email
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Industry
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Applied Date
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Status
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Follow-Up
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {filteredApplications.map((application) => (
+                <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-gray-400" />
+                      <div className="font-medium text-white text-sm">{application.company_name}</div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-white text-sm">
+                      {application.first_name} {application.last_name}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                      <Mail className="h-3 w-3" />
+                      {application.email}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-gray-400 text-sm">
+                    {application.industry || "—"}
+                  </td>
+                  <td className="py-4 px-6 text-gray-400 text-sm">
+                    {new Date(application.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-6">{getStatusBadge(application.status)}</td>
+                  <td className="py-4 px-6">
+                    {application.follow_up_sent_at ? (
+                      <span className="text-sm text-green-300">
+                        Sent {formatFollowUpDate(application.follow_up_sent_at)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-500">Not sent</span>
+                    )}
+                  </td>
+                  <td className="py-4 px-6">{renderApplicationActions(application)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTableShell>
+      </>
+    );
   };
 
   // Handle approve
@@ -353,13 +530,13 @@ export function AdminClientApplicationsClient({
           subtitle="Manage companies applying to become Career Builders on the platform"
           actions={
             <div className="flex flex-wrap items-center gap-2">
-              <div className="rounded-lg bg-gradient-to-r from-yellow-500 to-amber-500 px-3 py-2 text-sm font-medium text-white">
+              <div className="hidden rounded-lg bg-gradient-to-r from-yellow-500 to-amber-500 px-3 py-2 text-sm font-medium text-white md:block">
                 {pendingApplications.length} Pending
               </div>
-              <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
+              <div className="hidden rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white md:block">
                 {approvedApplications.length} Approved
               </div>
-              <div className="rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
+              <div className="hidden rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-3 py-2 text-sm font-medium text-white md:block">
                 {rejectedApplications.length} Rejected
               </div>
               <Button
@@ -383,6 +560,16 @@ export function AdminClientApplicationsClient({
           }
         />
 
+        <div className="md:hidden">
+          <MobileSummaryRow
+            items={[
+              { label: "Pending", value: pendingApplications.length, icon: Clock },
+              { label: "Approved", value: approvedApplications.length, icon: CheckCircle },
+              { label: "Rejected", value: rejectedApplications.length, icon: XCircle },
+            ]}
+          />
+        </div>
+
         {/* Applications Section */}
         <SectionCard className="border-gray-700 bg-gray-800/50" paddingClassName="p-0">
           <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
@@ -401,9 +588,55 @@ export function AdminClientApplicationsClient({
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon" className="border-gray-600 text-gray-300 hover:bg-gray-700">
-                  <Filter size={16} />
-                </Button>
+                <div className="md:hidden">
+                  <FiltersSheet
+                    open={isFiltersOpen}
+                    onOpenChange={setIsFiltersOpen}
+                    activeCount={activeFilterCount}
+                    title="Application Filters"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    <div className="space-y-2">
+                      <p className="text-xs text-gray-400">Follow-up status</p>
+                      <div className="grid grid-cols-1 gap-2">
+                        <Button
+                          type="button"
+                          variant={followUpFilter === "all" ? "default" : "outline"}
+                          className={followUpFilter === "all" ? "" : "border-gray-600 text-gray-300"}
+                          onClick={() => setFollowUpFilter("all")}
+                        >
+                          All ({applications.length})
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={followUpFilter === "sent" ? "default" : "outline"}
+                          className={followUpFilter === "sent" ? "" : "border-gray-600 text-gray-300"}
+                          onClick={() => setFollowUpFilter("sent")}
+                        >
+                          Follow-up sent ({followUpSentCount})
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={followUpFilter === "not_sent" ? "default" : "outline"}
+                          className={followUpFilter === "not_sent" ? "" : "border-gray-600 text-gray-300"}
+                          onClick={() => setFollowUpFilter("not_sent")}
+                        >
+                          Follow-up not sent ({followUpNotSentCount})
+                        </Button>
+                      </div>
+                    </div>
+                  </FiltersSheet>
+                </div>
+                <div className="hidden md:block">
+                  <Button
+                    variant="outline"
+                    onClick={() => setFollowUpFilter("all")}
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    {activeFilterCount > 0 ? "Filters (1)" : "Filters"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -433,357 +666,25 @@ export function AdminClientApplicationsClient({
             </div>
 
             <TabsContent value="pending" className="p-0">
-              {filteredApplications.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <Clock className="h-10 w-10 text-yellow-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Pending Applications</h3>
-                  <p className="text-gray-400 text-lg">
-                    {searchQuery
-                      ? "Try adjusting your search query"
-                      : "All Career Builder applications have been reviewed."}
-                  </p>
-                </div>
-              ) : (
-                <DataTableShell>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Company Name
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Contact
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Industry
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Follow-Up
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-gray-400" />
-                              <div className="font-medium text-white text-sm">{application.company_name}</div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="text-white text-sm">
-                              {application.first_name} {application.last_name}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2 text-gray-400 text-sm">
-                              <Mail className="h-3 w-3" />
-                              {application.email}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {application.industry || "—"}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            {getStatusBadge(application.status)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {application.follow_up_sent_at ? (
-                              <span className="text-sm text-green-300">
-                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-gray-500">Not sent</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setIsDetailsDialogOpen(true);
-                                  }}
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Details
-                                </DropdownMenuItem>
-                                {application.status === "pending" && (
-                                  <>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedApplication(application);
-                                        setAdminNotes("");
-                                        setIsApproveDialogOpen(true);
-                                      }}
-                                      className="text-gray-300 hover:bg-gray-700"
-                                    >
-                                      <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
-                                      Approve
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => {
-                                        setSelectedApplication(application);
-                                        setAdminNotes("");
-                                        setIsRejectDialogOpen(true);
-                                      }}
-                                      className="text-gray-300 hover:bg-gray-700"
-                                    >
-                                      <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                                      Reject
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </DataTableShell>
+              {renderApplicationsContent(
+                "No Pending Applications",
+                searchQuery
+                  ? "Try adjusting your search query."
+                  : "All Career Builder applications have been reviewed."
               )}
             </TabsContent>
 
             <TabsContent value="approved" className="p-0">
-              {filteredApplications.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <CheckCircle className="h-10 w-10 text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Approved Applications</h3>
-                  <p className="text-gray-400 text-lg">
-                    There are currently no approved Career Builder applications.
-                  </p>
-                </div>
-              ) : (
-                <DataTableShell>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Company Name
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Contact
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Industry
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Follow-Up
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-gray-400" />
-                              <div className="font-medium text-white text-sm">{application.company_name}</div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="text-white text-sm">
-                              {application.first_name} {application.last_name}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2 text-gray-400 text-sm">
-                              <Mail className="h-3 w-3" />
-                              {application.email}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {application.industry || "—"}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            {getStatusBadge(application.status)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {application.follow_up_sent_at ? (
-                              <span className="text-sm text-green-300">
-                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-gray-500">Not sent</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setIsDetailsDialogOpen(true);
-                                  }}
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Details
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </DataTableShell>
+              {renderApplicationsContent(
+                "No Approved Applications",
+                "There are currently no approved Career Builder applications."
               )}
             </TabsContent>
 
             <TabsContent value="rejected" className="p-0">
-              {filteredApplications.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <XCircle className="h-10 w-10 text-red-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Rejected Applications</h3>
-                  <p className="text-gray-400 text-lg">
-                    There are currently no rejected Career Builder applications.
-                  </p>
-                </div>
-              ) : (
-                <DataTableShell>
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Company Name
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Contact
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Industry
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Follow-Up
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-gray-400" />
-                              <div className="font-medium text-white text-sm">{application.company_name}</div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="text-white text-sm">
-                              {application.first_name} {application.last_name}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2 text-gray-400 text-sm">
-                              <Mail className="h-3 w-3" />
-                              {application.email}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {application.industry || "—"}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            {getStatusBadge(application.status)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {application.follow_up_sent_at ? (
-                              <span className="text-sm text-green-300">
-                                Sent {formatFollowUpDate(application.follow_up_sent_at)}
-                              </span>
-                            ) : (
-                              <span className="text-sm text-gray-500">Not sent</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setIsDetailsDialogOpen(true);
-                                  }}
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <Eye className="mr-2 h-4 w-4" />
-                                  View Details
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </DataTableShell>
+              {renderApplicationsContent(
+                "No Rejected Applications",
+                "There are currently no rejected Career Builder applications."
               )}
             </TabsContent>
           </Tabs>

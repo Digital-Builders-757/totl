@@ -21,6 +21,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { DataTableShell } from "@/components/layout/data-table-shell";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,8 +48,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
-import { createNameSlug } from "@/lib/utils/slug";
 import { logger } from "@/lib/utils/logger";
+import { createNameSlug } from "@/lib/utils/slug";
 
 type UserProfile = {
   id: string;
@@ -242,38 +247,219 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     }
   };
 
+  const renderUserActions = (userProfile: UserProfile) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+          <MoreVertical size={16} />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+        {userProfile.role === "talent" && (
+          <DropdownMenuItem asChild>
+            <Link
+              href={
+                userProfile.talent_profiles
+                  ? `/talent/${createNameSlug(userProfile.talent_profiles.first_name, userProfile.talent_profiles.last_name)}`
+                  : `/talent/${userProfile.id}`
+              }
+              className="text-gray-300 hover:bg-gray-700 flex items-center"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Talent Profile
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {userProfile.role === "client" && (
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/client/profile?userId=${userProfile.id}`}
+              className="text-gray-300 hover:bg-gray-700 flex items-center"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Career Builder Profile
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {userProfile.role !== "talent" && (
+          <DropdownMenuItem
+            onClick={() => handleUpdateRole(userProfile.id, "talent")}
+            disabled={isUpdatingRole === userProfile.id}
+            className="text-green-400 hover:bg-gray-700 flex items-center"
+          >
+            {isUpdatingRole === userProfile.id ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <ArrowUp className="mr-2 h-4 w-4" />
+            )}
+            Promote to Talent
+          </DropdownMenuItem>
+        )}
+        {userProfile.id !== user.id && (
+          <>
+            <DropdownMenuSeparator className="bg-gray-700" />
+            <DropdownMenuItem
+              onClick={() => openDeleteDialog(userProfile)}
+              className="text-red-400 hover:bg-gray-700 flex items-center"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete User
+            </DropdownMenuItem>
+          </>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  const renderUsersContent = () => {
+    if (filteredUsers.length === 0) {
+      return (
+        <div className="text-center py-10">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
+            <UserIcon className="h-7 w-7 text-blue-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">No Users Found</h3>
+          <p className="mt-2 text-sm text-gray-400">
+            {searchQuery ? "Try adjusting your search query." : "No users have been created yet."}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="space-y-3 md:hidden">
+          {filteredUsers.map((userProfile) => (
+            <MobileListRowCard
+              key={`mobile-${userProfile.id}`}
+              title={userProfile.display_name || "No name"}
+              subtitle={getRoleDisplayName(userProfile.role)}
+              meta={[
+                { label: "User ID", value: `${userProfile.id.slice(0, 8)}...` },
+                {
+                  label: "Email",
+                  value: userProfile.email_verified ? "Verified" : "Unverified",
+                },
+                { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
+              ]}
+              badge={getRoleBadge(userProfile.role)}
+              trailing={renderUserActions(userProfile)}
+            />
+          ))}
+        </div>
+        <DataTableShell className="hidden md:block">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  User
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Role
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Email Verified
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Joined
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  User ID
+                </th>
+                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {filteredUsers.map((userProfile) => (
+                <tr key={userProfile.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
+                        {userProfile.display_name?.charAt(0).toUpperCase() ||
+                          userProfile.id.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="font-medium text-white text-sm">
+                          {userProfile.display_name || "No name"}
+                        </div>
+                        <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2">
+                      {getRoleIcon(userProfile.role)}
+                      {getRoleBadge(userProfile.role)}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    {userProfile.email_verified ? (
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-400" />
+                        <span className="text-green-400 text-sm">Verified</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <XCircle className="h-4 w-4 text-yellow-400" />
+                        <span className="text-yellow-400 text-sm">Unverified</span>
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-4 px-6 text-gray-400 text-sm">
+                    <SafeDate date={userProfile.created_at} />
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
+                  </td>
+                  <td className="py-4 px-6">{renderUserActions(userProfile)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </DataTableShell>
+      </>
+    );
+  };
+
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
+    <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} notificationCount={3} />
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        {/* Dashboard Header */}
-        <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="mb-1 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-              All Users
-            </h1>
-            <p className="text-sm text-gray-400 sm:text-base">View and manage all users on the platform</p>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 md:mt-0">
-            <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
-              {talentUsers.length} Talent
-            </div>
-            <div className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-medium text-white">
-              {careerBuilderUsers.length} Career Builders
-            </div>
-            <div className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
-              {adminUsers.length} Admins
-            </div>
-            <Button
-              asChild
-              className="bg-purple-600 hover:bg-purple-700 text-white gap-2"
-            >
+      <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
+        <PageHeader
+          title="All Users"
+          subtitle="View and manage all users on the platform."
+          actions={
+            <Button asChild className="gap-2 bg-purple-600 text-white hover:bg-purple-700">
               <Link href="/admin/users/create">
                 <Plus className="h-4 w-4" />
                 Create User
               </Link>
             </Button>
+          }
+        />
+
+        <div className="md:hidden">
+          <MobileSummaryRow
+            items={[
+              { label: "Talent", value: talentUsers.length, icon: Users },
+              { label: "Career Builders", value: careerBuilderUsers.length, icon: Briefcase },
+              { label: "Admins", value: adminUsers.length, icon: Shield },
+            ]}
+          />
+        </div>
+
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
+          <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
+            {talentUsers.length} Talent
+          </div>
+          <div className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-medium text-white">
+            {careerBuilderUsers.length} Career Builders
+          </div>
+          <div className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
+            {adminUsers.length} Admins
           </div>
         </div>
 
@@ -302,30 +488,50 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             </div>
           </div>
 
-          <Tabs defaultValue="all" className="w-full" onValueChange={setActiveTab}>
+          <Tabs defaultValue="all" className="w-full space-y-4" onValueChange={setActiveTab}>
             <div className="border-b border-gray-700 px-4 sm:px-6">
-              <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
+              <div className="relative md:hidden">
+                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-gray-900 to-transparent" />
+                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-gray-900 to-transparent" />
+                <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+                    <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                      All ({users.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="talent" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                      Talent ({talentUsers.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="career-builders" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                      Career Builders ({careerBuilderUsers.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="admins" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                      Admins ({adminUsers.length})
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
+              </div>
+              <TabsList className="hidden h-12 border border-gray-600 bg-gray-700/50 md:grid md:grid-cols-4">
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
                   All ({users.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="talent"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
                 >
                   Talent ({talentUsers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="career-builders"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
                   Career Builders ({careerBuilderUsers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="admins"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
                 >
                   Admins ({adminUsers.length})
                 </TabsTrigger>
@@ -333,499 +539,19 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             </div>
 
             <TabsContent value="all" className="p-0">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <UserIcon className="h-10 w-10 text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Users Found</h3>
-                  <p className="text-gray-400 text-lg">
-                    {searchQuery
-                      ? "Try adjusting your search query"
-                      : "No users have been created yet."}
-                  </p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Role
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email Verified
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Joined
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredUsers.map((userProfile) => (
-                        <tr key={userProfile.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
-                                {userProfile.display_name?.charAt(0).toUpperCase() || userProfile.id.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="font-medium text-white text-sm">
-                                  {userProfile.display_name || "No name"}
-                                </div>
-                                <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-2">
-                              {getRoleIcon(userProfile.role)}
-                              {getRoleBadge(userProfile.role)}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            {userProfile.email_verified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-400" />
-                                <span className="text-green-400 text-sm">Verified</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <XCircle className="h-4 w-4 text-yellow-400" />
-                                <span className="text-yellow-400 text-sm">Unverified</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            <SafeDate date={userProfile.created_at} />
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                {userProfile.role === "talent" && (
-                                  <DropdownMenuItem asChild>
-                                    <Link
-                                      href={userProfile.talent_profiles
-                                        ? `/talent/${createNameSlug(userProfile.talent_profiles.first_name, userProfile.talent_profiles.last_name)}`
-                                        : `/talent/${userProfile.id}`}
-                                      className="text-gray-300 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      View Talent Profile
-                                    </Link>
-                                  </DropdownMenuItem>
-                                )}
-                                {userProfile.role === "client" && (
-                                  <DropdownMenuItem asChild>
-                                    <Link
-                                      href={`/client/profile?userId=${userProfile.id}`}
-                                      className="text-gray-300 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <Eye className="mr-2 h-4 w-4" />
-                                      View Career Builder Profile
-                                    </Link>
-                                  </DropdownMenuItem>
-                                )}
-                                {userProfile.role !== "talent" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleUpdateRole(userProfile.id, "talent")}
-                                    disabled={isUpdatingRole === userProfile.id}
-                                    className="text-green-400 hover:bg-gray-700 flex items-center"
-                                  >
-                                    {isUpdatingRole === userProfile.id ? (
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <ArrowUp className="mr-2 h-4 w-4" />
-                                    )}
-                                    Promote to Talent
-                                  </DropdownMenuItem>
-                                )}
-                                {userProfile.id !== user.id && (
-                                  <>
-                                    <DropdownMenuSeparator className="bg-gray-700" />
-                                    <DropdownMenuItem
-                                      onClick={() => openDeleteDialog(userProfile)}
-                                      className="text-red-400 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Delete User
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {renderUsersContent()}
             </TabsContent>
 
             <TabsContent value="talent" className="p-0">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <Users className="h-10 w-10 text-green-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Talent Users</h3>
-                  <p className="text-gray-400 text-lg">There are currently no talent users.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Role
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email Verified
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Joined
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredUsers.map((userProfile) => (
-                        <tr key={userProfile.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
-                                {userProfile.display_name?.charAt(0).toUpperCase() || userProfile.id.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="font-medium text-white text-sm">
-                                  {userProfile.display_name || "No name"}
-                                </div>
-                                <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            {getRoleBadge(userProfile.role)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {userProfile.email_verified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-400" />
-                                <span className="text-green-400 text-sm">Verified</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <XCircle className="h-4 w-4 text-yellow-400" />
-                                <span className="text-yellow-400 text-sm">Unverified</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            <SafeDate date={userProfile.created_at} />
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href={
-                                      userProfile.talent_profiles
-                                        ? `/talent/${createNameSlug(userProfile.talent_profiles.first_name, userProfile.talent_profiles.last_name)}`
-                                        : `/talent/${userProfile.id}`
-                                    }
-                                    className="text-gray-300 hover:bg-gray-700 flex items-center"
-                                  >
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Talent Profile
-                                  </Link>
-                                </DropdownMenuItem>
-                                {userProfile.role !== "client" && (
-                                  <DropdownMenuItem asChild>
-                                    <Link
-                                      href="/admin/client-applications"
-                                      className="text-blue-400 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <ArrowUp className="mr-2 h-4 w-4" />
-                                      Review Career Builder Applications
-                                    </Link>
-                                  </DropdownMenuItem>
-                                )}
-                                {userProfile.id !== user.id && (
-                                  <>
-                                    <DropdownMenuSeparator className="bg-gray-700" />
-                                    <DropdownMenuItem
-                                      onClick={() => openDeleteDialog(userProfile)}
-                                      className="text-red-400 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Delete User
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {renderUsersContent()}
             </TabsContent>
 
             <TabsContent value="career-builders" className="p-0">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <Briefcase className="h-10 w-10 text-blue-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Career Builder Users</h3>
-                  <p className="text-gray-400 text-lg">There are currently no Career Builder users.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Role
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email Verified
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Joined
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredUsers.map((userProfile) => (
-                        <tr key={userProfile.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
-                                {userProfile.display_name?.charAt(0).toUpperCase() || userProfile.id.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="font-medium text-white text-sm">
-                                  {userProfile.display_name || "No name"}
-                                </div>
-                                <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            {getRoleBadge(userProfile.role)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {userProfile.email_verified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-400" />
-                                <span className="text-green-400 text-sm">Verified</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <XCircle className="h-4 w-4 text-yellow-400" />
-                                <span className="text-yellow-400 text-sm">Unverified</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            <SafeDate date={userProfile.created_at} />
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    href={`/client/profile`}
-                                    className="text-gray-300 hover:bg-gray-700 flex items-center"
-                                  >
-                                    <Eye className="mr-2 h-4 w-4" />
-                                    View Career Builder Profile
-                                  </Link>
-                                </DropdownMenuItem>
-                                {userProfile.role !== "talent" && (
-                                  <DropdownMenuItem
-                                    onClick={() => handleUpdateRole(userProfile.id, "talent")}
-                                    disabled={isUpdatingRole === userProfile.id}
-                                    className="text-green-400 hover:bg-gray-700 flex items-center"
-                                  >
-                                    {isUpdatingRole === userProfile.id ? (
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                      <ArrowUp className="mr-2 h-4 w-4" />
-                                    )}
-                                    Promote to Talent
-                                  </DropdownMenuItem>
-                                )}
-                                {userProfile.id !== user.id && (
-                                  <>
-                                    <DropdownMenuSeparator className="bg-gray-700" />
-                                    <DropdownMenuItem
-                                      onClick={() => openDeleteDialog(userProfile)}
-                                      className="text-red-400 hover:bg-gray-700 flex items-center"
-                                    >
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      Delete User
-                                    </DropdownMenuItem>
-                                  </>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {renderUsersContent()}
             </TabsContent>
 
             <TabsContent value="admins" className="p-0">
-              {filteredUsers.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <Shield className="h-10 w-10 text-purple-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No Admin Users</h3>
-                  <p className="text-gray-400 text-lg">There are currently no admin users.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Role
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Email Verified
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Joined
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          User ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredUsers.map((userProfile) => (
-                        <tr key={userProfile.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
-                                {userProfile.display_name?.charAt(0).toUpperCase() || userProfile.id.charAt(0).toUpperCase()}
-                              </div>
-                              <div>
-                                <div className="font-medium text-white text-sm">
-                                  {userProfile.display_name || "No name"}
-                                </div>
-                                <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            {getRoleBadge(userProfile.role)}
-                          </td>
-                          <td className="py-4 px-6">
-                            {userProfile.email_verified ? (
-                              <div className="flex items-center gap-2">
-                                <CheckCircle className="h-4 w-4 text-green-400" />
-                                <span className="text-green-400 text-sm">Verified</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <XCircle className="h-4 w-4 text-yellow-400" />
-                                <span className="text-yellow-400 text-sm">Unverified</span>
-                              </div>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-gray-400 text-sm">
-                            <SafeDate date={userProfile.created_at} />
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem className="text-gray-300 hover:bg-gray-700">
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Admin Account
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              {renderUsersContent()}
             </TabsContent>
           </Tabs>
         </div>
@@ -885,7 +611,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }
 

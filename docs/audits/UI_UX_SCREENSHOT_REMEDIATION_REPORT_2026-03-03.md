@@ -138,9 +138,6 @@ If the first viewport fails this rule, the route is `P0` by default.
 - `talent/dashboard` - stacked prompts/stats/content blocks overload mobile.
 
 ### P1 (next wave)
-- `admin/gigs`
-- `admin/client-applications`
-- `admin/talent`
 - `client/dashboard`
 - `client/profile`
 - `talent/profile`
@@ -162,16 +159,17 @@ Violation legend:
 
 | Route | Wave | Violations | Fix pattern | Proof required | Owner | Status |
 |---|---|---|---|---|---|---|
-| `/admin/dashboard` | P0-A | A, D | collapsed KPI summary + single segmentation + content-first order | before/after screenshots (`390x844`, `360x800`) + stable test IDs | TBD | TODO |
-| `/admin/applications` | P0-A | A, B, C, E | single segmentation + FiltersSheet + mobile list row cards | before/after screenshots + filter interaction capture | TBD | TODO |
-| `/admin/users` | P0-A | A, E | compact header/stats + mobile row-card adaptation | before/after screenshots + no horizontal scroll proof | TBD | TODO |
-| `/talent/dashboard` | P0-B | A, D | KPI collapse + one dominant task module + reduced first-viewport chrome | before/after screenshots + task CTA visibility proof | TBD | TODO |
-| `/admin/gigs` | P1-A | B, C, E | single segmentation + FiltersSheet parity + mobile list/card view | before/after screenshots + filter chip summary proof | TBD | TODO |
-| `/admin/client-applications` | P1-A | A, B, C, E | summary row + one segmentation + mobile list adaptation | before/after screenshots + no overflow proof | TBD | TODO |
-| `/admin/talent` | P1-A | A, E | compact summary + searchable mobile cards | before/after screenshots + tap-target check | TBD | TODO |
-| `/client/dashboard` | P1-A | A, D | trim top chrome + collapse non-critical KPI blocks | before/after screenshots + first-row-in-viewport proof | TBD | TODO |
-| `/client/profile` | P1-A | A | progressive section grouping + reduced completion friction | before/after screenshots + section completion flow check | TBD | TODO |
-| `/talent/profile` | P1-A | A | progressive disclosure + section rhythm + sticky save affordance (if needed) | before/after screenshots + interaction video optional | TBD | TODO |
+| `/admin/dashboard` | P0-A | A, D | collapsed KPI summary + single segmentation + content-first order | before/after screenshots (`390x844`, `360x800`) + stable test IDs | codex-agent | DONE |
+| `/admin/applications` | P0-A | A, B, C, E | single segmentation + FiltersSheet + mobile list row cards | before/after screenshots + filter interaction capture | codex-agent | DONE |
+| `/admin/users` | P0-A | A, E | compact header/stats + mobile row-card adaptation | before/after screenshots + no horizontal scroll proof | codex-agent | DONE |
+| `/talent/dashboard` | P0-B | A, D | KPI collapse + one dominant task module + reduced first-viewport chrome | before/after screenshots + task CTA visibility proof | codex-agent | DONE |
+| `/admin/gigs` | P1-A | B, C, E | single segmentation + FiltersSheet parity + mobile list/card view | before/after screenshots + filter chip summary proof | codex-agent | DONE |
+| `/admin/client-applications` | P1-A | A, B, C, E | summary row + one segmentation + mobile list adaptation | before/after screenshots + no overflow proof | codex-agent | DONE |
+| `/admin/talent` | P1-A | A, E | compact summary + searchable mobile cards | before/after screenshots + tap-target check | codex-agent | DONE |
+| `/client/dashboard` | P1-A | A, D | trim top chrome + collapse non-critical KPI blocks | before/after screenshots + first-row-in-viewport proof | codex-agent | DONE |
+| `/client/profile` | P1-A | A | progressive section grouping + reduced completion friction | before/after screenshots + section completion flow check | codex-agent | DONE |
+| `/talent/profile` | P1-A | A | progressive disclosure + section rhythm + sticky save affordance (if needed) | before/after screenshots + interaction video optional | codex-agent | DONE |
+| `/talent/settings/billing` | P1-A | A | progressive disclosure + stable primary billing action placement | before/after screenshots + no-overflow proof | codex-agent | DONE |
 
 ---
 
@@ -293,6 +291,7 @@ Use this block in MVP status and team Notion updates.
 - Locked mobile enforcement contract and QA gate alignment to `docs/development/MOBILE_UX_QA_CHECKLIST.md`.
 - Added route-level remediation matrix (violations -> fix pattern -> proof) for P0/P1 execution without interpretation drift.
 - Added measurable P0 definition, explicit stop-the-line blockers, and screenshot regression gate requirements.
+- Added Doc <-> Code lock alignment via `docs/UI_IMPLEMENTATION_INDEX.md` (rule ownership + route compliance tracking).
 
 **Next (P0)**
 - Admin density remediation: `/admin/dashboard`, `/admin/applications`, `/admin/users`

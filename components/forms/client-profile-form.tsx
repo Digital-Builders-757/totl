@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Save, Building } from "lucide-react";
@@ -138,7 +138,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 pb-20 sm:pb-0">
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -147,8 +147,13 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
           )}
 
           {/* Company Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Company Details</h3>
+          <section className="space-y-4 rounded-xl border border-border/70 p-4 sm:p-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Step 1
+              </p>
+              <h3 className="text-base font-semibold text-foreground">Company details</h3>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="company_name">Company Name *</Label>
@@ -197,11 +202,16 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
                 <p className="text-sm text-red-600">{form.formState.errors.company_size.message}</p>
               )}
             </div>
-          </div>
+          </section>
 
           {/* Contact Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Contact Information</h3>
+          <section className="space-y-4 rounded-xl border border-border/70 p-4 sm:p-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Step 2
+              </p>
+              <h3 className="text-base font-semibold text-foreground">Contact information</h3>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="contact_name">Contact Name *</Label>
@@ -243,10 +253,19 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
                 </p>
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
+          <div className="sticky bottom-3 z-10 -mx-1 rounded-xl border bg-background/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(PATHS.CLIENT_DASHBOARD)}
+                className="sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="w-full sm:flex-1">
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
@@ -258,15 +277,8 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
                   Save Profile
                 </>
               )}
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.push(PATHS.CLIENT_DASHBOARD)}
-            >
-              Cancel
-            </Button>
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>

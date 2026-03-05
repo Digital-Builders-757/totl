@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Table Count Verification Script
  * 
@@ -17,10 +18,10 @@
  *   - Falls back to local dev database if no project linked
  */
 
+import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -121,9 +122,19 @@ function getActualFromDatabase() {
       tables: tableNames,
     };
   } catch (error) {
-    // Fallback: if Supabase CLI fails, try to read from migrations
-    console.warn(`⚠️  Could not query database directly: ${error.message}`);
-    console.warn(`   Falling back to migration file analysis...`);
+    // Fallback: if Supabase CLI query mode is unavailable, use migration analysis quietly.
+    const message = error instanceof Error ? error.message : String(error);
+    const queryUnsupported =
+      message.includes("unknown flag: --local") ||
+      message.includes("unknown command") ||
+      message.includes("supabase db [command]");
+
+    if (queryUnsupported) {
+      console.warn("ℹ️  Supabase CLI query mode unavailable; using migration file analysis.");
+    } else {
+      console.warn(`⚠️  Could not query database directly: ${message}`);
+      console.warn("   Falling back to migration file analysis...");
+    }
     
     return getActualFromMigrations();
   }
@@ -133,7 +144,6 @@ function getActualFromDatabase() {
  * Fallback: Count tables from migration files
  */
 function getActualFromMigrations() {
-  const migrationsDir = join(projectRoot, 'supabase', 'migrations');
   const tables = new Set();
 
   // Known tables from migrations

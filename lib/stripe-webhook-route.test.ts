@@ -2,9 +2,19 @@ import Stripe from "stripe";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 vi.mock("@/lib/supabase-admin-client", () => ({
   createSupabaseAdminClient: vi.fn(),
+}));
+
+vi.mock("@/lib/utils/logger", () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
 }));
 
 type SupabaseError = { code?: string; message: string };
@@ -129,10 +139,13 @@ function createSupabaseMock(opts: {
 
         // Read existing row status (duplicate insert path)
         const eventId = state.eq.get("event_id");
-        if (state.columns === "status" && typeof eventId === "string") {
+        if (state.columns?.includes("status") && typeof eventId === "string") {
           resetChainState();
           return {
-            data: { status: opts.ledgerExistingStatusOnDuplicate ?? "processed" },
+            data: {
+              status: opts.ledgerExistingStatusOnDuplicate ?? "processed",
+              attempt_count: 1,
+            },
             error: null,
           };
         }
@@ -275,6 +288,22 @@ describe("/api/stripe/webhook route handler", () => {
     );
 
     expect(res.status).toBe(400);
+
+    const loggerErrorMock = (logger.error as unknown as ReturnType<typeof vi.fn>);
+    expect(loggerErrorMock).toHaveBeenCalled();
+
+    const signatureDiagnosticCall = loggerErrorMock.mock.calls.find(
+      (call) => call[0] === "Webhook signature verification failed"
+    );
+    expect(signatureDiagnosticCall).toBeTruthy();
+
+    // Contract: diagnostics should include safe metadata, never raw signature values.
+    const diagnosticContext = signatureDiagnosticCall?.[2] as Record<string, unknown> | undefined;
+    expect(diagnosticContext).toBeDefined();
+    expect(diagnosticContext?.signatureHeaderLength).toBe("t=123,v1=deadbeef".length);
+    expect(diagnosticContext?.webhookSecretPresent).toBe(true);
+    expect(diagnosticContext?.signatureTimestamp).toBe(123);
+    expect(diagnosticContext).not.toHaveProperty("signature");
   });
 
   it("is idempotent by event.id: duplicate event short-circuits without double side effects", async () => {

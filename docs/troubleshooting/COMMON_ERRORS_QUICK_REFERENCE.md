@@ -72,6 +72,14 @@ npm run build
   - **Prevention:** See `docs/AUTH_THREE_TRUTHS_LOGGING_IMPLEMENTATION.md` for complete logging implementation
   - **Prevention:** Run `tests/auth/three-truths-logging.spec.ts` to verify all three truths are proven
   - **Verification:** All three truths must be true: SIGNED_IN fires, cookies exist in browser, middleware receives cookies
+- **UI screenshot automation fails with `login_failed:remained_on_login`:** Capture manifests show route failures even when server is running
+  - **Symptom:** `scripts/capture-ui-audit.mjs` logs many `login_failed:remained_on_login` rows (often non-admin only)
+  - **Symptom:** manifest rows show `login_failed:page.waitForSelector` with `locator('body') ... hidden` and capture can hang in a long-running process
+  - **Root Cause:** Seeded credentials are missing/stale for target roles, or login submit runs before hydration marker reaches `ready`
+  - **Fix:** Wait for `[data-testid="login-hydrated"]` text `ready` before submit, increase redirect wait, and validate credentials manually per role in the same environment
+  - **Fix:** run `node scripts/ensure-ui-audit-users.mjs` immediately before rerun, then rerun capture; if process hangs, stop it and retry after validating login manually
+  - **Fix:** Use `scripts/capture-admin-evidence.mjs` to unblock admin evidence while re-seeding non-admin accounts
+  - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
 - **Client Dashboard Error State Not Displayed:** Error state (`supabaseError`) is set but never rendered, leaving users with blank dashboard
   - **Fix:** Add error display banner/alert component that shows when `supabaseError` is set, with retry button to call `fetchDashboardData()` again
   - **Prevention:** Always render error states in UI, even if error handling exists in code

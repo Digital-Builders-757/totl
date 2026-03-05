@@ -83,30 +83,20 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           />
 
         <div className="mb-4 md:hidden">
-          <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
-              <span className="inline-flex items-center gap-2">
-                Show stats
-                <span className="text-xs text-gray-500">({dashboardStats.totalApplications} applications)</span>
-              </span>
-            </summary>
-            <div className="mt-2">
-              <MobileSummaryRow
-                items={[
-                  { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
-                  { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
-                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
-                  { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
-                  { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
-                  {
-                    label: "Paid talent",
-                    value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
-                    icon: DollarSign,
-                  },
-                ]}
-              />
-            </div>
-          </details>
+          <MobileSummaryRow
+            items={[
+              { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
+              { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
+              { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+              { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
+              { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
+              {
+                label: "Paid talent",
+                value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
+                icon: DollarSign,
+              },
+            ]}
+          />
         </div>
 
         {/* Quick Stats */}

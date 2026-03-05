@@ -148,23 +148,25 @@ For any PR that touches dashboard/list chrome:
 - [x] `/client/applications` — PASS — Code sweep complete (deduplicated mobile filtering + tab rail density)
 - [x] `/client/gigs` — PASS — Code sweep complete (tab rail density + compact top spacing)
 - [x] `/client/bookings` — PASS — Code sweep complete (terminal header + collapsed mobile stats + tab rail + compact spacing)
-- [ ] `/client/profile` — TODO —
+- [x] `/client/profile` — PASS — Route contract green (`tests/client/client-profile-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/client__profile__{360x800,390x844,1440x900}__loaded.png`
 
 ### Wave 2 — Talent terminal (`/talent/*`)
 - [x] `/talent/dashboard` — PASS — Code sweep complete (mobile tab rail density + compact top spacing)
-- [ ] `/talent/profile` — TODO —
-- [ ] `/talent/settings/billing` — TODO —
-- [ ] `/talent/subscribe` — TODO —
+- [x] `/talent/profile` — PASS — Route contract green (`tests/talent/talent-profile-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/talent__profile__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/talent/settings/billing` — PASS — Route contract green (`tests/talent/talent-billing-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/talent__settings-billing__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/talent/subscribe` — PASS — Route contract green (`tests/talent/talent-subscribe-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/talent__subscribe__{360x800,390x844,1440x900}__loaded.png`
 
 ### Wave 3 — Admin terminal (`/admin/*`)
 - [x] `/admin/dashboard` — PASS — Code sweep complete (collapsed mobile stats + tab rail density)
-- [ ] `/admin/applications` — TODO —
-- [ ] `/admin/users` — TODO —
-- [ ] `/admin/gigs` — TODO —
-- [ ] `/admin/moderation` — TODO —
+- [x] `/admin/applications` — PASS — Route contract green (`tests/admin/admin-applications-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/admin__applications__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/admin/users` — PASS — Route contract green (`tests/admin/admin-users-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/admin__users__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/admin/gigs` — PASS — Route contract green (`tests/admin/admin-gigs-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/admin__gigs__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/admin/talent` — PASS — Route contract green (`tests/admin/admin-talent-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/admin__talent__{360x800,390x844,1440x900}__loaded.png`
+- [x] `/admin/moderation` — PASS — Route contract green (`tests/admin/admin-moderation-route.spec.ts`) + screenshots in `screenshots/ui-audit-2026-03-03-v2/admin__moderation__{360x800,390x844}__loaded.png`
 
 ---
 
 ## Notes
 - This checklist intentionally does not enumerate every marketing page—focus is launch-critical flows and terminals.
 - If a route introduces a local header/drawer, it must be applied consistently across that terminal or documented as a temporary exception.
+- Manual client drawer smoke runbook (physical-device pending item): `docs/qa/CLIENT_DRAWER_MANUAL_VALIDATION_RUNBOOK_2026-03-04.md`.

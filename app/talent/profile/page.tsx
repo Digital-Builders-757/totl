@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 
 import TalentProfileForm from "@/components/forms/talent-profile-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -50,17 +52,15 @@ export default async function TalentProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-black py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Complete Your Profile</h1>
-          <p className="text-gray-300 mt-2">
-            Add your information to make your profile visible to clients
-          </p>
-        </div>
+    <PageShell className="bg-black" containerClassName="max-w-3xl py-4 sm:py-6">
+      <div className="space-y-6">
+        <PageHeader
+          title="Complete Your Profile"
+          subtitle="Add your information to make your profile visible to clients."
+        />
 
         <TalentProfileForm initialData={talentProfile} />
       </div>
-    </div>
+    </PageShell>
   );
 }

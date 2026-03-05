@@ -1,0 +1,186 @@
+{
+  "metadata": {
+    "timestamp": "2026-03-03T00:00:00Z",
+    "server_url": "http://localhost:3000",
+    "viewports": [
+      { "name": "mobile", "width": 390, "height": 844 },
+      { "name": "mobile", "width": 360, "height": 800 },
+      { "name": "desktop", "width": 1440, "height": 900 }
+    ],
+    "status": "partial_completion",
+    "notes": "Unable to complete authenticated routes due to Supabase database connection error: 'AuthApiError: Database error querying schema'. All public routes captured successfully."
+  },
+  "screenshots": [
+    {
+      "filename": "mobile__home__390x844__loaded.png",
+      "route": "/",
+      "route_name": "Home",
+      "viewport": "390x844",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__home__390x844__loaded.png"
+    },
+    {
+      "filename": "mobile__about__390x844__loaded.png",
+      "route": "/about",
+      "route_name": "About",
+      "viewport": "390x844",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__about__390x844__loaded.png"
+    },
+    {
+      "filename": "mobile__login__390x844__loaded.png",
+      "route": "/login",
+      "route_name": "Login",
+      "viewport": "390x844",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__login__390x844__loaded.png"
+    },
+    {
+      "filename": "mobile__signup__390x844__loaded.png",
+      "route": "/signup",
+      "route_name": "Signup (Role Selection)",
+      "viewport": "390x844",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__signup__390x844__loaded.png"
+    },
+    {
+      "filename": "mobile__home__360x800__loaded.png",
+      "route": "/",
+      "route_name": "Home",
+      "viewport": "360x800",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__home__360x800__loaded.png"
+    },
+    {
+      "filename": "mobile__about__360x800__loaded.png",
+      "route": "/about",
+      "route_name": "About",
+      "viewport": "360x800",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__about__360x800__loaded.png"
+    },
+    {
+      "filename": "mobile__login__360x800__loaded.png",
+      "route": "/login",
+      "route_name": "Login",
+      "viewport": "360x800",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__login__360x800__loaded.png"
+    },
+    {
+      "filename": "mobile__signup__360x800__loaded.png",
+      "route": "/signup",
+      "route_name": "Signup (Role Selection)",
+      "viewport": "360x800",
+      "terminal": "mobile",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\mobile__signup__360x800__loaded.png"
+    },
+    {
+      "filename": "desktop__login__1440x900__loaded.png",
+      "route": "/login",
+      "route_name": "Login",
+      "viewport": "1440x900",
+      "terminal": "desktop",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\desktop__login__1440x900__loaded.png"
+    },
+    {
+      "filename": "desktop__home__1440x900__loaded.png",
+      "route": "/",
+      "route_name": "Home",
+      "viewport": "1440x900",
+      "terminal": "desktop",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\desktop__home__1440x900__loaded.png"
+    },
+    {
+      "filename": "desktop__about__1440x900__loaded.png",
+      "route": "/about",
+      "route_name": "About",
+      "viewport": "1440x900",
+      "terminal": "desktop",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\desktop__about__1440x900__loaded.png"
+    },
+    {
+      "filename": "desktop__signup__1440x900__loaded.png",
+      "route": "/signup",
+      "route_name": "Signup (Role Selection)",
+      "viewport": "1440x900",
+      "terminal": "desktop",
+      "role": "public",
+      "status": "success",
+      "path": "c:\\Users\\young\\AppData\\Local\\Temp\\cursor\\screenshots\\desktop__signup__1440x900__loaded.png"
+    }
+  ],
+  "failures": [
+    {
+      "route": "/talent/*",
+      "role": "talent",
+      "reason": "Unable to authenticate: Supabase returned 'AuthApiError: Database error querying schema'. Authentication failed for both test@totl.local and emma.seed@thetotlagency.local with password 'Password123!'. Server connection working but database schema query failing.",
+      "attempted_credentials": [
+        "test@totl.local / Password123!",
+        "emma.seed@thetotlagency.local / Password123!"
+      ],
+      "error_details": "Console log shows: 'Login error: AuthApiError: Database error querying schema'"
+    },
+    {
+      "route": "/client/*",
+      "role": "client",
+      "reason": "Unable to authenticate due to same database connection error. Client login not attempted after talent login failure.",
+      "attempted_credentials": [],
+      "error_details": "Not attempted due to database error"
+    }
+  ],
+  "summary": {
+    "total_screenshots": 12,
+    "successful": 12,
+    "failed": 0,
+    "routes_covered": [
+      "/ (home)",
+      "/about",
+      "/login",
+      "/signup"
+    ],
+    "routes_not_covered": [
+      "/talent/dashboard",
+      "/talent/gigs",
+      "/talent/applications",
+      "/talent/bookings",
+      "/talent/profile",
+      "/talent/settings",
+      "/client/dashboard",
+      "/client/gigs",
+      "/client/gigs/new",
+      "/client/applications",
+      "/client/bookings",
+      "/client/settings"
+    ],
+    "recommendations": [
+      "Verify Supabase local instance is running: npx supabase status",
+      "Reset Supabase database if needed: npx supabase db reset",
+      "Check that migrations have been applied correctly",
+      "Verify seed data was loaded properly",
+      "Once database is fixed, re-run screenshot capture for authenticated routes"
+    ]
+  }
+}

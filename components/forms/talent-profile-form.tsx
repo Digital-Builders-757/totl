@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, Save, User, FileText } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, Save, User, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -91,6 +91,17 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   const [serverError, setServerError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const hasAdvancedValues = Boolean(
+    initialData?.age ||
+      initialData?.experience ||
+      initialData?.languages?.length ||
+      initialData?.height ||
+      initialData?.measurements ||
+      initialData?.hair_color ||
+      initialData?.eye_color ||
+      initialData?.shoe_size
+  );
+  const [showAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
   // Determine if this is modeling talent based on specialties from initialData
   // Note: Specialties are managed in a separate form (talent-professional-info-form),
@@ -208,7 +219,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pb-20 sm:pb-0">
       {serverError && (
         <Alert variant="destructive" className="bg-red-900/20 border-red-700">
           <AlertCircle className="h-4 w-4 text-red-400" />
@@ -341,8 +352,26 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         </CardContent>
       </Card>
 
+      <div className="rounded-xl border border-gray-700/80 bg-gray-900/50 p-3">
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto w-full justify-between px-2 py-2 text-left text-gray-100 hover:bg-gray-800/80"
+          onClick={() => setShowAdvanced((current) => !current)}
+        >
+          <span>
+            {showAdvanced ? "Hide additional profile details" : "Add additional profile details"}
+          </span>
+          {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+        <p className="px-2 pt-1 text-xs text-gray-400">
+          Keep this compact on mobile and expand only when you are ready.
+        </p>
+      </div>
+
       {/* Physical Characteristics */}
-      <Card className="bg-gray-900 border-gray-700">
+      {showAdvanced ? (
+        <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <User className="h-5 w-5" />
@@ -495,8 +524,10 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           )}
         </CardContent>
       </Card>
+      ) : null}
 
       {/* Additional Information */}
+      {showAdvanced ? (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -552,9 +583,11 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           </div>
         </CardContent>
       </Card>
+      ) : null}
 
       {/* Submit Button */}
-      <div className="flex justify-end space-x-4">
+      <div className="sticky bottom-3 z-10 -mx-1 rounded-xl border border-gray-700 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-4">
         <Button
           type="button"
           variant="outline"
@@ -581,6 +614,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             </>
           )}
         </Button>
+        </div>
       </div>
     </form>
   );

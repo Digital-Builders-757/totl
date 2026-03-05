@@ -34,6 +34,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
@@ -754,8 +755,20 @@ function TalentDashboardContent({
   return (
     <PageShell topPadding={false} fullBleed>
       <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="container mx-auto px-4 py-2 sm:py-3">
+          <div className="flex min-h-12 items-center justify-between md:hidden">
+            <div className="min-w-0">
+              <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
+              <p className="truncate text-xs text-gray-300">
+                {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover gigs"}
+              </p>
+            </div>
+            <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+              <Link href="/gigs">Browse gigs</Link>
+            </Button>
+          </div>
+
+          <div className="hidden md:flex md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
               <Avatar className="h-12 w-12">
                 <AvatarImage
@@ -823,6 +836,11 @@ function TalentDashboardContent({
       </div>
 
       <div className="container mx-auto px-4 py-4 sm:py-6">
+        <PageHeader
+          title="Overview"
+          subtitle="Track applications and find your next booking."
+          className="mb-4 hidden md:block"
+        />
         {showSubscriptionBanner && (
           <SubscriptionPrompt profile={subscriptionProfile} variant="banner" context="general" />
         )}
@@ -846,28 +864,14 @@ function TalentDashboardContent({
         )}
 
         <div className="mb-4 md:hidden">
-          <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
-              <span className="inline-flex items-center gap-2">
-                Show stats
-                <span className="text-xs text-gray-500">
-                  ({dashboardStats.totalApplications} applications)
-                </span>
-              </span>
-            </summary>
-            <div className="mt-2">
-              <MobileSummaryRow
-                items={[
-                  { label: "Profile views", value: 0, icon: Eye },
-                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
-                  { label: "Accepted", value: dashboardStats.acceptedTalentApplications, icon: Calendar },
-                  { label: "Earnings", value: "$0", icon: DollarSign },
-                  { label: "Rating", value: 0, icon: Star },
-                  { label: "Success rate", value: "0%", icon: TrendingUp },
-                ]}
-              />
-            </div>
-          </details>
+          <MobileSummaryRow
+            items={[
+              { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+              { label: "Accepted", value: dashboardStats.acceptedTalentApplications, icon: Calendar },
+              { label: "Active gigs", value: dashboardStats.activeGigs, icon: Briefcase },
+              { label: "New", value: dashboardStats.newApplications, icon: Clock },
+            ]}
+          />
         </div>
 
         <div className="hidden md:grid md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">

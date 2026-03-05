@@ -8,11 +8,18 @@ import {
   XCircle,
   Clock,
   Filter,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { AdminHeader } from "@/components/admin/admin-header";
+import { FiltersSheet } from "@/components/dashboard/filters-sheet";
+import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { DataTableShell } from "@/components/layout/data-table-shell";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,6 +72,8 @@ export function AdminApplicationsClient({
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [onlyWithMessage, setOnlyWithMessage] = useState(false);
 
   const { toast } = useToast();
 
@@ -85,6 +94,10 @@ export function AdminApplicationsClient({
       return true;
     });
 
+    if (onlyWithMessage) {
+      filtered = filtered.filter((app) => Boolean(app.message?.trim()));
+    }
+
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -97,7 +110,12 @@ export function AdminApplicationsClient({
     }
 
     setFilteredApplications(filtered);
-  }, [applications, searchQuery, activeTab]);
+  }, [applications, searchQuery, activeTab, onlyWithMessage]);
+
+  const newCount = applications.filter((app) => app.status === "new").length;
+  const approvedCount = applications.filter((app) => app.status === "accepted").length;
+  const rejectedCount = applications.filter((app) => app.status === "rejected").length;
+  const activeFilterCount = onlyWithMessage ? 1 : 0;
 
   const handleApprove = async () => {
     if (!selectedApplication) return;
@@ -187,314 +205,332 @@ export function AdminApplicationsClient({
     }
   };
 
-  return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-800 min-h-screen">
-      <AdminHeader user={user} notificationCount={3} />
+  const renderInlineActions = (application: ApplicationWithDetails) => (
+    <div className="flex flex-wrap items-center gap-2">
+      {activeTab === "new" ? (
+        <>
+          <Button
+            type="button"
+            size="sm"
+            className="h-9 bg-green-600 text-white hover:bg-green-700"
+            onClick={() => {
+              setSelectedApplication(application);
+              setShowApproveDialog(true);
+            }}
+          >
+            Approve
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="h-9 border-red-600/60 bg-transparent text-red-300 hover:bg-red-900/20"
+            onClick={() => {
+              setSelectedApplication(application);
+              setShowRejectDialog(true);
+            }}
+          >
+            Reject
+          </Button>
+        </>
+      ) : null}
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        className="h-9 border-gray-700 bg-transparent text-white hover:bg-gray-700"
+        asChild
+      >
+        <Link href={`/admin/applications/${application.id}`}>View details</Link>
+      </Button>
+    </div>
+  );
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        {/* Dashboard Header */}
-        <div className="mb-6 flex flex-col gap-3 md:mb-8 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="mb-1 bg-gradient-to-r from-white via-blue-100 to-purple-100 bg-clip-text text-2xl font-bold text-transparent sm:text-3xl">
-              Talent Applications
-            </h1>
-            <p className="text-sm text-gray-400 sm:text-base">Review and manage talent applications for gigs</p>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2 md:mt-0">
-            <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
-              {applications.filter(app => app.status === 'new').length} New
-            </div>
-            <div className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-medium text-white">
-              {applications.filter(app => app.status === 'accepted').length} Approved
-            </div>
-            <div className="rounded-lg bg-gradient-to-r from-red-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
-              {applications.filter(app => app.status === 'rejected').length} Rejected
-            </div>
-          </div>
+  return (
+    <PageShell topPadding={false} fullBleed>
+      <AdminHeader user={user} notificationCount={3} />
+      <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
+        <PageHeader
+          title="Talent Applications"
+          subtitle="Review and manage talent applications for gigs."
+        />
+
+        <div className="md:hidden">
+          <MobileSummaryRow
+            items={[
+              { label: "New", value: newCount, icon: Clock },
+              { label: "Approved", value: approvedCount, icon: CheckCircle },
+              { label: "Rejected", value: rejectedCount, icon: XCircle },
+            ]}
+          />
         </div>
 
-        {/* Applications Section */}
-        <div className="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 shadow-2xl backdrop-blur-sm">
-          <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between">
-              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={16}
-                  />
-                  <Input
-                    placeholder="Search applications"
-                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <Button variant="outline" size="icon" className="border-gray-600 text-gray-300 hover:bg-gray-700">
-                  <Filter size={16} />
-                </Button>
+        <div className="hidden items-center gap-2 md:flex">
+          <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/40">{newCount} New</Badge>
+          <Badge className="bg-green-500/20 text-green-300 border-green-500/40">{approvedCount} Approved</Badge>
+          <Badge className="bg-red-500/20 text-red-300 border-red-500/40">{rejectedCount} Rejected</Badge>
+        </div>
+
+        <div className="rounded-2xl border border-gray-700 bg-gray-800/50 p-4 sm:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative w-full sm:max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Input
+                placeholder="Search applications"
+                className="w-full border-gray-600 bg-gray-700 pl-9 text-white placeholder-gray-400 focus:border-blue-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="md:hidden">
+                <FiltersSheet
+                  open={filtersOpen}
+                  onOpenChange={setFiltersOpen}
+                  activeCount={activeFilterCount}
+                  title="Application Filters"
+                >
+                  <Button
+                    type="button"
+                    variant={onlyWithMessage ? "default" : "outline"}
+                    className="w-full justify-start"
+                    onClick={() => setOnlyWithMessage((prev) => !prev)}
+                  >
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    {onlyWithMessage ? "Only with message (on)" : "Only with message"}
+                  </Button>
+                </FiltersSheet>
               </div>
+              <Button
+                type="button"
+                variant={onlyWithMessage ? "default" : "outline"}
+                size="sm"
+                className="hidden border-gray-600 text-gray-200 hover:bg-gray-700 md:inline-flex"
+                onClick={() => setOnlyWithMessage((prev) => !prev)}
+              >
+                <Filter className="mr-2 h-4 w-4" />
+                {onlyWithMessage ? "With message" : "All messages"}
+              </Button>
             </div>
           </div>
 
-          <Tabs defaultValue="new" className="w-full" onValueChange={setActiveTab}>
-            <div className="border-b border-gray-700 px-4 sm:px-6">
-              <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
-                <TabsTrigger
-                  value="new"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-orange-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
-                >
-                  New ({applications.filter(app => app.status === 'new').length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="approved"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
-                >
-                  Approved ({applications.filter(app => app.status === 'accepted').length})
-                </TabsTrigger>
-                <TabsTrigger
-                  value="rejected"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
-                >
-                  Rejected ({applications.filter(app => app.status === 'rejected').length})
-                </TabsTrigger>
-              </TabsList>
+          <Tabs defaultValue="new" className="w-full space-y-4" onValueChange={setActiveTab}>
+            <div className="relative md:hidden">
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-gray-900 to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-gray-900 to-transparent" />
+              <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+                  <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    New ({newCount})
+                  </TabsTrigger>
+                  <TabsTrigger value="approved" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Approved ({approvedCount})
+                  </TabsTrigger>
+                  <TabsTrigger value="rejected" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Rejected ({rejectedCount})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
             </div>
 
-            <TabsContent value="new" className="p-0">
+            <TabsList className="hidden h-11 border border-gray-700 bg-gray-900 p-1 md:grid md:grid-cols-3">
+              <TabsTrigger value="new">New ({newCount})</TabsTrigger>
+              <TabsTrigger value="approved">Approved ({approvedCount})</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected ({rejectedCount})</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="new" className="space-y-3">
               {filteredApplications.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-full mx-auto flex items-center justify-center mb-6">
-                    <Clock className="h-10 w-10 text-amber-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-white">No New Applications</h3>
-                  <p className="text-gray-400 text-lg">
-                    There are currently no new talent applications to review.
-                  </p>
+                <div className="py-10 text-center">
+                  <Clock className="mx-auto mb-3 h-8 w-8 text-amber-400" />
+                  <p className="text-sm text-gray-300">No new applications found.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Application ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Gig ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Talent ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-700">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-white text-sm">{application.id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-white text-sm">{application.gig_id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-white text-sm">{application.talent_id.slice(0, 8)}...</div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-400">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            <ApplicationStatusBadge status={application.status} showIcon={true} />
-                          </td>
-                          <td className="py-4 px-6">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
-                                  <MoreVertical size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setShowApproveDialog(true);
-                                  }}
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
-                                  <span>Approve</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setSelectedApplication(application);
-                                    setShowRejectDialog(true);
-                                  }}
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                                  <span>Reject</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  asChild
-                                  className="text-gray-300 hover:bg-gray-700"
-                                >
-                                  <Link href={`/admin/applications/${application.id}`}>
-                                    <Search className="mr-2 h-4 w-4" />
-                                    <span>View Details</span>
-                                  </Link>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
+                <>
+                  <div className="space-y-3 md:hidden">
+                    {filteredApplications.map((application) => (
+                      <MobileListRowCard
+                        key={application.id}
+                        title={`Application #${application.id.slice(0, 8)}`}
+                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        meta={[
+                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
+                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                        ]}
+                        badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
+                        footer={renderInlineActions(application)}
+                      />
+                    ))}
+                  </div>
+                  <DataTableShell className="hidden md:block">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700">
+                        {filteredApplications.map((application) => (
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
+                            <td className="px-6 py-4">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700 hover:text-white">
+                                    <MoreVertical size={16} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="border-gray-700 bg-gray-800">
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedApplication(application);
+                                      setShowApproveDialog(true);
+                                    }}
+                                    className="text-gray-300 hover:bg-gray-700"
+                                  >
+                                    <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
+                                    <span>Approve</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => {
+                                      setSelectedApplication(application);
+                                      setShowRejectDialog(true);
+                                    }}
+                                    className="text-gray-300 hover:bg-gray-700"
+                                  >
+                                    <XCircle className="mr-2 h-4 w-4 text-red-400" />
+                                    <span>Reject</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem asChild className="text-gray-300 hover:bg-gray-700">
+                                    <Link href={`/admin/applications/${application.id}`}>
+                                      <Search className="mr-2 h-4 w-4" />
+                                      <span>View Details</span>
+                                    </Link>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </DataTableShell>
+                </>
               )}
             </TabsContent>
 
-            <TabsContent value="approved" className="p-0">
+            <TabsContent value="approved" className="space-y-3">
               {filteredApplications.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                    <CheckCircle className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No Approved Applications</h3>
-                  <p className="text-gray-500">
-                    There are currently no approved talent applications.
-                  </p>
+                <div className="py-10 text-center">
+                  <CheckCircle className="mx-auto mb-3 h-8 w-8 text-green-400" />
+                  <p className="text-sm text-gray-300">No approved applications found.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Application ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Gig ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Talent ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-50">
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.id}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.gig_id}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.talent_id}</div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-500">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            <Badge className="bg-green-100 text-green-800">Approved</Badge>
-                          </td>
-                          <td className="py-4 px-6">
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </td>
+                <>
+                  <div className="space-y-3 md:hidden">
+                    {filteredApplications.map((application) => (
+                      <MobileListRowCard
+                        key={application.id}
+                        title={`Application #${application.id.slice(0, 8)}`}
+                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        meta={[
+                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
+                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                        ]}
+                        badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
+                        footer={renderInlineActions(application)}
+                      />
+                    ))}
+                  </div>
+                  <DataTableShell className="hidden md:block">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700">
+                        {filteredApplications.map((application) => (
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
+                            <td className="px-6 py-4">{renderInlineActions(application)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </DataTableShell>
+                </>
               )}
             </TabsContent>
 
-            <TabsContent value="rejected" className="p-0">
+            <TabsContent value="rejected" className="space-y-3">
               {filteredApplications.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                    <XCircle className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-medium mb-2">No Rejected Applications</h3>
-                  <p className="text-gray-500">
-                    There are currently no rejected talent applications.
-                  </p>
+                <div className="py-10 text-center">
+                  <XCircle className="mx-auto mb-3 h-8 w-8 text-red-400" />
+                  <p className="text-sm text-gray-300">No rejected applications found.</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Application ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Gig ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Talent ID
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Applied Date
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Status
-                        </th>
-                        <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider py-3 px-6">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {filteredApplications.map((application) => (
-                        <tr key={application.id} className="hover:bg-gray-50">
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.id}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.gig_id}</div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-medium text-gray-900">{application.talent_id}</div>
-                          </td>
-                          <td className="py-4 px-6 text-gray-500">
-                            {new Date(application.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-4 px-6">
-                            <Badge className="bg-red-100 text-red-800">Rejected</Badge>
-                          </td>
-                          <td className="py-4 px-6">
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </td>
+                <>
+                  <div className="space-y-3 md:hidden">
+                    {filteredApplications.map((application) => (
+                      <MobileListRowCard
+                        key={application.id}
+                        title={`Application #${application.id.slice(0, 8)}`}
+                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        meta={[
+                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
+                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                        ]}
+                        badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
+                        footer={renderInlineActions(application)}
+                      />
+                    ))}
+                  </div>
+                  <DataTableShell className="hidden md:block">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700">
+                        {filteredApplications.map((application) => (
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
+                            <td className="px-6 py-4">{renderInlineActions(application)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </DataTableShell>
+                </>
               )}
             </TabsContent>
           </Tabs>
@@ -582,6 +618,6 @@ export function AdminApplicationsClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }
