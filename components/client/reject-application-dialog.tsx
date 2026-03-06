@@ -14,6 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { rejectApplication } from "@/lib/actions/booking-actions";
+import { logger } from "@/lib/utils/logger";
 
 interface RejectApplicationDialogProps {
   open: boolean;
@@ -57,7 +58,7 @@ export function RejectApplicationDialog({
       }
     } catch (err) {
       setError("An unexpected error occurred");
-      console.error("Reject application error:", err);
+      logger.error("Reject application dialog error", err);
     } finally {
       setLoading(false);
     }

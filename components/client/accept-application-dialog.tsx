@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { acceptApplication } from "@/lib/actions/booking-actions";
+import { logger } from "@/lib/utils/logger";
 
 interface AcceptApplicationDialogProps {
   open: boolean;
@@ -70,7 +71,7 @@ export function AcceptApplicationDialog({
       }
     } catch (err) {
       setError("An unexpected error occurred");
-      console.error("Accept application error:", err);
+      logger.error("Accept application dialog error", err);
     } finally {
       setLoading(false);
     }

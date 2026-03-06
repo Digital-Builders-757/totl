@@ -1,65 +1,56 @@
 "use client";
 
-import { Clock, MapPin, DollarSign, CheckCircle2, XCircle, MoreVertical, Briefcase } from "lucide-react";
+import { Clock, DollarSign, CheckCircle2, Briefcase } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { AcceptApplicationDialog } from "@/components/client/accept-application-dialog";
+import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+import type { Application } from "@/app/client/applications/types";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
-import { RejectApplicationDialog } from "@/components/client/reject-application-dialog";
 import { FiltersSheet } from "@/components/dashboard/filters-sheet";
-import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MediaThumb } from "@/components/ui/media-thumb";
-import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getClientApplications } from "@/lib/actions/client-applications-actions";
 import { createNameSlug } from "@/lib/utils/slug";
-import { publicBucketUrl } from "@/lib/utils/storage-urls";
 
-export interface Application {
-  id: string;
-  gig_id: string;
-  talent_id: string;
-  status: "new" | "under_review" | "shortlisted" | "rejected" | "accepted";
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  gigs?: {
-    title: string;
-    category?: string;
-    location: string;
-    compensation: string;
-  };
-  profiles?: {
-    display_name: string | null;
-    email_verified: boolean;
-    role: string;
-    avatar_url: string | null;
-    avatar_path: string | null;
-  };
-  talent_profiles?: {
-    first_name: string;
-    last_name: string;
-  } | null;
-}
+const AcceptApplicationDialog = dynamic(
+  () =>
+    import("@/components/client/accept-application-dialog").then((module) => ({
+      default: module.AcceptApplicationDialog,
+    })),
+  { ssr: false }
+);
+
+const RejectApplicationDialog = dynamic(
+  () =>
+    import("@/components/client/reject-application-dialog").then((module) => ({
+      default: module.RejectApplicationDialog,
+    })),
+  { ssr: false }
+);
+
+const MobileApplicationsList = dynamic(
+  () => import("./components/mobile-applications-list"),
+  { ssr: false }
+);
+
+const DesktopApplicationsList = dynamic(
+  () => import("./components/desktop-applications-list"),
+  { ssr: false }
+);
 
 interface ClientApplicationsClientProps {
+  userId: string;
   initialApplications: Application[];
 }
 
 export default function ClientApplicationsClient({
+  userId,
   initialApplications,
 }: ClientApplicationsClientProps) {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [gigFilter, setGigFilter] = useState("all");
@@ -69,8 +60,37 @@ export default function ClientApplicationsClient({
   const [acceptDialogOpen, setAcceptDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
 
-  const applications = initialApplications ?? [];
+  const {
+    data: applications = initialApplications ?? [],
+    mutate,
+  } = useSWR<Application[]>(
+    userId ? ["client-applications", userId] : null,
+    async () => {
+      const result = await getClientApplications();
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      return (result.applications as Application[]) ?? [];
+    },
+    {
+      fallbackData: initialApplications ?? [],
+      dedupingInterval: 30_000,
+      revalidateOnFocus: false,
+      revalidateOnMount: false,
+      shouldRetryOnError: false,
+      keepPreviousData: true,
+    }
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const handleChange = () => setIsDesktop(mediaQuery.matches);
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   const handleAcceptClick = (application: Application) => {
     setSelectedApplication(application);
@@ -82,8 +102,24 @@ export default function ClientApplicationsClient({
     setRejectDialogOpen(true);
   };
 
-  const handleDialogSuccess = () => {
-    router.refresh();
+  const handleDialogSuccess = (nextStatus: Application["status"]) => {
+    if (!selectedApplication) {
+      mutate();
+      return;
+    }
+
+    mutate(
+      applications.map((application) =>
+        application.id === selectedApplication.id
+          ? { ...application, status: nextStatus }
+          : application
+      ),
+      { revalidate: false }
+    );
+    setSelectedApplication(null);
+    setAcceptDialogOpen(false);
+    setRejectDialogOpen(false);
+    mutate();
   };
 
   const filteredApplications = useMemo(() => {
@@ -106,18 +142,48 @@ export default function ClientApplicationsClient({
     });
   }, [applications, searchTerm, statusFilter, gigFilter, activeTab]);
 
-  const uniqueGigs = Array.from(new Set(applications.map((app) => app.gig_id)));
+  const uniqueGigs = useMemo(
+    () => Array.from(new Set(applications.map((app) => app.gig_id))),
+    [applications]
+  );
   const activeFilterCount = gigFilter !== "all" ? 1 : 0;
-  const selectedGigLabel =
-    gigFilter === "all"
-      ? null
-      : applications.find((app) => app.gig_id === gigFilter)?.gigs?.title || "Selected gig";
-  const summaryItems = [
-    { label: "All", value: applications.length, icon: Briefcase },
-    { label: "New", value: applications.filter((app) => app.status === "new").length, icon: Clock },
-    { label: "Interviews", value: applications.filter((app) => app.status === "shortlisted").length, icon: Clock },
-    { label: "Hired", value: applications.filter((app) => app.status === "accepted").length, icon: CheckCircle2 },
-  ];
+  const selectedGigLabel = useMemo(
+    () =>
+      gigFilter === "all"
+        ? null
+        : applications.find((app) => app.gig_id === gigFilter)?.gigs?.title || "Selected gig",
+    [applications, gigFilter]
+  );
+  const applicationsByStatus = useMemo(() => {
+    const counts = {
+      new: 0,
+      under_review: 0,
+      shortlisted: 0,
+      accepted: 0,
+    };
+
+    for (const app of applications) {
+      if (app.status in counts) {
+        counts[app.status as keyof typeof counts] += 1;
+      }
+    }
+
+    return counts;
+  }, [applications]);
+
+  const summaryItems = useMemo(
+    () => [
+      { label: "All", value: applications.length, icon: Briefcase },
+      { label: "New", value: applicationsByStatus.new, icon: Clock },
+      {
+        label: "Interviews",
+        value: applicationsByStatus.shortlisted,
+        icon: Clock,
+      },
+      { label: "Hired", value: applicationsByStatus.accepted, icon: CheckCircle2 },
+    ],
+    [applications.length, applicationsByStatus.accepted, applicationsByStatus.new, applicationsByStatus.shortlisted]
+  );
 
   const getTalentName = (application: Application) => {
     if (application.talent_profiles?.first_name || application.talent_profiles?.last_name) {
@@ -184,7 +250,7 @@ export default function ClientApplicationsClient({
                 <div>
                   <p className="text-sm font-medium text-gray-300">Under Review</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "under_review").length}
+                    {applicationsByStatus.under_review}
                   </p>
                 </div>
                 <div className="bg-yellow-500/20 p-2 rounded-full">
@@ -200,7 +266,7 @@ export default function ClientApplicationsClient({
                 <div>
                   <p className="text-sm font-medium text-gray-300">Interviews</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "shortlisted").length}
+                    {applicationsByStatus.shortlisted}
                   </p>
                 </div>
                 <div className="bg-purple-500/20 p-2 rounded-full">
@@ -216,7 +282,7 @@ export default function ClientApplicationsClient({
                 <div>
                   <p className="text-sm font-medium text-gray-300">Hired</p>
                   <p className="text-2xl font-bold text-white">
-                    {applications.filter((app) => app.status === "accepted").length}
+                    {applicationsByStatus.accepted}
                   </p>
                 </div>
                 <div className="bg-green-500/20 p-2 rounded-full">
@@ -326,13 +392,13 @@ export default function ClientApplicationsClient({
                   All ({applications.length})
                 </TabsTrigger>
                 <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  New ({applications.filter((app) => app.status === "new").length})
+                  New ({applicationsByStatus.new})
                 </TabsTrigger>
                 <TabsTrigger value="interview" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Interviews ({applications.filter((app) => app.status === "shortlisted").length})
+                  Interviews ({applicationsByStatus.shortlisted})
                 </TabsTrigger>
                 <TabsTrigger value="hired" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Hired ({applications.filter((app) => app.status === "accepted").length})
+                  Hired ({applicationsByStatus.accepted})
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -340,13 +406,13 @@ export default function ClientApplicationsClient({
           <TabsList className="hidden w-full grid-cols-4 md:grid">
             <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
             <TabsTrigger value="new">
-              New ({applications.filter((app) => app.status === "new").length})
+              New ({applicationsByStatus.new})
             </TabsTrigger>
             <TabsTrigger value="interview">
-              Interviews ({applications.filter((app) => app.status === "shortlisted").length})
+              Interviews ({applicationsByStatus.shortlisted})
             </TabsTrigger>
             <TabsTrigger value="hired">
-              Hired ({applications.filter((app) => app.status === "accepted").length})
+              Hired ({applicationsByStatus.accepted})
             </TabsTrigger>
           </TabsList>
 
@@ -374,180 +440,30 @@ export default function ClientApplicationsClient({
               </Card>
             ) : (
               <>
-                <div className="space-y-3 md:hidden">
-                  {filteredApplications.map((application) => {
-                    const talentName = getTalentName(application);
-                    const profileHref = getTalentProfileHref(application);
-                    const appliedDate = new Date(application.created_at).toLocaleDateString();
-                    const showDecisionMenu =
-                      application.status === "new" || application.status === "under_review";
-
-                    return (
-                      <MobileListRowCard
-                        key={`${application.id}-mobile`}
-                        title={talentName}
-                        subtitle={application.gigs?.title || "Gig"}
-                        badge={<ApplicationStatusBadge status={application.status} showIcon={false} />}
-                        meta={[
-                          {
-                            label: "Location",
-                            value: application.gigs?.location || "Location TBD",
-                          },
-                          {
-                            label: "Comp",
-                            value: application.gigs?.compensation || "Comp TBD",
-                          },
-                          {
-                            label: "Applied",
-                            value: appliedDate,
-                          },
-                        ]}
-                        trailing={
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="More actions"
-                                className="h-11 w-11 text-gray-400 hover:bg-gray-700"
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                              <DropdownMenuItem asChild className="text-gray-200 focus:text-white">
-                                <Link href={profileHref}>Review profile</Link>
-                              </DropdownMenuItem>
-                              {showDecisionMenu ? (
-                                <>
-                                  <DropdownMenuItem
-                                    data-test="accept-application"
-                                    onClick={() => handleAcceptClick(application)}
-                                    className="text-gray-200 focus:text-white"
-                                  >
-                                    <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
-                                    Accept
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleRejectClick(application)}
-                                    className="text-gray-200 focus:text-white"
-                                  >
-                                    <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                                    Reject
-                                  </DropdownMenuItem>
-                                </>
-                              ) : null}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        }
-                        footer={
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-gray-400">Next action</span>
-                            <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
-                              Review profile
-                            </Link>
-                          </div>
-                        }
-                      />
-                    );
-                  })}
-                </div>
-                <div className="hidden space-y-4 md:block">
-                  {filteredApplications.map((application) => {
-                    const talentName = getTalentName(application);
-                    const talentInitials = getInitials(talentName);
-                    const profileHref = getTalentProfileHref(application);
-                    const appliedDate = new Date(application.created_at).toLocaleDateString();
-                    const showDecisionMenu =
-                      application.status === "new" || application.status === "under_review";
-
-                    const avatarSrc =
-                      application.profiles?.avatar_url ||
-                      publicBucketUrl("avatars", application.profiles?.avatar_path);
-
-                    return (
-                      <Card key={application.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
-                        <CardContent className="p-4 sm:p-6">
-                          <div className="flex flex-col gap-4 md:flex-row md:items-start">
-                            <MediaThumb
-                              src={avatarSrc}
-                              alt={`${talentName} profile`}
-                              variant="talent"
-                              fallbackText={talentInitials}
-                              className="w-16 md:w-20"
-                            />
-                            <div className="flex-1 space-y-3">
-                              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                                <div className="space-y-1">
-                                  <h3 className="text-lg font-semibold text-white">{talentName}</h3>
-                                  <p className="text-sm text-gray-300">{application.gigs?.title || "Gig"}</p>
-                                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
-                                    <span className="flex items-center gap-1">
-                                      <MapPin className="h-3 w-3" />
-                                      {application.gigs?.location || "Location TBD"}
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                      <DollarSign className="h-3 w-3" />
-                                      {application.gigs?.compensation || "Comp TBD"}
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      Applied {appliedDate}
-                                    </span>
-                                  </div>
-                                </div>
-                                <ApplicationStatusBadge status={application.status} showIcon={true} />
-                              </div>
-                              <div className="flex items-center justify-between border-t border-white/10 pt-3 text-sm">
-                                <span className="text-xs text-gray-400">Next action</span>
-                                <div className="flex items-center gap-2">
-                                  <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
-                                    Review profile
-                                  </Link>
-                                  {showDecisionMenu ? (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          aria-label="More actions"
-                                          className="h-11 w-11 text-gray-400 hover:bg-gray-700"
-                                        >
-                                          <MoreVertical className="h-4 w-4" />
-                                        </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                                        <DropdownMenuItem
-                                          data-test="accept-application"
-                                          onClick={() => handleAcceptClick(application)}
-                                          className="text-gray-200 focus:text-white"
-                                        >
-                                          <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
-                                          Accept
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                          onClick={() => handleRejectClick(application)}
-                                          className="text-gray-200 focus:text-white"
-                                        >
-                                          <XCircle className="mr-2 h-4 w-4 text-red-400" />
-                                          Reject
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
-                                  ) : (
-                                    <span className="text-xs text-gray-400">
-                                      {application.status === "accepted" ? "Accepted" : "Rejected"}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+                {isDesktop === null ? (
+                  <Card className="bg-gray-900 border-gray-700">
+                    <CardContent className="p-6 text-sm text-gray-300">
+                      Loading applications view...
+                    </CardContent>
+                  </Card>
+                ) : isDesktop ? (
+                  <DesktopApplicationsList
+                    applications={filteredApplications}
+                    getTalentName={getTalentName}
+                    getTalentProfileHref={getTalentProfileHref}
+                    getInitials={getInitials}
+                    onAccept={handleAcceptClick}
+                    onReject={handleRejectClick}
+                  />
+                ) : (
+                  <MobileApplicationsList
+                    applications={filteredApplications}
+                    getTalentName={getTalentName}
+                    getTalentProfileHref={getTalentProfileHref}
+                    onAccept={handleAcceptClick}
+                    onReject={handleRejectClick}
+                  />
+                )}
               </>
             )}
           </TabsContent>
@@ -563,7 +479,7 @@ export default function ClientApplicationsClient({
             talentName={selectedApplication.profiles?.display_name || "Talent"}
             gigTitle={selectedApplication.gigs?.title || "Gig"}
             suggestedCompensation={selectedApplication.gigs?.compensation}
-            onSuccess={handleDialogSuccess}
+            onSuccess={() => handleDialogSuccess("accepted")}
           />
           <RejectApplicationDialog
             open={rejectDialogOpen}
@@ -571,7 +487,7 @@ export default function ClientApplicationsClient({
             applicationId={selectedApplication.id}
             talentName={selectedApplication.profiles?.display_name || "Talent"}
             gigTitle={selectedApplication.gigs?.title || "Gig"}
-            onSuccess={handleDialogSuccess}
+            onSuccess={() => handleDialogSuccess("rejected")}
           />
         </>
       )}

@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Sentry Diagnostic Endpoint
@@ -52,10 +53,9 @@ export async function GET() {
     // Flush to ensure it's sent immediately
     await Sentry.flush(2000);
     
-    // eslint-disable-next-line no-console
-    console.log("[Sentry Diagnostic] Test error sent. Event ID:", testErrorId);
+    logger.info("[Sentry Diagnostic] Test error sent", { eventId: testErrorId });
   } catch (error) {
-    console.error("Failed to capture test error:", error);
+    logger.error("Failed to capture test error", error);
   }
   
   return NextResponse.json({

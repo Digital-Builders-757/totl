@@ -1,16 +1,10 @@
 "use client";
 
 import {
-  Calendar,
-  Clock,
   DollarSign,
-  MapPin,
-  MoreVertical,
   Users,
-  FileText,
   CheckCircle,
   Clock as ClockIcon,
-  UserCheck,
   Briefcase,
   BarChart3,
   Plus,
@@ -18,78 +12,29 @@ import {
   Bell,
   LogOut,
   Activity,
-  Eye,
-  Filter,
-  Search,
-  Phone,
-  ChevronRight,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import type { DashboardApplication, DashboardGig } from "@/app/client/dashboard/types";
 import { useAuth } from "@/components/auth/auth-provider";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
-import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
-import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
-import { EmptyState } from "@/components/layout/empty-state";
 import { PageShell } from "@/components/layout/page-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProfileCompletionBanner } from "@/components/ui/profile-completion-banner";
-import { SafeImage } from "@/components/ui/safe-image";
-import { GigStatusBadge, ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ClientDashboardData } from "@/lib/actions/dashboard-actions";
-import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 
-interface Application {
-  id: string;
-  gig_id: string;
-  talent_id: string;
-  status: string;
-  message: string | null;
-  created_at: string;
-  updated_at: string;
-  gigs?: {
-    title: string;
-    category?: string;
-    location: string;
-    compensation: string;
-  };
-  talent_profiles?: {
-    first_name: string;
-    last_name: string;
-    location: string | null;
-    experience: string | null;
-  } | null;
-  profiles?: {
-    display_name: string | null;
-    email_verified: boolean;
-    role: string;
-    avatar_url: string | null;
-  };
-}
-
-interface Gig {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  compensation: string;
-  category?: string;
-  status?: string;
-  image_url?: string | null;
-  created_at: string;
-  applications_count?: number;
-  application_deadline?: string | null;
-}
+const OverviewTabContent = dynamic(() => import("./tabs/overview-tab-content"), { ssr: false });
+const GigsTabContent = dynamic(() => import("./tabs/gigs-tab-content"), { ssr: false });
+const ApplicationsTabContent = dynamic(() => import("./tabs/applications-tab-content"), {
+  ssr: false,
+});
+const CreateTabContent = dynamic(() => import("./tabs/create-tab-content"), { ssr: false });
 
 interface ClientDashboardProps {
   initialData: ClientDashboardData | null;
@@ -106,8 +51,11 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
 
   // Use initialData from server component (no client-side fetching)
   const clientProfile = initialData?.clientProfile ?? null;
-  const applications = (initialData?.applications ?? []) as Application[];
-  const gigs = (initialData?.gigs ?? []) as Gig[];
+  const applications = useMemo(
+    () => ((initialData?.applications ?? []) as DashboardApplication[]),
+    [initialData?.applications]
+  );
+  const gigs = useMemo(() => ((initialData?.gigs ?? []) as DashboardGig[]), [initialData?.gigs]);
 
   // Memoize applications to prevent useEffect dependency changes
   const applicationsLength = applications.length;
@@ -194,7 +142,8 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   // Status color helper removed: dashboard uses StatusBadge components instead.
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
-  const getCategoryColor = (_category: string | undefined) => {
+  const getCategoryColor = (category: string | undefined) => {
+    void category;
     return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
@@ -392,675 +341,28 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <ProfileCompletionBanner
-              userRole="client"
+            <OverviewTabContent
               missingFields={missingFields}
-              profileUrl="/client/profile"
+              dashboardStats={dashboardStats}
+              gigs={gigs}
+              applications={applications}
+              upcomingDeadlines={upcomingDeadlines}
+              panelCardClass={panelCardClass}
+              getCategoryColor={getCategoryColor}
             />
-            <div className="space-y-2 md:hidden">
-              <MobileSummaryRow
-                items={[
-                  { label: "Active gigs", value: dashboardStats.activeGigs, icon: Activity },
-                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
-                  { label: "New", value: dashboardStats.newApplications, icon: ClockIcon },
-                  { label: "Closed", value: dashboardStats.closedGigs, icon: CheckCircle },
-                ]}
-              />
-              <div className="px-1">
-                <SecondaryActionLink href="/post-gig">Post a gig</SecondaryActionLink>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Gigs */}
-              <div className="totl-border-violet totl-hover-glow">
-                <Card className={`${panelCardClass} totl-border-violet-inner`}>
-                  <CardHeader>
-                    <div className="card-header-row">
-                      <CardTitle className="flex items-center gap-2 text-white">
-                      <Briefcase className="h-5 w-5 text-white" />
-                      Recent Gigs
-                    </CardTitle>
-                    <GigStatusBadge
-                      status="active"
-                      className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
-                    />
-                  </div>
-                  <CardDescription className="text-gray-400">Your latest gig postings and their status</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {gigs.length > 0 ? (
-                    <>
-                      <div className="md:hidden space-y-3">
-                        {gigs.slice(0, 3).map((gig) => (
-                          <div key={`${gig.id}-mobile`} className="elev-1 rounded-xl border border-white/10 p-3">
-                            <div className="flex items-start gap-3">
-                              <SafeImage
-                                src={gig.image_url || "/images/totl-logo.png"}
-                                alt={gig.title}
-                                width={48}
-                                height={48}
-                                className="rounded-md object-cover"
-                                fallbackSrc="/images/totl-logo-transparent.png"
-                              />
-                              <div className="flex-1 min-w-0 space-y-1">
-                                <p className="text-sm font-semibold text-white truncate">{gig.title}</p>
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                  <GigStatusBadge status={gig.status ?? "draft"} />
-                                  <span>{gig.location}</span>
-                                </div>
-                                <p className="text-xs text-gray-400">
-                                  {gig.applications_count || 0} applications
-                                </p>
-                              </div>
-                              <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700">
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="card-footer-row">
-                              <span>Next action</span>
-                              <Link href={`/client/gigs`} className="text-[var(--oklch-text-primary)] hover:underline">
-                                Review gig
-                              </Link>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="hidden md:block space-y-4">
-                        {gigs.slice(0, 3).map((gig) => (
-                          <div key={gig.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
-                            <SafeImage
-                              src={gig.image_url || "/images/totl-logo.png"}
-                              alt={gig.title}
-                              width={48}
-                              height={48}
-                              className="rounded-md object-cover"
-                              fallbackSrc="/images/totl-logo-transparent.png"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-white truncate">{gig.title}</h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                                  {getCategoryLabel(gig.category ?? "")}
-                                </Badge>
-                                <GigStatusBadge status={gig.status ?? "draft"} />
-                              </div>
-                              <p className="text-sm text-gray-400 mt-1">
-                                {gig.applications_count || 0} applications • {gig.location}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-white">{gig.compensation}</p>
-                              <p className="text-sm text-gray-400">{gig.created_at}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <EmptyState
-                      icon={FileText}
-                      title="No gigs posted yet"
-                      description="Start by creating your first gig to attract talent"
-                      className="totl-surface-card"
-                      action={{
-                        label: "Post Your First Gig",
-                        href: "/post-gig",
-                      }}
-                    />
-                  )}
-                  {gigs.length > 0 ? (
-                    <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
-                      <Link href="/client/gigs">View All Gigs</Link>
-                    </Button>
-                  ) : (
-                    <div className="px-1">
-                      <SecondaryActionLink href="/client/gigs">Open gigs workspace →</SecondaryActionLink>
-                    </div>
-                  )}
-                </CardContent>
-                </Card>
-              </div>
-
-              {/* Recent Applications */}
-              <div className="totl-border-violet totl-hover-glow">
-                <Card className={`${panelCardClass} totl-border-violet-inner`}>
-                  <CardHeader>
-                    <div className="card-header-row">
-                      <CardTitle className="flex items-center gap-2 text-white">
-                      <Users className="h-5 w-5 text-white" />
-                      Recent Applications
-                    </CardTitle>
-                    <Badge
-                      variant="outline"
-                      className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
-                    >
-                      New
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-gray-400">Latest talent applications to review</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-xs text-gray-400">
-                    Clients only see talent who applied to their gigs—no public directory is exposed.
-                  </p>
-                  {applications.length > 0 ? (
-                    <>
-                      <div className="md:hidden space-y-3">
-                        {applications.slice(0, 3).map((application) => (
-                          <div
-                            key={`${application.id}-mobile`}
-                            className="elev-1 rounded-xl border border-white/10 p-3"
-                          >
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                  src={
-                                    application.profiles?.avatar_url ||
-                                    "/images/totl-logo-transparent.png"
-                                  }
-                                  alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
-                                />
-                                <AvatarFallback>
-                                  {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
-                                  {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0 space-y-1">
-                                <p className="text-sm font-semibold text-white">
-                                  {application.talent_profiles?.first_name}{" "}
-                                  {application.talent_profiles?.last_name}
-                                </p>
-                                <p className="text-xs text-gray-400 truncate">
-                                  {application.gigs?.title}
-                                </p>
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
-                                  <ApplicationStatusBadge status={application.status} showIcon={false} />
-                                  <span>{application.talent_profiles?.location}</span>
-                                </div>
-                              </div>
-                              <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700">
-                                <ChevronRight className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="card-footer-row">
-                              <span>Next action</span>
-                              <Link href="/client/applications" className="text-[var(--oklch-text-primary)] hover:underline">
-                                Review
-                              </Link>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="hidden md:block space-y-4">
-                        {applications.slice(0, 3).map((application) => (
-                          <div key={application.id} className="flex items-center gap-4 p-3 rounded-lg border border-gray-700">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage
-                                src={
-                                  application.profiles?.avatar_url ||
-                                  "/images/totl-logo-transparent.png"
-                                }
-                                alt={`${application.talent_profiles?.first_name || "Talent"} ${application.talent_profiles?.last_name || ""}`}
-                              />
-                              <AvatarFallback>
-                                {`${application.talent_profiles?.first_name || "T"}`.charAt(0)}
-                                {`${application.talent_profiles?.last_name || ""}`.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-white">
-                                {application.talent_profiles?.first_name}{" "}
-                                {application.talent_profiles?.last_name}
-                              </h4>
-                              <p className="text-sm text-gray-400 truncate">
-                                {application.gigs?.title}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <ApplicationStatusBadge status={application.status} showIcon={true} />
-                                <span className="text-sm text-gray-400">
-                                  {application.talent_profiles?.location}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-400">
-                                {new Date(application.created_at).toLocaleDateString()}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {application.talent_profiles?.experience}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <EmptyState
-                      icon={Users}
-                      title="No applications yet"
-                      description="Applications will appear here once talent starts applying to your gigs"
-                      className="totl-surface-card"
-                    />
-                  )}
-                  <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
-                    <Link href="/client/applications">View All Applications</Link>
-                  </Button>
-                </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* Upcoming Deadlines */}
-            <div className="totl-border-violet totl-hover-glow">
-              <Card className={`${panelCardClass} totl-border-violet-inner`}>
-                <CardHeader>
-                  <div className="card-header-row">
-                    <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Upcoming Deadlines
-                  </CardTitle>
-                  <Badge
-                    variant="outline"
-                    className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
-                  >
-                    Next 30d
-                  </Badge>
-                </div>
-                <CardDescription>Gigs with approaching application deadlines</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {upcomingDeadlines.length > 0 ? (
-                    <>
-                      <div className="md:hidden space-y-3">
-                        {upcomingDeadlines.map((deadline) => (
-                          <div
-                            key={`${deadline.id}-mobile`}
-                            className="elev-1 rounded-xl border border-white/10 p-3"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="space-y-1">
-                                <p className="text-sm font-semibold text-white">{deadline.title}</p>
-                                <p className="text-xs text-gray-400">
-                                  {deadline.applications_count || 0} applications
-                                </p>
-                                <p className="text-xs text-gray-400">
-                                  Due {deadline.application_deadline}
-                                </p>
-                              </div>
-                              <GigStatusBadge status={deadline.status ?? "draft"} />
-                            </div>
-                            <div className="card-footer-row">
-                              <span>Next action</span>
-                              <Link href="/client/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                                Review gig
-                              </Link>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="hidden md:block space-y-4">
-                        {upcomingDeadlines.map((deadline) => (
-                          <div
-                            key={deadline.id}
-                            className="flex items-center justify-between p-4 rounded-lg border border-gray-800"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="flex-1">
-                                <h4 className="font-medium text-white">{deadline.title}</h4>
-                                <p className="text-sm text-gray-400">
-                                  {deadline.applications_count || 0} applications received
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-medium text-white">
-                                Due {deadline.application_deadline}
-                              </p>
-                              <GigStatusBadge status={deadline.status ?? "draft"} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <EmptyState
-                      icon={Calendar}
-                      title="No upcoming deadlines"
-                      description="Deadlines will appear here for gigs with application deadlines"
-                      className="totl-surface-card"
-                    />
-                  )}
-                </div>
-              </CardContent>
-              </Card>
-            </div>
           </TabsContent>
 
-          {/* My Gigs Tab */}
           <TabsContent value="gigs" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-white">My Gigs</h2>
-                <p className="text-gray-300">Manage your posted gigs and track their performance</p>
-              </div>
-              <Button
-                asChild
-                className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:opacity-90"
-              >
-                <Link href="/post-gig">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post New Gig
-                </Link>
-              </Button>
-            </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {gigs.map((gig) => (
-                <Card
-                  key={gig.id}
-                  className="hover:shadow-lg transition-shadow bg-gray-900/80 border border-gray-800 text-white"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg text-white">{gig.title}</CardTitle>
-                        <CardDescription className="mt-1 text-gray-400">{gig.location}</CardDescription>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <SafeImage
-                      src={gig.image_url || "/images/totl-logo.png"}
-                      alt={gig.title}
-                      width={300}
-                      height={200}
-                      className="w-full h-32 md:h-48 object-cover rounded-lg"
-                      fallbackSrc="/images/totl-logo-transparent.png"
-                    />
-
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className={getCategoryColor(gig.category)}>
-                        {getCategoryLabel(gig.category || "")}
-                      </Badge>
-                      <GigStatusBadge status={gig.status || "draft"} showIcon={true} />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Compensation:</span>
-                        <span className="font-medium">{gig.compensation}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Applications:</span>
-                        <span className="font-medium">{gig.applications_count}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Posted:</span>
-                        <span className="font-medium">{gig.created_at}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-gray-700 text-white hover:bg-white/5"
-                      >
-                        <Users className="h-4 w-4 mr-2" />
-                        Applications
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <GigsTabContent gigs={gigs} getCategoryColor={getCategoryColor} />
           </TabsContent>
 
-          {/* Applications Tab */}
           <TabsContent value="applications" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-white">Applications</h2>
-                <p className="text-gray-300">Review and manage talent applications for your gigs</p>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
-                  Filter
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {applications.length === 0 ? (
-                <EmptyState
-                  icon={FileText}
-                  title="No applications yet"
-                  description="Applications will appear here once talent starts applying to your gigs. Make sure your gigs are active and visible to talent."
-                  className="totl-surface-card"
-                  action={{
-                    label: "Create a Gig",
-                    onClick: () => setActiveTab("create"),
-                  }}
-                />
-              ) : (
-                <>
-                  <div className="md:hidden space-y-3">
-                    {applications.map((application) => (
-                      <div
-                        key={`${application.id}-mobile`}
-                        className="elev-1 rounded-xl border border-white/10 p-3 text-white"
-                      >
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage
-                              src={
-                                application.profiles?.avatar_url ||
-                                "/images/totl-logo-transparent.png"
-                              }
-                              alt={
-                                application.talent_profiles?.first_name &&
-                                application.talent_profiles?.last_name
-                                  ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
-                                  : application.profiles?.display_name || "Talent"
-                              }
-                            />
-                            <AvatarFallback className="text-sm">
-                              {application.talent_profiles?.first_name &&
-                              application.talent_profiles?.last_name
-                                ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
-                                : application.profiles?.display_name?.charAt(0) || "T"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <p className="text-sm font-semibold text-white">
-                              {application.talent_profiles?.first_name &&
-                              application.talent_profiles?.last_name
-                                ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
-                                : application.profiles?.display_name || "Talent User"}
-                            </p>
-                            <p className="text-xs text-gray-400 truncate">{application.gigs?.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                {application.talent_profiles?.location || "Location not specified"}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {application.talent_profiles?.experience || "Experience not specified"}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <ApplicationStatusBadge status={application.status} />
-                            <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700">
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <div className="card-footer-row">
-                          <span>Next action</span>
-                          <Link href="/client/applications" className="text-[var(--oklch-text-primary)] hover:underline">
-                            Review
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="hidden md:block space-y-4">
-                    {applications.map((application) => (
-                      <Card
-                        key={application.id}
-                        className="hover:shadow-md transition-shadow bg-gray-900/80 border border-gray-800 text-white"
-                      >
-                        <CardContent className="p-6">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-16 w-16">
-                              <AvatarImage
-                                src={
-                                  application.profiles?.avatar_url ||
-                                  "/images/totl-logo-transparent.png"
-                                }
-                                alt={
-                                  application.talent_profiles?.first_name &&
-                                  application.talent_profiles?.last_name
-                                    ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
-                                    : application.profiles?.display_name || "Talent"
-                                }
-                              />
-                              <AvatarFallback className="text-lg">
-                                {application.talent_profiles?.first_name &&
-                                application.talent_profiles?.last_name
-                                  ? `${application.talent_profiles.first_name.charAt(0)}${application.talent_profiles.last_name.charAt(0)}`
-                                  : application.profiles?.display_name?.charAt(0) || "T"}
-                              </AvatarFallback>
-                            </Avatar>
-
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h3 className="text-lg font-semibold text-white">
-                                    {application.talent_profiles?.first_name &&
-                                    application.talent_profiles?.last_name
-                                      ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
-                                      : application.profiles?.display_name || "Talent User"}
-                                  </h3>
-                                  <p className="text-gray-300">{application.gigs?.title}</p>
-                                  <div className="flex items-center gap-4 mt-2">
-                                    <span className="text-sm text-gray-400">
-                                      <MapPin className="h-4 w-4 inline mr-1" />
-                                      {application.talent_profiles?.location ||
-                                        "Location not specified"}
-                                    </span>
-                                    <span className="text-sm text-gray-400">
-                                      <Clock className="h-4 w-4 inline mr-1" />
-                                      {application.talent_profiles?.experience ||
-                                        "Experience not specified"}
-                                    </span>
-                                    <span className="text-sm text-gray-400">
-                                      Applied {new Date(application.created_at).toLocaleDateString()}
-                                    </span>
-                                    {application.profiles?.email_verified && (
-                                      <span className="text-sm text-green-600">
-                                        <CheckCircle className="h-4 w-4 inline mr-1" />
-                                        Verified
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <ApplicationStatusBadge status={application.status} />
-                              </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
-                                <UserCheck className="h-4 w-4 mr-2" />
-                                Review
-                              </Button>
-                              <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
-                                <Phone className="h-4 w-4 mr-2" />
-                                Contact
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+            <ApplicationsTabContent applications={applications} onCreateGig={() => setActiveTab("create")} />
           </TabsContent>
 
-          {/* Create Gig Tab */}
           <TabsContent value="create" className="space-y-6">
-            <div className="text-center max-w-2xl mx-auto">
-              <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6">
-                <Plus className="h-10 w-10 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-4">Create Your Next Gig</h2>
-              <p className="text-gray-300 mb-8">
-                Post a new opportunity or gig to find the perfect talent for your project. Our
-                platform connects you with qualified talent and professionals.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
-                  <div className="bg-purple-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-6 w-6 text-purple-300" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Easy Setup</h3>
-                  <p className="text-sm text-gray-400">
-                    Fill out a simple form with your project details
-                  </p>
-                </Card>
-
-                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
-                  <div className="bg-green-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <Users className="h-6 w-6 text-emerald-300" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Quality Applications</h3>
-                  <p className="text-sm text-gray-400">
-                    Receive applications from qualified talent
-                  </p>
-                </Card>
-
-                <Card className="text-center p-6 bg-gray-900/60 border border-gray-800 text-white">
-                  <div className="bg-blue-900/40 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="h-6 w-6 text-sky-300" />
-                  </div>
-                  <h3 className="font-semibold text-white mb-2">Quick Hiring</h3>
-                  <p className="text-sm text-gray-400">
-                    Review profiles and hire the perfect match
-                  </p>
-                </Card>
-              </div>
-
-              <Button size="lg" asChild>
-                <Link href="/post-gig">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Start Creating Gig
-                </Link>
-              </Button>
-            </div>
+            <CreateTabContent />
           </TabsContent>
         </Tabs>
       </div>

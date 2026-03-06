@@ -189,6 +189,11 @@ npm run build
 - **`no-console` build blocker in client utilities/components:** `next build` fails on `Error: Unexpected console statement. no-console`
   - **Fix:** Replace `console.log/debug` with `logger.info/debug` from `@/lib/utils/logger` (or remove log if unnecessary).
   - **Prevention:** If temporary diagnostics are needed, use project logger utilities instead of direct console calls.
+- **Module not found after chunk-splitting (`Can't resolve './tabs/...` or `./components/...`):**
+  - **Symptom:** `next build` fails immediately after dynamic-import refactors.
+  - **Root Cause:** One or more extracted files were not created/moved with the expected path used in `dynamic(() => import("..."))`.
+  - **Fix:** Verify the imported module path and confirm files exist on disk for every dynamic import target before ship.
+  - **Prevention:** After each split pass, run `npm run build` (not only route-scoped lint) to catch missing-module regressions early.
 - **Server Action 400 on File Upload:** Upload request fails before action runs (Network shows 400, no server logs)
   - **Root Cause:** Server Actions body limit defaults to 1MB
   - **Fix:** Set `experimental.serverActions.bodySizeLimit` in `next.config.mjs` (e.g., `4mb`), align client/server validation caps, and redeploy

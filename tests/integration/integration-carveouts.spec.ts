@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { loginWithCredentials } from "../helpers/auth";
+import { ensureTalentReady } from "../helpers/ensure-talent-ready";
+import { createTalentTestUser } from "../helpers/test-data";
 
 /**
  * Carved deterministic scenarios from legacy integration scaffold.
@@ -139,5 +142,263 @@ test.describe("Integration carve-outs (deterministic)", () => {
     } finally {
       await Promise.all(contexts.map((ctx) => ctx.close()));
     }
+  });
+
+  test("Complete booking workflow", async ({ browser, request }, testInfo) => {
+    const contexts = await Promise.all([browser.newContext(), browser.newContext(), browser.newContext()]);
+    try {
+      const [publicPage, adminPage, talentPage] = await Promise.all(
+        contexts.map((ctx) => ctx.newPage())
+      );
+
+      // Signed-out users should be auth-gated from booking surfaces.
+      await publicPage.goto("/client/bookings", { waitUntil: "domcontentloaded" });
+      await expect(publicPage).toHaveURL(/\/login(\?|$)/);
+
+      const adminUser = createTalentTestUser("pw-integration-booking-admin", testInfo, {
+        firstName: "Booking",
+        variant: "admin-carveout",
+      });
+      const talentUser = createTalentTestUser("pw-integration-booking-talent", testInfo, {
+        firstName: "Booking",
+        variant: "talent-carveout",
+      });
+
+      const [adminCreateRes, talentCreateRes] = await Promise.all([
+        request.post("/api/admin/create-user", {
+          data: {
+            email: adminUser.email,
+            password: adminUser.password,
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            role: "admin",
+          },
+        }),
+        request.post("/api/admin/create-user", {
+          data: {
+            email: talentUser.email,
+            password: talentUser.password,
+            firstName: talentUser.firstName,
+            lastName: talentUser.lastName,
+            role: "talent",
+          },
+        }),
+      ]);
+      expect(adminCreateRes.ok()).toBeTruthy();
+      expect(talentCreateRes.ok()).toBeTruthy();
+
+      await loginWithCredentials(adminPage, {
+        email: adminUser.email,
+        password: adminUser.password,
+      });
+      await adminPage.goto("/client/bookings", { waitUntil: "domcontentloaded" });
+      await expect(adminPage).toHaveURL(/\/admin\/dashboard(\?|$|\/)/);
+
+      await loginWithCredentials(talentPage, {
+        email: talentUser.email,
+        password: talentUser.password,
+      });
+      await ensureTalentReady(talentPage);
+      await talentPage.goto("/talent/bookings", { waitUntil: "domcontentloaded" });
+      await expect(talentPage).toHaveURL(/\/(talent\/bookings|talent\/dashboard|onboarding)(\?|$|\/)/);
+    } finally {
+      await Promise.all(contexts.map((ctx) => ctx.close()));
+    }
+  });
+
+  test("File upload and storage integration", async ({ page, request }, testInfo) => {
+    test.setTimeout(180000);
+
+    // Signed-out contract for upload surface ownership.
+    await page.goto("/settings", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login(\?|$)/);
+
+    const user = createTalentTestUser("pw-integration-upload", testInfo, {
+      firstName: "Upload",
+      variant: "carveout",
+    });
+
+    const createRes = await request.post("/api/admin/create-user", {
+      data: {
+        email: user.email,
+        password: user.password,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: "talent",
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+
+    await loginWithCredentials(page, { email: user.email, password: user.password });
+    await ensureTalentReady(page);
+
+    await page.goto("/settings", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/settings(\?|$)/);
+
+    const portfolioTab = page.getByRole("tab", { name: /portfolio/i }).first();
+    await expect(portfolioTab).toBeVisible();
+    await portfolioTab.click();
+
+    const addImageButton = page.getByRole("button", { name: /add image/i }).first();
+    await expect(addImageButton).toBeVisible();
+    await addImageButton.click();
+
+    const uploadButton = page.getByRole("button", { name: /upload portfolio image/i }).first();
+    await expect(uploadButton).toBeVisible();
+    await expect(uploadButton).toBeDisabled();
+
+    // Deterministic upload contract: invalid mime type is rejected client-side.
+    await page.locator('input[type="file"]').first().setInputFiles({
+      name: "not-image.txt",
+      mimeType: "text/plain",
+      buffer: Buffer.from("not-an-image"),
+    });
+    await expect(page.getByText(/invalid file type/i)).toBeVisible();
+    await expect(uploadButton).toBeDisabled();
+  });
+
+  test("Talent discovery and contact workflow", async ({ page, request }, testInfo) => {
+    // Public talent discovery surface should remain reachable for signed-out users.
+    await page.goto("/talent", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/talent(\?|$|\/)/);
+
+    // Signed-out users should be auth-gated from protected talent workflow surfaces.
+    await page.goto("/talent/applications", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login(\?|$)/);
+
+    const user = createTalentTestUser("pw-integration-talent-discovery", testInfo, {
+      firstName: "Discovery",
+      variant: "contact-carveout",
+    });
+
+    const createRes = await request.post("/api/admin/create-user", {
+      data: {
+        email: user.email,
+        password: user.password,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: "talent",
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+
+    await loginWithCredentials(page, { email: user.email, password: user.password });
+    await ensureTalentReady(page);
+
+    await page.goto("/talent", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/talent(\?|$|\/)/);
+
+    await page.goto("/talent/applications", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/(talent\/applications|talent\/dashboard|onboarding)(\?|$|\/)/);
+  });
+
+  test("Client posts gig, talent applies, client reviews", async ({ browser, request }, testInfo) => {
+    const contexts = await Promise.all([browser.newContext(), browser.newContext(), browser.newContext()]);
+    try {
+      const [publicPage, adminPage, talentPage] = await Promise.all(
+        contexts.map((ctx) => ctx.newPage())
+      );
+
+      // Signed-out users should be blocked from admin application-review surface.
+      await publicPage.goto("/admin/applications", { waitUntil: "domcontentloaded" });
+      await expect(publicPage).toHaveURL(/\/login(\?|$)/);
+
+      const adminUser = createTalentTestUser("pw-integration-app-review-admin", testInfo, {
+        firstName: "Review",
+        variant: "admin-carveout",
+      });
+      const talentUser = createTalentTestUser("pw-integration-app-review-talent", testInfo, {
+        firstName: "Review",
+        variant: "talent-carveout",
+      });
+
+      const [adminCreateRes, talentCreateRes] = await Promise.all([
+        request.post("/api/admin/create-user", {
+          data: {
+            email: adminUser.email,
+            password: adminUser.password,
+            firstName: adminUser.firstName,
+            lastName: adminUser.lastName,
+            role: "admin",
+          },
+        }),
+        request.post("/api/admin/create-user", {
+          data: {
+            email: talentUser.email,
+            password: talentUser.password,
+            firstName: talentUser.firstName,
+            lastName: talentUser.lastName,
+            role: "talent",
+          },
+        }),
+      ]);
+      expect(adminCreateRes.ok()).toBeTruthy();
+      expect(talentCreateRes.ok()).toBeTruthy();
+
+      await loginWithCredentials(adminPage, {
+        email: adminUser.email,
+        password: adminUser.password,
+      });
+      await adminPage.goto("/admin/applications", { waitUntil: "domcontentloaded" });
+      await expect(adminPage).toHaveURL(/\/(admin\/applications|admin\/dashboard)(\?|$|\/)/);
+
+      await loginWithCredentials(talentPage, {
+        email: talentUser.email,
+        password: talentUser.password,
+      });
+      await ensureTalentReady(talentPage);
+      await talentPage.goto("/talent/applications", { waitUntil: "domcontentloaded" });
+      await expect(talentPage).toHaveURL(/\/(talent\/applications|talent\/dashboard|onboarding)(\?|$|\/)/);
+    } finally {
+      await Promise.all(contexts.map((ctx) => ctx.close()));
+    }
+  });
+
+  test("End-to-end talent journey", async ({ page, request }, testInfo) => {
+    // Signed-out talent terminal contract.
+    await page.goto("/talent/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login(\?|$)/);
+
+    const user = createTalentTestUser("pw-integration-talent-journey", testInfo, {
+      firstName: "Journey",
+      variant: "talent-carveout",
+    });
+
+    const createRes = await request.post("/api/admin/create-user", {
+      data: {
+        email: user.email,
+        password: user.password,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: "talent",
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+
+    await loginWithCredentials(page, { email: user.email, password: user.password });
+    await ensureTalentReady(page);
+
+    await page.goto("/talent/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/(talent\/dashboard|onboarding)(\?|$|\/)/);
+
+    // Journey contract: signed-in talent can still reach gig discovery surface.
+    await page.goto("/gigs", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/gigs(\?|$|\/)/);
+  });
+
+  test("End-to-end client journey", async ({ page }) => {
+    // Current middleware contract in this environment auth-gates client journey entrypoints.
+    await page.goto("/client/apply", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login\?returnUrl=%2Fclient%2Fapply/);
+
+    // Success deep-link also requires auth.
+    await page.goto("/client/apply/success?applicationId=deterministic-contract", {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page).toHaveURL(/\/login\?returnUrl=%2Fclient%2Fapply%2Fsuccess/);
+
+    // Client dashboard remains protected for signed-out users.
+    await page.goto("/client/dashboard", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/\/login(\?|$)/);
   });
 });

@@ -5,6 +5,7 @@ import { createServerClient } from "@supabase/ssr";
 import type { SetAllCookies } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 export async function createSupabaseServer(): Promise<SupabaseClient<Database>> {
@@ -17,8 +18,7 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
 
   // Debug logging for development (gated behind DEBUG_SUPABASE flag)
   if (process.env.NODE_ENV === 'development' && process.env.DEBUG_SUPABASE === '1') {
-    // eslint-disable-next-line no-console
-    console.log('Supabase Server Client Debug:', {
+    logger.debug("Supabase Server Client Debug", {
       has_SUPABASE_URL: Boolean(process.env.SUPABASE_URL),
       has_SUPABASE_ANON_KEY: Boolean(process.env.SUPABASE_ANON_KEY),
       has_NEXT_PUBLIC_SUPABASE_URL: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
@@ -59,8 +59,9 @@ export async function createSupabaseServer(): Promise<SupabaseClient<Database>> 
             // The session will still work correctly with the cookies that are already set.
             // Only log in development when explicitly debugging.
             if (process.env.NODE_ENV === "development" && process.env.DEBUG_SUPABASE === "1") {
-              // eslint-disable-next-line no-console
-              console.warn("[supabase-server] cookieStore.set failed (expected in Server Components)", err);
+              logger.warn("[supabase-server] cookieStore.set failed (expected in Server Components)", {
+                error: err instanceof Error ? err.message : String(err),
+              });
             }
           }
         }) satisfies SetAllCookies,

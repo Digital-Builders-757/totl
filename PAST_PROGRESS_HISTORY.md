@@ -6,6 +6,82 @@
 
 ---
 
+# 🧪 BETA FEEDBACK LOG (MARCH 2026)
+
+Use this section to capture live beta tester findings during launch prep.
+
+## Template (copy for each tester/session)
+
+- **Date/Time:**
+- **Tester:**
+- **Environment:** (prod/preview/local + browser/device)
+- **Flows tested:** subscription / applications / moderation
+- **Outcome:** PASS / PASS WITH NOTES / FAIL
+- **Issues found:**
+  - Severity:
+  - Route:
+  - Repro steps:
+  - Expected vs actual:
+- **Evidence:** (screenshots/videos/links)
+- **Follow-up owner + ETA:**
+
+## Session Log
+
+### 2026-03-05 (pre-beta readiness pass)
+- Prepared formal smoke checklist at `docs/qa/BETA_SMOKE_TEST_CHECKLIST_2026-03-05.md`.
+- Security + role-gating preflight validation completed:
+  - `npm run security:check` -> pass
+  - `npm run test:qa:focused-routes` -> 69 passed / 0 failed
+- **Status:** ready to ingest real-user feedback entries.
+
+### 2026-03-05 (internal beta dry-run execution)
+- **Date/Time:** 2026-03-05 (internal QA run)
+- **Tester:** Engineering (internal dry-run)
+- **Environment:** local / Chromium desktop + mobile viewport contracts (390x844)
+- **Flows tested:** subscription / applications / moderation
+- **Outcome:** PASS WITH NOTES
+- **Command evidence:**
+  - `npx playwright test tests/talent/talent-subscribe-route.spec.ts tests/talent/talent-billing-route.spec.ts tests/talent/talent-applications-route.spec.ts tests/admin/admin-applications-route.spec.ts tests/client/client-applications-route.spec.ts tests/admin/admin-moderation-route.spec.ts tests/admin/admin-users-route.spec.ts tests/admin/admin-talent-route.spec.ts tests/admin/admin-gigs-route.spec.ts tests/admin/admin-role-guardrail.spec.ts tests/admin/admin-diagnostic-route.spec.ts --project=chromium --retries=0 --reporter=list`
+  - Result: **36 passed / 0 failed**
+- **Issues found:**
+  - Severity: none
+  - Route: n/a
+  - Repro steps: n/a
+  - Expected vs actual: all tested route contracts matched expected behavior
+- **Evidence:** terminal run output + passing Playwright report
+- **Follow-up owner + ETA:** Product/QA to run live external beta sessions and append real-user findings
+- **Notes:** this confirms checklist coverage is green in internal automation; real-user exploratory feedback is still pending.
+
+### 2026-03-05 (beta session operations runbook)
+- Published `docs/qa/BETA_SESSION_EXECUTION_RUNBOOK_2026-03-05.md` to standardize live tester execution.
+- Added severity rubric (`P0-P3`), evidence requirements, and daily triage cadence.
+- **Status:** ready for coordinated external beta sessions.
+
+### 2026-03-05 (soft launch operations prep)
+- Published `docs/qa/SOFT_LAUNCH_RUNBOOK_2026-03-05.md` with go/no-go gates, rollback triggers, and post-deploy validation sequence.
+- Re-ran launch gates:
+  - `npm run build` -> pass (non-blocking lint warnings only)
+  - `npm run test:qa:focused-routes` -> **69 passed / 0 failed**
+- Updated `docs/DOCUMENTATION_INDEX.md` to include new beta + soft-launch QA artifacts.
+- **Status:** launch procedures documented; awaiting real-user beta session evidence before soft launch execution.
+
+### 2026-03-06 (external beta session coordination started)
+- **Date/Time:** 2026-03-06 (coordination kickoff; waiting for live tester execution window)
+- **Tester:** pending real-user assignment
+- **Environment:** pending confirmation (prod/preview + browser/device)
+- **Flows tested:** subscription / applications / moderation (checklist scope pre-assigned)
+- **Outcome:** pending
+- **Issues found:**
+  - Severity: pending
+  - Route: pending
+  - Repro steps: pending
+  - Expected vs actual: pending
+- **Evidence:** pending screenshots/videos/session notes from real tester
+- **Follow-up owner + ETA:** Product/QA owner to execute live session and record final evidence in this entry.
+- **Notes:** checklist + runbook are execution-ready; this entry is the active handoff slot for the first external real-user beta session.
+
+---
+
 # 🚀 MAJOR MILESTONES & ACCOMPLISHMENTS
 
 ## 🎯 **January 15, 2025 - Authentication Flow Consolidation**

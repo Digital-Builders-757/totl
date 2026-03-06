@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** March 5, 2026
+**Last Updated:** March 6, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -133,7 +133,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
 - `PERFORMANCE_BASELINE.md` - **✅ NEW** - Performance baseline metrics tracking and optimization phases (Jan 2026)
 - `PERFORMANCE_CLEANUP_PLAN.md` - **✅ NEW** - Performance cleanup plan: eliminate reloads, remove console logs, validate RSC architecture (Jan 2026)
-- `PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Performance cleanup implementation summary: logger utility, console replacement, client dashboard RSC conversion (Jan 2026)
+- `performance/PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ UPDATED** - Performance cleanup implementation summary + March 6 addendum (SWR dedupe, optimistic UX, chunk-splitting for client dashboard/gigs/bookings/applications)
 - `ROUTE_CACHING_STRATEGY.md` - **✅ UPDATED** - Route-by-route caching strategy documentation (ISR for public, dynamic for routes using createSupabaseServer(), Jan 2026)
 - `ISR_TO_DYNAMIC_MIGRATION_PLAN.md` - **✅ NEW** - ISR to dynamic migration plan (MVP honesty mode - routes using cookies must be dynamic, Jan 2026)
 - `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
@@ -209,6 +209,9 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `qa/CLIENT_DRAWER_MANUAL_EVIDENCE_TEMPLATE_2026-03-04.md` - Fill-in checklist template for recording manual client drawer validation evidence (Mar 2026)
 - `qa/PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md` - Canonical route-to-spec ownership matrix, mobile rerun lane mapping, and CI partition/summary/artifact retention notes (Mar 2026)
 - `qa/PRODUCTION_AUTH_RECOVERY_VALIDATION_RUNBOOK_2026-03-04.md` - Production validation checklist for signed-out/signed-in reset-link flows and suspended-user routing enforcement (Mar 2026)
+- `qa/BETA_SMOKE_TEST_CHECKLIST_2026-03-05.md` - Launch-candidate smoke checklist covering subscription, applications, and moderation/admin flows (Mar 2026)
+- `qa/BETA_SESSION_EXECUTION_RUNBOOK_2026-03-05.md` - Live beta execution standard: setup, severity rubric, evidence capture, and triage cadence (Mar 2026)
+- `qa/SOFT_LAUNCH_RUNBOOK_2026-03-05.md` - Go/no-go gates, launch window validation, monitoring, and rollback procedure for soft launch (Mar 2026)
 
 ### **📧 Services & Integrations**
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)

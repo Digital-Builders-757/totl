@@ -284,3 +284,25 @@ All changes were surgical and followed existing patterns:
 - No middleware/auth/routing changes
 - No RLS policy changes
 - No schema changes
+
+---
+
+## 📌 Addendum (March 6, 2026)
+
+### Additional performance hardening completed
+- Expanded SWR dedupe + optimistic mutation UX on client-facing flows (`/client/bookings`, `/client/applications`, `/client/gigs`)
+- Added additional route-level chunk splitting with dynamic imports for heavy tab/list render blocks:
+  - `app/client/dashboard/tabs/*`
+  - `app/client/gigs/components/*`
+  - `app/client/bookings/components/*`
+- Moved shared booking/dashboard types into dedicated files to stabilize split-component imports.
+
+### Verification snapshot
+- `npm run schema:verify:comprehensive` -> pass
+- `npm run types:check` -> pass
+- `npm run build` -> pass (non-blocking lint warnings surfaced)
+- `npm run lint` -> pass (warnings only)
+
+### Remaining follow-up
+- Continue broader RSC migration on remaining read-heavy client routes.
+- Continue reducing residual lint-warning backlog not introduced by this pass.
