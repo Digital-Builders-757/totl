@@ -257,6 +257,15 @@ npm run build
   - `npm run build`
   - then `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
 
+### **Playwright webServer command works locally but fails in CI shell**
+- **Symptom:** Playwright tests fail before execution with shell parsing/quoting errors (`/bin/sh` syntax issues, env var chaining failures, or command not found).
+- **Root cause:** `playwright.config.ts` `webServer.command` is shell-specific (`cmd` chaining, inline `set`, or quoting assumptions) and does not run consistently across Windows + Linux shells.
+- **Fix:** Route startup through a Node launcher script (e.g., `node scripts/playwright-webserver.mjs`) that:
+  - sets env vars in JS,
+  - conditionally runs `npm run build` when `.next/BUILD_ID` is missing,
+  - then runs `npm run start`.
+- **Prevention:** Keep `webServer.command` shell-neutral and avoid inline shell conditionals in Playwright config.
+
 ### **Playwright strict-mode locator violations after UI copy/layout refresh**
 - **Symptom:** Assertions fail with strict mode errors like “locator resolved to multiple elements” or hidden duplicate matches.
 - **Root cause:** Broad text locators (`getByText("...")`) match subtitles, hidden tab labels, or repeated counters after UI refreshes.

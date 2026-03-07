@@ -8,6 +8,34 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Deployment ship-gate verification + Playwright server hardening (March 6, 2026)**
+
+**DEPLOYMENT / MERGE READINESS HARDENING** - March 6, 2026
+- ✅ Replaced shell-specific Playwright `webServer.command` with a cross-platform Node launcher:
+  - `playwright.config.ts` now runs `node scripts/playwright-webserver.mjs`
+  - avoids `/bin/sh` vs `cmd` quoting/env drift in CI and local Windows
+- ✅ Added deterministic Playwright web server bootstrap:
+  - build once when `.next/BUILD_ID` is missing
+  - then start `next start` with test-safe env flags (`DISABLE_EMAIL_SENDING`, `INTERNAL_EMAIL_API_KEY`, `NEXT_TELEMETRY_DISABLED`)
+- ✅ Verified merge safety gates locally (all passing):
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+  - `npm run test:qa:stripe-webhook-route`
+  - `npm run test:qa:mobile-guardrails:ci`
+
+**Problems discovered this session:**
+- ⚠️ Prior Playwright server boot command was shell-coupled and risked CI failures when command parsing differed by runtime shell.
+
+**Next (P0 - Merge/deploy confidence)**
+- [ ] Push the hardening commit to `develop` and confirm CI safety gates are green on GitHub.
+- [ ] Merge `develop` -> `main` after CI completion, then verify production deploy health checks.
+
+**Next (P1 - Follow-up reliability polish)**
+- [ ] Migrate remaining shell-fragile helper commands (where applicable) to Node launchers for cross-platform consistency.
+- [ ] Trim persistent lint-warning backlog so `lint` can move toward warning-free gate quality.
+
 ## 🚀 **Latest: Integration skip burn-down (March 5, 2026)**
 
 **PLAYWRIGHT INTEGRATION HARDENING CONTINUATION** - March 5, 2026
@@ -3754,6 +3782,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 6, 2026*
-*Current Status: MVP Complete - launch-prep hardening expanded (SWR dedupe + optimistic updates + chunk-splitting + broader RSC wrappers), with external beta evidence still pending*
-*Codebase Rating: 9.2/10 - Production ready with stronger client-route performance posture, cleaner logging discipline, and stable ship-gate verification*
-*Next Review: After first external beta evidence capture and soft-launch go/no-go decision*
+*Current Status: MVP Complete - deployment ship-gates validated locally and Playwright webServer startup hardened for cross-platform CI consistency; external beta evidence still pending*
+*Codebase Rating: 9.2/10 - Production ready with stronger deployment safety posture, cleaner logging discipline, and stable verification gates*
+*Next Review: After develop CI passes for this hardening commit and merge-to-main deploy validation completes*
