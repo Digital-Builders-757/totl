@@ -75,11 +75,11 @@ jobs:
       - name: Verify AuthProvider is client-only
         id: static_guard_auth_provider
         run: |
-          if ! head -1 components/auth/auth-provider.tsx | grep -q "use client"; then
-            echo "❌ AuthProvider missing 'use client' directive!" | tee auth-provider-client-only.log
+          if ! node scripts/guard-auth-provider-client-only.mjs | tee auth-provider-client-only.log; then
+            echo "❌ AuthProvider missing 'use client' directive!" | tee -a auth-provider-client-only.log
             exit 1
           fi
-          echo "✅ AuthProvider is properly client-only" | tee auth-provider-client-only.log
+          echo "✅ AuthProvider is properly client-only" | tee -a auth-provider-client-only.log
 
       - name: Publish build safety-gate summary
         if: always()
