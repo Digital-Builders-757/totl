@@ -3,13 +3,34 @@ Write-Host "Running Security Standards Check..." -ForegroundColor Cyan
 
 $errorCount = 0
 
+function Get-FileContentSafe {
+    param(
+        [string]$Path
+    )
+
+    try {
+        # Use -LiteralPath so Next.js route folders like [id] are handled correctly.
+        return Get-Content -LiteralPath $Path -Raw -ErrorAction Stop
+    }
+    catch {
+        Write-Host "WARNING: Could not read file: $Path" -ForegroundColor Yellow
+        return $null
+    }
+}
+
 # Check 1: Look for getSession() usage (security risk) - but allow in client components
 Write-Host "Checking for insecure getSession() usage..." -ForegroundColor Yellow
 $getSessionFiles = Get-ChildItem -Path . -Recurse -Include "*.ts", "*.tsx" | Where-Object { 
-    $_.FullName -notlike "*node_modules*" -and 
-    $_.FullName -notlike "*.next*" -and
-    (Get-Content $_.FullName) -match "getSession\(\)" -and
-    -not ((Get-Content $_.FullName) -match '"use client"')
+    if ($_.FullName -like "*node_modules*" -or $_.FullName -like "*.next*") {
+        return $false
+    }
+
+    $content = Get-FileContentSafe -Path $_.FullName
+    if ([string]::IsNullOrEmpty($content)) {
+        return $false
+    }
+
+    return $content -match "getSession\(\)" -and $content -notmatch '"use client"'
 }
 
 if ($getSessionFiles.Count -gt 0) {
@@ -24,9 +45,16 @@ if ($getSessionFiles.Count -gt 0) {
 # Check 2: Look for any types usage
 Write-Host "Checking for 'any' type usage..." -ForegroundColor Yellow
 $anyTypeFiles = Get-ChildItem -Path . -Recurse -Include "*.ts", "*.tsx" | Where-Object { 
-    $_.FullName -notlike "*node_modules*" -and 
-    $_.FullName -notlike "*.next*" -and
-    (Get-Content $_.FullName) -match ": any"
+    if ($_.FullName -like "*node_modules*" -or $_.FullName -like "*.next*") {
+        return $false
+    }
+
+    $content = Get-FileContentSafe -Path $_.FullName
+    if ([string]::IsNullOrEmpty($content)) {
+        return $false
+    }
+
+    return $content -match ": any"
 }
 
 if ($anyTypeFiles.Count -gt 0) {

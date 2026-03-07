@@ -53,8 +53,8 @@ export default defineConfig({
   webServer: {
     // Prevent tests from hitting the real email provider (rate limits, flakiness).
     // Use `next start` (not `next dev`) to reduce Windows/OneDrive `.next\\trace` file-lock flakiness.
-    command:
-      'cmd /d /c "set DISABLE_EMAIL_SENDING=1&& set INTERNAL_EMAIL_API_KEY=dev-internal-email-key&& set NEXT_TELEMETRY_DISABLED=1&& (if not exist .next\\BUILD_ID (npm run build)) && npm run start"',
+    // Use a Node launcher so CI shells (`/bin/sh`) and Windows shells behave the same.
+    command: 'node scripts/playwright-webserver.mjs',
     url: 'http://localhost:3000',
     // Reliability-first: avoid reusing an already-running server, which can mask stale builds and cause false failures.
     // If you explicitly want reuse for speed, set PW_REUSE_SERVER=1 locally.

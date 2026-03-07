@@ -101,6 +101,36 @@ supabase db lint
 # (Test through your application's auth flow)
 ```
 
+## ✅ Latest Verification Evidence (March 5, 2026)
+
+### Security Standards Script
+
+Command:
+```bash
+npm run security:check
+```
+
+Result summary:
+- Completed without path-read exceptions.
+- No insecure `getSession()` usage detected in server contexts.
+- No `: any` warnings remaining after typed cleanup in verification specs.
+- Exit code: `0`.
+
+### Protected Route Guardrails
+
+Command:
+```bash
+npm run test:qa:focused-routes
+```
+
+Result summary:
+- `69 passed`, `0 failed` (chromium, retries `0`).
+- Confirms middleware role-gating and protected route contracts across:
+  - Admin routes
+  - Client routes
+  - Talent routes
+  - Mobile guardrail surfaces (390x844 checks)
+
 ## 📚 Additional Resources
 
 - [Supabase Security Best Practices](https://supabase.com/docs/guides/platform/going-into-prod#security)

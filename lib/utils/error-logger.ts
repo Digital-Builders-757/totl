@@ -1,4 +1,5 @@
 // Error logging and analytics utility for production monitoring
+import { logger } from "@/lib/utils/logger";
 
 export interface ErrorLogData {
   error: string;
@@ -47,8 +48,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your logging service
     if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.error("🚨 Error Logged:", logData);
+      logger.error("Error logged", undefined, { logData });
     }
 
     // You could also send to Supabase, Sentry, or other services here
@@ -76,8 +76,7 @@ class ErrorLogger {
 
     // In production, you'd send this to your analytics service
     if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.log("📊 Analytics Event:", analyticsData);
+      logger.debug("Analytics event", analyticsData);
     }
   }
 

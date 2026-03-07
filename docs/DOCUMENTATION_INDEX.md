@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** February 26, 2026
+**Last Updated:** March 6, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -90,6 +90,8 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `AUTH_*.md` stubs - Stable links that forward to archived auth history in `docs/archive/`
 - `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
+- `security/SECRETS_ROTATION_AND_WEBHOOK_SECRET_VALIDATION_RUNBOOK_2026-03-04.md` - Ops runbook for rotating leaked Supabase keys and verifying Stripe webhook secret pairing (Mar 2026)
+- `security/SECRETS_ROTATION_EXECUTION_LOG_TEMPLATE_2026-03-04.md` - Fill-in execution log template for key-rotation + webhook pairing proof capture (Mar 2026)
 - `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 - `SUPABASE_MCP_QUICK_START.md` - **✅ NEW** - Quick start guide for Supabase MCP (Nov 2025)
 - `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)
@@ -131,7 +133,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
 - `PERFORMANCE_BASELINE.md` - **✅ NEW** - Performance baseline metrics tracking and optimization phases (Jan 2026)
 - `PERFORMANCE_CLEANUP_PLAN.md` - **✅ NEW** - Performance cleanup plan: eliminate reloads, remove console logs, validate RSC architecture (Jan 2026)
-- `PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Performance cleanup implementation summary: logger utility, console replacement, client dashboard RSC conversion (Jan 2026)
+- `performance/PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ UPDATED** - Performance cleanup implementation summary + March 6 addendum (SWR dedupe, optimistic UX, chunk-splitting for client dashboard/gigs/bookings/applications)
 - `ROUTE_CACHING_STRATEGY.md` - **✅ UPDATED** - Route-by-route caching strategy documentation (ISR for public, dynamic for routes using createSupabaseServer(), Jan 2026)
 - `ISR_TO_DYNAMIC_MIGRATION_PLAN.md` - **✅ NEW** - ISR to dynamic migration plan (MVP honesty mode - routes using cookies must be dynamic, Jan 2026)
 - `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
@@ -180,6 +182,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `DASHBOARD_MOBILE_DENSITY_GUIDE.md` - **✅ NEW** - Shared mobile-first dashboard chrome and density contract (Feb 2026)
 - `development/MOBILE_UX_AUDIT_SCREEN_INVENTORY.md` - **✅ NEW** - Canonical list of screens/routes to audit for mobile launch polish (Admin/Client/Talent/User/Auth) (Feb 2026)
 - `development/MOBILE_UX_QA_CHECKLIST.md` - **✅ NEW** - Route-by-route mobile QA checklist enforcing the dashboard density contract (Feb 2026)
+- `development/UI_CONTRACT_DRIFT_LEDGER.md` - **✅ NEW** - Live docs-vs-code mismatch backlog with owner/PR/evidence closure fields (Mar 2026)
 - `CODING_STANDARDS.md` - Coding standards and best practices
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system
@@ -201,6 +204,14 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `MCP_QUICK_FIX.md` - ⚡ **NEW** - Quick 2-step fix for Playwright MCP connection issues (Nov 2025)
 - `TEST_DATA_REFERENCE.md` - 🧪 **NEW** - Seeded QA personas, gigs, and auth creation tips (Nov 2025)
 - `tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` - Proof ledger mapping Auth contract scenarios → Playwright coverage (Dec 2025)
+- `qa/PLAYWRIGHT_TRIAGE_LOG_2026-03-04.md` - Step-3 route-level QA triage ledger with command receipts, failure artifacts, rerun outcomes, CI safety-gate updates, mobile/build `GITHUB_STEP_SUMMARY` observability notes (artifact index + governance links + run metadata + rerun command surfacing + first-response checklists), CI retry-lane hardening, and artifact-index clarity (scope + retention) including always-on `.txt` + `.json` summary snapshots with run-correlation metadata, schema versioning, and parse-validation for mobile/build uploads (Mar 2026)
+- `qa/CLIENT_DRAWER_MANUAL_VALIDATION_RUNBOOK_2026-03-04.md` - Physical/mobile manual validation runbook for client drawer behavior (Mar 2026)
+- `qa/CLIENT_DRAWER_MANUAL_EVIDENCE_TEMPLATE_2026-03-04.md` - Fill-in checklist template for recording manual client drawer validation evidence (Mar 2026)
+- `qa/PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md` - Canonical route-to-spec ownership matrix, mobile rerun lane mapping, and CI partition/summary/artifact retention notes (Mar 2026)
+- `qa/PRODUCTION_AUTH_RECOVERY_VALIDATION_RUNBOOK_2026-03-04.md` - Production validation checklist for signed-out/signed-in reset-link flows and suspended-user routing enforcement (Mar 2026)
+- `qa/BETA_SMOKE_TEST_CHECKLIST_2026-03-05.md` - Launch-candidate smoke checklist covering subscription, applications, and moderation/admin flows (Mar 2026)
+- `qa/BETA_SESSION_EXECUTION_RUNBOOK_2026-03-05.md` - Live beta execution standard: setup, severity rubric, evidence capture, and triage cadence (Mar 2026)
+- `qa/SOFT_LAUNCH_RUNBOOK_2026-03-05.md` - Go/no-go gates, launch window validation, monitoring, and rollback procedure for soft launch (Mar 2026)
 
 ### **📧 Services & Integrations**
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)
@@ -219,12 +230,15 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 ### **📖 Project Documentation & Organization**
 - `DOCUMENTATION_INDEX.md` - This file (documentation spine)
+- `UI_CONSTITUTION.md` - Canonical UI laws (top-level governance)
+- `UI_IMPLEMENTATION_INDEX.md` - Rule-to-component ownership map + route compliance tracker
 - `releasenotes/v1.0.0.md` - Technical release notes for MVP launch (v1.0)
 - `releasenotes/v1.0.0-team.md` - **NEW** ✅ - Team-focused release notes for non-technical members (Jan 2026)
 - `releasenotes/README.md` - Release notes index and versioning guide
 - `AUDIT_STATUS_REPORT.md` - Evidence-based repo audit snapshot (quality gates, foundation PR status, system map, journey QA, drift/duplicates)
 - `AUDIT_MASTER_BOARD.md` - Rolling one-screen audit queue (IDs + proof hooks + next actions)
 - `AUDIT_LOG.md` - Append-only audit proof ledger (timestamped command receipts)
+- `audits/UI_UX_SCREENSHOT_REMEDIATION_REPORT_2026-03-03.md` - Screenshot-driven MVP UI/UX remediation system (matrix, P0 definition, stop-the-line blockers, mobile gate)
 - `ENGINEERING_COMMANDS.md` - **NEW** ✅ - Canonical Cursor command system (Dec 2025)
 - `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)

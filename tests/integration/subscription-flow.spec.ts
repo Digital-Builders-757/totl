@@ -1,17 +1,36 @@
 import { test, expect } from "@playwright/test";
-import { loginAsTalent } from "../helpers/auth";
-import { ensureTalentReady } from "../helpers/ensure-talent-ready";
+import { ensureTalentReady, loginWithCredentials } from "../helpers/auth";
+import {
+  createActiveGigForClient,
+  ensureClientFixture,
+  ensureTalentFixture,
+} from "../helpers/integration-fixtures";
+import { createTalentTestUser } from "../helpers/test-data";
 
-const talentEmail = process.env.PLAYWRIGHT_TALENT_EMAIL;
-const talentPassword = process.env.PLAYWRIGHT_TALENT_PASSWORD;
-const testGigId = process.env.PLAYWRIGHT_TEST_GIG_ID;
+let testGigId: string | null = null;
 
-test.describe("Talent subscription flow (requires test credentials)", () => {
-  test.beforeEach(async ({ page }) => {
-    if (!talentEmail || !talentPassword) {
-      test.skip(true, "Set PLAYWRIGHT_TALENT_EMAIL and PLAYWRIGHT_TALENT_PASSWORD to run these tests");
-    }
-    await loginAsTalent(page);
+test.describe("Talent subscription flow", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    const talentUser = createTalentTestUser("pw-subscription-talent", testInfo, {
+      firstName: "Subscription",
+      lastName: "Talent",
+      variant: "integration",
+    });
+    const clientUser = createTalentTestUser("pw-subscription-client", testInfo, {
+      firstName: "Subscription",
+      lastName: "Client",
+      variant: "integration",
+    });
+
+    const { userId: clientUserId } = await ensureClientFixture(clientUser);
+    await ensureTalentFixture(talentUser);
+    testGigId = await createActiveGigForClient(clientUserId, `subscription-${testInfo.workerIndex}`);
+
+    await loginWithCredentials(
+      page,
+      { email: talentUser.email, password: talentUser.password },
+      { returnUrl: "/talent/dashboard" }
+    );
     await ensureTalentReady(page);
   });
 
@@ -21,13 +40,13 @@ test.describe("Talent subscription flow (requires test credentials)", () => {
   });
 
   test("locks gig details for unsubscribed talent", async ({ page }) => {
-    test.skip(!testGigId, "Set PLAYWRIGHT_TEST_GIG_ID to run gig detail gating test");
+    expect(testGigId).toBeTruthy();
     await page.goto(`/gigs/${testGigId}`);
     await expect(page.getByTestId("client-details-locked")).toBeVisible();
   });
 
   test("blocks apply form when subscription is inactive", async ({ page }) => {
-    test.skip(!testGigId, "Set PLAYWRIGHT_TEST_GIG_ID to run apply gating test");
+    expect(testGigId).toBeTruthy();
     await page.goto(`/gigs/${testGigId}/apply`);
     await expect(page.getByTestId("subscription-apply-form-gate")).toBeVisible();
   });

@@ -18,6 +18,12 @@ import {
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
+const devLog = (...args: unknown[]) => {
+  if (nodeEnv === "development") {
+    // eslint-disable-next-line no-console
+    console.warn(...args);
+  }
+};
 
 // Fail loudly if DSN is missing (no silent failures)
 if (!SENTRY_DSN) {
@@ -28,7 +34,7 @@ if (!SENTRY_DSN) {
 
 // Log DSN status for debugging (only in development)
 if (nodeEnv === "development") {
-  console.log("[Sentry Client] Initializing with:", {
+  devLog("[Sentry Client] Initializing with:", {
     isProduction,
     hasProductionDSN: !!productionDSN,
     hasDevelopmentDSN: !!developmentDSN,
@@ -43,14 +49,14 @@ if (nodeEnv === "development") {
 
   if (SENTRY_DSN) {
     if (projectIdMatches) {
-      console.log("[Sentry Client] ✅ Sentry is configured correctly for totlmodelagency");
+      devLog("[Sentry Client] ✅ Sentry is configured correctly for totlmodelagency");
     } else {
       console.warn(
         `[Sentry Client] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`
       );
       console.warn("[Sentry Client] ⚠️ Update your .env.local DSNs to point to the correct project");
     }
-    console.log(
+    devLog(
       "[Sentry Client] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/"
     );
   } else {
@@ -181,7 +187,7 @@ Sentry.init({
         
         // Check for hydration errors
         if (errorObj.message?.includes("hydrat") || errorObj.message?.includes("hydration")) {
-          console.warn("Hydration error filtered - often caused by browser extensions");
+          devLog("Hydration error filtered - often caused by browser extensions");
           return null; // Don't send to Sentry
         }
         
@@ -191,7 +197,7 @@ Sentry.init({
             errorObj.code === 'EPIPE' ||
             errorObj.errno === -32) {
           if (process.env.NODE_ENV === 'development') {
-            console.warn("EPIPE error filtered - development server logging issue");
+            devLog("EPIPE error filtered - development server logging issue");
             return null; // Filter in dev
           }
         }
@@ -200,7 +206,7 @@ Sentry.init({
       if (errorObj.message === 'Particles is not defined' ||
           errorObj.message?.includes('Particles is not defined') ||
           (errorObj.name === 'ReferenceError' && errorObj.message?.includes('Particles'))) {
-        console.warn("Particles ReferenceError filtered - likely from browser extension, Electron environment, or external script");
+        devLog("Particles ReferenceError filtered - likely from browser extension, Electron environment, or external script");
         return null; // Filter this error
       }
 
@@ -221,7 +227,7 @@ Sentry.init({
               errorMessage: errorObj.message,
             },
           });
-          console.warn("Supabase auth lock AbortError filtered - expected during navigation");
+          devLog("Supabase auth lock AbortError filtered - expected during navigation");
           return null;
         }
       }
@@ -230,7 +236,7 @@ Sentry.init({
       if (errorObj.message === 'UserPlus is not defined' ||
           errorObj.message?.includes('UserPlus is not defined') ||
           (errorObj.name === 'ReferenceError' && errorObj.message?.includes('UserPlus'))) {
-        console.warn("UserPlus ReferenceError filtered - Lucide React icon import issue");
+        devLog("UserPlus ReferenceError filtered - Lucide React icon import issue");
         return null; // Filter this error
       }
 
@@ -240,7 +246,7 @@ Sentry.init({
           errorObj.message?.includes('Invalid or unexpected token') ||
           (errorObj.name === 'SyntaxError' && errorObj.message?.includes('Invalid or unexpected token'))) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
+          devLog("SyntaxError filtered - Invalid or unexpected token (likely import path issue)");
           return null; // Filter in dev only
         }
         // In production, let it through - could be a real issue
@@ -251,7 +257,7 @@ Sentry.init({
           (window as any).navigator?.userAgent?.includes('Electron') &&
           errorObj.name === 'ReferenceError' && 
           errorObj.message?.includes('is not defined')) {
-        console.warn("Electron ReferenceError filtered - likely from Electron environment or external script");
+        devLog("Electron ReferenceError filtered - likely from Electron environment or external script");
         return null; // Filter this error
       }
 
@@ -261,14 +267,14 @@ Sentry.init({
           errorObj.message?.includes('window.__firefox__') ||
           (errorObj.name === 'ReferenceError' && errorObj.message?.includes('__firefox__')) ||
           (errorObj.name === 'TypeError' && errorObj.message?.includes('__firefox__'))) {
-        console.warn("__firefox__ error filtered - likely from browser extension or external script");
+        devLog("__firefox__ error filtered - likely from browser extension or external script");
         return null; // Filter this error
       }
       
       // Server Component prop serialization errors
       if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {
         if (process.env.NODE_ENV === 'development') {
-          console.error("Server Component error in development - this should be fixed!");
+          devLog("Server Component error in development - this should be fixed!");
           return null; // Filter in dev to reduce noise, but fix the code!
         }
         // In production, let it through so we know there's a problem
@@ -287,7 +293,7 @@ Sentry.init({
         );
         
         if (isBrowserExtensionError) {
-          console.warn("Network error from browser extension filtered");
+          devLog("Network error from browser extension filtered");
           return null; // Don't send to Sentry
         }
       }
@@ -302,7 +308,7 @@ Sentry.init({
         );
         
         if (isWebpackError && process.env.NODE_ENV === 'development') {
-          console.warn("Webpack chunk loading error filtered - development HMR issue");
+          devLog("Webpack chunk loading error filtered - development HMR issue");
           return null; // Filter in dev
         }
       }
@@ -319,7 +325,7 @@ Sentry.init({
         );
         
         if (isWebpackError && process.env.NODE_ENV === 'development') {
-          console.warn("Webpack build error filtered - development HMR issue");
+          devLog("Webpack build error filtered - development HMR issue");
           return null; // Filter in dev
         }
       }
@@ -327,7 +333,7 @@ Sentry.init({
       // Context provider HMR errors
       if (errorObj.message?.match(/must be used within an? \w+Provider/i)) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn("Context provider error filtered - development HMR issue");
+          devLog("Context provider error filtered - development HMR issue");
           return null; // Filter in dev
         }
       }
@@ -344,7 +350,7 @@ Sentry.init({
         );
         
         if (isAuthLockError) {
-          console.log("AbortError from Supabase auth locks filtered - expected during navigation/unmount");
+          devLog("AbortError from Supabase auth locks filtered - expected during navigation/unmount");
           return null; // Don't send to Sentry - this is expected behavior
         }
       }
@@ -393,7 +399,7 @@ Sentry.init({
         // Filter if it's clearly guest mode (INITIAL_SESSION with no session OR no_session_exit/no_session_expected on public path)
         // DO NOT filter if isProtectedPath is true - those are real auth failures
         if (hasInitialSessionNoSession || hasNoSessionExitPublic || hasNoSessionExpected) {
-          console.log("AuthSessionMissingError filtered - expected guest mode on public page");
+          devLog("AuthSessionMissingError filtered - expected guest mode on public page");
           return null; // Don't send to Sentry - this is expected behavior
         }
         

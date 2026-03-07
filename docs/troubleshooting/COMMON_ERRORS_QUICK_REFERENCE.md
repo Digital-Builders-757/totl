@@ -72,6 +72,14 @@ npm run build
   - **Prevention:** See `docs/AUTH_THREE_TRUTHS_LOGGING_IMPLEMENTATION.md` for complete logging implementation
   - **Prevention:** Run `tests/auth/three-truths-logging.spec.ts` to verify all three truths are proven
   - **Verification:** All three truths must be true: SIGNED_IN fires, cookies exist in browser, middleware receives cookies
+- **UI screenshot automation fails with `login_failed:remained_on_login`:** Capture manifests show route failures even when server is running
+  - **Symptom:** `scripts/capture-ui-audit.mjs` logs many `login_failed:remained_on_login` rows (often non-admin only)
+  - **Symptom:** manifest rows show `login_failed:page.waitForSelector` with `locator('body') ... hidden` and capture can hang in a long-running process
+  - **Root Cause:** Seeded credentials are missing/stale for target roles, or login submit runs before hydration marker reaches `ready`
+  - **Fix:** Wait for `[data-testid="login-hydrated"]` text `ready` before submit, increase redirect wait, and validate credentials manually per role in the same environment
+  - **Fix:** run `node scripts/ensure-ui-audit-users.mjs` immediately before rerun, then rerun capture; if process hangs, stop it and retry after validating login manually
+  - **Fix:** Use `scripts/capture-admin-evidence.mjs` to unblock admin evidence while re-seeding non-admin accounts
+  - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
 - **Client Dashboard Error State Not Displayed:** Error state (`supabaseError`) is set but never rendered, leaving users with blank dashboard
   - **Fix:** Add error display banner/alert component that shows when `supabaseError` is set, with retry button to call `fetchDashboardData()` again
   - **Prevention:** Always render error states in UI, even if error handling exists in code
@@ -181,6 +189,11 @@ npm run build
 - **`no-console` build blocker in client utilities/components:** `next build` fails on `Error: Unexpected console statement. no-console`
   - **Fix:** Replace `console.log/debug` with `logger.info/debug` from `@/lib/utils/logger` (or remove log if unnecessary).
   - **Prevention:** If temporary diagnostics are needed, use project logger utilities instead of direct console calls.
+- **Module not found after chunk-splitting (`Can't resolve './tabs/...` or `./components/...`):**
+  - **Symptom:** `next build` fails immediately after dynamic-import refactors.
+  - **Root Cause:** One or more extracted files were not created/moved with the expected path used in `dynamic(() => import("..."))`.
+  - **Fix:** Verify the imported module path and confirm files exist on disk for every dynamic import target before ship.
+  - **Prevention:** After each split pass, run `npm run build` (not only route-scoped lint) to catch missing-module regressions early.
 - **Server Action 400 on File Upload:** Upload request fails before action runs (Network shows 400, no server logs)
   - **Root Cause:** Server Actions body limit defaults to 1MB
   - **Fix:** Set `experimental.serverActions.bodySizeLimit` in `next.config.mjs` (e.g., `4mb`), align client/server validation caps, and redeploy
@@ -244,6 +257,21 @@ npm run build
   - `npm run build`
   - then `npx playwright test tests/auth --project=chromium --retries=0 --reporter=list`
 
+### **Playwright webServer command works locally but fails in CI shell**
+- **Symptom:** Playwright tests fail before execution with shell parsing/quoting errors (`/bin/sh` syntax issues, env var chaining failures, or command not found).
+- **Root cause:** `playwright.config.ts` `webServer.command` is shell-specific (`cmd` chaining, inline `set`, or quoting assumptions) and does not run consistently across Windows + Linux shells.
+- **Fix:** Route startup through a Node launcher script (e.g., `node scripts/playwright-webserver.mjs`) that:
+  - sets env vars in JS,
+  - conditionally runs `npm run build` when `.next/BUILD_ID` is missing,
+  - then runs `npm run start`.
+- **Prevention:** Keep `webServer.command` shell-neutral and avoid inline shell conditionals in Playwright config.
+
+### **CI static guard false-positive: `next/headers` import flagged in client code when none exists**
+- **Symptom:** CI build fails at static guard step with `Found next/headers import in client code!` while repo search shows no `next/headers` usage in `"use client"` files.
+- **Root cause:** Shell-dependent `grep` + glob patterns in workflow (`app/**/*.tsx`) can behave inconsistently across environments and do not model `"use client"` boundaries.
+- **Fix:** Replace the workflow grep check with `node scripts/guard-no-next-headers-in-client.mjs`, which scans only `"use client"` modules under `app` and `components`.
+- **Prevention:** For policy-style CI checks, prefer deterministic script guards over shell/glob pipelines.
+
 ### **Playwright strict-mode locator violations after UI copy/layout refresh**
 - **Symptom:** Assertions fail with strict mode errors like “locator resolved to multiple elements” or hidden duplicate matches.
 - **Root cause:** Broad text locators (`getByText("...")`) match subtitles, hidden tab labels, or repeated counters after UI refreshes.
@@ -297,6 +325,13 @@ npm run build
     Remove-Item Env:SUPABASE_AUTH_JWT_SECRET -ErrorAction SilentlyContinue
     ```
     Then retry `supabase stop` → `supabase start` → `npm run db:reset`.
+- **UI audit screenshots mislabeled by viewport (false evidence risk)**
+  - **Symptom:** screenshot filenames say `390x844` / `360x800`, but actual image dimensions are `1600x900`.
+  - **Root Cause:** browser automation captures with default viewport while filenames are generated from intended viewport labels.
+  - **Fix:** enforce explicit viewport before capture and validate files before merge:
+    - `await page.setViewportSize({ width, height })`
+    - run a dimension check script (Pillow/ImageMagick) to compare filename label vs actual file dimensions.
+  - **Prevention:** treat screenshot evidence as invalid unless filename labels and pixel dimensions match exactly.
 
 ## **4. BRANCH-SPECIFIC REQUIREMENTS**
 - **DEVELOP Branch:** Use `npm run types:regen:dev` if needed

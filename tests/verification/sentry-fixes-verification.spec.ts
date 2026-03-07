@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type ConsoleMessage, type Page } from "@playwright/test";
 
 /**
  * Sentry Error Fixes Verification Test Suite
@@ -16,10 +16,10 @@ import { test, expect } from "@playwright/test";
  */
 
 // Helper function to check for console errors (excluding filtered ones)
-function setupConsoleErrorTracking(page: any) {
+function setupConsoleErrorTracking(page: Page) {
   const errors: string[] = [];
   
-  page.on('console', (msg: any) => {
+  page.on('console', (msg: ConsoleMessage) => {
     if (msg.type() === 'error') {
       const text = msg.text();
       // Filter out errors we intentionally ignore

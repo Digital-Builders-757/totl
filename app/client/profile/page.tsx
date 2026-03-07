@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { ClientProfileDetails } from "@/components/client/client-profile-details";
 import ClientProfileForm from "@/components/forms/client-profile-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -67,51 +69,47 @@ export default async function ClientProfilePage({
   // If admin viewing other user and no client profile exists, show friendly empty state
   if (isAdmin && isViewingOtherUser && !clientProfile) {
     return (
-      <div className="min-h-screen bg-black py-8">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <PageShell className="bg-black" containerClassName="max-w-3xl py-4 sm:py-6">
+        <div className="space-y-4">
           <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded text-blue-300 text-sm">
             Admin viewing as staff
           </div>
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white">Client Profile (Admin View)</h1>
-            <p className="text-gray-300 mt-2">
-              This user does not have a client profile yet.
-            </p>
-          </div>
+          <PageHeader
+            title="Client Profile (Admin View)"
+            subtitle="This user does not have a client profile yet."
+          />
           <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
             <p className="text-gray-400 text-sm">
               The client profile has not been created for this user. They may need to complete their profile setup.
             </p>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <PageShell className="bg-black" containerClassName="max-w-3xl py-4 sm:py-6">
+      <div className="space-y-6">
         {isAdmin && isViewingOtherUser && (
-          <div className="mb-4 p-3 bg-blue-900/30 border border-blue-700 rounded text-blue-300 text-sm">
+          <div className="p-3 bg-blue-900/30 border border-blue-700 rounded text-blue-300 text-sm">
             Admin viewing as staff
           </div>
         )}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">
-            {isAdmin && isViewingOtherUser ? "Client Profile (Admin View)" : "Complete Your Company Profile"}
-          </h1>
-          <p className="text-gray-300 mt-2">
-            {isAdmin && isViewingOtherUser
+        <PageHeader
+          title={isAdmin && isViewingOtherUser ? "Client Profile (Admin View)" : "Complete Your Company Profile"}
+          subtitle={
+            isAdmin && isViewingOtherUser
               ? "Viewing client profile information"
-              : "Add your company information to make your gigs more attractive to talent"}
-          </p>
-        </div>
+              : "Add your company information to make your gigs more attractive to talent."
+          }
+        />
         {isAdmin && isViewingOtherUser ? (
           <ClientProfileDetails clientProfile={clientProfile} />
         ) : (
           <ClientProfileForm initialData={clientProfile || undefined} />
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

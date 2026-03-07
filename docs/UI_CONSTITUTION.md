@@ -10,6 +10,20 @@ It defines UX contracts, responsive behavior, role-surface separation, and enfor
 
 ---
 
+## Canonical hierarchy (Doc <-> Code Lock)
+
+This file is the top-level law for UI governance.
+
+- Laws: `docs/UI_CONSTITUTION.md` (this file)
+- Implementation ownership map: `docs/UI_IMPLEMENTATION_INDEX.md`
+- Drift backlog: `docs/development/UI_CONTRACT_DRIFT_LEDGER.md`
+- Layout primitives: `docs/features/UI_LAYOUT_CONTRACT.md`
+- Route-level QA gate: `docs/development/MOBILE_UX_QA_CHECKLIST.md`
+
+If any appendix or audit doc conflicts with this constitution, this constitution wins.
+
+---
+
 ## 0) Purpose
 
 We build fast, but we build coherent. This constitution prevents:
@@ -158,6 +172,13 @@ Every UI PR that touches chrome/density must include:
 If a law is intentionally broken, PR must include:
 - **Waiver:** what law, why, and what will fix it later
 - **Expiry:** a date/version milestone when waiver must be removed
+
+### Doc <-> Code lock requirement
+- [ ] PR reuses a mapped owning primitive from `docs/UI_IMPLEMENTATION_INDEX.md`
+  - OR updates that index in the same PR for any new pattern
+- [ ] If a new header/filter/list pattern is introduced, PR must include:
+  - constitution/index updates
+  - route evidence screenshots at `390x844` and `360x800`
 
 ---
 

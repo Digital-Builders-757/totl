@@ -21,8 +21,9 @@ const buttonVariants = cva(
         success: "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
+        // Normalize to 40px min touch target across standard controls.
+        default: "h-10 min-h-10 px-4 py-2",
+        sm: "h-10 min-h-10 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
       },

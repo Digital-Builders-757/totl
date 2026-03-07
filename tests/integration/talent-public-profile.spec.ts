@@ -1,27 +1,67 @@
 import { test, expect } from "@playwright/test";
-import { waitForLoginHydrated } from "../helpers/auth";
+import { loginWithCredentials } from "../helpers/auth";
+import {
+  createNameSlug,
+  ensureClientFixture,
+  ensureTalentFixture,
+} from "../helpers/integration-fixtures";
 import { safeGoto } from "../helpers/navigation";
-
-const talentSlug = "emma-rodriguez";
-const PUBLIC_PROFILE_PATH = `/talent/${talentSlug}`;
-
-// NOTE: This spec assumes a seeded public profile exists for this slug.
-// Make assertions resilient to fixture drift (image alt/copy) while still proving gating.
+import { createTalentTestUser } from "../helpers/test-data";
 
 test.describe("Talent public profile", () => {
-  test.skip("keeps sensitive info gated for anonymous visitors", async ({ page }) => {
-    // This relies on a seeded public profile slug existing (e.g. /talent/emma-rodriguez).
-    // In this environment, the route currently 404s, so keep this spec skipped until the
-    // public profile fixture contract is reinstated.
-    await safeGoto(page, PUBLIC_PROFILE_PATH, { timeoutMs: 60_000 });
+  test("keeps sensitive info gated for anonymous visitors", async ({ page }, testInfo) => {
+    const slugSuffix = `${testInfo.workerIndex}a`;
+    const talentUser = createTalentTestUser("pw-public-talent", testInfo, {
+      firstName: `Public${slugSuffix}`,
+      lastName: `Anon${slugSuffix}`,
+      variant: "anon-gate",
+    });
+    await ensureTalentFixture(talentUser);
+
+    const talentSlug = createNameSlug(talentUser.firstName, talentUser.lastName);
+    const publicProfilePath = `/talent/${talentSlug}`;
+
+    await safeGoto(page, publicProfilePath, { timeoutMs: 60_000 });
     await expect(page).toHaveURL(new RegExp(`/talent/${talentSlug}`));
+    await expect(page.getByRole("heading", { name: `${talentUser.firstName} ${talentUser.lastName}` })).toBeVisible();
+    await expect(page.getByText(/contact details unlock after/i)).toBeVisible();
+    await expect(page.getByRole("link", { name: /sign in to unlock/i })).toBeVisible();
+    await expect(page.getByText("555-0101")).toHaveCount(0);
   });
 
-  test.skip(
+  test(
     "allows a logged-in client to open the flag dialog and view sensitive info",
-    () => {
-      // Requires seeded client credentials + a stable profile fixture.
-      // Re-enable once client fixtures are deterministic in CI/dev.
+    async ({ page }, testInfo) => {
+      const slugSuffix = `${testInfo.workerIndex}c`;
+      const talentUser = createTalentTestUser("pw-public-talent", testInfo, {
+        firstName: `Public${slugSuffix}`,
+        lastName: `Client${slugSuffix}`,
+        variant: "client-report",
+      });
+      const clientUser = createTalentTestUser("pw-public-client", testInfo, {
+        firstName: "Public",
+        lastName: "Client",
+        variant: "client-report",
+      });
+
+      await ensureTalentFixture(talentUser);
+      await ensureClientFixture(clientUser);
+
+      const talentSlug = createNameSlug(talentUser.firstName, talentUser.lastName);
+      const publicProfilePath = `/talent/${talentSlug}`;
+
+      await loginWithCredentials(
+        page,
+        { email: clientUser.email, password: clientUser.password }
+      );
+      await safeGoto(page, publicProfilePath, { timeoutMs: 60_000 });
+
+      await expect(page.getByRole("heading", { name: `${talentUser.firstName} ${talentUser.lastName}` })).toBeVisible();
+      await expect(page.getByText(/contact details unlock after/i)).toBeVisible();
+      await expect(page.getByRole("button", { name: /report this profile/i })).toBeVisible();
+      await page.getByRole("button", { name: /report this profile/i }).click();
+      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(page.getByRole("heading", { name: /report this profile/i })).toBeVisible();
     }
   );
 });

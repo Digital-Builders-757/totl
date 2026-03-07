@@ -1,7 +1,10 @@
 import { test, expect } from "@playwright/test";
 import { ensureTalentReady, waitForLoginHydrated } from "../helpers/auth";
+import {
+  createActiveGigForClient,
+  ensureTalentUserViaAdminApi,
+} from "../helpers/integration-fixtures";
 import { safeGoto } from "../helpers/navigation";
-import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
 import { createTalentTestUser } from "../helpers/test-data";
 
 // NOTE: avoid hardcoding a gig UUID that may not exist in the environment.
@@ -16,46 +19,9 @@ test.describe("Talent gig application experience", () => {
       variant: "anon",
     });
 
-    // Deterministic: create a verified talent user (no dependence on seeded env accounts).
-    const createRes = await request.post("/api/admin/create-user", {
-      data: {
-        email: user.email,
-        password: user.password,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: "talent",
-      },
-    });
-    expect(createRes.ok()).toBeTruthy();
-
-    // Create a gig in DB so we have a stable /gigs/:id target.
-    const admin = createSupabaseAdminClientForTests();
-    const { data: usersPage, error: usersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-    expect(usersError).toBeNull();
-    const talentAuth = usersPage.users.find((u) => u.email?.toLowerCase() === user.email.toLowerCase());
-    expect(talentAuth?.id).toBeTruthy();
-
-    // Insert minimal gig (client_id must be non-null; reuse talent id as placeholder in test env if schema allows).
-    // If gigs require a real client id, this test should be refactored to use an approved client fixture.
-    const { data: gig, error: gigError } = await admin
-      .from("gigs")
-      .insert({
-        client_id: talentAuth!.id,
-        title: `PW Apply Gate ${testInfo.workerIndex}`,
-        description: "Playwright deterministic gig for subscription gate proof.",
-        category: "Commercial",
-        location: "New York, NY",
-        compensation: "$1000",
-        duration: "1 day",
-        date: "2025-12-31",
-        status: "active",
-      })
-      .select("id")
-      .single();
-    expect(gigError).toBeNull();
-    expect(gig?.id).toBeTruthy();
-
-    const gigPath = `/gigs/${gig!.id}`;
+    const talentUserId = await ensureTalentUserViaAdminApi(request, user);
+    const gigId = await createActiveGigForClient(talentUserId, `${testInfo.workerIndex}-anon-cta`);
+    const gigPath = `/gigs/${gigId}`;
 
     // Signed-out visit should show sign-in CTA.
     await page.context().clearCookies();

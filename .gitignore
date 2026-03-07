@@ -42,3 +42,6 @@ Thumbs.db
 automation/.openclaw
 .openclaw
 
+# Local utility scripts with env-dependent credentials
+/fix-test-passwords.mjs
+

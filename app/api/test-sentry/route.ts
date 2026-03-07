@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Server-side Sentry test endpoint
@@ -29,10 +30,11 @@ export async function GET(request: Request) {
           },
           level: "error",
         });
-        // eslint-disable-next-line no-console
-        console.log("[Sentry Test] Error captured and sent to Sentry. Event ID:", eventId);
-        // eslint-disable-next-line no-console
-        console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+        logger.info("[Sentry Test] Error captured and sent to Sentry", {
+          eventId,
+          dashboard:
+            "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+        });
         
         // Also flush to ensure it's sent immediately
         await Sentry.flush(2000);
@@ -66,10 +68,11 @@ export async function GET(request: Request) {
             },
             level: "error",
           });
-          // eslint-disable-next-line no-console
-          console.log("[Sentry Test] Exception captured and sent to Sentry. Event ID:", exceptionId);
-          // eslint-disable-next-line no-console
-          console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+          logger.info("[Sentry Test] Exception captured and sent to Sentry", {
+            eventId: exceptionId,
+            dashboard:
+              "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+          });
           
           // Flush to ensure it's sent immediately
           await Sentry.flush(2000);
@@ -88,10 +91,11 @@ export async function GET(request: Request) {
       default: {
         // Send an info message
         const messageId = Sentry.captureMessage("✅ Server-side test message: Sentry API integration working!", "info");
-        // eslint-disable-next-line no-console
-        console.log("[Sentry Test] Message sent to Sentry. Event ID:", messageId);
-        // eslint-disable-next-line no-console
-        console.log("[Sentry Test] Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/");
+        logger.info("[Sentry Test] Message sent to Sentry", {
+          eventId: messageId,
+          dashboard:
+            "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+        });
         
         // Flush to ensure it's sent immediately
         await Sentry.flush(2000);
@@ -122,8 +126,7 @@ export async function GET(request: Request) {
         },
         level: "error",
       });
-      // eslint-disable-next-line no-console
-      console.log("[Sentry Test] Error caught and sent to Sentry from catch block");
+      logger.warn("[Sentry Test] Error caught and sent to Sentry from catch block");
     }
     
     return NextResponse.json(

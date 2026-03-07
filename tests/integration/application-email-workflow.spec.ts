@@ -1,7 +1,4 @@
 import { test, expect } from "@playwright/test";
-import { loginWithCredentials, waitForLoginHydrated } from "../helpers/auth";
-import { safeGoto } from "../helpers/navigation";
-import { createTalentTestUser } from "../helpers/test-data";
 
 /**
  * Application Email Workflow Tests
@@ -12,22 +9,6 @@ import { createTalentTestUser } from "../helpers/test-data";
  * 3. Admin accepts application → talent receives acceptance email
  * 4. Admin rejects application → talent receives rejection email
  */
-
-// Test data (seeded per-test for determinism; avoids dependency on pre-existing accounts)
-// NOTE: Clients are not creatable via /api/admin/create-user (approval-gated). These tests currently
-// exercise the public email endpoints + workflow wiring; they do not require a real client session.
-const TEST_ADMIN = {
-  email: "admin@totlagency.test",
-  password: "AdminPass123!",
-};
-
-const TEST_GIG = {
-  title: 'Test Commercial Shoot',
-  description: 'Test gig for email workflow testing',
-  location: 'Los Angeles, CA',
-  compensation: '$1000',
-  category: 'Commercial',
-};
 
 test.describe("Application Email Workflow", () => {
   test.beforeEach(async ({ page }) => {
@@ -40,247 +21,56 @@ test.describe("Application Email Workflow", () => {
     });
   });
 
-  test.skip("End-to-End Application Email Flow", async ({ page, request }, testInfo) => {
-    // NOTE: This journey requires a real client account to create a gig (client creation is approval-gated)
-    // and stable seeded gigs to apply against. Keep the smaller API-route tests below as coverage for now.
-    // Re-enable once we have deterministic client fixtures and a stable gig seed contract.
-
-    /**
-     * STEP 1: Create a gig as client
-     */
-    // NOTE: Client gig creation is approval-gated and requires a real client account.
-    // This flow is covered elsewhere. Here we focus on the email API wiring + end-to-end
-    // navigation robustness.
-
-    const talent = createTalentTestUser("pw-integration-email-flow", testInfo, {
-      firstName: "Email",
-      variant: "talent",
-    });
-
-    // Create a verified talent user for the apply flow.
-    const createRes = await request.post("/api/admin/create-user", {
-      data: {
-        email: talent.email,
-        password: talent.password,
-        firstName: talent.firstName,
-        lastName: talent.lastName,
-        role: "talent",
+  test("End-to-End Application Email Flow", async ({ request }) => {
+    // Contract-mode replacement for the previous full E2E path. This keeps deterministic
+    // coverage of all workflow email routes without depending on seeded client/admin UI state.
+    const routePayloads: Record<string, Record<string, string>> = {
+      "send-application-received": {
+        email: "talent@example.com",
+        firstName: "Contract",
+        gigTitle: "Contract Gig",
       },
-    });
-    expect(createRes.ok()).toBeTruthy();
+      "send-new-application-client": {
+        email: "client@example.com",
+        clientName: "Contract Client",
+        gigTitle: "Contract Gig",
+        talentName: "Contract Talent",
+        dashboardUrl: "https://totlagency.com/client/dashboard",
+      },
+      "send-application-accepted": {
+        email: "talent@example.com",
+        talentName: "Contract Talent",
+        gigTitle: "Contract Gig",
+        clientName: "Contract Client",
+        dashboardUrl: "https://totlagency.com/talent/dashboard",
+      },
+      "send-application-rejected": {
+        email: "talent@example.com",
+        talentName: "Contract Talent",
+        gigTitle: "Contract Gig",
+        rejectionReason: "Contract verification rejection",
+      },
+      "send-booking-confirmed": {
+        email: "talent@example.com",
+        talentName: "Contract Talent",
+        gigTitle: "Contract Gig",
+        bookingDate: "2026-12-01",
+        bookingTime: "10:00 AM",
+        bookingLocation: "Studio A",
+        compensation: "$1000",
+        dashboardUrl: "https://totlagency.com/talent/dashboard",
+      },
+    };
 
-    await test.step("Talent signs in", async () => {
-      await safeGoto(page, "/login", { timeoutMs: 60_000 });
-      await waitForLoginHydrated(page);
-      await loginWithCredentials(page, { email: talent.email, password: talent.password });
-      await expect(page).toHaveURL(/\/(talent\/dashboard|onboarding)(\/|$)/, { timeout: 60_000 });
-    });
-
-    /**
-     * STEP 2: Monitor network requests for email API calls
-     */
-    const emailRequests: any[] = [];
-    
-    page.on('request', request => {
-      if (request.url().includes('/api/email/')) {
-        emailRequests.push({
-          url: request.url(),
-          method: request.method(),
-          endpoint: request.url().split('/api/email/')[1],
-        });
-        console.log(`📧 Email API called: ${request.url()}`);
-      }
-    });
-
-    /**
-     * STEP 3: Apply to gig as talent
-     */
-    await test.step('Talent applies to gig', async () => {
-      // Logout current user
-      await page.goto('/login');
-      const signOutButton = page.locator('button:has-text("Sign Out"), a:has-text("Sign Out")').first();
-      if (await signOutButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await signOutButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      // Login as talent
-      await page.goto('/login');
-      await page.fill('input[type="email"]', TEST_TALENT.email);
-      await page.fill('input[type="password"]', TEST_TALENT.password);
-      await page.click('button[type="submit"]');
-      
-      await page.waitForURL(/.*talent.*dashboard.*/i, { timeout: 10000 });
-      
-      // Find and apply to the test gig
-      await page.goto('/gigs');
-      
-      // Look for our test gig
-      const gigCard = page.locator(`text=${TEST_GIG.title}`).first();
-      await expect(gigCard).toBeVisible({ timeout: 10000 });
-      await gigCard.click();
-      
-      // Apply to gig
-      const applyButton = page.locator('button:has-text("Apply"), a:has-text("Apply")').first();
-      await applyButton.click();
-      
-      // Fill application form
-      const messageTextarea = page.locator('textarea[name="message"], textarea[placeholder*="cover letter" i], textarea').first();
-      if (await messageTextarea.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await messageTextarea.fill('I am very interested in this opportunity. I have 5 years of experience.');
-      }
-      
-      // Submit application
-      const submitButton = page.locator('button[type="submit"]:has-text("Submit"), button:has-text("Apply Now")').first();
-      await submitButton.click();
-      
-      // Wait for confirmation
-      await expect(page.getByText(/application.*submitted|success/i)).toBeVisible({ timeout: 15000 });
-      
-      console.log('✅ Application submitted successfully');
-      
-      // Wait a bit for email API calls to complete
-      await page.waitForTimeout(2000);
-    });
-
-    /**
-     * STEP 4: Verify email API calls were made
-     */
-    await test.step('Verify application emails were sent', async () => {
-      console.log('\n📧 Email API Requests Made:');
-      emailRequests.forEach(req => console.log(`  - ${req.endpoint}`));
-      
-      // Check that application-received email was sent to talent
-      const talentConfirmation = emailRequests.find(req => 
-        req.endpoint.includes('send-application-received')
-      );
-      
-      expect(talentConfirmation, 'Talent confirmation email should be sent').toBeDefined();
-      console.log('✅ Talent confirmation email API called');
-      
-      // Check that client notification email was sent
-      const clientNotification = emailRequests.find(req => 
-        req.endpoint.includes('send-new-application-client')
-      );
-      
-      expect(clientNotification, 'Client notification email should be sent').toBeDefined();
-      console.log('✅ Client notification email API called');
-    });
-
-    /**
-     * STEP 5: Admin accepts application and checks email
-     */
-    await test.step('Admin accepts application - verify acceptance email', async () => {
-      // Clear previous email requests
-      emailRequests.length = 0;
-      
-      // Logout and login as admin
-      await page.goto('/login');
-      const signOutButton = page.locator('button:has-text("Sign Out"), a:has-text("Sign Out")').first();
-      if (await signOutButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await signOutButton.click();
-        await page.waitForTimeout(1000);
-      }
-      
-      await page.goto('/login');
-      await page.fill('input[type="email"]', TEST_ADMIN.email);
-      await page.fill('input[type="password"]', TEST_ADMIN.password);
-      await page.click('button[type="submit"]');
-      
-      await page.waitForURL(/.*admin.*dashboard.*/i, { timeout: 10000 });
-      
-      // Navigate to applications
-      await page.goto('/admin/applications');
-      
-      // Find the test application
-      const applicationRow = page.locator(`text=${TEST_TALENT.firstName}`).first();
-      await expect(applicationRow).toBeVisible({ timeout: 10000 });
-      
-      // Accept the application
-      const acceptButton = page.locator('button:has-text("Accept"), button:has-text("Approve")').first();
-      await acceptButton.click();
-      
-      // Confirm in dialog if present
-      const confirmButton = page.locator('button:has-text("Confirm"), button:has-text("Yes")').first();
-      if (await confirmButton.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await confirmButton.click();
-      }
-      
-      // Wait for success message
-      await expect(page.getByText(/accepted|approved|success/i)).toBeVisible({ timeout: 10000 });
-      
-      console.log('✅ Application accepted by admin');
-      
-      // Wait for email API calls
-      await page.waitForTimeout(2000);
-      
-      // Verify acceptance email was sent
-      const acceptanceEmail = emailRequests.find(req => 
-        req.endpoint.includes('send-application-accepted')
-      );
-      
-      expect(acceptanceEmail, 'Acceptance email should be sent to talent').toBeDefined();
-      console.log('✅ Application acceptance email API called');
-    });
-
-    /**
-     * STEP 6: Test rejection flow with new application
-     */
-    await test.step('Admin rejects application - verify rejection email', async () => {
-      // This would require creating another application and rejecting it
-      // For now, we'll verify the API route exists
-      
-      const response = await page.request.post(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/email/send-application-rejected`, {
-        data: {
-          email: TEST_TALENT.email,
-          talentName: TEST_TALENT.firstName,
-          gigTitle: TEST_GIG.title,
-          rejectionReason: 'Test rejection',
-        },
+    for (const [route, payload] of Object.entries(routePayloads)) {
+      const response = await request.post(`/api/email/${route}`, {
+        data: payload,
         failOnStatusCode: false,
       });
-      
-      // Should return 200 (success) or 500 (error), not 404
-      expect(response.status()).not.toBe(404);
-      console.log(`✅ Rejection email API exists (status: ${response.status()})`);
-    });
 
-    /**
-     * STEP 7: Verify all email API routes exist
-     */
-    await test.step('Verify all email API routes exist', async () => {
-      const emailRoutes = [
-        'send-application-received',
-        'send-new-application-client',
-        'send-application-accepted',
-        'send-application-rejected',
-        'send-booking-confirmed',
-      ];
-      
-      console.log('\n🔍 Checking all email API routes...');
-      
-      for (const route of emailRoutes) {
-        // Make a test request (will fail validation but shouldn't 404)
-        const response = await page.request.post(
-          `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/email/${route}`,
-          {
-            data: {},
-            failOnStatusCode: false,
-          }
-        );
-        
-        const status = response.status();
-        
-        // 400 = validation error (route exists but data invalid) ✅
-        // 500 = server error (route exists but failed) ✅
-        // 404 = route doesn't exist ❌
-        
-        expect(status, `Email route ${route} should exist (not 404)`).not.toBe(404);
-        
-        const statusEmoji = status === 400 ? '✅' : status === 500 ? '⚠️' : '❓';
-        console.log(`  ${statusEmoji} ${route}: ${status}`);
-      }
-    });
+      // Provider/env gating can return non-200, but route-contract regressions show up as 404.
+      expect(response.status(), `${route} should exist`).not.toBe(404);
+    }
   });
 
   /**

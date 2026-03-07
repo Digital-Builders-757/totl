@@ -17,6 +17,12 @@ import {
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
+const devLog = (...args: unknown[]) => {
+  if (nodeEnv === "development") {
+    // eslint-disable-next-line no-console
+    console.warn(...args);
+  }
+};
 
 // Fail loudly if DSN is missing (no silent failures)
 if (!SENTRY_DSN) {
@@ -27,7 +33,7 @@ if (!SENTRY_DSN) {
 
 // Log DSN status for debugging (only in development)
 if (nodeEnv === "development") {
-  console.log("[Sentry Server] Initializing with:", {
+  devLog("[Sentry Server] Initializing with:", {
     isProduction: serverIsProduction,
     hasProductionDSN: !!productionDSN,
     hasDevelopmentDSN: !!developmentDSN,
@@ -42,17 +48,17 @@ if (nodeEnv === "development") {
 
   if (SENTRY_DSN) {
     if (projectIdMatches) {
-      console.log("[Sentry Server] ✅ Sentry is configured correctly for totlmodelagency");
+      devLog("[Sentry Server] ✅ Sentry is configured correctly for totlmodelagency");
     } else {
       console.warn(
         `[Sentry Server] ⚠️ Project ID mismatch! Using ${currentProjectId}, expected ${expectedProjectId}`
       );
       console.warn("[Sentry Server] ⚠️ Update your .env.local DSNs to point to the correct project");
     }
-    console.log(
+    devLog(
       "[Sentry Server] Test errors will appear at: https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/"
     );
-    console.log("[Sentry Server] Diagnostic endpoint: http://localhost:3000/api/sentry-diagnostic");
+    devLog("[Sentry Server] Diagnostic endpoint: http://localhost:3000/api/sentry-diagnostic");
   } else {
     console.warn("[Sentry Server] ⚠️ Sentry DSN is missing - errors will not be tracked!");
   }
@@ -150,7 +156,7 @@ Sentry.init({
           );
           
           if (isNextDevServerError) {
-            console.warn("Next.js dev server EPIPE error filtered - client disconnected during logging");
+            devLog("Next.js dev server EPIPE error filtered - client disconnected during logging");
             return null; // Don't send to Sentry
           }
         }
@@ -162,7 +168,7 @@ Sentry.init({
               frame => frame.filename?.includes('log-requests.js') && 
                        frame.function === 'writeLine'
             )) {
-          console.warn("Next.js dev server writeLine EPIPE error filtered - client disconnected during request logging");
+          devLog("Next.js dev server writeLine EPIPE error filtered - client disconnected during request logging");
           return null; // Don't send to Sentry
         }
       }
@@ -171,7 +177,7 @@ Sentry.init({
       // These occur when .next folder is deleted while dev server is running
       if (errorObj.code === 'ENOENT' && errorObj.message?.includes('.next')) {
         if (process.env.NODE_ENV === 'development') {
-          console.warn("Webpack cache file missing - restart dev server to rebuild cache");
+          devLog("Webpack cache file missing - restart dev server to rebuild cache");
           return null; // Don't send to Sentry in development
         }
       }
@@ -190,7 +196,7 @@ Sentry.init({
         );
         
         if (isWebpackError && process.env.NODE_ENV === 'development') {
-          console.warn("Webpack HMR/chunk loading error detected - clear .next cache and restart dev server");
+          devLog("Webpack HMR/chunk loading error detected - clear .next cache and restart dev server");
           return null; // Don't send to Sentry in development
         }
       }
@@ -199,7 +205,7 @@ Sentry.init({
       // In production, we want to know if these slip through
       if (errorObj.message?.includes('Event handlers cannot be passed to Client Component props')) {
         if (process.env.NODE_ENV === 'development') {
-          console.error("Server Component error in development - this should be fixed!");
+          devLog("Server Component error in development - this should be fixed!");
           return null; // Filter in dev to reduce noise, but fix the code!
         }
         // In production, let it through so we know there's a problem
@@ -209,7 +215,7 @@ Sentry.init({
       // This error occurs when trying to modify cookies in Server Components
       // instead of Server Actions or Route Handlers
       if (errorObj.message?.includes('Cookies can only be modified in a Server Action or Route Handler')) {
-        console.warn("Next.js 15 App Router cookies error filtered - cookies should only be modified in Server Actions or Route Handlers");
+        devLog("Next.js 15 App Router cookies error filtered - cookies should only be modified in Server Actions or Route Handlers");
         return null; // Don't send to Sentry - this is a code architecture issue
       }
 

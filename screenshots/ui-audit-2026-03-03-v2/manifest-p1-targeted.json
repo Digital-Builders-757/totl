@@ -1,0 +1,74 @@
+[
+  {
+    "filename": "client__dashboard__390x844__loaded.png",
+    "role": "client",
+    "route": "/client/dashboard",
+    "viewport": "390x844",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__dashboard__390x844__loaded.png"
+  },
+  {
+    "filename": "client__profile__390x844__loaded.png",
+    "role": "client",
+    "route": "/client/profile",
+    "viewport": "390x844",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__profile__390x844__loaded.png"
+  },
+  {
+    "filename": "talent__profile__390x844__loaded.png",
+    "role": "talent",
+    "route": "/talent/profile",
+    "viewport": "390x844",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\talent__profile__390x844__loaded.png"
+  },
+  {
+    "filename": "client__dashboard__360x800__loaded.png",
+    "role": "client",
+    "route": "/client/dashboard",
+    "viewport": "360x800",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__dashboard__360x800__loaded.png"
+  },
+  {
+    "filename": "client__profile__360x800__loaded.png",
+    "role": "client",
+    "route": "/client/profile",
+    "viewport": "360x800",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__profile__360x800__loaded.png"
+  },
+  {
+    "filename": "talent__profile__360x800__loaded.png",
+    "role": "talent",
+    "route": "/talent/profile",
+    "viewport": "360x800",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\talent__profile__360x800__loaded.png"
+  },
+  {
+    "filename": "client__dashboard__1440x900__loaded.png",
+    "role": "client",
+    "route": "/client/dashboard",
+    "viewport": "1440x900",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__dashboard__1440x900__loaded.png"
+  },
+  {
+    "filename": "client__profile__1440x900__loaded.png",
+    "role": "client",
+    "route": "/client/profile",
+    "viewport": "1440x900",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\client__profile__1440x900__loaded.png"
+  },
+  {
+    "filename": "talent__profile__1440x900__loaded.png",
+    "role": "talent",
+    "route": "/talent/profile",
+    "viewport": "1440x900",
+    "status": "success",
+    "path": "C:\\Users\\young\\Desktop\\Project Files\\totl\\screenshots\\ui-audit-2026-03-03-v2\\talent__profile__1440x900__loaded.png"
+  }
+]

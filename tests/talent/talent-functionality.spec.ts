@@ -16,8 +16,16 @@ import { loginAsTalent } from "../helpers/auth";
  * current UI. Until the UI is instrumented with those ids (or the suite is
  * rewritten to use role/label selectors), it will always fail and drown out
  * meaningful regressions.
+ *
+ * Active replacements:
+ * - `tests/talent/talent-dashboard-route.spec.ts`
+ * - `tests/talent/talent-profile-route.spec.ts`
+ * - `tests/talent/talent-applications-route.spec.ts`
+ * - `tests/talent/talent-gigs-route.spec.ts`
+ * - `tests/talent/talent-gig-detail-route.spec.ts`
+ * - `tests/talent/talent-billing-route.spec.ts`
  */
-test.skip(true, "Scaffold suite pending UI instrumentation (data-testid coverage)");
+test.skip(true, "Legacy scaffold suite replaced by route-level talent route contracts");
 
 // Test data
 const talentProfile = {

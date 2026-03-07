@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VerificationPendingLoading() {
   return (
@@ -7,21 +8,21 @@ export default function VerificationPendingLoading() {
         <div className="max-w-md mx-auto">
           <Card>
             <CardHeader>
-              <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                <div className="w-8 h-8 border-2 border-t-black border-r-gray-200 border-b-gray-200 border-l-gray-200 rounded-full animate-spin"></div>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                <Skeleton className="h-8 w-8 rounded-full" />
               </div>
               <CardTitle className="text-center">Loading...</CardTitle>
               <CardDescription className="text-center">Please wait</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4 mx-auto"></div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="mx-auto h-4 w-3/4" />
               <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="h-4 bg-gray-200 rounded animate-pulse mb-4"></div>
+                <Skeleton className="mb-4 h-4 w-full" />
                 <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                  <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-full" />
                 </div>
               </div>
             </CardContent>

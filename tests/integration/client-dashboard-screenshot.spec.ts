@@ -10,27 +10,23 @@ import { test, expect } from "@playwright/test";
  */
 
 test.describe("client dashboard screenshot (opt-in)", () => {
-  test.skip(
-    process.env.RUN_CLIENT_SCREENSHOT !== "1",
-    "Client dashboard screenshot regression is opt-in (RUN_CLIENT_SCREENSHOT=1) until seeded client login is deterministic."
-  );
-
   test("/client/dashboard matches baseline", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
 
-    // Assumes runner already has an authenticated session cookie.
     await page.goto("/client/dashboard", { waitUntil: "domcontentloaded" });
 
-    // Avoid false positives: if redirected to login, fail.
-    await expect(page).toHaveURL(/\/client\/dashboard/);
+    if (process.env.RUN_CLIENT_SCREENSHOT === "1") {
+      // Opt-in visual regression mode: assumes an authenticated seeded client session.
+      await expect(page).toHaveURL(/\/client\/dashboard/);
+      await page.waitForTimeout(750);
+      await expect(page).toHaveScreenshot("client-dashboard-mobile.png", {
+        fullPage: true,
+        maxDiffPixelRatio: 0.01,
+      });
+      return;
+    }
 
-    // Let client hydration settle.
-    await page.waitForTimeout(750);
-
-    // A small threshold keeps this stable across minor font rendering differences.
-    await expect(page).toHaveScreenshot("client-dashboard-mobile.png", {
-      fullPage: true,
-      maxDiffPixelRatio: 0.01,
-    });
+    // Default deterministic mode: assert route contract (dashboard access or auth redirect).
+    await expect(page).toHaveURL(/\/(client\/dashboard|login)(\?|$)/);
   });
 });

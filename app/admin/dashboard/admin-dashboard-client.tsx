@@ -83,30 +83,20 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           />
 
         <div className="mb-4 md:hidden">
-          <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
-              <span className="inline-flex items-center gap-2">
-                Show stats
-                <span className="text-xs text-gray-500">({dashboardStats.totalApplications} applications)</span>
-              </span>
-            </summary>
-            <div className="mt-2">
-              <MobileSummaryRow
-                items={[
-                  { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
-                  { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
-                  { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
-                  { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
-                  { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
-                  {
-                    label: "Paid talent",
-                    value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
-                    icon: DollarSign,
-                  },
-                ]}
-              />
-            </div>
-          </details>
+          <MobileSummaryRow
+            items={[
+              { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
+              { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
+              { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
+              { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
+              { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
+              {
+                label: "Paid talent",
+                value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
+                icon: DollarSign,
+              },
+            ]}
+          />
         </div>
 
         {/* Quick Stats */}
@@ -235,12 +225,12 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                   {paidTalentStats.monthlyCount + paidTalentStats.annualCount}
                 </span>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-300">
                 Monthly: <span data-testid="paid-talent-monthly">{paidTalentStats.monthlyCount}</span> · Annual:{" "}
                 <span data-testid="paid-talent-annual">{paidTalentStats.annualCount}</span> · Unknown:{" "}
                 <span data-testid="paid-talent-unknown">{paidTalentStats.unknownPlanCount}</span>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-300">
                 Est. MRR:{" "}
                 <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span> · Est. ARR:{" "}
                 <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
@@ -303,21 +293,21 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </TabsTrigger>
             <TabsTrigger
               value="gigs"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Briefcase className="h-4 w-4" />
               Gigs
             </TabsTrigger>
             <TabsTrigger
               value="applications"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex items-center gap-2 text-gray-400 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <BarChart className="h-4 w-4" />
               Analytics
@@ -585,7 +575,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                               {new Date(application.created_at).toLocaleDateString()}
                             </span>
                             {application.message && (
-                              <span className="text-gray-500 italic truncate max-w-md">
+                              <span className="text-gray-300 italic truncate max-w-md">
                                 {application.message.length > 50 
                                   ? `${application.message.substring(0, 50)}...` 
                                   : application.message}
@@ -626,7 +616,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                 <div className="text-center py-8">
                   <BarChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-300 mb-4">Analytics dashboard coming soon.</p>
-                  <p className="text-sm text-gray-400">Track platform performance, user engagement, and business metrics.</p>
+                  <p className="text-sm text-gray-300">Track platform performance, user engagement, and business metrics.</p>
                 </div>
               </CardContent>
             </Card>

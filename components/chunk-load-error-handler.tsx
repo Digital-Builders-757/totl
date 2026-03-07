@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { logger } from "@/lib/utils/logger";
 
@@ -8,6 +9,8 @@ import { logger } from "@/lib/utils/logger";
  * This is a common issue in Next.js development when hot reload fails
  */
 export function ChunkLoadErrorHandler() {
+  const router = useRouter();
+
   useEffect(() => {
     const handleChunkError = (event: ErrorEvent) => {
       const error = event.error;
@@ -21,15 +24,15 @@ export function ChunkLoadErrorHandler() {
       ) {
         logger.warn("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
         
-        // Try to reload the page after a short delay
-        // This is often caused by hot reload issues and a refresh fixes it
+        // Try to refresh route data after a short delay.
+        // This keeps SPA navigation semantics instead of forcing a full document reload.
         const retryDelay = 2000; // 2 seconds
         
         setTimeout(() => {
-          // Only reload if we're still on the same page (user hasn't navigated away)
+          // Only refresh if we're still on the same page (user hasn't navigated away)
           if (document.visibilityState === "visible") {
-            logger.info("[ChunkLoadErrorHandler] Reloading page to recover from chunk error.");
-            window.location.reload();
+            logger.info("[ChunkLoadErrorHandler] Refreshing route to recover from chunk error.");
+            router.refresh();
           }
         }, retryDelay);
       }
@@ -41,7 +44,7 @@ export function ChunkLoadErrorHandler() {
     return () => {
       window.removeEventListener("error", handleChunkError);
     };
-  }, []);
+  }, [router]);
 
   return null; // This component doesn't render anything
 }

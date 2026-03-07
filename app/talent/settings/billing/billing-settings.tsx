@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CheckCircle, Clock, CreditCard, ExternalLink } from "lucide-react";
+import { AlertCircle, CheckCircle, ChevronDown, ChevronUp, Clock, CreditCard, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -37,6 +37,7 @@ interface BillingSettingsProps {
 
 export function BillingSettings({ profile }: BillingSettingsProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPlanDetails, setShowPlanDetails] = useState(isActiveSubscriber(profile));
 
   const handleManageSubscription = async () => {
     setIsLoading(true);
@@ -76,16 +77,15 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Subscription Status */}
+    <div className="space-y-5 pb-20 sm:pb-0">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {getStatusIcon(profile.subscription_status)}
-            Subscription Status
+            Subscription Snapshot
           </CardTitle>
           <CardDescription>
-            Current status of your TOTL Agency subscription
+            Current status of your TOTL Agency subscription.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -136,39 +136,22 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
         </Alert>
       )}
 
-      {/* Actions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            Manage Subscription
+            Billing Actions
           </CardTitle>
           <CardDescription>
-            Update your payment method, change plans, or cancel your subscription
+            Update your payment method, change plans, or cancel your subscription.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {profile.stripe_customer_id ? (
-            <Button 
-              onClick={handleManageSubscription}
-              disabled={isLoading}
-              className="w-full sm:w-auto"
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              {isLoading ? 'Opening...' : 'Manage Subscription'}
-            </Button>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                You haven&apos;t subscribed yet. Choose a plan to get started.
-              </p>
-              <Button asChild className="w-full sm:w-auto">
-                <Link href="/talent/subscribe">
-                  Choose Plan
-                </Link>
-              </Button>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground">
+            {profile.stripe_customer_id
+              ? "Open Stripe's secure billing portal to manage cards, invoices, and plan changes."
+              : "You haven't subscribed yet. Choose a plan to get started."}
+          </p>
           
           <p className="text-xs text-muted-foreground">
             You&apos;ll be redirected to Stripe&apos;s secure billing portal where you can update your payment method, 
@@ -177,8 +160,22 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
         </CardContent>
       </Card>
 
-      {/* Features */}
-      {isActiveSubscriber(profile) && (
+      <div className="rounded-xl border border-gray-700/80 bg-gray-900/50 p-3">
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto w-full justify-between px-2 py-2 text-left text-gray-100 hover:bg-gray-800/80"
+          onClick={() => setShowPlanDetails((current) => !current)}
+        >
+          <span>{showPlanDetails ? "Hide plan details" : "Show plan details"}</span>
+          {showPlanDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+        <p className="px-2 pt-1 text-xs text-gray-400">
+          Expand this section only when you need feature-level details.
+        </p>
+      </div>
+
+      {showPlanDetails && isActiveSubscriber(profile) && (
         <Card>
           <CardHeader>
             <CardTitle>Premium Features</CardTitle>
@@ -208,6 +205,25 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
           </CardContent>
         </Card>
       )}
+
+      <div className="sticky bottom-3 z-10 -mx-1 rounded-xl border border-gray-700 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+        {profile.stripe_customer_id ? (
+          <Button
+            onClick={handleManageSubscription}
+            disabled={isLoading}
+            className="w-full"
+          >
+            <ExternalLink className="h-4 w-4 mr-2" />
+            {isLoading ? 'Opening...' : 'Manage Subscription'}
+          </Button>
+        ) : (
+          <Button asChild className="w-full">
+            <Link href="/talent/subscribe">
+              Choose Plan
+            </Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

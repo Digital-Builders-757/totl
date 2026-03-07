@@ -1,4 +1,5 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AuthCallbackLoading() {
   return (
@@ -9,8 +10,8 @@ export default function AuthCallbackLoading() {
           <CardDescription className="text-center">Verifying your email address...</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
-          <div className="w-12 h-12 border-4 border-t-black border-r-gray-200 border-b-gray-200 border-l-gray-200 rounded-full animate-spin mb-4"></div>
-          <p className="text-gray-600">Please wait while we verify your email...</p>
+          <Skeleton className="mb-6 h-12 w-12 rounded-full" />
+          <Skeleton className="h-4 w-64 max-w-full" />
         </CardContent>
       </Card>
     </div>

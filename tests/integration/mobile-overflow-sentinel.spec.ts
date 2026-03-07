@@ -1,4 +1,7 @@
 import { test, expect, type Locator, type Page } from "@playwright/test";
+import { loginWithCredentials } from "../helpers/auth";
+import { ensureClientFixture } from "../helpers/integration-fixtures";
+import { createTalentTestUser } from "../helpers/test-data";
 
 /**
  * Mobile horizontal overflow sentinel
@@ -162,17 +165,19 @@ test.describe("UI overflow sentinel (mobile)", () => {
   });
 
   test("client dashboard has no horizontal overflow", async ({ page }) => {
-    test.skip(
-      process.env.RUN_CLIENT_OVERFLOW !== "1",
-      "Client overflow sentinel is opt-in (RUN_CLIENT_OVERFLOW=1) until seeded client login is deterministic in CI/dev."
+    const clientUser = createTalentTestUser("pw-overflow-client", test.info(), {
+      firstName: "Overflow",
+      lastName: "Client",
+      variant: "dashboard",
+    });
+    await ensureClientFixture(clientUser);
+    await loginWithCredentials(
+      page,
+      { email: clientUser.email, password: clientUser.password },
+      { returnUrl: "/client/dashboard" }
     );
-
-    // NOTE: This test assumes the runner is already authenticated.
     await page.goto("/client/dashboard", { waitUntil: "domcontentloaded" });
-
-    // If auth isn't present, Next will redirect to /login; fail fast to avoid false confidence.
     await expect(page).toHaveURL(/\/client\/dashboard/);
-
     await expectNoHorizontalOverflow(page, "client dashboard");
   });
 });

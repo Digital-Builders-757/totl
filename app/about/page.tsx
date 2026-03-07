@@ -53,7 +53,7 @@ export default function AboutPage() {
 
       {/* Our Story Section */}
       <section className="py-32 bg-gradient-to-b from-black to-gray-900">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center space-y-12 animate-apple-fade-in">
             <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto">
               <span className="text-white font-medium text-sm flex items-center gap-2">
@@ -137,7 +137,7 @@ export default function AboutPage() {
 
       {/* Our Mission Section */}
       <section className="py-32 bg-gray-900">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-apple-fade-in">
             <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
               💎 Our Mission
@@ -204,7 +204,7 @@ export default function AboutPage() {
 
       {/* Our Services Section */}
       <section className="py-32 bg-black">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-apple-fade-in">
             <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
               🌟 What We Offer
@@ -285,7 +285,7 @@ export default function AboutPage() {
 
       {/* Contact Section */}
       <section id="contact" className="py-32 bg-gray-900">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16 animate-apple-fade-in">
             <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm mb-6">
               📧 Contact Us
@@ -407,7 +407,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
 
-        <div className="container mx-auto px-4 text-center relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="max-w-4xl mx-auto space-y-8 animate-apple-fade-in">
             <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
               🚀 Join Us
