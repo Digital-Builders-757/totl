@@ -266,6 +266,12 @@ npm run build
   - then runs `npm run start`.
 - **Prevention:** Keep `webServer.command` shell-neutral and avoid inline shell conditionals in Playwright config.
 
+### **CI static guard false-positive: `next/headers` import flagged in client code when none exists**
+- **Symptom:** CI build fails at static guard step with `Found next/headers import in client code!` while repo search shows no `next/headers` usage in `"use client"` files.
+- **Root cause:** Shell-dependent `grep` + glob patterns in workflow (`app/**/*.tsx`) can behave inconsistently across environments and do not model `"use client"` boundaries.
+- **Fix:** Replace the workflow grep check with `node scripts/guard-no-next-headers-in-client.mjs`, which scans only `"use client"` modules under `app` and `components`.
+- **Prevention:** For policy-style CI checks, prefer deterministic script guards over shell/glob pipelines.
+
 ### **Playwright strict-mode locator violations after UI copy/layout refresh**
 - **Symptom:** Assertions fail with strict mode errors like “locator resolved to multiple elements” or hidden duplicate matches.
 - **Root cause:** Broad text locators (`getByText("...")`) match subtitles, hidden tab labels, or repeated counters after UI refreshes.

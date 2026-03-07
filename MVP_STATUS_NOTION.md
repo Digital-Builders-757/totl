@@ -8,6 +8,31 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: CI static-guard false-positive fix for build pipeline (March 6, 2026)**
+
+**CI / BUILD STABILITY HARDENING** - March 6, 2026
+- ✅ Fixed failing CI gate that incorrectly flagged `next/headers` imports in client code.
+- ✅ Replaced brittle shell grep in `.github/workflows/ci.yml` with deterministic guard script:
+  - `scripts/guard-no-next-headers-in-client.mjs`
+  - scans only `"use client"` files under `app` + `components`
+  - fails only on real `next/headers` imports in client modules
+- ✅ Re-ran mandatory ship gates after the fix (all passing):
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ Previous CI command used shell-dependent glob/grep behavior, which can produce false positives and block deploys even when no client violation exists.
+
+**Next (P0 - Immediate merge confidence)**
+- [ ] Push this CI guard fix and rerun the failed pipeline to confirm green build.
+- [ ] Proceed with `develop` -> `main` merge after CI confirms static guard stability.
+
+**Next (P1 - Guardrail quality follow-up)**
+- [ ] Continue replacing shell-fragile CI checks with deterministic script guards where practical.
+- [ ] Reduce existing lint warning backlog so CI signal quality stays high.
+
 ## 🚀 **Latest: Deployment ship-gate verification + Playwright server hardening (March 6, 2026)**
 
 **DEPLOYMENT / MERGE READINESS HARDENING** - March 6, 2026
@@ -3782,6 +3807,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 6, 2026*
-*Current Status: MVP Complete - deployment ship-gates validated locally and Playwright webServer startup hardened for cross-platform CI consistency; external beta evidence still pending*
-*Codebase Rating: 9.2/10 - Production ready with stronger deployment safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After develop CI passes for this hardening commit and merge-to-main deploy validation completes*
+*Current Status: MVP Complete - deployment ship-gates validated locally, Playwright startup hardened, and CI static guard false positives eliminated for client `next/headers` checks; external beta evidence still pending*
+*Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
+*Next Review: After CI rerun confirms this static-guard fix and merge-to-main deploy validation completes*
