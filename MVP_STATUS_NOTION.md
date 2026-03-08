@@ -8,6 +8,43 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
+
+**AUTH / ONBOARDING FLOW HARDENING** - March 8, 2026
+- ✅ Added admin invite endpoint for VIP Career Builder applicants:
+  - `app/api/admin/invite-career-builder/route.ts`
+  - Sends Supabase invite with callback redirect targeting `/auth/callback?returnUrl=/client/apply`
+- ✅ Added admin UI control on `/admin/client-applications` to issue invites directly.
+- ✅ Fixed middleware/bootstrap safety so invited users can stay on Career Builder application entry surfaces during profile-missing/unassigned states:
+  - `/client/apply`
+  - `/client/apply/success`
+  - `/client/application-status`
+- ✅ Fixed callback route allowlisting drift:
+  - Added `/auth/callback` to canonical auth route constants (`AUTH_ROUTES`)
+  - Prevents signed-out middleware bounce from callback to generic `/login`
+- ✅ Expanded callback auth completion to support both Supabase callback styles:
+  - `code` (PKCE exchange)
+  - `token_hash + type` (OTP/invite verify flow)
+- ✅ Re-ran mandatory ship gates (all passing):
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ Invite links could land on `/login?returnUrl=/auth/callback` because `/auth/callback` was missing from canonical auth route allowlist.
+- ⚠️ Callback handler only processed `code`, but Supabase invite links can use `token_hash + type`, causing session completion failures and fallback to login.
+- ⚠️ Expired/previously-used OTP links (`error_code=otp_expired`) can mimic routing issues; fresh-link verification is required.
+
+**Next (P0 - immediate VIP readiness)**
+- [ ] Run one full fresh invite acceptance in incognito and capture evidence of final landing at `/client/apply`.
+- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`).
+- [ ] Validate existing-account invite path and decide whether to ship login/reset fallback for `409` responses.
+
+**Next (P1 - reliability polish)**
+- [ ] Add focused auth callback regression tests covering `token_hash + type=invite` and `returnUrl=/client/apply`.
+- [ ] Add admin UX fallback action for already-registered emails (send login/reset link with preserved returnUrl).
+
 ## 🚀 **Latest: CI static-guard false-positive fix for build pipeline (March 6, 2026)**
 
 **CI / BUILD STABILITY HARDENING** - March 6, 2026

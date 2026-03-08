@@ -35,6 +35,11 @@ const isAssetOrApi = (path: string) =>
   path.startsWith("/api/") || // Allow all API routes (including /api/auth/*) to bypass middleware
   path.includes(".");
 
+const isCareerBuilderApplicationPath = (path: string) =>
+  path === PATHS.CLIENT_APPLY ||
+  path === PATHS.CLIENT_APPLY_SUCCESS ||
+  path === PATHS.CLIENT_APPLICATION_STATUS;
+
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
@@ -170,6 +175,7 @@ export async function middleware(req: NextRequest) {
       isPublicPath(path) ||
       path === ONBOARDING_PATH ||
       path === PATHS.TALENT_DASHBOARD ||
+      isCareerBuilderApplicationPath(path) ||
       path === PATHS.GIGS; // Allow /gigs for signed-in users without profile
 
     if (isSafeForProfileBootstrap) {
@@ -251,13 +257,25 @@ export async function middleware(req: NextRequest) {
   // If user needs onboarding but has a role, sync account_type and redirect to appropriate dashboard
   // Handle both talent and client roles symmetrically
   // Allow public routes (like /client/apply) to be accessible even during onboarding
-  if (needsOnboarding && profile?.role === "talent" && path !== PATHS.TALENT_DASHBOARD && !isPublicPath(path)) {
+  if (
+    needsOnboarding &&
+    profile?.role === "talent" &&
+    path !== PATHS.TALENT_DASHBOARD &&
+    !isPublicPath(path) &&
+    !isCareerBuilderApplicationPath(path)
+  ) {
     // User has talent role but account_type is unassigned - redirect to Talent Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
     return redirectWithCookies(new URL(PATHS.TALENT_DASHBOARD, req.url));
   }
 
-  if (needsOnboarding && profile?.role === "client" && path !== PATHS.CLIENT_DASHBOARD && !isPublicPath(path)) {
+  if (
+    needsOnboarding &&
+    profile?.role === "client" &&
+    path !== PATHS.CLIENT_DASHBOARD &&
+    !isPublicPath(path) &&
+    !isCareerBuilderApplicationPath(path)
+  ) {
     // User has client role but account_type is unassigned - redirect to Client Dashboard
     // The sync will happen in handleLoginRedirect or on next page load
     return redirectWithCookies(new URL(PATHS.CLIENT_DASHBOARD, req.url));
@@ -272,7 +290,8 @@ export async function middleware(req: NextRequest) {
     path !== ONBOARDING_PATH &&
     path !== PATHS.CHOOSE_ROLE &&
     path !== PATHS.TALENT_DASHBOARD &&
-    !isPublicPath(path)
+    !isPublicPath(path) &&
+    !isCareerBuilderApplicationPath(path)
   ) {
     // Default to Talent Dashboard instead of onboarding page
     return redirectWithCookies(new URL(PATHS.TALENT_DASHBOARD, req.url));
