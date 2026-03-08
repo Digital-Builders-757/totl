@@ -14,6 +14,7 @@ export const PATHS = {
 
   // Auth
   LOGIN: "/login",
+  AUTH_CALLBACK: "/auth/callback",
   RESET_PASSWORD: "/reset-password",
   UPDATE_PASSWORD: "/update-password",
   VERIFICATION_PENDING: "/verification-pending",
@@ -65,6 +66,7 @@ export const PUBLIC_ROUTES: readonly string[] = [
 
 export const AUTH_ROUTES: readonly string[] = [
   PATHS.LOGIN,
+  PATHS.AUTH_CALLBACK,
   PATHS.RESET_PASSWORD,
   PATHS.UPDATE_PASSWORD,
   PATHS.VERIFICATION_PENDING,

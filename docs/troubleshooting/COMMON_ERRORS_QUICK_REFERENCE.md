@@ -176,6 +176,13 @@ npm run build
 - **Profile-Missing Bootstrap Redirect Loop:** Signed-in users without profile get redirected to login when accessing `/gigs`, causing redirect loops.
   - **Fix:** Allow `/gigs` in `isSafeForProfileBootstrap` for signed-in users without profile. AuthProvider handles profile creation, and page can gate by profile if needed.
   - **Prevention:** When adding route restrictions, ensure bootstrap-safe routes (signed-in but profile missing) are handled correctly. Reference: `docs/ARCHITECTURE_CONSTITUTION.md` (missing profile is valid bootstrap state).
+- **Invite link bounces to `/login` instead of completing `/auth/callback`:**
+  - **Symptom:** Invite URL lands on `/login?returnUrl=/auth/callback` or callback fails to establish a session before redirecting.
+  - **Root Cause:** `/auth/callback` missing from canonical `AUTH_ROUTES` allowlist and/or callback only handling `code` while invite uses `token_hash + type`.
+  - **Fix:** Add `/auth/callback` to `AUTH_ROUTES`, and in `app/auth/callback/page.tsx` support both:
+    - `exchangeCodeForSession(code)`
+    - `verifyOtp({ token_hash, type })`
+  - **Prevention:** Keep auth route lists canonical (`lib/constants/routes.ts`) and ensure callback supports both Supabase link styles used for verification/invites.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

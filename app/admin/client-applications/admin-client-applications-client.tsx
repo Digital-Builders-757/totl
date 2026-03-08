@@ -76,6 +76,8 @@ export function AdminClientApplicationsClient({
   const [adminNotes, setAdminNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSendingFollowUps, setIsSendingFollowUps] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [isSendingInvite, setIsSendingInvite] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [followUpFilter, setFollowUpFilter] = useState<"all" | "sent" | "not_sent">("all");
   const { toast } = useToast();
@@ -464,6 +466,54 @@ export function AdminClientApplicationsClient({
     }
   };
 
+  const handleSendInvite = async () => {
+    const normalizedEmail = inviteEmail.trim().toLowerCase();
+    if (!normalizedEmail) {
+      toast({
+        title: "Email required",
+        description: "Enter an email address to send the invite.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSendingInvite(true);
+    try {
+      const response = await fetch("/api/admin/invite-career-builder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+
+      const payload = (await response.json()) as { error?: string; success?: boolean };
+      if (!response.ok || !payload.success) {
+        toast({
+          title: response.status === 409 ? "User already exists" : "Invite failed",
+          description:
+            payload.error ??
+            "Could not send invite right now. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Invite sent",
+        description: `${normalizedEmail} received a Career Builder application invite.`,
+      });
+      setInviteEmail("");
+    } catch (error) {
+      logger.error("Error sending Career Builder invite", error);
+      toast({
+        title: "Invite failed",
+        description: "Unexpected error while sending invite.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingInvite(false);
+    }
+  };
+
   // Export to CSV
   const handleExport = () => {
     const csvHeaders = [
@@ -559,6 +609,36 @@ export function AdminClientApplicationsClient({
             </div>
           }
         />
+
+        <SectionCard className="border-gray-700 bg-gray-800/50 p-4 sm:p-6">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end">
+            <div className="flex-1">
+              <Label htmlFor="vip-invite-email" className="text-gray-300">
+                Invite VIP Career Builder Applicant
+              </Label>
+              <Input
+                id="vip-invite-email"
+                type="email"
+                placeholder="client@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="mt-2 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              />
+            </div>
+            <Button
+              type="button"
+              onClick={handleSendInvite}
+              disabled={isSendingInvite}
+              className="gap-2"
+            >
+              <Mail className="h-4 w-4" />
+              {isSendingInvite ? "Sending invite..." : "Send invite"}
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-gray-400">
+            Invite links land recipients on the Career Builder application flow after auth.
+          </p>
+        </SectionCard>
 
         <div className="md:hidden">
           <MobileSummaryRow

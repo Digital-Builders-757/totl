@@ -39,6 +39,18 @@ function isNonEmptyText(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+function isCareerBuilderEntryPath(path: string | null): boolean {
+  if (!path) return false;
+  return (
+    path === PATHS.CLIENT_APPLY ||
+    path.startsWith(`${PATHS.CLIENT_APPLY}?`) ||
+    path === PATHS.CLIENT_APPLY_SUCCESS ||
+    path.startsWith(`${PATHS.CLIENT_APPLY_SUCCESS}?`) ||
+    path === PATHS.CLIENT_APPLICATION_STATUS ||
+    path.startsWith(`${PATHS.CLIENT_APPLICATION_STATUS}?`)
+  );
+}
+
 function computeTalentNeedsOnboarding(params: {
   displayName: string | null;
   talentFirstName: string | null;
@@ -141,7 +153,12 @@ export async function getBootState(params?: {
     // - If onboarding required → go to onboarding entrypoint.
     // - Otherwise route by canonical destination decision.
     let nextPath: string;
-    if (!isAdmin && needsOnboarding && !isClient) {
+    const allowCareerBuilderEntry =
+      Boolean(params?.postAuth) && isCareerBuilderEntryPath(validatedReturnUrl);
+
+    if (allowCareerBuilderEntry && validatedReturnUrl) {
+      nextPath = validatedReturnUrl;
+    } else if (!isAdmin && needsOnboarding && !isClient) {
       nextPath = ONBOARDING_PATH;
     } else if (!isAdmin && needsOnboarding && isClient) {
       nextPath = "/client/profile";
@@ -279,7 +296,12 @@ export async function getBootStateRedirect(params?: {
 
     // Compute nextPath (server-owned truth).
     let nextPath: string;
-    if (!isAdmin && needsOnboarding && !isClient) {
+    const allowCareerBuilderEntry =
+      Boolean(params?.postAuth) && isCareerBuilderEntryPath(validatedReturnUrl);
+
+    if (allowCareerBuilderEntry && validatedReturnUrl) {
+      nextPath = validatedReturnUrl;
+    } else if (!isAdmin && needsOnboarding && !isClient) {
       nextPath = ONBOARDING_PATH;
     } else if (!isAdmin && needsOnboarding && isClient) {
       nextPath = "/client/profile";
