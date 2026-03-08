@@ -1,5 +1,8 @@
+"use client";
+
 import { XCircle } from "lucide-react";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,238 +12,187 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getBootState } from "@/lib/actions/boot-actions";
+import { getBootStateRedirect } from "@/lib/actions/boot-actions";
 import { PATHS } from "@/lib/constants/routes";
-import { syncEmailVerifiedForUser } from "@/lib/server/sync-email-verified";
-import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { useSupabase } from "@/lib/hooks/use-supabase";
+import { logger } from "@/lib/utils/logger";
+import { safeReturnUrl } from "@/lib/utils/return-url";
 
-// Force dynamic rendering to prevent static pre-rendering
-export const dynamic = "force-dynamic";
+type GateState =
+  | { kind: "checking"; message: string }
+  | { kind: "failed"; message: string };
 
-export default async function AuthCallbackPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    code?: string;
-    token_hash?: string;
-    type?: string;
-    error?: string;
-    error_description?: string;
-    returnUrl?: string;
-  }>;
-}) {
-  const supabase = await createSupabaseServer();
-  const params = await searchParams;
-  const code = params.code;
-  const tokenHash = params.token_hash;
-  const otpType = params.type;
-  const error = params.error;
-  const errorDescription = params.error_description;
-  const returnUrl = params.returnUrl;
+const isSupportedOtpType = (
+  value: string | null | undefined
+): value is "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email" => {
+  return (
+    value === "signup" ||
+    value === "invite" ||
+    value === "magiclink" ||
+    value === "recovery" ||
+    value === "email_change" ||
+    value === "email"
+  );
+};
 
-  // Handle OAuth errors
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-center">Authentication Error</CardTitle>
-            <CardDescription className="text-center">
-              There was an error during authentication
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <div className="flex flex-col items-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <XCircle className="h-8 w-8 text-red-600" />
-              </div>
-              <h3 className="text-xl font-medium text-red-800 mb-2">Authentication Failed</h3>
-              <p className="text-gray-600 text-center mb-4">
-                {errorDescription || "An error occurred during the authentication process."}
-              </p>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-center">
-            <Button asChild>
-              <a href={PATHS.LOGIN}>Return to Login</a>
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
+function AuthCallbackGate() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const supabase = useSupabase();
+  const [state, setState] = useState<GateState>({
+    kind: "checking",
+    message: "Signing you in...",
+  });
 
-  const redirectAfterAuth = async (user: NonNullable<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>) => {
-    // Keep profiles.email_verified in sync with Supabase auth.
-    const syncResult = await syncEmailVerifiedForUser({
-      supabase,
-      user,
-      currentEmailVerified: null,
-    });
-    if (!syncResult.success) {
-      console.error("[auth/callback] email_verified sync failed:", syncResult.error);
-    }
+  useEffect(() => {
+    let cancelled = false;
 
-    // Single routing truth: compute BootState and redirect to server-computed nextPath.
-    const boot = await getBootState({ postAuth: true, returnUrlRaw: returnUrl ?? null });
-    const baseNext = boot?.nextPath ?? PATHS.TALENT_DASHBOARD;
-    const nextWithVerified = baseNext.includes("?")
-      ? `${baseNext}&verified=true`
-      : `${baseNext}?verified=true`;
+    async function run() {
+      if (!supabase) return;
 
-    redirect(nextWithVerified);
-  };
-
-  const isSupportedOtpType = (
-    value: string | undefined
-  ): value is "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email" => {
-    return (
-      value === "signup" ||
-      value === "invite" ||
-      value === "magiclink" ||
-      value === "recovery" ||
-      value === "email_change" ||
-      value === "email"
-    );
-  };
-
-  // Handle email verification, invite, or OAuth callback
-  if (code || (tokenHash && otpType && isSupportedOtpType(otpType))) {
-    try {
-      let callbackUser: NonNullable<
-        Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]
-      > | null = null;
-
-      if (code) {
-        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (exchangeError) {
-          console.error("Verification error:", exchangeError);
-          return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-              <Card className="w-full max-w-md">
-                <CardHeader>
-                  <CardTitle className="text-center">Verification Failed</CardTitle>
-                  <CardDescription className="text-center">
-                    We couldn&apos;t verify your email
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                      <XCircle className="h-8 w-8 text-red-600" />
-                    </div>
-                    <h3 className="text-xl font-medium text-red-800 mb-2">Verification Failed</h3>
-                    <p className="text-gray-600 text-center mb-4">
-                      {exchangeError.message ||
-                        "The verification link may have expired or is invalid."}
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                  <Button asChild>
-                    <a href={PATHS.LOGIN}>Return to Login</a>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          );
-        }
-        callbackUser = data.session?.user ?? null;
-      } else if (tokenHash && otpType && isSupportedOtpType(otpType)) {
-        const { data, error: otpError } = await supabase.auth.verifyOtp({
-          token_hash: tokenHash,
-          type: otpType,
+      const error = searchParams.get("error");
+      const errorDescription = searchParams.get("error_description");
+      if (error) {
+        setState({
+          kind: "failed",
+          message: errorDescription || "An error occurred during the authentication process.",
         });
-        if (otpError) {
-          console.error("OTP verification error:", otpError);
-          return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-              <Card className="w-full max-w-md">
-                <CardHeader>
-                  <CardTitle className="text-center">Verification Failed</CardTitle>
-                  <CardDescription className="text-center">
-                    We couldn&apos;t verify your link
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center py-8">
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                      <XCircle className="h-8 w-8 text-red-600" />
-                    </div>
-                    <h3 className="text-xl font-medium text-red-800 mb-2">Verification Failed</h3>
-                    <p className="text-gray-600 text-center mb-4">
-                      {otpError.message ||
-                        "The verification link may have expired or is invalid."}
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                  <Button asChild>
-                    <a href={PATHS.LOGIN}>Return to Login</a>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
+        return;
+      }
+
+      const returnUrlRaw = searchParams.get("returnUrl");
+      const safeReturn = safeReturnUrl(returnUrlRaw) ?? PATHS.TALENT_DASHBOARD;
+
+      try {
+        const code = searchParams.get("code");
+        const tokenHash = searchParams.get("token_hash");
+        const otpType = searchParams.get("type");
+
+        let didEstablishSession = false;
+
+        if (code) {
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError || !data?.session) {
+            throw new Error(exchangeError?.message || "Could not exchange auth code.");
+          }
+          didEstablishSession = true;
+        } else if (tokenHash && isSupportedOtpType(otpType)) {
+          const { data, error: otpError } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: otpType,
+          });
+          if (otpError || !data?.session) {
+            throw new Error(otpError?.message || "Could not verify auth token.");
+          }
+          didEstablishSession = true;
+        } else {
+          const hashParams = new URLSearchParams(
+            window.location.hash.startsWith("#")
+              ? window.location.hash.slice(1)
+              : window.location.hash
           );
+          const hashAccessToken = hashParams.get("access_token");
+          const hashRefreshToken = hashParams.get("refresh_token");
+          const hashTokenHash = hashParams.get("token_hash");
+          const hashType = hashParams.get("type");
+
+          if (hashAccessToken && hashRefreshToken) {
+            const { data, error: setSessionError } = await supabase.auth.setSession({
+              access_token: hashAccessToken,
+              refresh_token: hashRefreshToken,
+            });
+            if (setSessionError || !data?.session) {
+              throw new Error(setSessionError?.message || "Could not establish session from invite link.");
+            }
+            didEstablishSession = true;
+          } else if (hashTokenHash && isSupportedOtpType(hashType)) {
+            const { data, error: hashOtpError } = await supabase.auth.verifyOtp({
+              token_hash: hashTokenHash,
+              type: hashType,
+            });
+            if (hashOtpError || !data?.session) {
+              throw new Error(hashOtpError?.message || "Could not verify invite token from link.");
+            }
+            didEstablishSession = true;
+          }
         }
-        callbackUser = data.user ?? null;
-      }
 
-      // Success path for either callback style.
-      if (callbackUser) {
-        await redirectAfterAuth(callbackUser);
-      }
+        if (!didEstablishSession) {
+          throw new Error("The invite link did not include a valid authentication token.");
+        }
 
-      // Fallback redirect
-      redirect("/dashboard");
-    } catch (error) {
-      // CRITICAL: Next.js redirect() throws a special error to interrupt execution
-      // We must re-throw redirect errors so they work correctly
-      // Check if this is a redirect error by checking for NEXT_REDIRECT digest
-      if (
-        error &&
-        typeof error === "object" &&
-        "digest" in error &&
-        typeof error.digest === "string" &&
-        error.digest.startsWith("NEXT_REDIRECT")
-      ) {
-        // Re-throw redirect errors so Next.js can handle them properly
-        throw error;
+        // Remove invite tokens from the URL so refreshes do not re-run token exchange.
+        window.history.replaceState({}, "", `${PATHS.AUTH_CALLBACK}?returnUrl=${encodeURIComponent(safeReturn)}`);
+
+        // Cookie sync to server can be briefly delayed after setSession/verifyOtp.
+        let resolvedTarget: string | null = null;
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+          const result = await getBootStateRedirect({ postAuth: true, returnUrlRaw });
+          if (result.redirectTo) {
+            resolvedTarget = result.redirectTo;
+            break;
+          }
+          if (attempt < 4) {
+            await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+          }
+        }
+
+        if (cancelled) return;
+        const target = resolvedTarget ?? safeReturn;
+        router.replace(target);
+      } catch (callbackError) {
+        logger.error("[auth/callback] Failed to establish session from callback", callbackError);
+        if (!cancelled) {
+          setState({
+            kind: "failed",
+            message:
+              callbackError instanceof Error
+                ? callbackError.message
+                : "The verification link may have expired or is invalid.",
+          });
+        }
       }
-      
-      // Only log and show error UI for actual errors, not redirects
-      console.error("Unexpected error:", error);
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle className="text-center">Unexpected Error</CardTitle>
-              <CardDescription className="text-center">
-                Something went wrong during verification
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center py-8">
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                  <XCircle className="h-8 w-8 text-red-600" />
-                </div>
-                <h3 className="text-xl font-medium text-red-800 mb-2">Unexpected Error</h3>
-                <p className="text-gray-600 text-center mb-4">
-                  An unexpected error occurred. Please try again.
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button asChild>
-                <a href={PATHS.LOGIN}>Return to Login</a>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      );
     }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [router, searchParams, supabase]);
+
+  if (state.kind === "checking") {
+    return <p className="text-gray-600 text-center mb-4">{state.message}</p>;
   }
 
-  // No code provided - redirect to home
-  redirect("/");
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+        <XCircle className="h-8 w-8 text-red-600" />
+      </div>
+      <h3 className="text-xl font-medium text-red-800 mb-2">Authentication Failed</h3>
+      <p className="text-gray-600 text-center mb-4">{state.message}</p>
+      <Button asChild>
+        <a href={PATHS.LOGIN}>Return to Login</a>
+      </Button>
+    </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center">Finalizing Sign In</CardTitle>
+          <CardDescription className="text-center">
+            We&apos;re verifying your invite and preparing your account.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <AuthCallbackGate />
+        </CardContent>
+        <CardFooter className="flex justify-center" />
+      </Card>
+    </div>
+  );
 }

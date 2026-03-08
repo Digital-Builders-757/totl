@@ -178,11 +178,14 @@ npm run build
   - **Prevention:** When adding route restrictions, ensure bootstrap-safe routes (signed-in but profile missing) are handled correctly. Reference: `docs/ARCHITECTURE_CONSTITUTION.md` (missing profile is valid bootstrap state).
 - **Invite link bounces to `/login` instead of completing `/auth/callback`:**
   - **Symptom:** Invite URL lands on `/login?returnUrl=/auth/callback` or callback fails to establish a session before redirecting.
-  - **Root Cause:** `/auth/callback` missing from canonical `AUTH_ROUTES` allowlist and/or callback only handling `code` while invite uses `token_hash + type`.
-  - **Fix:** Add `/auth/callback` to `AUTH_ROUTES`, and in `app/auth/callback/page.tsx` support both:
-    - `exchangeCodeForSession(code)`
-    - `verifyOtp({ token_hash, type })`
-  - **Prevention:** Keep auth route lists canonical (`lib/constants/routes.ts`) and ensure callback supports both Supabase link styles used for verification/invites.
+  - **Root Cause:** Server-only callback handling misses invite variants where Supabase sends credentials in URL hash (`#access_token`, `#refresh_token`, `#token_hash`), and query-only handlers can fail to establish app session.
+  - **Fix:** Keep `/auth/callback` in canonical `AUTH_ROUTES` and use a client callback gate in `app/auth/callback/page.tsx` that supports all invite token variants:
+    - query `code` -> `exchangeCodeForSession(code)`
+    - query `token_hash + type` -> `verifyOtp({ token_hash, type })`
+    - hash `access_token + refresh_token` -> `setSession(...)`
+    - hash `token_hash + type` -> `verifyOtp({ token_hash, type })`
+  - **Fix:** After session establishment, clear callback tokens from the URL and resolve destination via `getBootStateRedirect({ postAuth: true, returnUrlRaw })` with bounded retries.
+  - **Prevention:** Never assume invite tokens are query-only; always support hash delivery modes and keep `returnUrl` handling safe (`safeReturnUrl`) with a local fallback route.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.
