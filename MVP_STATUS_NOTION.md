@@ -11,20 +11,16 @@
 ## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
 
 **AUTH / ONBOARDING FLOW HARDENING** - March 8, 2026
-- ✅ Added admin invite endpoint for VIP Career Builder applicants:
-  - `app/api/admin/invite-career-builder/route.ts`
-  - Sends Supabase invite with callback redirect targeting `/auth/callback?returnUrl=/client/apply`
-- ✅ Added admin UI control on `/admin/client-applications` to issue invites directly.
-- ✅ Fixed middleware/bootstrap safety so invited users can stay on Career Builder application entry surfaces during profile-missing/unassigned states:
-  - `/client/apply`
-  - `/client/apply/success`
-  - `/client/application-status`
-- ✅ Fixed callback route allowlisting drift:
-  - Added `/auth/callback` to canonical auth route constants (`AUTH_ROUTES`)
-  - Prevents signed-out middleware bounce from callback to generic `/login`
-- ✅ Expanded callback auth completion to support both Supabase callback styles:
-  - `code` (PKCE exchange)
-  - `token_hash + type` (OTP/invite verify flow)
+- ✅ Kept prior invite pipeline fixes on `develop` (admin invite endpoint + admin UI + allowlists + Career Builder bootstrap carveouts).
+- ✅ Replaced `app/auth/callback/page.tsx` with a client callback gate so invite auth can complete for real-world link shapes:
+  - query `code` -> `exchangeCodeForSession(code)`
+  - query `token_hash + type` -> `verifyOtp({ token_hash, type })`
+  - hash `access_token + refresh_token` -> `setSession(...)`
+  - hash `token_hash + type` -> `verifyOtp({ token_hash, type })`
+- ✅ Added token hygiene + redirect resilience in callback:
+  - strips callback tokens from the URL before redirect decisions
+  - keeps `returnUrlRaw` intact for BootState decisioning, with local safe fallback
+  - retries bounded BootState resolution before falling back
 - ✅ Re-ran mandatory ship gates (all passing):
   - `npm run schema:verify:comprehensive`
   - `npm run types:check`
@@ -32,8 +28,8 @@
   - `npm run lint`
 
 **Problems discovered this session:**
-- ⚠️ Invite links could land on `/login?returnUrl=/auth/callback` because `/auth/callback` was missing from canonical auth route allowlist.
-- ⚠️ Callback handler only processed `code`, but Supabase invite links can use `token_hash + type`, causing session completion failures and fallback to login.
+- ⚠️ Server-only callback handling was brittle for invite flows because Supabase links can deliver auth tokens in URL hash fragments (invisible to server-side `searchParams`).
+- ⚠️ Existing callback processing did not guarantee session establishment for all invite token variants, causing signed-out landing and homepage/login fallback behavior.
 - ⚠️ Expired/previously-used OTP links (`error_code=otp_expired`) can mimic routing issues; fresh-link verification is required.
 
 **Next (P0 - immediate VIP readiness)**
@@ -3843,7 +3839,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 6, 2026*
-*Current Status: MVP Complete - deployment ship-gates validated locally, Playwright startup hardened, and CI static guard false positives eliminated for client `next/headers` checks; external beta evidence still pending*
+*Last Updated: March 8, 2026*
+*Current Status: MVP Complete - VIP invite callback auth flow hardened with client-side token handling for query/hash variants; ship-gates passing locally; fresh invite incognito proof capture still pending*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After CI rerun confirms this static-guard fix and merge-to-main deploy validation completes*
+*Next Review: After fresh invite acceptance proof (incognito -> `/client/apply` -> refresh stable) is captured on deployed `develop`*
