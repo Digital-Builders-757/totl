@@ -186,6 +186,14 @@ npm run build
     - hash `token_hash + type` -> `verifyOtp({ token_hash, type })`
   - **Fix:** After session establishment, clear callback tokens from the URL and resolve destination via `getBootStateRedirect({ postAuth: true, returnUrlRaw })` with bounded retries.
   - **Prevention:** Never assume invite tokens are query-only; always support hash delivery modes and keep `returnUrl` handling safe (`safeReturnUrl`) with a local fallback route.
+- **Career Builder submit fails right after successful invite acceptance (`unexpected error` / `must be logged in`):**
+  - **Symptom:** User reaches `/client/apply` from invite callback, fills form, then submit fails with auth-like error or generic unexpected failure.
+  - **Root Cause:** Callback can establish browser session before server-side cookie visibility fully converges; server action `submitClientApplication()` calls `auth.getUser()` and may read `null` during this race.
+  - **Fix:** In callback gate, wait for server session readiness before redirecting:
+    - add `GET /api/auth/session-ready` that validates server `auth.getUser()`
+    - retry probe with short backoff before leaving `/auth/callback`
+  - **Fix:** Add structured diagnostics in `submitClientApplication()` with `traceId` across auth lookup, duplicate check, insert, and email side-effects to isolate branch failures quickly.
+  - **Prevention:** For invite-linked auth flows, verify both browser and server session convergence before navigating users into server-action submit pages.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

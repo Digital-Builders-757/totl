@@ -21,6 +21,11 @@
   - strips callback tokens from the URL before redirect decisions
   - keeps `returnUrlRaw` intact for BootState decisioning, with local safe fallback
   - retries bounded BootState resolution before falling back
+- ✅ Added server-session readiness probe to callback completion:
+  - new endpoint `app/api/auth/session-ready/route.ts` validates server-side `auth.getUser()` before redirecting to `/client/apply`
+  - callback now waits/retries for server cookie visibility to reduce submit-time auth races
+- ✅ Added structured submit diagnostics for Career Builder application failures:
+  - `submitClientApplication()` now emits traceable logs (auth check, duplicate lookup, insert, and email side-effects) with per-request `traceId`
 - ✅ Re-ran mandatory ship gates (all passing):
   - `npm run schema:verify:comprehensive`
   - `npm run types:check`
@@ -30,12 +35,14 @@
 **Problems discovered this session:**
 - ⚠️ Server-only callback handling was brittle for invite flows because Supabase links can deliver auth tokens in URL hash fragments (invisible to server-side `searchParams`).
 - ⚠️ Existing callback processing did not guarantee session establishment for all invite token variants, causing signed-out landing and homepage/login fallback behavior.
+- ⚠️ Even after callback success, submit could fail if server session cookies were not visible quickly enough (`auth.getUser()` in server action reads as signed-out).
 - ⚠️ Expired/previously-used OTP links (`error_code=otp_expired`) can mimic routing issues; fresh-link verification is required.
 
 **Next (P0 - immediate VIP readiness)**
 - [ ] Run one full fresh invite acceptance in incognito and capture evidence of final landing at `/client/apply`.
-- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`).
+- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`) with new server-session readiness probe.
 - [ ] Validate existing-account invite path and decide whether to ship login/reset fallback for `409` responses.
+- [ ] Capture one failing trace (if any) and map by `traceId` from `submitClientApplication()` logs.
 
 **Next (P1 - reliability polish)**
 - [ ] Add focused auth callback regression tests covering `token_hash + type=invite` and `returnUrl=/client/apply`.

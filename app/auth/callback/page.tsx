@@ -22,6 +22,30 @@ type GateState =
   | { kind: "checking"; message: string }
   | { kind: "failed"; message: string };
 
+async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch("/api/auth/session-ready", {
+        method: "GET",
+        cache: "no-store",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return true;
+      }
+    } catch {
+      // Ignore probe failures and retry with backoff.
+    }
+
+    if (attempt < maxAttempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+    }
+  }
+
+  return false;
+}
+
 const isSupportedOtpType = (
   value: string | null | undefined
 ): value is "signup" | "invite" | "magiclink" | "recovery" | "email_change" | "email" => {
@@ -124,6 +148,16 @@ function AuthCallbackGate() {
         // Remove invite tokens from the URL so refreshes do not re-run token exchange.
         window.history.replaceState({}, "", `${PATHS.AUTH_CALLBACK}?returnUrl=${encodeURIComponent(safeReturn)}`);
 
+        // Ensure server-side auth sees the cookie-backed session before leaving callback.
+        const serverSessionReady = await waitForServerSessionReady();
+        if (!serverSessionReady) {
+          logger.warn("[auth/callback] server session not ready after callback exchange", {
+            hasCode: Boolean(code),
+            hasTokenHash: Boolean(tokenHash),
+            hasOtpType: Boolean(otpType),
+          });
+        }
+
         // Cookie sync to server can be briefly delayed after setSession/verifyOtp.
         let resolvedTarget: string | null = null;
         for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -138,6 +172,11 @@ function AuthCallbackGate() {
         }
 
         if (cancelled) return;
+        if (!resolvedTarget && !serverSessionReady) {
+          throw new Error(
+            "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again."
+          );
+        }
         const target = resolvedTarget ?? safeReturn;
         router.replace(target);
       } catch (callbackError) {
