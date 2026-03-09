@@ -13,9 +13,15 @@ function isAuthUserNotFoundError(error: SupabaseLikeError): boolean {
   return /user not found/i.test(msg) || /not found/i.test(msg);
 }
 
+function isForeignKeyConstraintError(error: SupabaseLikeError): boolean {
+  const msg = String(error?.message ?? "");
+  return error?.status === 409 || /foreign key/i.test(msg) || /constraint/i.test(msg);
+}
+
 export const POST = async (request: Request) => {
   try {
-    const { userId } = await request.json();
+    const body = (await request.json()) as { userId?: string };
+    const userId = typeof body.userId === "string" ? body.userId.trim() : "";
 
     if (!userId) {
       return NextResponse.json({ error: "User ID is required" }, { status: 400 });
@@ -59,8 +65,33 @@ export const POST = async (request: Request) => {
     //
     // NOTE: DB cascades do NOT delete Storage objects; we must remove those explicitly.
     //
-    // Use admin client to delete user (cascade delete will handle related DB data)
     const supabaseAdmin = createSupabaseAdminClient();
+
+    const { data: targetProfile, error: targetProfileError } = await supabaseAdmin
+      .from("profiles")
+      .select("id, role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (targetProfileError) {
+      return NextResponse.json({ error: "Failed to load target user profile" }, { status: 500 });
+    }
+
+    if (!targetProfile) {
+      return NextResponse.json({ error: "Target user not found" }, { status: 404 });
+    }
+
+    if (targetProfile.role === "admin") {
+      return NextResponse.json({ error: "Cannot hard-delete another admin account" }, { status: 403 });
+    }
+
+    // Career Builder target = profiles.role === "client" only.
+    if (targetProfile.role !== "client") {
+      return NextResponse.json(
+        { error: "Hard delete is only available for Career Builder (client) accounts" },
+        { status: 400 }
+      );
+    }
 
     // Optional (recommended): Storage cleanup hook before deleting auth user.
     // - This prevents orphaned storage objects for deleted accounts.
@@ -149,6 +180,12 @@ export const POST = async (request: Request) => {
           success: true,
           message: "User already deleted.",
         });
+      }
+      if (isForeignKeyConstraintError(error as SupabaseLikeError)) {
+        return NextResponse.json(
+          { error: "Hard delete failed due to related data constraints. Use Disable instead." },
+          { status: 409 }
+        );
       }
       console.error("Error deleting user:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });

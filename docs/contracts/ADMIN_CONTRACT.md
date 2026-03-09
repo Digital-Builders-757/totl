@@ -30,6 +30,7 @@
 ### API routes (admin)
 - `/api/admin/create-user`
 - `/api/admin/delete-user`
+- `/api/admin/disable-user`
 - `/api/admin/update-user-role`
 - `/api/admin/check-auth-schema`
 - `/api/admin/test-connection`
@@ -106,6 +107,12 @@
   - These routes must verify:
     - session via `createSupabaseServer()` and `auth.getUser()`
     - admin role via `profiles.role = 'admin'`
+  - Career Builder lifecycle guardrails:
+    - target eligibility for disable/delete is `profiles.role = 'client'`
+    - admin cannot disable/delete self
+    - admin cannot hard-delete admin targets
+    - disable is the primary path (`profiles.is_suspended = true`)
+    - hard delete must fail loudly with guidance to disable instead when related data blocks deletion
 
 ---
 
@@ -157,10 +164,18 @@
 - Admin can:
   - approve client applications (promotion)
   - suspend/reinstate accounts
+  - disable Career Builder accounts from `/admin/users`
+  - hard-delete eligible Career Builder accounts only with explicit confirmation
   - close gigs via moderation
 
 ### Manual test steps
 - Login as admin → visit `/admin/dashboard`.
+- Login as admin → visit `/admin/users` and verify:
+  - client rows expose `Disable Career Builder` + `Hard Delete (Danger)`
+  - non-client rows do not expose those actions
+  - disabling a client sets `profiles.is_suspended = true`
+  - a disabled client is routed to `/suspended` on next protected navigation
+  - hard delete rejects non-client targets and admin targets
 - Approve a `client_applications` row → verify:
   - `client_applications.status='approved'`
   - `profiles.role='client' AND profiles.account_type='client'`

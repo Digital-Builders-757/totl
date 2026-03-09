@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Career Builder disable + hard-delete guardrails (March 9, 2026)**
+
+**ADMIN USER LIFECYCLE SAFETY HARDENING** - March 9, 2026
+- ✅ Added admin-only endpoint `POST /api/admin/disable-user` for Career Builder accounts (`profiles.role = 'client'`), with server-side role checks and self-action rejection.
+- ✅ Made disable the primary admin action for Career Builders in `/admin/users` with destructive checkbox confirmation and optional suspension reason.
+- ✅ Tightened `POST /api/admin/delete-user` guardrails:
+  - rejects non-client targets
+  - rejects self-delete
+  - rejects hard delete of admin targets
+  - returns explicit “Use Disable instead” guidance when hard delete fails due to data constraints
+- ✅ Added/updated Playwright guardrails:
+  - `tests/admin/admin-user-lifecycle-guardrail.spec.ts` (authz + target eligibility)
+  - `tests/admin/admin-users-route.spec.ts` (Career Builder action visibility)
+
 ## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
 
 **AUTH / ONBOARDING FLOW HARDENING** - March 8, 2026

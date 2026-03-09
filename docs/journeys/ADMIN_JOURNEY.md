@@ -27,7 +27,7 @@
 
 ### 3) Manage users
 - **Routes:** `/admin/users` (+ API routes)
-- **Writes:** Supabase Auth admin operations (create/delete)
+- **Writes:** Supabase Auth admin operations (create/delete) + profile suspension (`disable-user`)
 - **Contracts:** `docs/contracts/ADMIN_CONTRACT.md`
 
 ### 4) Moderate content
@@ -41,6 +41,8 @@
 - [ ] Admin can access `/admin/dashboard`.
 - [ ] Admin can approve a client application.
 - [ ] Admin can suspend and reinstate an account.
+- [ ] Admin can disable a Career Builder from `/admin/users`.
+- [ ] Hard delete is restricted to eligible Career Builder accounts only.
 
 ---
 

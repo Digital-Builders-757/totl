@@ -29,6 +29,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -55,6 +56,7 @@ type UserProfile = {
   id: string;
   role: "talent" | "client" | "admin";
   display_name: string | null;
+  is_suspended: boolean | null;
   avatar_url: string | null;
   avatar_path: string | null;
   email_verified: boolean | null;
@@ -80,6 +82,12 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
+  const [userToDisable, setUserToDisable] = useState<UserProfile | null>(null);
+  const [isDisabling, setIsDisabling] = useState(false);
+  const [disableConfirmChecked, setDisableConfirmChecked] = useState(false);
+  const [disableReason, setDisableReason] = useState("");
   const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
 
   // Filter users based on search query and active tab
@@ -116,6 +124,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
+    if (deleteConfirmText.trim() !== "DELETE") return;
 
     // Capture the user ID at the start to avoid stale closure issues
     // if another delete operation starts while this one is in flight
@@ -143,6 +152,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userIdToDelete));
       setDeleteDialogOpen(false);
       setUserToDelete(null);
+      setDeleteConfirmText("");
       router.refresh();
     } catch (error) {
       logger.error("Error deleting user", error);
@@ -153,6 +163,53 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleDisableUser = async () => {
+    if (!userToDisable || !disableConfirmChecked) return;
+
+    const userIdToDisable = userToDisable.id;
+    const reasonToSend = disableReason.trim();
+
+    setIsDisabling(true);
+    try {
+      const response = await fetch("/api/admin/disable-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userIdToDisable, reason: reasonToSend || undefined }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to disable Career Builder");
+      }
+
+      toast({
+        title: "Success",
+        description: data.message || "Career Builder account disabled successfully.",
+        variant: "success",
+      });
+
+      setUsers((prevUsers) =>
+        prevUsers.map((profile) =>
+          profile.id === userIdToDisable ? { ...profile, is_suspended: true } : profile
+        )
+      );
+      setDisableDialogOpen(false);
+      setUserToDisable(null);
+      setDisableConfirmChecked(false);
+      setDisableReason("");
+      router.refresh();
+    } catch (error) {
+      logger.error("Error disabling Career Builder account", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to disable Career Builder",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDisabling(false);
     }
   };
 
@@ -205,8 +262,40 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       });
       return;
     }
+    if (userProfile.role !== "client") {
+      toast({
+        title: "Error",
+        description: "Hard delete is only available for Career Builder accounts.",
+        variant: "destructive",
+      });
+      return;
+    }
     setUserToDelete(userProfile);
+    setDeleteConfirmText("");
     setDeleteDialogOpen(true);
+  };
+
+  const openDisableDialog = (userProfile: UserProfile) => {
+    if (userProfile.id === user.id) {
+      toast({
+        title: "Error",
+        description: "Cannot disable your own account",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (userProfile.role !== "client") {
+      toast({
+        title: "Error",
+        description: "Disable is only available for Career Builder accounts.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setUserToDisable(userProfile);
+    setDisableReason("");
+    setDisableConfirmChecked(false);
+    setDisableDialogOpen(true);
   };
 
   const getRoleIcon = (role: string) => {
@@ -222,7 +311,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     }
   };
 
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (role: string, isSuspended?: boolean | null) => {
     switch (role) {
       case "admin":
         return (
@@ -233,7 +322,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       case "client":
         return (
           <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
-            Career Builder
+            {isSuspended ? "Career Builder (Disabled)" : "Career Builder"}
           </Badge>
         );
       case "talent":
@@ -295,15 +384,22 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             Promote to Talent
           </DropdownMenuItem>
         )}
-        {userProfile.id !== user.id && (
+        {userProfile.id !== user.id && userProfile.role === "client" && (
           <>
             <DropdownMenuSeparator className="bg-gray-700" />
+            <DropdownMenuItem
+              onClick={() => openDisableDialog(userProfile)}
+              className="text-amber-300 hover:bg-gray-700 flex items-center"
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              {userProfile.is_suspended ? "Disabled (Already Suspended)" : "Disable Career Builder"}
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => openDeleteDialog(userProfile)}
               className="text-red-400 hover:bg-gray-700 flex items-center"
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              Delete User
+              Hard Delete (Danger)
             </DropdownMenuItem>
           </>
         )}
@@ -342,7 +438,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
-              badge={getRoleBadge(userProfile.role)}
+              badge={getRoleBadge(userProfile.role, userProfile.is_suspended)}
               trailing={renderUserActions(userProfile)}
             />
           ))}
@@ -391,7 +487,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       {getRoleIcon(userProfile.role)}
-                      {getRoleBadge(userProfile.role)}
+                      {getRoleBadge(userProfile.role, userProfile.is_suspended)}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -557,13 +653,80 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Disable Confirmation Dialog */}
+      <Dialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-amber-300">Disable Career Builder</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              This will suspend the selected Career Builder account and prevent access to protected
+              routes until reinstated.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <p className="text-sm text-gray-300">Optional reason shown on the suspended page:</p>
+              <Input
+                value={disableReason}
+                onChange={(event) => setDisableReason(event.target.value)}
+                placeholder="Policy violation, fraud risk, or internal note..."
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                disabled={isDisabling}
+              />
+            </div>
+            <div className="flex items-start gap-3 text-sm text-gray-300">
+              <Checkbox
+                aria-label="Confirm disable Career Builder account"
+                checked={disableConfirmChecked}
+                onCheckedChange={(checked) => setDisableConfirmChecked(checked === true)}
+                disabled={isDisabling}
+              />
+              <span>I understand this will immediately block this account from dashboard access.</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDisableDialogOpen(false);
+                setUserToDisable(null);
+                setDisableConfirmChecked(false);
+                setDisableReason("");
+              }}
+              disabled={isDisabling}
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDisableUser}
+              disabled={isDisabling || !disableConfirmChecked}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {isDisabling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Disabling...
+                </>
+              ) : (
+                <>
+                  <Shield className="mr-2 h-4 w-4" />
+                  Disable Career Builder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hard Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent className="bg-gray-800 border-gray-700 text-white">
           <DialogHeader>
-            <DialogTitle className="text-red-400">Delete User</DialogTitle>
+            <DialogTitle className="text-red-400">Hard Delete Career Builder</DialogTitle>
             <DialogDescription className="text-gray-400">
-              Are you sure you want to delete this user? This action cannot be undone.
+              This permanently deletes the auth account and cascades related database records. This
+              action cannot be undone.
               <br />
               <br />
               <strong className="text-white">
@@ -579,12 +742,25 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
               </ul>
             </DialogDescription>
           </DialogHeader>
+          <div className="space-y-2 py-2">
+            <p className="text-sm text-gray-300">
+              Type <span className="font-semibold text-white">DELETE</span> to confirm.
+            </p>
+            <Input
+              value={deleteConfirmText}
+              onChange={(event) => setDeleteConfirmText(event.target.value)}
+              placeholder="DELETE"
+              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+              disabled={isDeleting}
+            />
+          </div>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
                 setDeleteDialogOpen(false);
                 setUserToDelete(null);
+                setDeleteConfirmText("");
               }}
               disabled={isDeleting}
               className="border-gray-600 text-gray-300 hover:bg-gray-700"
@@ -593,7 +769,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             </Button>
             <Button
               onClick={handleDeleteUser}
-              disabled={isDeleting}
+              disabled={isDeleting || deleteConfirmText.trim() !== "DELETE"}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {isDeleting ? (
@@ -604,7 +780,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
               ) : (
                 <>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete User
+                  Hard Delete
                 </>
               )}
             </Button>
