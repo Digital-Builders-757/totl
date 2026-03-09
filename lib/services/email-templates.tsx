@@ -1,4 +1,4 @@
-﻿// This file must only be imported in server-side code (API routes, server actions, or server components).
+// This file must only be imported in server-side code (API routes, server actions, or server components).
 // Do NOT import in any Client Component or file with "use client".
 
 // Pure TypeScript approach - no React dependencies
@@ -837,6 +837,47 @@ export function generateClientApplicationFollowUpAdminEmail(data: EmailTemplateD
   };
 }
 
+export function generateClientApplicationExistingUserLoginEmail(data: EmailTemplateData): EmailTemplate {
+  const content = `
+    <h1>Continue Your Career Builder Application</h1>
+    <p>Hello ${escapeHtml(data.name)},</p>
+    <p>
+      A TOTL Agency admin invited you to continue the Career Builder application flow with your
+      existing account.
+    </p>
+
+    <div class="highlight">
+      <p><strong>What this link does:</strong></p>
+      <ul>
+        <li>Signs you into your existing TOTL account</li>
+        <li>Takes you directly to the Career Builder application flow</li>
+        <li>Lets you continue without creating a duplicate account</li>
+      </ul>
+    </div>
+
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${escapeHtml(data.loginUrl || "")}" class="button">Continue Application</a>
+    </div>
+
+    <p>If the button above doesn't work, you can copy and paste this link into your browser:</p>
+    <p style="word-break: break-all; color: #666; font-size: 14px;">${escapeHtml(data.loginUrl || "")}</p>
+
+    <p>
+      Best regards,<br>
+      <strong>The TOTL Agency Team</strong>
+    </p>
+  `;
+
+  return {
+    subject: "Continue Your TOTL Career Builder Application",
+    html: createBaseTemplate(
+      "Continue Your Career Builder Application",
+      content,
+      "Use your existing TOTL account to continue the Career Builder application flow"
+    ),
+  };
+}
+
 export function generateEmailBatch(
   templates: Array<{
     type:
@@ -854,7 +895,8 @@ export function generateEmailBatch(
       | "clientApplicationApproved"
       | "clientApplicationRejected"
       | "clientApplicationFollowUpApplicant"
-      | "clientApplicationFollowUpAdmin";
+      | "clientApplicationFollowUpAdmin"
+      | "client-application-existing-user-login";
     data: EmailTemplateData;
   }>
 ): EmailTemplate[] {
@@ -890,6 +932,8 @@ export function generateEmailBatch(
         return generateClientApplicationFollowUpApplicantEmail(data);
       case "clientApplicationFollowUpAdmin":
         return generateClientApplicationFollowUpAdminEmail(data);
+      case "client-application-existing-user-login":
+        return generateClientApplicationExistingUserLoginEmail(data);
       default:
         throw new Error(`Unknown email template type: ${type}`);
     }

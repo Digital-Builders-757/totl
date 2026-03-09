@@ -145,7 +145,17 @@ test.describe("Admin users route contracts (mobile 390x844)", () => {
 
     const card = page.locator("div.rounded-xl", { hasText: seededClient.displayName }).first();
     await expect(card).toBeVisible();
-    await expect(page.getByText("Career Builder", { exact: true })).toHaveCount(2);
-    await expect(page.getByText("Suspended", { exact: true })).toHaveCount(2);
+    await expect
+      .poll(async () => {
+        const text = (await card.textContent()) ?? "";
+        return (text.match(/Career Builder/g) ?? []).length;
+      })
+      .toBe(2);
+    await expect
+      .poll(async () => {
+        const text = (await card.textContent()) ?? "";
+        return (text.match(/Suspended/g) ?? []).length;
+      })
+      .toBe(1);
   });
 });

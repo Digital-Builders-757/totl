@@ -270,8 +270,8 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     return <Badge className="bg-rose-500/20 text-rose-300 border-rose-500/50">Suspended</Badge>;
   };
 
-  const getCombinedBadges = (role: string, isSuspended?: boolean | null) => (
-    <div className="flex flex-wrap gap-2">
+  const getCombinedBadges = (userId: string, role: string, isSuspended?: boolean | null) => (
+    <div className="flex flex-wrap gap-2" data-testid={`mobile-user-badges-${userId}`}>
       {getRoleBadge(role)}
       {getSuspensionBadge(isSuspended)}
     </div>
@@ -373,7 +373,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
-              badge={getCombinedBadges(userProfile.role, userProfile.is_suspended)}
+              badge={getCombinedBadges(userProfile.id, userProfile.role, userProfile.is_suspended)}
               trailing={renderUserActions(userProfile)}
             />
           ))}

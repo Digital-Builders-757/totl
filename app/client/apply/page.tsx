@@ -1,4 +1,4 @@
-﻿ "use client";
+ "use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -21,6 +21,31 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
+
+async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    try {
+      const response = await fetch("/api/auth/session-ready", {
+        method: "GET",
+        cache: "no-store",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        return true;
+      }
+    } catch {
+      // Ignore probe errors and retry with short backoff.
+    }
+
+    if (attempt < maxAttempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+    }
+  }
+
+  return false;
+}
+
 export default function ClientApplicationPage() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -47,6 +72,7 @@ export default function ClientApplicationPage() {
     adminNotes?: string | null;
   } | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -79,6 +105,17 @@ export default function ClientApplicationPage() {
     setIsSubmitting(true);
 
     try {
+      const serverSessionReady = await waitForServerSessionReady();
+      if (!serverSessionReady) {
+        toast({
+          title: "Still signing you in",
+          description: "Your session is still finishing. Please wait a moment and try again.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       const result = await submitClientApplication({
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -127,15 +164,43 @@ export default function ClientApplicationPage() {
     if (!userEmail || hasStartedEditing || hasSubmitted) {
       setApplicationStatus(null);
       setStatusMessage(null);
+      setIsCheckingStatus(false);
       return;
     }
 
     const controller = new AbortController();
     const checkStatus = async () => {
+      setIsCheckingStatus(true);
       try {
-        const response = await fetch(`/api/client-applications/status`, { signal: controller.signal });
+        let response: Response | null = null;
 
-        if (!response.ok) {
+        for (let attempt = 0; attempt < 6; attempt += 1) {
+          const serverSessionReady = await waitForServerSessionReady();
+          if (!serverSessionReady) {
+            setStatusMessage("Finalizing your sign-in. Checking application status...");
+            continue;
+          }
+
+          response = await fetch(`/api/client-applications/status`, { signal: controller.signal });
+
+          // Invite/callback flows can briefly race server cookie visibility even after
+          // the browser session exists. Retry auth failures before surfacing an error.
+          if (response.ok) {
+            break;
+          }
+
+          if (response.status === 401 || response.status === 403) {
+            setStatusMessage("Finalizing your sign-in. Checking application status...");
+            if (attempt < 5) {
+              await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+              continue;
+            }
+          }
+
+          break;
+        }
+
+        if (!response?.ok) {
           throw new Error("Unable to check application status");
         }
 
@@ -166,6 +231,8 @@ export default function ClientApplicationPage() {
       } catch (error) {
         console.error("Failed to load application status", error);
         setStatusMessage("Unable to load your application status right now.");
+      } finally {
+        setIsCheckingStatus(false);
       }
     };
 
@@ -181,7 +248,7 @@ export default function ClientApplicationPage() {
     applicationStatus?.status &&
     applicationStatus.status !== "approved" &&
     user;
-  const shouldShowForm = hasStartedEditing || !applicationStatus?.status;
+  const shouldShowForm = (hasStartedEditing || !applicationStatus?.status) && !isCheckingStatus;
   const labelClass = "text-sm font-semibold text-white/80";
   const inputClass = "bg-slate-900 text-white border-white/10 focus-visible:border-amber-500";
 
@@ -243,6 +310,13 @@ export default function ClientApplicationPage() {
                       : applicationStatus.status === 'rejected'
                         ? 'Your application was rejected. Please reach out to hello@thetotlagency.com to reapply.'
                         : 'We found an existing application. Check your email for the latest status.'}
+                  </p>
+                </div>
+              ) : isCheckingStatus ? (
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-inner shadow-black/30">
+                  <p className="text-white font-semibold mb-2">Checking application status</p>
+                  <p className="text-white/70 text-sm">
+                    Finalizing your sign-in and checking whether you already have a Career Builder application on file.
                   </p>
                 </div>
               ) : shouldShowForm ? (

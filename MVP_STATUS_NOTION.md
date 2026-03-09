@@ -64,14 +64,21 @@
 - ⚠️ Expired/previously-used OTP links (`error_code=otp_expired`) can mimic routing issues; fresh-link verification is required.
 
 **Next (P0 - immediate VIP readiness)**
-- [ ] Run one full fresh invite acceptance in incognito and capture evidence of final landing at `/client/apply`.
-- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`) with new server-session readiness probe.
-- [ ] Validate existing-account invite path and decide whether to ship login/reset fallback for `409` responses.
+- [x] Add automated proof for invite callback -> `/client/apply` -> submit -> revisit pending state using a real invite `token_hash`.
+- [x] Run one full fresh invite acceptance in browser and confirm final landing at `/client/apply`.
+- [x] Confirm browser-level submit + revisit shows `pending` / under-review state on `/client/apply`.
+- [x] Validate existing-account invite path and ship fallback sign-in link for `409` responses.
 - [ ] Capture one failing trace (if any) and map by `traceId` from `submitClientApplication()` logs.
 
 **Next (P1 - reliability polish)**
-- [ ] Add focused auth callback regression tests covering `token_hash + type=invite` and `returnUrl=/client/apply`.
-- [ ] Add admin UX fallback action for already-registered emails (send login/reset link with preserved returnUrl).
+- [x] Harden Playwright mobile/route baselines with seeded Client/Talent user preflight so auth-protected route guardrails do not fail from stale local personas.
+- [x] Add focused admin invite route regression coverage for:
+  - unauthenticated/non-admin rejection
+  - new invite success + `/auth/callback?returnUrl=/client/apply` target
+  - already-registered email `409` guidance
+- [x] Add callback regression coverage for both `type=invite` and existing-user `type=magiclink` landing on `/client/apply`.
+- [x] Add admin UX fallback action for already-registered emails (send login link with preserved `/client/apply` return path).
+- [x] Add a dedicated rerun lane for invite/auth regressions (`npm run test:qa:invite-auth`).
 
 ## 🚀 **Latest: CI static-guard false-positive fix for build pipeline (March 6, 2026)**
 

@@ -31,6 +31,7 @@
 - `/api/admin/create-user`
 - `/api/admin/delete-user`
 - `/api/admin/disable-user`
+- `/api/admin/invite-career-builder`
 - `/api/admin/update-user-role`
 - `/api/admin/check-auth-schema`
 - `/api/admin/test-connection`
