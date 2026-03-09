@@ -3,7 +3,7 @@ import { loginAsAdmin } from "../helpers/admin-auth";
 import { safeGoto } from "../helpers/navigation";
 import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
 
-async function seedClientForUsersTable(runId: number) {
+async function seedClientForUsersTable(runId: number, opts?: { isSuspended?: boolean }) {
   const supabaseAdmin = createSupabaseAdminClientForTests();
   const email = `pw-admin-users-client-${runId}@example.com`;
   const password = "TestPassword123!";
@@ -31,6 +31,7 @@ async function seedClientForUsersTable(runId: number) {
       account_type: "client",
       email_verified: true,
       display_name: displayName,
+      is_suspended: opts?.isSuspended ?? false,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "id" }
@@ -130,5 +131,21 @@ test.describe("Admin users route contracts (mobile 390x844)", () => {
       return el.scrollWidth <= el.clientWidth + 1;
     });
     expect(noOverflow).toBeTruthy();
+  });
+
+  test("mobile suspended client row shows both role and suspended badges", async ({ page }) => {
+    const runId = Date.now();
+    const seededClient = await seedClientForUsersTable(runId, { isSuspended: true });
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    await page.getByRole("tab", { name: /Career Builders \(/i }).first().click();
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededClient.displayName);
+
+    const card = page.locator("div.rounded-xl", { hasText: seededClient.displayName }).first();
+    await expect(card).toBeVisible();
+    await expect(page.getByText("Career Builder", { exact: true })).toHaveCount(2);
+    await expect(page.getByText("Suspended", { exact: true })).toHaveCount(2);
   });
 });
