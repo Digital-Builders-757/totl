@@ -204,6 +204,15 @@ npm run build
   - **Root Cause:** Local seeded Client/Talent personas drifted or were not repaired before auth-protected Playwright route specs ran.
   - **Fix:** Run `node scripts/ensure-ui-audit-users.mjs` before those route suites, or use the hardened npm scripts that now include route-user preflight.
   - **Prevention:** Treat broad Client/Talent login failures as auth-baseline/test-fixture drift first, not as route UI regressions, until seeded personas are revalidated.
+- **`mobile-guardrails` CI job fails immediately with `Missing SUPABASE_URL/NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY`:**
+  - **Symptom:** GitHub Actions fails during `npm run test:qa:route-users:preflight` before Playwright starts, while local runs still pass.
+  - **Root Cause:** The `develop` GitHub environment may have the Supabase secrets, but `.github/workflows/ci.yml` did not map them into the `mobile-guardrails` job `env`, so `scripts/ensure-ui-audit-users.mjs` sees an empty `process.env`.
+  - **Fix:** Add these secrets to `Settings -> Environments -> develop -> Environment secrets` and inject them into the `mobile-guardrails` job:
+    - `NEXT_PUBLIC_SUPABASE_URL`
+    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - `SUPABASE_SERVICE_ROLE_KEY`
+    - map `SUPABASE_URL` and `SUPABASE_ANON_KEY` from the same hosted project values in workflow `env`
+  - **Prevention:** Do not rely on `.env.local` existing in GitHub Actions; the `dotenv` log line is expected, but CI must satisfy these values through workflow `env` + GitHub environment secrets.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

@@ -8,6 +8,40 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile guardrails CI Supabase env injection fix (March 9, 2026)**
+
+**CI / MERGE CONFIDENCE HARDENING** - March 9, 2026
+- ✅ Audited the live GitHub state and confirmed there is currently no open `develop` -> `main` PR; `main` already contains PR `#200`.
+- ✅ Verified the red CI signal is isolated to the `mobile-guardrails` job while the `build` job is green on both `develop` and `main`.
+- ✅ Identified the failing preflight root cause: `scripts/ensure-ui-audit-users.mjs` requires Supabase runtime env vars in CI, but `.github/workflows/ci.yml` only injected Stripe secrets for the `mobile-guardrails` job.
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now injects:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+- ✅ Confirmed the required `develop` GitHub environment secrets now exist for those names.
+- ✅ Re-ran mandatory ship gates locally after the workflow/doc updates:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ GitHub Actions secrets do not help unless the workflow actually maps them into the failing job’s `env` block.
+- ⚠️ The `dotenv` log line in CI is misleading: the preflight script attempts `.env.local`, but GitHub Actions is expected to satisfy those values through `process.env`, not a committed env file.
+- ⚠️ Merge confidence was overstated in the working handoff: `main` is currently ahead of `develop`, so the next branch action is sync-back after CI reruns clean.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Add the missing Supabase env mapping to the `mobile-guardrails` CI job.
+- [x] Add the missing `develop` environment secrets in GitHub.
+- [ ] Push the workflow fix to `develop`.
+- [ ] Rerun `CI` and confirm `mobile-guardrails` no longer fails during `test:qa:route-users:preflight`.
+
+**Next (P1 - branch hygiene)**
+- [ ] Sync `main` back into `develop` once CI is green so branch history matches the already-merged production path.
+- [ ] Consider branch-aware GitHub environment selection in workflow jobs if `main` should stop using `environment: develop`.
+
 ## 🚀 **Latest: Admin Career Builder disable + hard-delete guardrails (March 9, 2026)**
 
 **ADMIN USER LIFECYCLE SAFETY HARDENING** - March 9, 2026
@@ -3878,7 +3912,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 8, 2026*
-*Current Status: MVP Complete - VIP invite callback auth flow hardened with client-side token handling for query/hash variants; ship-gates passing locally; fresh invite incognito proof capture still pending*
+*Last Updated: March 9, 2026*
+*Current Status: MVP Complete - mobile-guardrails CI env injection fix prepared locally, required GitHub develop secrets confirmed, and ship-gates passing locally; next step is push + rerun CI + reconcile branch state*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After fresh invite acceptance proof (incognito -> `/client/apply` -> refresh stable) is captured on deployed `develop`*
+*Next Review: After the pushed CI rerun confirms `mobile-guardrails` passes and `develop` is reconciled with `main`*
