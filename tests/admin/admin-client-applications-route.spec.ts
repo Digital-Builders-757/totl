@@ -37,6 +37,32 @@ test.describe("Admin client applications route contracts", () => {
     await expect(page.getByRole("columnheader", { name: "Company Name" })).toBeVisible();
     await expect(page.getByRole("columnheader", { name: "Actions" })).toBeVisible();
   });
+
+  test("existing-account invite fallback offers sign-in link action", async ({ page }) => {
+    const runId = Date.now();
+    const existingEmail = `pw-existing-client-invite-${runId}@example.com`;
+
+    await loginAsAdmin(page);
+
+    const createRes = await page.request.post("/api/admin/create-user", {
+      data: {
+        email: existingEmail,
+        password: "TestPassword123!",
+        firstName: "Existing",
+        lastName: "Invite",
+        role: "talent",
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+
+    await safeGoto(page, "/admin/client-applications");
+
+    await page.getByLabel("Invite VIP Career Builder Applicant").fill(existingEmail);
+    await page.getByRole("button", { name: "Send invite" }).click();
+
+    await expect(page.getByText("This email already belongs to an existing user.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Send sign-in link" })).toBeVisible();
+  });
 });
 
 test.describe("Admin client applications route contracts (mobile 390x844)", () => {

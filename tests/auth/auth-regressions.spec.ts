@@ -50,6 +50,46 @@ async function createSuspendedTalentUser() {
   return { email, password };
 }
 
+async function createInviteCallbackToken(returnUrl: string) {
+  const admin = createSupabaseAdminClientForTests();
+  const runId = Date.now();
+  const email = `pw-invite-callback-${runId}@example.com`;
+
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: {
+      redirectTo: `http://localhost:3000/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`,
+    },
+  });
+
+  if (error || !data?.properties?.hashed_token) {
+    throw new Error(error?.message ?? "failed to generate invite callback token");
+  }
+
+  return {
+    email,
+    tokenHash: data.properties.hashed_token,
+  };
+}
+
+async function createMagiclinkCallbackToken(email: string) {
+  const admin = createSupabaseAdminClientForTests();
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "magiclink",
+    email,
+    options: {
+      redirectTo: "http://localhost:3000/auth/callback",
+    },
+  });
+
+  if (error || !data?.properties?.hashed_token) {
+    throw new Error(error?.message ?? "failed to generate magiclink callback token");
+  }
+
+  return data.properties.hashed_token;
+}
+
 test.describe("Auth regressions (routing + reset links)", () => {
   test("SIGNED-OUT: /choose-role does not redirect to /login", async ({ page }) => {
     test.setTimeout(60_000);
@@ -127,6 +167,61 @@ test.describe("Auth regressions (routing + reset links)", () => {
 
     // Query-token links can resolve through multiple UI states; route-level contract is:
     // no premature bounce to /login and URL ownership remains /update-password.
+  });
+
+  test("SIGNED-OUT: /auth/callback accepts invite token_hash and lands on /client/apply", async ({
+    page,
+  }) => {
+    test.setTimeout(90_000);
+    const invite = await createInviteCallbackToken("/client/apply");
+
+    await page.context().clearCookies();
+    await safeGoto(
+      page,
+      `/auth/callback?token_hash=${encodeURIComponent(invite.tokenHash)}&type=invite&returnUrl=${encodeURIComponent("/client/apply")}`,
+      { timeoutMs: 60_000 }
+    );
+
+    await expect(page).not.toHaveURL(/\/login(\?|\/|$)/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/client\/apply(\?|\/|$)/, { timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: /career builder application/i })).toBeVisible({
+      timeout: 30_000,
+    });
+  });
+
+  test("SIGNED-OUT: /auth/callback accepts magiclink token_hash and lands on /client/apply", async ({
+    page,
+    request,
+  }) => {
+    test.setTimeout(90_000);
+    const runId = Date.now();
+    const existingEmail = `pw-existing-magiclink-${runId}@example.com`;
+
+    const createRes = await request.post("/api/admin/create-user", {
+      data: {
+        email: existingEmail,
+        password: "TestPassword123!",
+        firstName: "Existing",
+        lastName: "Magiclink",
+        role: "talent",
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+
+    const tokenHash = await createMagiclinkCallbackToken(existingEmail);
+
+    await page.context().clearCookies();
+    await safeGoto(
+      page,
+      `/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&returnUrl=${encodeURIComponent("/client/apply")}`,
+      { timeoutMs: 60_000 }
+    );
+
+    await expect(page).not.toHaveURL(/\/login(\?|\/|$)/, { timeout: 15_000 });
+    await expect(page).toHaveURL(/\/client\/apply(\?|\/|$)/, { timeout: 60_000 });
+    await expect(page.getByRole("heading", { name: /career builder application/i })).toBeVisible({
+      timeout: 30_000,
+    });
   });
 
   test("SUSPENDED: signed-in user is forced to /suspended when targeting /update-password", async ({

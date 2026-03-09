@@ -78,6 +78,8 @@ export function AdminClientApplicationsClient({
   const [isSendingFollowUps, setIsSendingFollowUps] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [isSendingInvite, setIsSendingInvite] = useState(false);
+  const [existingAccountInviteEmail, setExistingAccountInviteEmail] = useState<string | null>(null);
+  const [isSendingExistingUserLink, setIsSendingExistingUserLink] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [followUpFilter, setFollowUpFilter] = useState<"all" | "sent" | "not_sent">("all");
   const { toast } = useToast();
@@ -479,6 +481,7 @@ export function AdminClientApplicationsClient({
 
     setIsSendingInvite(true);
     try {
+      setExistingAccountInviteEmail(null);
       const response = await fetch("/api/admin/invite-career-builder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -487,6 +490,9 @@ export function AdminClientApplicationsClient({
 
       const payload = (await response.json()) as { error?: string; success?: boolean };
       if (!response.ok || !payload.success) {
+        if (response.status === 409) {
+          setExistingAccountInviteEmail(normalizedEmail);
+        }
         toast({
           title: response.status === 409 ? "User already exists" : "Invite failed",
           description:
@@ -511,6 +517,47 @@ export function AdminClientApplicationsClient({
       });
     } finally {
       setIsSendingInvite(false);
+    }
+  };
+
+  const handleSendExistingUserLink = async () => {
+    if (!existingAccountInviteEmail) {
+      return;
+    }
+
+    setIsSendingExistingUserLink(true);
+    try {
+      const response = await fetch("/api/admin/send-career-builder-login-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: existingAccountInviteEmail }),
+      });
+
+      const payload = (await response.json()) as { error?: string; success?: boolean };
+      if (!response.ok || !payload.success) {
+        toast({
+          title: "Sign-in link failed",
+          description: payload.error ?? "Could not send a sign-in link right now.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Sign-in link sent",
+        description: `${existingAccountInviteEmail} received a direct link back to /client/apply.`,
+      });
+      setExistingAccountInviteEmail(null);
+      setInviteEmail("");
+    } catch (error) {
+      logger.error("Error sending existing-user Career Builder sign-in link", error);
+      toast({
+        title: "Sign-in link failed",
+        description: "Unexpected error while sending sign-in link.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingExistingUserLink(false);
     }
   };
 
@@ -638,6 +685,36 @@ export function AdminClientApplicationsClient({
           <p className="mt-2 text-xs text-gray-400">
             Invite links land recipients on the Career Builder application flow after auth.
           </p>
+          {existingAccountInviteEmail ? (
+            <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+              <p className="text-sm font-medium text-amber-200">
+                This email already belongs to an existing user.
+              </p>
+              <p className="mt-1 text-sm text-amber-100/80">
+                Send a direct sign-in link so they can continue at <code>/client/apply</code>
+                without creating a duplicate account.
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={handleSendExistingUserLink}
+                  disabled={isSendingExistingUserLink}
+                  className="gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  {isSendingExistingUserLink ? "Sending sign-in link..." : "Send sign-in link"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setExistingAccountInviteEmail(null)}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                >
+                  Dismiss
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </SectionCard>
 
         <div className="md:hidden">

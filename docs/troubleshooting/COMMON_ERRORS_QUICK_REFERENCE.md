@@ -199,6 +199,11 @@ npm run build
   - **Root Cause:** Career Builder accounts can own dependent rows that are not safe to remove via auth-user deletion from the Admin Users workflow.
   - **Fix:** Treat `Disable Career Builder` (`profiles.is_suspended = true`) as the official admin action and block Career Builder hard delete with a clear “Use Disable Career Builder instead” message.
   - **Prevention:** Do not use hard delete for Career Builder accounts in admin UX unless a future scoped cleanup flow first proves FK-safe dependency handling.
+- **Mobile route contract suite fails with `Login failed: Invalid credentials` across many Client/Talent specs:**
+  - **Symptom:** `test:qa:mobile-guardrails`, `client-routes`, or `talent-routes` fail before route assertions run, often across many specs at once.
+  - **Root Cause:** Local seeded Client/Talent personas drifted or were not repaired before auth-protected Playwright route specs ran.
+  - **Fix:** Run `node scripts/ensure-ui-audit-users.mjs` before those route suites, or use the hardened npm scripts that now include route-user preflight.
+  - **Prevention:** Treat broad Client/Talent login failures as auth-baseline/test-fixture drift first, not as route UI regressions, until seeded personas are revalidated.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.
