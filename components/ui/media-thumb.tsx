@@ -20,7 +20,6 @@ const variantClasses: Record<MediaThumbVariant, string> = {
 
 export function MediaThumb({ src, alt, variant, fallbackText, className }: MediaThumbProps) {
   const trimmedFallback = fallbackText?.trim();
-  const shouldShowFallbackText = !src && !!trimmedFallback;
 
   return (
     <div

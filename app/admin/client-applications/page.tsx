@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { logger } from "@/lib/utils/logger";
 import { AdminClientApplicationsClient } from "./admin-client-applications-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // Force dynamic rendering to prevent static pre-rendering

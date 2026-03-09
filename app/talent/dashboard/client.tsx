@@ -34,6 +34,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
@@ -1003,42 +1004,38 @@ function TalentDashboardContent({
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <div className="relative md:hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
-            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
-                <TabsTrigger
-                  value="overview"
-                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
-                >
-                  <Activity className="h-3.5 w-3.5" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger
-                  value="applications"
-                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
-                >
-                  <Target className="h-3.5 w-3.5" />
-                  Applications
-                </TabsTrigger>
-                <TabsTrigger
-                  value="bookings"
-                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  Bookings
-                </TabsTrigger>
-                <TabsTrigger
-                  value="discover"
-                  className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
-                >
-                  <Search className="h-3.5 w-3.5" />
-                  Discover
-                </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
+          <MobileTabRail>
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+              <TabsTrigger
+                value="overview"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              >
+                <Activity className="h-3.5 w-3.5" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="applications"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              >
+                <Target className="h-3.5 w-3.5" />
+                Applications
+              </TabsTrigger>
+              <TabsTrigger
+                value="bookings"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              >
+                <Calendar className="h-3.5 w-3.5" />
+                Bookings
+              </TabsTrigger>
+              <TabsTrigger
+                value="discover"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Discover
+              </TabsTrigger>
+            </TabsList>
+          </MobileTabRail>
           <TabsList className="hidden w-full grid-cols-4 border-gray-800 bg-gray-900 md:grid lg:w-auto lg:grid-cols-4">
             <TabsTrigger
               value="overview"

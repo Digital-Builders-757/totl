@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { logger } from "@/lib/utils/logger";
 import { TalentDashboardClient } from "./talent-dashboard-client";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,6 +28,7 @@ import {
 import { EmailVerificationReminder } from "@/components/ui/email-verification-reminder";
 import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import { createNameSlug } from "@/lib/utils/slug";
 import {
   type TalentProfileRow,

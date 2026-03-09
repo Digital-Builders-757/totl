@@ -10,6 +10,7 @@ import useSWR from "swr";
 import type { Booking } from "@/app/client/bookings/types";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -189,29 +190,25 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
         <BookingsStatsOverview stats={bookingStats} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="relative md:hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
-            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
-                <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  All ({bookingStats.total})
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Pending ({bookingStats.pending})
-                </TabsTrigger>
-                <TabsTrigger value="confirmed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Confirmed ({bookingStats.confirmed})
-                </TabsTrigger>
-                <TabsTrigger value="completed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Completed ({bookingStats.completed})
-                </TabsTrigger>
-                <TabsTrigger value="cancelled" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Cancelled ({bookingStats.cancelled})
-                </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
+          <MobileTabRail>
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+              <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                All ({bookingStats.total})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Pending ({bookingStats.pending})
+              </TabsTrigger>
+              <TabsTrigger value="confirmed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Confirmed ({bookingStats.confirmed})
+              </TabsTrigger>
+              <TabsTrigger value="completed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Completed ({bookingStats.completed})
+              </TabsTrigger>
+              <TabsTrigger value="cancelled" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Cancelled ({bookingStats.cancelled})
+              </TabsTrigger>
+            </TabsList>
+          </MobileTabRail>
           <TabsList className="hidden w-full grid-cols-5 md:grid">
             <TabsTrigger value="all">All ({bookingStats.total})</TabsTrigger>
             <TabsTrigger value="pending">Pending ({bookingStats.pending})</TabsTrigger>

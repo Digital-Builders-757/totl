@@ -22,6 +22,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard-skeleton";
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageShell } from "@/components/layout/page-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -298,30 +299,26 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               footerActionHref="/client/gigs"
             />
           </div>
-          <div className="relative md:hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
-            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-gray-800 bg-gray-900 p-1">
-                <TabsTrigger value="overview" className={tabTriggerClass}>
-                  <BarChart3 className="h-3.5 w-3.5" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="gigs" className={tabTriggerClass}>
-                  <Briefcase className="h-3.5 w-3.5" />
-                  My Gigs
-                </TabsTrigger>
-                <TabsTrigger value="applications" className={tabTriggerClass}>
-                  <Users className="h-3.5 w-3.5" />
-                  Applications
-                </TabsTrigger>
-                <TabsTrigger value="create" className={tabTriggerClass}>
-                  <Plus className="h-3.5 w-3.5" />
-                  Create Gig
-                </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
+          <MobileTabRail>
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-gray-800 bg-gray-900 p-1">
+              <TabsTrigger value="overview" className={tabTriggerClass}>
+                <BarChart3 className="h-3.5 w-3.5" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="gigs" className={tabTriggerClass}>
+                <Briefcase className="h-3.5 w-3.5" />
+                My Gigs
+              </TabsTrigger>
+              <TabsTrigger value="applications" className={tabTriggerClass}>
+                <Users className="h-3.5 w-3.5" />
+                Applications
+              </TabsTrigger>
+              <TabsTrigger value="create" className={tabTriggerClass}>
+                <Plus className="h-3.5 w-3.5" />
+                Create Gig
+              </TabsTrigger>
+            </TabsList>
+          </MobileTabRail>
           <TabsList className="hidden w-full grid-cols-4 gap-2 rounded-2xl border border-gray-800 bg-gray-900 p-1 md:grid">
             <TabsTrigger value="overview" className={tabTriggerClass}>
               <BarChart3 className="h-4 w-4" />

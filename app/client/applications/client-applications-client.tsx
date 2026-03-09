@@ -10,6 +10,7 @@ import { ClientTerminalHeader } from "@/components/client/client-terminal-header
 import { FiltersSheet } from "@/components/dashboard/filters-sheet";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -383,26 +384,22 @@ export default function ClientApplicationsClient({
         ) : null}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="relative md:hidden">
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-black to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-black to-transparent" />
-            <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
-                <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  All ({applications.length})
-                </TabsTrigger>
-                <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  New ({applicationsByStatus.new})
-                </TabsTrigger>
-                <TabsTrigger value="interview" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Interviews ({applicationsByStatus.shortlisted})
-                </TabsTrigger>
-                <TabsTrigger value="hired" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                  Hired ({applicationsByStatus.accepted})
-                </TabsTrigger>
-              </TabsList>
-            </div>
-          </div>
+          <MobileTabRail>
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+              <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                All ({applications.length})
+              </TabsTrigger>
+              <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                New ({applicationsByStatus.new})
+              </TabsTrigger>
+              <TabsTrigger value="interview" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Interviews ({applicationsByStatus.shortlisted})
+              </TabsTrigger>
+              <TabsTrigger value="hired" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                Hired ({applicationsByStatus.accepted})
+              </TabsTrigger>
+            </TabsList>
+          </MobileTabRail>
           <TabsList className="hidden w-full grid-cols-4 md:grid">
             <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
             <TabsTrigger value="new">

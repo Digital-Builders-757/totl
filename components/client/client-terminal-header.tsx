@@ -87,13 +87,13 @@ export function ClientTerminalHeader({
       <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DialogContent
           data-testid="client-drawer-panel"
-          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 rounded-none border-r border-white/10 bg-black p-0 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)] text-white"
+          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-black p-0 pb-[env(safe-area-inset-bottom)] text-white"
         >
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-black/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
               <div className="min-w-0">
-                <p className="text-sm text-gray-300">Menu</p>
                 <p className="truncate text-base font-semibold">Career Builder</p>
+                <p className="text-xs text-gray-300">Navigation</p>
               </div>
               <Button
                 type="button"
@@ -108,7 +108,7 @@ export function ClientTerminalHeader({
               </Button>
             </div>
 
-            <nav className="flex-1 space-y-1 px-2 py-3">
+            <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-2">
               {drawerLinks.map((item) => (
                 <Link
                   key={item.href}
