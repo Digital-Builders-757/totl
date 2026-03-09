@@ -112,7 +112,7 @@
     - admin cannot disable/delete self
     - admin cannot hard-delete admin targets
     - disable is the primary path (`profiles.is_suspended = true`)
-    - hard delete must fail loudly with guidance to disable instead when related data blocks deletion
+    - hard delete for Career Builder accounts is blocked; disable is the official policy because dependent rows can violate FK constraints
 
 ---
 
@@ -165,17 +165,16 @@
   - approve client applications (promotion)
   - suspend/reinstate accounts
   - disable Career Builder accounts from `/admin/users`
-  - hard-delete eligible Career Builder accounts only with explicit confirmation
   - close gigs via moderation
 
 ### Manual test steps
 - Login as admin → visit `/admin/dashboard`.
 - Login as admin → visit `/admin/users` and verify:
-  - client rows expose `Disable Career Builder` + `Hard Delete (Danger)`
+  - client rows expose `Disable Career Builder`
   - non-client rows do not expose those actions
   - disabling a client sets `profiles.is_suspended = true`
   - a disabled client is routed to `/suspended` on next protected navigation
-  - hard delete rejects non-client targets and admin targets
+  - hard delete for Career Builder targets fails with explicit guidance to disable instead
 - Approve a `client_applications` row → verify:
   - `client_applications.status='approved'`
   - `profiles.role='client' AND profiles.account_type='client'`

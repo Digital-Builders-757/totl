@@ -98,7 +98,7 @@ test.describe("Admin users route contracts", () => {
     await expect(row).toBeVisible();
     await row.getByRole("button").click();
     await expect(page.getByRole("menuitem", { name: "Disable Career Builder" })).toBeVisible();
-    await expect(page.getByRole("menuitem", { name: "Hard Delete (Danger)" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Hard Delete (Danger)" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "View Career Builder Profile" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/client/profile\\?userId=${seededClient.userId}`));

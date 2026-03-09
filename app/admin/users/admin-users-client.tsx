@@ -13,7 +13,6 @@ import {
   XCircle,
   Eye,
   Plus,
-  Trash2,
   ArrowUp,
   Loader2,
 } from "lucide-react";
@@ -79,10 +78,6 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [users, setUsers] = useState(initialUsers);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [userToDisable, setUserToDisable] = useState<UserProfile | null>(null);
   const [isDisabling, setIsDisabling] = useState(false);
@@ -121,50 +116,6 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const talentUsers = users.filter((u) => u.role === "talent");
   const careerBuilderUsers = users.filter((u) => u.role === "client");
   const adminUsers = users.filter((u) => u.role === "admin");
-
-  const handleDeleteUser = async () => {
-    if (!userToDelete) return;
-    if (deleteConfirmText.trim() !== "DELETE") return;
-
-    // Capture the user ID at the start to avoid stale closure issues
-    // if another delete operation starts while this one is in flight
-    const userIdToDelete = userToDelete.id;
-
-    setIsDeleting(true);
-    try {
-      const response = await fetch("/api/admin/delete-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userIdToDelete }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to delete user");
-      }
-
-      toast({
-        title: "Success",
-        description: "User deleted successfully. All related data has been removed.",
-        variant: "success",
-      });
-      setUsers((prevUsers) => prevUsers.filter((u) => u.id !== userIdToDelete));
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
-      setDeleteConfirmText("");
-      router.refresh();
-    } catch (error) {
-      logger.error("Error deleting user", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete user",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const handleDisableUser = async () => {
     if (!userToDisable || !disableConfirmChecked) return;
@@ -252,29 +203,6 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     }
   };
 
-  const openDeleteDialog = (userProfile: UserProfile) => {
-    // Prevent deleting yourself
-    if (userProfile.id === user.id) {
-      toast({
-        title: "Error",
-        description: "Cannot delete your own account",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (userProfile.role !== "client") {
-      toast({
-        title: "Error",
-        description: "Hard delete is only available for Career Builder accounts.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setUserToDelete(userProfile);
-    setDeleteConfirmText("");
-    setDeleteDialogOpen(true);
-  };
-
   const openDisableDialog = (userProfile: UserProfile) => {
     if (userProfile.id === user.id) {
       toast({
@@ -311,7 +239,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     }
   };
 
-  const getRoleBadge = (role: string, isSuspended?: boolean | null) => {
+  const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
         return (
@@ -322,7 +250,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       case "client":
         return (
           <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/50">
-            {isSuspended ? "Career Builder (Disabled)" : "Career Builder"}
+            Career Builder
           </Badge>
         );
       case "talent":
@@ -334,6 +262,12 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
+  };
+
+  const getSuspensionBadge = (isSuspended?: boolean | null) => {
+    if (!isSuspended) return null;
+
+    return <Badge className="bg-rose-500/20 text-rose-300 border-rose-500/50">Suspended</Badge>;
   };
 
   const renderUserActions = (userProfile: UserProfile) => (
@@ -389,17 +323,11 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             <DropdownMenuSeparator className="bg-gray-700" />
             <DropdownMenuItem
               onClick={() => openDisableDialog(userProfile)}
+              disabled={Boolean(userProfile.is_suspended)}
               className="text-amber-300 hover:bg-gray-700 flex items-center"
             >
               <Shield className="mr-2 h-4 w-4" />
-              {userProfile.is_suspended ? "Disabled (Already Suspended)" : "Disable Career Builder"}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => openDeleteDialog(userProfile)}
-              className="text-red-400 hover:bg-gray-700 flex items-center"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Hard Delete (Danger)
+              {userProfile.is_suspended ? "Already Suspended" : "Disable Career Builder"}
             </DropdownMenuItem>
           </>
         )}
@@ -438,7 +366,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
-              badge={getRoleBadge(userProfile.role, userProfile.is_suspended)}
+              badge={getSuspensionBadge(userProfile.is_suspended) ?? getRoleBadge(userProfile.role)}
               trailing={renderUserActions(userProfile)}
             />
           ))}
@@ -487,7 +415,8 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       {getRoleIcon(userProfile.role)}
-                      {getRoleBadge(userProfile.role, userProfile.is_suspended)}
+                      {getRoleBadge(userProfile.role)}
+                      {getSuspensionBadge(userProfile.is_suspended)}
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -712,75 +641,6 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 <>
                   <Shield className="mr-2 h-4 w-4" />
                   Disable Career Builder
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Hard Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-red-400">Hard Delete Career Builder</DialogTitle>
-            <DialogDescription className="text-gray-400">
-              This permanently deletes the auth account and cascades related database records. This
-              action cannot be undone.
-              <br />
-              <br />
-              <strong className="text-white">
-                All related data will be permanently deleted:
-              </strong>
-              <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
-                <li>User profile and account</li>
-                <li>All applications</li>
-                <li>All bookings</li>
-                <li>Portfolio items</li>
-                <li>Gigs (if Career Builder)</li>
-                <li>All other related data</li>
-              </ul>
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            <p className="text-sm text-gray-300">
-              Type <span className="font-semibold text-white">DELETE</span> to confirm.
-            </p>
-            <Input
-              value={deleteConfirmText}
-              onChange={(event) => setDeleteConfirmText(event.target.value)}
-              placeholder="DELETE"
-              className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-              disabled={isDeleting}
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setUserToDelete(null);
-                setDeleteConfirmText("");
-              }}
-              disabled={isDeleting}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteUser}
-              disabled={isDeleting || deleteConfirmText.trim() !== "DELETE"}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Hard Delete
                 </>
               )}
             </Button>

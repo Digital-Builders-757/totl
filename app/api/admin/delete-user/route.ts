@@ -85,10 +85,20 @@ export const POST = async (request: Request) => {
       return NextResponse.json({ error: "Cannot hard-delete another admin account" }, { status: 403 });
     }
 
-    // Career Builder target = profiles.role === "client" only.
-    if (targetProfile.role !== "client") {
+    // Career Builder accounts are disable-only because dependent rows can block auth user deletes.
+    if (targetProfile.role === "client") {
       return NextResponse.json(
-        { error: "Hard delete is only available for Career Builder (client) accounts" },
+        {
+          error:
+            "Hard delete is blocked for Career Builder accounts because dependent records can violate foreign key constraints. Use Disable Career Builder instead.",
+        },
+        { status: 409 }
+      );
+    }
+
+    if (targetProfile.role !== "talent") {
+      return NextResponse.json(
+        { error: "Hard delete is not available for this user from the Admin Users workflow" },
         { status: 400 }
       );
     }
