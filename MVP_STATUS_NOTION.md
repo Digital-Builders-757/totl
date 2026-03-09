@@ -14,6 +14,7 @@
 - ✅ Added admin-only endpoint `POST /api/admin/disable-user` for Career Builder accounts (`profiles.role = 'client'`), with server-side role checks and self-action rejection.
 - ✅ Made disable the primary admin action for Career Builders in `/admin/users` with destructive checkbox confirmation and optional suspension reason.
 - ✅ Hard delete for Career Builders is now blocked by FK-safe policy; disable/suspend is the official admin action.
+- ✅ Fixed mobile admin users badge rendering so suspended Career Builders show both badges (`Career Builder` + `Suspended`) instead of hiding the role badge.
 - ✅ Tightened `POST /api/admin/delete-user` guardrails:
   - rejects self-delete
   - rejects hard delete of admin targets

@@ -270,6 +270,13 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     return <Badge className="bg-rose-500/20 text-rose-300 border-rose-500/50">Suspended</Badge>;
   };
 
+  const getCombinedBadges = (role: string, isSuspended?: boolean | null) => (
+    <div className="flex flex-wrap gap-2">
+      {getRoleBadge(role)}
+      {getSuspensionBadge(isSuspended)}
+    </div>
+  );
+
   const renderUserActions = (userProfile: UserProfile) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -366,7 +373,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
-              badge={getSuspensionBadge(userProfile.is_suspended) ?? getRoleBadge(userProfile.role)}
+              badge={getCombinedBadges(userProfile.role, userProfile.is_suspended)}
               trailing={renderUserActions(userProfile)}
             />
           ))}
