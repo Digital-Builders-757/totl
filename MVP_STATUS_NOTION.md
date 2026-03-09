@@ -13,14 +13,24 @@
 **ADMIN USER LIFECYCLE SAFETY HARDENING** - March 9, 2026
 - ✅ Added admin-only endpoint `POST /api/admin/disable-user` for Career Builder accounts (`profiles.role = 'client'`), with server-side role checks and self-action rejection.
 - ✅ Made disable the primary admin action for Career Builders in `/admin/users` with destructive checkbox confirmation and optional suspension reason.
+- ✅ Hard delete for Career Builders is now blocked by FK-safe policy; disable/suspend is the official admin action.
 - ✅ Tightened `POST /api/admin/delete-user` guardrails:
-  - rejects non-client targets
   - rejects self-delete
   - rejects hard delete of admin targets
-  - returns explicit “Use Disable instead” guidance when hard delete fails due to data constraints
+  - blocks Career Builder hard delete with explicit “Use Disable Career Builder instead” guidance
 - ✅ Added/updated Playwright guardrails:
-  - `tests/admin/admin-user-lifecycle-guardrail.spec.ts` (authz + target eligibility)
-  - `tests/admin/admin-users-route.spec.ts` (Career Builder action visibility)
+  - `tests/admin/admin-user-lifecycle-guardrail.spec.ts` (authz + FK-safe disable behavior)
+  - `tests/admin/admin-users-route.spec.ts` (Disable-only Career Builder action visibility)
+
+**Problems discovered this session:**
+- ⚠️ Career Builder hard delete can violate foreign key constraints when dependent rows still reference the user (`client_applications.user_id_fkey`), so delete is not a safe default for admin ops.
+
+**Next (P0 - admin safety policy)**
+- [x] Replace Career Builder hard delete in the Admin Users UX with FK-safe disable/suspend.
+- [x] Document disable as the official policy when dependent rows exist.
+
+**Next (P1 - follow-up polish)**
+- [ ] Decide whether hard delete should remain available only for non-client test-user cleanup flows in a separate scoped PR.
 
 ## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
 
