@@ -8,6 +8,33 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile guardrails CI Playwright browser install fix (March 9, 2026)**
+
+**CI / PLAYWRIGHT RUNNER HARDENING** - March 9, 2026
+- ✅ Confirmed the prior Supabase env injection fix worked: `test:qa:route-users:preflight` now succeeds on GitHub Actions and seeded UI audit users are repaired before the route suite starts.
+- ✅ Identified the next failing CI layer: every `mobile-guardrails` spec aborted at browser launch because the GitHub runner had no Playwright Chromium executable installed.
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now runs:
+  - `npx playwright install --with-deps chromium`
+  before executing `npm run test:qa:mobile-guardrails:ci`
+- ✅ Re-ran mandatory ship gates locally after the workflow/doc updates:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ `npm ci` installs the Playwright package but does **not** guarantee the browser binary exists on a fresh GitHub runner cache path.
+- ⚠️ Once env injection was fixed, the job advanced to the real next blocker instead of any auth/mobile regression in the app itself.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Add Playwright Chromium install step to the `mobile-guardrails` CI job.
+- [ ] Push the workflow fix to `develop`.
+- [ ] Rerun `CI` and confirm `mobile-guardrails` reaches real test execution instead of failing at `browserType.launch`.
+
+**Next (P1 - branch hygiene)**
+- [ ] If the rerun is green, sync `main` back into `develop` so branch history matches the already-merged production path.
+- [ ] Consider whether other CI jobs that rely on browser-backed Playwright should install browsers explicitly for cache-independent safety.
+
 ## 🚀 **Latest: Mobile guardrails CI Supabase env injection fix (March 9, 2026)**
 
 **CI / MERGE CONFIDENCE HARDENING** - March 9, 2026
@@ -3913,6 +3940,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 9, 2026*
-*Current Status: MVP Complete - mobile-guardrails CI env injection fix prepared locally, required GitHub develop secrets confirmed, and ship-gates passing locally; next step is push + rerun CI + reconcile branch state*
+*Current Status: MVP Complete - mobile-guardrails CI env injection and Playwright browser-install fixes prepared locally, ship-gates passing locally, and next step is push + rerun CI + reconcile branch state*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After the pushed CI rerun confirms `mobile-guardrails` passes and `develop` is reconciled with `main`*

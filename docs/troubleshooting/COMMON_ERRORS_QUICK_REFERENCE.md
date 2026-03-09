@@ -213,6 +213,12 @@ npm run build
     - `SUPABASE_SERVICE_ROLE_KEY`
     - map `SUPABASE_URL` and `SUPABASE_ANON_KEY` from the same hosted project values in workflow `env`
   - **Prevention:** Do not rely on `.env.local` existing in GitHub Actions; the `dotenv` log line is expected, but CI must satisfy these values through workflow `env` + GitHub environment secrets.
+- **`mobile-guardrails` CI job fails with `browserType.launch: Executable doesn't exist`:**
+  - **Symptom:** Seed preflight succeeds and the Next app boots, but every Playwright spec fails immediately at `browserType.launch` with a missing `chrome-headless-shell` path on the GitHub runner.
+  - **Root Cause:** `npm ci` installs the Playwright package only; it does not guarantee the Chromium browser binary is installed on a fresh CI runner.
+  - **Fix:** Add an explicit workflow step before the mobile suite:
+    - `npx playwright install --with-deps chromium`
+  - **Prevention:** Treat missing browser executables as CI runner setup drift, not as route regressions; ensure browser-backed Playwright jobs install the required browser explicitly.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.
