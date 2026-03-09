@@ -12,6 +12,7 @@ import {
 } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ClientApplicationData = {
@@ -28,8 +29,16 @@ type ClientApplicationData = {
 
 export async function submitClientApplication(data: ClientApplicationData) {
   const supabase = await createSupabaseServer();
+  const traceId = crypto.randomUUID();
 
   try {
+    logger.info("[client-apply] submit start", {
+      traceId,
+      hasEmailInput: Boolean(data.email),
+      hasCompanyName: Boolean(data.companyName),
+      hasNeedsDescription: Boolean(data.needsDescription),
+    });
+
     // 🔐 Require authenticated user (RLS truth for authenticated submissions is email-match).
     const {
       data: { user },
@@ -37,7 +46,15 @@ export async function submitClientApplication(data: ClientApplicationData) {
     } = await supabase.auth.getUser();
 
     if (userError || !user || !user.email) {
-      console.error("No authenticated user when submitting client application:", userError);
+      logger.error(
+        "[client-apply] auth user missing during submit",
+        userError,
+        {
+          traceId,
+          hasUser: Boolean(user),
+          hasUserEmail: Boolean(user?.email),
+        }
+      );
       return { error: "You must be logged in to apply as a Career Builder." };
     }
 
@@ -53,11 +70,20 @@ export async function submitClientApplication(data: ClientApplicationData) {
       .maybeSingle();
 
     if (existingError) {
-      console.error("Error checking existing client application:", existingError);
+      logger.error("[client-apply] existing application lookup failed", existingError, {
+        traceId,
+        userId: user.id,
+      });
       return { error: "Failed to check existing application. Please try again." };
     }
 
     if (existing) {
+      logger.warn("[client-apply] existing application found", {
+        traceId,
+        userId: user.id,
+        status: existing.status,
+        existingApplicationId: existing.id,
+      });
       if (existing.status === "rejected") {
         // Allow re-apply by updating the same row (keeps UNIQUE(email) truth intact).
         const { error: updateError } = await supabase
@@ -81,11 +107,20 @@ export async function submitClientApplication(data: ClientApplicationData) {
           .eq("id", existing.id);
 
         if (updateError) {
-          console.error("Error updating rejected client application:", updateError);
+          logger.error("[client-apply] rejected application update failed", updateError, {
+            traceId,
+            userId: user.id,
+            existingApplicationId: existing.id,
+          });
           return { error: updateError.message };
         }
 
         // Keep response shape consistent with insert path.
+        logger.info("[client-apply] rejected application resubmitted", {
+          traceId,
+          userId: user.id,
+          applicationId: existing.id,
+        });
         return { success: true, applicationId: existing.id };
       }
 
@@ -117,9 +152,19 @@ export async function submitClientApplication(data: ClientApplicationData) {
       .single();
 
     if (error) {
-      console.error("Error submitting client application:", error);
+      logger.error("[client-apply] insert failed", error, {
+        traceId,
+        userId: user.id,
+        canonicalEmail,
+      });
       return { error: error.message };
     }
+
+    logger.info("[client-apply] insert succeeded", {
+      traceId,
+      userId: user.id,
+      applicationId: application.id,
+    });
 
     // Send email notifications
     try {
@@ -166,7 +211,11 @@ export async function submitClientApplication(data: ClientApplicationData) {
       await logEmailSent(adminEmailAddress, "client-application-admin", true);
     } catch (emailError) {
       // Log email errors but don't fail the application submission
-      console.error("Error sending client application emails:", emailError);
+      logger.error("[client-apply] email side-effects failed", emailError, {
+        traceId,
+        applicationId: application.id,
+        canonicalEmail,
+      });
       await logEmailSent(
         canonicalEmail,
         "client-application-confirmation",
@@ -177,7 +226,7 @@ export async function submitClientApplication(data: ClientApplicationData) {
 
     return { success: true, applicationId: application.id };
   } catch (error) {
-    console.error("Unexpected error submitting client application:", error);
+    logger.error("[client-apply] unexpected submit failure", error, { traceId });
     return { error: "An unexpected error occurred. Please try again." };
   }
 }

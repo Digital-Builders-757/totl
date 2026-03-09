@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Career Builder disable + hard-delete guardrails (March 9, 2026)**
+
+**ADMIN USER LIFECYCLE SAFETY HARDENING** - March 9, 2026
+- ✅ Added admin-only endpoint `POST /api/admin/disable-user` for Career Builder accounts (`profiles.role = 'client'`), with server-side role checks and self-action rejection.
+- ✅ Made disable the primary admin action for Career Builders in `/admin/users` with destructive checkbox confirmation and optional suspension reason.
+- ✅ Tightened `POST /api/admin/delete-user` guardrails:
+  - rejects non-client targets
+  - rejects self-delete
+  - rejects hard delete of admin targets
+  - returns explicit “Use Disable instead” guidance when hard delete fails due to data constraints
+- ✅ Added/updated Playwright guardrails:
+  - `tests/admin/admin-user-lifecycle-guardrail.spec.ts` (authz + target eligibility)
+  - `tests/admin/admin-users-route.spec.ts` (Career Builder action visibility)
+
 ## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
 
 **AUTH / ONBOARDING FLOW HARDENING** - March 8, 2026
@@ -21,6 +35,11 @@
   - strips callback tokens from the URL before redirect decisions
   - keeps `returnUrlRaw` intact for BootState decisioning, with local safe fallback
   - retries bounded BootState resolution before falling back
+- ✅ Added server-session readiness probe to callback completion:
+  - new endpoint `app/api/auth/session-ready/route.ts` validates server-side `auth.getUser()` before redirecting to `/client/apply`
+  - callback now waits/retries for server cookie visibility to reduce submit-time auth races
+- ✅ Added structured submit diagnostics for Career Builder application failures:
+  - `submitClientApplication()` now emits traceable logs (auth check, duplicate lookup, insert, and email side-effects) with per-request `traceId`
 - ✅ Re-ran mandatory ship gates (all passing):
   - `npm run schema:verify:comprehensive`
   - `npm run types:check`
@@ -30,12 +49,14 @@
 **Problems discovered this session:**
 - ⚠️ Server-only callback handling was brittle for invite flows because Supabase links can deliver auth tokens in URL hash fragments (invisible to server-side `searchParams`).
 - ⚠️ Existing callback processing did not guarantee session establishment for all invite token variants, causing signed-out landing and homepage/login fallback behavior.
+- ⚠️ Even after callback success, submit could fail if server session cookies were not visible quickly enough (`auth.getUser()` in server action reads as signed-out).
 - ⚠️ Expired/previously-used OTP links (`error_code=otp_expired`) can mimic routing issues; fresh-link verification is required.
 
 **Next (P0 - immediate VIP readiness)**
 - [ ] Run one full fresh invite acceptance in incognito and capture evidence of final landing at `/client/apply`.
-- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`).
+- [ ] Confirm submit + refresh behavior remains stable (`pending` shown on `/client/apply`) with new server-session readiness probe.
 - [ ] Validate existing-account invite path and decide whether to ship login/reset fallback for `409` responses.
+- [ ] Capture one failing trace (if any) and map by `traceId` from `submitClientApplication()` logs.
 
 **Next (P1 - reliability polish)**
 - [ ] Add focused auth callback regression tests covering `token_hash + type=invite` and `returnUrl=/client/apply`.

@@ -9,6 +9,7 @@ type UserProfile = {
   id: string;
   role: "talent" | "client" | "admin";
   display_name: string | null;
+  is_suspended: boolean | null;
   avatar_url: string | null;
   avatar_path: string | null;
   email_verified: boolean | null;
@@ -55,6 +56,7 @@ export default async function AdminUsersPage() {
       id,
       role,
       display_name,
+      is_suspended,
       avatar_url,
       avatar_path,
       email_verified,
@@ -120,6 +122,7 @@ export default async function AdminUsersPage() {
             id,
             role,
             display_name,
+            is_suspended,
             avatar_url,
             avatar_path,
             email_verified,
