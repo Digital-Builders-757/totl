@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { User } from "@supabase/supabase-js";
 import { useState } from "react";
@@ -50,18 +50,22 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
     <div className="space-y-6">
       {/* Profile Header with Avatar */}
       <Card className="bg-gray-900 border-gray-700">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-3">
+        <CardHeader className="gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="min-w-0 flex-1">
+              <CardTitle className="text-2xl font-bold text-white">
+                {profile.display_name || "Profile"}
+              </CardTitle>
+              <CardDescription className="mt-1 break-all text-sm text-gray-400">
+                {user.email}
+              </CardDescription>
+            </div>
             <AvatarUpload
               currentAvatarUrl={avatarSrc}
               userEmail={user.email || ""}
               displayName={profile.display_name}
             />
-            <div>
-              <h2 className="text-2xl font-bold text-white">{profile.display_name || "Profile"}</h2>
-              <p className="text-sm text-gray-400">{user.email}</p>
-            </div>
-          </CardTitle>
+          </div>
         </CardHeader>
       </Card>
 

@@ -236,6 +236,14 @@ npm run build
     - to `/ship` when the intended batch is complete and develop-ready
     - to `/pr` when the batch is already shipped, `develop` is clean, relevant CI is green, and PR creation is the next honest action
   - **Prevention:** When no meaningful local implementation step remains, do not keep using `/continue` for status-only turns; deliver via `/ship` or `/pr`.
+- **Mobile Settings avatar upload card feels like a desktop dropzone shoved into mobile:**
+  - **Symptom:** On `/settings`, the tall dashed “Drag and drop or click to upload” box dominates the profile header card and reads awkwardly on narrow screens.
+  - **Root Cause:** The same drag/drop presentation was used on mobile and desktop, even though mobile only needs a compact file-picker affordance.
+  - **Fix:** Keep the dashed dropzone for `md+`, but on mobile replace it with:
+    - avatar preview
+    - one primary `Change photo` / `Upload photo` button
+    - small helper caption under the button
+  - **Prevention:** For mobile account/profile surfaces, prefer compact upload controls and keep helper text outside tall bordered boxes unless drag/drop is a primary interaction.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

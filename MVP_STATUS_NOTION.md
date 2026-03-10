@@ -8,6 +8,34 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Settings mobile avatar upload polish (March 10, 2026)**
+
+**MOBILE UX / SETTINGS POLISH** - March 10, 2026
+- ✅ Fixed the awkward mobile avatar upload module on `/settings`.
+- ✅ Kept the existing upload/file-input/server-action logic intact and changed presentation only.
+- ✅ On mobile, replaced the tall dashed drag/drop box with a compact avatar module:
+  - avatar preview
+  - primary upload/change button
+  - small helper caption under the button
+- ✅ Preserved the drag/drop upload box for `md+` desktop/tablet layouts.
+- ✅ Tightened the settings profile header card layout so name/email and avatar controls stack intentionally on small screens instead of reading like a cramped desktop row.
+- ✅ Re-ran mandatory verification for this UI batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ The existing settings avatar uploader used a desktop-style dashed dropzone that felt visually shoved into the mobile profile card.
+- ⚠️ Helper text inside the tall dropzone created unnecessary vertical bulk on `390x844` and made the card feel less intentional than the rest of the mobile UI.
+
+**Next (P0 - immediate polish)**
+- [x] Replace the mobile avatar dropzone presentation with a compact avatar/button/caption module.
+- [ ] Check whether the settings tabs area below the profile card still feels too cramped on mobile after the header fix.
+
+**Next (P1 - follow-up consistency)**
+- [ ] Apply the same “mobile-first compact uploader, desktop dropzone” pattern anywhere else a desktop upload box leaks into mobile profile/account surfaces.
+
 ## 🚀 **Latest: Continue command delivery handoff hardening (March 10, 2026)**
 
 **WORKFLOW / AGENT HANDOFF HARDENING** - March 10, 2026

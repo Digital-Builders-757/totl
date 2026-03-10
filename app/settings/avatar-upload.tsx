@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Upload, X, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -136,8 +136,9 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
   const avatarUrl = previewUrl || currentAvatarUrl;
 
   return (
-    <div className="flex items-center gap-4">
-      <div className="relative">
+    <div className="space-y-3">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="relative shrink-0">
         <Avatar className="h-20 w-20">
           <AvatarImage src={avatarUrl || undefined} alt={displayName || userEmail} />
           <AvatarFallback className="text-lg font-semibold">{initials}</AvatarFallback>
@@ -148,51 +149,67 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
             <Loader2 className="h-6 w-6 animate-spin text-white" />
           </div>
         )}
+        </div>
+
+        <div className="hidden flex-1 space-y-2 md:block">
+          <button
+            type="button"
+            className="w-full rounded-lg border-2 border-dashed border-gray-600 bg-gray-800 p-4 text-left transition-colors hover:border-gray-500"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="text-center">
+              <Upload className="mx-auto mb-2 h-6 w-6 text-gray-400" />
+              <p className="text-sm text-gray-300">
+                {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
+              </p>
+              <p className="mt-1 text-xs text-gray-400">JPG, PNG or GIF. Max 1MB.</p>
+            </div>
+          </button>
+        </div>
+
+        <div className="flex flex-col items-start gap-2 md:hidden">
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-11 border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {previewUrl || currentAvatarUrl ? "Change photo" : "Upload photo"}
+          </Button>
+          <p className="text-xs text-gray-400">JPG, PNG or GIF. Max 1MB.</p>
+        </div>
       </div>
 
-      <div className="flex-1 space-y-2">
-        <button
-          type="button"
-          className="w-full border-2 border-dashed border-gray-600 rounded-lg p-4 hover:border-gray-500 transition-colors cursor-pointer text-left bg-gray-800"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <div className="text-center">
-            <Upload className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-            <p className="text-sm text-gray-300">
-              {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
-            </p>
-            <p className="text-xs text-gray-400 mt-1">JPG, PNG or GIF. Max 1MB.</p>
-          </div>
-        </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif"
+        onChange={handleFileChange}
+        className="hidden"
+      />
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/gif"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-
-        {previewUrl && (
-          <div className="flex items-center gap-2">
-            <Button size="sm" onClick={handleUpload} disabled={isUploading} className="flex-1">
-              {isUploading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Uploading...
-                </>
-              ) : (
-                "Save Avatar"
-              )}
-            </Button>
-            <Button size="sm" variant="outline" onClick={clearPreview} disabled={isUploading}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      </div>
+      {previewUrl && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button size="sm" onClick={handleUpload} disabled={isUploading} className="sm:flex-1">
+            {isUploading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Save photo"
+            )}
+          </Button>
+          <Button size="sm" variant="outline" onClick={clearPreview} disabled={isUploading}>
+            <X className="mr-2 h-4 w-4 sm:mr-0" />
+            <span className="sm:hidden">Cancel</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
