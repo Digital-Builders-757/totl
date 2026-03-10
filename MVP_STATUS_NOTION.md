@@ -8,6 +8,40 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Dashboard KPI responsive layout convergence (March 10, 2026)**
+
+**MOBILE UX / DASHBOARD KPI POLISH** - March 10, 2026
+- ✅ Hardened the shared dashboard KPI/stat-row pattern so dense desktop card grids no longer collapse into cramped pseudo-scrollers on smaller and intermediate viewports.
+- ✅ Applied the same breakpoint strategy across the affected terminal surfaces:
+  - `/talent/dashboard`
+  - `/client/dashboard`
+  - `/client/applications`
+  - `/client/bookings`
+  - `/client/gigs`
+  - `/admin/dashboard`
+- ✅ Replaced the hand-rolled mobile tabs wrapper on `/settings` with the shared `MobileTabRail` primitive so the mobile rail now matches the rest of the app's hidden-scrollbar and edge-gradient behavior.
+- ✅ Aligned the talent dashboard loading skeleton with the updated KPI breakpoint behavior so loading state and hydrated layout stay visually consistent.
+- ✅ Re-ran the relevant local verification for this batch:
+  - `npm run lint`
+  - `npm run build`
+- ✅ Re-validated the affected dashboard surfaces manually at:
+  - `390x844`
+  - `820x900`
+  - `1024x900`
+
+**Problems discovered this session:**
+- ⚠️ Several dashboard-like routes were still switching from mobile summaries to overly dense multi-column KPI grids too early, which made the rows feel squeezed even when they did not trigger a literal page scrollbar.
+- ⚠️ `/settings` mobile tabs were functionally correct but had drifted from the shared `MobileTabRail` primitive, missing the standard hidden-scrollbar and edge-indicator affordances.
+- ⚠️ The talent dashboard loading skeleton still implied the older six-up desktop breakpoint behavior, which could make the loading state feel out of sync with the rendered dashboard.
+
+**Next (P0 - immediate polish)**
+- [x] Normalize the affected dashboard KPI rows to wrap more gracefully before expanding to the full desktop column count.
+- [x] Validate the affected dashboard surfaces again on real mobile/tablet widths after the breakpoint changes.
+
+**Next (P1 - follow-up consistency)**
+- [ ] Scan the remaining dashboard-like overview surfaces for any other dense stat strips that should adopt the same stepped KPI breakpoint pattern.
+- [ ] Keep loading/skeleton states aligned any time a shared dashboard density breakpoint changes.
+
 ## 🚀 **Latest: Settings mobile tabs compact rail polish (March 10, 2026)**
 
 **MOBILE UX / SETTINGS POLISH** - March 10, 2026

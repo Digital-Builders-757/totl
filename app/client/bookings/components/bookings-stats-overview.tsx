@@ -39,8 +39,8 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
         </details>
       </div>
 
-      <div className="mb-8 hidden grid-cols-2 gap-4 md:grid md:grid-cols-5">
-        <Card className="border-gray-700 bg-gray-900">
+      <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <Card className="min-w-0 border-gray-700 bg-gray-900">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -52,7 +52,7 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
           </CardContent>
         </Card>
 
-        <Card className="border-gray-700 bg-gray-900">
+        <Card className="min-w-0 border-gray-700 bg-gray-900">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -64,7 +64,7 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
           </CardContent>
         </Card>
 
-        <Card className="border-gray-700 bg-gray-900">
+        <Card className="min-w-0 border-gray-700 bg-gray-900">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -76,7 +76,7 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
           </CardContent>
         </Card>
 
-        <Card className="border-gray-700 bg-gray-900">
+        <Card className="min-w-0 border-gray-700 bg-gray-900">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
@@ -88,7 +88,7 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
           </CardContent>
         </Card>
 
-        <Card className="border-gray-700 bg-gray-900">
+        <Card className="min-w-0 border-gray-700 bg-gray-900">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
