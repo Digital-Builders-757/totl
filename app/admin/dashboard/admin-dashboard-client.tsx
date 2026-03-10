@@ -101,8 +101,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
         </div>
 
         {/* Quick Stats */}
-        <div className="hidden md:grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6 md:gap-4 mb-6">
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+        <div className="mb-6 hidden grid-cols-2 gap-3 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-6">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -123,7 +123,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -144,7 +144,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -165,7 +165,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -186,7 +186,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -208,7 +208,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </Card>
 
           <Card
-            className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800"
+            className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md"
             data-testid="paid-talent-card"
           >
             <CardContent className="p-4 space-y-3">

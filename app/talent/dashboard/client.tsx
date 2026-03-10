@@ -875,8 +875,8 @@ function TalentDashboardContent({
           />
         </div>
 
-        <div className="hidden md:grid md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+        <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -897,7 +897,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -918,7 +918,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -939,7 +939,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -960,7 +960,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
@@ -981,7 +981,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-md transition-shadow bg-gray-900 border-gray-800">
+          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
             <CardContent className="p-4 space-y-3">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">

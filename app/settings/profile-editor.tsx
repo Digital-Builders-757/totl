@@ -8,6 +8,7 @@ import { BasicInfoSection } from "./sections/basic-info";
 import { ClientDetailsSection } from "./sections/client-details";
 import { PortfolioSection } from "./sections/portfolio-section";
 import { TalentDetailsSection } from "./sections/talent-details";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
@@ -80,7 +81,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="-mx-1 overflow-x-auto pb-1 md:hidden">
+            <MobileTabRail className="pb-1" edgeColorClassName="from-gray-900">
               <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-800 p-1">
                 <TabsTrigger value="basic" className={triggerClassName}>
                   Basic Info
@@ -97,7 +98,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
                   Account
                 </TabsTrigger>
               </TabsList>
-            </div>
+            </MobileTabRail>
 
             <TabsList
               className={`hidden h-auto w-full rounded-xl border border-gray-700 bg-gray-800 p-1 md:grid ${

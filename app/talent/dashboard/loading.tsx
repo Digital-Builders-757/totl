@@ -23,7 +23,7 @@ export default function TalentDashboardLoading() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="bg-gray-900 border border-gray-800 rounded-lg p-4">
               <div className="h-4 w-20 bg-gray-700 rounded mb-2 animate-pulse" />

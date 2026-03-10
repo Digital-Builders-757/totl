@@ -232,7 +232,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <ClientStatCard
               className={quickStatCardClass}
               title="Total Gigs"

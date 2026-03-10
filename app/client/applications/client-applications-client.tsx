@@ -233,8 +233,8 @@ export default function ClientApplicationsClient({
           </details>
         </div>
 
-        <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gray-900 border-gray-700">
+        <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-4">
+          <Card className="min-w-0 bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -245,7 +245,7 @@ export default function ClientApplicationsClient({
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="min-w-0 bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -261,7 +261,7 @@ export default function ClientApplicationsClient({
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="min-w-0 bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -277,7 +277,7 @@ export default function ClientApplicationsClient({
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-gray-700">
+          <Card className="min-w-0 bg-gray-900 border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
