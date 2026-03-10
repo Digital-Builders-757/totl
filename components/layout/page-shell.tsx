@@ -36,7 +36,7 @@ export function PageShell({
       {fullBleed ? (
         children
       ) : (
-        <div className={cn("container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10", containerClassName)}>
+        <div className={cn("container mx-auto px-4 py-4 sm:px-6 sm:py-8 lg:px-8", containerClassName)}>
           {children}
         </div>
       )}

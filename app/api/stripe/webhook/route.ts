@@ -144,7 +144,7 @@ export async function POST(req: Request) {
             
           // Get the subscription details
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          const result = await handleSubscriptionUpdate(supabase, subscription, event, ledgerContext.customerEmail);
+          const result = await handleSubscriptionUpdate(supabase, subscription, event);
           
           if (!result.success) {
             // checkout.session.completed MUST resolve to a profile (this is a bug if it doesn't)
@@ -164,7 +164,7 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         logger.info('Subscription updated', { subscriptionId: subscription.id, status: subscription.status });
-        const result = await handleSubscriptionUpdate(supabase, subscription, event, ledgerContext.customerEmail);
+        const result = await handleSubscriptionUpdate(supabase, subscription, event);
         
         if (!result.success) {
           // Check if this is a retryable failure or truly orphaned
@@ -228,7 +228,7 @@ export async function POST(req: Request) {
         }
 
         // Use metadata-first resolution
-        const resolved = await resolveProfileFromStripeEvent(supabase, event, customerId, ledgerContext.customerEmail);
+        const resolved = await resolveProfileFromStripeEvent(supabase, event, customerId);
 
         if (!resolved) {
           // Subscription deletion for non-existent profile is acceptable (user may have been deleted)
@@ -533,8 +533,7 @@ async function getLatestProcessedStripeCreatedForCustomer(
 async function resolveProfileFromStripeEvent(
   supabase: ReturnType<typeof createSupabaseAdminClient>,
   event: Stripe.Event,
-  customerId: string | null,
-  _customerEmail: string | null
+  customerId: string | null
 ): Promise<{ profile: { id: string; subscription_plan: string | null }; resolutionMethod: string } | null> {
   if (!customerId) {
     return null;
@@ -641,8 +640,7 @@ async function resolveProfileFromStripeEvent(
 async function handleSubscriptionUpdate(
   supabase: ReturnType<typeof createSupabaseAdminClient>, 
   subscription: Stripe.Subscription,
-  event: Stripe.Event,
-  customerEmail: string | null
+  event: Stripe.Event
 ): Promise<{ success: boolean; profileId: string | null; resolutionMethod: string | null }> {
   const customerId = typeof subscription.customer === 'string' 
     ? subscription.customer 
@@ -654,7 +652,7 @@ async function handleSubscriptionUpdate(
   }
 
   // Use metadata-first resolution
-  const resolved = await resolveProfileFromStripeEvent(supabase, event, customerId, customerEmail);
+  const resolved = await resolveProfileFromStripeEvent(supabase, event, customerId);
 
   if (!resolved) {
     logger.error("No profile found for customer", undefined, { customerId });

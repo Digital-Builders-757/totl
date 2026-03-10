@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
+import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from "@/lib/db/selects";
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
-import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -85,7 +85,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
   // For now, keeping a simple fallback since badge styling may vary
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = () => {
     // Default fallback - can be enhanced with getCategoryBadgeVariant
     return "bg-gray-100 text-gray-800";
   };
@@ -113,7 +113,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   <CardTitle className="text-3xl font-bold">{displayTitle}</CardTitle>
                   <CardDescription className="text-lg mt-2">{displayDescription}</CardDescription>
                 </div>
-                <Badge className={getCategoryColor(gig.category || "general")}>
+                <Badge className={getCategoryColor()}>
                   {getCategoryLabel(gig.category || "")}
                 </Badge>
               </div>

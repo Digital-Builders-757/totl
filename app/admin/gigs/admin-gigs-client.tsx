@@ -18,6 +18,7 @@ import { FiltersSheet } from "@/components/dashboard/filters-sheet";
 import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { DataTableShell } from "@/components/layout/data-table-shell";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
@@ -361,26 +362,22 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
 
           <Tabs defaultValue="all" className="w-full space-y-4" onValueChange={setActiveTab}>
             <div className="border-b border-gray-700 px-4 sm:px-6">
-              <div className="relative md:hidden">
-                <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-gray-900 to-transparent" />
-                <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-gray-900 to-transparent" />
-                <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
-                    <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                      All ({initialGigs.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="active" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                      Active ({activeGigs.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="draft" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                      Draft ({draftGigs.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="closed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                      Closed ({closedGigs.length})
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-              </div>
+              <MobileTabRail edgeColorClassName="from-gray-900">
+                <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+                  <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    All ({initialGigs.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="active" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Active ({activeGigs.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="draft" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Draft ({draftGigs.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="closed" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Closed ({closedGigs.length})
+                  </TabsTrigger>
+                </TabsList>
+              </MobileTabRail>
               <TabsList className="hidden h-12 border border-gray-600 bg-gray-700/50 md:grid md:grid-cols-4">
                 <TabsTrigger
                   value="all"

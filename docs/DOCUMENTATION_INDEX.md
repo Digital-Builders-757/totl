@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** March 6, 2026
+**Last Updated:** March 9, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -28,23 +28,25 @@ All other documentation has been organized into the `docs/` folder with the foll
 | Directory | Purpose |
 |-----------|---------|
 | `docs/releasenotes/` | **📦 NEW** - Versioned release notes (see `releasenotes/README.md`) |
-| `docs/guides/` | User guides, developer guides, setup instructions |
-| `docs/development/` | Coding standards, type safety, development practices |
-| `docs/features/` | Feature implementation documentation |
+| `docs/guides/` | User guides, developer guides, setup instructions (`guides/README.md`) |
+| `docs/development/` | Coding standards, type safety, development practices (`development/README.md`) |
+| `docs/features/` | Feature implementation documentation (`features/README.md`) |
 | `docs/troubleshooting/` | Error fixes, debugging guides, common issues |
 | | `AUTH_BREADCRUMB_ANALYSIS_REPORT.md` | Comprehensive analysis of auth breadcrumb strings and debugging infrastructure |
 | | `AUTH_SESSION_MISSING_ERROR_FIX.md` | Fix for AuthSessionMissingError Sentry noise (session gate + route-aware handling) |
 | | `AUTH_SESSION_MISSING_ERROR_FIX_SUMMARY.md` | Final implementation summary with acceptance criteria |
-| `docs/performance/` | Performance optimization documentation |
+| `docs/performance/` | Performance optimization documentation (`performance/README.md`) |
 | `docs/security/` | Security configuration and standards |
 | `docs/audits/` | Audit reports and implementation summaries |
 | `docs/contracts/` | Domain contracts (Layer 2 source of truth) |
 | `docs/journeys/` | User journeys (Layer 3 source of truth) |
 | `docs/diagrams/` | Architecture diagrams and visual documentation |
 | `docs/tests/` | Test documentation and matrices |
-| `docs/archive/` | Historical / superseded documentation |
+| `docs/archive/` | Historical / superseded documentation (`archive/README.md`) |
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
+
+**Archive entry point:** start with `archive/README.md` when you need historical context, and only then open individual archived docs.
 
 **Root hygiene note (Feb 18, 2026):** non-canonical root docs were consolidated into `docs/archive/`:
 - `docs/archive/BUILD_AND_AUDIT_REFERENCE.md`
@@ -76,6 +78,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 ## 📚 Reference Docs (useful, non-authoritative)
 
 ### **🔐 Authentication & Security**
+- `security/README.md` - Entry point for security docs, secrets rotation, and webhook secret validation runbooks
 - `AUTH_DATABASE_TRIGGER_CHECKLIST.md` - **🚨 CRITICAL** - Pre-flight checklist for auth changes (Oct 2025)
 - `contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - **✅ CANONICAL** - Auth bootstrap, routing-safe states, and recovery invariants
 - `tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` - **✅ CANONICAL** - Scenario-to-proof ledger for auth/bootstrap coverage
@@ -108,6 +111,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_IMPLEMENTATION.md` - **✅ NEW** - Implementation summary for orphaned customer webhook handling (Feb 2026)
 
 ### **🚨 Critical Error Prevention**
+- `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
 - `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors, Jan 2026 - added Bugbot fixes)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
@@ -203,6 +207,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `MCP_PLAYWRIGHT_TROUBLESHOOTING.md` - 🔧 **NEW** - Complete Playwright MCP troubleshooting guide (Nov 2025)
 - `MCP_QUICK_FIX.md` - ⚡ **NEW** - Quick 2-step fix for Playwright MCP connection issues (Nov 2025)
 - `TEST_DATA_REFERENCE.md` - 🧪 **NEW** - Seeded QA personas, gigs, and auth creation tips (Nov 2025)
+- `qa/README.md` - Entry point for QA runbooks, route ownership, beta execution, and launch checklists
 - `tests/AUTH_BOOTSTRAP_TEST_MATRIX.md` - Proof ledger mapping Auth contract scenarios → Playwright coverage (Dec 2025)
 - `qa/PLAYWRIGHT_TRIAGE_LOG_2026-03-04.md` - Step-3 route-level QA triage ledger with command receipts, failure artifacts, rerun outcomes, CI safety-gate updates, mobile/build `GITHUB_STEP_SUMMARY` observability notes (artifact index + governance links + run metadata + rerun command surfacing + first-response checklists), CI retry-lane hardening, and artifact-index clarity (scope + retention) including always-on `.txt` + `.json` summary snapshots with run-correlation metadata, schema versioning, and parse-validation for mobile/build uploads (Mar 2026)
 - `qa/CLIENT_DRAWER_MANUAL_VALIDATION_RUNBOOK_2026-03-04.md` - Physical/mobile manual validation runbook for client drawer behavior (Mar 2026)

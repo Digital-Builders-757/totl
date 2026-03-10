@@ -1,9 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
-import { logger } from "@/lib/utils/logger";
 import { AdminModerationClient } from "./admin-moderation-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { ContentFlagRow, ModerationDatabase } from "@/lib/types/moderation";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 export const dynamic = "force-dynamic";

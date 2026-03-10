@@ -14,6 +14,7 @@ import {
   Shield,
   UserIcon,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -119,33 +120,48 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
             </DialogTrigger>
             <DialogContent
               data-testid="admin-drawer-panel"
-              className="left-0 top-0 h-dvh w-[88vw] max-w-sm translate-x-0 translate-y-0 border-r border-gray-700 bg-gray-900 p-0 text-white sm:rounded-none"
+              className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-gray-700 bg-gray-900 p-0 pb-[env(safe-area-inset-bottom)] text-white"
             >
               <DialogTitle className="sr-only">Admin Navigation</DialogTitle>
-              <div className="border-b border-gray-700 p-4">
-                <p className="text-sm font-semibold">Admin Navigation</p>
-                <p className="text-xs text-gray-400">Platform Management</p>
+              <div className="flex h-full flex-col">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-700 bg-gray-900/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-semibold">Admin</p>
+                    <p className="text-xs text-gray-400">Platform Management</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    data-testid="admin-drawer-close"
+                    aria-label="Close admin navigation"
+                    className="h-11 w-11 text-gray-100 hover:bg-gray-800"
+                    onClick={() => setIsDrawerOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-2">
+                  {navigationItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Button
+                        key={item.href}
+                        variant="ghost"
+                        className={`h-11 justify-start gap-3 px-3 ${
+                          isActive(item.href) ? "bg-gray-800 text-white" : "text-gray-300 hover:bg-gray-800"
+                        }`}
+                        asChild
+                      >
+                        <Link href={item.href} onClick={() => setIsDrawerOpen(false)}>
+                          <Icon className="h-4 w-4" />
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      </Button>
+                    );
+                  })}
+                </nav>
               </div>
-              <nav className="flex flex-col gap-1 p-3">
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Button
-                      key={item.href}
-                      variant="ghost"
-                      className={`h-11 justify-start gap-3 px-3 ${
-                        isActive(item.href) ? "bg-gray-800 text-white" : "text-gray-300 hover:bg-gray-800"
-                      }`}
-                      asChild
-                    >
-                      <Link href={item.href} onClick={() => setIsDrawerOpen(false)}>
-                        <Icon className="h-4 w-4" />
-                        <span className="truncate">{item.label}</span>
-                      </Link>
-                    </Button>
-                  );
-                })}
-              </nav>
             </DialogContent>
           </Dialog>
           <p className="truncate text-center text-base font-semibold text-white">{mobileTitle}</p>

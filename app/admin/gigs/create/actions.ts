@@ -1,10 +1,9 @@
 "use server";
 
-import { logger } from "@/lib/utils/logger";
-
 import { revalidatePath } from "next/cache";
 import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 export async function createGig(formData: FormData) {

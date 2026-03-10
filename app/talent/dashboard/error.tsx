@@ -33,7 +33,7 @@ export default function DashboardError({
           <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
             <p className="font-medium">What happened?</p>
             <p className="mt-1">
-              The dashboard couldn't load your data. This is usually temporary and should resolve shortly.
+              The dashboard couldn&apos;t load your data. This is usually temporary and should resolve shortly.
             </p>
           </div>
           <Button onClick={reset} className="w-full" variant="default">

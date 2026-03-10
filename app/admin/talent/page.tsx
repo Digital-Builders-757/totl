@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { logger } from "@/lib/utils/logger";
 import { AdminTalentClient } from "./admin-talent-client";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
 type TalentProfile = {

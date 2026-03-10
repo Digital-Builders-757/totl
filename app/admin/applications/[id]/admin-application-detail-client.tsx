@@ -31,8 +31,8 @@ import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
-import { createNameSlug } from "@/lib/utils/slug";
 import { logger } from "@/lib/utils/logger";
+import { createNameSlug } from "@/lib/utils/slug";
 import type { Database } from "@/types/supabase";
 
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {

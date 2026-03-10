@@ -8,6 +8,169 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Shared mobile chrome convergence + docs workflow hardening (March 9, 2026)**
+
+**MOBILE UX / DX HARDENING** - March 9, 2026
+- ✅ Burned down the active lint-warning backlog to zero without changing product behavior.
+- ✅ Standardized shared mobile terminal primitives:
+  - drawer headers + safe-area handling in shared admin/client terminal headers
+  - reusable `FiltersSheet` mobile contract (pinned header, internal scroll area, safe bottom inset, stable test hooks)
+  - reusable `MobileTabRail` primitive adopted across major admin/client/talent terminal surfaces
+  - tighter shared `PageShell` / `PageHeader` density so first meaningful content appears sooner on mobile
+- ✅ Follow-up mobile contract cleanup:
+  - fixed `FiltersSheet` title/close-button overlap by switching the header to a structural flex layout (`justify-between`, `min-w-0`, `truncate`, `shrink-0`) and truncating the subtitle line too
+  - extended `MobileTabRail` adoption to remaining shared admin surfaces (`/admin/gigs`, legacy `/admin/talentdashboard`)
+- ✅ Improved documentation information architecture with new directory entry points:
+  - `docs/archive/README.md`
+  - `docs/development/README.md`
+  - `docs/features/README.md`
+  - `docs/guides/README.md`
+  - `docs/performance/README.md`
+  - `docs/qa/README.md`
+  - `docs/security/README.md`
+  - `docs/troubleshooting/README.md`
+- ✅ Added a reusable Cursor command for ongoing roadmap-safe progress:
+  - `.cursor/commands/continue.md`
+  - documented in `docs/development/ENGINEERING_COMMANDS.md`
+- ✅ Re-ran ship gates during the batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ High-value mobile polish work was still duplicated across tab rails, drawer headers, sheets, and spacing primitives, making route-to-route quality drift too easy.
+- ⚠️ Documentation entry points were missing in several dense directories, which made the roadmap/docs spine harder to navigate than the app itself.
+- ⚠️ The `.cursor` directory is gitignored by default, so the new `/continue` command must be force-staged when shipping if the team wants it tracked in-repo.
+
+**Next (P0 - immediate product polish)**
+- [x] Converge shared mobile UX primitives instead of continuing route-by-route duplication.
+- [x] Improve docs/navigation ergonomics for recurring contributor workflows.
+- [ ] Ship this accumulated batch and create a truthful `develop` -> `main` PR narrative.
+
+**Next (P1 - follow-up convergence)**
+- [ ] Continue replacing remaining duplicated mobile rail wrappers/shell chrome with shared primitives where it materially reduces drift.
+- [ ] Resume the paused `mobile-guardrails` CI hardening thread separately when ready.
+
+## 🚀 **Latest: Documentation information architecture entry-point cleanup (March 9, 2026)**
+
+**DOCS / INFORMATION ARCHITECTURE HARDENING** - March 9, 2026
+- ✅ Advanced the roadmap item `Continue doc information architecture cleanup (subdirectory READMEs + archive superseded docs)`.
+- ✅ Added new subdirectory entry-point docs:
+  - `docs/qa/README.md`
+  - `docs/security/README.md`
+  - `docs/troubleshooting/README.md`
+- ✅ Added `docs/archive/README.md` so historical/superseded docs now have a safe entry point that redirects readers back to canonical docs first.
+- ✅ Extended the same README pattern to other dense active directories:
+  - `docs/development/README.md`
+  - `docs/guides/README.md`
+  - `docs/features/README.md`
+  - `docs/performance/README.md`
+- ✅ Updated `docs/DOCUMENTATION_INDEX.md` to point to those new entry docs and refreshed the index timestamp.
+- ✅ Improved navigation for:
+  - QA runbooks, route ownership, beta/launch checklists
+  - security configuration and secret-rotation runbooks
+  - troubleshooting triage and common error lookup
+  - archived historical docs and superseded references
+  - development standards, setup guides, feature docs, and performance plans
+
+**Problems discovered this session:**
+- ⚠️ `docs/releasenotes/README.md` was the only subdirectory README under `docs/`, which made the broader documentation spine harder to enter by area.
+- ⚠️ The highest-value information architecture win was not a large reorg, but adding lightweight directory entry points that preserve the existing canonical docs.
+
+**Next (P0 - immediate docs IA progress)**
+- [x] Add entry-point READMEs for high-traffic docs subdirectories.
+- [ ] Identify superseded non-canonical docs that can safely move to `docs/archive/` without breaking active references.
+
+**Next (P1 - follow-up cleanup)**
+- [ ] Consider adding the same README pattern to other dense subdirectories only where it materially improves navigation.
+- [ ] Continue archive hygiene without disturbing canonical contracts/journeys/index files.
+
+## 🚀 **Latest: Lint warning burn-down cleanup (March 9, 2026)**
+
+**CODE QUALITY / SHIP SIGNAL HARDENING** - March 9, 2026
+- ✅ Cleared the current repo-wide ESLint warning backlog that was showing up in `npm run lint` / `npm run build`.
+- ✅ Applied warning-only, non-behavioral cleanups across touched files:
+  - import-order normalization on admin, auth, gig, dashboard, and shared UI files
+  - unused variable removal in auth, Stripe webhook, media, and settings code
+  - escaped JSX apostrophe fix in `app/talent/dashboard/error.tsx`
+- ✅ Verified the cleanup with:
+  - `npm run lint` -> **0 warnings, 0 errors**
+  - `npm run build` -> **pass**
+
+**Problems discovered this session:**
+- ⚠️ The warning backlog was concentrated in low-risk mechanical issues, so it was a good roadmap-safe task to advance while the Playwright CI thread is paused.
+- ⚠️ A few cleanup changes had small follow-on edges (for example, removing unused Stripe webhook params required updating their call sites), so even warning-only passes still need a full verification run.
+
+**Next (P0 - immediate code quality gain)**
+- [x] Burn down the active lint/import-order warning backlog in the currently flagged files.
+- [ ] Decide whether to ship this warning-only cleanup as a dedicated code-quality commit or bundle it with the next safe roadmap slice.
+
+**Next (P1 - follow-up hardening)**
+- [ ] Continue broader roadmap work while keeping the Playwright CI thread paused.
+- [ ] Use the now-clean lint baseline to keep future hotfix/launch diffs high-signal.
+
+## 🚀 **Latest: Mobile guardrails CI Playwright browser install fix (March 9, 2026)**
+
+**CI / PLAYWRIGHT RUNNER HARDENING** - March 9, 2026
+- ✅ Confirmed the prior Supabase env injection fix worked: `test:qa:route-users:preflight` now succeeds on GitHub Actions and seeded UI audit users are repaired before the route suite starts.
+- ✅ Identified the next failing CI layer: every `mobile-guardrails` spec aborted at browser launch because the GitHub runner had no Playwright Chromium executable installed.
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now runs:
+  - `npx playwright install --with-deps chromium`
+  before executing `npm run test:qa:mobile-guardrails:ci`
+- ✅ Re-ran mandatory ship gates locally after the workflow/doc updates:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ `npm ci` installs the Playwright package but does **not** guarantee the browser binary exists on a fresh GitHub runner cache path.
+- ⚠️ Once env injection was fixed, the job advanced to the real next blocker instead of any auth/mobile regression in the app itself.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Add Playwright Chromium install step to the `mobile-guardrails` CI job.
+- [ ] Push the workflow fix to `develop`.
+- [ ] Rerun `CI` and confirm `mobile-guardrails` reaches real test execution instead of failing at `browserType.launch`.
+
+**Next (P1 - branch hygiene)**
+- [ ] If the rerun is green, sync `main` back into `develop` so branch history matches the already-merged production path.
+- [ ] Consider whether other CI jobs that rely on browser-backed Playwright should install browsers explicitly for cache-independent safety.
+
+## 🚀 **Latest: Mobile guardrails CI Supabase env injection fix (March 9, 2026)**
+
+**CI / MERGE CONFIDENCE HARDENING** - March 9, 2026
+- ✅ Audited the live GitHub state and confirmed there is currently no open `develop` -> `main` PR; `main` already contains PR `#200`.
+- ✅ Verified the red CI signal is isolated to the `mobile-guardrails` job while the `build` job is green on both `develop` and `main`.
+- ✅ Identified the failing preflight root cause: `scripts/ensure-ui-audit-users.mjs` requires Supabase runtime env vars in CI, but `.github/workflows/ci.yml` only injected Stripe secrets for the `mobile-guardrails` job.
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now injects:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+- ✅ Confirmed the required `develop` GitHub environment secrets now exist for those names.
+- ✅ Re-ran mandatory ship gates locally after the workflow/doc updates:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ GitHub Actions secrets do not help unless the workflow actually maps them into the failing job’s `env` block.
+- ⚠️ The `dotenv` log line in CI is misleading: the preflight script attempts `.env.local`, but GitHub Actions is expected to satisfy those values through `process.env`, not a committed env file.
+- ⚠️ Merge confidence was overstated in the working handoff: `main` is currently ahead of `develop`, so the next branch action is sync-back after CI reruns clean.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Add the missing Supabase env mapping to the `mobile-guardrails` CI job.
+- [x] Add the missing `develop` environment secrets in GitHub.
+- [ ] Push the workflow fix to `develop`.
+- [ ] Rerun `CI` and confirm `mobile-guardrails` no longer fails during `test:qa:route-users:preflight`.
+
+**Next (P1 - branch hygiene)**
+- [ ] Sync `main` back into `develop` once CI is green so branch history matches the already-merged production path.
+- [ ] Consider branch-aware GitHub environment selection in workflow jobs if `main` should stop using `environment: develop`.
+
 ## 🚀 **Latest: Admin Career Builder disable + hard-delete guardrails (March 9, 2026)**
 
 **ADMIN USER LIFECYCLE SAFETY HARDENING** - March 9, 2026
@@ -3878,7 +4041,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 8, 2026*
-*Current Status: MVP Complete - VIP invite callback auth flow hardened with client-side token handling for query/hash variants; ship-gates passing locally; fresh invite incognito proof capture still pending*
+*Last Updated: March 9, 2026*
+*Current Status: MVP Complete - shared mobile UX primitives are more consistent, lint is clean, docs entry-point navigation is improved, and the paused Playwright mobile-guardrails CI thread is no longer blocking roadmap-safe work*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After fresh invite acceptance proof (incognito -> `/client/apply` -> refresh stable) is captured on deployed `develop`*
+*Next Review: After this accumulated UX/docs/code-quality batch is shipped or when the paused `mobile-guardrails` CI hardening thread resumes*

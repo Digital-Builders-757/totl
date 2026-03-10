@@ -2,8 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { UpdatePasswordForm } from "./update-password-form";
 import { UpdatePasswordClientGate } from "./update-password-client-gate";
+import { UpdatePasswordForm } from "./update-password-form";
 import { Button } from "@/components/ui/button";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 

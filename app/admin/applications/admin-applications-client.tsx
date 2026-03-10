@@ -18,6 +18,7 @@ import { FiltersSheet } from "@/components/dashboard/filters-sheet";
 import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { DataTableShell } from "@/components/layout/data-table-shell";
+import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
@@ -315,23 +316,19 @@ export function AdminApplicationsClient({
           </div>
 
           <Tabs defaultValue="new" className="w-full space-y-4" onValueChange={setActiveTab}>
-            <div className="relative md:hidden">
-              <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-gray-900 to-transparent" />
-              <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-gray-900 to-transparent" />
-              <div className="-mx-1 overflow-x-auto px-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
-                  <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                    New ({newCount})
-                  </TabsTrigger>
-                  <TabsTrigger value="approved" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                    Approved ({approvedCount})
-                  </TabsTrigger>
-                  <TabsTrigger value="rejected" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                    Rejected ({rejectedCount})
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
+            <MobileTabRail edgeColorClassName="from-gray-900">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+                <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  New ({newCount})
+                </TabsTrigger>
+                <TabsTrigger value="approved" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Approved ({approvedCount})
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                  Rejected ({rejectedCount})
+                </TabsTrigger>
+              </TabsList>
+            </MobileTabRail>
 
             <TabsList className="hidden h-11 border border-gray-700 bg-gray-900 p-1 md:grid md:grid-cols-3">
               <TabsTrigger value="new">New ({newCount})</TabsTrigger>

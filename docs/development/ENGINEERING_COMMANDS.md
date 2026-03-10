@@ -32,15 +32,35 @@ These command files are designed to be **copy/paste-safe operating doctrine** fo
 - **Mode**: execution
 - **Output**: pass/fail summary + next action
 
+### `/continue`
+- **Use when**: you want the agent to keep making the best next roadmap-safe improvement without re-prompting
+- **Mode**: execution
+- **Output**: current thread resumed, smallest useful next win implemented, checks run, next continuation point
+- **Hardening notes**:
+  - continue the same active workstream already visible in the dirty tree when possible
+  - prefer shared primitives / high-leverage cleanup over one-off tweaks
+  - do not start commit/PR/release flows unless explicitly requested
+  - avoid touching unrelated dirty files
+
 ### `/ship`
 - **Use when**: code is complete and verified
 - **Mode**: execution + docs hygiene
-- **Output**: docs updated, single commit, pushed to `develop`
+- **Output**: docs updated, intended files only staged, single commit, pushed to `develop`
+- **Hardening notes**:
+  - inspect dirty worktree before staging
+  - do not blindly `git add -A`
+  - use PowerShell-safe command execution
+  - stop if git author identity is missing instead of changing git config automatically
 
 ### `/pr`
 - **Use when**: ready to merge `develop` → `main`
 - **Mode**: PR narrative creation
 - **Output**: standardized PR body with risk + rollback
+- **Hardening notes**:
+  - check for an existing `develop` → `main` PR before creating one
+  - update existing PRs instead of duplicating them
+  - if `gh pr edit` fails due to GitHub GraphQL / Projects Classic issues, fall back to `gh api` REST PATCH
+  - describe the actual `main...develop` branch delta honestly
 
 ---
 
@@ -75,11 +95,16 @@ These command files are designed to be **copy/paste-safe operating doctrine** fo
 - **Use when**: auth/redirects/dashboards/roles changed
 - **Mode**: execution
 - **Output**: pass/fail per spec file + next step if failing
+- **Hardening notes**:
+  - run with `--project=chromium --reporter=list --workers=1` by default
+  - distinguish feature failures from broader app/runtime boot failures
 
 ### `/release`
 - **Use when**: PR is approved and you’re about to merge to `main`
 - **Mode**: analysis
 - **Output**: release notes + rollout/rollback + post-merge verification
+- **Hardening notes**:
+  - archive output under `docs/releasenotes/` to match the documentation spine
 
 ### `/retro`
 - **Use when**: painful fix cycle or recurring bug
@@ -117,6 +142,7 @@ All commands assume and must respect:
 ## Current command files
 
 - `.cursor/commands/plan.md`
+- `.cursor/commands/continue.md`
 - `.cursor/commands/implement.md`
 - `.cursor/commands/Ship.md`
 - `.cursor/commands/pr.md`

@@ -1,7 +1,5 @@
 "use server";
 
-import { logger } from "@/lib/utils/logger";
-
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import {
@@ -11,6 +9,7 @@ import {
 } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ApplicationStatus = Database["public"]["Enums"]["application_status"];
