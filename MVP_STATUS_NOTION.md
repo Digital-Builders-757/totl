@@ -8,6 +8,61 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Settings mobile tabs compact rail polish (March 10, 2026)**
+
+**MOBILE UX / SETTINGS POLISH** - March 10, 2026
+- ✅ Fixed the cramped mobile tabs area below the settings profile header card.
+- ✅ Replaced the multi-column mobile tabs grid with the same compact horizontal tab-rail pattern already used across other terminal surfaces.
+- ✅ Kept the full grid tabs layout for `md+` while making mobile tabs:
+  - horizontally scrollable
+  - compact
+  - more intentional on narrow viewports
+- ✅ Tightened the top spacing before tab content on mobile so the settings page feels less top-heavy.
+- ✅ Re-ran mandatory verification for this UI batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ The settings page was still forcing a desktop-style grid tabs layout into mobile, which made the section switcher feel cramped even after the avatar header was cleaned up.
+- ⚠️ The shared tabs primitive has a desktop-oriented default height, so forcing multiple labels into a narrow grid was the wrong mobile presentation compared with the tab-rail pattern already used elsewhere in the app.
+
+**Next (P0 - immediate polish)**
+- [x] Check whether the settings tabs area below the profile card still feels too cramped on mobile after the header fix.
+- [ ] Validate the combined header + tabs settings experience again on a real `390x844` viewport after both fixes are shipped.
+
+**Next (P1 - follow-up consistency)**
+- [ ] Apply the same “mobile rail, desktop grid” tabs pattern anywhere else a desktop tabs grid still leaks into narrow account/profile surfaces.
+
+## 🚀 **Latest: Settings mobile avatar upload polish (March 10, 2026)**
+
+**MOBILE UX / SETTINGS POLISH** - March 10, 2026
+- ✅ Fixed the awkward mobile avatar upload module on `/settings`.
+- ✅ Kept the existing upload/file-input/server-action logic intact and changed presentation only.
+- ✅ On mobile, replaced the tall dashed drag/drop box with a compact avatar module:
+  - avatar preview
+  - primary upload/change button
+  - small helper caption under the button
+- ✅ Preserved the drag/drop upload box for `md+` desktop/tablet layouts.
+- ✅ Tightened the settings profile header card layout so name/email and avatar controls stack intentionally on small screens instead of reading like a cramped desktop row.
+- ✅ Re-ran mandatory verification for this UI batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ The existing settings avatar uploader used a desktop-style dashed dropzone that felt visually shoved into the mobile profile card.
+- ⚠️ Helper text inside the tall dropzone created unnecessary vertical bulk on `390x844` and made the card feel less intentional than the rest of the mobile UI.
+
+**Next (P0 - immediate polish)**
+- [x] Replace the mobile avatar dropzone presentation with a compact avatar/button/caption module.
+- [ ] Check whether the settings tabs area below the profile card still feels too cramped on mobile after the header fix.
+
+**Next (P1 - follow-up consistency)**
+- [ ] Apply the same “mobile-first compact uploader, desktop dropzone” pattern anywhere else a desktop upload box leaks into mobile profile/account surfaces.
+
 ## 🚀 **Latest: Continue command delivery handoff hardening (March 10, 2026)**
 
 **WORKFLOW / AGENT HANDOFF HARDENING** - March 10, 2026
