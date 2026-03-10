@@ -49,6 +49,45 @@ Do not:
 - undo or rewrite unrelated local changes
 
 ────────────────────────────────────────────
+STEP 2.5 — AUTO-HANDOFF TO /SHIP
+────────────────────────────────────────────
+If `/continue` reaches a state where the current intended dirty set is a coherent, develop-ready batch and the next honest action is to commit/push rather than do more local edits:
+
+- do **not** keep looping with more tiny local-only follow-ups
+- do **not** wait for the user to separately type `/ship`
+- immediately transition into the repo’s `/ship` workflow in the same turn
+
+Treat the batch as **ready to ship** when all of these are true:
+- the dirty files belong to one intended workstream
+- relevant local verification for the touched work has already passed, or the only remaining unknown is an external CI rerun / remote check
+- there is no clearly higher-value local increment left than committing and pushing
+
+Auto-handoff safety rules:
+- if unrelated dirty files exist, only ship the intended files
+- if the batch is blocked by failing local checks, missing git identity, or another pre-push requirement, report the block clearly instead of looping
+- if there is still a real local implementation step left, stay in `/continue`
+
+────────────────────────────────────────────
+STEP 2.75 — AUTO-HANDOFF TO /PR
+────────────────────────────────────────────
+If `/continue` reaches a state where the intended batch has already been shipped to `develop`, the worktree is clean, the latest relevant `develop` CI is green, and the next honest action is opening or updating a `develop -> main` PR:
+
+- do **not** keep looping with status-only follow-ups
+- do **not** wait for the user to separately type `/pr`
+- immediately transition into the repo’s `/pr` workflow in the same turn
+
+Treat the branch as **ready for /pr** when all of these are true:
+- there are no intended local edits left to make
+- `develop` is clean locally
+- the latest relevant shipped `develop` verification is green locally and/or on GitHub
+- the remaining work is PR/merge coordination rather than implementation
+
+Auto-handoff safety rules:
+- check whether a `develop -> main` PR is already open and update it instead of creating a duplicate
+- be truthful about the full `main...develop` branch scope; do not describe it as only the latest session unless that is actually true
+- if CI is still running or failing, stay in `/continue` and report the blocker instead of jumping to `/pr`
+
+────────────────────────────────────────────
 STEP 3 — VERIFY BEFORE STOPPING
 ────────────────────────────────────────────
 Run the smallest relevant checks for the touched files.
@@ -70,3 +109,7 @@ Return:
 - changed files
 - checks run + results
 - the next best continuation point
+
+If `/continue` auto-handed off to `/ship`, return the `/ship` results instead of this format.
+
+If `/continue` auto-handed off to `/pr`, return the `/pr` results instead of this format.

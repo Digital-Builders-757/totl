@@ -8,6 +8,78 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Continue command delivery handoff hardening (March 10, 2026)**
+
+**WORKFLOW / AGENT HANDOFF HARDENING** - March 10, 2026
+- ✅ Hardened `.cursor/commands/continue.md` so `/continue` now escalates when delivery is the next honest step instead of looping with tiny local-only follow-ups.
+- ✅ `/continue` now supports two explicit delivery handoff gates:
+  - auto-handoff to `/ship` when a coherent develop-ready batch is complete
+  - auto-handoff to `/pr` when the batch is already shipped, `develop` is clean, relevant CI is green, and the next honest action is a `develop -> main` PR
+- ✅ Added a persistent Cursor rule so the same behavior is reinforced outside a single command file edit:
+  - `.cursor/rules/continue-auto-ship.mdc`
+- ✅ Updated command-system docs to reflect the new behavior:
+  - `docs/development/ENGINEERING_COMMANDS.md`
+- ✅ Added a troubleshooting note for the repeatable failure mode this fixes:
+  - `/continue` looping after the work is already ready for `/ship` or `/pr`
+- ✅ Re-ran mandatory ship gates for this batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ `/continue` could keep producing status-only or micro-follow-up turns even after the current batch was clearly ready to ship or ready for a PR.
+- ⚠️ That loop was especially easy to hit after successful CI, when the next real move was `develop -> main` PR creation rather than more local work.
+- ⚠️ `.cursor` content is gitignored here, so command/rule changes must be force-staged intentionally if the team wants them preserved in-repo.
+
+**Next (P0 - workflow ergonomics)**
+- [x] Teach `/continue` to auto-handoff to `/ship` once a develop-ready batch is done.
+- [x] Teach `/continue` to auto-handoff to `/pr` once shipped `develop` is clean and green.
+- [ ] Validate the new handoff behavior in the next real `/continue` -> `/pr` cycle.
+
+**Next (P1 - follow-up polish)**
+- [ ] If the handoff still feels too chatty, tighten the wording in `.cursor/commands/continue.md` again based on real usage.
+- [ ] Keep command-system docs aligned any time command behavior changes.
+
+## 🚀 **Latest: Mobile guardrails CI auth credential env fix (March 10, 2026)**
+
+**CI / PLAYWRIGHT ROUTE AUTH HARDENING** - March 10, 2026
+- ✅ Re-triaged the failing `mobile-guardrails` GitHub Actions lane after the browser install fix landed.
+- ✅ Confirmed the browser-install issue is no longer the active blocker:
+  - the job now launches Playwright
+  - seeded route-user preflight succeeds
+  - admin mobile guardrail specs pass in CI
+- ✅ Identified the real next failure layer in CI:
+  - client/talent mobile specs abort immediately because `tests/helpers/auth.ts` requires explicit CI auth credentials
+  - `.github/workflows/ci.yml` was not injecting `PLAYWRIGHT_CLIENT_*` / `PLAYWRIGHT_TALENT_*`
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now injects the same deterministic seeded personas already repaired by `scripts/ensure-ui-audit-users.mjs`:
+  - `PLAYWRIGHT_CLIENT_EMAIL`
+  - `PLAYWRIGHT_CLIENT_PASSWORD`
+  - `PLAYWRIGHT_TALENT_EMAIL`
+  - `PLAYWRIGHT_TALENT_PASSWORD`
+- ✅ Added a fast-fail workflow precheck so credential drift is surfaced once, before the suite runs:
+  - `Validate Playwright route auth env`
+  - fails immediately if any required `PLAYWRIGHT_CLIENT_*` / `PLAYWRIGHT_TALENT_*` vars are missing
+- ✅ Updated supporting docs so the failure mode is easier to recognize next time:
+  - `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`
+  - `docs/guides/ENV_VARIABLES_COMPLETE_LIST.md`
+- ✅ Re-ran local verification on the current change set:
+  - `npm run lint` -> **0 warnings, 0 errors**
+
+**Problems discovered this session:**
+- ⚠️ The CI blocker had moved again: after browser install was fixed, the next red layer was missing Playwright client/talent credential env vars rather than any route UI regression.
+- ⚠️ The status tracker itself had become stale and still described `browserType.launch` as the active blocker, which could send the next agent down the wrong thread.
+- ⚠️ Without a dedicated workflow precheck, missing CI auth creds would fail noisily across many specs instead of exposing one targeted setup error.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Inject CI Playwright client/talent credential env into the `mobile-guardrails` job using the seeded audit personas.
+- [ ] Push the workflow/docs fix to `develop`.
+- [ ] Rerun `CI` and inspect the first real route-level failure, if any, after auth-backed client/talent specs are allowed to execute in GitHub Actions.
+
+**Next (P1 - branch hygiene)**
+- [ ] If the rerun is green, sync `main` back into `develop` so branch history matches the already-merged production path.
+- [ ] If the rerun still fails, keep the next diff limited to the first actual mobile contract regression instead of reopening workflow setup work.
+
 ## 🚀 **Latest: Shared mobile chrome convergence + docs workflow hardening (March 9, 2026)**
 
 **MOBILE UX / DX HARDENING** - March 9, 2026

@@ -38,6 +38,13 @@
   - If a local route contract run fails with `Login failed: Invalid credentials`, rerun the preflight explicitly and treat the failure as test-fixture/auth-baseline drift before assuming route UI regression.
 - CI partitioning note:
   - `mobile-guardrails` now runs as a dedicated CI job to isolate mobile contract failures from build/lint/webhook safety checks.
+  - CI must inject explicit Playwright auth creds for the same seeded route-audit personas used by `ensure-ui-audit-users.mjs`; otherwise client/talent specs will abort before route assertions run.
+  - Current mobile-lane CI persona mapping:
+    - `PLAYWRIGHT_CLIENT_EMAIL=cameron.seed@thetotlagency.local`
+    - `PLAYWRIGHT_CLIENT_PASSWORD=Password123!`
+    - `PLAYWRIGHT_TALENT_EMAIL=emma.seed@thetotlagency.local`
+    - `PLAYWRIGHT_TALENT_PASSWORD=Password123!`
+  - `mobile-guardrails` now validates those four env vars before the Playwright suite starts, so credential drift fails once with a targeted workflow error instead of cascading across many specs.
 - CI summary note:
   - `mobile-guardrails` job writes pass/fail totals to `GITHUB_STEP_SUMMARY` for fast PR triage.
   - `build` job now writes a one-glance per-gate outcome summary (lint/build/table-count/webhook/static guards) to `GITHUB_STEP_SUMMARY`.

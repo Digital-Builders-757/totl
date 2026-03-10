@@ -39,8 +39,11 @@ These command files are designed to be **copy/paste-safe operating doctrine** fo
 - **Hardening notes**:
   - continue the same active workstream already visible in the dirty tree when possible
   - prefer shared primitives / high-leverage cleanup over one-off tweaks
-  - do not start commit/PR/release flows unless explicitly requested
   - avoid touching unrelated dirty files
+  - when the current workstream is clearly ready to deliver, stop looping and auto-handoff instead:
+    - `/ship` when the intended batch is complete and develop-ready
+    - `/pr` when the batch is already shipped, `develop` is clean, relevant CI is green, and the next honest action is a `develop -> main` PR
+  - be truthful about branch scope when auto-handing off to `/pr`; do not describe `main...develop` as only the latest session unless that is actually true
 
 ### `/ship`
 - **Use when**: code is complete and verified

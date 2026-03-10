@@ -1,0 +1,38 @@
+description: Auto-handoff from /continue to /ship or /pr when delivery is the next honest step
+alwaysApply: true
+---
+
+# Continue Delivery Handoff
+
+When a work session is using `/continue`, do not keep looping with small local-only follow-ups once the current dirty set is already a coherent, intended batch.
+
+Treat the work as ready to hand off to `/ship` when:
+- the dirty files belong to one workstream
+- relevant local verification has passed, or the only remaining unknown is an external CI/remote rerun
+- there is no clearly higher-value local implementation step left than committing and pushing
+
+When that state is reached:
+- stop proposing another `/continue` increment
+- transition into the repo's `/ship` workflow in the same turn
+- stage and ship only the intended files if unrelated dirty files exist
+
+Do not auto-handoff to `/ship` if:
+- local checks are still failing
+- git identity or another required pre-push precondition is missing
+- there is still a meaningful local code/docs change left to make
+
+Treat the work as ready to hand off to `/pr` when:
+- the intended batch has already been shipped to `develop`
+- the worktree is clean
+- the latest relevant `develop` CI is green
+- the next honest action is opening or updating a `develop -> main` PR rather than more implementation
+
+When that state is reached:
+- stop proposing another `/continue` increment
+- transition into the repo's `/pr` workflow in the same turn
+- update an existing `develop -> main` PR if one is already open; otherwise create one
+
+Do not auto-handoff to `/pr` if:
+- the latest relevant CI is still running or failing
+- there are still intended local edits left to make
+- the PR narrative would be misleading about the actual `main...develop` branch scope
