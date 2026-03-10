@@ -219,6 +219,16 @@ npm run build
   - **Fix:** Add an explicit workflow step before the mobile suite:
     - `npx playwright install --with-deps chromium`
   - **Prevention:** Treat missing browser executables as CI runner setup drift, not as route regressions; ensure browser-backed Playwright jobs install the required browser explicitly.
+- **`mobile-guardrails` CI job fails with `Missing PLAYWRIGHT_CLIENT_EMAIL...` or `Missing PLAYWRIGHT_TALENT_EMAIL...`:**
+  - **Symptom:** Admin mobile specs pass, but every client/talent mobile spec aborts immediately before route assertions run.
+  - **Root Cause:** `tests/helpers/auth.ts` intentionally requires explicit CI auth credentials for client/talent personas, but `.github/workflows/ci.yml` did not inject those env vars into the `mobile-guardrails` job.
+  - **Fix:** Map the seeded route-audit personas into the workflow job `env`:
+    - `PLAYWRIGHT_CLIENT_EMAIL=cameron.seed@thetotlagency.local`
+    - `PLAYWRIGHT_CLIENT_PASSWORD=Password123!`
+    - `PLAYWRIGHT_TALENT_EMAIL=emma.seed@thetotlagency.local`
+    - `PLAYWRIGHT_TALENT_PASSWORD=Password123!`
+  - **Workflow guard:** `mobile-guardrails` now validates those env vars before the suite runs, so future drift should fail once at workflow setup instead of surfacing as many repeated spec failures.
+  - **Prevention:** If `ensure-ui-audit-users.mjs` is the canonical source for seeded auth-backed route personas, keep CI Playwright credential env aligned with those same seeded accounts.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

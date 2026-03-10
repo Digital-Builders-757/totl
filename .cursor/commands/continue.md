@@ -49,6 +49,25 @@ Do not:
 - undo or rewrite unrelated local changes
 
 ────────────────────────────────────────────
+STEP 2.5 — AUTO-HANDOFF TO /SHIP
+────────────────────────────────────────────
+If `/continue` reaches a state where the current intended dirty set is a coherent, develop-ready batch and the next honest action is to commit/push rather than do more local edits:
+
+- do **not** keep looping with more tiny local-only follow-ups
+- do **not** wait for the user to separately type `/ship`
+- immediately transition into the repo’s `/ship` workflow in the same turn
+
+Treat the batch as **ready to ship** when all of these are true:
+- the dirty files belong to one intended workstream
+- relevant local verification for the touched work has already passed, or the only remaining unknown is an external CI rerun / remote check
+- there is no clearly higher-value local increment left than committing and pushing
+
+Auto-handoff safety rules:
+- if unrelated dirty files exist, only ship the intended files
+- if the batch is blocked by failing local checks, missing git identity, or another pre-push requirement, report the block clearly instead of looping
+- if there is still a real local implementation step left, stay in `/continue`
+
+────────────────────────────────────────────
 STEP 3 — VERIFY BEFORE STOPPING
 ────────────────────────────────────────────
 Run the smallest relevant checks for the touched files.
@@ -70,3 +89,5 @@ Return:
 - changed files
 - checks run + results
 - the next best continuation point
+
+If `/continue` auto-handed off to `/ship`, return the `/ship` results instead of this format.

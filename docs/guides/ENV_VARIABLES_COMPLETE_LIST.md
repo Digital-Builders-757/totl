@@ -92,6 +92,8 @@
 
 | Variable | Description | Example |
 |----------|-------------|---------|
+| `PLAYWRIGHT_CLIENT_EMAIL` | Test client account email | `test-client@example.com` |
+| `PLAYWRIGHT_CLIENT_PASSWORD` | Test client account password | `test-password-123` |
 | `PLAYWRIGHT_TALENT_EMAIL` | Test talent account email | `test-talent@example.com` |
 | `PLAYWRIGHT_TALENT_PASSWORD` | Test talent account password | `test-password-123` |
 | `PLAYWRIGHT_TEST_PASSWORD` | Default password used for dynamically-created Playwright users (admin API + signup flows) | `TestPassword123!` |
@@ -178,6 +180,8 @@ NEXT_PUBLIC_VERCEL_ENV=development
 # ======================================
 # 🧪 Testing (Optional - for Playwright)
 # ======================================
+PLAYWRIGHT_CLIENT_EMAIL=test-client@example.com
+PLAYWRIGHT_CLIENT_PASSWORD=test-password-123
 PLAYWRIGHT_TALENT_EMAIL=test-talent@example.com
 PLAYWRIGHT_TALENT_PASSWORD=test-password-123
 PLAYWRIGHT_TEST_PASSWORD=TestPassword123!

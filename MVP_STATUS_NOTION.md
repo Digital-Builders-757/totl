@@ -8,6 +8,45 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile guardrails CI auth credential env fix (March 10, 2026)**
+
+**CI / PLAYWRIGHT ROUTE AUTH HARDENING** - March 10, 2026
+- ✅ Re-triaged the failing `mobile-guardrails` GitHub Actions lane after the browser install fix landed.
+- ✅ Confirmed the browser-install issue is no longer the active blocker:
+  - the job now launches Playwright
+  - seeded route-user preflight succeeds
+  - admin mobile guardrail specs pass in CI
+- ✅ Identified the real next failure layer in CI:
+  - client/talent mobile specs abort immediately because `tests/helpers/auth.ts` requires explicit CI auth credentials
+  - `.github/workflows/ci.yml` was not injecting `PLAYWRIGHT_CLIENT_*` / `PLAYWRIGHT_TALENT_*`
+- ✅ Hardened `.github/workflows/ci.yml` so the `mobile-guardrails` job now injects the same deterministic seeded personas already repaired by `scripts/ensure-ui-audit-users.mjs`:
+  - `PLAYWRIGHT_CLIENT_EMAIL`
+  - `PLAYWRIGHT_CLIENT_PASSWORD`
+  - `PLAYWRIGHT_TALENT_EMAIL`
+  - `PLAYWRIGHT_TALENT_PASSWORD`
+- ✅ Added a fast-fail workflow precheck so credential drift is surfaced once, before the suite runs:
+  - `Validate Playwright route auth env`
+  - fails immediately if any required `PLAYWRIGHT_CLIENT_*` / `PLAYWRIGHT_TALENT_*` vars are missing
+- ✅ Updated supporting docs so the failure mode is easier to recognize next time:
+  - `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`
+  - `docs/guides/ENV_VARIABLES_COMPLETE_LIST.md`
+- ✅ Re-ran local verification on the current change set:
+  - `npm run lint` -> **0 warnings, 0 errors**
+
+**Problems discovered this session:**
+- ⚠️ The CI blocker had moved again: after browser install was fixed, the next red layer was missing Playwright client/talent credential env vars rather than any route UI regression.
+- ⚠️ The status tracker itself had become stale and still described `browserType.launch` as the active blocker, which could send the next agent down the wrong thread.
+- ⚠️ Without a dedicated workflow precheck, missing CI auth creds would fail noisily across many specs instead of exposing one targeted setup error.
+
+**Next (P0 - immediate CI recovery)**
+- [x] Inject CI Playwright client/talent credential env into the `mobile-guardrails` job using the seeded audit personas.
+- [ ] Push the workflow/docs fix to `develop`.
+- [ ] Rerun `CI` and inspect the first real route-level failure, if any, after auth-backed client/talent specs are allowed to execute in GitHub Actions.
+
+**Next (P1 - branch hygiene)**
+- [ ] If the rerun is green, sync `main` back into `develop` so branch history matches the already-merged production path.
+- [ ] If the rerun still fails, keep the next diff limited to the first actual mobile contract regression instead of reopening workflow setup work.
+
 ## 🚀 **Latest: Shared mobile chrome convergence + docs workflow hardening (March 9, 2026)**
 
 **MOBILE UX / DX HARDENING** - March 9, 2026

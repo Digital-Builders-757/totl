@@ -187,6 +187,12 @@ jobs:
       SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # Match the deterministic seeded personas repaired by ensure-ui-audit-users.mjs
+      # so CI exercises the same auth-backed client/talent mobile surfaces as local runs.
+      PLAYWRIGHT_CLIENT_EMAIL: cameron.seed@thetotlagency.local
+      PLAYWRIGHT_CLIENT_PASSWORD: Password123!
+      PLAYWRIGHT_TALENT_EMAIL: emma.seed@thetotlagency.local
+      PLAYWRIGHT_TALENT_PASSWORD: Password123!
       STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
       STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
       STRIPE_PRICE_TALENT_MONTHLY: ${{ secrets.STRIPE_PRICE_TALENT_MONTHLY }}
@@ -208,10 +214,28 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Validate Playwright route auth env
+        run: |
+          : > mobile-guardrails.log
+          missing=0
+          for var_name in PLAYWRIGHT_CLIENT_EMAIL PLAYWRIGHT_CLIENT_PASSWORD PLAYWRIGHT_TALENT_EMAIL PLAYWRIGHT_TALENT_PASSWORD; do
+            if [ -z "${!var_name}" ]; then
+              echo "❌ Missing required env: $var_name" | tee -a mobile-guardrails.log
+              missing=1
+            fi
+          done
+
+          if [ "$missing" -ne 0 ]; then
+            echo "mobile-guardrails requires explicit client/talent Playwright credentials for auth-backed route specs." | tee -a mobile-guardrails.log
+            exit 1
+          fi
+
+          echo "✅ Playwright route auth env present" | tee -a mobile-guardrails.log
+
       - name: Run mobile route contract guardrails
         run: |
           set -o pipefail
-          npm run test:qa:mobile-guardrails:ci | tee mobile-guardrails.log
+          npm run test:qa:mobile-guardrails:ci | tee -a mobile-guardrails.log
 
       - name: Publish mobile guardrail summary
         if: always()

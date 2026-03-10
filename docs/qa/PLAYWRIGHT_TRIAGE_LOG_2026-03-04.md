@@ -1094,3 +1094,32 @@
       - `npm run test:qa:client-drawer` → **3 passed, 0 failed**
 - Failed-run artifacts:
   - None in this pass (green).
+
+## Step-3 automation continuation: CI auth credential parity for mobile guardrails
+- CI triage follow-up:
+  - Re-read the latest failing GitHub Actions `mobile-guardrails` log after the browser-install fix.
+  - Confirmed the active blocker had moved past `browserType.launch`.
+  - Admin mobile specs were already passing in CI, but every client/talent mobile spec aborted before route assertions because `tests/helpers/auth.ts` requires explicit CI credentials for those personas.
+- Hardening applied:
+  - `.github/workflows/ci.yml`
+    - injects:
+      - `PLAYWRIGHT_CLIENT_EMAIL=cameron.seed@thetotlagency.local`
+      - `PLAYWRIGHT_CLIENT_PASSWORD=Password123!`
+      - `PLAYWRIGHT_TALENT_EMAIL=emma.seed@thetotlagency.local`
+      - `PLAYWRIGHT_TALENT_PASSWORD=Password123!`
+  - Docs synchronized:
+    - `docs/qa/PLAYWRIGHT_ROUTE_OWNERSHIP_MATRIX_2026-03-04.md`
+    - `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`
+    - `docs/guides/ENV_VARIABLES_COMPLETE_LIST.md`
+    - `MVP_STATUS_NOTION.md`
+- Verification:
+  - `gh run view 22881548018 --job 66385236984 --log`
+  - Result:
+    - browser install step succeeded
+    - seeded route-user preflight succeeded
+    - admin mobile specs passed
+    - client/talent specs failed with missing `PLAYWRIGHT_CLIENT_*` / `PLAYWRIGHT_TALENT_*`
+  - `npm run lint`
+  - Result: **pass** (`0 warnings, 0 errors`)
+- Notes:
+  - This pass is workflow/docs hardening only; no app route behavior changed locally.

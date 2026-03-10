@@ -1,0 +1,23 @@
+---
+description: Auto-handoff from /continue to /ship when a develop-ready batch is complete
+alwaysApply: true
+---
+
+# Continue To Ship Handoff
+
+When a work session is using `/continue`, do not keep looping with small local-only follow-ups once the current dirty set is already a coherent, intended batch.
+
+Treat the work as ready to hand off to `/ship` when:
+- the dirty files belong to one workstream
+- relevant local verification has passed, or the only remaining unknown is an external CI/remote rerun
+- there is no clearly higher-value local implementation step left than committing and pushing
+
+When that state is reached:
+- stop proposing another `/continue` increment
+- transition into the repo's `/ship` workflow in the same turn
+- stage and ship only the intended files if unrelated dirty files exist
+
+Do not auto-handoff to `/ship` if:
+- local checks are still failing
+- git identity or another required pre-push precondition is missing
+- there is still a meaningful local code/docs change left to make
