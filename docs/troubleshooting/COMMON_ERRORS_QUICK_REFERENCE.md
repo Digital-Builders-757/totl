@@ -229,6 +229,13 @@ npm run build
     - `PLAYWRIGHT_TALENT_PASSWORD=Password123!`
   - **Workflow guard:** `mobile-guardrails` now validates those env vars before the suite runs, so future drift should fail once at workflow setup instead of surfacing as many repeated spec failures.
   - **Prevention:** If `ensure-ui-audit-users.mjs` is the canonical source for seeded auth-backed route personas, keep CI Playwright credential env aligned with those same seeded accounts.
+- **`/continue` keeps looping even though the next honest move is ship or PR creation:**
+  - **Symptom:** The agent keeps proposing tiny status-only or local-only follow-ups after the work is already ready to deliver.
+  - **Root Cause:** `/continue` had no explicit delivery handoff rule for the “develop-ready batch” or “clean-and-green, ready for `develop -> main` PR” states.
+  - **Fix:** Teach `/continue` to auto-handoff:
+    - to `/ship` when the intended batch is complete and develop-ready
+    - to `/pr` when the batch is already shipped, `develop` is clean, relevant CI is green, and PR creation is the next honest action
+  - **Prevention:** When no meaningful local implementation step remains, do not keep using `/continue` for status-only turns; deliver via `/ship` or `/pr`.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

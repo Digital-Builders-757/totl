@@ -8,6 +8,39 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Continue command delivery handoff hardening (March 10, 2026)**
+
+**WORKFLOW / AGENT HANDOFF HARDENING** - March 10, 2026
+- ✅ Hardened `.cursor/commands/continue.md` so `/continue` now escalates when delivery is the next honest step instead of looping with tiny local-only follow-ups.
+- ✅ `/continue` now supports two explicit delivery handoff gates:
+  - auto-handoff to `/ship` when a coherent develop-ready batch is complete
+  - auto-handoff to `/pr` when the batch is already shipped, `develop` is clean, relevant CI is green, and the next honest action is a `develop -> main` PR
+- ✅ Added a persistent Cursor rule so the same behavior is reinforced outside a single command file edit:
+  - `.cursor/rules/continue-auto-ship.mdc`
+- ✅ Updated command-system docs to reflect the new behavior:
+  - `docs/development/ENGINEERING_COMMANDS.md`
+- ✅ Added a troubleshooting note for the repeatable failure mode this fixes:
+  - `/continue` looping after the work is already ready for `/ship` or `/pr`
+- ✅ Re-ran mandatory ship gates for this batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ `/continue` could keep producing status-only or micro-follow-up turns even after the current batch was clearly ready to ship or ready for a PR.
+- ⚠️ That loop was especially easy to hit after successful CI, when the next real move was `develop -> main` PR creation rather than more local work.
+- ⚠️ `.cursor` content is gitignored here, so command/rule changes must be force-staged intentionally if the team wants them preserved in-repo.
+
+**Next (P0 - workflow ergonomics)**
+- [x] Teach `/continue` to auto-handoff to `/ship` once a develop-ready batch is done.
+- [x] Teach `/continue` to auto-handoff to `/pr` once shipped `develop` is clean and green.
+- [ ] Validate the new handoff behavior in the next real `/continue` -> `/pr` cycle.
+
+**Next (P1 - follow-up polish)**
+- [ ] If the handoff still feels too chatty, tighten the wording in `.cursor/commands/continue.md` again based on real usage.
+- [ ] Keep command-system docs aligned any time command behavior changes.
+
 ## 🚀 **Latest: Mobile guardrails CI auth credential env fix (March 10, 2026)**
 
 **CI / PLAYWRIGHT ROUTE AUTH HARDENING** - March 10, 2026

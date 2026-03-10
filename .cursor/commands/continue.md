@@ -68,6 +68,26 @@ Auto-handoff safety rules:
 - if there is still a real local implementation step left, stay in `/continue`
 
 ────────────────────────────────────────────
+STEP 2.75 — AUTO-HANDOFF TO /PR
+────────────────────────────────────────────
+If `/continue` reaches a state where the intended batch has already been shipped to `develop`, the worktree is clean, the latest relevant `develop` CI is green, and the next honest action is opening or updating a `develop -> main` PR:
+
+- do **not** keep looping with status-only follow-ups
+- do **not** wait for the user to separately type `/pr`
+- immediately transition into the repo’s `/pr` workflow in the same turn
+
+Treat the branch as **ready for /pr** when all of these are true:
+- there are no intended local edits left to make
+- `develop` is clean locally
+- the latest relevant shipped `develop` verification is green locally and/or on GitHub
+- the remaining work is PR/merge coordination rather than implementation
+
+Auto-handoff safety rules:
+- check whether a `develop -> main` PR is already open and update it instead of creating a duplicate
+- be truthful about the full `main...develop` branch scope; do not describe it as only the latest session unless that is actually true
+- if CI is still running or failing, stay in `/continue` and report the blocker instead of jumping to `/pr`
+
+────────────────────────────────────────────
 STEP 3 — VERIFY BEFORE STOPPING
 ────────────────────────────────────────────
 Run the smallest relevant checks for the touched files.
@@ -91,3 +111,5 @@ Return:
 - the next best continuation point
 
 If `/continue` auto-handed off to `/ship`, return the `/ship` results instead of this format.
+
+If `/continue` auto-handed off to `/pr`, return the `/pr` results instead of this format.
