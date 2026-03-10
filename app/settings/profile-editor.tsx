@@ -45,6 +45,8 @@ interface ProfileEditorProps {
 export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfolioItems = [] }: ProfileEditorProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const isTalent = profile.role === "talent";
+  const triggerClassName =
+    "min-h-10 rounded-lg px-3 py-2 text-sm text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white md:text-base md:px-4";
 
   return (
     <div className="space-y-6">
@@ -78,40 +80,51 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid w-full ${isTalent ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'} bg-gray-800 border-gray-700`}>
-              <TabsTrigger
-                value="basic"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
-              >
+            <div className="-mx-1 overflow-x-auto pb-1 md:hidden">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-800 p-1">
+                <TabsTrigger value="basic" className={triggerClassName}>
+                  Basic Info
+                </TabsTrigger>
+                <TabsTrigger value="details" className={triggerClassName}>
+                  Details
+                </TabsTrigger>
+                {isTalent && (
+                  <TabsTrigger value="portfolio" className={triggerClassName}>
+                    Portfolio
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="account" className={triggerClassName}>
+                  Account
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsList
+              className={`hidden h-auto w-full rounded-xl border border-gray-700 bg-gray-800 p-1 md:grid ${
+                isTalent ? "md:grid-cols-4" : "md:grid-cols-3"
+              }`}
+            >
+              <TabsTrigger value="basic" className={triggerClassName}>
                 Basic Info
               </TabsTrigger>
-              <TabsTrigger
-                value="details"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
-              >
+              <TabsTrigger value="details" className={triggerClassName}>
                 Details
               </TabsTrigger>
               {isTalent && (
-                <TabsTrigger
-                  value="portfolio"
-                  className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
-                >
+                <TabsTrigger value="portfolio" className={triggerClassName}>
                   Portfolio
                 </TabsTrigger>
               )}
-              <TabsTrigger
-                value="account"
-                className="data-[state=active]:bg-gray-700 data-[state=active]:text-white text-gray-400 text-sm md:text-base px-2 md:px-4 py-2"
-              >
+              <TabsTrigger value="account" className={triggerClassName}>
                 Account
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="basic" className="space-y-4 mt-6">
+            <TabsContent value="basic" className="mt-5 space-y-4 md:mt-6">
               <BasicInfoSection user={user} profile={profile} />
             </TabsContent>
 
-            <TabsContent value="details" className="space-y-4 mt-6">
+            <TabsContent value="details" className="mt-5 space-y-4 md:mt-6">
               {profile.role === "talent" ? (
                 <TalentDetailsSection talent={talent} />
               ) : profile.role === "client" ? (
@@ -124,12 +137,12 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
             </TabsContent>
 
             {isTalent && (
-              <TabsContent value="portfolio" className="space-y-4 mt-6">
+              <TabsContent value="portfolio" className="mt-5 space-y-4 md:mt-6">
                 <PortfolioSection portfolioItems={portfolioItems} />
               </TabsContent>
             )}
 
-            <TabsContent value="account" className="space-y-4 mt-6">
+            <TabsContent value="account" className="mt-5 space-y-4 md:mt-6">
               <AccountSettingsSection 
                 user={user} 
                 profile={{

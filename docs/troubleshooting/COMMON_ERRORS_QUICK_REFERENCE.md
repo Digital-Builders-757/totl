@@ -244,6 +244,11 @@ npm run build
     - one primary `Change photo` / `Upload photo` button
     - small helper caption under the button
   - **Prevention:** For mobile account/profile surfaces, prefer compact upload controls and keep helper text outside tall bordered boxes unless drag/drop is a primary interaction.
+- **Mobile Settings tabs feel cramped under the profile header:**
+  - **Symptom:** The settings section switcher looks compressed or awkward on narrow screens even after the profile header card is cleaned up.
+  - **Root Cause:** A desktop-style multi-column tabs grid was still being forced into mobile instead of using a compact horizontal rail.
+  - **Fix:** On mobile, replace the grid tabs layout with a horizontally scrollable compact tab rail; keep the full grid layout for `md+`.
+  - **Prevention:** When tab labels must compete for width on mobile, prefer the same compact mobile rail pattern already used on dashboard surfaces instead of forcing a narrow multi-column grid.
 - **Client Talent Phone Access Leak:** Clients can see sensitive talent fields (phone/email) on any public marketing profile without relationship check.
   - **Fix:** Implement relationship-bound access check using `canClientSeeTalentSensitive()` helper. Client can only see sensitive fields if talent applied to client's gig OR client has booking with talent. Reference: `docs/POLICY_MATRIX_APPROACH_B.md` (relationship-bound access).
   - **Prevention:** Never grant blanket client access to sensitive fields. Always check for relationship (applicant/booking) before exposing phone/email. Use explicit queries instead of PostgREST relationship inference.

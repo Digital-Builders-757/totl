@@ -8,6 +8,33 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Settings mobile tabs compact rail polish (March 10, 2026)**
+
+**MOBILE UX / SETTINGS POLISH** - March 10, 2026
+- ✅ Fixed the cramped mobile tabs area below the settings profile header card.
+- ✅ Replaced the multi-column mobile tabs grid with the same compact horizontal tab-rail pattern already used across other terminal surfaces.
+- ✅ Kept the full grid tabs layout for `md+` while making mobile tabs:
+  - horizontally scrollable
+  - compact
+  - more intentional on narrow viewports
+- ✅ Tightened the top spacing before tab content on mobile so the settings page feels less top-heavy.
+- ✅ Re-ran mandatory verification for this UI batch:
+  - `npm run schema:verify:comprehensive`
+  - `npm run types:check`
+  - `npm run build`
+  - `npm run lint`
+
+**Problems discovered this session:**
+- ⚠️ The settings page was still forcing a desktop-style grid tabs layout into mobile, which made the section switcher feel cramped even after the avatar header was cleaned up.
+- ⚠️ The shared tabs primitive has a desktop-oriented default height, so forcing multiple labels into a narrow grid was the wrong mobile presentation compared with the tab-rail pattern already used elsewhere in the app.
+
+**Next (P0 - immediate polish)**
+- [x] Check whether the settings tabs area below the profile card still feels too cramped on mobile after the header fix.
+- [ ] Validate the combined header + tabs settings experience again on a real `390x844` viewport after both fixes are shipped.
+
+**Next (P1 - follow-up consistency)**
+- [ ] Apply the same “mobile rail, desktop grid” tabs pattern anywhere else a desktop tabs grid still leaks into narrow account/profile surfaces.
+
 ## 🚀 **Latest: Settings mobile avatar upload polish (March 10, 2026)**
 
 **MOBILE UX / SETTINGS POLISH** - March 10, 2026
