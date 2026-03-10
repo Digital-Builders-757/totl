@@ -17,6 +17,9 @@
   - reusable `FiltersSheet` mobile contract (pinned header, internal scroll area, safe bottom inset, stable test hooks)
   - reusable `MobileTabRail` primitive adopted across major admin/client/talent terminal surfaces
   - tighter shared `PageShell` / `PageHeader` density so first meaningful content appears sooner on mobile
+- ✅ Follow-up mobile contract cleanup:
+  - fixed `FiltersSheet` title/close-button overlap by switching the header to a structural flex layout (`justify-between`, `min-w-0`, `truncate`, `shrink-0`) and truncating the subtitle line too
+  - extended `MobileTabRail` adoption to remaining shared admin surfaces (`/admin/gigs`, legacy `/admin/talentdashboard`)
 - ✅ Improved documentation information architecture with new directory entry points:
   - `docs/archive/README.md`
   - `docs/development/README.md`

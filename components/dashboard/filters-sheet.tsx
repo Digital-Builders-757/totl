@@ -48,23 +48,23 @@ export function FiltersSheet({
           <div className="flex h-full flex-col">
             <div className="sticky top-0 z-10 border-b border-white/10 bg-black/95 px-4 pb-3 pt-3 backdrop-blur">
               <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-white/15" aria-hidden="true" />
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold">{title}</p>
-                  <p className="text-xs text-gray-300">Refine results</p>
+                  <p className="truncate text-xs text-gray-300">Refine results</p>
                 </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  data-testid="filters-sheet-close"
+                  className="h-10 w-10 shrink-0 text-white hover:bg-white/10"
+                  onClick={() => onOpenChange(false)}
+                  aria-label="Close filters"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                data-testid="filters-sheet-close"
-                className="absolute right-4 top-3 h-10 w-10 text-white hover:bg-white/10"
-                onClick={() => onOpenChange(false)}
-                aria-label="Close filters"
-              >
-                <X className="h-4 w-4" />
-              </Button>
             </div>
             <div className="flex-1 overflow-y-auto px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
               <div className="space-y-4">{children}</div>
