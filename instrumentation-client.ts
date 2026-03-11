@@ -16,6 +16,7 @@ import {
   projectIdMatches,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterHandledLoadFailedNoise,
   shouldFilterLocalFailedFetchNoise,
   shouldFilterLocalResourceEventNoise,
   shouldFilterLocalWebpackNoise,
@@ -188,17 +189,8 @@ Sentry.init({
       return null;
     }
 
-    if (errorMessage && errorMessage.includes("Load failed")) {
-      const hasStack = Boolean(
-        event.exception?.values?.[0]?.stacktrace?.frames &&
-          event.exception.values[0].stacktrace.frames.length
-      );
-
-      const isHandled = event.tags?.handled === "yes";
-
-      if (isHandled && !hasStack) {
-        return null;
-      }
+    if (shouldFilterHandledLoadFailedNoise(event, errorMessage)) {
+      return null;
     }
 
       // Filter out hydration errors (often caused by browser extensions)

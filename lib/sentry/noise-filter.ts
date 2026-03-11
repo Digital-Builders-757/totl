@@ -173,3 +173,17 @@ export function shouldFilterLocalServerRenderNoise(
     );
   });
 }
+
+export function shouldFilterHandledLoadFailedNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const hasStack = Boolean(
+    event.exception?.values?.[0]?.stacktrace?.frames &&
+      event.exception.values[0].stacktrace.frames.length
+  );
+  const isHandled = String(event.tags?.handled ?? "") === "yes";
+
+  return normalizedMessage.includes("load failed") && isHandled && !hasStack;
+}
