@@ -62,12 +62,55 @@ function parseStripeSignatureTimestamp(signature: string | null): number | null 
   return null;
 }
 
+function isLocalWebhookRequest(req: Request): boolean {
+  try {
+    const url = new URL(req.url);
+    return (
+      url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1" ||
+      url.hostname === "::1"
+    );
+  } catch {
+    return req.url.includes("localhost") || req.url.includes("127.0.0.1");
+  }
+}
+
+function isBrowserLikeUserAgent(userAgent: string | null): boolean {
+  if (!userAgent) return false;
+
+  const lower = userAgent.toLowerCase();
+  return (
+    lower.includes("mozilla/") ||
+    lower.includes("chrome/") ||
+    lower.includes("safari/") ||
+    lower.includes("headlesschrome") ||
+    lower.includes("electron")
+  );
+}
+
+function shouldSuppressStripeWebhookSignatureNoise(req: Request): boolean {
+  const userAgent = req.headers.get("user-agent");
+  return isLocalWebhookRequest(req) || isBrowserLikeUserAgent(userAgent);
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const signature = req.headers.get("stripe-signature");
+  const userAgent = req.headers.get("user-agent");
+  const suppressSignatureNoise = shouldSuppressStripeWebhookSignatureNoise(req);
 
   if (!signature) {
-    logger.error("No Stripe signature found");
+    if (suppressSignatureNoise) {
+      logger.info("Ignoring non-Stripe webhook probe without signature", {
+        url: req.url,
+        userAgent,
+      });
+    } else {
+      logger.error("No Stripe signature found", undefined, {
+        url: req.url,
+        userAgent,
+      });
+    }
     return NextResponse.json({ error: "No signature" }, { status: 400 });
   }
 
@@ -75,15 +118,22 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    logger.error("Webhook signature verification failed", err, {
+    const signatureErrorContext = {
+      url: req.url,
       signatureTimestamp: parseStripeSignatureTimestamp(signature),
       signatureHeaderLength: signature.length,
       webhookSecretPresent: Boolean(STRIPE_WEBHOOK_SECRET),
       bodyLength: body.length,
       contentLengthHeader: req.headers.get("content-length"),
       contentType: req.headers.get("content-type"),
-      userAgent: req.headers.get("user-agent"),
-    });
+      userAgent,
+    };
+
+    if (suppressSignatureNoise) {
+      logger.info("Ignoring non-Stripe webhook probe with invalid signature", signatureErrorContext);
+    } else {
+      logger.error("Webhook signature verification failed", err, signatureErrorContext);
+    }
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 

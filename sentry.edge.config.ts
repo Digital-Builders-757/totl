@@ -9,6 +9,7 @@ import {
   developmentDSN,
   productionDSN,
 } from "@/lib/sentry/env";
+import { shouldFilterLocalWebpackNoise } from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
@@ -55,6 +56,11 @@ Sentry.init({
     // Filter out EPIPE errors (broken pipe from stdout/stderr)
     if (error && typeof error === 'object') {
       const errorObj = error as any;
+      const errorMessage = typeof errorObj.message === "string" ? errorObj.message : "";
+
+      if (shouldFilterLocalWebpackNoise(event, errorMessage)) {
+        return null;
+      }
       
       // Check for EPIPE system errors
       if (errorObj.code === 'EPIPE' || errorObj.errno === -32) {

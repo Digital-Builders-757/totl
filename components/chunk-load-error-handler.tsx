@@ -22,7 +22,16 @@ export function ChunkLoadErrorHandler() {
         error?.message?.includes("chunk load failed") ||
         error?.name === "ChunkLoadError"
       ) {
-        logger.warn("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
+        const isProduction = process.env.NODE_ENV === "production";
+
+        // Development chunk failures are usually HMR/cache turbulence on localhost.
+        // Keep the signal visible locally without promoting expected recovery attempts
+        // into Sentry warnings.
+        if (isProduction) {
+          logger.warn("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
+        } else {
+          logger.info("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
+        }
         
         // Try to refresh route data after a short delay.
         // This keeps SPA navigation semantics instead of forcing a full document reload.

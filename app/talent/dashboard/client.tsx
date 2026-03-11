@@ -92,11 +92,13 @@ function useTalentDashboardData({
   profile,
   authLoading,
   initialData,
+  disableClientFetch = false,
 }: {
   user: ReturnType<typeof useAuth>["user"];
   profile: ReturnType<typeof useAuth>["profile"];
   authLoading: boolean;
   initialData?: TalentDashboardData | null;
+  disableClientFetch?: boolean;
 }) {
   // Use initial data if provided (server-fetched), otherwise start empty for client-side fetch
   const [talentProfile, setTalentProfile] = useState<TalentProfileLite | null>(
@@ -125,6 +127,10 @@ function useTalentDashboardData({
 
   useEffect(() => {
     if (authLoading) return;
+
+    // When this component is only acting as a Suspense fallback shell, avoid
+    // duplicate client-side Supabase queries that race the server loader.
+    if (disableClientFetch) return;
     
     // If we have initial data from server, skip client-side fetch (unless refetch triggered)
     if (initialData && reloadToken === 0) {
@@ -477,6 +483,7 @@ function useTalentDashboardData({
     profile?.account_type,
     reloadToken,
     initialData,
+    disableClientFetch,
   ]);
 
   return {
@@ -494,8 +501,10 @@ function useTalentDashboardData({
 
 function TalentDashboardContent({
   initialData,
+  disableClientFetch = false,
 }: {
   initialData?: TalentDashboardData | null;
+  disableClientFetch?: boolean;
 }) {
   const router = useRouter();
   const { user, signOut, profile, isLoading: authLoading } = useAuth();
@@ -511,7 +520,7 @@ function TalentDashboardContent({
     applicationsLoading,
     applicationsError,
     refetch,
-  } = useTalentDashboardData({ user, profile, authLoading, initialData });
+  } = useTalentDashboardData({ user, profile, authLoading, initialData, disableClientFetch });
 
   const subscriptionProfile =
     profile && profile.role === "talent"
@@ -1853,8 +1862,10 @@ function TalentDashboardContent({
 
 export function DashboardClient({
   initialData,
+  disableClientFetch = false,
 }: {
   initialData?: TalentDashboardData | null;
+  disableClientFetch?: boolean;
 }) {
   return (
     <Suspense
@@ -1864,7 +1875,7 @@ export function DashboardClient({
         </div>
       }
     >
-      <TalentDashboardContent initialData={initialData} />
+      <TalentDashboardContent initialData={initialData} disableClientFetch={disableClientFetch} />
     </Suspense>
   );
 }

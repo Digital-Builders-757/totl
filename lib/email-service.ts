@@ -45,7 +45,7 @@ export async function sendEmail({
   text?: string;
 }) {
   if (process.env.DISABLE_EMAIL_SENDING === "1") {
-    logger.warn("[totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)", { to, subject });
+    logger.info("[totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)", { to, subject });
     return { success: true, messageId: "disabled" };
   }
 

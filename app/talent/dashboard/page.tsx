@@ -25,7 +25,7 @@ export default async function DashboardPage() {
 
     // Stream dashboard data with Suspense for progressive rendering
     return (
-      <Suspense fallback={<DashboardClient initialData={null} />}>
+      <Suspense fallback={<DashboardClient initialData={null} disableClientFetch />}>
         <DashboardDataLoader userId={boot.userId} />
       </Suspense>
     );
