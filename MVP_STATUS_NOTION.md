@@ -83,6 +83,7 @@
 - ✅ PR #208 merged: Sentry noise filters (2E, 2X, Event promise rejection) + docs.
 - ✅ Sentry issues 2E and 2X resolved in dashboard.
 - ✅ `npm audit fix` applied: 14 → 5 vulnerabilities (ajv, lodash, minimatch, qs, rollup, serialize-javascript, tar, supabase).
+- ✅ Fix: `shouldFilterSupabaseLockAbortNoise` now checks `error.name === "AbortError"` (not just message)—AbortError lives in `name`, not `message`. Added unit tests.
 - ⏳ Remaining: Next.js 15.5.12 (patch), vitest/esbuild (dev). Consider `npm audit fix --force` for Next.js when ready.
 
 ## 🚀 **Latest: Dashboard KPI responsive layout convergence (March 10, 2026)**
