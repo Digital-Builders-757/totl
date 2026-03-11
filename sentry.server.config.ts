@@ -15,6 +15,7 @@ import {
   serverIsProduction,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterLocalEmailDisabledNoise,
   shouldFilterLocalWebStreamNoise,
   shouldFilterLocalServerRenderNoise,
   shouldFilterLocalWebpackNoise,
@@ -120,22 +121,32 @@ Sentry.init({
     // SECURITY: Scrub sensitive data from event (shared utility)
     event = scrubEvent(event);
 
+    const errorMessage =
+      error && typeof error === "object" && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : event.message ?? event.logentry?.message ?? "";
+
+    if (shouldFilterLocalEmailDisabledNoise(event, String(errorMessage))) {
+      devLog("Local email-disabled noise filtered from server Sentry (2E)");
+      return null;
+    }
+
     // Filter out EPIPE errors (broken pipe from stdout/stderr)
     if (error && typeof error === 'object') {
       const errorObj = error as any;
-      const errorMessage = typeof errorObj.message === "string" ? errorObj.message : "";
+      const errMsg = typeof errorObj.message === "string" ? errorObj.message : errorMessage;
 
-      if (shouldFilterLocalWebpackNoise(event, errorMessage)) {
+      if (shouldFilterLocalWebpackNoise(event, errMsg)) {
         devLog("Local webpack bootstrap noise filtered from server Sentry");
         return null;
       }
 
-      if (shouldFilterLocalServerRenderNoise(event, errorMessage)) {
+      if (shouldFilterLocalServerRenderNoise(event, errMsg)) {
         devLog("Local server render noise filtered from server Sentry");
         return null;
       }
 
-      if (shouldFilterLocalWebStreamNoise(event, errorMessage)) {
+      if (shouldFilterLocalWebStreamNoise(event, errMsg)) {
         devLog("Local web stream runtime noise filtered from server Sentry");
         return null;
       }

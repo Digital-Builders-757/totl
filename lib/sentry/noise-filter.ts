@@ -133,11 +133,19 @@ export function shouldFilterLocalResourceEventNoise(
   const serializedType = String(serialized?.type ?? "").toLowerCase();
   const serializedTarget = String(serialized?.target ?? "").toLowerCase();
 
-  return (
+  // Resource load: Event on head > link (2N)
+  const isResourceLoadEvent =
     normalizedMessage.includes("event `event`") &&
     serializedType === "error" &&
-    serializedTarget.includes("head > link")
-  );
+    serializedTarget.includes("head > link");
+
+  // Promise rejection: Event (type=error) captured as promise rejection on dashboard routes
+  const isPromiseRejectionEvent =
+    normalizedMessage.includes("event `event`") &&
+    normalizedMessage.includes("type=error") &&
+    normalizedMessage.includes("captured as promise rejection");
+
+  return isResourceLoadEvent || isPromiseRejectionEvent;
 }
 
 export function shouldFilterLocalServerRenderNoise(
@@ -221,4 +229,45 @@ export function shouldFilterSupabaseLockAbortNoise(
     const filename = (frame.filename ?? "").toLowerCase();
     return filename.includes("auth-js") && filename.includes("locks");
   });
+}
+
+/**
+ * Filter: [totl][email] sending disabled (DISABLE_EMAIL_SENDING=1)
+ * From localhost/HeadlessChrome during Playwright tests. Intentional no-op, not actionable.
+ * Sentry issue: TOTLMODELAGENCY-2E
+ */
+export function shouldFilterLocalEmailDisabledNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  return (
+    normalizedMessage.includes("[totl][email] sending disabled") ||
+    normalizedMessage.includes("disable_email_sending")
+  );
+}
+
+/**
+ * Filter: "The invite link did not include a valid authentication token"
+ * From localhost when user hits /auth/callback without valid tokens (e.g. refresh after cleanup,
+ * or Playwright hitting callback without tokens). Handled in UI, not actionable.
+ * Sentry issue: TOTLMODELAGENCY-2X
+ */
+export function shouldFilterLocalAuthCallbackInvalidTokenNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const isHandled = String(event.tags?.handled ?? "") === "yes";
+
+  return (
+    normalizedMessage.includes("invite link did not include a valid authentication token") &&
+    isHandled
+  );
 }

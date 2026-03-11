@@ -50,9 +50,11 @@ lib/sentry/noise-filter.ts     ← Shared filter helpers
 
 ### 3. `shouldFilterLocalResourceEventNoise`
 
-**When:** Localhost or headless + `Event 'event'` + resource load `Error` on `head > link`.
+**When:** Localhost or headless + either:
+- `Event 'event'` + resource load `Error` on `head > link` (2N), or
+- `Event 'Event' (type=error) captured as promise rejection` on dashboard routes
 
-**Why:** Browser resource load events sometimes fire as generic `Event` errors on `<link>` tags. These are benign and often appear in dev/Playwright.
+**Why:** Browser resource load events and unhandled promise rejections sometimes wrap generic `Event` objects. Benign, often from dev/Playwright/CI.
 
 ---
 
@@ -122,6 +124,22 @@ lib/sentry/noise-filter.ts     ← Shared filter helpers
 
 ---
 
+### 8. `shouldFilterLocalEmailDisabledNoise`
+
+**When:** Localhost or headless + message contains `[totl][email] sending disabled` or `disable_email_sending`.
+
+**Why:** Intentional no-op when `DISABLE_EMAIL_SENDING=1` during Playwright tests. Not actionable. **Sentry issue: 2E**
+
+---
+
+### 9. `shouldFilterLocalAuthCallbackInvalidTokenNoise`
+
+**When:** Localhost or headless + message contains `invite link did not include a valid authentication token` + `handled: yes`.
+
+**Why:** User hits `/auth/callback` without valid tokens (refresh after cleanup, or Playwright). Error is handled in UI. **Sentry issue: 2X**
+
+---
+
 ## 🚫 What NOT to Filter
 
 - **Production-only errors** — Don't filter by URL if the error can occur in production.
@@ -154,6 +172,7 @@ Filters were added/refined to address these Sentry issues:
 | Web stream | 2W | `shouldFilterLocalWebStreamNoise` |
 | Supabase lock | 1K | `shouldFilterSupabaseLockAbortNoise` |
 | React Client Manifest | 28, 29 | `shouldFilterLocalServerRenderNoise` |
-| Auth/callback/fetch | 2X, 2S, 2R, 2G, 2F | Route-level fixes + auth-actions suppression |
+| Auth/callback/fetch | 2X, 2S, 2R, 2G, 2F | `shouldFilterLocalAuthCallbackInvalidTokenNoise` + route-level fixes |
+| Email disabled | 2E | `shouldFilterLocalEmailDisabledNoise` |
 
 When listing fixed issues for Sentry resolution, only include **newly** fixed ones so they can be marked resolved without re-listing older ones.

@@ -17,6 +17,7 @@ import {
 } from "@/lib/sentry/env";
 import {
   shouldFilterHandledLoadFailedNoise,
+  shouldFilterLocalAuthCallbackInvalidTokenNoise,
   shouldFilterLocalFailedFetchNoise,
   shouldFilterLocalResourceEventNoise,
   shouldFilterLocalWebpackNoise,
@@ -187,6 +188,11 @@ Sentry.init({
 
     if (shouldFilterSupabaseLockAbortNoise(event, errorMessage)) {
       devLog("Supabase auth lock abort noise filtered from normalized event");
+      return null;
+    }
+
+    if (shouldFilterLocalAuthCallbackInvalidTokenNoise(event, errorMessage)) {
+      devLog("Local auth callback invalid token noise filtered (2X)");
       return null;
     }
 
