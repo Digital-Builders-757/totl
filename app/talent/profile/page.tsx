@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -48,7 +49,7 @@ export default async function TalentProfilePage() {
     .single();
 
   if (talentError && talentError.code !== "PGRST116") {
-    console.error("Error fetching talent profile:", talentError);
+    logger.error("Error fetching talent profile", talentError);
   }
 
   return (

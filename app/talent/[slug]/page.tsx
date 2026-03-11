@@ -119,7 +119,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         .limit(1);
 
       if (uuidError) {
-        console.error("Supabase error fetching talent by UUID:", uuidError);
+        logger.error("Supabase error fetching talent by UUID", uuidError);
         error = `Database error: ${uuidError.message}`;
       } else {
         candidates = (data ?? []) as PublicTalentProfile[];
@@ -135,7 +135,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         .limit(25); // Hard cap to prevent enumeration
 
       if (nameError) {
-        console.error("Supabase error fetching talent by name:", nameError);
+        logger.error("Supabase error fetching talent by name", nameError);
         error = `Database error: ${nameError.message}`;
       } else {
         candidates = (data ?? []) as PublicTalentProfile[];

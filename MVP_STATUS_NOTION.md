@@ -8,6 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Loading skeletons + error logging (March 11, 2026)**
+
+**MVP POLISH / LOADING STATES + SENTRY** - March 11, 2026
+- ✅ Added `loading.tsx` skeletons for 8 high-traffic routes that lacked them:
+  - `/talent/profile` – profile form skeleton with PageShell
+  - `/gigs/[id]` – gig detail hero, meta, description, apply card
+  - `/gigs/[id]/apply` – apply form skeleton
+  - `/talent/subscribe` – subscription plans grid
+  - `/admin/talent` – admin talent list with AdminHeader
+  - `/admin/gigs` – admin gigs list
+  - `/admin/users` – admin users list
+  - `/admin/moderation` – admin moderation page
+- ✅ Replaced `console.error` with `logger.error` in talent profile, gig detail, subscribe, billing, and talent slug pages for proper Sentry integration.
+- ✅ Added 3 more loading skeletons: `/talent/[slug]`, `/talent/settings/billing`, `/admin/applications/[id]`.
+- ✅ PR #209 already merged (Sentry noise filters).
+- ✅ Confirmed `window.location.reload()` already removed from app code (no instances in `app/`, `components/`, `lib/`).
+
+**Next (P1 - follow-up)**
+- [ ] Resolve Sentry issues 3O, 1N, 2M, 2Q, 2H, 2J, 2K after deploy if they stop reproducing.
+- [ ] Optional: Upgrade Next.js to 15.5.12 for security fixes.
+
 ## 🚀 **Latest: Sentry signal hardening + local-noise reduction (March 11, 2026)**
 
 **ERROR TRIAGE / SENTRY HARDENING** - March 11, 2026
@@ -2963,11 +2984,11 @@ Use this as the active operating board. Historical sections below remain the aud
 **Impact:** Users see blank screens or generic loading indicators instead of contextual placeholders
 
 **Tasks:**
-- [ ] Audit all pages for missing `loading.tsx` files
-- [ ] Create skeleton components matching actual content layout
-- [ ] Replace generic spinners with content-specific skeletons
-- [ ] Ensure skeletons match final content dimensions (prevent layout shift)
-- [ ] Add skeleton states for: dashboard cards, application lists, profile sections
+- [x] Audit all pages for missing `loading.tsx` files
+- [x] Create skeleton components matching actual content layout for 8 routes (talent/profile, gigs/[id], gigs/[id]/apply, talent/subscribe, admin/talent, admin/gigs, admin/users, admin/moderation)
+- [ ] Replace generic spinners with content-specific skeletons (remaining routes)
+- [x] Ensure skeletons match final content dimensions (prevent layout shift)
+- [x] Add skeleton states for: profile sections, gig detail, application forms, admin lists
 
 **Estimated Time:** 2-3 hours  
 **Priority:** 🟡 Medium
