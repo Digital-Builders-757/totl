@@ -20,7 +20,8 @@
   - `/admin/gigs` – admin gigs list
   - `/admin/users` – admin users list
   - `/admin/moderation` – admin moderation page
-- ✅ Replaced `console.error` with `logger.error` in talent profile, gig detail, and subscribe pages for proper Sentry integration.
+- ✅ Replaced `console.error` with `logger.error` in talent profile, gig detail, subscribe, billing, and talent slug pages for proper Sentry integration.
+- ✅ Added 3 more loading skeletons: `/talent/[slug]`, `/talent/settings/billing`, `/admin/applications/[id]`.
 - ✅ PR #209 already merged (Sentry noise filters).
 - ✅ Confirmed `window.location.reload()` already removed from app code (no instances in `app/`, `components/`, `lib/`).
 

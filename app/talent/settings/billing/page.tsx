@@ -4,6 +4,7 @@ import { BillingSettings } from "./billing-settings";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export default async function BillingPage() {
   const supabase = await createSupabaseServer();
@@ -18,7 +19,7 @@ export default async function BillingPage() {
     .maybeSingle();
 
   if (profileError) {
-    console.error('Error loading profile for billing page:', profileError);
+    logger.error("Error loading profile for billing page", profileError);
     redirect('/talent/dashboard');
   }
 
