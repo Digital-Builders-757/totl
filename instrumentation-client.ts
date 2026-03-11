@@ -19,6 +19,7 @@ import {
   shouldFilterHandledLoadFailedNoise,
   shouldFilterLocalAuthCallbackInvalidTokenNoise,
   shouldFilterLocalFailedFetchNoise,
+  shouldFilterLocalObjectCapturedAsExceptionNoise,
   shouldFilterLocalResourceEventNoise,
   shouldFilterLocalWebpackNoise,
   shouldFilterSupabaseLockAbortNoise,
@@ -193,6 +194,11 @@ Sentry.init({
 
     if (shouldFilterLocalAuthCallbackInvalidTokenNoise(event, errorMessage)) {
       devLog("Local auth callback invalid token noise filtered (2X)");
+      return null;
+    }
+
+    if (shouldFilterLocalObjectCapturedAsExceptionNoise(event, errorMessage)) {
+      devLog("Local object-captured-as-exception noise filtered (1N)");
       return null;
     }
 

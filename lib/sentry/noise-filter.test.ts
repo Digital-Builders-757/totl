@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { shouldFilterSupabaseLockAbortNoise } from "./noise-filter";
+import {
+  shouldFilterLocalObjectCapturedAsExceptionNoise,
+  shouldFilterServerAbortIncomingNoise,
+  shouldFilterSupabaseLockAbortNoise,
+} from "./noise-filter";
 
 describe("shouldFilterSupabaseLockAbortNoise", () => {
   const eventWithAuthJsLocksFrames = {
@@ -61,6 +65,58 @@ describe("shouldFilterSupabaseLockAbortNoise", () => {
   it("returns false when error is undefined", () => {
     expect(
       shouldFilterSupabaseLockAbortNoise(eventWithAuthJsLocksFrames as never, undefined)
+    ).toBe(false);
+  });
+});
+
+describe("shouldFilterLocalObjectCapturedAsExceptionNoise", () => {
+  const localhostEvent = {
+    request: { url: "http://localhost:3000/talent/dashboard" },
+    tags: {},
+  };
+
+  it("returns true for object captured as exception from localhost", () => {
+    expect(
+      shouldFilterLocalObjectCapturedAsExceptionNoise(
+        localhostEvent as never,
+        "Object captured as exception with keys: code, details, hint, message"
+      )
+    ).toBe(true);
+  });
+
+  it("returns false for production URL", () => {
+    const prodEvent = { request: { url: "https://app.example.com/talent/dashboard" } };
+    expect(
+      shouldFilterLocalObjectCapturedAsExceptionNoise(
+        prodEvent as never,
+        "Object captured as exception with keys: code, details, hint, message"
+      )
+    ).toBe(false);
+  });
+});
+
+describe("shouldFilterServerAbortIncomingNoise", () => {
+  const eventWithAbortStack = {
+    exception: {
+      values: [
+        {
+          stacktrace: {
+            frames: [{ filename: "node:_http_server" }, { filename: "node:net" }],
+          },
+        },
+      ],
+    },
+  };
+
+  it("returns true for aborted with _http_server stack", () => {
+    expect(
+      shouldFilterServerAbortIncomingNoise(eventWithAbortStack as never, "aborted")
+    ).toBe(true);
+  });
+
+  it("returns false for different message", () => {
+    expect(
+      shouldFilterServerAbortIncomingNoise(eventWithAbortStack as never, "EPIPE")
     ).toBe(false);
   });
 });
