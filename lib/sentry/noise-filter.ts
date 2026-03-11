@@ -173,3 +173,29 @@ export function shouldFilterLocalServerRenderNoise(
     );
   });
 }
+
+export function shouldFilterHandledLoadFailedNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const hasStack = Boolean(
+    event.exception?.values?.[0]?.stacktrace?.frames &&
+      event.exception.values[0].stacktrace.frames.length
+  );
+  const isHandled = String(event.tags?.handled ?? "") === "yes";
+
+  return normalizedMessage.includes("load failed") && isHandled && !hasStack;
+}
+
+export function shouldFilterLocalWebStreamNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+
+  return normalizedMessage.includes("controller[kstate].transformalgorithm is not a function");
+}
