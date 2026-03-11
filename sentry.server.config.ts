@@ -19,6 +19,7 @@ import {
   shouldFilterLocalWebStreamNoise,
   shouldFilterLocalServerRenderNoise,
   shouldFilterLocalWebpackNoise,
+  shouldFilterServerAbortIncomingNoise,
 } from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
@@ -128,6 +129,11 @@ Sentry.init({
 
     if (shouldFilterLocalEmailDisabledNoise(event, String(errorMessage))) {
       devLog("Local email-disabled noise filtered from server Sentry (2E)");
+      return null;
+    }
+
+    if (shouldFilterServerAbortIncomingNoise(event, String(errorMessage))) {
+      devLog("Server abortIncoming noise filtered (2M)");
       return null;
     }
 

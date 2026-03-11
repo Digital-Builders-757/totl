@@ -93,9 +93,9 @@ lib/sentry/noise-filter.ts     ← Shared filter helpers
 
 ### 7. `shouldFilterSupabaseLockAbortNoise`
 
-**When:** `AbortError` + `signal is aborted without reason` + stack includes `auth-js` and `locks`.
+**When:** `error.name === "AbortError"` OR message contains `signal is aborted without reason` + stack includes `auth-js` and `locks`.
 
-**Why:** Supabase auth-js uses locks that abort during navigation or session changes. These are expected and not bugs.
+**Why:** Supabase auth-js uses locks that abort during navigation or session changes. These are expected and not bugs. **Note:** Check `error.name` (not just message)—`AbortError` lives in `name`, not `message`.
 
 ---
 
@@ -140,6 +140,22 @@ lib/sentry/noise-filter.ts     ← Shared filter helpers
 
 ---
 
+### 10. `shouldFilterLocalObjectCapturedAsExceptionNoise`
+
+**When:** Localhost or headless + message contains `object captured as exception with keys` (or `object captured as exception` + serialized message mentions failed to fetch/supabase).
+
+**Why:** Raw Supabase/PostgREST object passed to Sentry instead of Error. **Sentry issue: 1N**
+
+---
+
+### 11. `shouldFilterServerAbortIncomingNoise`
+
+**When:** Message is `aborted` + stack contains `abortIncoming`, `_http_server`, or `node:net`.
+
+**Why:** Client disconnected during HTTP request. Server-side, not actionable. **Sentry issue: 2M**
+
+---
+
 ## 🚫 What NOT to Filter
 
 - **Production-only errors** — Don't filter by URL if the error can occur in production.
@@ -174,5 +190,10 @@ Filters were added/refined to address these Sentry issues:
 | React Client Manifest | 28, 29 | `shouldFilterLocalServerRenderNoise` |
 | Auth/callback/fetch | 2X, 2S, 2R, 2G, 2F | `shouldFilterLocalAuthCallbackInvalidTokenNoise` + route-level fixes |
 | Email disabled | 2E | `shouldFilterLocalEmailDisabledNoise` |
+| Object captured as exception | 1N | `shouldFilterLocalObjectCapturedAsExceptionNoise` |
+| Server abortIncoming | 2M | `shouldFilterServerAbortIncomingNoise` |
+| Webpack/bootstrap (3O, 2J, 2K) | 3O, 2J, 2K | `shouldFilterLocalWebpackNoise`, `shouldFilterLocalServerRenderNoise` |
+| Unexpected JSON (2Q) | 2Q | `shouldFilterLocalServerRenderNoise` (load-manifest) |
+| Failed to fetch (2H) | 2H | `shouldFilterLocalFailedFetchNoise` |
 
 When listing fixed issues for Sentry resolution, only include **newly** fixed ones so they can be marked resolved without re-listing older ones.

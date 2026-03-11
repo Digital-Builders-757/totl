@@ -61,13 +61,14 @@ function isWebpackBootstrapError(event: SentryEventLike, errorMessage: string): 
   const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
 
   return frames.some((frame) => {
-    const filename = frame.filename ?? "";
-    const moduleName = frame.module ?? "";
+    const filename = (frame.filename ?? "").toLowerCase();
+    const moduleName = (frame.module ?? "").toLowerCase();
 
     return (
       filename.includes("webpack") ||
       filename.includes("bootstrap") ||
       filename.includes("_next/static/chunks") ||
+      filename.includes("chunks/webpack") ||
       filename.includes(".next/server") ||
       moduleName.includes("webpack-runtime")
     );
@@ -175,11 +176,15 @@ export function shouldFilterLocalServerRenderNoise(
 
     return (
       filename.includes("webpack/bootstrap") ||
+      filename.includes("webpack") ||
       filename.includes("app-page.runtime.prod") ||
       filename.includes("pages-handler") ||
       filename.includes("get-page-files") ||
       filename.includes("_document.js") ||
       filename.includes(".next/server") ||
+      filename.includes("load-manifest") ||
+      filename.includes("next-dev-server") ||
+      filename.includes("next/server") ||
       moduleName.includes("webpack-runtime")
     );
   });
@@ -211,20 +216,24 @@ export function shouldFilterLocalWebStreamNoise(
   return normalizedMessage.includes("controller[kstate].transformalgorithm is not a function");
 }
 
+/**
+ * Filter Supabase auth-js lock AbortError. Check error.name (not just message)
+ * since AbortError typically has message "signal is aborted without reason"
+ * and "AbortError" lives in error.name.
+ */
 export function shouldFilterSupabaseLockAbortNoise(
   event: SentryEventLike,
-  errorMessage: string
+  errorOrMessage: unknown
 ): boolean {
-  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const e = errorOrMessage as { name?: string; message?: string } | null | undefined;
+  const name = String(e?.name ?? "").toLowerCase();
+  const msg = String(e?.message ?? getEventMessage(event, "")).toLowerCase();
+
+  const isAbortError =
+    name === "aborterror" || msg.includes("signal is aborted without reason");
+  if (!isAbortError) return false;
+
   const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
-
-  if (
-    !normalizedMessage.includes("aborterror") ||
-    !normalizedMessage.includes("signal is aborted without reason")
-  ) {
-    return false;
-  }
-
   return frames.some((frame) => {
     const filename = (frame.filename ?? "").toLowerCase();
     return filename.includes("auth-js") && filename.includes("locks");
@@ -270,4 +279,51 @@ export function shouldFilterLocalAuthCallbackInvalidTokenNoise(
     normalizedMessage.includes("invite link did not include a valid authentication token") &&
     isHandled
   );
+}
+
+/**
+ * Filter: "Object captured as exception with keys: code, details, hint, message"
+ * Raw Supabase/PostgREST object passed to Sentry instead of Error. From localhost/talent-dashboard.
+ * Sentry issue: TOTLMODELAGENCY-1N
+ */
+export function shouldFilterLocalObjectCapturedAsExceptionNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const serialized = getSerializedEventData(event);
+  const serializedMessage = String(serialized?.message ?? "").toLowerCase();
+
+  return (
+    normalizedMessage.includes("object captured as exception with keys") ||
+    (normalizedMessage.includes("object captured as exception") &&
+      (serializedMessage.includes("failed to fetch") || serializedMessage.includes("supabase")))
+  );
+}
+
+/**
+ * Filter: "aborted" at abortIncoming(node:_http_server)
+ * Client disconnected during HTTP request. Server-side, not actionable.
+ * Sentry issue: TOTLMODELAGENCY-2M
+ */
+export function shouldFilterServerAbortIncomingNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
+
+  if (normalizedMessage !== "aborted") return false;
+
+  return frames.some((frame) => {
+    const filename = (frame.filename ?? "").toLowerCase();
+    return (
+      filename.includes("abortincoming") ||
+      filename.includes("_http_server") ||
+      filename.includes("node:net")
+    );
+  });
 }

@@ -76,8 +76,16 @@
 
 **Next (P1 - follow-up triage)**
 - [ ] Re-run or watch `mobile-guardrails` on GitHub to confirm the `/client/applications` failure is cleared and identify the next failing test, if any.
-- [ ] Re-check the unresolved Sentry backlog after deploy and resolve the issues that stop reproducing.
-- [ ] Continue with the next real production-facing Sentry issue instead of local/dev-only noise.
+- [x] Re-check the unresolved Sentry backlog after deploy and resolve the issues that stop reproducing.
+- [x] Continue with the next real production-facing Sentry issue instead of local/dev-only noise.
+
+**Post-merge (March 11, 2026)**
+- ✅ PR #208 merged: Sentry noise filters (2E, 2X, Event promise rejection) + docs.
+- ✅ Sentry issues 2E and 2X resolved in dashboard.
+- ✅ `npm audit fix` applied: 14 → 5 vulnerabilities (ajv, lodash, minimatch, qs, rollup, serialize-javascript, tar, supabase).
+- ✅ Fix: `shouldFilterSupabaseLockAbortNoise` now checks `error.name === "AbortError"` (not just message)—AbortError lives in `name`, not `message`. Added unit tests.
+- ✅ PR #209: Noise filters for 3O, 1N, 2M, 2Q, 2H (webpack, object-captured, abortIncoming, load-manifest, failed fetch). Broader frame matching.
+- ⏳ Remaining: Next.js 15.5.12 (patch), vitest/esbuild (dev). Consider `npm audit fix --force` for Next.js when ready.
 
 ## 🚀 **Latest: Dashboard KPI responsive layout convergence (March 10, 2026)**
 
