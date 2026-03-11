@@ -186,7 +186,7 @@ Sentry.init({
       return null;
     }
 
-    if (shouldFilterSupabaseLockAbortNoise(event, errorMessage)) {
+    if (shouldFilterSupabaseLockAbortNoise(event, error)) {
       devLog("Supabase auth lock abort noise filtered from normalized event");
       return null;
     }
@@ -234,27 +234,7 @@ Sentry.init({
         return null; // Filter this error
       }
 
-      // Filter Supabase auth-js lock AbortError during navigation (expected)
-      if (errorObj.name === "AbortError" && errorObj.message?.includes("signal is aborted without reason")) {
-        const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];
-        const isSupabaseLockAbort = frames.some(
-          (frame) => frame.filename?.includes("@supabase/auth-js") && frame.filename?.includes("locks")
-        );
-
-        if (isSupabaseLockAbort) {
-          Sentry.addBreadcrumb({
-            category: "auth.bootstrap",
-            message: "supabase_lock_abort_filtered",
-            level: "info",
-            data: {
-              errorName: errorObj.name,
-              errorMessage: errorObj.message,
-            },
-          });
-          devLog("Supabase auth lock AbortError filtered - expected during navigation");
-          return null;
-        }
-      }
+      // Supabase auth-js lock AbortError: handled by shouldFilterSupabaseLockAbortNoise above
 
       // Filter UserPlus ReferenceError (Lucide React icon import issue)
       if (errorObj.message === 'UserPlus is not defined' ||

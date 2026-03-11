@@ -93,9 +93,9 @@ lib/sentry/noise-filter.ts     ← Shared filter helpers
 
 ### 7. `shouldFilterSupabaseLockAbortNoise`
 
-**When:** `AbortError` + `signal is aborted without reason` + stack includes `auth-js` and `locks`.
+**When:** `error.name === "AbortError"` OR message contains `signal is aborted without reason` + stack includes `auth-js` and `locks`.
 
-**Why:** Supabase auth-js uses locks that abort during navigation or session changes. These are expected and not bugs.
+**Why:** Supabase auth-js uses locks that abort during navigation or session changes. These are expected and not bugs. **Note:** Check `error.name` (not just message)—`AbortError` lives in `name`, not `message`.
 
 ---
 

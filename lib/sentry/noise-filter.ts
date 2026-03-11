@@ -211,20 +211,24 @@ export function shouldFilterLocalWebStreamNoise(
   return normalizedMessage.includes("controller[kstate].transformalgorithm is not a function");
 }
 
+/**
+ * Filter Supabase auth-js lock AbortError. Check error.name (not just message)
+ * since AbortError typically has message "signal is aborted without reason"
+ * and "AbortError" lives in error.name.
+ */
 export function shouldFilterSupabaseLockAbortNoise(
   event: SentryEventLike,
-  errorMessage: string
+  errorOrMessage: unknown
 ): boolean {
-  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const e = errorOrMessage as { name?: string; message?: string } | null | undefined;
+  const name = String(e?.name ?? "").toLowerCase();
+  const msg = String(e?.message ?? getEventMessage(event, "")).toLowerCase();
+
+  const isAbortError =
+    name === "aborterror" || msg.includes("signal is aborted without reason");
+  if (!isAbortError) return false;
+
   const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
-
-  if (
-    !normalizedMessage.includes("aborterror") ||
-    !normalizedMessage.includes("signal is aborted without reason")
-  ) {
-    return false;
-  }
-
   return frames.some((frame) => {
     const filename = (frame.filename ?? "").toLowerCase();
     return filename.includes("auth-js") && filename.includes("locks");
