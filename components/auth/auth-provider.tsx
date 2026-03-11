@@ -181,6 +181,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const isExpectedAbortErrorMessage = (message: string | undefined) => {
+    const m = (message || "").toLowerCase();
+    return m.includes("aborterror") && m.includes("signal is aborted");
+  };
+
   const mapProfileRow = (row: {
     role: UserRole;
     account_type: AccountType | null;
@@ -256,6 +261,11 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (lastError && lastError.code !== "PGRST116") {
+        if (isExpectedAbortErrorMessage(lastError.message)) {
+          logger.debug("[auth.profile] Profile query aborted during navigation (expected)");
+          return { profile: mapProfileRow(data as ProfileData) };
+        }
+
         const Sentry = await import("@sentry/nextjs");
 
         const level = isLikelyNetworkErrorMessage(lastError.message) ? "warning" : "error";
