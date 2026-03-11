@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { SubscriptionPlans } from "./subscription-plans";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export default async function SubscribePage() {
   const supabase = await createSupabaseServer();
@@ -17,7 +18,7 @@ export default async function SubscribePage() {
     .maybeSingle();
 
   if (profileError) {
-    console.error('Error loading profile for subscribe page:', profileError);
+    logger.error("Error loading profile for subscribe page", profileError);
     redirect(PATHS.TALENT_DASHBOARD);
   }
 

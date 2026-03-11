@@ -13,6 +13,7 @@ import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from "@/lib/db/selects";
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // Public gig detail page - dynamic rendering required due to createSupabaseServer() / cookies()
@@ -43,7 +44,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
     .single();
 
   if (error || !gig) {
-    console.error("Gig not found:", error);
+    logger.error("Gig not found", error);
     notFound();
   }
 
