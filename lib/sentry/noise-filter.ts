@@ -1,8 +1,13 @@
 type SentryEventLike = {
+  message?: string;
+  logentry?: {
+    message?: string;
+  };
   request?: {
     url?: string;
   };
   tags?: Record<string, unknown>;
+  extra?: Record<string, unknown>;
   exception?: {
     values?: Array<{
       stacktrace?: {
@@ -69,6 +74,23 @@ function isWebpackBootstrapError(event: SentryEventLike, errorMessage: string): 
   });
 }
 
+function getEventMessage(event: SentryEventLike, errorMessage: string): string {
+  if (errorMessage) return errorMessage;
+  if (typeof event.message === "string") return event.message;
+  if (typeof event.logentry?.message === "string") return event.logentry.message;
+
+  const extraMessage = event.extra?.message;
+  if (typeof extraMessage === "string") return extraMessage;
+
+  return "";
+}
+
+function getSerializedEventData(event: SentryEventLike): Record<string, unknown> | null {
+  const serialized = event.extra?.__serialized__;
+  if (!serialized || typeof serialized !== "object") return null;
+  return serialized as Record<string, unknown>;
+}
+
 export function shouldFilterLocalWebpackNoise(
   event: SentryEventLike,
   errorMessage: string
@@ -78,4 +100,42 @@ export function shouldFilterLocalWebpackNoise(
   if (!isLocalSignal) return false;
 
   return isWebpackBootstrapError(event, errorMessage);
+}
+
+export function shouldFilterLocalFailedFetchNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const details = String(event.extra?.details ?? "").toLowerCase();
+  const extraMessage = String(event.extra?.message ?? "").toLowerCase();
+
+  const mentionsFailedFetch =
+    normalizedMessage.includes("failed to fetch") ||
+    details.includes("failed to fetch") ||
+    extraMessage.includes("failed to fetch");
+
+  return mentionsFailedFetch;
+}
+
+export function shouldFilterLocalResourceEventNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const serialized = getSerializedEventData(event);
+  const serializedType = String(serialized?.type ?? "").toLowerCase();
+  const serializedTarget = String(serialized?.target ?? "").toLowerCase();
+
+  return (
+    normalizedMessage.includes("event `event`") &&
+    serializedType === "error" &&
+    serializedTarget.includes("head > link")
+  );
 }

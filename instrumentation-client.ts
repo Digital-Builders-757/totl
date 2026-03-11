@@ -15,7 +15,11 @@ import {
   productionDSN,
   projectIdMatches,
 } from "@/lib/sentry/env";
-import { shouldFilterLocalWebpackNoise } from "@/lib/sentry/noise-filter";
+import {
+  shouldFilterLocalFailedFetchNoise,
+  shouldFilterLocalResourceEventNoise,
+  shouldFilterLocalWebpackNoise,
+} from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
@@ -166,6 +170,16 @@ Sentry.init({
 
     if (shouldFilterLocalWebpackNoise(event, errorMessage)) {
       devLog("Local webpack bootstrap noise filtered from Sentry");
+      return null;
+    }
+
+    if (shouldFilterLocalFailedFetchNoise(event, errorMessage)) {
+      devLog("Local failed-fetch dashboard noise filtered from Sentry");
+      return null;
+    }
+
+    if (shouldFilterLocalResourceEventNoise(event, errorMessage)) {
+      devLog("Local resource event noise filtered from Sentry");
       return null;
     }
 
