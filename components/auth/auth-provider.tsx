@@ -430,10 +430,22 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
                 scope.setTag("auth_redirect_fallback", outcome);
                 scope.setTag("auth_redirect_timeout_ms", String(navigationTimeoutMs));
                 scope.setContext("auth_redirect_fallback", context);
-                Sentry.captureMessage(
-                  "[auth.onAuthStateChange] redirect timeout fallback telemetry",
-                  "info"
-                );
+
+                if (outcome === "skipped") {
+                  Sentry.addBreadcrumb({
+                    category: "auth.redirect_fallback",
+                    message: "[auth.onAuthStateChange] redirect timeout fallback telemetry",
+                    level: "info",
+                    data: {
+                      outcome,
+                      navigationTimeoutMs,
+                      ...context,
+                    },
+                  });
+                  return;
+                }
+
+                Sentry.captureMessage("[auth.onAuthStateChange] redirect timeout fallback telemetry", "info");
               });
             })
             .catch(() => {
