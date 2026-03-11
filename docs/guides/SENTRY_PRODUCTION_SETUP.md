@@ -47,7 +47,7 @@ SENTRY_AUTH_TOKEN=your_sentry_auth_token
 
 # Sentry Organization and Project
 SENTRY_ORG=the-digital-builders-bi
-SENTRY_PROJECT=sentry-yellow-notebook
+SENTRY_PROJECT=totlmodelagency
 ```
 
 **Important:** Make sure to set these environment variables for **Production** only in Vercel!
@@ -173,7 +173,7 @@ const SENTRY_DSN = isProduction && PRODUCTION_DSN
 
 **Solution:**
 1. Verify `SENTRY_AUTH_TOKEN` is set in Vercel
-2. Check `SENTRY_ORG` and `SENTRY_PROJECT` match exactly
+2. Check `SENTRY_ORG` and `SENTRY_PROJECT` match exactly (`totlmodelagency`)
 3. Ensure token has correct scopes
 4. Redeploy after adding token
 
@@ -181,8 +181,9 @@ const SENTRY_DSN = isProduction && PRODUCTION_DSN
 
 **Solution:**
 1. Adjust `tracesSampleRate` in config (currently 0.1 = 10%)
-2. Add more errors to `ignoreErrors` array
-3. Use Sentry's "Ignore" feature for known issues
+2. Add filters to `lib/sentry/noise-filter.ts` (see [SENTRY_NOISE_FILTERING.md](../troubleshooting/SENTRY_NOISE_FILTERING.md))
+3. Add more errors to `ignoreErrors` array (minimal—only truly external noise)
+4. Use Sentry's "Ignore" feature for known issues
 
 ---
 

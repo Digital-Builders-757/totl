@@ -10,11 +10,11 @@ You have **two Sentry projects** configured for different environments:
 - **Use:** Local development and testing
 - **URL:** https://sentry.io/organizations/the-digital-builders-bi/projects/javascript-nextjs/
 
-### Project 2: `sentry-yellow-notebook` (Vercel Production)
+### Project 2: `totlmodelagency` (Vercel Production)
 - **Org:** `the-digital-builders-bi`
-- **Project:** `sentry-yellow-notebook`
+- **Project:** `totlmodelagency`
 - **Use:** Vercel deployments (production & preview)
-- **URL:** https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
+- **URL:** https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
 
 ---
 
@@ -30,11 +30,11 @@ SENTRY_DSN=<YOUR_VERCEL_PROJECT_DSN>
 NEXT_PUBLIC_SENTRY_DSN=<YOUR_VERCEL_PROJECT_DSN>
 SENTRY_AUTH_TOKEN=<YOUR_SENTRY_AUTH_TOKEN>
 SENTRY_ORG=the-digital-builders-bi
-SENTRY_PROJECT=sentry-yellow-notebook
+SENTRY_PROJECT=totlmodelagency
 ```
 
 **To get your Vercel project DSN:**
-1. Go to: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
+1. Go to: https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
 2. Click "Settings" → "Client Keys (DSN)"
 3. Copy the DSN
 
@@ -56,20 +56,21 @@ Create `.env.local` in your project root:
 ## 🎯 How It Works
 
 ### **Local Development** (`npm run dev`)
-- Errors go to → `javascript-nextjs` project
+- Errors go to → `javascript-nextjs` project (or `totlmodelagency` if DSN points there)
 - Environment tag: `development`
 - 100% error tracking (tracesSampleRate: 1.0)
 - Debug logs enabled
 - Full stack traces
+- **Noise filtering:** Localhost/webpack/bootstrap noise is filtered (see [SENTRY_NOISE_FILTERING.md](../troubleshooting/SENTRY_NOISE_FILTERING.md))
 
 ### **Vercel Preview** (PR deployments)
-- Errors go to → `sentry-yellow-notebook` project
+- Errors go to → `totlmodelagency` project
 - Environment tag: `preview`
 - 10% sampling (to save quota)
 - Session replay enabled
 
 ### **Vercel Production** (main branch)
-- Errors go to → `sentry-yellow-notebook` project
+- Errors go to → `totlmodelagency` project
 - Environment tag: `production`
 - 10% sampling
 - Session replay enabled
@@ -101,11 +102,13 @@ Your Cursor MCP is configured at: `c:\Users\young\.cursor\mcp.json`
 
 **Test queries:**
 ```
-"Show me the latest errors from sentry-yellow-notebook project"
-"What's the error rate for javascript-nextjs project today?"
+"Show me the latest errors from totlmodelagency project"
+"What's the error rate for totlmodelagency today?"
 "Get details for Sentry issue #12345"
 "Show me all unresolved 500 errors"
 ```
+
+**MCP config location:** Use `.cursor/mcp.json` (or global Cursor config). For local-only config, run `git update-index --skip-worktree .cursor/mcp.json` so it isn't committed.
 
 ---
 
@@ -150,14 +153,14 @@ export default function TestSentry() {
 1. Run `npm run dev`
 2. Visit `http://localhost:3000/test-sentry`
 3. Click "Throw Test Error"
-4. Check https://sentry.io/organizations/the-digital-builders-bi/projects/javascript-nextjs/
+4. Check https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
 5. You should see the error!
 
 ### **Test in Production:**
 1. Deploy to Vercel
 2. Visit `/test-sentry` on your live site
 3. Click "Throw Test Error"
-4. Check https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
+4. Check https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
 
 ---
 
@@ -178,6 +181,14 @@ export default function TestSentry() {
 - ❌ Network request failures
 - ❌ Next.js navigation redirects
 - ❌ 404 errors
+- ❌ Localhost/webpack bootstrap noise (dev HMR, chunk load)
+- ❌ Headless browser (Playwright) noise
+- ❌ Supabase auth-js lock AbortError (expected during navigation)
+- ❌ Web stream `transformAlgorithm` noise (dev/headless)
+- ❌ React Client Manifest / segment-explorer noise
+- ❌ Resource load `Event` noise on `<link>` tags
+
+See [SENTRY_NOISE_FILTERING.md](../troubleshooting/SENTRY_NOISE_FILTERING.md) for full filter reference.
 
 ---
 
@@ -277,7 +288,8 @@ if (insertError) {
 - **Sentry Docs:** https://docs.sentry.io/platforms/javascript/guides/nextjs/
 - **MCP Server:** https://github.com/getsentry/sentry-mcp
 - **javascript-nextjs Project:** https://sentry.io/organizations/the-digital-builders-bi/projects/javascript-nextjs/
-- **sentry-yellow-notebook Project:** https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
+- **totlmodelagency Project:** https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
+- **Noise Filtering Guide:** [docs/troubleshooting/SENTRY_NOISE_FILTERING.md](../troubleshooting/SENTRY_NOISE_FILTERING.md)
 
 ---
 

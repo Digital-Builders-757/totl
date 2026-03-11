@@ -20,6 +20,7 @@ import {
   shouldFilterLocalFailedFetchNoise,
   shouldFilterLocalResourceEventNoise,
   shouldFilterLocalWebpackNoise,
+  shouldFilterSupabaseLockAbortNoise,
 } from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
@@ -181,6 +182,11 @@ Sentry.init({
 
     if (shouldFilterLocalResourceEventNoise(event, errorMessage)) {
       devLog("Local resource event noise filtered from Sentry");
+      return null;
+    }
+
+    if (shouldFilterSupabaseLockAbortNoise(event, errorMessage)) {
+      devLog("Supabase auth lock abort noise filtered from normalized event");
       return null;
     }
 

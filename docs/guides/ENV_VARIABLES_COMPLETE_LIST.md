@@ -77,7 +77,7 @@
 | `SENTRY_DSN_PROD` | Sentry DSN for production | Same as above (use prod project) | `https://...@...sentry.io/...` |
 | `SENTRY_AUTH_TOKEN` | Sentry auth token | Settings → Account → Auth Tokens | `...` |
 | `SENTRY_ORG` | Sentry organization slug | Organization settings | `your-org-slug` |
-| `SENTRY_PROJECT` | Sentry project name | Project settings | `totl` |
+| `SENTRY_PROJECT` | Sentry project name | Project settings | `totlmodelagency` |
 | `NEXT_PUBLIC_SENTRY_DSN` | Public Sentry DSN (optional) | Same as SENTRY_DSN_DEV | `https://...@...sentry.io/...` |
 | `NEXT_PUBLIC_SENTRY_ENVIRONMENT` | Sentry environment tag | Custom value | `development` or `production` |
 

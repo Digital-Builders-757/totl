@@ -42,7 +42,7 @@ export default function TestSentryPage() {
             <CardTitle>🔍 Sentry Integration Test</CardTitle>
             <CardDescription>
               Test your Sentry setup and MCP integration. Errors will go to the{" "}
-              <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">sentry-yellow-notebook</code>{" "}
+              <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">totlmodelagency</code>{" "}
               project.
             </CardDescription>
           </CardHeader>
@@ -87,12 +87,12 @@ export default function TestSentryPage() {
             <div>
               <p className="text-sm font-medium">Sentry Dashboard:</p>
               <a
-                href="https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/"
+                href="https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline text-sm"
               >
-                View sentry-yellow-notebook project →
+                View totlmodelagency project →
               </a>
             </div>
           </CardContent>
@@ -107,7 +107,7 @@ export default function TestSentryPage() {
               After generating test errors, ask your AI assistant:
             </p>
             <div className="bg-gray-100 p-3 rounded text-sm font-mono space-y-1">
-              <p>&quot;Show me the latest errors from sentry-yellow-notebook&quot;</p>
+              <p>&quot;Show me the latest errors from totlmodelagency&quot;</p>
               <p>&quot;What errors happened in the last hour?&quot;</p>
               <p>&quot;Get details for the most recent error&quot;</p>
             </div>

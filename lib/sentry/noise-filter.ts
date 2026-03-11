@@ -154,7 +154,10 @@ export function shouldFilterLocalServerRenderNoise(
     normalizedMessage.includes("cannot read properties of undefined (reading 'call')") ||
     normalizedMessage.includes("cannot read properties of undefined (reading '/_app')") ||
     normalizedMessage.includes("unexpected end of json input") ||
-    (normalizedMessage.includes("enoent") && normalizedMessage.includes("_document.js"));
+    (normalizedMessage.includes("enoent") && normalizedMessage.includes("_document.js")) ||
+    (normalizedMessage.includes("could not find the module") &&
+      normalizedMessage.includes("segment-explorer-node") &&
+      normalizedMessage.includes("react client manifest"));
 
   if (!mentionsLocalRenderFailure) return false;
 
@@ -198,4 +201,24 @@ export function shouldFilterLocalWebStreamNoise(
   const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
 
   return normalizedMessage.includes("controller[kstate].transformalgorithm is not a function");
+}
+
+export function shouldFilterSupabaseLockAbortNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
+
+  if (
+    !normalizedMessage.includes("aborterror") ||
+    !normalizedMessage.includes("signal is aborted without reason")
+  ) {
+    return false;
+  }
+
+  return frames.some((frame) => {
+    const filename = (frame.filename ?? "").toLowerCase();
+    return filename.includes("auth-js") && filename.includes("locks");
+  });
 }

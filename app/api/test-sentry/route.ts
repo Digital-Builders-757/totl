@@ -33,7 +33,7 @@ export async function GET(request: Request) {
         logger.info("[Sentry Test] Error captured and sent to Sentry", {
           eventId,
           dashboard:
-            "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+            "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
         });
         
         // Also flush to ensure it's sent immediately
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
           eventId: eventId,
           testType: "error",
           note: "Error should appear in Sentry dashboard within 5-10 seconds",
-          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
         });
       }
 
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
           logger.info("[Sentry Test] Exception captured and sent to Sentry", {
             eventId: exceptionId,
             dashboard:
-              "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+              "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
           });
           
           // Flush to ensure it's sent immediately
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
             eventId: exceptionId,
             testType: "exception",
             note: "Exception should appear in Sentry dashboard within 5-10 seconds",
-            sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+            sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
           });
         }
 
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         logger.info("[Sentry Test] Message sent to Sentry", {
           eventId: messageId,
           dashboard:
-            "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+            "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
         });
         
         // Flush to ensure it's sent immediately
@@ -106,7 +106,7 @@ export async function GET(request: Request) {
           eventId: messageId,
           testType: "message",
           note: "Message should appear in Sentry dashboard within 5-10 seconds",
-          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+          sentryUrl: "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
         });
       }
     }

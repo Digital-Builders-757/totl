@@ -32,6 +32,7 @@
 - ✅ Added a narrow server-side localhost/headless filter for the `controller[kState].transformAlgorithm is not a function` web-stream runtime failure seen on `/gigs`, so local runtime turbulence stops reading like a product bug.
 - ✅ Tightened the talent dashboard applications error path so localhost/headless `Failed to fetch` noise is suppressed locally and any real remaining Sentry capture now uses a proper `Error` instead of a raw PostgREST object.
 - ✅ Added a shared auth-actions suppression for localhost Cloudflare/HTML gateway responses so local Supabase 502 pages no longer create auth/profile query issues during bootstrap and redirect flows.
+- ✅ Kept the auth timeout recovery UI intact but downgraded localhost/headless bootstrap timeout telemetry to info-level logging, so local/mobile-emulation slow boots no longer open Sentry issues while still leaving a breadcrumb trail.
 - ✅ Re-ran the relevant local verification for this batch:
   - `npx playwright test tests/auth/auth-regressions.spec.ts --project=chromium --retries=0 --reporter=list --grep "SIGNED-OUT: /auth/callback accepts invite token_hash|SIGNED-OUT: /auth/callback accepts magiclink token_hash"`
   - `npx playwright test tests/auth/invite-client-apply-flow.spec.ts --project=chromium --retries=0 --reporter=list`
@@ -51,6 +52,7 @@
 - ⚠️ A separate localhost/headless `/gigs` issue was still coming from the Node web-stream runtime (`controller[kState].transformAlgorithm is not a function`), which pointed to environment/runtime churn rather than a clear first-party code path.
 - ⚠️ The talent dashboard applications path was still explicitly logging and capturing localhost failed-fetch noise, and the old capture shape used a raw object that produced the generic “Object captured as exception with keys...” Sentry issue form.
 - ⚠️ Shared auth bootstrap/profile repair actions were still turning localhost Cloudflare/Supabase HTML gateway responses into real auth/profile query issues even though the failure mode was environment/network turbulence rather than app logic.
+- ⚠️ The hard bootstrap timeout warning path still used warning-level telemetry for localhost/headless runs, which made one-off slow mobile emulation boots look like a production auth problem even though the recovery UI already handled the scenario.
 - ⚠️ The old Sentry MCP setup docs were still pointing at a deprecated token-based local server flow even though the current working setup is hosted OAuth.
 - ⚠️ The Playwright webserver launcher can still fail locally with `SyntaxError: Unexpected end of JSON input`; reusing a manually started production server is currently the reliable fallback for targeted contract verification.
 
@@ -68,6 +70,7 @@
 - [x] Add a narrow localhost/headless server filter for the `/gigs` web-stream runtime error signature so the stale local runtime issue no longer remains in the unresolved queue.
 - [x] Suppress localhost/headless talent dashboard applications fetch noise and convert real application-query captures to proper `Error` instances for clearer Sentry grouping.
 - [x] Suppress localhost Cloudflare/Supabase HTML gateway noise in shared auth bootstrap/profile actions so those old profile query issues stop reappearing from local runs.
+- [x] Reclassify localhost/headless auth bootstrap hard-timeout telemetry so the recovery path stays visible without opening a standalone Sentry issue.
 - [x] Fix the `/client/applications` mobile shell regression that was failing the `mobile-guardrails` route contract in CI.
 - [ ] Re-run the Stripe webhook route contract once the local Playwright webserver startup issue is stabilized.
 
