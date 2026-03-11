@@ -9,6 +9,23 @@ import { syncEmailVerifiedForUser } from "@/lib/server/sync-email-verified";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 
+function isLocalhostSiteUrl(): boolean {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  return siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1");
+}
+
+function isCloudflareHtmlGatewayError(message: string | null | undefined): boolean {
+  const normalized = String(message ?? "").toLowerCase();
+  return (
+    (normalized.includes("<html") || normalized.includes("<!doctype html")) &&
+    (normalized.includes("cloudflare") || normalized.includes("bad gateway") || normalized.includes("502"))
+  );
+}
+
+function shouldSuppressLocalProfileQueryNoise(message: string | null | undefined): boolean {
+  return isLocalhostSiteUrl() && isCloudflareHtmlGatewayError(message);
+}
+
 /**
  * Ensures a profile exists for the current user and updates it with name from auth metadata if missing
  * This is called after login to ensure the profile is properly set up
@@ -39,6 +56,14 @@ export async function ensureProfileExists() {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileError) {
+    if (shouldSuppressLocalProfileQueryNoise(profileError.message)) {
+      logger.info("Suppressing local profile query gateway noise", {
+        userId: user.id,
+        userEmail: user.email,
+      });
+      return { success: true, skipped: true };
+    }
+
     logger.error("Error checking profile", profileError);
     Sentry.captureException(new Error(`Profile query error: ${profileError.message}`), {
       tags: {
@@ -438,6 +463,14 @@ export async function ensureProfilesAfterSignup() {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileCheckError) {
+    if (shouldSuppressLocalProfileQueryNoise(profileCheckError.message)) {
+      logger.info("Suppressing local profile check gateway noise after signup", {
+        userId: user.id,
+        userEmail: user.email,
+      });
+      return { success: true };
+    }
+
     logger.error("Error checking profile", profileCheckError);
     Sentry.captureException(new Error(`Profile check error: ${profileCheckError.message}`), {
       tags: {
@@ -632,6 +665,14 @@ export async function handleLoginRedirect(returnUrl?: string) {
 
   // Handle actual errors (not PGRST116 - that doesn't occur with maybeSingle())
   if (profileError) {
+    if (shouldSuppressLocalProfileQueryNoise(profileError.message)) {
+      logger.info("Suppressing local login redirect profile query gateway noise", {
+        userId: user.id,
+        userEmail: user.email,
+      });
+      redirect(PATHS.TALENT_DASHBOARD);
+    }
+
     logger.error("Error checking profile", profileError);
     Sentry.captureException(new Error(`Login redirect profile query error: ${profileError.message}`), {
       tags: {
