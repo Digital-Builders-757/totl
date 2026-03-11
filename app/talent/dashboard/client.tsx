@@ -87,6 +87,30 @@ interface Gig {
   application_deadline?: string | null;
 }
 
+function isLocalOrAutomationClient(): boolean {
+  if (typeof window === "undefined") return false;
+
+  const hostname = window.location.hostname;
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+    return true;
+  }
+
+  const userAgent = window.navigator.userAgent.toLowerCase();
+  return userAgent.includes("headlesschrome") || userAgent.includes("electron");
+}
+
+function isFailedFetchNoise(
+  errorLike: { message?: string | null; details?: string | null } | null | undefined
+): boolean {
+  if (!errorLike) return false;
+
+  const message = String(errorLike.message ?? "").toLowerCase();
+  const details = String(errorLike.details ?? "").toLowerCase();
+  const mentionsFailedFetch = message.includes("failed to fetch") || details.includes("failed to fetch");
+
+  return mentionsFailedFetch && isLocalOrAutomationClient();
+}
+
 function useTalentDashboardData({
   user,
   profile,
@@ -313,43 +337,54 @@ function useTalentDashboardData({
                   },
                 };
 
-                logger.error("[talent-dashboard] Error fetching applications", undefined, errorContext);
+                const shouldSuppressLocalFailedFetch = isFailedFetchNoise(applicationsError);
+
+                if (shouldSuppressLocalFailedFetch) {
+                  logger.info("[talent-dashboard] Suppressing local failed-fetch applications noise", errorContext);
+                } else {
+                  logger.error("[talent-dashboard] Error fetching applications", undefined, errorContext);
+                }
 
                 // Send to Sentry for production debugging
-                try {
-                  const Sentry = await import("@sentry/nextjs");
-                  Sentry.addBreadcrumb({
-                    category: "talent-dashboard",
-                    message: "applications company name merge",
-                    level: "info",
-                    data: {
-                      companyMergeStatus,
-                      clientIdsCount,
-                      applicationsCount,
-                      queryVersion: "v2",
-                      hasInvalidEmbed: false,
-                    },
-                  });
-                  Sentry.captureException(applicationsError, {
-                    tags: {
-                      feature: "talent-dashboard",
-                      error_type: "applications_query_error",
-                      error_code: applicationsError.code || "UNKNOWN",
-                      supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-                      has_session: sessionContext?.hasSession ? "true" : "false",
-                      talent_dashboard_query_version: "v2",
-                      company_name_merge: companyMergeStatus,
-                      has_invalid_embed: "false",
-                    },
-                    extra: {
-                      ...errorContext,
-                      userId: user.id,
-                      userEmail: user.email,
-                    },
-                    level: "error",
-                  });
-                } catch {
-                  // Sentry not available, skip
+                if (!shouldSuppressLocalFailedFetch) {
+                  try {
+                    const Sentry = await import("@sentry/nextjs");
+                    Sentry.addBreadcrumb({
+                      category: "talent-dashboard",
+                      message: "applications company name merge",
+                      level: "info",
+                      data: {
+                        companyMergeStatus,
+                        clientIdsCount,
+                        applicationsCount,
+                        queryVersion: "v2",
+                        hasInvalidEmbed: false,
+                      },
+                    });
+                    Sentry.captureException(
+                      new Error(applicationsError.message || "[talent-dashboard] Error fetching applications"),
+                      {
+                        tags: {
+                          feature: "talent-dashboard",
+                          error_type: "applications_query_error",
+                          error_code: applicationsError.code || "UNKNOWN",
+                          supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+                          has_session: sessionContext?.hasSession ? "true" : "false",
+                          talent_dashboard_query_version: "v2",
+                          company_name_merge: companyMergeStatus,
+                          has_invalid_embed: "false",
+                        },
+                        extra: {
+                          ...errorContext,
+                          userId: user.id,
+                          userEmail: user.email,
+                        },
+                        level: "error",
+                      }
+                    );
+                  } catch {
+                    // Sentry not available, skip
+                  }
                 }
 
                 // Check for missing API key error specifically

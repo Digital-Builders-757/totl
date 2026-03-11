@@ -30,6 +30,7 @@
 - ✅ Added a server-side localhost/headless render-noise filter for older `_app` / `_document` / webpack bootstrap page-render failures so stale local `/_error` and `/login` incidents stop appearing like product regressions.
 - ✅ Hardened the handled `Load failed` filter so it suppresses stackless Safari/network noise even when the useful message only exists in Sentry’s event payload rather than `hint.originalException`.
 - ✅ Added a narrow server-side localhost/headless filter for the `controller[kState].transformAlgorithm is not a function` web-stream runtime failure seen on `/gigs`, so local runtime turbulence stops reading like a product bug.
+- ✅ Tightened the talent dashboard applications error path so localhost/headless `Failed to fetch` noise is suppressed locally and any real remaining Sentry capture now uses a proper `Error` instead of a raw PostgREST object.
 - ✅ Re-ran the relevant local verification for this batch:
   - `npx playwright test tests/auth/auth-regressions.spec.ts --project=chromium --retries=0 --reporter=list --grep "SIGNED-OUT: /auth/callback accepts invite token_hash|SIGNED-OUT: /auth/callback accepts magiclink token_hash"`
   - `npx playwright test tests/auth/invite-client-apply-flow.spec.ts --project=chromium --retries=0 --reporter=list`
@@ -47,6 +48,7 @@
 - ⚠️ Older local/headless server-render failures (`/_app`, `_document.js`, webpack bootstrap parse issues) were still hanging around in Sentry as unresolved issues even though they reflected environment/runtime turbulence rather than user-facing production bugs.
 - ⚠️ The client-side `Load failed` suppression originally depended too heavily on `hint.originalException.message`, which could be empty for Safari/no-stack events even though the event payload still clearly described the known non-actionable failure.
 - ⚠️ A separate localhost/headless `/gigs` issue was still coming from the Node web-stream runtime (`controller[kState].transformAlgorithm is not a function`), which pointed to environment/runtime churn rather than a clear first-party code path.
+- ⚠️ The talent dashboard applications path was still explicitly logging and capturing localhost failed-fetch noise, and the old capture shape used a raw object that produced the generic “Object captured as exception with keys...” Sentry issue form.
 - ⚠️ The old Sentry MCP setup docs were still pointing at a deprecated token-based local server flow even though the current working setup is hosted OAuth.
 - ⚠️ The Playwright webserver launcher can still fail locally with `SyntaxError: Unexpected end of JSON input`; reusing a manually started production server is currently the reliable fallback for targeted contract verification.
 
@@ -62,6 +64,7 @@
 - [x] Extend the server-side Sentry filter to suppress old localhost/headless page-render noise from `_app` / `_document` / webpack bootstrap failures.
 - [x] Make the handled `Load failed` filter use normalized Sentry event messages so stackless Safari/admin-dashboard noise is suppressed more reliably.
 - [x] Add a narrow localhost/headless server filter for the `/gigs` web-stream runtime error signature so the stale local runtime issue no longer remains in the unresolved queue.
+- [x] Suppress localhost/headless talent dashboard applications fetch noise and convert real application-query captures to proper `Error` instances for clearer Sentry grouping.
 - [x] Fix the `/client/applications` mobile shell regression that was failing the `mobile-guardrails` route contract in CI.
 - [ ] Re-run the Stripe webhook route contract once the local Playwright webserver startup issue is stabilized.
 
