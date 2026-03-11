@@ -14,7 +14,10 @@ import {
   nodeEnv,
   serverIsProduction,
 } from "@/lib/sentry/env";
-import { shouldFilterLocalWebpackNoise } from "@/lib/sentry/noise-filter";
+import {
+  shouldFilterLocalServerRenderNoise,
+  shouldFilterLocalWebpackNoise,
+} from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
@@ -123,6 +126,11 @@ Sentry.init({
 
       if (shouldFilterLocalWebpackNoise(event, errorMessage)) {
         devLog("Local webpack bootstrap noise filtered from server Sentry");
+        return null;
+      }
+
+      if (shouldFilterLocalServerRenderNoise(event, errorMessage)) {
+        devLog("Local server render noise filtered from server Sentry");
         return null;
       }
       

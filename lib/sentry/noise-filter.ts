@@ -139,3 +139,37 @@ export function shouldFilterLocalResourceEventNoise(
     serializedTarget.includes("head > link")
   );
 }
+
+export function shouldFilterLocalServerRenderNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const isLocalSignal = isLocalhostUrl(getEventUrl(event)) || hasAutomationBrowserTag(event);
+  if (!isLocalSignal) return false;
+
+  const normalizedMessage = getEventMessage(event, errorMessage).toLowerCase();
+  const frames = event.exception?.values?.[0]?.stacktrace?.frames ?? [];
+
+  const mentionsLocalRenderFailure =
+    normalizedMessage.includes("cannot read properties of undefined (reading 'call')") ||
+    normalizedMessage.includes("cannot read properties of undefined (reading '/_app')") ||
+    normalizedMessage.includes("unexpected end of json input") ||
+    (normalizedMessage.includes("enoent") && normalizedMessage.includes("_document.js"));
+
+  if (!mentionsLocalRenderFailure) return false;
+
+  return frames.some((frame) => {
+    const filename = (frame.filename ?? "").toLowerCase();
+    const moduleName = (frame.module ?? "").toLowerCase();
+
+    return (
+      filename.includes("webpack/bootstrap") ||
+      filename.includes("app-page.runtime.prod") ||
+      filename.includes("pages-handler") ||
+      filename.includes("get-page-files") ||
+      filename.includes("_document.js") ||
+      filename.includes(".next/server") ||
+      moduleName.includes("webpack-runtime")
+    );
+  });
+}
