@@ -1,7 +1,7 @@
 "use client";
 
 import { XCircle } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,7 +61,6 @@ const isSupportedOtpType = (
 
 function AuthCallbackGate() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const supabase = useSupabase();
   const [state, setState] = useState<GateState>({
     kind: "checking",
@@ -74,8 +73,11 @@ function AuthCallbackGate() {
     async function run() {
       if (!supabase) return;
 
-      const error = searchParams.get("error");
-      const errorDescription = searchParams.get("error_description");
+      const currentUrl = new URL(window.location.href);
+      const currentSearchParams = currentUrl.searchParams;
+
+      const error = currentSearchParams.get("error");
+      const errorDescription = currentSearchParams.get("error_description");
       if (error) {
         setState({
           kind: "failed",
@@ -84,13 +86,13 @@ function AuthCallbackGate() {
         return;
       }
 
-      const returnUrlRaw = searchParams.get("returnUrl");
+      const returnUrlRaw = currentSearchParams.get("returnUrl");
       const safeReturn = safeReturnUrl(returnUrlRaw) ?? PATHS.TALENT_DASHBOARD;
 
       try {
-        const code = searchParams.get("code");
-        const tokenHash = searchParams.get("token_hash");
-        const otpType = searchParams.get("type");
+        const code = currentSearchParams.get("code");
+        const tokenHash = currentSearchParams.get("token_hash");
+        const otpType = currentSearchParams.get("type");
 
         let didEstablishSession = false;
 
@@ -197,7 +199,7 @@ function AuthCallbackGate() {
     return () => {
       cancelled = true;
     };
-  }, [router, searchParams, supabase]);
+  }, [router, supabase]);
 
   if (state.kind === "checking") {
     return <p className="text-gray-600 text-center mb-4">{state.message}</p>;

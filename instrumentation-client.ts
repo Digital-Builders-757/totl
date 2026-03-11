@@ -15,6 +15,7 @@ import {
   productionDSN,
   projectIdMatches,
 } from "@/lib/sentry/env";
+import { shouldFilterLocalWebpackNoise } from "@/lib/sentry/noise-filter";
 import { scrubEvent } from "@/lib/sentry/scrub";
 
 const SENTRY_DSN = currentDSN;
@@ -162,6 +163,11 @@ Sentry.init({
       error && typeof error === "object" && "message" in error
         ? String((error as { message?: unknown }).message)
         : "";
+
+    if (shouldFilterLocalWebpackNoise(event, errorMessage)) {
+      devLog("Local webpack bootstrap noise filtered from Sentry");
+      return null;
+    }
 
     // Instagram Android WebView + Sentry Replay flake (not actionable, not app code).
     if (errorMessage.includes("enableDidUserTypeOnKeyboardLogging")) {

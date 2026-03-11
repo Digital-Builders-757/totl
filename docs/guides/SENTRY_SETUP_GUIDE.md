@@ -83,20 +83,21 @@ Your Cursor MCP is configured at: `c:\Users\young\.cursor\mcp.json`
 
 ```json
 "sentry": {
-  "command": "npx",
-  "args": ["-y", "@sentry/mcp-server"],
-  "env": {
-    "SENTRY_AUTH_TOKEN": "YOUR_SENTRY_AUTH_TOKEN_HERE",
-    "SENTRY_ORG": "the-digital-builders-bi"
-  }
+  "url": "https://mcp.sentry.dev/mcp"
 }
 ```
 
 **To complete MCP setup:**
-1. Get your auth token (see above)
-2. Replace `YOUR_SENTRY_AUTH_TOKEN_HERE` in the mcp.json file
-3. Restart Cursor
-4. Type `/mcp` in chat to verify connection
+1. Add the Sentry MCP server URL above to `mcp.json`
+2. Restart or reload Cursor
+3. Approve the OAuth prompt from Sentry
+4. Choose the correct Sentry organization during auth
+5. Type `/mcp` in chat to verify connection
+
+**Why this changed:**
+- Cursor now supports Sentry's hosted OAuth MCP directly.
+- The old local `npx @sentry/mcp-server` token setup is outdated for `sentry.io` use in Cursor.
+- This avoids storing a long-lived Sentry token in local config.
 
 **Test queries:**
 ```
