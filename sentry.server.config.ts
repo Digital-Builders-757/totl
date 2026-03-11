@@ -15,6 +15,7 @@ import {
   serverIsProduction,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterLocalWebStreamNoise,
   shouldFilterLocalServerRenderNoise,
   shouldFilterLocalWebpackNoise,
 } from "@/lib/sentry/noise-filter";
@@ -131,6 +132,11 @@ Sentry.init({
 
       if (shouldFilterLocalServerRenderNoise(event, errorMessage)) {
         devLog("Local server render noise filtered from server Sentry");
+        return null;
+      }
+
+      if (shouldFilterLocalWebStreamNoise(event, errorMessage)) {
+        devLog("Local web stream runtime noise filtered from server Sentry");
         return null;
       }
       
