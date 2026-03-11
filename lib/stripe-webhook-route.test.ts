@@ -289,7 +289,47 @@ describe("/api/stripe/webhook route handler", () => {
 
     expect(res.status).toBe(400);
 
-    const loggerErrorMock = (logger.error as unknown as ReturnType<typeof vi.fn>);
+    const loggerInfoMock = logger.info as unknown as ReturnType<typeof vi.fn>;
+    expect(loggerInfoMock).toHaveBeenCalled();
+
+    const signatureDiagnosticCall = loggerInfoMock.mock.calls.find(
+      (call) => call[0] === "Ignoring non-Stripe webhook probe with invalid signature"
+    );
+    expect(signatureDiagnosticCall).toBeTruthy();
+
+    // Contract: diagnostics should include safe metadata, never raw signature values.
+    const diagnosticContext = signatureDiagnosticCall?.[1] as Record<string, unknown> | undefined;
+    expect(diagnosticContext).toBeDefined();
+    expect(diagnosticContext?.signatureHeaderLength).toBe("t=123,v1=deadbeef".length);
+    expect(diagnosticContext?.webhookSecretPresent).toBe(true);
+    expect(diagnosticContext?.signatureTimestamp).toBe(123);
+    expect(diagnosticContext).not.toHaveProperty("signature");
+  });
+
+  it("keeps invalid signature logging at error level for non-local requests", async () => {
+    const { supabase } = createSupabaseMock({});
+    (createSupabaseAdminClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue(supabase);
+
+    const payload = buildSubscriptionUpdatedEventPayload({
+      eventId: "evt_invalid_sig_remote",
+      created: 1000,
+      customerId: "cus_456",
+      subscriptionId: "sub_456",
+    });
+
+    const res = await route.POST(
+      new Request("https://www.thetotlagency.com/api/stripe/webhook", {
+        method: "POST",
+        headers: {
+          "stripe-signature": "t=123,v1=deadbeef",
+        },
+        body: payload,
+      })
+    );
+
+    expect(res.status).toBe(400);
+
+    const loggerErrorMock = logger.error as unknown as ReturnType<typeof vi.fn>;
     expect(loggerErrorMock).toHaveBeenCalled();
 
     const signatureDiagnosticCall = loggerErrorMock.mock.calls.find(
@@ -297,13 +337,10 @@ describe("/api/stripe/webhook route handler", () => {
     );
     expect(signatureDiagnosticCall).toBeTruthy();
 
-    // Contract: diagnostics should include safe metadata, never raw signature values.
     const diagnosticContext = signatureDiagnosticCall?.[2] as Record<string, unknown> | undefined;
-    expect(diagnosticContext).toBeDefined();
     expect(diagnosticContext?.signatureHeaderLength).toBe("t=123,v1=deadbeef".length);
     expect(diagnosticContext?.webhookSecretPresent).toBe(true);
     expect(diagnosticContext?.signatureTimestamp).toBe(123);
-    expect(diagnosticContext).not.toHaveProperty("signature");
   });
 
   it("is idempotent by event.id: duplicate event short-circuits without double side effects", async () => {
