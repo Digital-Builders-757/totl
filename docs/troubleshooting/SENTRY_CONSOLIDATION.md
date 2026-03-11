@@ -1,7 +1,7 @@
 # 🔄 Sentry Project Consolidation
 
-**Date:** January 2025  
-**Status:** ✅ Complete - All errors now go to `sentry-yellow-notebook`
+**Date:** January 2025 (updated March 2026)  
+**Status:** ✅ Complete - All errors now go to `totlmodelagency`
 
 ---
 
@@ -10,12 +10,13 @@
 **Before:**
 - ❌ Errors were going to two different projects:
   - `javascript-nextjs` (old project) - receiving all errors
-  - `sentry-yellow-notebook` (correct project) - receiving 0 errors
+  - `sentry-yellow-notebook` / `totlmodelagency` (correct project) - receiving 0 errors
 
 **After:**
-- ✅ All errors now go to **`sentry-yellow-notebook`** project
+- ✅ All errors now go to **`totlmodelagency`** project
 - ✅ Single source of truth for error tracking
 - ✅ Consistent across all environments (development, preview, production)
+- ✅ Shared noise filtering in `lib/sentry/noise-filter.ts` (see [SENTRY_NOISE_FILTERING.md](./SENTRY_NOISE_FILTERING.md))
 
 ---
 
@@ -23,7 +24,7 @@
 
 ### **1. Updated Sentry Configuration Files**
 
-All Sentry config files now use the `sentry-yellow-notebook` DSN:
+All Sentry config files now use the `totlmodelagency` DSN:
 
 - ✅ `sentry.server.config.ts` - Server-side errors
 - ✅ `instrumentation-client.ts` - Client-side errors (Next.js 15.3+ convention, replaces deprecated `sentry.client.config.ts`)
@@ -38,7 +39,7 @@ https://9f271197ad8ee6ef9c43094ffae46796@o4510191106654208.ingest.us.sentry.io/4
 
 ### **2. Updated Test Page**
 
-- ✅ Updated `/test-sentry` page to reference `sentry-yellow-notebook`
+- ✅ Updated `/test-sentry` page to reference `totlmodelagency`
 - ✅ Removed references to old `javascript-nextjs` project
 
 ---
@@ -66,24 +67,24 @@ npm run dev
 
 1. Visit: `http://localhost:3000/test-sentry`
 2. Click "💥 Throw Test Error"
-3. Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
-4. **You should now see the error in `sentry-yellow-notebook`!**
+3. Check Sentry dashboard: https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
+4. **You should now see the error in `totlmodelagency`!**
 
 ### **3. Test API Endpoint**
 
 1. Visit: `http://localhost:3000/api/test-sentry?type=error`
-2. Check `sentry-yellow-notebook` project dashboard
+2. Check `totlmodelagency` project dashboard
 3. Error should appear within 5-10 seconds
 
 ---
 
 ## 📊 Expected Behavior
 
-### **All Environments Now Use `sentry-yellow-notebook`:**
+### **All Environments Now Use `totlmodelagency`:**
 
-- ✅ **Local Development** → `sentry-yellow-notebook` project
-- ✅ **Vercel Preview** → `sentry-yellow-notebook` project  
-- ✅ **Vercel Production** → `sentry-yellow-notebook` project
+- ✅ **Local Development** → `totlmodelagency` project
+- ✅ **Vercel Preview** → `totlmodelagency` project  
+- ✅ **Vercel Production** → `totlmodelagency` project
 
 **Environment Tags:**
 - Development: `development`
@@ -96,7 +97,7 @@ npm run dev
 
 ### **For Local Development**
 
-No changes needed! The fallback DSN now points to `sentry-yellow-notebook`.
+No changes needed! The fallback DSN now points to `totlmodelagency`.
 
 **Optional:** You can still set these in `.env.local` if you want:
 ```bash
@@ -118,7 +119,7 @@ SENTRY_AUTH_TOKEN=your_sentry_auth_token
 
 # Sentry Organization and Project
 SENTRY_ORG=the-digital-builders-bi
-SENTRY_PROJECT=sentry-yellow-notebook
+SENTRY_PROJECT=totlmodelagency
 ```
 
 ---
@@ -129,25 +130,25 @@ The old `javascript-nextjs` project can be:
 - **Archived** in Sentry (if you want to keep it for historical reference)
 - **Deleted** (if you don't need the old errors)
 
-**Note:** The old project will stop receiving new errors automatically since all configs now point to `sentry-yellow-notebook`.
+**Note:** The old project will stop receiving new errors automatically since all configs now point to `totlmodelagency`.
 
 ---
 
 ## ✅ Verification Checklist
 
-- [x] Updated `sentry.server.config.ts` to use `sentry-yellow-notebook` DSN
+- [x] Updated `sentry.server.config.ts` to use `totlmodelagency` DSN
 - [x] Migrated client-side config to `instrumentation-client.ts` (Next.js 15.3+)
 - [x] Removed deprecated `sentry.client.config.ts` file
-- [x] Updated `sentry.edge.config.ts` to use `sentry-yellow-notebook` DSN
+- [x] Updated `sentry.edge.config.ts` to use `totlmodelagency` DSN
 - [x] Updated test page references
-- [ ] Tested locally - errors appear in `sentry-yellow-notebook`
-- [ ] Verified production errors go to `sentry-yellow-notebook`
+- [ ] Tested locally - errors appear in `totlmodelagency`
+- [ ] Verified production errors go to `totlmodelagency`
 
 ---
 
 ## 🎉 Result
 
-**All errors from all environments now go to a single project: `sentry-yellow-notebook`**
+**All errors from all environments now go to a single project: `totlmodelagency`**
 
 This makes it much easier to:
 - Monitor all errors in one place
@@ -157,7 +158,7 @@ This makes it much easier to:
 
 ---
 
-**Sentry Dashboard:** https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/
+**Sentry Dashboard:** https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/
 
 
 

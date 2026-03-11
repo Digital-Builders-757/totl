@@ -244,13 +244,15 @@
 - Release tracking (git commit hashes)
 
 **Custom Filtering:**
+- Shared noise filters in `lib/sentry/noise-filter.ts` (see [SENTRY_NOISE_FILTERING.md](../troubleshooting/SENTRY_NOISE_FILTERING.md))
+- Localhost/webpack/bootstrap, headless browser, Supabase lock abort, web stream, React Client Manifest
 - Development errors filtered (EPIPE, webpack HMR)
 - Production errors fully monitored
-- Smart `beforeSend` hooks for noise reduction
+- Smart `beforeSend` hooks in client, server, and edge configs
 
 **Sentry Organization:**
 - Org: `the-digital-builders-bi`
-- Project: `sentry-yellow-notebook`
+- Project: `totlmodelagency`
 - Tunnel Route: `/monitoring` (bypasses ad blockers)
 
 **Integration:**

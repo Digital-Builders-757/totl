@@ -9,6 +9,11 @@
 - `COMMON_ERRORS_QUICK_REFERENCE.md` - fastest copy/paste fixes and recurring failure modes
 - `TROUBLESHOOTING_GUIDE.md` - broader issue catalog and recovery patterns
 
+## Sentry & Error Tracking
+
+- `SENTRY_NOISE_FILTERING.md` - shared noise filter reference, patterns, and how to add new filters
+- `SENTRY_CONSOLIDATION.md` - project consolidation and DSN configuration
+
 ## High-Value Debugging Guides
 
 - `AUTH_SESSION_MISSING_ERROR_FIX.md` - auth bootstrap guest-mode noise fix

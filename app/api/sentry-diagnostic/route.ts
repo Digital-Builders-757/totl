@@ -83,9 +83,9 @@ export async function GET() {
       },
     },
     expectedProject: {
-      name: "sentry-yellow-notebook",
+      name: "totlmodelagency",
       id: "4510191108292609",
-      url: "https://sentry.io/organizations/the-digital-builders-bi/projects/sentry-yellow-notebook/",
+      url: "https://sentry.io/organizations/the-digital-builders-bi/projects/totlmodelagency/",
     },
     testError: {
       captured: !!testErrorId,

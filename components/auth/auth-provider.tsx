@@ -186,6 +186,18 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     return m.includes("aborterror") && m.includes("signal is aborted");
   };
 
+  const isLocalOrAutomationClient = () => {
+    if (typeof window === "undefined") return false;
+
+    const hostname = window.location.hostname;
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+      return true;
+    }
+
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    return userAgent.includes("headlesschrome") || userAgent.includes("electron");
+  };
+
   const mapProfileRow = (row: {
     role: UserRole;
     account_type: AccountType | null;
@@ -770,10 +782,16 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
           if (mounted && isLoadingRef.current && !hasTimedOutRef.current) {
             const elapsedMs = Date.now() - bootstrapStartedAt;
             hasTimedOutRef.current = true;
-            logger.warn("[auth.timeout] Bootstrap exceeded timeout threshold", {
+            const timeoutContext = {
               thresholdMs: hardTimeoutMs,
               elapsedMs,
-            });
+            };
+
+            if (isLocalOrAutomationClient()) {
+              logger.info("[auth.timeout] Bootstrap exceeded timeout threshold", timeoutContext);
+            } else {
+              logger.warn("[auth.timeout] Bootstrap exceeded timeout threshold", timeoutContext);
+            }
             breadcrumb({ phase: "timeout_hard", threshold: hardTimeoutMs, elapsedMs });
             setShowTimeoutRecovery(true);
           }
