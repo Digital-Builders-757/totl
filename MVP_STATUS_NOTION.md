@@ -32,6 +32,8 @@
 
 **Verification:** All cursor command paths unchanged; /plan, /implement, /Ship, /pr flow preserved. `npm run docs:verify-paths` passes.
 
+**Shipped:** Mar 12, 2026 — docs overhaul commit (subdirectory READMEs, archive moves, CI doc path guard).
+
 ## 🚀 **Latest: Mobile guardrails — Gigs→Opportunities test alignment (March 12, 2026)**
 
 **CI / PLAYWRIGHT** - March 12, 2026

@@ -42,6 +42,14 @@ If an archived document conflicts with a current contract, journey, constitution
 - `CAREER_BUILDER_LOGIN_SIGNUP_ANALYSIS.md`
 - `CAREER_BUILDER_SIGNUP_FIX_PLAN.md`
 
+### Docs Overhaul (March 2026)
+
+- `ORGANIZATION_SUMMARY.md` — Superseded by `DOCUMENTATION_INDEX.md`
+- `GOLD_STANDARD_IMPLEMENTATION_COMPLETE.md` — One-off completion report
+- `BETA_TESTING_CHECKLIST.md` — Superseded by `qa/BETA_SMOKE_TEST_CHECKLIST_2026-03-05.md`
+- `COMPREHENSIVE_QA_CHECKLIST.md` — Use `development/PRE_PUSH_CHECKLIST.md` + `qa/README.md` (stub at `docs/COMPREHENSIVE_QA_CHECKLIST.md`)
+- `UI_UX_TESTING_GUIDE.md` — Use `audits/UI_UX_SCREENSHOT_REMEDIATION_REPORT_2026-03-03.md` + `qa/README.md` (stub at `docs/UI_UX_TESTING_GUIDE.md`)
+
 ## When To Add Something Here
 
 Move a doc into `docs/archive/` when:

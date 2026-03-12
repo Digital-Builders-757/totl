@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** March 9, 2026
+**Last Updated:** March 11, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -31,17 +31,18 @@ All other documentation has been organized into the `docs/` folder with the foll
 | `docs/guides/` | User guides, developer guides, setup instructions (`guides/README.md`) |
 | `docs/development/` | Coding standards, type safety, development practices (`development/README.md`) |
 | `docs/features/` | Feature implementation documentation (`features/README.md`) |
-| `docs/troubleshooting/` | Error fixes, debugging guides, common issues |
+| `docs/troubleshooting/` | Error fixes, debugging guides, common issues (`troubleshooting/README.md`) |
 | | `AUTH_BREADCRUMB_ANALYSIS_REPORT.md` | Comprehensive analysis of auth breadcrumb strings and debugging infrastructure |
 | | `AUTH_SESSION_MISSING_ERROR_FIX.md` | Fix for AuthSessionMissingError Sentry noise (session gate + route-aware handling) |
 | | `AUTH_SESSION_MISSING_ERROR_FIX_SUMMARY.md` | Final implementation summary with acceptance criteria |
 | `docs/performance/` | Performance optimization documentation (`performance/README.md`) |
-| `docs/security/` | Security configuration and standards |
-| `docs/audits/` | Audit reports and implementation summaries |
-| `docs/contracts/` | Domain contracts (Layer 2 source of truth) |
-| `docs/journeys/` | User journeys (Layer 3 source of truth) |
-| `docs/diagrams/` | Architecture diagrams and visual documentation |
-| `docs/tests/` | Test documentation and matrices |
+| `docs/security/` | Security configuration and standards (`security/README.md`) |
+| `docs/audits/` | Audit reports and implementation summaries (`audits/README.md`) |
+| `docs/contracts/` | Domain contracts (Layer 2 source of truth) (`contracts/README.md`) |
+| `docs/journeys/` | User journeys (Layer 3 source of truth) (`journeys/README.md`) |
+| `docs/diagrams/` | Architecture diagrams and visual documentation (`diagrams/README.md`) |
+| `docs/tests/` | Test documentation and matrices (`tests/README.md`) |
+| `docs/plans/` | Design plans and implementation summaries (`plans/README.md`) |
 | `docs/archive/` | Historical / superseded documentation (`archive/README.md`) |
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
@@ -180,7 +181,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `TYPESCRIPT_COMMON_ERRORS.md` - ⚡ **QUICK REFERENCE** - Common TypeScript errors & instant solutions (Nov 2, 2025)
 - `TYPESCRIPT_REFACTOR_NOVEMBER_2025.md` - 📋 **NEW** - Complete refactor summary & learnings (Nov 2, 2025)
 - `TYPES_SYNC_PREVENTION_SYSTEM.md` - 🚨 **CRITICAL** - Complete types synchronization prevention system (Oct 24, 2025)
-- `COMPREHENSIVE_QA_CHECKLIST.md` - 🚨 **MANDATORY** - Complete QA checklist for all features (Oct 24, 2025)
+- `COMPREHENSIVE_QA_CHECKLIST.md` - Legacy stub; use `development/PRE_PUSH_CHECKLIST.md` + `qa/README.md` (archived: `archive/COMPREHENSIVE_QA_CHECKLIST.md`)
 - `CSS_BEST_PRACTICES.md` - 🚨 **CRITICAL** - CSS best practices to prevent build failures (Oct 24, 2025)
 - `NEXTJS_15_COOKIES_ERROR_FIX.md` - 🚨 **CRITICAL** - Next.js 15 App Router cookies error fix (Oct 24, 2025)
 - `IMPORT_PATH_BEST_PRACTICES.md` - **NEW** ✅ - Import path best practices and error prevention (Oct 23, 2025)
@@ -249,6 +250,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
 - `OFF_SYNC_INVENTORY.md` - Winners declared + drift remediation tracker (Dec 2025)
+- `DOCS_OVERHAUL_PLAN_2026.md` - Design plan for docs overhaul (Approach A implemented Mar 2026)
 - `NEW_DEV_ONBOARDING.md` - **NEW** - New developer onboarding (“operate the airport”) (Dec 2025)
 
 ---

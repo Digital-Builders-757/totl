@@ -359,7 +359,7 @@ GITHUB_REF=refs/heads/main npm run schema:verify:comprehensive
 
 ## 📚 **Related Documentation**
 
-- `docs/COMPREHENSIVE_QA_CHECKLIST.md` - Mandatory QA process
+- `docs/development/PRE_PUSH_CHECKLIST.md` - Mandatory pre-push verification
 - `docs/CSS_BEST_PRACTICES.md` - CSS guidelines
 - `docs/NEXTJS_15_COOKIES_ERROR_FIX.md` - Next.js 15 fixes
 - `database_schema_audit.md` - Schema documentation

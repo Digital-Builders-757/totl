@@ -121,5 +121,5 @@ Repeat for any additional personas you want to exercise (e.g., `Northwind Events
 
 **Last updated:** November 27, 2025  
 **Maintainer:** TOTL Engineering  
-**Related docs:** `supabase/seed.sql`, `docs/COMPREHENSIVE_QA_CHECKLIST.md`, `MVP_STATUS_NOTION.md` (Testing Expansion)
+**Related docs:** `supabase/seed.sql`, `docs/development/PRE_PUSH_CHECKLIST.md`, `docs/qa/README.md`, `MVP_STATUS_NOTION.md` (Testing Expansion)
 
