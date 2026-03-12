@@ -102,7 +102,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       // Redirect to dashboard
       router.push(PATHS.CLIENT_DASHBOARD);
     } catch (err) {
-      logger.error("Error updating profile", err instanceof Error ? err : new Error(String(err)));
+      logger.error("Error updating profile", err);
       
       // Extract error message from various error types
       let errorMessage = "An unexpected error occurred";

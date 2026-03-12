@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Logger Bugbot fix + faceted search sort (March 12, 2026)**
+
+**OBSERVABILITY / FACETED SEARCH** - March 12, 2026
+- ✅ **Logger error wrapping (Cursor Bugbot):** Removed manual `err instanceof Error ? err : new Error(String(err))` pattern in post-gig, talent/[slug], claim-email-send, client-profile-form. Pass raw `err` to `logger.error()` so `toError` and `safeExtraFromError` preserve Supabase PostgrestError fields (message, code, details, hint).
+- ✅ **Gigs sort options:** Added sort dropdown (Newest first, Soonest date first, Highest pay first, Lowest pay first). URL param `sort`; constants in `lib/constants/gigs-sort.ts`.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Sentry/Bugbot fixes — Upcoming timezone + pay range (March 12, 2026)**
 
 **FACETED SEARCH / PAY RANGE** - March 12, 2026
@@ -4506,6 +4514,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Sentry/Bugbot fixes (Upcoming timezone, pay range regex/gap); Logger P0–P3*
+*Current Status: MVP Complete - Logger Bugbot fix (pass raw err); Faceted search sort (newest, soonest, pay high/low)*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

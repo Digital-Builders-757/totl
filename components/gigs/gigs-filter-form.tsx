@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
+import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { PAY_RANGE_OPTIONS, type PayRangeValue } from "@/lib/constants/pay-range-filter";
 
 /** YYYY-MM-DD in user's local timezone */
@@ -22,6 +23,7 @@ export interface GigsFilterFormProps {
   location: string;
   compensation: string;
   payRange: PayRangeValue;
+  sort: GigsSortValue;
   upcoming: boolean;
 }
 
@@ -31,6 +33,7 @@ export function GigsFilterForm({
   location,
   compensation,
   payRange,
+  sort,
   upcoming,
 }: GigsFilterFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -95,6 +98,17 @@ export function GigsFilterForm({
         >
           {PAY_RANGE_OPTIONS.map((opt) => (
             <option key={opt.value || "any"} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <select
+          name="sort"
+          defaultValue={sort}
+          className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+        >
+          {GIGS_SORT_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}

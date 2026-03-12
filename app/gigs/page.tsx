@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
+import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -63,6 +64,9 @@ export default async function GigsPage({
   const upcoming =
     sp.upcoming === "1" || sp.upcoming === "true" || sp.upcoming === "yes";
   const localDateRaw = typeof sp.local_date === "string" ? sp.local_date.trim() : "";
+  const sortRaw = typeof sp.sort === "string" ? sp.sort.trim() : "";
+  const sort: GigsSortValue =
+    GIGS_SORT_OPTIONS.some((o) => o.value === sortRaw) ? (sortRaw as GigsSortValue) : "newest";
   const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 9;
@@ -125,10 +129,26 @@ export default async function GigsPage({
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
+  // Apply sort
+  switch (sort) {
+    case "newest":
+      query = query.order("created_at", { ascending: false });
+      break;
+    case "soonest":
+      query = query.order("date", { ascending: true, nullsFirst: false });
+      break;
+    case "pay_high":
+      query = query.order("compensation_numeric", { ascending: false, nullsFirst: false });
+      break;
+    case "pay_low":
+      query = query.order("compensation_numeric", { ascending: true, nullsFirst: true });
+      break;
+    default:
+      query = query.order("created_at", { ascending: false });
+  }
+
   // Build query promise (not executed yet)
-  const gigsPromise = query
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  const gigsPromise = query.range(from, to);
 
   // Fetch profile in parallel (no dependency on gigs query)
   const profilePromise = supabase
@@ -200,6 +220,7 @@ export default async function GigsPage({
     if (location) params.set("location", location);
     if (compensation) params.set("compensation", compensation);
     if (payRange) params.set("pay_range", payRange);
+    if (sort !== "newest") params.set("sort", sort);
     if (upcoming) params.set("upcoming", "1");
     if (localDateRaw && /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw))
       params.set("local_date", localDateRaw);
@@ -289,6 +310,7 @@ export default async function GigsPage({
                 location={location}
                 compensation={compensation}
                 payRange={payRange}
+                sort={sort}
                 upcoming={upcoming}
               />
             </div>
