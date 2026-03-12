@@ -8,11 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: compensation_numeric regex capture-group fix (March 12, 2026)**
+
+**FACETED SEARCH / PAY RANGE** - March 12, 2026
+- ✅ **Sentry/Bugbot:** Pattern `(\.[0-9]+)?` created a capture group; PostgreSQL `regexp_match` [1] returned only that group (decimal part), not full number. Integer compensations produced NULL; decimals produced fractional part only (e.g. 0.50 instead of 1500.50).
+- ✅ **Fix:** Non-capturing group `(?:\.[0-9]+)?` so [1] returns full match. Migration `20260312211447_fix_compensation_numeric_regex_non_capturing.sql`.
+
+**Verification:** schema:verify, types:check, build, lint; `supabase db push`.
+
+## 🚀 **Latest: Logger Bugbot fix + faceted search sort (March 12, 2026)**
+
+**OBSERVABILITY / FACETED SEARCH** - March 12, 2026
+- ✅ **Logger error wrapping (Cursor Bugbot):** Removed manual `err instanceof Error ? err : new Error(String(err))` pattern in post-gig, talent/[slug], claim-email-send, client-profile-form. Pass raw `err` to `logger.error()` so `toError` and `safeExtraFromError` preserve Supabase PostgrestError fields (message, code, details, hint).
+- ✅ **Gigs sort options:** Added sort dropdown (Newest first, Soonest date first, Highest pay first, Lowest pay first). URL param `sort`; constants in `lib/constants/gigs-sort.ts`. Both pay sorts use `nullsFirst: false` so unknown-compensation gigs appear last.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Sentry/Bugbot fixes — Upcoming timezone + pay range (March 12, 2026)**
 
 **FACETED SEARCH / PAY RANGE** - March 12, 2026
 - ✅ **Upcoming filter timezone:** Client sends `local_date` on form submit; server uses user's local date instead of UTC.
-- ✅ **compensation_numeric regex:** New migration fixes regex to require digit, at most one decimal (`[0-9][0-9,]*(\.[0-9]+)?`); avoids dot-only matches (e.g. "Negotiable.") and invalid numbers ("1.2.3") that crashed gig INSERT.
+- ✅ **compensation_numeric regex:** New migration fixes regex to require digit, at most one decimal; use non-capturing `(?:\.[0-9]+)?` so regexp_match [1] returns full number (see capture-group fix migration).
 - ✅ **Pay range gap:** "Under $500" now uses `max: 499.99` to include 499.01–499.99.
 - ✅ **Select cleanup:** Removed unused `compensation_numeric` from gigs page select.
 
@@ -4506,6 +4522,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Sentry/Bugbot fixes (Upcoming timezone, pay range regex/gap); Logger P0–P3*
+*Current Status: MVP Complete - compensation_numeric regex non-capturing fix; Logger Bugbot; Faceted search sort*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

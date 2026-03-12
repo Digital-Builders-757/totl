@@ -120,7 +120,7 @@ export async function claimEmailSend(args: ClaimArgs): Promise<ClaimEmailSendRes
 
     return { didClaim: true, ledgerId: data.id, idempotencyKey, cooldownBucketIso };
   } catch (e) {
-    logger.error("[totl][email-ledger] claim threw", e instanceof Error ? e : new Error(String(e)), {
+    logger.error("[totl][email-ledger] claim threw", e, {
       purpose: args.purpose,
       cooldownBucketIso,
     });

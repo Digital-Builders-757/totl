@@ -102,11 +102,21 @@ npm run build
   - **Implementation:** Client component adds hidden `local_date` input on submit via `new Date().toLocaleDateString("en-CA")`; server reads `local_date` from searchParams when `upcoming` is true
 - **compensation_numeric regex crashes gig INSERT:** Migration regex `[\d,\.]+` matches dot-only (e.g. "Negotiable.") or invalid numbers ("1.2.3"), causing ::numeric cast to fail
   - **Symptom:** Gig creation fails when compensation text contains only punctuation or multiple decimal points
-  - **Fix:** Use regex `[0-9][0-9,]*(\.[0-9]+)?` — requires at least one digit, at most one decimal point
+  - **Fix:** Use regex `[0-9][0-9,]*(?:\.[0-9]+)?` — requires at least one digit, at most one decimal; use non-capturing `(?:...)` so regexp_match [1] returns full match
   - **Migration:** Create new migration to drop and re-add compensation_numeric with the safer regex (never edit existing migrations)
+- **compensation_numeric capture group breaks pay range:** Pattern `(\.[0-9]+)?` creates a capture group; PostgreSQL regexp_match [1] returns only that group (decimal part), not full number
+  - **Symptom:** Integer compensations (e.g. "$1,500") produce NULL; decimals (e.g. "$1,500.50") produce 0.50 instead of 1500.50; pay range filter returns wrong/empty results
+  - **Fix:** Use non-capturing group `(?:\.[0-9]+)?` so [1] returns the full matched number
+  - **Migration:** `20260312211447_fix_compensation_numeric_regex_non_capturing.sql`
+- **"Lowest pay first" sort shows unknown-pay gigs first:** pay_low used `nullsFirst: true`, placing NULL compensation_numeric at top
+  - **Fix:** Use `nullsFirst: false` for both pay_high and pay_low so unknown-compensation gigs appear last
 - **Pay range "Under $500" excludes 499.01–499.99:** Filter used `max: 499` with `.lte()`, creating a gap
   - **Fix:** Use `max: 499.99` in `getPayRangeBounds` for `under_500` case
   - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs; or use `.first()` in specs when both are present
+- **Logger error wrapping defeats structured extraction (Cursor Bugbot):** Pattern `err instanceof Error ? err : new Error(String(err))` passed to `logger.error()` loses Supabase error fields (message, code, details, hint)
+  - **Symptom:** Sentry shows "[object Object]" or generic messages instead of PostgrestError details
+  - **Fix:** Pass the raw error directly: `logger.error("message", err)` — the logger's `toError` and `safeExtraFromError` handle non-Error objects correctly
+  - **Avoid:** Manual wrapping; server-side files (boot-actions, portfolio-actions) correctly pass errors directly
 - **Dashboard Infinite Loading:** `useSupabase()` hook excluded from useEffect dependencies, causing effect to run once with null client and never re-run when client initializes
   - **Fix:** Include `supabase` in useEffect dependency array to handle null → non-null transition
   - **Prevention:** Always include hooks that return null initially in dependencies, even if they're "memoized singletons"

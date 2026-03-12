@@ -94,7 +94,7 @@ export default function PostGigPage() {
       // Redirect to client dashboard
       router.push("/client/dashboard");
     } catch (err) {
-      logger.error("Error creating gig", err instanceof Error ? err : new Error(String(err)));
+      logger.error("Error creating gig", err);
       setError(err instanceof Error ? err.message : "Failed to create opportunity");
     } finally {
       setIsSubmitting(false);
