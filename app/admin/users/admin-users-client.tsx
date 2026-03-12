@@ -88,18 +88,25 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
 
   // Filter users based on search query and active tab
   const filteredUsers = useMemo(() => {
-    let filtered = users;
+    let filtered: typeof users;
 
-    // Filter by role based on active tab
-    if (activeTab === "talent") {
-      filtered = filtered.filter((u) => u.role === "talent");
-    } else if (activeTab === "career-builders") {
-      filtered = filtered.filter((u) => u.role === "client");
-    } else if (activeTab === "admins") {
-      filtered = filtered.filter((u) => u.role === "admin");
+    if (activeTab === "suspended") {
+      // Suspended tab: only users where is_suspended === true
+      filtered = users.filter((u) => u.is_suspended === true);
+    } else {
+      // All other tabs: exclude suspended users by default
+      filtered = users.filter((u) => u.is_suspended !== true);
+      // Filter by role based on active tab
+      if (activeTab === "talent") {
+        filtered = filtered.filter((u) => u.role === "talent");
+      } else if (activeTab === "career-builders") {
+        filtered = filtered.filter((u) => u.role === "client");
+      } else if (activeTab === "admins") {
+        filtered = filtered.filter((u) => u.role === "admin");
+      }
     }
 
-    // Filter by search query
+    // Filter by search query (within tab's dataset)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -113,10 +120,12 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     return filtered;
   }, [users, searchQuery, activeTab]);
 
-  // Group by role for stats
-  const talentUsers = users.filter((u) => u.role === "talent");
-  const careerBuilderUsers = users.filter((u) => u.role === "client");
-  const adminUsers = users.filter((u) => u.role === "admin");
+  // Group by role for stats (exclude suspended from active tab counts)
+  const talentUsers = users.filter((u) => u.role === "talent" && u.is_suspended !== true);
+  const careerBuilderUsers = users.filter((u) => u.role === "client" && u.is_suspended !== true);
+  const adminUsers = users.filter((u) => u.role === "admin" && u.is_suspended !== true);
+  const suspendedUsers = users.filter((u) => u.is_suspended === true);
+  const activeAllCount = users.filter((u) => u.is_suspended !== true).length;
 
   const handleDisableUser = async () => {
     if (!userToDisable || !disableConfirmChecked) return;
@@ -480,6 +489,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
               { label: "Talent", value: talentUsers.length, icon: Users },
               { label: "Career Builders", value: careerBuilderUsers.length, icon: Briefcase },
               { label: "Admins", value: adminUsers.length, icon: Shield },
+              { label: "Suspended", value: suspendedUsers.length, icon: XCircle },
             ]}
           />
         </div>
@@ -493,6 +503,9 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           </div>
           <div className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2 text-sm font-medium text-white">
             {adminUsers.length} Admins
+          </div>
+          <div className="rounded-lg bg-gradient-to-r from-rose-500 to-rose-600 px-3 py-2 text-sm font-medium text-white">
+            {suspendedUsers.length} Suspended
           </div>
         </div>
 
@@ -526,7 +539,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
               <MobileTabRail edgeColorClassName="from-gray-900">
                 <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
                   <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                    All ({users.length})
+                    All ({activeAllCount})
                   </TabsTrigger>
                   <TabsTrigger value="talent" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                     Talent ({talentUsers.length})
@@ -537,14 +550,17 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   <TabsTrigger value="admins" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                     Admins ({adminUsers.length})
                   </TabsTrigger>
+                  <TabsTrigger value="suspended" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
+                    Suspended ({suspendedUsers.length})
+                  </TabsTrigger>
                 </TabsList>
               </MobileTabRail>
-              <TabsList className="hidden h-12 border border-gray-600 bg-gray-700/50 md:grid md:grid-cols-4">
+              <TabsList className="hidden h-12 border border-gray-600 bg-gray-700/50 md:grid md:grid-cols-5">
                 <TabsTrigger
                   value="all"
                   className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
-                  All ({users.length})
+                  All ({activeAllCount})
                 </TabsTrigger>
                 <TabsTrigger
                   value="talent"
@@ -564,6 +580,12 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 >
                   Admins ({adminUsers.length})
                 </TabsTrigger>
+                <TabsTrigger
+                  value="suspended"
+                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white"
+                >
+                  Suspended ({suspendedUsers.length})
+                </TabsTrigger>
               </TabsList>
             </div>
 
@@ -580,6 +602,10 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             </TabsContent>
 
             <TabsContent value="admins" className="p-0">
+              {renderUsersContent()}
+            </TabsContent>
+
+            <TabsContent value="suspended" className="p-0">
               {renderUsersContent()}
             </TabsContent>
           </Tabs>
