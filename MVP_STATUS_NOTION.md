@@ -33,7 +33,7 @@
 - ✅ Admin dashboard: "Gig Management" → "Opportunity Management", "Manage all your platform gigs" → "opportunities".
 
 **Next (P1 - follow-up)**
-- [ ] Consider adding a changelog or release note for client-facing terminology change.
+- [x] Consider adding a changelog or release note for client-facing terminology change. *(Completed: `docs/releasenotes/v1.2.0.md` + `v1.2.0-team.md`)*
 
 ## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
 

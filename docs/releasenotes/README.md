@@ -16,6 +16,20 @@ Release notes are published on the **first business day of each month**, coverin
 
 ## Current Releases
 
+### [v1.2.0](./v1.2.0.md) - Opportunities Terminology & UX Polish
+**Date:** March 12, 2026  
+**Status:** ✅ COMPLETE  
+**Audience:** Technical stakeholders
+
+Client-facing terminology update (Gigs → Opportunities), expanded Opportunity Type filter (Events, Others), and opportunity cover image specs (1200×900 px).
+
+### [v1.2.0 - Team Version](./v1.2.0-team.md) - Terminology Update
+**Date:** March 12, 2026  
+**Status:** ✅ COMPLETE  
+**Audience:** Non-technical team members
+
+Non-technical release notes covering the Gigs → Opportunities terminology change, new filter options, and image upload guidance.
+
 ### [v1.1.0](./v1.1.0.md) - UX Improvements & Architecture Hardening
 **Date:** February 4, 2026  
 **Status:** ✅ COMPLETE  
