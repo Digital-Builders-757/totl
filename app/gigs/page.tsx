@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
 import { GigsFilterForm } from "@/components/gigs/gigs-filter-form";
+import { SavedSearchesBar } from "@/components/gigs/saved-searches-bar";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -304,6 +305,19 @@ export default async function GigsPage({
           {/* Search and Filter */}
           <div className="max-w-4xl mx-auto mb-10 sm:mb-14">
             <div className="panel-frosted grain-texture relative p-4 sm:p-6 md:p-8 shadow-lg">
+              <SavedSearchesBar
+                currentParams={{
+                  q: rawKeyword || undefined,
+                  category: category || undefined,
+                  location: location || undefined,
+                  compensation: compensation || undefined,
+                  pay_range: payRange || undefined,
+                  upcoming: upcoming || undefined,
+                  local_date: localDateRaw && /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw) ? localDateRaw : undefined,
+                  sort: sort !== "newest" ? sort : undefined,
+                }}
+              />
+              <div className="mt-4 sm:mt-6">
               <GigsFilterForm
                 rawKeyword={rawKeyword}
                 category={category}
@@ -313,6 +327,7 @@ export default async function GigsPage({
                 sort={sort}
                 upcoming={upcoming}
               />
+              </div>
             </div>
           </div>
 
