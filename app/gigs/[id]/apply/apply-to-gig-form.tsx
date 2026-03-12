@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { logger } from "@/lib/utils/logger";
 
 interface ApplyToGigFormProps {
   gig: {
@@ -45,7 +46,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
           ? "Application error: Database connection unavailable. Please contact support."
           : "Database connection not available. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local";
       
-      console.error("[ApplyToGigForm] Supabase client is null", {
+      logger.error("[ApplyToGigForm] Supabase client is null", undefined, {
         nodeEnv: process.env.NODE_ENV,
         hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
         hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -64,7 +65,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        console.error("[ApplyToGigForm] Auth error:", userError);
+        logger.error("[ApplyToGigForm] Auth error:", userError ?? undefined);
         setError("You must be logged in to apply for gigs.");
         setSubmitting(false);
         return;
@@ -88,32 +89,12 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
 
       // Handle query errors (including missing apikey header)
       if (queryError) {
-        const errorDetails = {
-          code: queryError.code,
-          message: queryError.message,
-          details: queryError.details,
-          hint: queryError.hint,
+        logger.error("[ApplyToGigForm] Query error", queryError, {
+          feature: "application-check",
+          error_code: queryError.code ?? "UNKNOWN",
           gigId: gig.id,
-        };
-
-        console.error("[ApplyToGigForm] Query error:", errorDetails);
-
-        // Send to Sentry with full context
-        const Sentry = await import("@sentry/nextjs");
-        Sentry.captureException(queryError, {
-          tags: {
-            feature: "application-check",
-            error_type: "supabase_query_error",
-            error_code: queryError.code || "UNKNOWN",
-            supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-          },
-          extra: {
-            ...errorDetails,
-            userId: user.id,
-            userEmail: user.email,
-            hasSupabaseClient: !!supabase,
-          },
-          level: "error",
+          userId: user.id,
+          userEmail: user.email,
         });
 
         // Check for missing API key error specifically
@@ -151,42 +132,14 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       // Success! Redirect to dashboard with success message
       router.push("/talent/dashboard?applied=success");
     } catch (err) {
-      // Enhanced error logging for production debugging
       const errorMessage = err instanceof Error ? err.message : String(err);
-      const errorStack = err instanceof Error ? err.stack : undefined;
-      
-      console.error("[ApplyToGigForm] Unexpected error:", {
-        error: err,
-        message: errorMessage,
-        stack: errorStack,
+      logger.error("[ApplyToGigForm] Unexpected error", err instanceof Error ? err : new Error(errorMessage), {
+        feature: "application-submission",
+        error_type: "unexpected_error",
         gigId: gig.id,
         hasSupabase: !!supabase,
       });
 
-      // HARDENING: Wrap Sentry import in try-catch to ensure UI always recovers
-      // If Sentry import fails, form must still show error and clear submitting state
-      try {
-        const Sentry = await import("@sentry/nextjs");
-        Sentry.captureException(err instanceof Error ? err : new Error(errorMessage), {
-          tags: {
-            feature: "application-submission",
-            error_type: "unexpected_error",
-            supabase_env_present: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-          },
-          extra: {
-            message: errorMessage,
-            stack: errorStack,
-            gigId: gig.id,
-            hasSupabase: !!supabase,
-            release: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA || "unknown",
-          },
-          level: "error",
-        });
-      } catch (sentryError) {
-        // Sentry not available - log but don't block error handling
-        console.warn("[ApplyToGigForm] Failed to send error to Sentry:", sentryError);
-      }
-      
       // User-friendly error message
       // CRITICAL: Always execute these regardless of Sentry success/failure
       const userMessage = err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")

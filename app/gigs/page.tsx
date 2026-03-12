@@ -1,6 +1,5 @@
 export const dynamic = "force-dynamic";
 
-import * as Sentry from "@sentry/nextjs";
 import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
@@ -13,6 +12,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type SubscriptionAwareProfile = Pick<
@@ -130,11 +130,9 @@ export default async function GigsPage({
   // Handle errors - PGRST103 is expected for out-of-range pages, just show empty results
   if (error && error.code === "PGRST103") {
     // Pagination out of range - this is expected, just show empty results
-    console.warn(`Pagination out of range: page ${page}, total rows: ${total}`);
+    logger.warn("Pagination out of range", { page, total });
   } else if (error && error.code !== "PGRST103") {
-    // Unexpected error - log to Sentry and show error page
-    Sentry.captureException(error);
-    console.error("Error fetching gigs:", error);
+    logger.error("Error fetching gigs", error);
     return (
       <div className="min-h-screen bg-black pt-40">
         <div className="container mx-auto px-4 py-16">

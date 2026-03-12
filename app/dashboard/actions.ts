@@ -1,7 +1,8 @@
-﻿"use server";
+"use server";
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createSupabaseServer();
@@ -24,7 +25,7 @@ export async function updateProfile(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
-    console.error("Error updating profile:", error);
+    logger.error("Error updating profile:", error);
     return { error: error.message };
   }
 
@@ -90,7 +91,7 @@ export async function createTalentProfile(formData: FormData) {
   }
 
   if (error) {
-    console.error("Error with talent profile:", error);
+    logger.error("Error with talent profile:", error);
     return { error: error.message };
   }
 

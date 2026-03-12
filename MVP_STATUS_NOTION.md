@@ -22,6 +22,14 @@
 
 **Verification:** `schema:verify:comprehensive`, `types:check`, `lint`, `build` — all green.
 
+## 🚀 **Latest: Logger in dashboard + gigs (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in dashboard and gigs paths:
+  - `app/dashboard/actions.ts`, `app/dashboard/page.tsx`, `app/dashboard/client.tsx` (4 calls)
+  - `app/gigs/page.tsx` (2 calls; removed Sentry import)
+  - `app/gigs/[id]/apply/apply-to-gig-form.tsx` (5 calls; consolidated Sentry + console into logger)
+
 ## 🚀 **Latest: Logger in API/apply paths (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026

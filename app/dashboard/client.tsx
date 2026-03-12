@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 
 type UserRole = "talent" | "client" | "admin" | null;
 
@@ -32,7 +33,7 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
       // AuthProvider's signOut() owns redirect - trust it
       await signOut();
     } catch (err) {
-      console.error("Error signing out:", err);
+      logger.error("Error signing out:", err);
       setError("Failed to sign out. Please try again.");
       setIsLoading(false);
     }
