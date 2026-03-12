@@ -219,7 +219,7 @@
 - [x] Validate the affected dashboard surfaces again on real mobile/tablet widths after the breakpoint changes.
 
 **Next (P1 - follow-up consistency)**
-- [ ] Scan the remaining dashboard-like overview surfaces for any other dense stat strips that should adopt the same stepped KPI breakpoint pattern.
+- [ ] Scan the remaining dashboard-like overview surfaces for any other dense stat strips that should adopt the same stepped KPI breakpoint pattern. *(Progress: admin/moderation stat strip updated with mobile summary + stepped breakpoints `md:grid-cols-2 lg:grid-cols-4`.)*
 - [ ] Keep loading/skeleton states aligned any time a shared dashboard density breakpoint changes.
 
 ## 🚀 **Latest: Settings mobile tabs compact rail polish (March 10, 2026)**

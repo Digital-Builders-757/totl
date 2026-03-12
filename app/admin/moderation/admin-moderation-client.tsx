@@ -1,9 +1,10 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { BadgeCheck, Loader2, ShieldAlert } from "lucide-react";
+import { AlertCircle, BadgeCheck, CheckCircle, Clock, FileText, Loader2, ShieldAlert } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -153,26 +154,47 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
             </CardHeader>
           </Card>
         )}
-        <div className="mb-6 grid gap-3 md:mb-8 md:grid-cols-4 md:gap-4">
-          <Card className="bg-gray-800/40 border-gray-700">
+        <div className="mb-4 md:hidden">
+          <details>
+            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+              <span className="inline-flex items-center gap-2">
+                Show stats
+                <span className="text-xs text-gray-500">({stats.total} total)</span>
+              </span>
+            </summary>
+            <div className="mt-2">
+              <MobileSummaryRow
+                items={[
+                  { label: "Total", value: stats.total, icon: FileText },
+                  { label: "Open", value: stats.byStatus.open, icon: AlertCircle },
+                  { label: "In Review", value: stats.byStatus.in_review, icon: Clock },
+                  { label: "Resolved", value: stats.byStatus.resolved, icon: CheckCircle },
+                ]}
+              />
+            </div>
+          </details>
+        </div>
+
+        <div className="mb-6 hidden gap-4 md:mb-8 md:grid md:grid-cols-2 lg:grid-cols-4">
+          <Card className="min-w-0 bg-gray-800/40 border-gray-700">
             <CardHeader className="pb-2">
               <CardDescription>Total Reports</CardDescription>
               <CardTitle className="text-3xl text-white">{stats.total}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="bg-red-950/30 border-red-900/50">
+          <Card className="min-w-0 bg-red-950/30 border-red-900/50">
             <CardHeader className="pb-2">
               <CardDescription>Open</CardDescription>
               <CardTitle className="text-3xl text-red-200">{stats.byStatus.open}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="bg-amber-900/30 border-amber-900/40">
+          <Card className="min-w-0 bg-amber-900/30 border-amber-900/40">
             <CardHeader className="pb-2">
               <CardDescription>In Review</CardDescription>
               <CardTitle className="text-3xl text-amber-100">{stats.byStatus.in_review}</CardTitle>
             </CardHeader>
           </Card>
-          <Card className="bg-emerald-900/30 border-emerald-900/40">
+          <Card className="min-w-0 bg-emerald-900/30 border-emerald-900/40">
             <CardHeader className="pb-2">
               <CardDescription>Resolved</CardDescription>
               <CardTitle className="text-3xl text-emerald-100">{stats.byStatus.resolved}</CardTitle>
