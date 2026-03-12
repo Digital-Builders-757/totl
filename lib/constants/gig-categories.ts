@@ -13,11 +13,14 @@ export const GIG_CATEGORIES = [
   "influencer",
   "dancer",
   "musician",
+  "events",
+  "others",
   "other",
 ] as const;
 
 /**
- * Categories visible in UI dropdowns (excludes "other" for cleaner UX)
+ * Categories visible in UI dropdowns (Opportunity Type filter).
+ * Excludes "other" to avoid confusion with "others" — "other" remains in GIG_CATEGORIES for normalization/legacy.
  */
 export const VISIBLE_GIG_CATEGORIES = [
   "modeling",
@@ -27,6 +30,8 @@ export const VISIBLE_GIG_CATEGORIES = [
   "influencer",
   "dancer",
   "musician",
+  "events",
+  "others",
 ] as const;
 
 export type GigCategory = (typeof GIG_CATEGORIES)[number];
@@ -47,8 +52,11 @@ export const LEGACY_CATEGORY_MAP: Record<string, GigCategory> = {
   // Promotional/e-commerce → influencer (closer intent than modeling)
   promotional: "influencer",
   "e-commerce": "influencer",
+  // Events / Others
+  event: "events",
   // Generic fallback
   other: "other",
+  others: "others",
 };
 
 /**
@@ -63,6 +71,8 @@ export const CATEGORY_FILTER_SETS = {
   video: ["video"],
   dancer: ["dancer"],
   musician: ["musician"],
+  events: ["events"],
+  others: ["others"],
   other: ["other"],
 } satisfies Record<GigCategory, string[]>;
 
@@ -77,6 +87,8 @@ const LABELS = {
   influencer: "Influencer",
   dancer: "Dancer",
   musician: "Musician",
+  events: "Events",
+  others: "Others",
   other: "Other",
 } satisfies Record<GigCategory, string>;
 
@@ -91,6 +103,8 @@ const BADGE_VARIANTS = {
   influencer: "default" as const,
   dancer: "outline" as const,
   musician: "secondary" as const,
+  events: "outline" as const,
+  others: "outline" as const,
   other: "outline" as const,
 } satisfies Record<GigCategory, "default" | "secondary" | "outline">;
 

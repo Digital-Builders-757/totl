@@ -98,7 +98,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
         <Button variant="ghost" asChild>
           <Link href={user ? "/gigs" : "/"} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
-            {user ? "Back to All Gigs" : "Back to Home"}
+            {user ? "Back to All Opportunities" : "Back to Home"}
           </Link>
         </Button>
       </div>
@@ -247,7 +247,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
         <div className="space-y-6">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle>Apply for this Gig</CardTitle>
+              <CardTitle>Apply for this Opportunity</CardTitle>
               <CardDescription>
                 Submit your application to be considered for this opportunity
               </CardDescription>
@@ -256,7 +256,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               {!user ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">
-                    Sign in to apply for this gig.
+                    Sign in to apply for this opportunity.
                   </p>
                   <Link
                     data-testid="gig-signin-link"
@@ -272,7 +272,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                     Application Submitted
                   </Badge>
                   <p className="text-sm text-gray-600">
-                    You&apos;ve already applied for this gig. Check your dashboard for updates.
+                    You&apos;ve already applied for this opportunity. Check your dashboard for updates.
                   </p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/talent/dashboard">View Dashboard</Link>
@@ -286,7 +286,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <div className="space-y-4" data-testid="subscription-apply-gate">
                   <Alert className="bg-amber-500/10 border-amber-500/30">
                     <AlertDescription className="text-amber-100 text-sm">
-                      You need an active subscription to apply to this gig and see full client
+                      You need an active subscription to apply to this opportunity and see full client
                       details.
                     </AlertDescription>
                   </Alert>
@@ -320,7 +320,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Category</span>
+                <span className="text-gray-600">Opportunity Type</span>
                 <span className="font-medium">{getCategoryLabel(gig.category || "")}</span>
               </div>
               <div className="flex justify-between">

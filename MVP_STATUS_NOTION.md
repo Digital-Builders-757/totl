@@ -8,6 +8,33 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Opportunity image dimension notice (March 12, 2026)**
+
+**DOCUMENTATION / UX** - March 12, 2026
+- ✅ **Image specs notice:** Added recommended dimensions (1200×900 px, 4:3 aspect ratio) to the opportunity cover image uploader so flyers display correctly without distortion.
+- ✅ **Constants:** `lib/constants/opportunity-image-specs.ts` — single source of truth for display specs.
+- ✅ **Docs:** `docs/guides/OPPORTUNITY_IMAGE_SPECS.md` — full spec reference; linked from guides README and DOCUMENTATION_INDEX.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `build`, `lint` — all green.
+
+## 🚀 **Latest: Gigs → Opportunities terminology + Events/Others filter (March 12, 2026)**
+
+**UI/UX / TAXONOMY** - March 12, 2026
+- ✅ **Labeling change:** Globally updated user-facing terminology from "Gigs" to "Opportunities" across the platform (nav, dashboards, forms, error messages, command palette, etc.). Route paths (`/gigs`, `/client/gigs`) unchanged for stability.
+- ✅ **Filter categorization:** Added "Events" and "Others" as options within the Opportunity Type filter (`lib/constants/gig-categories.ts`). Both appear in create forms, browse filters, and category badges.
+- ✅ **Opportunity Type label:** Renamed "Category" to "Opportunity Type" in filter dropdowns and form labels where it denotes the type of opportunity.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `build`, `lint` — all green.
+
+**PR #212 review fixes (March 12, 2026):**
+- ✅ Removed "other" from VISIBLE_GIG_CATEGORIES to avoid confusion with "others" (Sentry/Bugbot).
+- ✅ Client applications: "All Gigs" → "All Opportunities", filter label "Gig" → "Opportunity".
+- ✅ Gig detail page: "Sign in to apply for this gig" → "opportunity", "You've already applied" → "opportunity", subscription gate text.
+- ✅ Admin dashboard: "Gig Management" → "Opportunity Management", "Manage all your platform gigs" → "opportunities".
+
+**Next (P1 - follow-up)**
+- [ ] Consider adding a changelog or release note for client-facing terminology change.
+
 ## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
 
 **SECURITY / STABILITY** - March 11, 2026

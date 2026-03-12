@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { CheckCircle, Clock, Users } from "lucide-react";
 import Link from "next/link";
@@ -19,7 +19,7 @@ export default function GigSuccessPage() {
     // Show success toast
     toast({
       title: "Gig Submitted Successfully!",
-      description: "Your gig has been submitted and is pending review.",
+      description: "Your opportunity has been submitted and is pending review.",
     });
   }, [toast]);
 

@@ -253,7 +253,7 @@ export function AdminApplicationsClient({
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
         <PageHeader
           title="Talent Applications"
-          subtitle="Review and manage talent applications for gigs."
+          subtitle="Review and manage talent applications for opportunities."
         />
 
         <div className="md:hidden">

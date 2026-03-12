@@ -58,7 +58,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
     { href: "/admin/applications", label: "Talent Applications", icon: FileText },
     { href: "/admin/client-applications", label: "Career Builder Applications", icon: Building2 },
     { href: "/admin/talent", label: "Talent", icon: Users },
-    { href: "/admin/gigs", label: "Gigs", icon: Briefcase },
+    { href: "/admin/gigs", label: "Opportunities", icon: Briefcase },
     { href: "/admin/users", label: "Users", icon: UserIcon },
     { href: "/admin/moderation", label: "Moderation", icon: Shield },
   ];
@@ -68,7 +68,7 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
     "/admin/applications": "Talent Applications",
     "/admin/client-applications": "Career Builder Applications",
     "/admin/talent": "Talent",
-    "/admin/gigs": "Gigs",
+    "/admin/gigs": "Opportunities",
     "/admin/users": "Users",
     "/admin/moderation": "Moderation",
   };

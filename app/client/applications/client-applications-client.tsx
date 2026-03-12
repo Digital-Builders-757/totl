@@ -152,7 +152,7 @@ export default function ClientApplicationsClient({
     () =>
       gigFilter === "all"
         ? null
-        : applications.find((app) => app.gig_id === gigFilter)?.gigs?.title || "Selected gig",
+        : applications.find((app) => app.gig_id === gigFilter)?.gigs?.title || "Selected opportunity",
     [applications, gigFilter]
   );
   const applicationsByStatus = useMemo(() => {
@@ -209,13 +209,13 @@ export default function ClientApplicationsClient({
     <div className="min-h-screen bg-black text-white">
       <ClientTerminalHeader
         title="Applications"
-        subtitle="Review and manage talent applications for your gigs"
+        subtitle="Review and manage talent applications for your opportunities"
         desktopPrimaryAction={
           <Button variant="outline" asChild>
-            <Link href="/client/gigs">View My Gigs</Link>
+            <Link href="/client/gigs">View My Opportunities</Link>
           </Button>
         }
-        mobileSecondaryAction={<SecondaryActionLink href="/client/gigs">My gigs →</SecondaryActionLink>}
+        mobileSecondaryAction={<SecondaryActionLink href="/client/gigs">My opportunities →</SecondaryActionLink>}
       />
 
       <div className="container mx-auto px-4 py-4 sm:py-6">
@@ -297,7 +297,7 @@ export default function ClientApplicationsClient({
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
           <div className="flex-1 relative">
             <input
-              placeholder="Search by talent name, gig title, or location..."
+              placeholder="Search by talent name, opportunity title, or location..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400 rounded-md px-3 py-2 border"
@@ -321,12 +321,12 @@ export default function ClientApplicationsClient({
               onChange={(event) => setGigFilter(event.target.value)}
               className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Gigs</option>
+              <option value="all">All Opportunities</option>
               {uniqueGigs.map((gigId) => {
                 const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
                 return (
                   <option key={gigId} value={gigId}>
-                    {gig?.title || `Gig ${gigId}`}
+                    {gig?.title || `Opportunity ${gigId}`}
                   </option>
                 );
               })}
@@ -340,21 +340,21 @@ export default function ClientApplicationsClient({
               className="border-gray-700 text-white hover:bg-white/5"
             >
               <div className="space-y-2">
-                <label htmlFor="mobile-gig-filter" className="text-sm text-gray-300">
-                  Gig
+                <label htmlFor="mobile-opportunity-filter" className="text-sm text-gray-300">
+                  Opportunity
                 </label>
                 <select
-                  id="mobile-gig-filter"
+                  id="mobile-opportunity-filter"
                   value={gigFilter}
                   onChange={(event) => setGigFilter(event.target.value)}
                   className="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">All Gigs</option>
+                  <option value="all">All Opportunities</option>
                   {uniqueGigs.map((gigId) => {
                     const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
                     return (
                       <option key={gigId} value={gigId}>
-                        {gig?.title || `Gig ${gigId}`}
+                        {gig?.title || `Opportunity ${gigId}`}
                       </option>
                     );
                   })}
@@ -421,12 +421,12 @@ export default function ClientApplicationsClient({
                   <p className="text-gray-300 mb-6">
                     {searchTerm || statusFilter !== "all" || gigFilter !== "all"
                       ? "Try adjusting your search or filters"
-                      : "When talent applies to your gigs, their applications will show up here."}
+                      : "When talent applies to your opportunities, their applications will show up here."}
                   </p>
                   {!searchTerm && statusFilter === "all" && gigFilter === "all" && (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                       <Button asChild>
-                        <Link href="/post-gig">Post a gig</Link>
+                        <Link href="/post-gig">Post an opportunity</Link>
                       </Button>
                       <Link href="/about" className="text-sm text-gray-400 hover:text-white underline">
                         How applications work
@@ -474,7 +474,7 @@ export default function ClientApplicationsClient({
             onOpenChange={setAcceptDialogOpen}
             applicationId={selectedApplication.id}
             talentName={selectedApplication.profiles?.display_name || "Talent"}
-            gigTitle={selectedApplication.gigs?.title || "Gig"}
+            gigTitle={selectedApplication.gigs?.title || "Opportunity"}
             suggestedCompensation={selectedApplication.gigs?.compensation}
             onSuccess={() => handleDialogSuccess("accepted")}
           />
@@ -483,7 +483,7 @@ export default function ClientApplicationsClient({
             onOpenChange={setRejectDialogOpen}
             applicationId={selectedApplication.id}
             talentName={selectedApplication.profiles?.display_name || "Talent"}
-            gigTitle={selectedApplication.gigs?.title || "Gig"}
+            gigTitle={selectedApplication.gigs?.title || "Opportunity"}
             onSuccess={() => handleDialogSuccess("rejected")}
           />
         </>

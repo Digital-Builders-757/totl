@@ -15,10 +15,10 @@ interface SignInGateProps {
 const variantConfig = {
   gigs: {
     icon: Lock,
-    headline: "Unlock Amazing Gigs",
+    headline: "Unlock Amazing Opportunities",
     subheadline: "Sign in to discover exclusive opportunities",
-    description: "Join our trusted community of talent and clients. Access premium gigs, connect with industry professionals, and take your career to the next level.",
-    primaryCta: "Sign in to view gigs",
+    description: "Join our trusted community of talent and clients. Access premium opportunities, connect with industry professionals, and take your career to the next level.",
+    primaryCta: "Sign in to view opportunities",
     secondaryCta: "Create an account",
     primaryHref: PATHS.LOGIN,
     secondaryHref: PATHS.CHOOSE_ROLE,

@@ -22,7 +22,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
   } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return { error: "You must be logged in to apply for gigs" };
+    return { error: "You must be logged in to apply for opportunities" };
   }
 
   // Check if user has talent role and active subscription
@@ -33,19 +33,19 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .maybeSingle();
 
   if (profileError || !profile || profile.role !== "talent") {
-    return { error: "Only talent users can apply for gigs" };
+    return { error: "Only talent users can apply for opportunities" };
   }
 
   // Check subscription status - only active subscribers can apply
   if (profile.subscription_status !== 'active') {
     const subscriptionMessages = {
-      'none': 'You need an active subscription to apply to gigs. Subscribe now to unlock this feature.',
-      'canceled': 'Your subscription has ended. Reactivate your subscription to apply to gigs.',
-      'past_due': 'Your payment is overdue. Please update your payment method to continue applying to gigs.',
+'none': 'You need an active subscription to apply to opportunities. Subscribe now to unlock this feature.',
+    'canceled': 'Your subscription has ended. Reactivate your subscription to apply to opportunities.',
+    'past_due': 'Your payment is overdue. Please update your payment method to continue applying to opportunities.',
     };
     
     const subscriptionErrorMessage = subscriptionMessages[profile.subscription_status as keyof typeof subscriptionMessages] || 
-                   'An active subscription is required to apply to gigs.';
+                   'An active subscription is required to apply to opportunities.';
     
     return { error: subscriptionErrorMessage };
   }
@@ -71,20 +71,20 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     if (talentProfileError?.code === "PGRST116") {
       return {
         error:
-          "Your talent profile is incomplete. Please complete your profile in settings before applying for gigs.",
+          "Your talent profile is incomplete. Please complete your profile in settings before applying for opportunities.",
       };
     }
 
     return {
       error:
-        "Please complete your talent profile before applying for gigs. Go to your profile settings to get started.",
+        "Please complete your talent profile before applying for opportunities. Go to your profile settings to get started.",
     };
   }
 
   // Optional: Verify minimum required fields
   if (!talentProfile.first_name || !talentProfile.last_name) {
     return {
-      error: "Please complete your name in your profile before applying for gigs.",
+      error: "Please complete your name in your profile before applying for opportunities.",
     };
   }
 
@@ -102,7 +102,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
   }
 
   if (existingApplication) {
-    return { error: "You have already applied for this gig" };
+    return { error: "You have already applied for this opportunity" };
   }
 
   // Verify gig exists and is active
@@ -114,7 +114,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .maybeSingle();
 
   if (gigError || !gig) {
-    return { error: "Gig not found or no longer available" };
+    return { error: "Opportunity not found or no longer available" };
   }
 
   // Submit application
@@ -143,10 +143,10 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     // Provide more specific error messages based on error type
     if (insertError.code === "23505") {
       // Unique constraint violation
-      return { error: "You have already applied for this gig." };
+      return { error: "You have already applied for this opportunity." };
     } else if (insertError.code === "23503") {
       // Foreign key constraint violation
-      return { error: "Invalid gig or user data. Please refresh and try again." };
+      return { error: "Invalid opportunity or user data. Please refresh and try again." };
     }
 
     return { error: "Failed to submit application. Please try again." };

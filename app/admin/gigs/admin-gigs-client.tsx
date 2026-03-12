@@ -115,7 +115,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
           <p className="mt-2 text-sm text-gray-400">
             {searchQuery || locationFilter !== "all"
               ? "Try adjusting your search or filters."
-              : "No gigs have been posted yet."}
+              : "No opportunities have been posted yet."}
           </p>
         </div>
       );
@@ -150,7 +150,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     <DropdownMenuItem asChild>
                       <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                         <Eye className="mr-2 h-4 w-4" />
-                        View Gig
+                        View Opportunity
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -224,7 +224,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <DropdownMenuItem asChild>
                           <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
-                            View Gig
+                            View Opportunity
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -249,13 +249,13 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
 
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
         <PageHeader
-          title="All Gigs"
-          subtitle="View and manage all gigs posted by Career Builders."
+          title="All Opportunities"
+          subtitle="View and manage all opportunities posted by Career Builders."
           actions={
             <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
               <Link href="/admin/gigs/create">
                 <Plus className="h-4 w-4" />
-                Create Gig
+                Create Opportunity
               </Link>
             </Button>
           }
@@ -293,7 +293,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     size={16}
                   />
                   <Input
-                    placeholder="Search by title, location, category, or company..."
+                    placeholder="Search by title, location, opportunity type, or company..."
                     className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -304,7 +304,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     open={isFiltersOpen}
                     onOpenChange={setIsFiltersOpen}
                     activeCount={activeFilterCount}
-                    title="Gig Filters"
+                    title="Opportunity Filters"
                     className="border-gray-600 text-gray-300 hover:bg-gray-700"
                   >
                     <div className="space-y-2">

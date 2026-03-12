@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
@@ -26,7 +26,7 @@ export function PostGigFooterLink() {
       onClick={handleClick}
       className="focus-hint hover:text-white transition-colors cursor-pointer bg-transparent border-none p-0 text-inherit font-inherit"
     >
-      Post a Gig
+      Post an Opportunity
     </button>
   );
 }

@@ -12,9 +12,9 @@ export default function CreateTabContent() {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
           <Plus className="h-10 w-10 text-blue-600" />
         </div>
-        <h2 className="mb-4 text-2xl font-bold text-white">Create Your Next Gig</h2>
+        <h2 className="mb-4 text-2xl font-bold text-white">Create Your Next Opportunity</h2>
         <p className="mb-8 text-gray-300">
-          Post a new opportunity or gig to find the perfect talent for your project. Our platform
+          Post a new opportunity to find the perfect talent for your project. Our platform
           connects you with qualified talent and professionals.
         </p>
 
@@ -47,7 +47,7 @@ export default function CreateTabContent() {
         <Button size="lg" asChild>
           <Link href="/post-gig">
             <Plus className="mr-2 h-5 w-5" />
-            Start Creating Gig
+            Start Creating Opportunity
           </Link>
         </Button>
       </div>

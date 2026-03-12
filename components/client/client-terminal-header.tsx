@@ -19,7 +19,7 @@ interface ClientTerminalHeaderProps {
 
 const drawerLinks = [
   { label: "Overview", href: "/client/dashboard" },
-  { label: "My Gigs", href: "/client/gigs" },
+  { label: "My Opportunities", href: "/client/gigs" },
   { label: "Applications", href: "/client/applications" },
   { label: "Bookings", href: "/client/bookings" },
   { label: "Settings", href: "/settings" },

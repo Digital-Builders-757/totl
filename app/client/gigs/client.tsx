@@ -116,7 +116,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">Unable to load gigs</h2>
           <p className="text-gray-300 mb-4">
-            {error instanceof Error ? error.message : "Failed to load gigs"}
+            {error instanceof Error ? error.message : "Failed to load opportunities"}
           </p>
           <Button onClick={() => mutate()}>Try Again</Button>
         </div>
@@ -147,17 +147,17 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
   return (
     <div className="min-h-screen bg-black text-white">
       <ClientTerminalHeader
-        title="My Gigs"
-        subtitle="Manage your posted gigs and track applications"
+        title="My Opportunities"
+        subtitle="Manage your posted opportunities and track applications"
         desktopPrimaryAction={
           <Button asChild>
             <Link href="/post-gig">
               <Plus className="h-4 w-4 mr-2" />
-              Post New Gig
+              Post New Opportunity
             </Link>
           </Button>
         }
-        mobileSecondaryAction={<SecondaryActionLink href="/post-gig">Post new gig →</SecondaryActionLink>}
+        mobileSecondaryAction={<SecondaryActionLink href="/post-gig">Post new opportunity →</SecondaryActionLink>}
       />
 
       <div className="container mx-auto px-4 py-4 sm:py-6">
@@ -173,7 +173,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search gigs by title, description, or location..."
+              placeholder="Search opportunities by title, description, or location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400"
@@ -186,7 +186,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
           <MobileTabRail>
             <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
               <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
-                All Gigs ({gigs.length})
+                All Opportunities ({gigs.length})
               </TabsTrigger>
               <TabsTrigger value="active" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                 Active ({statusCounts.active})
@@ -200,7 +200,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
             </TabsList>
           </MobileTabRail>
           <TabsList className="hidden w-full grid-cols-4 md:grid">
-            <TabsTrigger value="all">All Gigs ({gigs.length})</TabsTrigger>
+            <TabsTrigger value="all">All Opportunities ({gigs.length})</TabsTrigger>
             <TabsTrigger value="active">
               Active ({statusCounts.active})
             </TabsTrigger>

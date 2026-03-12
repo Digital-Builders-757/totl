@@ -191,7 +191,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     <PageShell topPadding={false} fullBleed>
       <ClientTerminalHeader
         title="Career Builder Dashboard"
-        subtitle={clientProfile?.company_name || "Manage gigs and applications"}
+        subtitle={clientProfile?.company_name || "Manage opportunities and applications"}
         desktopPrimaryAction={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
@@ -235,23 +235,23 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
           <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <ClientStatCard
               className={quickStatCardClass}
-              title="Total Gigs"
+              title="Total Opportunities"
               icon={<Briefcase className="h-4 w-4 text-blue-300" />}
               badgeLabel="All time"
               value={dashboardStats.totalGigs}
               footerLabel="Next action"
-              footerActionText="Post a gig"
+              footerActionText="Post an opportunity"
               footerActionHref="/post-gig"
             />
 
             <ClientStatCard
               className={quickStatCardClass}
-              title="Active Gigs"
+              title="Active Opportunities"
               icon={<Activity className="h-4 w-4 text-green-300" />}
               badgeLabel="Live"
               value={dashboardStats.activeGigs}
               footerLabel="Next action"
-              footerActionText="Manage gigs"
+              footerActionText="Manage opportunities"
               footerActionHref="/client/gigs"
             />
 
@@ -307,7 +307,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               </TabsTrigger>
               <TabsTrigger value="gigs" className={tabTriggerClass}>
                 <Briefcase className="h-3.5 w-3.5" />
-                My Gigs
+                My Opportunities
               </TabsTrigger>
               <TabsTrigger value="applications" className={tabTriggerClass}>
                 <Users className="h-3.5 w-3.5" />
@@ -315,7 +315,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               </TabsTrigger>
               <TabsTrigger value="create" className={tabTriggerClass}>
                 <Plus className="h-3.5 w-3.5" />
-                Create Gig
+                Create Opportunity
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
@@ -326,7 +326,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             </TabsTrigger>
             <TabsTrigger value="gigs" className={tabTriggerClass}>
               <Briefcase className="h-4 w-4" />
-              My Gigs
+              My Opportunities
             </TabsTrigger>
             <TabsTrigger value="applications" className={tabTriggerClass}>
               <Users className="h-4 w-4" />
@@ -334,7 +334,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             </TabsTrigger>
             <TabsTrigger value="create" className={tabTriggerClass}>
               <Plus className="h-4 w-4" />
-              Create Gig
+              Create Opportunity
             </TabsTrigger>
           </TabsList>
 

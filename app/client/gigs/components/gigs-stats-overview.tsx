@@ -30,7 +30,7 @@ export default function GigsStatsOverview({
           <div className="mt-2">
             <MobileSummaryRow
               items={[
-                { label: "Total gigs", value: totalGigs, icon: Building },
+                { label: "Total opportunities", value: totalGigs, icon: Building },
                 { label: "Active", value: activeCount, icon: CheckCircle },
                 { label: "Applications", value: totalApplications, icon: Users },
                 { label: "Completed", value: completedCount, icon: CheckCircle },
@@ -45,7 +45,7 @@ export default function GigsStatsOverview({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-300">Total Gigs</p>
+                <p className="text-sm font-medium text-gray-300">Total Opportunities</p>
                 <p className="text-2xl font-bold text-white">{totalGigs}</p>
               </div>
               <div className="rounded-full bg-blue-500/20 p-2">

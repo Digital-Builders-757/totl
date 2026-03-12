@@ -117,7 +117,7 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
           Become a Career Builder
         </CardTitle>
         <CardDescription className="text-gray-400">
-          Post gigs and hire talent through TOTL Agency
+          Post opportunities and hire talent through TOTL Agency
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -162,10 +162,10 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
           <>
             <div className="text-sm text-gray-400 space-y-2">
               <p>
-                Career Builders can post gigs and hire talent through TOTL Agency. Apply now to join our exclusive network.
+                Career Builders can post opportunities and hire talent through TOTL Agency. Apply now to join our exclusive network.
               </p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Post unlimited gigs</li>
+                <li>Post unlimited opportunities</li>
                 <li>Access our premium talent roster</li>
                 <li>Manage applications and bookings</li>
                 <li>Direct communication with talent</li>
