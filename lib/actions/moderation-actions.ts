@@ -6,6 +6,7 @@ import { validateAdminAuth, validateFlagContent, validateUserAuth } from "./mode
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import type { FlagResourceType, FlagStatus, ModerationDatabase } from "@/lib/types/moderation";
+import { logger } from "@/lib/utils/logger";
 
 type FlagContentArgs = {
   resourceType: FlagResourceType;
@@ -45,7 +46,7 @@ async function flagContentAction({ resourceType, resourceId, gigId, reason, deta
   const { error } = await typedSupabase.from("content_flags").insert(payload);
 
   if (error) {
-    console.error("Error submitting content flag:", error);
+    logger.error("Error submitting content flag", error, { resourceType, resourceId });
     return { error: "Unable to submit report right now. Please try again." };
   }
 
@@ -121,7 +122,7 @@ export async function updateContentFlagAction({
     .maybeSingle();
 
   if (profileError) {
-    console.error("Error fetching admin profile:", profileError);
+    logger.error("Error fetching admin profile", profileError, { userId: user.id });
     return { error: "Failed to verify admin permissions." };
   }
 
@@ -161,7 +162,7 @@ export async function updateContentFlagAction({
     .eq("id", flagId);
 
   if (updateError) {
-    console.error("Error updating content flag:", updateError);
+    logger.error("Error updating content flag", updateError, { flagId });
     return { error: "Failed to update moderation record." };
   }
 
@@ -174,7 +175,7 @@ export async function updateContentFlagAction({
       .eq("id", flagRecord.gig_id);
 
     if (gigError) {
-      console.error("Error closing gig:", gigError);
+      logger.error("Error closing gig", gigError, { gigId: flagRecord.gig_id });
       return { error: "Flag updated but failed to close gig." };
     }
   }
@@ -203,7 +204,7 @@ export async function updateContentFlagAction({
       .eq("id", targetProfileId);
 
     if (reinstateError) {
-      console.error("Error reinstating account:", reinstateError);
+      logger.error("Error reinstating account", reinstateError, { targetProfileId });
       return { error: "Flag updated but failed to reinstate user." };
     }
   }
@@ -220,7 +221,7 @@ export async function updateContentFlagAction({
       .eq("id", targetProfileId);
 
     if (suspendError) {
-      console.error("Error suspending account:", suspendError);
+      logger.error("Error suspending account", suspendError, { targetProfileId });
       return { error: "Flag updated but failed to suspend user." };
     }
   } else if (suspendAccount && !targetProfileId) {

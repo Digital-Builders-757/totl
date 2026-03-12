@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Logger migration P1 batch (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **portfolio-actions.ts:** Replaced 11 `console.error` with `logger.error` (upload, insert, delete, reorder, setPrimary, update, fetch).
+- ✅ **moderation-actions.ts:** Replaced 6 `console.error` with `logger.error` (flag submit, admin profile, flag update, close gig, reinstate, suspend).
+- ✅ **claim-email-send.ts:** Replaced 2 `console.error` with `logger.error` (email ledger claim failed/threw).
+
+**Verification:** lint, build — all green.
+
 ## 🚀 **Latest: Logger migration P0 batch (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026
@@ -4472,6 +4481,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Logger P0 batch (boot/client/auth actions); CI typecheck enforced; faceted search pay range filter*
+*Current Status: MVP Complete - Logger P0+P1 batches (boot/client/auth/portfolio/moderation/email-ledger); CI typecheck enforced*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

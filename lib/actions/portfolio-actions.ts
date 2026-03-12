@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"];
@@ -66,7 +67,7 @@ export async function uploadPortfolioImage(formData: FormData) {
     });
 
     if (uploadError) {
-      console.error("Portfolio upload error:", uploadError);
+      logger.error("Portfolio upload error", uploadError);
       return { error: "Failed to upload image. Please try again." };
     }
 
@@ -87,7 +88,7 @@ export async function uploadPortfolioImage(formData: FormData) {
     if (insertError) {
       // Rollback: remove the uploaded file
       await supabase.storage.from("portfolio").remove([path]);
-      console.error("Database insert error:", insertError);
+      logger.error("Database insert error", insertError);
       return { error: "Failed to create portfolio item. Please try again." };
     }
 
@@ -99,7 +100,7 @@ export async function uploadPortfolioImage(formData: FormData) {
       message: "Portfolio image uploaded successfully",
     };
   } catch (error) {
-    console.error("Unexpected portfolio upload error:", error);
+    logger.error("Unexpected portfolio upload error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -142,7 +143,7 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       .eq("id", portfolioItemId);
 
     if (deleteError) {
-      console.error("Database delete error:", deleteError);
+      logger.error("Database delete error", deleteError);
       return { error: "Failed to delete portfolio item. Please try again." };
     }
 
@@ -157,7 +158,7 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       message: "Portfolio item deleted successfully",
     };
   } catch (error) {
-    console.error("Unexpected delete error:", error);
+    logger.error("Unexpected delete error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -189,7 +190,7 @@ export async function reorderPortfolioItems(_itemIds: string[]) {
       message: "Portfolio order updated successfully",
     };
   } catch (error) {
-    console.error("Unexpected reorder error:", error);
+    logger.error("Unexpected reorder error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -219,7 +220,7 @@ export async function setPrimaryPortfolioItem(_portfolioItemId: string) {
       message: "Primary image feature has been removed",
     };
   } catch (error) {
-    console.error("Unexpected set primary error:", error);
+    logger.error("Unexpected set primary error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -267,7 +268,7 @@ export async function updatePortfolioItem(
       .eq("talent_id", user.id); // RLS enforcement
 
     if (updateError) {
-      console.error("Database update error:", updateError);
+      logger.error("Database update error", updateError);
       return { error: "Failed to update portfolio item. Please try again." };
     }
 
@@ -278,7 +279,7 @@ export async function updatePortfolioItem(
       message: "Portfolio item updated successfully",
     };
   } catch (error) {
-    console.error("Unexpected update error:", error);
+    logger.error("Unexpected update error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -300,7 +301,7 @@ export async function getPortfolioItems(talentId: string): Promise<{
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching portfolio items:", error);
+      logger.error("Error fetching portfolio items", error, { talentId });
       return { items: [], error: "Failed to load portfolio items" };
     }
 
@@ -312,7 +313,7 @@ export async function getPortfolioItems(talentId: string): Promise<{
 
     return { items: itemsWithUrls };
   } catch (error) {
-    console.error("Unexpected error fetching portfolio:", error);
+    logger.error("Unexpected error fetching portfolio", error, { talentId });
     return { items: [], error: "An unexpected error occurred" };
   }
 }
