@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Loader2 } from "lucide-react";
 import type React from "react";
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { updateTalentProfessionalInfoAction } from "@/lib/actions/profile-actions";
+import { logger } from "@/lib/utils/logger";
 
 interface ProfessionalInfoFormData {
   experience: string;
@@ -114,7 +115,7 @@ export default function TalentProfessionalInfoForm({
         onSaved();
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile", error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Update failed",
         description: "There was a problem updating your profile. Please try again.",

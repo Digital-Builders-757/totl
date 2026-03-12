@@ -228,7 +228,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
       }
     }
   } catch (err: unknown) {
-    console.error("Unexpected error fetching talent profile:", err);
+    logger.error("Unexpected error fetching talent profile", err instanceof Error ? err : new Error(String(err)));
     error = err instanceof Error ? err.message : "An unexpected error occurred.";
   }
 

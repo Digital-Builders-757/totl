@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
+import { logger } from "@/lib/utils/logger";
 
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
@@ -93,7 +94,7 @@ export default function PostGigPage() {
       // Redirect to client dashboard
       router.push("/client/dashboard");
     } catch (err) {
-      console.error("Error creating gig:", err);
+      logger.error("Error creating gig", err instanceof Error ? err : new Error(String(err)));
       setError(err instanceof Error ? err.message : "Failed to create opportunity");
     } finally {
       setIsSubmitting(false);

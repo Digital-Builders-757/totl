@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertTalentProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 import { isModelingTalent } from "@/lib/utils/talent-type";
 import type { Database } from "@/types/supabase";
 
@@ -193,7 +194,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       // Redirect to dashboard
       router.push(PATHS.TALENT_DASHBOARD);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile", error instanceof Error ? error : new Error(String(error)));
       
       // Extract error message from various error types
       let errorMessage = "An unexpected error occurred. Please try again.";

@@ -16,6 +16,7 @@ import {
 import { LongToken } from "@/components/ui/long-token";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 
 export default function VerificationPendingPage() {
   const searchParams = useSearchParams();
@@ -69,7 +70,7 @@ export default function VerificationPendingPage() {
         setJustSent(false);
       }, 30000);
     } catch (error) {
-      console.error("Error sending verification email:", error);
+      logger.error("Error sending verification email", error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
