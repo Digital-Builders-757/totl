@@ -31,7 +31,7 @@ export function SubscriptionPrompt({
   const message = getSubscriptionPromptMessage(profile);
   
   const contextMessages = {
-    'gig-apply': 'Subscribe to apply to this gig and thousands more',
+    'gig-apply': 'Subscribe to apply to this opportunity and thousands more',
     'gig-details': 'Subscribe to see full client details and apply',
     'general': message,
   };
@@ -88,7 +88,7 @@ export function SubscriptionPrompt({
             <div className="text-sm text-muted-foreground">
               <p className="font-medium mb-2">What you&apos;ll get:</p>
               <ul className="space-y-1">
-                <li>• Apply to unlimited gigs</li>
+                <li>• Apply to unlimited opportunities</li>
                 <li>• See full client details</li>
                 <li>• Profile visible to clients</li>
                 <li>• Priority support</li>

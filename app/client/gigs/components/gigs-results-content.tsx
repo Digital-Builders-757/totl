@@ -26,15 +26,15 @@ export default function GigsResultsContent({
       <Card className="border-gray-700 bg-gray-900">
         <CardContent className="p-12 text-center">
           <Building className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-          <h3 className="mb-2 text-lg font-medium text-white">No gigs found</h3>
+          <h3 className="mb-2 text-lg font-medium text-white">No opportunities found</h3>
           <p className="mb-6 text-gray-300">
-            {searchTerm ? "Try adjusting your search or filters" : "Get started by posting your first gig"}
+            {searchTerm ? "Try adjusting your search or filters" : "Get started by posting your first opportunity"}
           </p>
           {!searchTerm && (
             <Button asChild>
               <Link href="/post-gig">
                 <Plus className="mr-2 h-4 w-4" />
-                Post Your First Gig
+                Post Your First Opportunity
               </Link>
             </Button>
           )}

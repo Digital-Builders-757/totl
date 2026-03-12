@@ -65,7 +65,7 @@ export default function PostGigPage() {
     setError(null);
 
     if (!user) {
-      setError("You must be logged in to post a gig");
+      setError("You must be logged in to post an opportunity");
       setIsSubmitting(false);
       return;
     }
@@ -86,15 +86,15 @@ export default function PostGigPage() {
       if (!result.ok) throw new Error(result.error);
 
       toast({
-        title: "Gig Posted Successfully!",
-        description: "Your gig has been created and is now visible to talent.",
+        title: "Opportunity Posted Successfully!",
+        description: "Your opportunity has been created and is now visible to talent.",
       });
 
       // Redirect to client dashboard
       router.push("/client/dashboard");
     } catch (err) {
       console.error("Error creating gig:", err);
-      setError(err instanceof Error ? err.message : "Failed to create gig");
+      setError(err instanceof Error ? err.message : "Failed to create opportunity");
     } finally {
       setIsSubmitting(false);
     }
@@ -131,9 +131,9 @@ export default function PostGigPage() {
         <div className="max-w-3xl mx-auto rounded-3xl border border-border bg-card/80 shadow-2xl shadow-black/40 backdrop-blur overflow-hidden">
           <div className="p-10 space-y-8">
             <div className="space-y-3">
-              <h1 className="text-3xl font-bold text-foreground">Post a New Gig</h1>
+              <h1 className="text-3xl font-bold text-foreground">Post a New Opportunity</h1>
               <p className="text-muted-foreground">
-                Fill out the form below to create a new casting call or gig. Be as detailed as
+                Fill out the form below to create a new casting call or opportunity. Be as detailed as
                 possible to attract the right talent.
               </p>
             </div>
@@ -147,7 +147,7 @@ export default function PostGigPage() {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="title">Gig Title *</Label>
+                <Label htmlFor="title">Opportunity Title *</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Fashion Editorial Model Needed"
@@ -162,7 +162,7 @@ export default function PostGigPage() {
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
                   id="description"
-                  placeholder="Provide a detailed description of the gig, requirements, and what you're looking for..."
+                  placeholder="Provide a detailed description of the opportunity, requirements, and what you're looking for..."
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
@@ -173,13 +173,13 @@ export default function PostGigPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="category">Opportunity Type *</Label>
                   <Select value={formData.category} onValueChange={handleSelectChange}>
                     <SelectTrigger
                       id="category"
                       className="bg-background text-foreground placeholder:text-muted-foreground/70"
                     >
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select opportunity type" />
                     </SelectTrigger>
                     <SelectContent>
                       {VISIBLE_GIG_CATEGORIES.map((category) => (
@@ -230,7 +230,7 @@ export default function PostGigPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Gig Date *</Label>
+                  <Label htmlFor="date">Opportunity Date *</Label>
                   <Input
                     id="date"
                     type="date"
@@ -252,7 +252,7 @@ export default function PostGigPage() {
                 </div>
               </div>
 
-              {/* Gig Cover Image Upload */}
+              {/* Opportunity Cover Image Upload */}
               <div className="space-y-2">
                 <GigImageUploader
                   onFileSelect={setImageFile}
@@ -269,10 +269,10 @@ export default function PostGigPage() {
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Creating Gig...
+                      Creating Opportunity...
                     </>
                   ) : (
-                    "Post Gig"
+                    "Post Opportunity"
                   )}
                 </Button>
                 <Button

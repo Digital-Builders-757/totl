@@ -98,7 +98,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
         <Button variant="ghost" asChild>
           <Link href={user ? "/gigs" : "/"} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
-            {user ? "Back to All Gigs" : "Back to Home"}
+            {user ? "Back to All Opportunities" : "Back to Home"}
           </Link>
         </Button>
       </div>
@@ -247,7 +247,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
         <div className="space-y-6">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle>Apply for this Gig</CardTitle>
+              <CardTitle>Apply for this Opportunity</CardTitle>
               <CardDescription>
                 Submit your application to be considered for this opportunity
               </CardDescription>
@@ -320,7 +320,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Category</span>
+                <span className="text-gray-600">Opportunity Type</span>
                 <span className="font-medium">{getCategoryLabel(gig.category || "")}</span>
               </div>
               <div className="flex justify-between">

@@ -83,7 +83,7 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
             <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
               <Link href={`/gigs/${gig.id}`} className="flex items-center gap-2">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Gig Details
+                Back to Opportunity Details
               </Link>
             </Button>
           </div>

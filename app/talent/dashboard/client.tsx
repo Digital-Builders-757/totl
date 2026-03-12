@@ -437,7 +437,7 @@ function useTalentDashboardData({
               message: gigsError.message,
               details: gigsError.details,
             });
-            setDataError((prev) => prev ?? "There was a problem loading gigs.");
+            setDataError((prev) => prev ?? "There was a problem loading opportunities.");
           } else {
             setGigs((gigsData as Gig[]) ?? []);
           }
@@ -805,11 +805,11 @@ function TalentDashboardContent({
             <div className="min-w-0">
               <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
               <p className="truncate text-xs text-gray-300">
-                {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover gigs"}
+                {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover opportunities"}
               </p>
             </div>
             <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
-              <Link href="/gigs">Browse gigs</Link>
+              <Link href="/gigs">Browse opportunities</Link>
             </Button>
           </div>
 
@@ -913,7 +913,7 @@ function TalentDashboardContent({
             items={[
               { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
               { label: "Accepted", value: dashboardStats.acceptedTalentApplications, icon: Calendar },
-              { label: "Active gigs", value: dashboardStats.activeGigs, icon: Briefcase },
+              { label: "Active opportunities", value: dashboardStats.activeGigs, icon: Briefcase },
               { label: "New", value: dashboardStats.newApplications, icon: Clock },
             ]}
           />
@@ -956,7 +956,7 @@ function TalentDashboardContent({
               <div className="card-footer-row">
                 <span>Next action</span>
                 <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Apply to more gigs
+                  Apply to more opportunities
                 </Link>
               </div>
             </CardContent>
@@ -998,7 +998,7 @@ function TalentDashboardContent({
               <div className="card-footer-row">
                 <span>Next action</span>
                 <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Browse gigs
+                  Browse opportunities
                 </Link>
               </div>
             </CardContent>
@@ -1040,7 +1040,7 @@ function TalentDashboardContent({
               <div className="card-footer-row">
                 <span>Next action</span>
                 <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Apply to more gigs
+                  Apply to more opportunities
                 </Link>
               </div>
             </CardContent>
@@ -1208,7 +1208,7 @@ function TalentDashboardContent({
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
                       <Briefcase className="h-5 w-5 text-green-400" />
-                      Available Gigs
+                      Available Opportunities
                     </CardTitle>
                     <Badge variant="outline" className="status-chip">
                       Live
@@ -1221,12 +1221,12 @@ function TalentDashboardContent({
                 <CardContent className="space-y-4">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-green-400 mb-2">{gigs.length}</div>
-                    <p className="text-sm text-white">Active gigs available</p>
+                    <p className="text-sm text-white">Active opportunities available</p>
                   </div>
                   <Button className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
                     <Link href="/gigs" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      Browse All Gigs
+                      Browse All Opportunities
                     </Link>
                   </Button>
                 </CardContent>
@@ -1269,7 +1269,7 @@ function TalentDashboardContent({
                 <div className="card-header-row">
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Clock className="h-5 w-5 text-purple-400" />
-                    Upcoming Gigs
+                    Upcoming Opportunities
                   </CardTitle>
                   <Badge variant="outline" className="status-chip">
                     Confirmed
@@ -1294,7 +1294,7 @@ function TalentDashboardContent({
                               <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
                                 <SafeImage
                                   src={app.gigs?.image_url}
-                                  alt={app.gigs?.title || "Unknown Gig"}
+                                  alt={app.gigs?.title || "Unknown Opportunity"}
                                   fallbackSrc="/images/totl-logo-transparent.png"
                                   fill
                                   className="object-cover"
@@ -1346,7 +1346,7 @@ function TalentDashboardContent({
                             <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
                               <SafeImage
                                 src={app.gigs?.image_url}
-                                alt={app.gigs?.title || "Unknown Gig"}
+                                alt={app.gigs?.title || "Unknown Opportunity"}
                                 fallbackSrc="/images/totl-logo-transparent.png"
                                 fill
                                 className="object-cover"
@@ -1401,9 +1401,9 @@ function TalentDashboardContent({
                 ) : (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-300 mb-4">You don&apos;t have any upcoming gigs.</p>
+                    <p className="text-gray-300 mb-4">You don&apos;t have any upcoming opportunities.</p>
                     <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
-                      <Link href="/gigs">Browse Available Gigs</Link>
+                      <Link href="/gigs">Browse Available Opportunities</Link>
                     </Button>
                   </div>
                 )}
@@ -1423,7 +1423,7 @@ function TalentDashboardContent({
                       </Badge>
                     </div>
                     <CardDescription className="text-gray-300">
-                      Track all your gig applications and their status
+                      Track all your opportunity applications and their status
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
@@ -1468,9 +1468,9 @@ function TalentDashboardContent({
                   <EmptyState
                     icon={Briefcase}
                     title="No Applications Yet"
-                    description="You haven't applied to any gigs yet. Browse available gigs to get started!"
+                    description="You haven't applied to any opportunities yet. Browse available opportunities to get started!"
                     action={{
-                      label: "Browse Gigs",
+                      label: "Browse Opportunities",
                       onClick: () => {
                         router.push("/gigs");
                       },
@@ -1488,7 +1488,7 @@ function TalentDashboardContent({
                             <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
                               <SafeImage
                                 src={app.gigs?.image_url}
-                                alt={app.gigs?.title || "Unknown Gig"}
+                                alt={app.gigs?.title || "Unknown Opportunity"}
                                 fallbackSrc="/images/totl-logo-transparent.png"
                                 fill
                                 className="object-cover"
@@ -1547,7 +1547,7 @@ function TalentDashboardContent({
                           <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
                               src={app.gigs?.image_url}
-                              alt={app.gigs?.title || "Unknown Gig"}
+                              alt={app.gigs?.title || "Unknown Opportunity"}
                               fallbackSrc="/images/totl-logo-transparent.png"
                               fill
                               className="object-cover"
@@ -1613,7 +1613,7 @@ function TalentDashboardContent({
                     Upcoming
                   </Badge>
                 </div>
-                <CardDescription>Your confirmed and upcoming gigs</CardDescription>
+                <CardDescription>Your confirmed and upcoming opportunities</CardDescription>
               </CardHeader>
               <CardContent>
                 <>
@@ -1629,7 +1629,7 @@ function TalentDashboardContent({
                             <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
                               <SafeImage
                                 src={app.gigs?.image_url}
-                                alt={app.gigs?.title || "Unknown Gig"}
+                                alt={app.gigs?.title || "Unknown Opportunity"}
                                 fallbackSrc="/images/totl-logo-transparent.png"
                                 fill
                                 className="object-cover"
@@ -1690,7 +1690,7 @@ function TalentDashboardContent({
                           <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
                               src={app.gigs?.image_url}
-                              alt={app.gigs?.title || "Unknown Gig"}
+                              alt={app.gigs?.title || "Unknown Opportunity"}
                               fallbackSrc="/images/totl-logo-transparent.png"
                               fill
                               className="object-cover"
@@ -1753,7 +1753,7 @@ function TalentDashboardContent({
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="space-y-2">
                     <div className="card-header-row">
-                      <CardTitle>Available Gigs</CardTitle>
+                      <CardTitle>Available Opportunities</CardTitle>
                       <Badge variant="outline" className="status-chip">
                         Live
                       </Badge>
@@ -1774,7 +1774,7 @@ function TalentDashboardContent({
                     <Button asChild size="sm">
                       <Link href="/gigs">
                         <Eye className="h-4 w-4 mr-2" />
-                        View All Gigs
+                        View All Opportunities
                       </Link>
                     </Button>
                   </div>
@@ -1784,12 +1784,12 @@ function TalentDashboardContent({
                 {dataLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-300">Loading available gigs...</p>
+                    <p className="mt-4 text-gray-300">Loading available opportunities...</p>
                   </div>
                 ) : dataError ? (
                   <EmptyState
                     icon={AlertCircle}
-                    title="Error Loading Gigs"
+                    title="Error Loading Opportunities"
                     description={dataError}
                     action={{
                       label: "Try Again",
@@ -1801,8 +1801,8 @@ function TalentDashboardContent({
                 ) : gigs.length === 0 ? (
                   <EmptyState
                     icon={Briefcase}
-                    title="No Gigs Available"
-                    description="There are currently no active gigs available. Check back soon for new opportunities!"
+                    title="No Opportunities Available"
+                    description="There are currently no active opportunities available. Check back soon for new opportunities!"
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

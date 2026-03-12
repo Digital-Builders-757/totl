@@ -55,8 +55,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         ? [
             {
               icon: Search,
-              label: "Browse Gigs",
-              description: "View all available gigs",
+              label: "Browse Opportunities",
+              description: "View all available opportunities",
               action: () => router.push("/gigs"),
               shortcut: "G",
             },
@@ -64,7 +64,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         : [
             {
               icon: Search,
-              label: "Sign in to Browse Gigs",
+              label: "Sign in to Browse Opportunities",
               description: "Sign in required to view opportunities",
               action: () => router.push(PATHS.LOGIN),
               shortcut: "G",
@@ -92,7 +92,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           {
             icon: FileText,
             label: "My Applications",
-            description: "View your gig applications",
+            description: "View your opportunity applications",
             action: () => router.push(PATHS.TALENT_DASHBOARD),
             shortcut: "A",
           }
@@ -108,8 +108,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           },
           {
             icon: Briefcase,
-            label: "My Gigs",
-            description: "Manage your posted gigs",
+            label: "My Opportunities",
+            description: "Manage your posted opportunities",
             action: () => router.push("/client/gigs"),
             shortcut: "M",
           },
@@ -146,8 +146,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           },
           {
             icon: Briefcase,
-            label: "Create Gig",
-            description: "Post a new gig",
+            label: "Create Opportunity",
+            description: "Post a new opportunity",
             action: () => router.push("/admin/gigs/create"),
             shortcut: "C",
           }

@@ -46,8 +46,8 @@ export default function HomePage() {
                   <span className="text-gray-200">Instantly</span>
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg mx-0 md:mx-auto lg:mx-0">
-                  TOTL Agency is the fastest way to post gigs, book talent, and manage projects end-to-end.
-                  No public directory — discovery happens through gigs and invite-only links.
+                  TOTL Agency is the fastest way to post opportunities, book talent, and manage projects end-to-end.
+                  No public directory — discovery happens through opportunities and invite-only links.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-start md:justify-center lg:justify-start">
@@ -108,7 +108,7 @@ export default function HomePage() {
               <span className="apple-text-gradient"> Manage Cleaner.</span>
             </h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
-              TOTL is gigs-first: brands post opportunities, talent applies, and booking stays organized.
+              TOTL is opportunities-first: brands post opportunities, talent applies, and booking stays organized.
             </p>
           </div>
 
@@ -189,7 +189,7 @@ export default function HomePage() {
 
                   <Button className="w-full button-glow border-0 mt-3 sm:mt-4 min-h-[48px]" asChild>
                     <Link href="/choose-role" prefetch={false}>
-                      View gigs (sign in) <ArrowRight className="ml-2 h-4 w-4" />
+                      View opportunities (sign in) <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>

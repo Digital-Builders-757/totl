@@ -66,7 +66,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
 
       if (userError || !user) {
         logger.error("[ApplyToGigForm] Auth error:", userError ?? undefined);
-        setError("You must be logged in to apply for gigs.");
+        setError("You must be logged in to apply for opportunities.");
         setSubmitting(false);
         return;
       }
@@ -112,7 +112,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       }
 
       if (existingApplication) {
-        setError("You have already applied for this gig.");
+        setError("You have already applied for this opportunity.");
         setSubmitting(false);
         return;
       }
@@ -169,7 +169,7 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
           id="coverLetter"
           value={coverLetter}
           onChange={(e) => setCoverLetter(e.target.value)}
-          placeholder="Tell the client why you're perfect for this gig. Include any relevant experience, availability, or special skills..."
+          placeholder="Tell the client why you're perfect for this opportunity. Include any relevant experience, availability, or special skills..."
           className="min-h-[120px] bg-gray-800 border-gray-600 text-white placeholder-gray-400"
           maxLength={1000}
         />

@@ -86,8 +86,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
         <div className="mb-4 md:hidden">
           <MobileSummaryRow
             items={[
-              { label: "Total gigs", value: dashboardStats.totalGigs, icon: Briefcase },
-              { label: "Active gigs", value: dashboardStats.activeGigs, icon: Zap },
+              { label: "Total opportunities", value: dashboardStats.totalGigs, icon: Briefcase },
+              { label: "Active opportunities", value: dashboardStats.activeGigs, icon: Zap },
               { label: "Applications", value: dashboardStats.totalApplications, icon: Users },
               { label: "Pending", value: dashboardStats.pendingApplications, icon: Clock },
               { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
@@ -262,7 +262,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                 className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
               >
                 <Briefcase className="h-3.5 w-3.5" />
-                Gigs
+                Opportunities
               </TabsTrigger>
               <TabsTrigger
                 value="applications"
@@ -293,7 +293,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
             >
               <Briefcase className="h-4 w-4" />
-              Gigs
+              Opportunities
             </TabsTrigger>
             <TabsTrigger
               value="applications"
@@ -333,7 +333,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                   <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white" asChild>
                     <Link href="/admin/gigs/create" className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
-                      Create New Gig
+                      Create New Opportunity
                     </Link>
                   </Button>
                   <Button className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800" variant="outline" asChild>
@@ -444,7 +444,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                       <Input
-                        placeholder="Search gigs"
+                        placeholder="Search opportunities"
                         className="pl-9 w-full md:w-60 bg-gray-800 border-gray-700 text-white"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -456,7 +456,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
                       <Link href="/admin/gigs/create">
                         <Plus className="h-4 w-4 mr-2" />
-                        Create Gig
+                        Create Opportunity
                       </Link>
                     </Button>
                   </div>

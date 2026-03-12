@@ -139,10 +139,10 @@ export default async function GigsPage({
           <div className="max-w-6xl mx-auto">
             <div className="mb-16 text-center">
               <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
-                Find Gigs
+                Find Opportunities
               </h1>
               <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
-                Browse through available opportunities and gigs. Filter by category,
+                Browse through available opportunities. Filter by opportunity type,
                 location, and more to find the perfect match for your talents.
               </p>
             </div>
@@ -154,7 +154,7 @@ export default async function GigsPage({
                   </div>
                 </div>
                 <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
-                  Unable to Load Gigs
+                  Unable to Load Opportunities
                 </h3>
                 <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
                   We&apos;re experiencing technical difficulties. Please try again later.
@@ -231,7 +231,7 @@ export default async function GigsPage({
                 <span className="text-[var(--oklch-text-muted)]">/</span>
               </>
             )}
-            <span className="text-white font-medium">Find Gigs</span>
+            <span className="text-white font-medium">Find Opportunities</span>
           </div>
 
           <div className="mb-10 sm:mb-14 text-left md:text-center px-4 sm:px-0">
@@ -239,10 +239,10 @@ export default async function GigsPage({
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-5 sm:mb-7 text-gradient-glow tracking-[-0.03em] animate-apple-fade-in">
-              Find Gigs
+              Find Opportunities
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed">
-              Browse available opportunities and filter by category, location, and compensation
+              Browse available opportunities and filter by opportunity type, location, and compensation
               to find the right fit for your next booking.
             </p>
           </div>
@@ -273,7 +273,7 @@ export default async function GigsPage({
                     defaultValue={category}
                     className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
                   >
-                    <option value="">All categories</option>
+                    <option value="">All opportunity types</option>
                     {VISIBLE_GIG_CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>
                         {getCategoryLabel(cat)}
@@ -304,7 +304,7 @@ export default async function GigsPage({
             </div>
           </div>
 
-          {/* Gigs Grid */}
+          {/* Opportunities Grid */}
           {gigsList.length === 0 ? (
             <div className="text-center py-20">
               <div className="max-w-2xl mx-auto">
@@ -313,10 +313,10 @@ export default async function GigsPage({
                     <Search className="h-12 w-12 text-white" />
                   </div>
                   <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
-                    No Active Gigs
+                    No Active Opportunities
                   </h3>
                   <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
-                    There are currently no active gigs available. Check back later for new
+                    There are currently no active opportunities available. Check back later for new
                     opportunities!
                   </p>
                 </div>

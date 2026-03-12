@@ -19,6 +19,8 @@ const OBFUSCATED_TITLES: Record<GigCategory, string> = {
   influencer: "Influencer Campaign with Premium Brand",
   dancer: "Paid Dance Performance Opportunity",
   musician: "Live Performance / Session Opportunity",
+  events: "Event Opportunity for Premium Client",
+  others: "Creative Opportunity for Premium Client",
   other: "Creative Opportunity for Premium Client",
 };
 
@@ -34,6 +36,8 @@ const OBFUSCATED_DESCRIPTIONS: Record<GigCategory, string> = {
   influencer: "Brand campaign opportunity for creators. Subscribe to view deliverables, usage, and compensation details.",
   dancer: "Performance opportunity for experienced dancers. Subscribe to see schedule, style, and compensation details.",
   musician: "Music opportunity for performers or session players. Subscribe to see set details and compensation.",
+  events: "Event opportunity with a premium client. Subscribe to see full details, dates, and requirements.",
+  others: "Professional creative opportunity with a premium client. Subscribe to see full details.",
   other: "Professional creative opportunity with a premium client. Subscribe to see full details.",
 };
 
@@ -118,11 +122,11 @@ export function getSubscriptionPromptMessage(profile: Profile | MinimalProfile |
 
   switch (profile.subscription_status) {
     case "none":
-      return "Subscribe to apply to gigs and see full client details";
+      return "Subscribe to apply to opportunities and see full client details";
     case "canceled":
-      return "Reactivate your subscription to apply to gigs";
+      return "Reactivate your subscription to apply to opportunities";
     case "past_due":
-      return "Update your payment method to continue applying to gigs";
+      return "Update your payment method to continue applying to opportunities";
     case "active":
       return "You already have full access to premium features.";
     default:

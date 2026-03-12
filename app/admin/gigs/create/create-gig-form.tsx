@@ -97,7 +97,7 @@ export function CreateGigForm() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-white">Gig Title</Label>
+                <Label htmlFor="title" className="text-white">Opportunity Title</Label>
                 <Input
                   id="title"
                   name="title"
@@ -120,13 +120,13 @@ export function CreateGigForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-white">Category</Label>
+                  <Label htmlFor="category" className="text-white">Opportunity Type</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger 
                       id="category"
                       className="bg-gray-800 border-gray-700 text-white data-[placeholder]:text-gray-500"
                     >
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select opportunity type" />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-700 text-white">
                       {VISIBLE_GIG_CATEGORIES.map((cat) => (
@@ -161,7 +161,7 @@ export function CreateGigForm() {
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Describe the gig, requirements, and what you're looking for..."
+                  placeholder="Describe the opportunity, requirements, and what you're looking for..."
                   rows={4}
                   className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
                   required

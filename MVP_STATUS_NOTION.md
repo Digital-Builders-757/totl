@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gigs → Opportunities terminology + Events/Others filter (March 12, 2026)**
+
+**UI/UX / TAXONOMY** - March 12, 2026
+- ✅ **Labeling change:** Globally updated user-facing terminology from "Gigs" to "Opportunities" across the platform (nav, dashboards, forms, error messages, command palette, etc.). Route paths (`/gigs`, `/client/gigs`) unchanged for stability.
+- ✅ **Filter categorization:** Added "Events" and "Others" as options within the Opportunity Type filter (`lib/constants/gig-categories.ts`). Both appear in create forms, browse filters, and category badges.
+- ✅ **Opportunity Type label:** Renamed "Category" to "Opportunity Type" in filter dropdowns and form labels where it denotes the type of opportunity.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `build`, `lint` — all green.
+
+**Next (P1 - follow-up)**
+- [ ] Consider adding a changelog or release note for client-facing terminology change.
+
 ## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
 
 **SECURITY / STABILITY** - March 11, 2026

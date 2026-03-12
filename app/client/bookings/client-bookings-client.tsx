@@ -177,7 +177,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
               <Link href="/client/applications">View Applications</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link href="/client/gigs">My Gigs</Link>
+              <Link href="/client/gigs">My Opportunities</Link>
             </Button>
           </div>
         }
