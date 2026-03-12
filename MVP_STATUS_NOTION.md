@@ -8,6 +8,42 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Users — Suspended tab (March 12, 2026)**
+
+**ADMIN / UX** - March 12, 2026
+- ✅ **Suspended tab:** Added dedicated Suspended tab in Admin Users dashboard; suspended users no longer clutter Talent/Career Builders/Admin/All lists.
+- ✅ **Filter logic:** All tabs except Suspended exclude `is_suspended === true`; Suspended tab shows only suspended users.
+- ✅ **Stats/counts:** Talent, Career Builders, Admins, All counts exclude suspended; Suspended count added to mobile summary and desktop badges.
+- ✅ **Search:** Search works within each tab's dataset.
+- ✅ **Tests:** Updated `admin-users-route.spec.ts` — Suspended tab assertion; suspended user appears only in Suspended tab, not in Career Builders.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `lint` — passed. Playwright blocked by pre-existing login hydration failure.
+
+## 🚀 **Latest: Docs overhaul — subdirectory READMEs + archive (March 11, 2026)**
+
+**DOCUMENTATION** - March 11, 2026
+- ✅ **Subdirectory READMEs:** Added 6 READMEs (contracts, journeys, diagrams, audits, tests, plans) with consistent 4-section template (What/When/Start here/Do not put here).
+- ✅ **Archive moves:** Moved 5 superseded docs to `docs/archive/`: ORGANIZATION_SUMMARY, GOLD_STANDARD_IMPLEMENTATION_COMPLETE, BETA_TESTING_CHECKLIST, COMPREHENSIVE_QA_CHECKLIST, UI_UX_TESTING_GUIDE.
+- ✅ **Stubs:** Left stubs at `docs/COMPREHENSIVE_QA_CHECKLIST.md` and `docs/UI_UX_TESTING_GUIDE.md` (heavily referenced); point to archive + current replacements.
+- ✅ **DOCUMENTATION_INDEX:** Linked all 6 new READMEs; updated COMPREHENSIVE_QA_CHECKLIST entry; added plans/.
+- ✅ **References updated:** TOTL_PROJECT_CONTEXT_PROMPT, TEST_DATA_REFERENCE, TYPES_SYNC_PREVENTION_SYSTEM, CLIENT_ACCOUNT_FLOW_PRD, TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN, NEXTJS_15_COOKIES_ERROR_FIX.
+- ✅ **DOCS_OVERHAUL_PLAN_2026.md:** Fixed system-map-full wording (keep path immutable; treat as legacy/rarely used).
+- ✅ **CI doc path guard:** `npm run docs:verify-paths` — existence checks for 6 critical docs (constitution, index, schema audit, airport-model, common errors, MVP status). Runs in CI build job.
+
+**Verification:** All cursor command paths unchanged; /plan, /implement, /Ship, /pr flow preserved. `npm run docs:verify-paths` passes.
+
+## 🚀 **Latest: Mobile guardrails — Gigs→Opportunities test alignment (March 12, 2026)**
+
+**CI / PLAYWRIGHT** - March 12, 2026
+- ✅ **Test terminology fix:** Updated 5 failing mobile-guardrails specs to match Gigs→Opportunities terminology from PR #212:
+  - `admin-gigs-route.spec.ts` — "All Gigs" → "All Opportunities", "Create Gig" → "Create Opportunity"
+  - `client-applications-route.spec.ts` — search placeholder "gig title" → "opportunity title"
+  - `client-gigs-route.spec.ts` — "My Gigs" → "My Opportunities", search placeholder, "All Gigs" tab, "No gigs found" → "No opportunities found", "Post Your First Gig" → "Post Your First Opportunity"
+  - `talent-gig-detail-route.spec.ts` — "Apply for this Gig" → "Apply for this Opportunity", "No Active Gigs" → "No Active Opportunities", "Back to All Gigs" → "Back to All Opportunities"
+  - `talent-gigs-route.spec.ts` — "Find Gigs" → "Find Opportunities", "No Active Gigs" → "No Active Opportunities"
+
+**Verification:** `npm run lint`, `npm run build` — passed. CI mobile-guardrails will re-run on push.
+
 ## 🚀 **Latest: Opportunity image dimension notice (March 12, 2026)**
 
 **DOCUMENTATION / UX** - March 12, 2026
@@ -33,7 +69,7 @@
 - ✅ Admin dashboard: "Gig Management" → "Opportunity Management", "Manage all your platform gigs" → "opportunities".
 
 **Next (P1 - follow-up)**
-- [ ] Consider adding a changelog or release note for client-facing terminology change.
+- [x] Consider adding a changelog or release note for client-facing terminology change. *(Completed: `docs/releasenotes/v1.2.0.md` + `v1.2.0-team.md`)*
 
 ## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
 
@@ -219,7 +255,7 @@
 - [x] Validate the affected dashboard surfaces again on real mobile/tablet widths after the breakpoint changes.
 
 **Next (P1 - follow-up consistency)**
-- [ ] Scan the remaining dashboard-like overview surfaces for any other dense stat strips that should adopt the same stepped KPI breakpoint pattern.
+- [ ] Scan the remaining dashboard-like overview surfaces for any other dense stat strips that should adopt the same stepped KPI breakpoint pattern. *(Progress: admin/moderation stat strip updated with mobile summary + stepped breakpoints `md:grid-cols-2 lg:grid-cols-4`.)*
 - [ ] Keep loading/skeleton states aligned any time a shared dashboard density breakpoint changes.
 
 ## 🚀 **Latest: Settings mobile tabs compact rail polish (March 10, 2026)**

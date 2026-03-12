@@ -8,11 +8,11 @@ test.describe("Client gigs route contracts", () => {
     await safeGoto(page, "/client/gigs");
 
     await expect(page).toHaveURL(/\/client\/gigs(\/|$)/);
-    await expect(page.getByRole("heading", { name: "My Gigs" }).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "My Opportunities" }).first()).toBeVisible();
     await expect(
-      page.getByPlaceholder("Search gigs by title, description, or location...")
+      page.getByPlaceholder("Search opportunities by title, description, or location...")
     ).toBeVisible();
-    await expect(page.getByRole("tab", { name: /All Gigs \(/i }).first()).toBeVisible();
+    await expect(page.getByRole("tab", { name: /All Opportunities \(/i }).first()).toBeVisible();
     await expect(page.getByRole("tab", { name: /Active \(/i }).first()).toBeVisible();
     await expect(page.getByRole("tab", { name: /Completed \(/i }).first()).toBeVisible();
   });
@@ -24,9 +24,9 @@ test.describe("Client gigs route contracts", () => {
     await page.getByRole("tab", { name: /Active \(/i }).first().click();
     await expect(page.getByRole("tab", { name: /Active \(/i }).first()).toBeVisible();
 
-    const emptyState = page.getByRole("heading", { name: "No gigs found" });
+    const emptyState = page.getByRole("heading", { name: "No opportunities found" });
     if (await emptyState.isVisible()) {
-      await expect(page.getByRole("link", { name: /Post Your First Gig/i })).toBeVisible();
+      await expect(page.getByRole("link", { name: /Post Your First Opportunity/i })).toBeVisible();
       return;
     }
 
@@ -46,9 +46,9 @@ test.describe("Client gigs route contracts (mobile 390x844)", () => {
     // Mobile density can hide the large shell heading;
     // search + primary tab remain stable route contract markers.
     await expect(
-      page.getByPlaceholder("Search gigs by title, description, or location...")
+      page.getByPlaceholder("Search opportunities by title, description, or location...")
     ).toBeVisible();
-    await expect(page.getByRole("tab", { name: /All Gigs \(/i }).first()).toBeVisible();
+    await expect(page.getByRole("tab", { name: /All Opportunities \(/i }).first()).toBeVisible();
 
     const noOverflow = await page.evaluate(() => {
       const el = document.documentElement;

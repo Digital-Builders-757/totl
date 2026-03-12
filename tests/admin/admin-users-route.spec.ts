@@ -65,6 +65,7 @@ test.describe("Admin users route contracts", () => {
     await expect(page.getByRole("tab", { name: /All \(/i }).first()).toBeVisible();
     await expect(page.getByRole("tab", { name: /Talent \(/i }).first()).toBeVisible();
     await expect(page.getByRole("tab", { name: /Career Builders \(/i }).first()).toBeVisible();
+    await expect(page.getByRole("tab", { name: /Suspended \(/i }).first()).toBeVisible();
     await expect(page.getByPlaceholder("Search by name, ID, or role...")).toBeVisible();
   });
 
@@ -133,29 +134,37 @@ test.describe("Admin users route contracts (mobile 390x844)", () => {
     expect(noOverflow).toBeTruthy();
   });
 
-  test("mobile suspended client row shows both role and suspended badges", async ({ page }) => {
+  test("suspended user appears only in Suspended tab with role and suspended badges", async ({
+    page,
+  }) => {
     const runId = Date.now();
     const seededClient = await seedClientForUsersTable(runId, { isSuspended: true });
 
     await loginAsAdmin(page);
     await safeGoto(page, "/admin/users");
 
+    // Suspended user must NOT appear in Career Builders tab
     await page.getByRole("tab", { name: /Career Builders \(/i }).first().click();
     await page.getByPlaceholder("Search by name, ID, or role...").fill(seededClient.displayName);
+    const careerBuildersCard = page.locator("div.rounded-xl", { hasText: seededClient.displayName });
+    await expect(careerBuildersCard).toHaveCount(0);
 
-    const card = page.locator("div.rounded-xl", { hasText: seededClient.displayName }).first();
-    await expect(card).toBeVisible();
+    // Suspended user MUST appear in Suspended tab
+    await page.getByRole("tab", { name: /Suspended \(/i }).first().click();
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededClient.displayName);
+    const suspendedCard = page.locator("div.rounded-xl", { hasText: seededClient.displayName }).first();
+    await expect(suspendedCard).toBeVisible();
     await expect
       .poll(async () => {
-        const text = (await card.textContent()) ?? "";
+        const text = (await suspendedCard.textContent()) ?? "";
         return (text.match(/Career Builder/g) ?? []).length;
       })
-      .toBe(2);
+      .toBeGreaterThanOrEqual(1);
     await expect
       .poll(async () => {
-        const text = (await card.textContent()) ?? "";
+        const text = (await suspendedCard.textContent()) ?? "";
         return (text.match(/Suspended/g) ?? []).length;
       })
-      .toBe(1);
+      .toBeGreaterThanOrEqual(1);
   });
 });

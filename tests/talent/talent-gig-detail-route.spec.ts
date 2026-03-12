@@ -8,7 +8,7 @@ test.describe("Talent gig detail route contracts", () => {
     await ensureTalentReady(page);
     await safeGoto(page, "/gigs");
 
-    const noGigsHeading = page.getByRole("heading", { name: "No Active Gigs" });
+    const noGigsHeading = page.getByRole("heading", { name: "No Active Opportunities" });
     if (await noGigsHeading.isVisible()) {
       test.skip(true, "Seed has no active gigs to validate /gigs/[id] contracts");
     }
@@ -18,7 +18,7 @@ test.describe("Talent gig detail route contracts", () => {
 
     await expect(page.getByRole("heading", { name: "Gig Details" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Client Information" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Apply for this Gig" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Apply for this Opportunity" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Quick Info" })).toBeVisible();
   });
 
@@ -27,16 +27,16 @@ test.describe("Talent gig detail route contracts", () => {
     await ensureTalentReady(page);
     await safeGoto(page, "/gigs");
 
-    const noGigsHeading = page.getByRole("heading", { name: "No Active Gigs" });
+    const noGigsHeading = page.getByRole("heading", { name: "No Active Opportunities" });
     if (await noGigsHeading.isVisible()) {
       test.skip(true, "Seed has no active gigs to validate apply sidebar contracts");
     }
 
     await page.getByRole("link", { name: /View Details/i }).first().click();
     await expect(page).toHaveURL(/\/gigs\/[^/]+(\/|$)/);
-    await expect(page.getByRole("heading", { name: "Apply for this Gig" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Apply for this Opportunity" })).toBeVisible();
 
-    const backLink = page.getByRole("link", { name: "Back to All Gigs" });
+    const backLink = page.getByRole("link", { name: "Back to All Opportunities" });
     await expect(backLink).toHaveAttribute("href", "/gigs");
     await safeGoto(page, "/gigs");
     await expect(page).toHaveURL(/\/gigs(\?|$)/);
@@ -51,14 +51,14 @@ test.describe("Talent gig detail route contracts (mobile 390x844)", () => {
     await ensureTalentReady(page);
     await safeGoto(page, "/gigs");
 
-    const noGigsHeading = page.getByRole("heading", { name: "No Active Gigs" });
+    const noGigsHeading = page.getByRole("heading", { name: "No Active Opportunities" });
     if (await noGigsHeading.isVisible()) {
       test.skip(true, "Seed has no active gigs to validate mobile /gigs/[id] contracts");
     }
 
     await page.getByRole("link", { name: /View Details/i }).first().click();
     await expect(page).toHaveURL(/\/gigs\/[^/]+(\/|$)/);
-    await expect(page.getByRole("heading", { name: "Apply for this Gig" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Apply for this Opportunity" })).toBeVisible();
 
     const noOverflow = await page.evaluate(() => {
       const el = document.documentElement;

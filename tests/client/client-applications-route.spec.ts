@@ -10,7 +10,7 @@ test.describe("Client applications route contracts", () => {
     await expect(page).toHaveURL(/\/client\/applications(\/|$)/);
     await expect(page.locator("h1", { hasText: "Applications" })).toBeVisible();
     await expect(
-      page.getByPlaceholder("Search by talent name, gig title, or location...")
+      page.getByPlaceholder("Search by talent name, opportunity title, or location...")
     ).toBeVisible();
     await expect(page.getByRole("tab", { name: /All \(/i }).first()).toBeVisible();
   });
@@ -38,7 +38,7 @@ test.describe("Client applications route contracts (mobile 390x844)", () => {
     // Mobile density can partially occlude large heading text;
     // tab rail + search box are the stable ownership markers.
     await expect(
-      page.getByPlaceholder("Search by talent name, gig title, or location...")
+      page.getByPlaceholder("Search by talent name, opportunity title, or location...")
     ).toBeVisible();
     await expect(page.getByRole("tab", { name: /All \(/i }).first()).toBeVisible();
 
