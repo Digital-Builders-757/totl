@@ -20,7 +20,7 @@
 
 **OBSERVABILITY / FACETED SEARCH** - March 12, 2026
 - ✅ **Logger error wrapping (Cursor Bugbot):** Removed manual `err instanceof Error ? err : new Error(String(err))` pattern in post-gig, talent/[slug], claim-email-send, client-profile-form. Pass raw `err` to `logger.error()` so `toError` and `safeExtraFromError` preserve Supabase PostgrestError fields (message, code, details, hint).
-- ✅ **Gigs sort options:** Added sort dropdown (Newest first, Soonest date first, Highest pay first, Lowest pay first). URL param `sort`; constants in `lib/constants/gigs-sort.ts`.
+- ✅ **Gigs sort options:** Added sort dropdown (Newest first, Soonest date first, Highest pay first, Lowest pay first). URL param `sort`; constants in `lib/constants/gigs-sort.ts`. Both pay sorts use `nullsFirst: false` so unknown-compensation gigs appear last.
 
 **Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
 

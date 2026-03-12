@@ -141,7 +141,7 @@ export default async function GigsPage({
       query = query.order("compensation_numeric", { ascending: false, nullsFirst: false });
       break;
     case "pay_low":
-      query = query.order("compensation_numeric", { ascending: true, nullsFirst: true });
+      query = query.order("compensation_numeric", { ascending: true, nullsFirst: false });
       break;
     default:
       query = query.order("created_at", { ascending: false });

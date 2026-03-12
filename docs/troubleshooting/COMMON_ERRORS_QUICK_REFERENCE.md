@@ -108,6 +108,8 @@ npm run build
   - **Symptom:** Integer compensations (e.g. "$1,500") produce NULL; decimals (e.g. "$1,500.50") produce 0.50 instead of 1500.50; pay range filter returns wrong/empty results
   - **Fix:** Use non-capturing group `(?:\.[0-9]+)?` so [1] returns the full matched number
   - **Migration:** `20260312211447_fix_compensation_numeric_regex_non_capturing.sql`
+- **"Lowest pay first" sort shows unknown-pay gigs first:** pay_low used `nullsFirst: true`, placing NULL compensation_numeric at top
+  - **Fix:** Use `nullsFirst: false` for both pay_high and pay_low so unknown-compensation gigs appear last
 - **Pay range "Under $500" excludes 499.01–499.99:** Filter used `max: 499` with `.lte()`, creating a gap
   - **Fix:** Use `max: 499.99` in `getPayRangeBounds` for `under_500` case
   - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs; or use `.first()` in specs when both are present
