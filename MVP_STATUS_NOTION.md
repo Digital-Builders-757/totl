@@ -8,6 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Sentry/Bugbot fixes — Upcoming timezone + pay range (March 12, 2026)**
+
+**FACETED SEARCH / PAY RANGE** - March 12, 2026
+- ✅ **Upcoming filter timezone:** Client sends `local_date` on form submit; server uses user's local date instead of UTC.
+- ✅ **compensation_numeric regex:** New migration fixes regex to require digit, at most one decimal (`[0-9][0-9,]*(\.[0-9]+)?`); avoids dot-only matches (e.g. "Negotiable.") and invalid numbers ("1.2.3") that crashed gig INSERT.
+- ✅ **Pay range gap:** "Under $500" now uses `max: 499.99` to include 499.01–499.99.
+- ✅ **Select cleanup:** Removed unused `compensation_numeric` from gigs page select.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Migration pushed.
+
 ## 🚀 **Latest: Logger migration P3 batch — API routes (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026
@@ -4496,6 +4506,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Logger P0+P1+P2+P3 (API routes); CI typecheck enforced*
+*Current Status: MVP Complete - Sentry/Bugbot fixes (Upcoming timezone, pay range regex/gap); Logger P0–P3*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
