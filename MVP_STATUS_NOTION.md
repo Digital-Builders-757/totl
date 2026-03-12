@@ -22,6 +22,15 @@
 
 **Verification:** `schema:verify:comprehensive`, `types:check`, `lint`, `build` — all green.
 
+## 🚀 **Latest: Logger in API/apply paths (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in high-value API and apply paths:
+  - `app/api/admin/delete-user/route.ts` (9 calls)
+  - `app/api/client/applications/accept/route.ts` (1 call)
+  - `app/client/apply/page.tsx` (2 calls)
+  - `app/gigs/[id]/apply/actions.ts` (4 calls; consolidated Sentry + console into logger)
+
 ## 🚀 **Latest: Loading skeletons + error logging (March 11, 2026)**
 
 **MVP POLISH / LOADING STATES + SENTRY** - March 11, 2026

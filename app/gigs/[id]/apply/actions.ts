@@ -1,11 +1,11 @@
 "use server";
 
-import * as Sentry from "@sentry/nextjs";
 import { revalidatePath } from "next/cache";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateApplicationReceivedEmail, generateNewApplicationClientEmail } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 interface ApplyToGigParams {
   gigId: string;
@@ -58,25 +58,13 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .maybeSingle();
 
   if (talentProfileError || !talentProfile) {
-    console.error("Talent profile not found:", talentProfileError);
-
-    // Track in Sentry with more detailed information
-    Sentry.captureException(talentProfileError || new Error("Talent profile missing"), {
-      tags: {
-        feature: "application-submission",
-        error_type: "missing_talent_profile",
-        error_code: talentProfileError?.code || "PGRST116",
-      },
-      extra: {
-        userId: user.id,
-        userEmail: user.email,
-        gigId: gigId,
-        errorCode: talentProfileError?.code,
-        errorDetails: talentProfileError?.details,
-        errorMessage: talentProfileError?.message,
-        timestamp: new Date().toISOString(),
-      },
-      level: "error",
+    logger.error("Talent profile not found", talentProfileError ?? new Error("Talent profile missing"), {
+      feature: "application-submission",
+      error_type: "missing_talent_profile",
+      error_code: talentProfileError?.code ?? "PGRST116",
+      userId: user.id,
+      userEmail: user.email,
+      gigId: gigId,
     });
 
     // Provide more specific error messages based on error type
@@ -109,7 +97,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .maybeSingle();
 
   if (existingApplicationError) {
-    console.error("Existing application check error:", existingApplicationError);
+    logger.error("Existing application check error", existingApplicationError);
     return { error: "Failed to verify existing application. Please try again." };
   }
 
@@ -142,32 +130,14 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     .single();
 
   if (insertError) {
-    console.error("Application insert error:", insertError);
-
-    // Track in Sentry with enhanced details
-    Sentry.captureException(insertError, {
-      tags: {
-        feature: "application-submission",
-        error_type: "application_insert_failed",
-        error_code: insertError.code || "UNKNOWN",
-      },
-      extra: {
-        userId: user.id,
-        userEmail: user.email,
-        gigId: gigId,
-        gigTitle: gig.title,
-        applicationData: {
-          gig_id: gigId,
-          talent_id: user.id,
-          status: "new",
-          message: message,
-        },
-        errorCode: insertError.code,
-        errorDetails: insertError.details,
-        errorMessage: insertError.message,
-        timestamp: new Date().toISOString(),
-      },
-      level: "error",
+    logger.error("Application insert error", insertError, {
+      feature: "application-submission",
+      error_type: "application_insert_failed",
+      error_code: insertError.code ?? "UNKNOWN",
+      userId: user.id,
+      userEmail: user.email,
+      gigId: gigId,
+      gigTitle: gig.title,
     });
 
     // Provide more specific error messages based on error type
@@ -212,10 +182,9 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       await logEmailSent(clientProfile.contact_email, "new-application-client", true);
     }
   } catch (emailError) {
-    // Log email errors but don't fail the application
-    console.error("Failed to send application emails:", emailError);
-    Sentry.captureException(emailError, {
-      tags: { feature: "email-notifications", email_type: "application-submitted" },
+    logger.error("Failed to send application emails", emailError, {
+      feature: "email-notifications",
+      email_type: "application-submitted",
     });
   }
 
