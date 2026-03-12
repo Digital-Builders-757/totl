@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 
 import { Button } from "@/components/ui/button";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { PATHS } from "@/lib/constants/routes";
 
 interface SignInGateProps {
@@ -43,8 +44,7 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
 
   // Analytics hook (non-blocking)
   React.useEffect(() => {
-    // TODO: Implement analytics tracking
-    // trackEvent('sign_in_gate_viewed', { page: variant });
+    trackEvent("sign_in_gate_viewed", { page: variant });
   }, [variant]);
 
   return (
@@ -86,7 +86,11 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
             {/* CTAs */}
             <div className="space-y-3 sm:space-y-4">
               {/* Primary CTA */}
-              <Link href={config.primaryHref} className="block">
+              <Link
+                href={config.primaryHref}
+                className="block"
+                onClick={() => trackEvent("sign_in_gate_cta_click", { cta: "primary", page: variant })}
+              >
                 <Button 
                   className="w-full button-glow bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 text-sm sm:text-base sm:py-3 sm:px-6"
                   size="lg"
@@ -96,7 +100,11 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
               </Link>
 
               {/* Secondary CTA */}
-              <Link href={config.secondaryHref} className="block">
+              <Link
+                href={config.secondaryHref}
+                className="block"
+                onClick={() => trackEvent("sign_in_gate_cta_click", { cta: "secondary", page: variant })}
+              >
                 <Button 
                   variant="outline"
                   className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-gray-500 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 py-3 px-4 text-sm sm:text-base sm:py-3 sm:px-6"
@@ -111,6 +119,7 @@ export function SignInGate({ variant, className = "" }: SignInGateProps) {
                 <Link 
                   href={config.learnMoreHref}
                   className="text-xs text-gray-400 hover:text-gray-300 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-sm sm:text-sm"
+                  onClick={() => trackEvent("sign_in_gate_cta_click", { cta: "learn_more", page: variant })}
                 >
                   Learn more about TOTL
                 </Link>

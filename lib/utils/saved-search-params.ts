@@ -7,11 +7,13 @@ import type { GigsSortValue } from "@/lib/constants/gigs-sort";
 import { GIGS_SORT_OPTIONS } from "@/lib/constants/gigs-sort";
 import type { PayRangeValue } from "@/lib/constants/pay-range-filter";
 import { PAY_RANGE_OPTIONS } from "@/lib/constants/pay-range-filter";
+import { RADIUS_OPTIONS } from "@/lib/constants/radius-filter";
 
 const ALLOWED_KEYS = [
   "q",
   "category",
   "location",
+  "radius_miles",
   "compensation",
   "pay_range",
   "upcoming",
@@ -32,11 +34,15 @@ const VALID_PAY_RANGE = new Set<string>(
   PAY_RANGE_OPTIONS.map((o) => o.value).filter(Boolean) as string[]
 );
 const VALID_SORT = new Set<string>(GIGS_SORT_OPTIONS.map((o) => o.value) as string[]);
+const VALID_RADIUS = new Set<string>(
+  RADIUS_OPTIONS.map((o) => o.value).filter(Boolean) as string[]
+);
 
 export interface SavedSearchParams {
   q?: string;
   category?: string;
   location?: string;
+  radius_miles?: string;
   compensation?: string;
   pay_range?: PayRangeValue;
   upcoming?: boolean;
@@ -73,6 +79,11 @@ export function sanitizeSavedSearchParams(raw: unknown): SavedSearchParams {
       case "sort":
         if (typeof val === "string" && VALID_SORT.has(val)) {
           out.sort = val as GigsSortValue;
+        }
+        break;
+      case "radius_miles":
+        if (typeof val === "string" && VALID_RADIUS.has(val)) {
+          out.radius_miles = val;
         }
         break;
       case "local_date":

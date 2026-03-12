@@ -84,7 +84,7 @@ export async function saveSearch(
 
     const { count } = await supabase
       .from("saved_searches")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("user_id", user.id);
 
     if (typeof count === "number" && count >= MAX_SAVED_SEARCHES_PER_USER) {

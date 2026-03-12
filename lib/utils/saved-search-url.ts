@@ -8,6 +8,7 @@ export function buildGigsUrl(params: SavedSearchParams): string {
   if (params.q) search.set("q", params.q);
   if (params.category) search.set("category", params.category);
   if (params.location) search.set("location", params.location);
+  if (params.radius_miles) search.set("radius_miles", params.radius_miles);
   if (params.compensation) search.set("compensation", params.compensation);
   if (params.pay_range) search.set("pay_range", params.pay_range);
   if (params.upcoming) search.set("upcoming", "1");

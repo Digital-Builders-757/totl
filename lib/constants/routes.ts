@@ -35,6 +35,16 @@ export const PATHS = {
   TALENT_SIGNUP: "/talent/signup",
 } as const;
 
+/** Dev-only pages blocked in production (security/hygiene) */
+export const DEV_ONLY_PAGE_PATHS = ["/test-sentry", "/ui-showcase"] as const;
+
+/** Returns true if path is a dev-only page (including subpaths like /ui-showcase/...) */
+export function isDevOnlyPage(pathname: string): boolean {
+  return DEV_ONLY_PAGE_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
+}
+
 export const PREFIXES = {
   TALENT: "/talent/",
   GIGS: "/gigs/",

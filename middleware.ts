@@ -6,6 +6,7 @@ import {
   ONBOARDING_PATH,
   PATHS,
   isAuthRoute,
+  isDevOnlyPage,
   isPublicPath,
 } from "@/lib/constants/routes";
 import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
@@ -63,6 +64,11 @@ export async function middleware(req: NextRequest) {
 
   if (isAssetOrApi(path)) {
     return res;
+  }
+
+  // Block dev-only pages in production (test-sentry, ui-showcase)
+  if (process.env.NODE_ENV === "production" && isDevOnlyPage(path)) {
+    return new NextResponse("Not Found", { status: 404 });
   }
 
   // NOTE: returnUrl handling is delegated to the shared routing decision brain where applicable.
