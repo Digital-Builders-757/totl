@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client applications test — Playwright strict mode fix (March 12, 2026)**
+
+**CI / PLAYWRIGHT** - March 12, 2026
+- ✅ **client-applications-route.spec.ts:** Added `.first()` to search placeholder locator to avoid Playwright strict mode violation when multiple elements match (e.g., loading skeleton + real content share same placeholder).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Faceted search — pay range filter (March 12, 2026)**
 
 **FACETED SEARCH** - March 12, 2026
@@ -4447,7 +4454,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 9, 2026*
-*Current Status: MVP Complete - shared mobile UX primitives are more consistent, lint is clean, docs entry-point navigation is improved, and the paused Playwright mobile-guardrails CI thread is no longer blocking roadmap-safe work*
+*Last Updated: March 12, 2026*
+*Current Status: MVP Complete - client applications Playwright strict mode fix (`.first()` on search placeholder); faceted search pay range filter; loading skeleton KPI breakpoints*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After this accumulated UX/docs/code-quality batch is shipped or when the paused `mobile-guardrails` CI hardening thread resumes*
+*Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

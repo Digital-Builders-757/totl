@@ -91,8 +91,9 @@ npm run build
   - **See:** `docs/BUGBOT_FIXES_PLAN.md` for full implementation details
 - **Playwright strict mode: "resolved to 2 elements" for getByPlaceholder:** Test fails with `strict mode violation: getByPlaceholder(...) resolved to 2 elements`
   - **Symptom:** mobile-guardrails CI fails on client-applications route; loading skeleton and page content share same placeholder
-  - **Fix:** Use a distinct placeholder in loading.tsx (e.g. "Search...") so the test locator matches only the real content
-  - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs
+  - **Fix (option A):** Use a distinct placeholder in loading.tsx (e.g. "Search...") so the test locator matches only the real content
+  - **Fix (option B):** Append `.first()` to the locator when multiple elements are expected (e.g. skeleton + real content): `page.getByPlaceholder("...").first()`
+  - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs; or use `.first()` in specs when both are present
 - **Dashboard Infinite Loading:** `useSupabase()` hook excluded from useEffect dependencies, causing effect to run once with null client and never re-run when client initializes
   - **Fix:** Include `supabase` in useEffect dependency array to handle null → non-null transition
   - **Prevention:** Always include hooks that return null initially in dependencies, even if they're "memoized singletons"
