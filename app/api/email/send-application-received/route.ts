@@ -3,6 +3,7 @@ import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
 import { safeRequestJson } from "@/lib/server/safe-request-json";
 import { generateApplicationReceivedEmail } from "@/lib/services/email-templates";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error sending application received email:", error);
+    logger.error("Error sending application received email:", error);
     await logEmailSent(
       "",
       "application-received",

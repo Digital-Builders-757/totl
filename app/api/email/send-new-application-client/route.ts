@@ -4,6 +4,7 @@ import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-a
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { safeRequestJson } from "@/lib/server/safe-request-json";
 import { generateNewApplicationClientEmail } from "@/lib/services/email-templates";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error sending new application client email:", error);
+    logger.error("Error sending new application client email:", error);
     await logEmailSent(
       "",
       "new-application-client",

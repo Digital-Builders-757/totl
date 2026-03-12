@@ -22,6 +22,12 @@
 
 **Verification:** `schema:verify:comprehensive`, `types:check`, `lint`, `build` — all green.
 
+## 🚀 **Latest: Logger in email API routes (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in all email API routes:
+  - `send-application-rejected`, `send-application-accepted`, `send-verification`, `send-application-received`, `send-welcome`, `send-new-application-client`, `send-booking-confirmed` (9 calls total)
+
 ## 🚀 **Latest: Logger in dashboard + gigs (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026

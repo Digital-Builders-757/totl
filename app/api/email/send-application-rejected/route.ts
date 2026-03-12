@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { requireInternalEmailRequest } from "@/lib/server/email/internal-email-auth";
 import { generateApplicationRejectedEmail } from "@/lib/services/email-templates";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error sending application rejected email:", error);
+    logger.error("Error sending application rejected email:", error);
     await logEmailSent(
       "",
       "application-rejected",
