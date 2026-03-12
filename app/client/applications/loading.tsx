@@ -37,7 +37,7 @@ export default function ClientApplicationsLoading() {
             <input
               disabled
               aria-label="Loading application search"
-              placeholder="Search by talent name, gig title, or location..."
+              placeholder="Search..."
               className="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-white placeholder-gray-400"
             />
           </div>

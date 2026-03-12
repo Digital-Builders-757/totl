@@ -45,6 +45,13 @@
   - UI: `components/navbar.tsx`, `components/ui/email-verification-reminder.tsx`
   - Shared libs: `lib/safe-query.ts`, `lib/utils/safe-query.ts`, `lib/api/api-utils.ts`, `lib/supabase-admin-client.ts`
 
+## 🚀 **Latest: Logger hardening + mobile guardrails fix (March 12, 2026)**
+
+**OBSERVABILITY / CI** - March 12, 2026
+- ✅ **Logger:** Normalized Supabase errors (PostgrestError, AuthError) in `lib/utils/logger.ts` via `toError()` and `safeExtraFromError()` — always capture as exception (not message), preserve code/details/hint in Sentry extra, avoid "[object Object]" in logs.
+- ✅ **Apply form:** Wrapped `logger.error` in try/catch in `apply-to-gig-form.tsx` so logging failures never block UI recovery (setError, setSubmitting).
+- ✅ **Mobile guardrails:** Fixed client-applications Playwright strict mode violation — loading skeleton used same placeholder as real content; changed loading placeholder to "Search..." so test matches single element.
+
 ## 🚀 **Latest: Logger in API/apply paths (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026

@@ -133,19 +133,27 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       router.push("/talent/dashboard?applied=success");
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      logger.error("[ApplyToGigForm] Unexpected error", err instanceof Error ? err : new Error(errorMessage), {
-        feature: "application-submission",
-        error_type: "unexpected_error",
-        gigId: gig.id,
-        hasSupabase: !!supabase,
-      });
 
-      // User-friendly error message
-      // CRITICAL: Always execute these regardless of Sentry success/failure
+      try {
+        logger.error(
+          "[ApplyToGigForm] Unexpected error",
+          err instanceof Error ? err : new Error(errorMessage),
+          {
+            feature: "application-submission",
+            error_type: "unexpected_error",
+            gigId: gig.id,
+            hasSupabase: !!supabase,
+          }
+        );
+      } catch {
+        // Swallow logging failures - never block UI recovery
+      }
+
+      // CRITICAL: Always execute these regardless of Sentry/logger success/failure
       const userMessage = err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
         ? "Configuration error: Please refresh the page. If the problem persists, contact support."
         : "An unexpected error occurred. Please try again.";
-      
+
       setError(userMessage);
       setSubmitting(false);
     }
