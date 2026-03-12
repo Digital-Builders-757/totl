@@ -132,7 +132,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
             <Skeleton className="h-9 w-56 bg-zinc-800/70" />
             <Skeleton className="h-4 w-72 max-w-full bg-zinc-800/60" />
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />
             <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />
             <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />

@@ -461,6 +461,7 @@ export type Database = {
           category: string
           client_id: string
           compensation: string
+          compensation_numeric: number | null
           created_at: string
           date: string
           description: string
@@ -478,6 +479,7 @@ export type Database = {
           category: string
           client_id: string
           compensation: string
+          compensation_numeric?: number | null
           created_at?: string
           date: string
           description: string
@@ -495,6 +497,7 @@ export type Database = {
           category?: string
           client_id?: string
           compensation?: string
+          compensation_numeric?: number | null
           created_at?: string
           date?: string
           description?: string

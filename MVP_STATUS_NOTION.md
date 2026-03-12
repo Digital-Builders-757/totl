@@ -8,6 +8,28 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Client applications test — Playwright strict mode fix (March 12, 2026)**
+
+**CI / PLAYWRIGHT** - March 12, 2026
+- ✅ **client-applications-route.spec.ts:** Added `.first()` to search placeholder locator to avoid Playwright strict mode violation when multiple elements match (e.g., loading skeleton + real content share same placeholder).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+## 🚀 **Latest: Faceted search — pay range filter (March 12, 2026)**
+
+**FACETED SEARCH** - March 12, 2026
+- ✅ **Pay range filter:** Added preset pay range dropdown on /gigs browse (Under $500, $500–$1K, $1K–$2.5K, $2.5K–$5K, $5K+).
+- ✅ **Migration:** `compensation_numeric` generated column extracts first numeric from compensation text; index for efficient range queries.
+- ✅ **Constants:** `lib/constants/pay-range-filter.ts` — pay range options and bounds; URL param `pay_range`.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Migration pushed; types regenerated.
+
+**Next (P1)**
+- [ ] Location radius (PostGIS) or saved searches for faceted search.
+
+**Follow-up (March 12)**
+- ✅ Client/gigs loading skeleton: aligned with stepped KPI breakpoints (md:grid-cols-2 lg:grid-cols-4).
+
 ## 🚀 **Latest: Bug fixes + docs hygiene + faceted search (March 12, 2026)**
 
 **SESSION BATCH** - March 12, 2026
@@ -19,10 +41,6 @@
 - ✅ **Faceted search:** "Upcoming only" date filter on /gigs browse (date ≥ today).
 
 **Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Mobile guardrails 21/21 passed.
-
-**Next (P1)**
-- [ ] Open develop → main PR when CI is green.
-- [ ] Consider pay range or location-radius filters for faceted search.
 
 ## 🚀 **Latest: Admin Users — Suspended tab (March 12, 2026)**
 
@@ -4436,7 +4454,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 9, 2026*
-*Current Status: MVP Complete - shared mobile UX primitives are more consistent, lint is clean, docs entry-point navigation is improved, and the paused Playwright mobile-guardrails CI thread is no longer blocking roadmap-safe work*
+*Last Updated: March 12, 2026*
+*Current Status: MVP Complete - client applications Playwright strict mode fix (`.first()` on search placeholder); faceted search pay range filter; loading skeleton KPI breakpoints*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After this accumulated UX/docs/code-quality batch is shipped or when the paused `mobile-guardrails` CI hardening thread resumes*
+*Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
