@@ -26,7 +26,7 @@ test.describe("Talent gigs/apply route contracts", () => {
 
     await viewDetailsLink.click();
     await expect(page).toHaveURL(/\/gigs\/[^/]+(\/|$)/);
-    await expect(page.getByRole("heading", { name: "Apply for this Gig" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Apply for this Opportunity" })).toBeVisible();
 
     const gigId = page.url().match(/\/gigs\/([^/?#]+)/)?.[1];
     if (!gigId) {

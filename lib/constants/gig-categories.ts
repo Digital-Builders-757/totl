@@ -71,8 +71,8 @@ export const CATEGORY_FILTER_SETS = {
   video: ["video"],
   dancer: ["dancer"],
   musician: ["musician"],
-  events: ["events"],
-  others: ["others"],
+  events: ["events", "event"],
+  others: ["other", "others"],
   other: ["other"],
 } satisfies Record<GigCategory, string[]>;
 
