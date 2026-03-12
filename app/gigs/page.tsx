@@ -57,6 +57,8 @@ export default async function GigsPage({
   const location = typeof sp.location === "string" ? sp.location.trim() : "";
   const compensation =
     typeof sp.compensation === "string" ? sp.compensation.trim() : "";
+  const upcoming =
+    sp.upcoming === "1" || sp.upcoming === "true" || sp.upcoming === "yes";
   const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 9;
@@ -97,6 +99,10 @@ export default async function GigsPage({
   }
   if (compensation) {
     query = query.ilike("compensation", `%${compensation}%`);
+  }
+  if (upcoming) {
+    const today = new Date().toISOString().slice(0, 10);
+    query = query.gte("date", today);
   }
 
   // Calculate range for current page
@@ -177,6 +183,7 @@ export default async function GigsPage({
     if (category) params.set("category", category);
     if (location) params.set("location", location);
     if (compensation) params.set("compensation", compensation);
+    if (upcoming) params.set("upcoming", "1");
     params.set("page", String(targetPage));
     return `/gigs?${params.toString()}`;
   };
@@ -292,7 +299,17 @@ export default async function GigsPage({
                     placeholder="Compensation"
                     className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base sm:col-span-2 md:col-span-1"
                   />
-                  <input type="hidden" name="page" value={String(page)} />
+                  <label className="flex items-center gap-2 sm:gap-3 min-h-[52px] sm:h-14 px-3 rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white text-base cursor-pointer md:col-span-3">
+                    <input
+                      type="checkbox"
+                      name="upcoming"
+                      value="1"
+                      defaultChecked={upcoming}
+                      className="rounded border-gray-500"
+                    />
+                    <span>Upcoming only (date ≥ today)</span>
+                  </label>
+                  <input type="hidden" name="page" value="1" />
                 </div>
                 <Button
                   type="submit"

@@ -62,3 +62,10 @@ Do not archive canonical docs such as:
 - contracts
 - journeys
 - active runbooks still referenced by the execution board
+
+## Stub Maintenance (March 2026)
+
+Heavily-referenced paths (e.g. `docs/AUTH_*.md`) may remain as **minimal stubs** in `docs/` for link stability. Stubs should:
+- Be short (pointer + canonical links only)
+- Not duplicate full content (that lives in `docs/archive/`)
+- Direct readers to `docs/archive/` for historical detail and to contracts for current truth
