@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 export async function GET() {
@@ -54,7 +55,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error("Connection test error:", error);
+    logger.error("Connection test error", error);
     return NextResponse.json({
       connected: false,
       error: error instanceof Error ? error.message : "Unknown error occurred",

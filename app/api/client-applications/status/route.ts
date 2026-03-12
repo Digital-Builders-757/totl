@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export async function GET() {
   const supabase = await createSupabaseServer();
@@ -10,7 +11,7 @@ export async function GET() {
   } = await supabase.auth.getUser();
 
   if (userError) {
-    console.error("Unable to resolve auth user for status check:", userError);
+    logger.error("Unable to resolve auth user for status check", userError);
     return NextResponse.json({ error: "Unable to determine authenticated user" }, { status: 500 });
   }
 
@@ -27,7 +28,7 @@ export async function GET() {
     .maybeSingle();
 
   if (error) {
-    console.error("Error fetching client application status:", error);
+    logger.error("Error fetching client application status", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

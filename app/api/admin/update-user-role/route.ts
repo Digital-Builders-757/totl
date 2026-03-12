@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -76,7 +77,7 @@ export async function POST(request: Request) {
       .eq("id", userId);
 
     if (updateError) {
-      console.error("Error updating profile role:", updateError);
+      logger.error("Error updating profile role", updateError, { userId });
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
       message: `User role updated from ${oldRole} to ${newRole}`,
     });
   } catch (error) {
-    console.error("Error updating user role:", error);
+    logger.error("Error updating user role", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

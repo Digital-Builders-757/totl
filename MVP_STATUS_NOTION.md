@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Logger migration P3 batch — API routes (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **API routes:** Replaced `console.error` with `logger.error` in client-applications/status, admin/create-user, admin/update-user-role, admin/check-auth-schema, admin/test-connection, avatar-url.
+
+**Verification:** lint, build — all green.
+
 ## 🚀 **Latest: Logger migration P2 batch (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026
@@ -4489,6 +4496,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Logger P0+P1+P2 (forms, post-gig, verification, talent slug); CI typecheck enforced*
+*Current Status: MVP Complete - Logger P0+P1+P2+P3 (API routes); CI typecheck enforced*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
