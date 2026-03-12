@@ -91,7 +91,6 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
     setDeletingId(null);
     if (result.ok) {
       await fetchSearches();
-      setManageOpen(false);
       toast({ title: "Search deleted" });
     } else {
       toast({ title: "Failed to delete", description: result.error, variant: "destructive" });

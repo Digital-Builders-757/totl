@@ -82,10 +82,15 @@ export async function saveSearch(
       return { ok: false, error: "Name must be 64 characters or less" };
     }
 
-    const { count } = await supabase
+    const { count, error: countError } = await supabase
       .from("saved_searches")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .eq("user_id", user.id);
+
+    if (countError) {
+      logger.error("Error counting saved searches", countError);
+      return { ok: false, error: "Failed to check search limit" };
+    }
 
     if (typeof count === "number" && count >= MAX_SAVED_SEARCHES_PER_USER) {
       return {

@@ -5,8 +5,13 @@ import { logger } from "@/lib/utils/logger";
 /**
  * Server-side Sentry test endpoint
  * GET /api/test-sentry?type=error|message|exception
+ * Dev-only: blocked in production.
  */
 export async function GET(request: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const testType = searchParams.get("type") || "message";
 

@@ -13,7 +13,9 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
 import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
+import { RADIUS_OPTIONS, type RadiusValue } from "@/lib/constants/radius-filter";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
+import { geocode, milesToMeters } from "@/lib/server/geocode";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -58,6 +60,10 @@ export default async function GigsPage({
   const keyword = rawKeyword.replace(/[,()]/g, " ").trim();
   const category = typeof sp.category === "string" ? sp.category.trim() : "";
   const location = typeof sp.location === "string" ? sp.location.trim() : "";
+  const radiusMilesRaw = typeof sp.radius_miles === "string" ? sp.radius_miles.trim() : "";
+  const radiusMiles: RadiusValue = RADIUS_OPTIONS.some((o) => o.value === radiusMilesRaw)
+    ? (radiusMilesRaw as RadiusValue)
+    : "";
   const compensation =
     typeof sp.compensation === "string" ? sp.compensation.trim() : "";
   const payRange =
@@ -72,6 +78,75 @@ export default async function GigsPage({
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 9;
 
+  const payBounds = getPayRangeBounds(payRange);
+  const dateMin =
+    upcoming && (/^\d{4}-\d{2}-\d{2}$/.test(localDateRaw) && localDateRaw
+      ? localDateRaw
+      : new Date().toISOString().slice(0, 10));
+
+  const useRadiusSearch = Boolean(
+    location && radiusMiles && radiusMilesRaw && parseFloat(radiusMilesRaw) > 0
+  );
+
+  let gigsList: GigRow[] = [];
+  let total = 0;
+  let error: { code?: string } | null = null;
+  let profileData: SubscriptionAwareProfile | null = null;
+
+  const profilePromise = supabase
+    .from("profiles")
+    .select("role, subscription_status")
+    .eq("id", user.id)
+    .maybeSingle<SubscriptionAwareProfile>();
+
+  if (useRadiusSearch) {
+    const coords = await geocode(location);
+    if (coords) {
+      const radiusMeters = milesToMeters(parseFloat(radiusMilesRaw));
+      const from = (page - 1) * pageSize;
+      const [gigsRes, countRes, profileResult] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC added in migration, types not yet regenerated
+        (supabase as any).rpc("gigs_within_radius", {
+          center_lat: coords.lat,
+          center_lng: coords.lng,
+          radius_meters: radiusMeters,
+          p_category: category || null,
+          p_keyword: keyword || null,
+          p_pay_min: payBounds?.min ?? null,
+          p_pay_max: payBounds?.max ?? null,
+          p_date_min: upcoming ? dateMin : null,
+          p_limit: pageSize,
+          p_offset: from,
+          p_sort: sort,
+        }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- RPC added in migration, types not yet regenerated
+        (supabase as any).rpc("gigs_within_radius_count", {
+          center_lat: coords.lat,
+          center_lng: coords.lng,
+          radius_meters: radiusMeters,
+          p_category: category || null,
+          p_keyword: keyword || null,
+          p_pay_min: payBounds?.min ?? null,
+          p_pay_max: payBounds?.max ?? null,
+          p_date_min: upcoming ? dateMin : null,
+        }),
+        profilePromise,
+      ]);
+      if (gigsRes.error) {
+        error = gigsRes.error;
+        logger.error("Radius search error", gigsRes.error);
+      } else {
+        gigsList = (gigsRes.data ?? []) as GigRow[];
+        total = Number(countRes.data) ?? gigsList.length;
+      }
+      profileData = profileResult?.data ?? null;
+    } else {
+      const { data } = await profilePromise;
+      profileData = data ?? null;
+    }
+  }
+
+  if (!useRadiusSearch) {
   let query = supabase
     .from("gigs")
     .select(
@@ -109,7 +184,6 @@ export default async function GigsPage({
   if (compensation) {
     query = query.ilike("compensation", `%${compensation}%`);
   }
-  const payBounds = getPayRangeBounds(payRange);
   if (payBounds) {
     if (payBounds.min != null) {
       query = query.gte("compensation_numeric", payBounds.min);
@@ -160,21 +234,25 @@ export default async function GigsPage({
 
   // Execute both queries in parallel to eliminate waterfall
   const [
-    { data: gigs, error, count },
-    { data: profileData },
+    { data: gigs, error: queryError, count },
+    { data: profileDataFromQuery },
   ] = await Promise.all([gigsPromise, profilePromise]);
 
-  // If we got a range error, it means the page is beyond available data
-  // In this case, just show empty results instead of erroring
-  const gigsList = error?.code === "PGRST103" ? [] : ((gigs || []) as GigRow[]);
-  const total = typeof count === "number" ? count : gigsList.length;
+  gigsList = queryError?.code === "PGRST103" ? [] : ((gigs || []) as GigRow[]);
+  total = typeof count === "number" ? count : gigsList.length;
+  error = queryError;
+  profileData = profileDataFromQuery ?? null;
+  }
+
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
   
   // Handle errors - PGRST103 is expected for out-of-range pages, just show empty results
-  if (error && error.code === "PGRST103") {
-    // Pagination out of range - this is expected, just show empty results
+  if (error?.code === "PGRST103") {
     logger.warn("Pagination out of range", { page, total });
-  } else if (error && error.code !== "PGRST103") {
+  }
+  if (error && error.code !== "PGRST103") {
     logger.error("Error fetching gigs", error);
     return (
       <div className="min-h-screen bg-black pt-40">
@@ -216,9 +294,10 @@ export default async function GigsPage({
   // Helper to preserve query params while changing page
   const buildPageHref = (targetPage: number) => {
     const params = new URLSearchParams();
-    if (rawKeyword) params.set("q", rawKeyword); // Use original keyword for URL
+    if (rawKeyword) params.set("q", rawKeyword);
     if (category) params.set("category", category);
     if (location) params.set("location", location);
+    if (radiusMiles) params.set("radius_miles", radiusMiles);
     if (compensation) params.set("compensation", compensation);
     if (payRange) params.set("pay_range", payRange);
     if (sort !== "newest") params.set("sort", sort);
@@ -310,6 +389,7 @@ export default async function GigsPage({
                   q: rawKeyword || undefined,
                   category: category || undefined,
                   location: location || undefined,
+                  radius_miles: radiusMiles || undefined,
                   compensation: compensation || undefined,
                   pay_range: payRange || undefined,
                   upcoming: upcoming || undefined,
@@ -322,6 +402,7 @@ export default async function GigsPage({
                 rawKeyword={rawKeyword}
                 category={category}
                 location={location}
+                radiusMiles={radiusMiles}
                 compensation={compensation}
                 payRange={payRange}
                 sort={sort}

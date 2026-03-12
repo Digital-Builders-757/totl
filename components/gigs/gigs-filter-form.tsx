@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { PAY_RANGE_OPTIONS, type PayRangeValue } from "@/lib/constants/pay-range-filter";
+import { RADIUS_OPTIONS, type RadiusValue } from "@/lib/constants/radius-filter";
 
 /** YYYY-MM-DD in user's local timezone */
 function getLocalDateString(): string {
@@ -21,6 +22,7 @@ export interface GigsFilterFormProps {
   rawKeyword: string;
   category: string;
   location: string;
+  radiusMiles: RadiusValue;
   compensation: string;
   payRange: PayRangeValue;
   sort: GigsSortValue;
@@ -31,6 +33,7 @@ export function GigsFilterForm({
   rawKeyword,
   category,
   location,
+  radiusMiles,
   compensation,
   payRange,
   sort,
@@ -82,9 +85,21 @@ export function GigsFilterForm({
         <Input
           name="location"
           defaultValue={location}
-          placeholder="Location"
+          placeholder="City or address (for radius)"
           className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
         />
+        <select
+          name="radius_miles"
+          defaultValue={radiusMiles}
+          className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+          title="Within X miles of location (requires location)"
+        >
+          {RADIUS_OPTIONS.map((opt) => (
+            <option key={opt.value || "none"} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
         <Input
           name="compensation"
           defaultValue={compensation}

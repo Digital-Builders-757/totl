@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: PR #219 feedback — saved-search error handling, UX, dead code (March 12, 2026)**
+
+**BUG FIXES** - March 12, 2026
+- ✅ **saveSearch count error handling:** Destructure and handle `error` from count query; return early on failure so 25-search limit is enforced (Sentry Bugbot).
+- ✅ **Manage dialog stays open:** Removed `setManageOpen(false)` after delete so users can batch-delete saved searches (Cursor Bugbot).
+- ✅ **buildGigsUrl dead code:** Removed unreachable `"/gigs"` fallback; `page=1` is always set (Cursor Bugbot).
+
+## 🚀 **Latest: Sign-in analytics + dev gating + PostGIS location radius (March 12, 2026)**
+
+**ANALYTICS / SECURITY / FACETED SEARCH** - March 12, 2026
+- ✅ **Sign-in gate analytics:** `trackEvent()` utility in `lib/analytics/track-event.ts`; GA4 events `sign_in_gate_viewed` and `sign_in_gate_cta_click` wired in SignInGate (closes TODO).
+- ✅ **Dev/test page gating:** `/test-sentry`, `/ui-showcase` (and subpaths) return 404 in production via middleware; `/api/test-sentry` blocked in production. `profile-bootstrap` already gated.
+- ✅ **Location radius (PostGIS):** Migration adds `location_lat`/`location_lng` to gigs, `gigs_within_radius` and `gigs_within_radius_count` RPCs. Geocoding via Nominatim. Radius dropdown (10/25/50/100 miles) in gigs filter; saved search params include `radius_miles`.
+
+**Verification:** typecheck, build, lint — all green. Migration requires `supabase db push` before radius search works.
+
 ## 🚀 **Latest: Saved searches for faceted search (March 12, 2026)**
 
 **FACETED SEARCH P1** - March 12, 2026
@@ -106,7 +122,7 @@
 
 **Next (P1)**
 - [x] Saved searches for faceted search (March 12, 2026).
-- [ ] Location radius (PostGIS) for faceted search.
+- [x] Location radius (PostGIS) for faceted search (March 12, 2026).
 
 **Follow-up (March 12)**
 - ✅ Client/gigs loading skeleton: aligned with stepped KPI breakpoints (md:grid-cols-2 lg:grid-cols-4).
@@ -4536,6 +4552,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Saved searches; compensation_numeric fix; Logger Bugbot; Faceted search sort*
+*Current Status: MVP Complete - Sign-in analytics; dev gating; PostGIS location radius; saved searches*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
+*Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*
