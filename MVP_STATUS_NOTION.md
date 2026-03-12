@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: PR #219 feedback — saved-search error handling, UX, dead code (March 12, 2026)**
+
+**BUG FIXES** - March 12, 2026
+- ✅ **saveSearch count error handling:** Destructure and handle `error` from count query; return early on failure so 25-search limit is enforced (Sentry Bugbot).
+- ✅ **Manage dialog stays open:** Removed `setManageOpen(false)` after delete so users can batch-delete saved searches (Cursor Bugbot).
+- ✅ **buildGigsUrl dead code:** Removed unreachable `"/gigs"` fallback; `page=1` is always set (Cursor Bugbot).
+
 ## 🚀 **Latest: Sign-in analytics + dev gating + PostGIS location radius (March 12, 2026)**
 
 **ANALYTICS / SECURITY / FACETED SEARCH** - March 12, 2026

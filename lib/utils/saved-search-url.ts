@@ -17,6 +17,5 @@ export function buildGigsUrl(params: SavedSearchParams): string {
   }
   if (params.sort && params.sort !== "newest") search.set("sort", params.sort);
   search.set("page", "1");
-  const qs = search.toString();
-  return qs ? `/gigs?${qs}` : "/gigs";
+  return `/gigs?${search.toString()}`;
 }
