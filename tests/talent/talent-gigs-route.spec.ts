@@ -9,7 +9,7 @@ test.describe("Talent gigs/apply route contracts", () => {
     await safeGoto(page, "/gigs");
 
     await expect(page).toHaveURL(/\/gigs(\?|$)/);
-    await expect(page.getByRole("heading", { name: "Find Gigs" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Find Opportunities" })).toBeVisible();
     await expect(page.getByPlaceholder("Search keywords...")).toBeVisible();
     await expect(page.getByRole("button", { name: "Search" })).toBeVisible();
   });
@@ -20,7 +20,7 @@ test.describe("Talent gigs/apply route contracts", () => {
     await safeGoto(page, "/gigs");
 
     const viewDetailsLink = page.getByRole("link", { name: /View Details/i }).first();
-    const noGigsHeading = page.getByRole("heading", { name: "No Active Gigs" });
+    const noGigsHeading = page.getByRole("heading", { name: "No Active Opportunities" });
     const hasNoGigs = await noGigsHeading.isVisible();
     test.skip(hasNoGigs, "Seed has no active gigs to validate details/apply route contracts");
 
@@ -63,7 +63,7 @@ test.describe("Talent gigs/apply route contracts (mobile 390x844)", () => {
     await safeGoto(page, "/gigs");
 
     await expect(page).toHaveURL(/\/gigs(\?|$)/);
-    await expect(page.getByRole("heading", { name: "Find Gigs" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Find Opportunities" })).toBeVisible();
 
     const noOverflow = await page.evaluate(() => {
       const el = document.documentElement;

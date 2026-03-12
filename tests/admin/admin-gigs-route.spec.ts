@@ -8,8 +8,8 @@ test.describe("Admin gigs route contracts", () => {
     await safeGoto(page, "/admin/gigs");
 
     await expect(page).toHaveURL(/\/admin\/gigs(\/|$)/);
-    await expect(page.getByRole("heading", { name: "All Gigs" })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Create Gig/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "All Opportunities" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Create Opportunity/i })).toBeVisible();
     await expect(
       page.getByPlaceholder("Search by title, location, category, or company...")
     ).toBeVisible();
@@ -53,7 +53,7 @@ test.describe("Admin gigs route contracts (mobile 390x844)", () => {
     await safeGoto(page, "/admin/gigs");
 
     await expect(page).toHaveURL(/\/admin\/gigs(\/|$)/);
-    await expect(page.getByRole("heading", { name: "All Gigs" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "All Opportunities" })).toBeVisible();
     await expect(page.getByRole("tab", { name: /All \(/i }).first()).toBeVisible();
 
     const noOverflow = await page.evaluate(() => {

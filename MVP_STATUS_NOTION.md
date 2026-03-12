@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Mobile guardrails — Gigs→Opportunities test alignment (March 12, 2026)**
+
+**CI / PLAYWRIGHT** - March 12, 2026
+- ✅ **Test terminology fix:** Updated 5 failing mobile-guardrails specs to match Gigs→Opportunities terminology from PR #212:
+  - `admin-gigs-route.spec.ts` — "All Gigs" → "All Opportunities", "Create Gig" → "Create Opportunity"
+  - `client-applications-route.spec.ts` — search placeholder "gig title" → "opportunity title"
+  - `client-gigs-route.spec.ts` — "My Gigs" → "My Opportunities", search placeholder, "All Gigs" tab, "No gigs found" → "No opportunities found", "Post Your First Gig" → "Post Your First Opportunity"
+  - `talent-gig-detail-route.spec.ts` — "Apply for this Gig" → "Apply for this Opportunity", "No Active Gigs" → "No Active Opportunities", "Back to All Gigs" → "Back to All Opportunities"
+  - `talent-gigs-route.spec.ts` — "Find Gigs" → "Find Opportunities", "No Active Gigs" → "No Active Opportunities"
+
+**Verification:** `npm run lint`, `npm run build` — passed. CI mobile-guardrails will re-run on push.
+
 ## 🚀 **Latest: Opportunity image dimension notice (March 12, 2026)**
 
 **DOCUMENTATION / UX** - March 12, 2026
