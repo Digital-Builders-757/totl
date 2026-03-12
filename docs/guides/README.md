@@ -31,6 +31,7 @@
 - `TECH_STACK_BREAKDOWN.md`
 - `PROFILE_IMAGE_UPLOAD_SETUP.md`
 - `DESIGN_SYSTEM_COMPREHENSIVE_BREAKDOWN.md`
+- `OPPORTUNITY_IMAGE_SPECS.md` - Recommended dimensions (1200×900 px, 4:3) for opportunity cover images
 
 ## How To Use This Folder
 

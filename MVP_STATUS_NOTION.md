@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Opportunity image dimension notice (March 12, 2026)**
+
+**DOCUMENTATION / UX** - March 12, 2026
+- ✅ **Image specs notice:** Added recommended dimensions (1200×900 px, 4:3 aspect ratio) to the opportunity cover image uploader so flyers display correctly without distortion.
+- ✅ **Constants:** `lib/constants/opportunity-image-specs.ts` — single source of truth for display specs.
+- ✅ **Docs:** `docs/guides/OPPORTUNITY_IMAGE_SPECS.md` — full spec reference; linked from guides README and DOCUMENTATION_INDEX.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `build`, `lint` — all green.
+
 ## 🚀 **Latest: Gigs → Opportunities terminology + Events/Others filter (March 12, 2026)**
 
 **UI/UX / TAXONOMY** - March 12, 2026

@@ -1,10 +1,11 @@
 "use client";
 
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Info } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { OPPORTUNITY_IMAGE_SPEC_NOTICE } from "@/lib/constants/opportunity-image-specs";
 
 interface GigImageUploaderProps {
   onFileSelect: (file: File | null) => void;
@@ -102,8 +103,14 @@ export function GigImageUploader({
   return (
     <div className="space-y-2">
       <label htmlFor="gig-image-upload" className="text-sm font-medium text-white">
-        Gig Cover Image
+        Opportunity Cover Image
       </label>
+      <div className="flex items-start gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 px-3 py-2 text-sm text-blue-200">
+        <Info className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden />
+        <p>
+          <strong>Recommended:</strong> {OPPORTUNITY_IMAGE_SPEC_NOTICE}. Flyers and images in this format will display correctly without distortion.
+        </p>
+      </div>
       <div
         role="button"
         tabIndex={0}
@@ -187,8 +194,7 @@ export function GigImageUploader({
         )}
       </div>
       <p className="text-xs text-gray-400">
-        Optional: Add a cover image to make your gig stand out. Tip: keep images under ~1MB for
-        faster uploads.
+        Optional: Add a cover image to make your opportunity stand out. JPEG, PNG, GIF, or WebP (max 4MB). Tip: keep images under ~1MB for faster uploads.
       </p>
     </div>
   );
