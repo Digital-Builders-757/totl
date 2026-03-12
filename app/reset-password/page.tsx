@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -41,7 +42,7 @@ export default function ResetPassword() {
         });
       }
     } catch (error) {
-      console.error("Password reset error:", error);
+      logger.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

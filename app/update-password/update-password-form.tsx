@@ -10,6 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { PASSWORD_RECOVERY_INTENT_KEY } from "@/lib/constants/password-recovery";
 import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
+import { logger } from "@/lib/utils/logger";
 
 export function UpdatePasswordForm() {
   const [password, setPassword] = useState("");
@@ -85,7 +86,7 @@ export function UpdatePasswordForm() {
         }, 3000);
       }
     } catch (error) {
-      console.error("Password update error:", error);
+      logger.error("Password update error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

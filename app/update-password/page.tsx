@@ -6,6 +6,7 @@ import { UpdatePasswordClientGate } from "./update-password-client-gate";
 import { UpdatePasswordForm } from "./update-password-form";
 import { Button } from "@/components/ui/button";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
@@ -101,7 +102,7 @@ export default async function UpdatePasswordPage({
         </div>
       );
     } catch (error) {
-      console.error("Token verification error:", error);
+      logger.error("Token verification error:", error);
       redirect("/login?error=invalid_token");
     }
   }
@@ -151,7 +152,7 @@ export default async function UpdatePasswordPage({
         </div>
       );
     } catch (error) {
-      console.error("Access token verification error:", error);
+      logger.error("Access token verification error:", error);
       redirect("/login?error=invalid_token");
     }
   }

@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
+
+**SECURITY / STABILITY** - March 11, 2026
+- ✅ Upgraded Next.js from 15.5.9 to 15.5.12 to address DoS vulnerabilities (Image Optimizer remotePatterns, RSC deserialization).
+- ✅ Replaced `console.error`/`console.warn` with `logger.error`/`logger.warn` in critical auth and error paths:
+  - `app/login/page.tsx`, `app/reset-password/page.tsx`, `app/update-password/page.tsx`, `app/update-password/update-password-form.tsx`
+  - `app/api/auth/signout/route.ts`, `app/api/email/send-password-reset/route.ts`
+  - `app/global-error.tsx` (hydration → `logger.info` to avoid Sentry noise), `app/talent/dashboard/error.tsx`
+- ✅ Auth recovery/reset/suspended paths inspected; no regression risk from upgrade (async cookies, hash tokens, recovery intent already correct).
+- ✅ Client drawer inspected; role-scoped links, test hooks, and mobile breakpoints correct.
+- ✅ No secrets/env rotation performed.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `lint`, `build` — all green.
+
 ## 🚀 **Latest: Loading skeletons + error logging (March 11, 2026)**
 
 **MVP POLISH / LOADING STATES + SENTRY** - March 11, 2026
@@ -27,7 +41,7 @@
 
 **Next (P1 - follow-up)**
 - [ ] Resolve Sentry issues 3O, 1N, 2M, 2Q, 2H, 2J, 2K after deploy if they stop reproducing.
-- [ ] Optional: Upgrade Next.js to 15.5.12 for security fixes.
+- [x] Upgrade Next.js to 15.5.12 for security fixes (completed March 11, 2026).
 
 ## 🚀 **Latest: Sentry signal hardening + local-noise reduction (March 11, 2026)**
 

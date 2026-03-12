@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +82,7 @@ export default function Login() {
       const { error } = await signIn(email, password);
 
       if (error) {
-        console.error("Login error:", error);
+        logger.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
           setFormErrors({ auth: "Invalid credentials. Please try again." });
         } else if (error.message.includes("Email not confirmed")) {
@@ -105,7 +106,7 @@ export default function Login() {
       // This prevents client-side "guess redirects" that can race profile bootstrap and create loops.
       return;
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
