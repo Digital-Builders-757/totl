@@ -20,6 +20,9 @@
 **Next (P1)**
 - [ ] Location radius (PostGIS) or saved searches for faceted search.
 
+**Follow-up (March 12)**
+- ✅ Client/gigs loading skeleton: aligned with stepped KPI breakpoints (md:grid-cols-2 lg:grid-cols-4).
+
 ## 🚀 **Latest: Bug fixes + docs hygiene + faceted search (March 12, 2026)**
 
 **SESSION BATCH** - March 12, 2026
