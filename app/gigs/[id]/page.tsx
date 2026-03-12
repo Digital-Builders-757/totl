@@ -256,7 +256,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               {!user ? (
                 <div className="space-y-3">
                   <p className="text-sm text-gray-600">
-                    Sign in to apply for this gig.
+                    Sign in to apply for this opportunity.
                   </p>
                   <Link
                     data-testid="gig-signin-link"
@@ -272,7 +272,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                     Application Submitted
                   </Badge>
                   <p className="text-sm text-gray-600">
-                    You&apos;ve already applied for this gig. Check your dashboard for updates.
+                    You&apos;ve already applied for this opportunity. Check your dashboard for updates.
                   </p>
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/talent/dashboard">View Dashboard</Link>
@@ -286,7 +286,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <div className="space-y-4" data-testid="subscription-apply-gate">
                   <Alert className="bg-amber-500/10 border-amber-500/30">
                     <AlertDescription className="text-amber-100 text-sm">
-                      You need an active subscription to apply to this gig and see full client
+                      You need an active subscription to apply to this opportunity and see full client
                       details.
                     </AlertDescription>
                   </Alert>

@@ -321,7 +321,7 @@ export default function ClientApplicationsClient({
               onChange={(event) => setGigFilter(event.target.value)}
               className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All Gigs</option>
+              <option value="all">All Opportunities</option>
               {uniqueGigs.map((gigId) => {
                 const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
                 return (
@@ -341,7 +341,7 @@ export default function ClientApplicationsClient({
             >
               <div className="space-y-2">
                 <label htmlFor="mobile-opportunity-filter" className="text-sm text-gray-300">
-                  Gig
+                  Opportunity
                 </label>
                 <select
                   id="mobile-opportunity-filter"
@@ -349,7 +349,7 @@ export default function ClientApplicationsClient({
                   onChange={(event) => setGigFilter(event.target.value)}
                   className="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">All Gigs</option>
+                  <option value="all">All Opportunities</option>
                   {uniqueGigs.map((gigId) => {
                     const gig = applications.find((app) => app.gig_id === gigId)?.gigs;
                     return (

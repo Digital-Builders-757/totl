@@ -19,7 +19,8 @@ export const GIG_CATEGORIES = [
 ] as const;
 
 /**
- * Categories visible in UI dropdowns (Opportunity Type filter)
+ * Categories visible in UI dropdowns (Opportunity Type filter).
+ * Excludes "other" to avoid confusion with "others" — "other" remains in GIG_CATEGORIES for normalization/legacy.
  */
 export const VISIBLE_GIG_CATEGORIES = [
   "modeling",
@@ -31,7 +32,6 @@ export const VISIBLE_GIG_CATEGORIES = [
   "musician",
   "events",
   "others",
-  "other",
 ] as const;
 
 export type GigCategory = (typeof GIG_CATEGORIES)[number];

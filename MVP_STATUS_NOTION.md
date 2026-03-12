@@ -26,6 +26,12 @@
 
 **Verification:** `schema:verify:comprehensive`, `types:check`, `build`, `lint` — all green.
 
+**PR #212 review fixes (March 12, 2026):**
+- ✅ Removed "other" from VISIBLE_GIG_CATEGORIES to avoid confusion with "others" (Sentry/Bugbot).
+- ✅ Client applications: "All Gigs" → "All Opportunities", filter label "Gig" → "Opportunity".
+- ✅ Gig detail page: "Sign in to apply for this gig" → "opportunity", "You've already applied" → "opportunity", subscription gate text.
+- ✅ Admin dashboard: "Gig Management" → "Opportunity Management", "Manage all your platform gigs" → "opportunities".
+
 **Next (P1 - follow-up)**
 - [ ] Consider adding a changelog or release note for client-facing terminology change.
 

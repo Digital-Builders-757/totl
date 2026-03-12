@@ -435,9 +435,9 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div>
-                    <CardTitle className="text-white">Gig Management</CardTitle>
+                    <CardTitle className="text-white">Opportunity Management</CardTitle>
                     <CardDescription className="text-gray-300">
-                      Manage all your platform gigs
+                      Manage all your platform opportunities
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
