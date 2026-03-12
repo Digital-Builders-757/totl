@@ -4,13 +4,13 @@ import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, La
 import Link from "next/link";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
+import { GigsFilterForm } from "@/components/gigs/gigs-filter-form";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
-import { VISIBLE_GIG_CATEGORIES, getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
-import { PAY_RANGE_OPTIONS, getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
+import { getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
+import { getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
@@ -62,6 +62,7 @@ export default async function GigsPage({
     (typeof sp.pay_range === "string" ? sp.pay_range.trim() : "") as PayRangeValue;
   const upcoming =
     sp.upcoming === "1" || sp.upcoming === "true" || sp.upcoming === "yes";
+  const localDateRaw = typeof sp.local_date === "string" ? sp.local_date.trim() : "";
   const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 9;
@@ -75,7 +76,6 @@ export default async function GigsPage({
       description, 
       location, 
       compensation, 
-      compensation_numeric,
       date, 
       category,
       image_url,
@@ -114,7 +114,10 @@ export default async function GigsPage({
     }
   }
   if (upcoming) {
-    const today = new Date().toISOString().slice(0, 10);
+    const today =
+      /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw) && localDateRaw
+        ? localDateRaw
+        : new Date().toISOString().slice(0, 10);
     query = query.gte("date", today);
   }
 
@@ -198,6 +201,8 @@ export default async function GigsPage({
     if (compensation) params.set("compensation", compensation);
     if (payRange) params.set("pay_range", payRange);
     if (upcoming) params.set("upcoming", "1");
+    if (localDateRaw && /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw))
+      params.set("local_date", localDateRaw);
     params.set("page", String(targetPage));
     return `/gigs?${params.toString()}`;
   };
@@ -278,71 +283,14 @@ export default async function GigsPage({
           {/* Search and Filter */}
           <div className="max-w-4xl mx-auto mb-10 sm:mb-14">
             <div className="panel-frosted grain-texture relative p-4 sm:p-6 md:p-8 shadow-lg">
-              <form className="flex flex-col gap-4 sm:gap-5 md:gap-6 relative z-10" method="get">
-                <div className="relative flex-grow">
-                  <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
-                  <Input
-                    name="q"
-                    defaultValue={rawKeyword}
-                    placeholder="Search keywords..."
-                    className="input-glow pl-10 sm:pl-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 w-full">
-                  <select
-                    name="category"
-                    defaultValue={category}
-                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
-                  >
-                    <option value="">All opportunity types</option>
-                    {VISIBLE_GIG_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {getCategoryLabel(cat)}
-                      </option>
-                    ))}
-                  </select>
-                  <Input
-                    name="location"
-                    defaultValue={location}
-                    placeholder="Location"
-                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
-                  />
-                  <Input
-                    name="compensation"
-                    defaultValue={compensation}
-                    placeholder="Compensation (keyword)"
-                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
-                  />
-                  <select
-                    name="pay_range"
-                    defaultValue={payRange}
-                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
-                  >
-                    {PAY_RANGE_OPTIONS.map((opt) => (
-                      <option key={opt.value || "any"} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                  <label className="flex items-center gap-2 sm:gap-3 min-h-[52px] sm:h-14 px-3 rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white text-base cursor-pointer md:col-span-3">
-                    <input
-                      type="checkbox"
-                      name="upcoming"
-                      value="1"
-                      defaultChecked={upcoming}
-                      className="rounded border-gray-500"
-                    />
-                    <span>Upcoming only (date ≥ today)</span>
-                  </label>
-                  <input type="hidden" name="page" value="1" />
-                </div>
-                <Button
-                  type="submit"
-                  className="button-glow px-6 sm:px-8 py-4 sm:py-5 md:py-6 text-base sm:text-lg border-0 min-h-[52px] w-full sm:w-auto sm:self-start"
-                >
-                  Search
-                </Button>
-              </form>
+              <GigsFilterForm
+                rawKeyword={rawKeyword}
+                category={category}
+                location={location}
+                compensation={compensation}
+                payRange={payRange}
+                upcoming={upcoming}
+              />
             </div>
           </div>
 

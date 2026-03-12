@@ -8,6 +8,57 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Sentry/Bugbot fixes — Upcoming timezone + pay range (March 12, 2026)**
+
+**FACETED SEARCH / PAY RANGE** - March 12, 2026
+- ✅ **Upcoming filter timezone:** Client sends `local_date` on form submit; server uses user's local date instead of UTC.
+- ✅ **compensation_numeric regex:** New migration fixes regex to require digit, at most one decimal (`[0-9][0-9,]*(\.[0-9]+)?`); avoids dot-only matches (e.g. "Negotiable.") and invalid numbers ("1.2.3") that crashed gig INSERT.
+- ✅ **Pay range gap:** "Under $500" now uses `max: 499.99` to include 499.01–499.99.
+- ✅ **Select cleanup:** Removed unused `compensation_numeric` from gigs page select.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Migration pushed.
+
+## 🚀 **Latest: Logger migration P3 batch — API routes (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **API routes:** Replaced `console.error` with `logger.error` in client-applications/status, admin/create-user, admin/update-user-role, admin/check-auth-schema, admin/test-connection, avatar-url.
+
+**Verification:** lint, build — all green.
+
+## 🚀 **Latest: Logger migration P2 batch (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **Form components:** Replaced `console.error` with `logger.error` in client-profile-form, talent-profile-form, talent-personal-info-form, talent-professional-info-form.
+- ✅ **Pages:** post-gig, verification-pending, talent/[slug] — profile/gig/verification error paths now use logger.
+
+**Verification:** lint, build — all green.
+
+## 🚀 **Latest: Logger migration P1 batch (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **portfolio-actions.ts:** Replaced 11 `console.error` with `logger.error` (upload, insert, delete, reorder, setPrimary, update, fetch).
+- ✅ **moderation-actions.ts:** Replaced 6 `console.error` with `logger.error` (flag submit, admin profile, flag update, close gig, reinstate, suspend).
+- ✅ **claim-email-send.ts:** Replaced 2 `console.error` with `logger.error` (email ledger claim failed/threw).
+
+**Verification:** lint, build — all green.
+
+## 🚀 **Latest: Logger migration P0 batch (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **boot-actions.ts:** Replaced 8 `console.error` with `logger.error` (ensureProfileExists, getBootState, getBootStateRedirect, finishOnboardingAction).
+- ✅ **client-actions.ts:** Replaced 11 `console.error` with `logger.error` (approve/reject RPC, email side-effects, follow-up reminders, status check).
+- ✅ **auth-actions.ts:** Replaced 3 `console.error` with `logger.error` (talent profile creation during role repair and signup).
+
+**Verification:** lint, build — all green.
+
+## 🚀 **Latest: CI typecheck enforcement (March 12, 2026)**
+
+**CI / QUALITY** - March 12, 2026
+- ✅ **Typecheck gate:** Removed `continue-on-error: true` from CI typecheck step; TypeScript errors now fail the build instead of being ignored.
+- ✅ **Safety-gate summary:** Added typecheck outcome to build summary; `typecheck.log` included in failure artifacts; `npm run typecheck` in recommended rerun commands.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Client applications test — Playwright strict mode fix (March 12, 2026)**
 
 **CI / PLAYWRIGHT** - March 12, 2026
@@ -4455,6 +4506,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - client applications Playwright strict mode fix (`.first()` on search placeholder); faceted search pay range filter; loading skeleton KPI breakpoints*
+*Current Status: MVP Complete - Sentry/Bugbot fixes (Upcoming timezone, pay range regex/gap); Logger P0–P3*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertClientProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 
 // Import the generated type instead of defining our own
 import type { Database } from "@/types/supabase";
@@ -101,7 +102,7 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       // Redirect to dashboard
       router.push(PATHS.CLIENT_DASHBOARD);
     } catch (err) {
-      console.error("Error updating profile:", err);
+      logger.error("Error updating profile", err instanceof Error ? err : new Error(String(err)));
       
       // Extract error message from various error types
       let errorMessage = "An unexpected error occurred";

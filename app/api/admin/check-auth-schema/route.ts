@@ -1,5 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export async function GET() {
   try {
@@ -36,7 +37,7 @@ export async function GET() {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error in check-auth-schema route:", error);
+    logger.error("Error in check-auth-schema route", error);
     return NextResponse.json(
       {
         exists: false,

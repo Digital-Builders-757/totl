@@ -43,6 +43,9 @@ npm run build
   - **Root Cause:** Session updates were added in-body, but the footer metadata block was not updated in the same commit
   - **Fix:** Whenever `MVP_STATUS_NOTION.md` changes, update the footer lines at the end of the file (`Last Updated`, `Current Status`, `Next Review`) before ship
   - **Prevention:** Treat footer metadata sync as a required pre-push checklist item for all MVP doc edits
+- **CI typecheck step fails:** Build job fails at "Run type checking" step
+  - **Fix:** Run `npm run typecheck` locally to reproduce; fix TypeScript errors before pushing
+  - **Prevention:** CI now enforces typecheck as a real gate (no longer continue-on-error); run `npm run typecheck` as part of pre-push
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
 - **Stripe API Version Errors:** `Invalid Stripe API version format with unsupported '.clover' suffix`
@@ -93,6 +96,16 @@ npm run build
   - **Symptom:** mobile-guardrails CI fails on client-applications route; loading skeleton and page content share same placeholder
   - **Fix (option A):** Use a distinct placeholder in loading.tsx (e.g. "Search...") so the test locator matches only the real content
   - **Fix (option B):** Append `.first()` to the locator when multiple elements are expected (e.g. skeleton + real content): `page.getByPlaceholder("...").first()`
+- **Upcoming only filter hides gigs for non-UTC users:** Sentry/bugbot reports "Upcoming only" uses server UTC date, hiding gigs that are still "today" for users in other timezones
+  - **Symptom:** User in New York at 11 PM March 12th sees no gigs for March 12th (server UTC is already March 13th)
+  - **Fix:** Pass user's local date from client on form submit; use `local_date` query param when valid YYYY-MM-DD; fall back to UTC for direct links/pagination
+  - **Implementation:** Client component adds hidden `local_date` input on submit via `new Date().toLocaleDateString("en-CA")`; server reads `local_date` from searchParams when `upcoming` is true
+- **compensation_numeric regex crashes gig INSERT:** Migration regex `[\d,\.]+` matches dot-only (e.g. "Negotiable.") or invalid numbers ("1.2.3"), causing ::numeric cast to fail
+  - **Symptom:** Gig creation fails when compensation text contains only punctuation or multiple decimal points
+  - **Fix:** Use regex `[0-9][0-9,]*(\.[0-9]+)?` — requires at least one digit, at most one decimal point
+  - **Migration:** Create new migration to drop and re-add compensation_numeric with the safer regex (never edit existing migrations)
+- **Pay range "Under $500" excludes 499.01–499.99:** Filter used `max: 499` with `.lte()`, creating a gap
+  - **Fix:** Use `max: 499.99` in `getPayRangeBounds` for `under_500` case
   - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs; or use `.first()` in specs when both are present
 - **Dashboard Infinite Loading:** `useSupabase()` hook excluded from useEffect dependencies, causing effect to run once with null client and never re-run when client initializes
   - **Fix:** Include `supabase` in useEffect dependency array to handle null → non-null transition

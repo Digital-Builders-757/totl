@@ -1,5 +1,6 @@
 import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export const EmailSendPurpose = {
   VERIFY_EMAIL: "verify_email",
@@ -110,19 +111,19 @@ export async function claimEmailSend(args: ClaimArgs): Promise<ClaimEmailSendRes
         return { didClaim: false, idempotencyKey, cooldownBucketIso, reason: "already-claimed" };
       }
 
-      console.error("[totl][email-ledger] claim failed", {
+      logger.error("[totl][email-ledger] claim failed", error, {
         purpose: args.purpose,
         cooldownBucketIso,
-        errorMessage: error.message,
-        errorCode: (error as { code?: string }).code ?? null,
       });
       return { didClaim: false, idempotencyKey, cooldownBucketIso, reason: "claim-failed" };
     }
 
     return { didClaim: true, ledgerId: data.id, idempotencyKey, cooldownBucketIso };
   } catch (e) {
-    const reason = e instanceof Error ? e.message : "unknown error";
-    console.error("[totl][email-ledger] claim threw", { purpose: args.purpose, cooldownBucketIso, reason });
+    logger.error("[totl][email-ledger] claim threw", e instanceof Error ? e : new Error(String(e)), {
+      purpose: args.purpose,
+      cooldownBucketIso,
+    });
     return { didClaim: false, idempotencyKey, cooldownBucketIso, reason: "claim-failed" };
   }
 }

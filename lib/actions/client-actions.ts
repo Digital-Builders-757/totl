@@ -270,9 +270,8 @@ export async function approveClientApplication(applicationId: string, adminNotes
     );
 
     if (rpcError || !rpcData || rpcData.length === 0) {
-      console.error("approveClientApplication RPC failed", {
+      logger.error("approveClientApplication RPC failed", rpcError ?? new Error("No RPC data"), {
         applicationId,
-        rpcError,
         rpcDataPresent: Boolean(rpcData),
         rpcRowCount: Array.isArray(rpcData) ? rpcData.length : null,
       });
@@ -312,7 +311,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
 
           await logEmailSent(applicationData.email, "client-application-approved", true);
         } catch (emailError) {
-          console.error("Error sending approval email:", emailError);
+          logger.error("Error sending approval email", emailError, { applicationId });
           await logEmailSent(
             applicationData.email,
             "client-application-approved",
@@ -330,7 +329,7 @@ export async function approveClientApplication(applicationId: string, adminNotes
       status: row.application_status,
     };
   } catch (error) {
-    console.error("Unexpected error approving client application:", error);
+    logger.error("Unexpected error approving client application", error, { applicationId });
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -406,7 +405,7 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
 
           await logEmailSent(applicationData.email, "client-application-rejected", true);
         } catch (emailError) {
-          console.error("Error sending rejection email:", emailError);
+          logger.error("Error sending rejection email", emailError, { applicationId });
           await logEmailSent(
             applicationData.email,
             "client-application-rejected",
@@ -423,7 +422,7 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
       status: row.application_status,
     };
   } catch (error) {
-    console.error("Unexpected error rejecting client application:", error);
+    logger.error("Unexpected error rejecting client application", error, { applicationId });
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -470,7 +469,7 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
     >();
 
   if (pendingError) {
-    console.error("Error fetching pending client applications for follow-up:", pendingError);
+    logger.error("Error fetching pending client applications for follow-up", pendingError);
     return { success: false, error: "Failed to fetch pending applications.", processed: 0, sentIds: [], failures: [] };
   }
 
@@ -508,7 +507,7 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
       adminEmailSuccess = true;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown error";
-      console.error("Error sending admin follow-up reminder:", { applicationId: application.id, reason });
+      logger.error("Error sending admin follow-up reminder", error, { applicationId: application.id });
       failures.push({ applicationId: application.id, stage: "admin-email", reason });
       await logEmailSent(adminEmailAddress, "client-application-followup-admin", false, reason);
     }
@@ -537,7 +536,7 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
       await logEmailSent(application.email, "client-application-followup-applicant", true);
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown error";
-      console.error("Error sending applicant follow-up:", { applicationId: application.id, reason });
+      logger.error("Error sending applicant follow-up", error, { applicationId: application.id });
       failures.push({ applicationId: application.id, stage: "applicant-email", reason });
       await logEmailSent(application.email, "client-application-followup-applicant", false, reason);
       continue;
@@ -555,7 +554,7 @@ export async function sendClientApplicationFollowUpReminders(): Promise<ClientAp
       .in("id", processedIds);
 
     if (updateError) {
-      console.error("Error updating follow_up_sent_at:", updateError);
+      logger.error("Error updating follow_up_sent_at", updateError);
       failures.push({
         applicationId: "batch",
         stage: "update-follow-up",
@@ -643,7 +642,7 @@ export async function checkClientApplicationStatus({
     const { data, error } = await query.maybeSingle();
 
     if (error) {
-      console.error("Error fetching client application status:", error);
+      logger.error("Error fetching client application status", error);
       return {
         success: false,
         error: "Unable to look up your application right now. Please try again soon.",
@@ -672,7 +671,7 @@ export async function checkClientApplicationStatus({
       },
     };
   } catch (error) {
-    console.error("Unexpected error checking client application status:", error);
+    logger.error("Unexpected error checking client application status", error);
     return {
       success: false,
       error: "An unexpected error occurred. Please try again.",

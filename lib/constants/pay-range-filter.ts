@@ -26,7 +26,7 @@ export interface PayRangeBounds {
 export function getPayRangeBounds(value: PayRangeValue): PayRangeBounds | null {
   switch (value) {
     case "under_500":
-      return { max: 499 };
+      return { max: 499.99 };
     case "500_1000":
       return { min: 500, max: 1000 };
     case "1000_2500":

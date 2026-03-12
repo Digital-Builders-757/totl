@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -54,7 +55,7 @@ export async function POST(request: Request) {
         );
       }
       
-      console.error("Auth user creation failed:", authError);
+      logger.error("Auth user creation failed", authError);
       return NextResponse.json({ error: authError.message }, { status: 500 });
     }
 
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
       );
 
     if (profileError) {
-      console.error("Profile creation failed:", profileError);
+      logger.error("Profile creation failed", profileError);
       // Continue anyway since the auth user was created
     }
 
@@ -98,13 +99,13 @@ export async function POST(request: Request) {
         );
 
       if (talentError) {
-        console.error("Talent profile creation failed:", talentError);
+        logger.error("Talent profile creation failed", talentError);
       }
     }
 
     return NextResponse.json({ success: true, user: authData.user }, { status: 200 });
   } catch (error) {
-    console.error("Error creating user:", error);
+    logger.error("Error creating user", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

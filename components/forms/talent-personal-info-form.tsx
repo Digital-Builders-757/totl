@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import { updateTalentPersonalInfoAction } from "@/lib/actions/profile-actions";
+import { logger } from "@/lib/utils/logger";
 import { isModelingTalent } from "@/lib/utils/talent-type";
 
 interface PersonalInfoFormData {
@@ -231,7 +232,7 @@ export default function TalentPersonalInfoForm({
         onSaved();
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
+      logger.error("Error updating profile", error instanceof Error ? error : new Error(String(error)));
       toast({
         title: "Update failed",
         description: "There was a problem updating your profile. Please try again.",

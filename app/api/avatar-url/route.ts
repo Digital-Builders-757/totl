@@ -1,5 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export async function GET() {
   try {
@@ -35,7 +36,7 @@ export async function GET() {
 
     return NextResponse.json({ url: signed?.signedUrl ?? null });
   } catch (error) {
-    console.error("Avatar URL refresh error:", error);
+    logger.error("Avatar URL refresh error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
