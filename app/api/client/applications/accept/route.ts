@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { acceptApplication } from "@/lib/actions/booking-actions";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(req: Request) {
   try {
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, bookingId: result.bookingId });
   } catch (e) {
-    console.error(e);
+    logger.error("Unexpected error accepting application", e);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }

@@ -8,6 +8,59 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Next.js 15.5.12 security upgrade + auth logger hardening (March 11, 2026)**
+
+**SECURITY / STABILITY** - March 11, 2026
+- ✅ Upgraded Next.js from 15.5.9 to 15.5.12 to address DoS vulnerabilities (Image Optimizer remotePatterns, RSC deserialization).
+- ✅ Replaced `console.error`/`console.warn` with `logger.error`/`logger.warn` in critical auth and error paths:
+  - `app/login/page.tsx`, `app/reset-password/page.tsx`, `app/update-password/page.tsx`, `app/update-password/update-password-form.tsx`
+  - `app/api/auth/signout/route.ts`, `app/api/email/send-password-reset/route.ts`
+  - `app/global-error.tsx` (hydration → `logger.info` to avoid Sentry noise), `app/talent/dashboard/error.tsx`
+- ✅ Auth recovery/reset/suspended paths inspected; no regression risk from upgrade (async cookies, hash tokens, recovery intent already correct).
+- ✅ Client drawer inspected; role-scoped links, test hooks, and mobile breakpoints correct.
+- ✅ No secrets/env rotation performed.
+
+**Verification:** `schema:verify:comprehensive`, `types:check`, `lint`, `build` — all green.
+
+## 🚀 **Latest: Logger in email API routes (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in all email API routes:
+  - `send-application-rejected`, `send-application-accepted`, `send-verification`, `send-application-received`, `send-welcome`, `send-new-application-client`, `send-booking-confirmed` (9 calls total)
+
+## 🚀 **Latest: Logger in dashboard + gigs (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in dashboard and gigs paths:
+  - `app/dashboard/actions.ts`, `app/dashboard/page.tsx`, `app/dashboard/client.tsx` (4 calls)
+  - `app/gigs/page.tsx` (2 calls; removed Sentry import)
+  - `app/gigs/[id]/apply/apply-to-gig-form.tsx` (5 calls; consolidated Sentry + console into logger)
+
+## 🚀 **Latest: Logger in settings + onboarding + shared libs (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in settings, onboarding, and shared libs:
+  - Settings: `app/settings/avatar-upload.tsx`, `app/settings/actions.ts`, `app/settings/sign-out-button.tsx`, `app/settings/sections/*` (account-settings, basic-info, talent-details, client-details, career-builder-section)
+  - Onboarding: `app/onboarding/onboarding-form.tsx`
+  - UI: `components/navbar.tsx`, `components/ui/email-verification-reminder.tsx`
+  - Shared libs: `lib/safe-query.ts`, `lib/utils/safe-query.ts`, `lib/api/api-utils.ts`, `lib/supabase-admin-client.ts`
+
+## 🚀 **Latest: Logger hardening + mobile guardrails fix (March 12, 2026)**
+
+**OBSERVABILITY / CI** - March 12, 2026
+- ✅ **Logger:** Normalized Supabase errors (PostgrestError, AuthError) in `lib/utils/logger.ts` via `toError()` and `safeExtraFromError()` — always capture as exception (not message), preserve code/details/hint in Sentry extra, avoid "[object Object]" in logs.
+- ✅ **Apply form:** Wrapped `logger.error` in try/catch in `apply-to-gig-form.tsx` so logging failures never block UI recovery (setError, setSubmitting).
+- ✅ **Mobile guardrails:** Fixed client-applications Playwright strict mode violation — loading skeleton used same placeholder as real content; changed loading placeholder to "Search..." so test matches single element.
+
+## 🚀 **Latest: Logger in API/apply paths (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in high-value API and apply paths:
+  - `app/api/admin/delete-user/route.ts` (9 calls)
+  - `app/api/client/applications/accept/route.ts` (1 call)
+  - `app/client/apply/page.tsx` (2 calls)
+  - `app/gigs/[id]/apply/actions.ts` (4 calls; consolidated Sentry + console into logger)
+
 ## 🚀 **Latest: Loading skeletons + error logging (March 11, 2026)**
 
 **MVP POLISH / LOADING STATES + SENTRY** - March 11, 2026
@@ -27,7 +80,7 @@
 
 **Next (P1 - follow-up)**
 - [ ] Resolve Sentry issues 3O, 1N, 2M, 2Q, 2H, 2J, 2K after deploy if they stop reproducing.
-- [ ] Optional: Upgrade Next.js to 15.5.12 for security fixes.
+- [x] Upgrade Next.js to 15.5.12 for security fixes (completed March 11, 2026).
 
 ## 🚀 **Latest: Sentry signal hardening + local-noise reduction (March 11, 2026)**
 

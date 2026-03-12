@@ -46,7 +46,7 @@ export const POST = async (request: Request) => {
       .maybeSingle();
 
     if (requesterProfileError) {
-      console.error("[AdminDeleteUser] Failed to verify admin:", requesterProfileError);
+      logger.error("[AdminDeleteUser] Failed to verify admin:", requesterProfileError);
       return NextResponse.json({ error: "Failed to verify admin" }, { status: 500 });
     }
 
@@ -150,29 +150,29 @@ export const POST = async (request: Request) => {
     try {
       const { paths, error: avatarListError } = await listAllPathsUnderPrefix("avatars", userId);
       if (avatarListError) {
-        console.warn("[AdminDeleteUser] Avatar list warning:", avatarListError);
+        logger.warn("[AdminDeleteUser] Avatar list warning:", { error: avatarListError });
       } else if (paths.length > 0) {
         const { error: avatarRemoveError } = await supabaseAdmin.storage.from("avatars").remove(paths);
         if (avatarRemoveError) {
-          console.warn("[AdminDeleteUser] Avatar remove warning:", avatarRemoveError);
+          logger.warn("[AdminDeleteUser] Avatar remove warning:", { error: avatarRemoveError });
         }
       }
     } catch (storageError) {
-      console.warn("[AdminDeleteUser] Avatar storage cleanup warning:", storageError);
+      logger.warn("[AdminDeleteUser] Avatar storage cleanup warning:", { error: storageError });
     }
 
     try {
       const { paths, error: portfolioListError } = await listAllPathsUnderPrefix("portfolio", userId);
       if (portfolioListError) {
-        console.warn("[AdminDeleteUser] Portfolio list warning:", portfolioListError);
+        logger.warn("[AdminDeleteUser] Portfolio list warning:", { error: portfolioListError });
       } else if (paths.length > 0) {
         const { error: portfolioRemoveError } = await supabaseAdmin.storage.from("portfolio").remove(paths);
         if (portfolioRemoveError) {
-          console.warn("[AdminDeleteUser] Portfolio remove warning:", portfolioRemoveError);
+          logger.warn("[AdminDeleteUser] Portfolio remove warning:", { error: portfolioRemoveError });
         }
       }
     } catch (storageError) {
-      console.warn("[AdminDeleteUser] Portfolio storage cleanup warning:", storageError);
+      logger.warn("[AdminDeleteUser] Portfolio storage cleanup warning:", { error: storageError });
     }
 
     // Audit breadcrumb (useful even without an audit table)
@@ -197,7 +197,7 @@ export const POST = async (request: Request) => {
           { status: 409 }
         );
       }
-      console.error("Error deleting user:", error);
+      logger.error("Error deleting user:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -206,7 +206,7 @@ export const POST = async (request: Request) => {
       message: "User deleted successfully. All related data has been cascaded.",
     });
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logger.error("Error deleting user:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

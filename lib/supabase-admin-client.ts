@@ -1,5 +1,6 @@
-﻿import "server-only";
+import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // Create a Supabase client with the service role key for admin operations
@@ -9,7 +10,7 @@ export const createSupabaseAdminClient = () => {
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Missing Supabase admin environment variables");
+    logger.error("Missing Supabase admin environment variables");
     throw new Error("Missing Supabase admin environment variables");
   }
 

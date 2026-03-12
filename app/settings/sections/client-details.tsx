@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type Client = Database["public"]["Tables"]["client_profiles"]["Row"];
@@ -95,7 +96,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
         reset(data); // Reset form with new values
       }
     } catch (error) {
-      console.error("Client profile update error:", error);
+      logger.error("Client profile update error", error);
       toast({
         title: "Update failed",
         description: "An unexpected error occurred. Please try again.",

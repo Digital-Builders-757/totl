@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST() {
   try {
@@ -9,19 +10,10 @@ export async function POST() {
     // Sign out from Supabase (clears server-side session)
     const { error: signOutError } = await supabase.auth.signOut();
     if (signOutError) {
-      console.error("Supabase sign-out error:", signOutError);
-      // Log to Sentry but don't fail the request (cookies still need to be cleared)
-      try {
-        const Sentry = await import("@sentry/nextjs");
-        Sentry.captureException(signOutError, {
-          tags: { feature: "auth", error_type: "supabase_signout_error" },
-        });
-      } catch {
-        // Sentry not available, skip
-      }
+      logger.error("Supabase sign-out error:", signOutError);
     }
   } catch (error) {
-    console.error("Error creating Supabase server client:", error);
+    logger.error("Error creating Supabase server client:", error);
     // Continue to clear cookies even if Supabase client creation fails
   }
   

@@ -1,8 +1,9 @@
-﻿import { redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { DashboardClient } from "./client";
 import { PATHS } from "@/lib/constants/routes";
 import { PROFILE_ROLE_SELECT } from "@/lib/db/selects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +26,7 @@ export default async function DashboardPage() {
     .maybeSingle();
 
   if (error || !profile) {
-    console.error("Error fetching profile:", error);
+    logger.error("Error fetching profile:", error);
     redirect(PATHS.LOGIN);
   }
 

@@ -21,6 +21,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
+import { logger } from "@/lib/utils/logger";
 
 async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -149,7 +150,7 @@ export default function ClientApplicationPage() {
         router.push("/client/apply/success");
       }
     } catch (error) {
-      console.error("Application submission error:", error);
+      logger.error("Application submission error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
@@ -229,7 +230,7 @@ export default function ClientApplicationPage() {
           setStatusMessage(null);
         }
       } catch (error) {
-        console.error("Failed to load application status", error);
+        logger.error("Failed to load application status", error);
         setStatusMessage("Unable to load your application status right now.");
       } finally {
         setIsCheckingStatus(false);

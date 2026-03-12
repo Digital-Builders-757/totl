@@ -7,6 +7,7 @@ import { uploadAvatar } from "./actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -99,7 +100,7 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
         router.refresh();
       }
     } catch (error) {
-      console.error("Avatar upload error:", error);
+      logger.error("Avatar upload error", error);
       toast({
         title: "Upload failed",
         description: "An unexpected error occurred. Please try again.",

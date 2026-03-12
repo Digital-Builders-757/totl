@@ -3,6 +3,7 @@
 import "server-only";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ProfilesUpdate = Database["public"]["Tables"]["profiles"]["Update"];
@@ -230,7 +231,7 @@ export async function uploadAvatar(formData: FormData) {
     });
 
     if (uploadError) {
-      console.error("Avatar upload error:", uploadError);
+      logger.error("Avatar upload error", uploadError);
       return { error: "Failed to upload image. Please try again." };
     }
 
@@ -249,7 +250,7 @@ export async function uploadAvatar(formData: FormData) {
     if (updateError) {
       // Rollback: remove the uploaded file
       await supabase.storage.from("avatars").remove([path]);
-      console.error("Database update error:", updateError);
+      logger.error("Database update error", updateError);
       return { error: "Failed to update profile. Please try again." };
     }
 
@@ -265,7 +266,7 @@ export async function uploadAvatar(formData: FormData) {
       }
     } catch (cleanupError) {
       // Log but don't fail the operation for cleanup errors
-      console.warn("Avatar cleanup warning:", cleanupError);
+      logger.warn("Avatar cleanup warning", { cleanupError });
     }
 
     revalidatePath("/settings");
@@ -275,7 +276,7 @@ export async function uploadAvatar(formData: FormData) {
       message: "Avatar updated successfully",
     };
   } catch (error) {
-    console.error("Unexpected avatar upload error:", error);
+    logger.error("Unexpected avatar upload error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }

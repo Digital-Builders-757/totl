@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { logger } from "@/lib/utils/logger";
 
 const profileFormSchema = z.object({
   full_name: z.string().min(2, {
@@ -81,7 +82,7 @@ export function OnboardingForm() {
 
       router.replace(result.nextPath);
     } catch (err) {
-      console.error("Error creating profile:", err);
+      logger.error("Error creating profile", err);
       setError(err instanceof Error ? err.message : "Failed to create profile. Please try again.");
     } finally {
       setIsSubmitting(false);

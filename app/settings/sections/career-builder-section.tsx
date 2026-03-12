@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/utils/logger";
 
 interface ApplicationStatus {
   status: string | null;
@@ -49,7 +50,7 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
-        console.error("Failed to load application status", error);
+        logger.error("Failed to load application status", error);
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false);

@@ -6,6 +6,7 @@ import { shouldThrottlePublicEmail } from "@/lib/server/email/public-email-throt
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generatePasswordResetEmail } from "@/lib/services/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
     // IMPORTANT: Do not leak whether the email exists.
     // If link generation fails (non-existent email, misconfig, etc.), still return success.
     if (error || !data.properties?.action_link) {
-      console.warn("[totl][email] password reset link generation failed (masked)", {
+      logger.warn("[totl][email] password reset link generation failed (masked)", {
         requestId,
         errorMessage: error?.message ?? null,
       });
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, requestId });
   } catch (error) {
-    console.error("Error sending password reset email:", error);
+    logger.error("Error sending password reset email:", error);
     // IMPORTANT: Do not leak whether the email exists.
     return NextResponse.json({ success: true, requestId });
   }

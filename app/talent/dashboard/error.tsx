@@ -4,6 +4,7 @@ import { AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/utils/logger";
 
 export default function DashboardError({
   error,
@@ -13,8 +14,7 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error for debugging
-    console.error("[talent/dashboard] Error boundary caught:", error);
+    logger.error("[talent/dashboard] Error boundary caught:", error);
   }, [error]);
 
   return (

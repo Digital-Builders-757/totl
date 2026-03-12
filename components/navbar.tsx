@@ -10,6 +10,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { PATHS, isAuthRoute } from "@/lib/constants/routes";
 import { getSubscriptionStatusText, needsSubscription } from "@/lib/subscription";
+import { logger } from "@/lib/utils/logger";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -74,7 +75,7 @@ export default function Navbar() {
       // Call signOut and wait for it to complete
       await signOut();
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error", error);
       setIsSigningOut(false);
     }
   };

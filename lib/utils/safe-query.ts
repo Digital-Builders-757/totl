@@ -1,4 +1,5 @@
-﻿import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type GigStatus = Database["public"]["Enums"]["gig_status"];
@@ -21,7 +22,7 @@ interface GigFilters {
 export async function safe<T>(promise: Promise<{ data: T; error: unknown }>): Promise<T> {
   const { data, error } = await promise;
   if (error) {
-    console.error("Supabase query error:", error);
+    logger.error("Supabase query error", error);
     throw error;
   }
   return data;
@@ -37,7 +38,7 @@ export async function safeOptional<T>(
   try {
     return await safe(promise);
   } catch (error) {
-    console.warn("Optional query failed:", error);
+    logger.warn("Optional query failed", { error });
     return null;
   }
 }
@@ -50,7 +51,7 @@ export async function safeInsert<T>(
 ): Promise<T> {
   const { data, error } = await promise;
   if (error) {
-    console.error("Supabase insert error:", error);
+    logger.error("Supabase insert error", error);
     throw error;
   }
   if (!data) {
@@ -67,7 +68,7 @@ export async function safeUpdate<T>(
 ): Promise<T | null> {
   const { data, error } = await promise;
   if (error) {
-    console.error("Supabase update error:", error);
+    logger.error("Supabase update error", error);
     throw error;
   }
   return data;

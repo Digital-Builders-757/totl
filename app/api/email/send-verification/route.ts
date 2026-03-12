@@ -8,6 +8,7 @@ import { shouldThrottlePublicEmail } from "@/lib/server/email/public-email-throt
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateVerificationEmail } from "@/lib/services/email-templates";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs"; // Needed for email operations
 
@@ -72,7 +73,7 @@ export async function POST(request: Request) {
       // IMPORTANT: Do not leak whether the email/user exists or any other sensitive state.
       // If link generation fails, still return success.
       if (error || !data.properties?.action_link) {
-        console.warn("[totl][email] verification link generation failed (masked)", {
+        logger.warn("[totl][email] verification link generation failed (masked)", {
           requestId,
           errorMessage: error?.message ?? null,
         });
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, requestId });
   } catch (error) {
-    console.error("Error sending verification email:", error);
+    logger.error("Error sending verification email:", error);
     // IMPORTANT: Do not leak whether the email/user exists.
     return NextResponse.json({ success: true, requestId });
   }

@@ -44,16 +44,42 @@ function redactSensitiveData(context: LogContext): LogContext {
 }
 
 /**
- * Safely extracts error message and stack from unknown error types
+ * Normalizes unknown into a real Error for Sentry exception capture.
+ * Supabase errors (PostgrestError, AuthError) are often not instanceof Error;
+ * wrapping them preserves stack traces and structured detail in Sentry.
  */
-function extractErrorInfo(error: unknown): { message: string; error?: Error } {
-  if (error instanceof Error) {
-    return { message: error.message, error };
+function toError(err: unknown): Error {
+  if (err instanceof Error) return err;
+  if (err && typeof err === "object") {
+    const anyErr = err as Record<string, unknown>;
+    const msg =
+      typeof anyErr.message === "string"
+        ? anyErr.message
+        : "Non-Error thrown";
+
+    const e = new Error(msg);
+    (e as Error & { cause?: unknown }).cause = err;
+    return e;
   }
-  if (typeof error === "string") {
-    return { message: error };
+  return new Error(String(err));
+}
+
+/**
+ * Extracts safe, serializable fields from error-like objects for Sentry extra.
+ * Avoids "[object Object]" and circular reference issues.
+ */
+function safeExtraFromError(err: unknown): Record<string, unknown> {
+  if (err && typeof err === "object") {
+    const anyErr = err as Record<string, unknown>;
+    const extra: Record<string, unknown> = {};
+    if (typeof anyErr.message === "string") extra.originalMessage = anyErr.message;
+    if (typeof anyErr.code === "string") extra.code = anyErr.code;
+    if (typeof anyErr.details === "string") extra.details = anyErr.details;
+    if (typeof anyErr.hint === "string") extra.hint = anyErr.hint;
+    if (typeof anyErr.status === "number") extra.status = anyErr.status;
+    return extra;
   }
-  return { message: String(error) };
+  return { raw: String(err) };
 }
 
 class Logger {
@@ -109,37 +135,31 @@ class Logger {
 
   /**
    * Error logs - always sent to Sentry
-   * Use this for actual errors (Error objects or error messages)
+   * Use this for actual errors (Error objects, Supabase errors, or error messages).
+   * Normalizes non-Error throwables (PostgrestError, AuthError) into proper exceptions
+   * so Sentry gets stack traces and structured detail.
    */
   error(message: string, error?: Error | unknown, context?: LogContext): void {
     if (!this.shouldLog("error")) return;
 
-    const { message: errorMessage, error: errorObj } = extractErrorInfo(error || message);
+    const normalizedError = toError(error ?? message);
     const redactedContext = context ? redactSensitiveData(context) : undefined;
+    const errorExtra = error !== undefined && error !== null ? safeExtraFromError(error) : {};
 
     if (this.isDevelopment) {
       // eslint-disable-next-line no-console
-      console.error(`[ERROR] ${message}`, errorObj || errorMessage, redactedContext);
+      console.error(`[ERROR] ${message}`, normalizedError, redactedContext);
     }
 
-    // Send to Sentry - use exception if we have Error object, otherwise message
-    if (errorObj) {
-      Sentry.captureException(errorObj, {
-        extra: {
-          message,
-          ...redactedContext,
-        },
-        level: "error",
-      });
-    } else {
-      Sentry.captureMessage(message, {
-        level: "error",
-        extra: {
-          errorMessage,
-          ...redactedContext,
-        },
-      });
-    }
+    // Always capture as exception for full stack trace and grouping
+    Sentry.captureException(normalizedError, {
+      extra: {
+        message,
+        ...errorExtra,
+        ...redactedContext,
+      },
+      level: "error",
+    });
   }
 }
 

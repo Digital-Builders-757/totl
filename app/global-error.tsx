@@ -3,12 +3,15 @@
 import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect } from "react";
+import { logger } from "@/lib/utils/logger";
 
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
     // Filter out hydration errors from being sent to Sentry as they're often caused by browser extensions
     if (error.message.includes("hydrat") || error.message.includes("hydration")) {
-      console.warn("Hydration error caught by global error boundary:", error.message);
+      logger.info("Hydration error caught by global error boundary (not sent to Sentry)", {
+        message: error.message,
+      });
       // Don't send hydration errors to Sentry as they're usually not actionable
       return;
     }

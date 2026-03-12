@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
@@ -89,7 +90,7 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
         reset(); // Reset form
       }
     } catch (error) {
-      console.error("Password change error:", error);
+      logger.error("Password change error", error);
       toast({
         title: "Password change failed",
         description: "An unexpected error occurred. Please try again.",
@@ -132,7 +133,7 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
       // AuthProvider's signOut() owns redirect - trust it
       await signOut();
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error", error);
       toast({
         title: "Sign out error",
         description: "There was an issue signing out. Please try again.",
