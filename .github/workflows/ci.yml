@@ -42,8 +42,10 @@ jobs:
           npm run lint | tee lint.log
         
       - name: Run type checking
-        run: npm run typecheck || echo "Type checking failed but continuing build"
-        continue-on-error: true
+        id: typecheck
+        run: |
+          set -o pipefail
+          npm run typecheck | tee typecheck.log
         
       - name: Build application
         id: build_app
@@ -94,6 +96,7 @@ jobs:
             echo "## Build Safety Gates Summary"
             echo ""
             echo "- Lint: ${{ steps.lint.outcome }}"
+            echo "- Typecheck: ${{ steps.typecheck.outcome }}"
             echo "- Docs Verify Paths: ${{ steps.docs_verify_paths.outcome }}"
             echo "- Build: ${{ steps.build_app.outcome }}"
             echo "- Table Count Verify: ${{ steps.table_count.outcome }}"
@@ -112,6 +115,7 @@ jobs:
             echo "  - If Stripe integration failed, inspect \`test-results/**\` + \`playwright-report/**\`"
             echo "- Recommended Rerun Commands:"
             echo "  - \`npm run lint\`"
+            echo "  - \`npm run typecheck\`"
             echo "  - \`npm run docs:verify-paths\`"
             echo "  - \`npm run build\`"
             echo "  - \`npm run table-count:verify\`"
@@ -177,6 +181,7 @@ jobs:
           path: |
             build-safety-summary.txt
             lint.log
+            typecheck.log
             docs-verify-paths.log
             build.log
             table-count.log

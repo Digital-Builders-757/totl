@@ -43,6 +43,9 @@ npm run build
   - **Root Cause:** Session updates were added in-body, but the footer metadata block was not updated in the same commit
   - **Fix:** Whenever `MVP_STATUS_NOTION.md` changes, update the footer lines at the end of the file (`Last Updated`, `Current Status`, `Next Review`) before ship
   - **Prevention:** Treat footer metadata sync as a required pre-push checklist item for all MVP doc edits
+- **CI typecheck step fails:** Build job fails at "Run type checking" step
+  - **Fix:** Run `npm run typecheck` locally to reproduce; fix TypeScript errors before pushing
+  - **Prevention:** CI now enforces typecheck as a real gate (no longer continue-on-error); run `npm run typecheck` as part of pre-push
 - **Type Errors:** `Property 'role' does not exist on type 'never'`
   - **Fix:** Ensure Database type is imported from `@/types/supabase`
 - **Stripe API Version Errors:** `Invalid Stripe API version format with unsupported '.clover' suffix`

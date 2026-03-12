@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: CI typecheck enforcement (March 12, 2026)**
+
+**CI / QUALITY** - March 12, 2026
+- ✅ **Typecheck gate:** Removed `continue-on-error: true` from CI typecheck step; TypeScript errors now fail the build instead of being ignored.
+- ✅ **Safety-gate summary:** Added typecheck outcome to build summary; `typecheck.log` included in failure artifacts; `npm run typecheck` in recommended rerun commands.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Client applications test — Playwright strict mode fix (March 12, 2026)**
 
 **CI / PLAYWRIGHT** - March 12, 2026
@@ -4455,6 +4463,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - client applications Playwright strict mode fix (`.first()` on search placeholder); faceted search pay range filter; loading skeleton KPI breakpoints*
+*Current Status: MVP Complete - CI typecheck enforced as real gate; client applications Playwright fix; faceted search pay range filter*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
