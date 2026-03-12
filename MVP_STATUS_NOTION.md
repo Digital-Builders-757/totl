@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Bug fixes + docs hygiene + faceted search (March 12, 2026)**
+
+**SESSION BATCH** - March 12, 2026
+- ✅ **Gig-categories:** events filter includes legacy "event"; others filter includes "other" (Sentry/Cursor Bugbot fixes).
+- ✅ **Talent-gigs test:** "Apply for this Gig" → "Apply for this Opportunity" in talent-gigs-route.spec.ts.
+- ✅ **CI docs gate:** docs:verify-paths added to safety-gate summary, failure artifacts, and recommended rerun commands.
+- ✅ **Docs archive hygiene:** Reduced 8 AUTH_* stub files to minimal pointers; added stub maintenance guidance to archive README.
+- ✅ **Admin moderation KPI:** Mobile summary + stepped breakpoints (md:grid-cols-2 lg:grid-cols-4) applied to /admin/moderation.
+- ✅ **Faceted search:** "Upcoming only" date filter on /gigs browse (date ≥ today).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Mobile guardrails 21/21 passed.
+
+**Next (P1)**
+- [ ] Open develop → main PR when CI is green.
+- [ ] Consider pay range or location-radius filters for faceted search.
+
 ## 🚀 **Latest: Admin Users — Suspended tab (March 12, 2026)**
 
 **ADMIN / UX** - March 12, 2026
