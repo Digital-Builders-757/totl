@@ -110,6 +110,10 @@ npm run build
   - **Migration:** `20260312211447_fix_compensation_numeric_regex_non_capturing.sql`
 - **"Lowest pay first" sort shows unknown-pay gigs first:** pay_low used `nullsFirst: true`, placing NULL compensation_numeric at top
   - **Fix:** Use `nullsFirst: false` for both pay_high and pay_low so unknown-compensation gigs appear last
+- **Saved search "name already used":** Unique constraint on (user_id, name) prevents duplicate names
+  - **Fix:** Choose a different name or delete the existing saved search with that name
+- **Saved search "You can save up to 25 searches":** Max limit per user to keep list usable
+  - **Fix:** Delete one or more saved searches via Manage dialog
 - **Pay range "Under $500" excludes 499.01–499.99:** Filter used `max: 499` with `.lte()`, creating a gap
   - **Fix:** Use `max: 499.99` in `getPayRangeBounds` for `under_500` case
   - **Prevention:** Loading skeletons should not duplicate exact placeholder text from the real form inputs; or use `.first()` in specs when both are present

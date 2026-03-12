@@ -627,6 +627,30 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_searches: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          params: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          params?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          params?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       stripe_webhook_events: {
         Row: {
           attempt_count: number

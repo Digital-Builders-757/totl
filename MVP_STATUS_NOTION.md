@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Saved searches for faceted search (March 12, 2026)**
+
+**FACETED SEARCH P1** - March 12, 2026
+- ✅ **Saved searches:** Talent can save and load gig search filter combinations on /gigs.
+- ✅ **Migration:** `saved_searches` table (user_id, name, params JSONB); RLS for own-row CRUD.
+- ✅ **Actions:** `listSavedSearches`, `saveSearch`, `deleteSavedSearch` in `lib/actions/saved-search-actions.ts`.
+- ✅ **UI:** `SavedSearchesBar` — "Load saved search" dropdown + "Save this search" + "Manage" dialog (list, load, delete with confirm).
+- ✅ **Uniqueness:** `(user_id, name)` unique constraint; "name already used" error on duplicate.
+- ✅ **Params validation:** `lib/utils/saved-search-params.ts` — whitelist (q, category, location, compensation, pay_range, upcoming, local_date, sort), string caps, pay_range/sort validated against allowed values.
+- ✅ **Max 25 per user:** Enforced in saveSearch before insert.
+
+**Verification:** schema:verify, types:check, build, lint; migrations pushed.
+
 ## 🚀 **Latest: compensation_numeric regex capture-group fix (March 12, 2026)**
 
 **FACETED SEARCH / PAY RANGE** - March 12, 2026
@@ -92,7 +105,8 @@
 **Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Migration pushed; types regenerated.
 
 **Next (P1)**
-- [ ] Location radius (PostGIS) or saved searches for faceted search.
+- [x] Saved searches for faceted search (March 12, 2026).
+- [ ] Location radius (PostGIS) for faceted search.
 
 **Follow-up (March 12)**
 - ✅ Client/gigs loading skeleton: aligned with stepped KPI breakpoints (md:grid-cols-2 lg:grid-cols-4).
@@ -4522,6 +4536,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - compensation_numeric regex non-capturing fix; Logger Bugbot; Faceted search sort*
+*Current Status: MVP Complete - Saved searches; compensation_numeric fix; Logger Bugbot; Faceted search sort*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*
