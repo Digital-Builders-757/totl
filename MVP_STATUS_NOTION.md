@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Faceted search — pay range filter (March 12, 2026)**
+
+**FACETED SEARCH** - March 12, 2026
+- ✅ **Pay range filter:** Added preset pay range dropdown on /gigs browse (Under $500, $500–$1K, $1K–$2.5K, $2.5K–$5K, $5K+).
+- ✅ **Migration:** `compensation_numeric` generated column extracts first numeric from compensation text; index for efficient range queries.
+- ✅ **Constants:** `lib/constants/pay-range-filter.ts` — pay range options and bounds; URL param `pay_range`.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Migration pushed; types regenerated.
+
+**Next (P1)**
+- [ ] Location radius (PostGIS) or saved searches for faceted search.
+
 ## 🚀 **Latest: Bug fixes + docs hygiene + faceted search (March 12, 2026)**
 
 **SESSION BATCH** - March 12, 2026
@@ -19,10 +31,6 @@
 - ✅ **Faceted search:** "Upcoming only" date filter on /gigs browse (date ≥ today).
 
 **Verification:** schema:verify:comprehensive, types:check, build, lint — all green. Mobile guardrails 21/21 passed.
-
-**Next (P1)**
-- [ ] Open develop → main PR when CI is green.
-- [ ] Consider pay range or location-radius filters for faceted search.
 
 ## 🚀 **Latest: Admin Users — Suspended tab (March 12, 2026)**
 

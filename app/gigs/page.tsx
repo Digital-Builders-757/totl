@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
+import { PAY_RANGE_OPTIONS, getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
 import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
@@ -57,6 +58,8 @@ export default async function GigsPage({
   const location = typeof sp.location === "string" ? sp.location.trim() : "";
   const compensation =
     typeof sp.compensation === "string" ? sp.compensation.trim() : "";
+  const payRange =
+    (typeof sp.pay_range === "string" ? sp.pay_range.trim() : "") as PayRangeValue;
   const upcoming =
     sp.upcoming === "1" || sp.upcoming === "true" || sp.upcoming === "yes";
   const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
@@ -72,6 +75,7 @@ export default async function GigsPage({
       description, 
       location, 
       compensation, 
+      compensation_numeric,
       date, 
       category,
       image_url,
@@ -99,6 +103,15 @@ export default async function GigsPage({
   }
   if (compensation) {
     query = query.ilike("compensation", `%${compensation}%`);
+  }
+  const payBounds = getPayRangeBounds(payRange);
+  if (payBounds) {
+    if (payBounds.min != null) {
+      query = query.gte("compensation_numeric", payBounds.min);
+    }
+    if (payBounds.max != null) {
+      query = query.lte("compensation_numeric", payBounds.max);
+    }
   }
   if (upcoming) {
     const today = new Date().toISOString().slice(0, 10);
@@ -183,6 +196,7 @@ export default async function GigsPage({
     if (category) params.set("category", category);
     if (location) params.set("location", location);
     if (compensation) params.set("compensation", compensation);
+    if (payRange) params.set("pay_range", payRange);
     if (upcoming) params.set("upcoming", "1");
     params.set("page", String(targetPage));
     return `/gigs?${params.toString()}`;
@@ -296,9 +310,20 @@ export default async function GigsPage({
                   <Input
                     name="compensation"
                     defaultValue={compensation}
-                    placeholder="Compensation"
-                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base sm:col-span-2 md:col-span-1"
+                    placeholder="Compensation (keyword)"
+                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
                   />
+                  <select
+                    name="pay_range"
+                    defaultValue={payRange}
+                    className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+                  >
+                    {PAY_RANGE_OPTIONS.map((opt) => (
+                      <option key={opt.value || "any"} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
                   <label className="flex items-center gap-2 sm:gap-3 min-h-[52px] sm:h-14 px-3 rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white text-base cursor-pointer md:col-span-3">
                     <input
                       type="checkbox"
