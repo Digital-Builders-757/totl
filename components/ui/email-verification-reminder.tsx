@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 
 export function EmailVerificationReminder() {
   const { user, isEmailVerified, sendVerificationEmail } = useAuth();
@@ -42,7 +43,7 @@ export function EmailVerificationReminder() {
         }, 30000);
       }
     } catch (error) {
-      console.error("Error sending verification email:", error);
+      logger.error("Error sending verification email", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",

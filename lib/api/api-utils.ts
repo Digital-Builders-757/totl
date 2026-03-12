@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodSchema } from "zod";
+import { logger } from "@/lib/utils/logger";
 
 /**
  * Standard API error response
@@ -62,7 +63,7 @@ export async function validateRequestBody<T>(
  * Handle API route errors consistently
  */
 export function handleApiError(error: unknown, context: string) {
-  console.error(`Error in ${context}:`, error);
+  logger.error(`Error in ${context}`, error);
 
   if (error instanceof Error) {
     return createErrorResponse(error.message, 500);

@@ -4,6 +4,7 @@ import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/utils/logger";
 
 export function SignOutButton() {
   const { signOut } = useAuth();
@@ -16,7 +17,7 @@ export function SignOutButton() {
       setIsSigningOut(true);
       await signOut();
     } catch (error) {
-      console.error("Sign out error:", error);
+      logger.error("Sign out error", error);
       setIsSigningOut(false);
     }
   };

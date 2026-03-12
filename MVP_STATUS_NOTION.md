@@ -36,6 +36,15 @@
   - `app/gigs/page.tsx` (2 calls; removed Sentry import)
   - `app/gigs/[id]/apply/apply-to-gig-form.tsx` (5 calls; consolidated Sentry + console into logger)
 
+## 🚀 **Latest: Logger in settings + onboarding + shared libs (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ Replaced `console.error`/`console.warn` with `logger` in settings, onboarding, and shared libs:
+  - Settings: `app/settings/avatar-upload.tsx`, `app/settings/actions.ts`, `app/settings/sign-out-button.tsx`, `app/settings/sections/*` (account-settings, basic-info, talent-details, client-details, career-builder-section)
+  - Onboarding: `app/onboarding/onboarding-form.tsx`
+  - UI: `components/navbar.tsx`, `components/ui/email-verification-reminder.tsx`
+  - Shared libs: `lib/safe-query.ts`, `lib/utils/safe-query.ts`, `lib/api/api-utils.ts`, `lib/supabase-admin-client.ts`
+
 ## 🚀 **Latest: Logger in API/apply paths (March 12, 2026)**
 
 **OBSERVABILITY** - March 12, 2026

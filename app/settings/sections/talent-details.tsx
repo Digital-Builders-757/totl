@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type Talent = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -111,7 +112,7 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
         reset(data);
       }
     } catch (error) {
-      console.error("Talent profile update error:", error);
+      logger.error("Talent profile update error", error);
       toast({
         title: "Update failed",
         description: "An unexpected error occurred. Please try again.",
