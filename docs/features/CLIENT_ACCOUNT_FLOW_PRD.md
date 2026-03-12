@@ -42,7 +42,7 @@ Ensure every new visitor creates a base Supabase account **before** choosing Tal
 
 ### Verification
 
-1. `npm run lint`, `npm run build`, and any QA scripts in `COMPREHENSIVE_QA_CHECKLIST.md` should pass.
+1. `npm run lint`, `npm run build`, and any QA scripts in `docs/development/PRE_PUSH_CHECKLIST.md` should pass.
 2. Document the new flow in `MVP_STATUS_NOTION.md` and link back to this PRD.
 3. Cross-reference `COMMON_ERRORS_QUICK_REFERENCE.md` and `AUTH_STRATEGY.md` for the updated guardrails.
 

@@ -2,7 +2,8 @@
 
 **Date:** October 19, 2025  
 **Version:** MVP v0.97  
-**Tester:** Manual Beta Testing
+**Tester:** Manual Beta Testing  
+**Archived:** March 2026 — Superseded by `qa/BETA_SMOKE_TEST_CHECKLIST_2026-03-05.md`
 
 ---
 
@@ -434,5 +435,3 @@ These features were just built and need extra attention:
 **Expected Time:** 15-30 minutes for full testing  
 **Critical Features:** All working ✅  
 **Known Issues:** Document any new bugs found
-
-

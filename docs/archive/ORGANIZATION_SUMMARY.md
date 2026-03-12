@@ -1,6 +1,9 @@
 # Documentation Organization Summary
 
-**Date:** January 25, 2026
+**Date:** January 25, 2026  
+**Status:** Archived (March 2026) — Superseded by `docs/DOCUMENTATION_INDEX.md`
+
+---
 
 ## Overview
 

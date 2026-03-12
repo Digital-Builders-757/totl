@@ -76,7 +76,8 @@
     "audit:single-vs-maybe-single": "node scripts/audit-single-vs-maybe-single.mjs",
     "audit:all": "node scripts/audit-all.mjs",
     "audit:quick": "powershell -ExecutionPolicy Bypass -File scripts/quick-sanity-grep.ps1",
-    "pre-push:check": "npm run guard:select-star && npm run guard:client-writes && npm run guard:import-paths && npm run guard:no-npm-run-in-code && npm run schema:verify:comprehensive && npm run types:check && npm run build && npm run lint && npm run audit:all"
+    "pre-push:check": "npm run guard:select-star && npm run guard:client-writes && npm run guard:import-paths && npm run guard:no-npm-run-in-code && npm run schema:verify:comprehensive && npm run types:check && npm run build && npm run lint && npm run audit:all",
+    "docs:verify-paths": "node scripts/verify-doc-paths.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

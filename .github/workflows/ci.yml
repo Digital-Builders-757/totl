@@ -28,6 +28,9 @@ jobs:
           
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify critical doc paths exist
+        run: npm run docs:verify-paths
         
       - name: Run linting
         id: lint

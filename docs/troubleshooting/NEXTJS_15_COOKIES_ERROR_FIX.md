@@ -166,4 +166,4 @@ beforeSend(event, hint) {
 - `app/talent/[id]/page.tsx` - Main server component
 - `app/talent/[id]/talent-profile-client.tsx` - Client component for auth logic
 - `sentry.server.config.ts` - Error filtering configuration
-- `docs/COMPREHENSIVE_QA_CHECKLIST.md` - QA process to prevent similar issues
+- `docs/development/PRE_PUSH_CHECKLIST.md` - QA process to prevent similar issues

@@ -114,7 +114,7 @@
 - **Type Safety:** `docs/TYPE_SAFETY_IMPROVEMENTS.md` (historical: `docs/archive/TYPE_SAFETY_COMPLETE.md`)  
 - **Security/Auth:** `docs/SECURITY_CONFIGURATION.md`, `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md`, `docs/AUTH_DATABASE_TRIGGER_CHECKLIST.md`  
 - **Stripe:** `docs/STRIPE_SUBSCRIPTION_PRD.md`, `docs/STRIPE_IMPLEMENTATION_PLAN.md`, `docs/STRIPE_TROUBLESHOOTING.md`  
-- **Testing/QA:** `docs/COMPREHENSIVE_QA_CHECKLIST.md`, `docs/UI_UX_TESTING_GUIDE.md`
+- **Testing/QA:** `docs/development/PRE_PUSH_CHECKLIST.md`, `docs/qa/README.md`, `docs/audits/UI_UX_SCREENSHOT_REMEDIATION_REPORT_2026-03-03.md`
 
 ---
 

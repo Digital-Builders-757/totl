@@ -379,7 +379,7 @@ $$ LANGUAGE plpgsql;
 - `docs/contracts/AUTH_BOOTSTRAP_ONBOARDING_CONTRACT.md` - Authentication bootstrap and onboarding contract (replace legacy `docs/AUTH_STRATEGY.md`)
 - `docs/DATABASE_REPORT.md` - Current database structure
 - `docs/SECURITY_CONFIGURATION.md` - Security best practices
-- `docs/COMPREHENSIVE_QA_CHECKLIST.md` - Quality assurance
+- `docs/development/PRE_PUSH_CHECKLIST.md` - Quality assurance
 - `database_schema_audit.md` - Schema single source of truth
 
 ---
