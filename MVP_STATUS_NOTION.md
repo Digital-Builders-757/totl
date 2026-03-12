@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Logger migration P0 batch (March 12, 2026)**
+
+**OBSERVABILITY** - March 12, 2026
+- ✅ **boot-actions.ts:** Replaced 8 `console.error` with `logger.error` (ensureProfileExists, getBootState, getBootStateRedirect, finishOnboardingAction).
+- ✅ **client-actions.ts:** Replaced 11 `console.error` with `logger.error` (approve/reject RPC, email side-effects, follow-up reminders, status check).
+- ✅ **auth-actions.ts:** Replaced 3 `console.error` with `logger.error` (talent profile creation during role repair and signup).
+
+**Verification:** lint, build — all green.
+
 ## 🚀 **Latest: CI typecheck enforcement (March 12, 2026)**
 
 **CI / QUALITY** - March 12, 2026
@@ -4463,6 +4472,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - CI typecheck enforced as real gate; client applications Playwright fix; faceted search pay range filter*
+*Current Status: MVP Complete - Logger P0 batch (boot/client/auth actions); CI typecheck enforced; faceted search pay range filter*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After faceted search P1 (location radius / saved searches) or mobile-guardrails CI hardening*

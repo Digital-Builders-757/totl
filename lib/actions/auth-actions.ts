@@ -325,7 +325,7 @@ export async function ensureProfileExists() {
           last_name: lastName,
         });
         if (talentError) {
-          console.error("Error creating talent profile during role repair:", talentError);
+          logger.error("Error creating talent profile during role repair", talentError, { userId: user.id });
         }
       }
     }
@@ -526,7 +526,7 @@ export async function ensureProfilesAfterSignup() {
         });
 
         if (talentError) {
-          console.error("Error creating talent profile after signup:", talentError);
+          logger.error("Error creating talent profile after signup", talentError, { userId: user.id });
           // Don't fail - profile was created
         }
         }
@@ -570,7 +570,7 @@ export async function ensureProfilesAfterSignup() {
       });
 
       if (talentError) {
-        console.error("Error creating talent profile after signup:", talentError);
+        logger.error("Error creating talent profile after signup", talentError, { userId: user.id });
         // Don't fail - profile exists
       } else {
         // Note: revalidatePath removed - cannot be called during render.

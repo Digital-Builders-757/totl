@@ -8,6 +8,7 @@ import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { determineDestination } from "@/lib/utils/determine-destination";
+import { logger } from "@/lib/utils/logger";
 import { safeReturnUrl } from "@/lib/utils/return-url";
 import type { Database } from "@/types/supabase";
 
@@ -93,12 +94,12 @@ export async function getBootState(params?: {
       const ensured = await ensureProfileExists();
       if (ensured?.error) {
         // Fail closed to a safe terminal; dashboards will still protect themselves.
-        console.error("[boot] ensureProfileExists failed:", ensured.error);
+        logger.error("[boot] ensureProfileExists failed", ensured.error);
       }
     } catch (error) {
       // If ensureProfileExists throws an exception, log it but continue
       // The profile query below will handle missing profiles gracefully
-      console.error("[boot] ensureProfileExists threw exception:", error);
+      logger.error("[boot] ensureProfileExists threw exception", error);
     }
 
     const { data: profile } = await supabase
@@ -199,7 +200,7 @@ export async function getBootState(params?: {
   } catch (error) {
     // CRITICAL: Never throw - return null on any error (caller uses fallback)
     // Missing profile, cookie timing, RLS edge cases are all valid bootstrap states
-    console.error("[boot] getBootState error (returning null, caller will use fallback):", error);
+    logger.error("[boot] getBootState error (returning null, caller will use fallback)", error);
     return null;
   }
 }
@@ -233,10 +234,10 @@ export async function getBootStateRedirect(params?: {
     try {
       const ensured = await ensureProfileExists();
       if (ensured?.error) {
-        console.error("[boot] ensureProfileExists failed:", ensured.error);
+        logger.error("[boot] ensureProfileExists failed", ensured.error);
       }
     } catch (error) {
-      console.error("[boot] ensureProfileExists threw exception:", error);
+      logger.error("[boot] ensureProfileExists threw exception", error);
     }
 
     const { data: profile, error: profileError } = await supabase
@@ -347,7 +348,7 @@ export async function getBootStateRedirect(params?: {
     };
   } catch (error) {
     // CRITICAL: Never throw - return safe shape on any error
-    console.error("[boot] getBootStateRedirect error:", error);
+    logger.error("[boot] getBootStateRedirect error", error);
     return {
       redirectTo: null,
       reason: "error",
@@ -393,7 +394,7 @@ export async function finishOnboardingAction(params: {
     .eq("id", user.id);
 
   if (profileUpdateError) {
-    console.error("[finishOnboardingAction] profiles update failed:", profileUpdateError);
+    logger.error("[finishOnboardingAction] profiles update failed", profileUpdateError);
     return { ok: false, error: "Failed to save your profile. Please try again." };
   }
 
@@ -412,7 +413,7 @@ export async function finishOnboardingAction(params: {
   );
 
   if (talentUpsertError) {
-    console.error("[finishOnboardingAction] talent_profiles upsert failed:", talentUpsertError);
+    logger.error("[finishOnboardingAction] talent_profiles upsert failed", talentUpsertError);
     return { ok: false, error: "Failed to save talent details. Please try again." };
   }
 
