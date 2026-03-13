@@ -22,6 +22,11 @@
 
 **Apply migration before use:** `supabase db push` (or `supabase db reset` for local). Migration `20260313120000_add_user_notifications.sql`.
 
+**Session Update (March 13, 2026 - Bugbot/Sentry PR #222 fixes):**
+- ✅ **Notification independence:** insertNotification moved outside email try-catch in apply/actions.ts, acceptApplication, rejectApplication — in-app notifications always created regardless of email transport failure.
+- ✅ **Accepted count accuracy:** acceptedTalentApplications excludes cancelled bookings; uses non-cancelled bookings or application count.
+- ✅ **Cron locale:** booking-reminders uses explicit 'en-US' locale for date/time in emails.
+
 **Next (P1)**
 - [ ] Mark-as-read on dropdown item click (markNotificationRead server action).
 - [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.

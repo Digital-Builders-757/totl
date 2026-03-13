@@ -684,7 +684,7 @@ function TalentDashboardContent({
     ).length,
     acceptedTalentApplications:
       bookings.length > 0
-        ? bookings.length
+        ? bookings.filter((b) => b.status !== "cancelled").length
         : applications.filter((app) => app.status === "accepted").length,
     activeGigs: gigs.filter((gig) => gig.status === "active").length,
     totalGigs: gigs.length,

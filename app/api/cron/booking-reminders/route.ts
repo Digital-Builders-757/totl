@@ -88,8 +88,8 @@ export async function GET(request: Request) {
         const { subject, html } = generateBookingReminderEmail({
           name: talentName,
           gigTitle: gig?.title || "Your booking",
-          bookingDate: bookingDate.toLocaleDateString(),
-          bookingTime: bookingDate.toLocaleTimeString(undefined, {
+          bookingDate: bookingDate.toLocaleDateString("en-US"),
+          bookingTime: bookingDate.toLocaleTimeString("en-US", {
             hour: "numeric",
             minute: "2-digit",
           }),
