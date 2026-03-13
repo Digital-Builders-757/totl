@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api/require-admin";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import { logger } from "@/lib/utils/logger";
 
 export async function GET() {
   try {
+    const admin = await requireAdmin();
+    if (!admin.ok) return admin.response;
+
     const supabase = createSupabaseAdminClient();
 
     // Use the RPC function to safely access information_schema

@@ -8,6 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: PR #220 fixes + security/UX improvements (March 12, 2026)**
+
+**BUG FIXES / SECURITY / UX** - March 12, 2026
+- ✅ **Radius search total count (Sentry/Cursor Bugbot):** `Number(countRes.data) ?? gigsList.length` never triggered fallback; fixed with `countRes.error || typeof countRes.data !== "number" ? gigsList.length : countRes.data`.
+- ✅ **GA4 event format (Cursor Bugbot):** `dataLayer.push(["event", ...])` used array instead of gtag format; now uses `window.gtag("event", ...)` when available; `window.gtag` exposed in ga4-analytics.
+- ✅ **Admin API auth (P0 security):** Added `lib/api/require-admin.ts`; protected `create-user`, `test-connection`, `check-auth-schema` — previously unauthenticated callers could create users or leak env/schema info.
+- ✅ **Gigs Try Again button:** Error state "Try Again" was non-functional; added `RetryButton` client component that calls `router.refresh()`.
+- ✅ **Gigs filter sanitization:** Applied `sanitizeFilterInput()` to `location` and `compensation` (same as `keyword`) to prevent query injection via `.or()`/`.ilike()`.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: PR #219 feedback — saved-search error handling, UX, dead code (March 12, 2026)**
 
 **BUG FIXES** - March 12, 2026
@@ -4552,6 +4563,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Sign-in analytics; dev gating; PostGIS location radius; saved searches*
+*Current Status: MVP Complete - PR #220 fixes; admin API auth; gigs UX + filter sanitization*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*

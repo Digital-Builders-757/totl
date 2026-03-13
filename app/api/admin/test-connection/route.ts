@@ -1,10 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/api/require-admin";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 export async function GET() {
   try {
+    const admin = await requireAdmin();
+    if (!admin.ok) return admin.response;
+
     // Check environment variables
     const publicVars = !!(
       process.env.NEXT_PUBLIC_SUPABASE_URL && 

@@ -23,8 +23,12 @@ export function trackEvent(
     const stored = window.localStorage.getItem(CONSENT_STORAGE_KEY);
     if (stored !== "granted") return;
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push(["event", eventName, params ?? {}]);
+    if (typeof window.gtag === "function") {
+      window.gtag("event", eventName, params ?? {});
+    } else {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(["event", eventName, params ?? {}]);
+    }
   } catch {
     // Non-blocking: never throw
   }

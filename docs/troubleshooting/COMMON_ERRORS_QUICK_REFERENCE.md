@@ -20,6 +20,9 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **Admin API routes return 401/403:** `POST /api/admin/create-user`, `GET /api/admin/test-connection`, `GET /api/admin/check-auth-schema` require authenticated admin.
+  - **Fix:** Ensure caller is signed in with `profiles.role = 'admin'`. Use `requireAdmin()` from `@/lib/api/require-admin` for new admin routes.
+  - **Prevention:** All admin API routes must call `requireAdmin()` (or equivalent) before performing admin operations.
 - **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
   - **Fix:** Run `npm run types:regen` for correct environment
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
