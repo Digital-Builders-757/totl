@@ -31,6 +31,14 @@
 - [ ] Mark-as-read on dropdown item click (markNotificationRead server action).
 - [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.
 
+## 🚀 **Latest: P0 login crash + P1 admin notification hygiene (March 13, 2026)**
+
+**RELIABILITY / NOTIFICATIONS** - March 13, 2026
+- ✅ **P0 /login crash (reading 'call'):** ChunkLoadErrorHandler now catches `Cannot read properties of undefined (reading 'call')` — known Next.js issue from stale webpack chunks after deployment. Triggers full page reload (500ms) to fetch fresh JS; prevents white-screen crash at launch.
+- ✅ **P1 Admin notification counts:** Removed hardcoded `notificationCount={0}` from `admin/applications/[id]` and `admin/gigs/create`; both now use AdminModerationCountProvider (real content_flags count) from layout.
+
+**Verification:** build, lint — green.
+
 ## 🚀 **Latest: Admin test helper fix for requireAdmin (March 12, 2026)**
 
 **CI / TESTS** - March 12, 2026
