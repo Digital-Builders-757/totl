@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Calendar, DollarSign, FileText, Loader2 } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, DollarSign, FileText, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +38,7 @@ export function AcceptApplicationDialog({
 }: AcceptApplicationDialogProps) {
   const [loading, setLoading] = useState(false);
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
   const [compensation, setCompensation] = useState(suggestedCompensation || "");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +53,19 @@ export function AcceptApplicationDialog({
         ? parseFloat(compensation.replace(/[^0-9.-]/g, ""))
         : undefined;
 
+      // Combine date + time into ISO string for booking (date required for time to apply)
+      let dateTimeIso: string | undefined;
+      if (date) {
+        if (time) {
+          dateTimeIso = `${date}T${time}:00`;
+        } else {
+          dateTimeIso = `${date}T12:00:00`; // Default noon if no time
+        }
+      }
+
       const result = await acceptApplication({
         applicationId,
-        date: date || undefined,
+        date: dateTimeIso || undefined,
         compensation: compensationNumber,
         notes: notes || undefined,
       });
@@ -66,6 +77,7 @@ export function AcceptApplicationDialog({
         onSuccess?.();
         // Reset form
         setDate("");
+        setTime("");
         setCompensation(suggestedCompensation || "");
         setNotes("");
       }
@@ -109,6 +121,24 @@ export function AcceptApplicationDialog({
               />
               <p className="text-sm text-gray-400">
                 Leave empty to default to 7 days from now
+              </p>
+            </div>
+
+            {/* Time */}
+            <div className="space-y-2">
+              <Label htmlFor="time" className="flex items-center gap-2 text-gray-200">
+                <Clock className="h-4 w-4" />
+                Call Time
+              </Label>
+              <Input
+                id="time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="bg-gray-800 border-gray-600 text-white"
+              />
+              <p className="text-sm text-gray-400">
+                When should talent arrive (optional)
               </p>
             </div>
 

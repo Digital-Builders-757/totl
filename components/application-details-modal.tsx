@@ -24,16 +24,26 @@ interface Application extends ApplicationRow {
   }) | null;
 }
 
+/** Real booking data (when application is accepted) - overrides gig display for date/compensation */
+interface BookingData {
+  date: string;
+  compensation: number | null;
+  notes: string | null;
+}
+
 interface ApplicationDetailsModalProps {
   application: Application | null;
   isOpen: boolean;
   onClose: () => void;
+  /** When provided (accepted application), shows real booking date/time, compensation, notes */
+  booking?: BookingData | null;
 }
 
 export function ApplicationDetailsModal({
   application,
   isOpen,
   onClose,
+  booking,
 }: ApplicationDetailsModalProps) {
   if (!application) return null;
 
@@ -129,13 +139,26 @@ export function ApplicationDetailsModal({
                 </div>
                 <div className="flex items-center gap-2 text-gray-300">
                   <DollarSign className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm">${application.gigs?.compensation}</span>
+                  <span className="text-sm">
+                    {booking?.compensation != null
+                      ? `$${Number(booking.compensation).toLocaleString()}`
+                      : application.gigs?.compensation
+                        ? `$${application.gigs.compensation}`
+                        : "TBD"}
+                  </span>
                 </div>
-                {application.gigs?.date && (
+                {(booking?.date || application.gigs?.date) && (
                   <div className="flex items-center gap-2 text-gray-300">
                     <Calendar className="h-4 w-4 text-gray-400" />
                     <span className="text-sm">
-                      {new Date(application.gigs.date).toLocaleDateString()}
+                      {booking?.date
+                        ? new Date(booking.date).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: booking.date.includes("T") ? "short" : undefined,
+                          })
+                        : application.gigs?.date
+                          ? new Date(application.gigs.date).toLocaleDateString()
+                          : ""}
                     </span>
                   </div>
                 )}
@@ -146,6 +169,12 @@ export function ApplicationDetailsModal({
                   </span>
                 </div>
               </div>
+              {booking?.notes && (
+                <div className="mt-4 p-4 bg-gray-900/50 border border-gray-700 rounded-lg">
+                  <p className="text-sm font-medium text-gray-300 mb-4">Booking Notes</p>
+                  <p className="text-gray-300 text-sm whitespace-pre-wrap">{booking.notes}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
