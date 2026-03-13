@@ -31,6 +31,13 @@
 - [x] Mark-as-read on dropdown item click (markNotificationRead server action). — Done: NotificationDropdown item click calls markNotificationRead then navigates.
 - [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.
 
+## 🚀 **Latest: Mark all as read in notification dropdown (March 13, 2026)**
+
+**NOTIFICATIONS** - March 13, 2026
+- ✅ **Mark all as read button:** NotificationDropdown shows "Mark all as read" when there are unread notifications. Calls `markAllNotificationsRead()` then `router.refresh()`; badge updates immediately.
+
+**Verification:** lint — green.
+
 ## 🚀 **Latest: P1 mark-as-read on notification click (March 13, 2026)**
 
 **NOTIFICATIONS** - March 13, 2026

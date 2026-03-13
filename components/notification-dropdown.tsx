@@ -3,6 +3,7 @@
 import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import type { NotificationItem } from "@/components/notification-count-provider";
 import { useNotificationCount } from "@/components/notification-count-provider";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { markNotificationRead } from "@/lib/actions/notification-actions";
+import {
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "@/lib/actions/notification-actions";
 
 interface NotificationDropdownProps {
   /** Link to view all (e.g. /client/applications or /talent/dashboard) */
@@ -49,6 +53,17 @@ export function NotificationDropdown({
 }: NotificationDropdownProps) {
   const { notificationCount, notifications } = useNotificationCount();
   const router = useRouter();
+  const [isMarkingAll, setIsMarkingAll] = useState(false);
+
+  const handleMarkAllRead = async () => {
+    if (notificationCount === 0 || isMarkingAll) return;
+    setIsMarkingAll(true);
+    const result = await markAllNotificationsRead();
+    setIsMarkingAll(false);
+    if (!result.error) {
+      router.refresh();
+    }
+  };
 
   const handleItemClick = async (n: NotificationItem) => {
     if (!n.read_at) {
@@ -112,7 +127,18 @@ export function NotificationDropdown({
             ))}
           </div>
         )}
-        <div className="border-t p-2">
+        <div className="border-t p-2 flex flex-col gap-1">
+          {notificationCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={handleMarkAllRead}
+              disabled={isMarkingAll}
+            >
+              {isMarkingAll ? "Marking..." : "Mark all as read"}
+            </Button>
+          )}
           <Button variant="ghost" size="sm" className="w-full" asChild>
             <Link href={viewAllHref}>View all</Link>
           </Button>
