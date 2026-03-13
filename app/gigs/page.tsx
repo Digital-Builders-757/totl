@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
 import { GigsFilterForm } from "@/components/gigs/gigs-filter-form";
+import { RetryButton } from "@/components/gigs/retry-button";
 import { SavedSearchesBar } from "@/components/gigs/saved-searches-bar";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Badge } from "@/components/ui/badge";
@@ -55,17 +56,17 @@ export default async function GigsPage({
 
   const sp = await searchParams;
   const rawKeyword = typeof sp.q === "string" ? sp.q.trim() : "";
-  // Sanitize keyword to prevent query injection via .or() string interpolation
-  // Remove characters that could break the filter expression
-  const keyword = rawKeyword.replace(/[,()]/g, " ").trim();
+  // Sanitize filter inputs to prevent query injection via .or() / .ilike() string interpolation
+  const sanitizeFilterInput = (s: string) => s.replace(/[,()]/g, " ").trim();
+  const keyword = sanitizeFilterInput(rawKeyword);
   const category = typeof sp.category === "string" ? sp.category.trim() : "";
-  const location = typeof sp.location === "string" ? sp.location.trim() : "";
+  const location = typeof sp.location === "string" ? sanitizeFilterInput(sp.location) : "";
   const radiusMilesRaw = typeof sp.radius_miles === "string" ? sp.radius_miles.trim() : "";
   const radiusMiles: RadiusValue = RADIUS_OPTIONS.some((o) => o.value === radiusMilesRaw)
     ? (radiusMilesRaw as RadiusValue)
     : "";
   const compensation =
-    typeof sp.compensation === "string" ? sp.compensation.trim() : "";
+    typeof sp.compensation === "string" ? sanitizeFilterInput(sp.compensation) : "";
   const payRange =
     (typeof sp.pay_range === "string" ? sp.pay_range.trim() : "") as PayRangeValue;
   const upcoming =
@@ -137,7 +138,10 @@ export default async function GigsPage({
         logger.error("Radius search error", gigsRes.error);
       } else {
         gigsList = (gigsRes.data ?? []) as GigRow[];
-        total = Number(countRes.data) ?? gigsList.length;
+        total =
+          countRes.error || typeof countRes.data !== "number"
+            ? gigsList.length
+            : countRes.data;
       }
       profileData = profileResult?.data ?? null;
     } else {
@@ -280,9 +284,9 @@ export default async function GigsPage({
                 <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
                   We&apos;re experiencing technical difficulties. Please try again later.
                 </p>
-                <Button className="apple-button px-8 py-4 text-lg animate-apple-glow">
+                <RetryButton className="apple-button px-8 py-4 text-lg animate-apple-glow">
                   Try Again
-                </Button>
+                </RetryButton>
               </div>
             </div>
           </div>
