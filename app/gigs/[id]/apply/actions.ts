@@ -153,7 +153,7 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     return { error: "Failed to submit application. Please try again." };
   }
 
-  // Send email notifications
+  // Send email notifications (best-effort; never fail the apply on email issues)
   try {
     // 1) Email to talent confirming application received (server-only direct call; no internal HTTP hop).
     const talentEmail = user.email;
@@ -182,21 +182,21 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       await sendEmail({ to: clientProfile.contact_email, subject, html });
       await logEmailSent(clientProfile.contact_email, "new-application-client", true);
     }
-
-    // In-app notification for client
-    await insertNotification({
-      recipientId: gig.client_id,
-      type: "new_application",
-      referenceId: application.id,
-      title: "New application",
-      body: `Someone applied to "${gig.title}"`,
-    });
   } catch (emailError) {
     logger.error("Failed to send application emails", emailError, {
       feature: "email-notifications",
       email_type: "application-submitted",
     });
   }
+
+  // In-app notification for client (runs regardless of email success)
+  await insertNotification({
+    recipientId: gig.client_id,
+    type: "new_application",
+    referenceId: application.id,
+    title: "New application",
+    body: `Someone applied to "${gig.title}"`,
+  });
 
   // Revalidate relevant paths
   revalidatePath("/gigs");

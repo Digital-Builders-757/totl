@@ -149,40 +149,44 @@ export async function acceptApplication(params: {
 
           const talentEmail = talentUser?.user?.email;
           if (talentEmail) {
-            const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
-            const clientName = clientProfile?.display_name || "Client";
+            try {
+              const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
+              const clientName = clientProfile?.display_name || "Client";
 
-            const acceptedEmail = generateApplicationAcceptedEmail({
-              name: talentName || "Talent",
-              gigTitle,
-              clientName,
-              dashboardUrl: absoluteUrl("/talent/dashboard"),
-            });
-            await sendEmail({ to: talentEmail, subject: acceptedEmail.subject, html: acceptedEmail.html });
-            await logEmailSent(talentEmail, "application-accepted", true);
+              const acceptedEmail = generateApplicationAcceptedEmail({
+                name: talentName || "Talent",
+                gigTitle,
+                clientName,
+                dashboardUrl: absoluteUrl("/talent/dashboard"),
+              });
+              await sendEmail({ to: talentEmail, subject: acceptedEmail.subject, html: acceptedEmail.html });
+              await logEmailSent(talentEmail, "application-accepted", true);
 
-            const bookingDate = bookingDateIso
-              ? new Date(bookingDateIso)
-              : new Date(Date.now() + 7 * 864e5);
-            const bookingConfirmed = generateBookingConfirmedEmail({
-              name: talentName || "Talent",
-              gigTitle,
-              bookingDate: bookingDate.toLocaleDateString(),
-              bookingTime: bookingDateIso?.includes("T")
-                ? bookingDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
-                : undefined,
-              bookingLocation: gigLocation,
-              compensation:
-                typeof params.compensation === "number"
-                  ? String(params.compensation)
-                  : "TBD",
-              dashboardUrl: absoluteUrl("/talent/dashboard"),
-            });
-            await sendEmail({ to: talentEmail, subject: bookingConfirmed.subject, html: bookingConfirmed.html });
-            await logEmailSent(talentEmail, "booking-confirmed", true);
+              const bookingDate = bookingDateIso
+                ? new Date(bookingDateIso)
+                : new Date(Date.now() + 7 * 864e5);
+              const bookingConfirmed = generateBookingConfirmedEmail({
+                name: talentName || "Talent",
+                gigTitle,
+                bookingDate: bookingDate.toLocaleDateString("en-US"),
+                bookingTime: bookingDateIso?.includes("T")
+                  ? bookingDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+                  : undefined,
+                bookingLocation: gigLocation,
+                compensation:
+                  typeof params.compensation === "number"
+                    ? String(params.compensation)
+                    : "TBD",
+                dashboardUrl: absoluteUrl("/talent/dashboard"),
+              });
+              await sendEmail({ to: talentEmail, subject: bookingConfirmed.subject, html: bookingConfirmed.html });
+              await logEmailSent(talentEmail, "booking-confirmed", true);
+            } catch (emailError) {
+              logger.error("Failed to send acceptance emails", emailError);
+            }
           }
 
-          // In-app notification for talent
+          // In-app notification for talent (runs regardless of email success)
           await insertNotification({
             recipientId: talentId,
             type: "application_accepted",
@@ -191,9 +195,8 @@ export async function acceptApplication(params: {
             body: `Your application for "${gigTitle}" was accepted`,
           });
         }
-      } catch (emailError) {
-        // Best-effort: never fail the acceptance on email issues.
-        logger.error("Failed to send acceptance emails", emailError);
+      } catch (err) {
+        logger.error("Accept application: failed to gather details or send notification", err);
       }
     }
 
@@ -290,20 +293,28 @@ export async function rejectApplication(params: {
         const { data: talentUser } = await admin.auth.admin.getUserById(
           fullApplication.talent_id
         );
-        
-        if (talentUser?.user?.email) {
-          const gig = fullApplication.gigs;
-          
-          const talentName = `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
-          const rejected = generateApplicationRejectedEmail({
-            name: talentName || "Talent",
-            gigTitle: gig?.title || "Gig",
-          });
-          await sendEmail({ to: talentUser.user.email, subject: rejected.subject, html: rejected.html });
-          await logEmailSent(talentUser.user.email, "application-rejected", true);
+
+        try {
+          if (talentUser?.user?.email) {
+            const gig = fullApplication.gigs;
+            const talentName =
+              `${talentProfile?.first_name || ""} ${talentProfile?.last_name || ""}`.trim();
+            const rejected = generateApplicationRejectedEmail({
+              name: talentName || "Talent",
+              gigTitle: gig?.title || "Gig",
+            });
+            await sendEmail({
+              to: talentUser.user.email,
+              subject: rejected.subject,
+              html: rejected.html,
+            });
+            await logEmailSent(talentUser.user.email, "application-rejected", true);
+          }
+        } catch (emailError) {
+          logger.error("Failed to send rejection email", emailError);
         }
 
-        // In-app notification for talent
+        // In-app notification for talent (runs regardless of email success)
         const gigTitle = fullApplication.gigs?.title ?? "Gig";
         await insertNotification({
           recipientId: fullApplication.talent_id,
@@ -313,9 +324,8 @@ export async function rejectApplication(params: {
           body: `Your application for "${gigTitle}" was not selected`,
         });
       }
-    } catch (emailError) {
-      // Log email errors but don't fail the rejection
-      logger.error("Failed to send rejection email", emailError);
+    } catch (fetchError) {
+      logger.error("Failed to load application for rejection notification", fetchError);
     }
 
     return { success: true };
