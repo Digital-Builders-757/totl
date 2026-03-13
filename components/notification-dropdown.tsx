@@ -2,6 +2,7 @@
 
 import { Bell } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { NotificationItem } from "@/components/notification-count-provider";
 import { useNotificationCount } from "@/components/notification-count-provider";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { markNotificationRead } from "@/lib/actions/notification-actions";
 
 interface NotificationDropdownProps {
   /** Link to view all (e.g. /client/applications or /talent/dashboard) */
@@ -46,6 +48,14 @@ export function NotificationDropdown({
   showLabel = false,
 }: NotificationDropdownProps) {
   const { notificationCount, notifications } = useNotificationCount();
+  const router = useRouter();
+
+  const handleItemClick = async (n: NotificationItem) => {
+    if (!n.read_at) {
+      await markNotificationRead(n.id);
+    }
+    router.push(viewAllHref);
+  };
 
   return (
     <DropdownMenu>
@@ -76,21 +86,29 @@ export function NotificationDropdown({
         ) : (
           <div className="py-1">
             {notifications.map((n: NotificationItem) => (
-              <Link key={n.id} href={viewAllHref}>
-                <div
-                  className={`px-3 py-2.5 text-sm hover:bg-accent cursor-pointer transition-colors ${
-                    !n.read_at ? "bg-accent/50" : ""
-                  }`}
-                >
-                  <p className="font-medium truncate">{n.title}</p>
-                  {n.body ? (
-                    <p className="text-muted-foreground truncate mt-0.5">{n.body}</p>
-                  ) : null}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatNotificationTime(n.created_at)}
-                  </p>
-                </div>
-              </Link>
+              <div
+                key={n.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleItemClick(n)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleItemClick(n);
+                  }
+                }}
+                className={`px-3 py-2.5 text-sm hover:bg-accent cursor-pointer transition-colors ${
+                  !n.read_at ? "bg-accent/50" : ""
+                }`}
+              >
+                <p className="font-medium truncate">{n.title}</p>
+                {n.body ? (
+                  <p className="text-muted-foreground truncate mt-0.5">{n.body}</p>
+                ) : null}
+                <p className="text-xs text-muted-foreground mt-1">
+                  {formatNotificationTime(n.created_at)}
+                </p>
+              </div>
             ))}
           </div>
         )}

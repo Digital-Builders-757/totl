@@ -28,8 +28,15 @@
 - ✅ **Cron locale:** booking-reminders uses explicit 'en-US' locale for date/time in emails.
 
 **Next (P1)**
-- [ ] Mark-as-read on dropdown item click (markNotificationRead server action).
+- [x] Mark-as-read on dropdown item click (markNotificationRead server action). — Done: NotificationDropdown item click calls markNotificationRead then navigates.
 - [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.
+
+## 🚀 **Latest: P1 mark-as-read on notification click (March 13, 2026)**
+
+**NOTIFICATIONS** - March 13, 2026
+- ✅ **Mark-as-read on dropdown item click:** NotificationDropdown item click calls `markNotificationRead(n.id)` then `router.push(viewAllHref)`. Unread items get marked before navigation; badge count updates on next page load.
+
+**Verification:** lint — green.
 
 ## 🚀 **Latest: P0 login crash + P1 admin notification hygiene (March 13, 2026)**
 
