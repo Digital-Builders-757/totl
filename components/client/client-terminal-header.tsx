@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/components/auth/auth-provider";
+import { NotificationDropdown } from "@/components/notification-dropdown";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -60,17 +61,25 @@ export function ClientTerminalHeader({
               <p className="truncate text-base font-semibold text-white">{title}</p>
               <p className="truncate text-xs text-gray-300">{subtitle}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Go to settings"
-              className="h-11 w-11 text-white hover:bg-white/10"
-              asChild
-            >
-              <Link href="/settings">
-                <Settings className="h-5 w-5" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-1">
+              <NotificationDropdown
+                viewAllHref="/client/applications"
+                variant="ghost"
+                size="icon"
+                className="h-11 w-11 text-white hover:bg-white/10"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Go to settings"
+                className="h-11 w-11 text-white hover:bg-white/10"
+                asChild
+              >
+                <Link href="/settings">
+                  <Settings className="h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
           </div>
 
           <div className="hidden items-center justify-between gap-4 md:flex">
@@ -78,7 +87,16 @@ export function ClientTerminalHeader({
               <h1 className="text-2xl font-bold text-white">{title}</h1>
               <p className="text-gray-300">{subtitle}</p>
             </div>
-            {desktopPrimaryAction}
+            <div className="flex items-center gap-2">
+              <NotificationDropdown
+                viewAllHref="/client/applications"
+                variant="outline"
+                size="sm"
+                className="border-white/20 text-white hover:bg-white/10"
+                showLabel
+              />
+              {desktopPrimaryAction}
+            </div>
           </div>
           {mobileSecondaryAction ? <div className="pt-2 md:hidden">{mobileSecondaryAction}</div> : null}
         </div>

@@ -43,6 +43,10 @@ npm run build
   - **Root Cause:** Missing `public.content_flags` table in the target Supabase project
   - **Fix:** Apply the moderation migration (`supabase db push`) that creates `content_flags` + policies
   - **Prevention:** Verify `to_regclass('public.content_flags')` returns non-null after deploy
+- **Notification badge/dropdown empty or errors:** "relation user_notifications does not exist"
+  - **Root Cause:** Migration `20260313120000_add_user_notifications.sql` not applied yet
+  - **Fix:** Run `supabase db push` (or `supabase db reset` for local) to apply the migration
+  - **Prevention:** Apply migration before deploying notification feature code
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **MVP tracker date is stale despite new updates:** `MVP_STATUS_NOTION.md` footer still shows an old "Last Updated" date

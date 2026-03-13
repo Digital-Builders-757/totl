@@ -9,7 +9,6 @@ import {
   BarChart3,
   Plus,
   User,
-  Bell,
   LogOut,
   Activity,
 } from "lucide-react";
@@ -193,30 +192,24 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
         title="Career Builder Dashboard"
         subtitle={clientProfile?.company_name || "Manage opportunities and applications"}
         desktopPrimaryAction={
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
-              <Bell className="h-4 w-4 mr-2" />
-              Notifications
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                if (isSigningOut) return;
-                setIsSigningOut(true);
-                try {
-                  await signOut();
-                } catch {
-                  setIsSigningOut(false);
-                }
-              }}
-              disabled={isSigningOut}
-              className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              {isSigningOut ? "Signing Out..." : "Sign Out"}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              if (isSigningOut) return;
+              setIsSigningOut(true);
+              try {
+                await signOut();
+              } catch {
+                setIsSigningOut(false);
+              }
+            }}
+            disabled={isSigningOut}
+            className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            {isSigningOut ? "Signing Out..." : "Sign Out"}
+          </Button>
         }
       />
 

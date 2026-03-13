@@ -782,6 +782,47 @@ export type Database = {
           },
         ]
       }
+      user_notifications: {
+        Row: {
+          id: string
+          recipient_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          reference_id: string
+          title: string
+          body: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipient_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          reference_id: string
+          title: string
+          body?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipient_id?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          reference_id?: string
+          title?: string
+          body?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       admin_bookings_dashboard: {
@@ -961,6 +1002,7 @@ export type Database = {
         | "booking"
       flag_status: "open" | "in_review" | "resolved" | "dismissed"
       gig_status: "draft" | "active" | "closed" | "featured" | "urgent"
+      notification_type: "new_application" | "application_accepted" | "application_rejected"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
     }
@@ -1108,6 +1150,7 @@ export const Constants = {
       ],
       flag_status: ["open", "in_review", "resolved", "dismissed"],
       gig_status: ["draft", "active", "closed", "featured", "urgent"],
+      notification_type: ["new_application", "application_accepted", "application_rejected"],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],
     },

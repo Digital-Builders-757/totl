@@ -619,7 +619,7 @@ export function AdminClientApplicationsClient({
       fullBleed
       className="bg-gradient-to-br from-gray-900 via-black to-gray-800"
     >
-      <AdminHeader user={user} notificationCount={3} />
+      <AdminHeader user={user} />
 
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <PageHeader
