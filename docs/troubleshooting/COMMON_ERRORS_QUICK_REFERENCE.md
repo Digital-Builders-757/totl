@@ -27,7 +27,8 @@ npm run build
   - **Fix:** Admin tests rely on `test:qa:route-users:preflight` (`ensure-ui-audit-users.mjs`) which creates admin@totlagency.com via Supabase service role before Playwright runs. Do not call create-user from tests.
   - **Prevention:** `tests/helpers/admin-auth.ts` `loginAsAdmin()` logs in with pre-seeded credentials; preflight must run before admin route specs.
 - **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
-  - **Fix:** Run `npm run types:regen` for correct environment
+  - **Fix:** Run `npm run types:regen:dev` (development) or `npm run types:regen:prod` (production)
+  - **Prevention:** After applying migrations to remote, always regenerate types and commit. Manual type edits drift from remote.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`

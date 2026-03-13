@@ -4588,7 +4588,13 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Admin test fix; PR #220; mobile guardrails CI green*
+### **Session Update (March 13, 2026 - types regen)**
+
+**Done:** Regenerated `types/database.ts` with `npm run types:regen:dev` to sync with remote schema (location_lat/lng, gigs_within_radius, user_notifications). Resolves CI "types out of sync" failure. Added troubleshooting entry for types drift.
+
+---
+
+*Last Updated: March 13, 2026*
+*Current Status: MVP Complete - Types regen; notifications + booking UX shipped*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*
