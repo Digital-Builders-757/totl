@@ -23,6 +23,9 @@ npm run build
 - **Admin API routes return 401/403:** `POST /api/admin/create-user`, `GET /api/admin/test-connection`, `GET /api/admin/check-auth-schema` require authenticated admin.
   - **Fix:** Ensure caller is signed in with `profiles.role = 'admin'`. Use `requireAdmin()` from `@/lib/api/require-admin` for new admin routes.
   - **Prevention:** All admin API routes must call `requireAdmin()` (or equivalent) before performing admin operations.
+- **Admin Playwright tests fail at `ensureAdminUser` / `expect(res.ok()).toBeTruthy()`:** Tests used to call `POST /api/admin/create-user` to bootstrap admin; that endpoint now requires admin auth.
+  - **Fix:** Admin tests rely on `test:qa:route-users:preflight` (`ensure-ui-audit-users.mjs`) which creates admin@totlagency.com via Supabase service role before Playwright runs. Do not call create-user from tests.
+  - **Prevention:** `tests/helpers/admin-auth.ts` `loginAsAdmin()` logs in with pre-seeded credentials; preflight must run before admin route specs.
 - **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
   - **Fix:** Run `npm run types:regen` for correct environment
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`

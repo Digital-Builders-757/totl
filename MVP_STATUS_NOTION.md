@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin test helper fix for requireAdmin (March 12, 2026)**
+
+**CI / TESTS** - March 12, 2026
+- ✅ **Mobile guardrails CI:** Admin tests failed because `ensureAdminUser` called `POST /api/admin/create-user`, which now requires admin auth. Removed create-user call; tests rely on preflight (`ensure-ui-audit-users.mjs`) which seeds admin@totlagency.com via Supabase service role before Playwright runs.
+- ✅ **docs/troubleshooting:** Added entry for admin Playwright test failure at ensureAdminUser.
+
+**Verification:** test:qa:mobile-guardrails:ci — 21 passed.
+
 ## 🚀 **Latest: PR #220 fixes + security/UX improvements (March 12, 2026)**
 
 **BUG FIXES / SECURITY / UX** - March 12, 2026
@@ -4563,6 +4571,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 12, 2026*
-*Current Status: MVP Complete - PR #220 fixes; admin API auth; gigs UX + filter sanitization*
+*Current Status: MVP Complete - Admin test fix; PR #220; mobile guardrails CI green*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*
