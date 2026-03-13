@@ -232,3 +232,42 @@ export async function updateContentFlagAction({
   return { success: true };
 }
 
+/**
+ * Get count of open content flags for admin notification badge.
+ * Admin-only; returns 0 if not admin or on error.
+ */
+export async function getAdminModerationCount(): Promise<number> {
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) return 0;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profile?.role !== "admin") return 0;
+
+    const typedSupabase = supabase as SupabaseClient<ModerationDatabase>;
+    const { count, error } = await typedSupabase
+      .from("content_flags")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open");
+
+    if (error) {
+      logger.error("getAdminModerationCount error", error);
+      return 0;
+    }
+    return count ?? 0;
+  } catch (err) {
+    logger.error("getAdminModerationCount", err);
+    return 0;
+  }
+}
+

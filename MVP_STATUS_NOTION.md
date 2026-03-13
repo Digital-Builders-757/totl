@@ -8,6 +8,24 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: In-app notifications (Approach B) + handoff doc (March 13, 2026)**
+
+**NOTIFICATIONS / BOOKING UX** - March 13, 2026
+- ✅ **user_notifications table:** Migration `20260313120000_add_user_notifications.sql` — RLS, indexes, notification_type enum.
+- ✅ **Notification inserts:** Talent applies → notify client; client accepts/rejects → notify talent (apply/actions.ts, booking-actions.ts).
+- ✅ **Real badge counts:** ClientTerminalHeader + Talent dashboard use NotificationCountProvider (page-load fetch); AdminHeader uses AdminModerationCountProvider (open content_flags count).
+- ✅ **Notification dropdown:** NotificationDropdown component shows last 10 notifications; Client + Talent layouts fetch getRecentNotifications(10) on page load.
+- ✅ **Removed hardcoded counts:** Admin pages no longer use `notificationCount={3}`; layout provides real moderation count.
+- ✅ **docs/plans/NOTIFICATIONS_IMPLEMENTATION_PLAN.md:** Design plan (Approach A/B/C); Approach B implemented.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Apply migration before use:** `supabase db push` (or `supabase db reset` for local). Migration `20260313120000_add_user_notifications.sql`.
+
+**Next (P1)**
+- [ ] Mark-as-read on dropdown item click (markNotificationRead server action).
+- [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.
+
 ## 🚀 **Latest: Admin test helper fix for requireAdmin (March 12, 2026)**
 
 **CI / TESTS** - March 12, 2026
@@ -4570,7 +4588,13 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 12, 2026*
-*Current Status: MVP Complete - Admin test fix; PR #220; mobile guardrails CI green*
+### **Session Update (March 13, 2026 - types regen)**
+
+**Done:** Regenerated `types/database.ts` with `npm run types:regen:dev` to sync with remote schema (location_lat/lng, gigs_within_radius, user_notifications). Resolves CI "types out of sync" failure. Added troubleshooting entry for types drift.
+
+---
+
+*Last Updated: March 13, 2026*
+*Current Status: MVP Complete - Types regen; notifications + booking UX shipped*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*

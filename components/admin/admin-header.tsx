@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAdminModerationCount } from "@/components/admin/admin-moderation-count-provider";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -39,14 +40,28 @@ import { logger } from "@/lib/utils/logger";
 
 interface AdminHeaderProps {
   user?: User;
+  /** Override moderation count (e.g. from page data). Falls back to layout context when undefined. */
   notificationCount?: number;
 }
 
-export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
+const DEFAULT_AVATAR = "/images/totl-logo-transparent.png";
+
+export function AdminHeader({ user, notificationCount: notificationCountProp }: AdminHeaderProps) {
+  const { moderationCount } = useAdminModerationCount();
+  const notificationCount = notificationCountProp ?? moderationCount;
   const pathname = usePathname();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+
+  // Prefer profile avatar (our storage) over OAuth metadata; fallback to default
+  const avatarUrl = profile?.avatar_url ?? user?.user_metadata?.avatar_url;
+  const effectiveAvatarSrc = avatarError || !avatarUrl ? DEFAULT_AVATAR : avatarUrl;
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [avatarUrl]);
 
   // Safety check: if user is not available yet, return null or loading state
   if (!user) {
@@ -267,7 +282,11 @@ export function AdminHeader({ user, notificationCount = 0 }: AdminHeaderProps) {
                     className="border-gray-700 text-white hover:bg-gray-800"
                   >
                     <Avatar className="mr-2 h-6 w-6">
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || "Admin"} />
+                      <AvatarImage
+                        src={effectiveAvatarSrc}
+                        alt={user.email || "Admin"}
+                        onError={() => setAvatarError(true)}
+                      />
                       <AvatarFallback className="bg-gradient-to-br from-purple-600 to-blue-600 text-xs text-white">
                         {user.email?.charAt(0).toUpperCase() || "A"}
                       </AvatarFallback>

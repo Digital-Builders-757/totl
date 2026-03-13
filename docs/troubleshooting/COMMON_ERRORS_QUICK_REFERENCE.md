@@ -27,7 +27,8 @@ npm run build
   - **Fix:** Admin tests rely on `test:qa:route-users:preflight` (`ensure-ui-audit-users.mjs`) which creates admin@totlagency.com via Supabase service role before Playwright runs. Do not call create-user from tests.
   - **Prevention:** `tests/helpers/admin-auth.ts` `loginAsAdmin()` logs in with pre-seeded credentials; preflight must run before admin route specs.
 - **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
-  - **Fix:** Run `npm run types:regen` for correct environment
+  - **Fix:** Run `npm run types:regen:dev` (development) or `npm run types:regen:prod` (production)
+  - **Prevention:** After applying migrations to remote, always regenerate types and commit. Manual type edits drift from remote.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`
@@ -43,6 +44,10 @@ npm run build
   - **Root Cause:** Missing `public.content_flags` table in the target Supabase project
   - **Fix:** Apply the moderation migration (`supabase db push`) that creates `content_flags` + policies
   - **Prevention:** Verify `to_regclass('public.content_flags')` returns non-null after deploy
+- **Notification badge/dropdown empty or errors:** "relation user_notifications does not exist"
+  - **Root Cause:** Migration `20260313120000_add_user_notifications.sql` not applied yet
+  - **Fix:** Run `supabase db push` (or `supabase db reset` for local) to apply the migration
+  - **Prevention:** Apply migration before deploying notification feature code
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **MVP tracker date is stale despite new updates:** `MVP_STATUS_NOTION.md` footer still shows an old "Last Updated" date

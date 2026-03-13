@@ -1,5 +1,6 @@
 "use server";
 
+import { insertNotification } from "@/lib/actions/notification-actions";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import {
@@ -160,12 +161,16 @@ export async function acceptApplication(params: {
             await sendEmail({ to: talentEmail, subject: acceptedEmail.subject, html: acceptedEmail.html });
             await logEmailSent(talentEmail, "application-accepted", true);
 
+            const bookingDate = bookingDateIso
+              ? new Date(bookingDateIso)
+              : new Date(Date.now() + 7 * 864e5);
             const bookingConfirmed = generateBookingConfirmedEmail({
               name: talentName || "Talent",
               gigTitle,
-              bookingDate: bookingDateIso
-                ? new Date(bookingDateIso).toLocaleDateString()
-                : new Date(Date.now() + 7 * 864e5).toLocaleDateString(),
+              bookingDate: bookingDate.toLocaleDateString(),
+              bookingTime: bookingDateIso?.includes("T")
+                ? bookingDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+                : undefined,
               bookingLocation: gigLocation,
               compensation:
                 typeof params.compensation === "number"
@@ -176,6 +181,15 @@ export async function acceptApplication(params: {
             await sendEmail({ to: talentEmail, subject: bookingConfirmed.subject, html: bookingConfirmed.html });
             await logEmailSent(talentEmail, "booking-confirmed", true);
           }
+
+          // In-app notification for talent
+          await insertNotification({
+            recipientId: talentId,
+            type: "application_accepted",
+            referenceId: params.applicationId,
+            title: "Application accepted",
+            body: `Your application for "${gigTitle}" was accepted`,
+          });
         }
       } catch (emailError) {
         // Best-effort: never fail the acceptance on email issues.
@@ -288,6 +302,16 @@ export async function rejectApplication(params: {
           await sendEmail({ to: talentUser.user.email, subject: rejected.subject, html: rejected.html });
           await logEmailSent(talentUser.user.email, "application-rejected", true);
         }
+
+        // In-app notification for talent
+        const gigTitle = fullApplication.gigs?.title ?? "Gig";
+        await insertNotification({
+          recipientId: fullApplication.talent_id,
+          type: "application_rejected",
+          referenceId: params.applicationId,
+          title: "Application not selected",
+          body: `Your application for "${gigTitle}" was not selected`,
+        });
       }
     } catch (emailError) {
       // Log email errors but don't fail the rejection
@@ -353,6 +377,97 @@ export async function updateApplicationStatus(params: {
     return { success: true };
   } catch (error) {
     logger.error("Update status error", error);
+    return { error: "An unexpected error occurred" };
+  }
+}
+
+/**
+ * Get talent's bookings (for talent dashboard - real booking data)
+ */
+export async function getTalentBookings() {
+  try {
+    const supabase = await createSupabaseServer();
+
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) {
+      return { error: "Unauthorized" };
+    }
+
+    const { data: bookings, error: bookingsError } = await supabase
+      .from("bookings")
+      .select(
+        `
+        id,
+        gig_id,
+        talent_id,
+        status,
+        compensation,
+        notes,
+        date,
+        created_at,
+        updated_at,
+        gigs!inner(id, title, description, category, location, compensation, image_url, date, client_id)
+      `
+      )
+      .eq("talent_id", userId)
+      .order("date", { ascending: true });
+
+    if (bookingsError) {
+      logger.error("Talent bookings fetch error", bookingsError);
+      return { error: "Failed to load bookings" };
+    }
+
+    const rows = bookings || [];
+    const clientIds = Array.from(
+      new Set(
+        rows
+          .map((b) => (b.gigs as { client_id?: string })?.client_id)
+          .filter((id): id is string => !!id)
+      )
+    );
+
+    const companyByClientId = new Map<string, string>();
+    if (clientIds.length > 0) {
+      const { data: clientProfiles } = await supabase
+        .from("client_profiles")
+        .select("user_id, company_name")
+        .in("user_id", clientIds);
+      (clientProfiles || []).forEach((cp) => {
+        companyByClientId.set(cp.user_id, cp.company_name ?? "");
+      });
+    }
+
+    // Fetch applications for modal (bookings and applications share gig_id + talent_id)
+    const applicationByKey = new Map<string, { id: string; status: string; message: string | null; created_at: string }>();
+    if (rows.length > 0) {
+      const gigIds = [...new Set(rows.map((r) => r.gig_id))];
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("id, gig_id, talent_id, status, message, created_at")
+        .eq("talent_id", userId)
+        .in("gig_id", gigIds);
+      (apps || []).forEach((a) => {
+        applicationByKey.set(`${a.gig_id}:${a.talent_id}`, a);
+      });
+    }
+
+    const bookingsWithCompany = rows.map((row) => {
+      const gig = row.gigs as { client_id?: string } & (typeof row.gigs);
+      const clientId = gig?.client_id;
+      const app = applicationByKey.get(`${row.gig_id}:${row.talent_id}`);
+      return {
+        ...row,
+        gigs: gig
+          ? { ...gig, client_profiles: clientId ? { company_name: companyByClientId.get(clientId) ?? null } : null }
+          : null,
+        application: app ?? null,
+      };
+    });
+
+    return { success: true, bookings: bookingsWithCompany };
+  } catch (error) {
+    logger.error("Get talent bookings error", error);
     return { error: "An unexpected error occurred" };
   }
 }

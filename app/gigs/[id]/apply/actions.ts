@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { insertNotification } from "@/lib/actions/notification-actions";
 import { sendEmail, logEmailSent } from "@/lib/email-service";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateApplicationReceivedEmail, generateNewApplicationClientEmail } from "@/lib/services/email-templates";
@@ -181,6 +182,15 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
       await sendEmail({ to: clientProfile.contact_email, subject, html });
       await logEmailSent(clientProfile.contact_email, "new-application-client", true);
     }
+
+    // In-app notification for client
+    await insertNotification({
+      recipientId: gig.client_id,
+      type: "new_application",
+      referenceId: application.id,
+      title: "New application",
+      body: `Someone applied to "${gig.title}"`,
+    });
   } catch (emailError) {
     logger.error("Failed to send application emails", emailError, {
       feature: "email-notifications",

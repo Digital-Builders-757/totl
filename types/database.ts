@@ -469,6 +469,8 @@ export type Database = {
           id: string
           image_url: string | null
           location: string
+          location_lat: number | null
+          location_lng: number | null
           search_vector: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
@@ -487,6 +489,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           location: string
+          location_lat?: number | null
+          location_lng?: number | null
           search_vector?: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
@@ -505,6 +509,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           location?: string
+          location_lat?: number | null
+          location_lng?: number | null
           search_vector?: unknown
           status?: Database["public"]["Enums"]["gig_status"]
           title?: string
@@ -782,6 +788,47 @@ export type Database = {
           },
         ]
       }
+      user_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          reference_id: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          reference_id: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          reference_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       admin_bookings_dashboard: {
@@ -930,6 +977,48 @@ export type Database = {
           id: string
         }[]
       }
+      gigs_within_radius: {
+        Args: {
+          center_lat: number
+          center_lng: number
+          p_category?: string
+          p_date_min?: string
+          p_keyword?: string
+          p_limit?: number
+          p_offset?: number
+          p_pay_max?: number
+          p_pay_min?: number
+          p_sort?: string
+          radius_meters: number
+        }
+        Returns: {
+          category: string
+          client_id: string
+          compensation: string
+          compensation_numeric: number
+          created_at: string
+          date: string
+          description: string
+          dist_meters: number
+          id: string
+          image_url: string
+          location: string
+          title: string
+        }[]
+      }
+      gigs_within_radius_count: {
+        Args: {
+          center_lat: number
+          center_lng: number
+          p_category?: string
+          p_date_min?: string
+          p_keyword?: string
+          p_pay_max?: number
+          p_pay_min?: number
+          radius_meters: number
+        }
+        Returns: number
+      }
       maintenance_cleanup: { Args: never; Returns: undefined }
       refresh_admin_dashboard_cache: { Args: never; Returns: undefined }
       reject_client_application: {
@@ -961,6 +1050,10 @@ export type Database = {
         | "booking"
       flag_status: "open" | "in_review" | "resolved" | "dismissed"
       gig_status: "draft" | "active" | "closed" | "featured" | "urgent"
+      notification_type:
+        | "new_application"
+        | "application_accepted"
+        | "application_rejected"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
     }
@@ -1108,6 +1201,11 @@ export const Constants = {
       ],
       flag_status: ["open", "in_review", "resolved", "dismissed"],
       gig_status: ["draft", "active", "closed", "featured", "urgent"],
+      notification_type: [
+        "new_application",
+        "application_accepted",
+        "application_rejected",
+      ],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],
     },

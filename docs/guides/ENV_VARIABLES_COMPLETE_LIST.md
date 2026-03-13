@@ -87,6 +87,7 @@
 |----------|-------------|---------|
 | `VERCEL_ENV` | Vercel environment | `development`, `preview`, or `production` |
 | `NEXT_PUBLIC_VERCEL_ENV` | Public Vercel environment | Same as above |
+| `CRON_SECRET` | Secret for cron endpoints (booking reminders) | Random string; Vercel sends as `Authorization: Bearer <CRON_SECRET>` | `your-random-secret` |
 
 ### 🧪 **Testing Variables** (Optional - for Playwright tests)
 

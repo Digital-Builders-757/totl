@@ -110,6 +110,8 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `STRIPE_LIVE_SUBSCRIPTIONS_PRD.md` - **NEW** - Live-mode migration and subscription launch plan (Nov 2025)
 - `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_PLAN.md` - **✅ NEW** - Design plan for handling orphaned Stripe webhook events (Feb 2026)
 - `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_IMPLEMENTATION.md` - **✅ NEW** - Implementation summary for orphaned customer webhook handling (Feb 2026)
+- `plans/NOTIFICATIONS_IMPLEMENTATION_PLAN.md` - **✅ NEW** - In-app notification design (Approach A/B/C); Approach B implemented (Mar 2026)
+- `HANDOFF.md` - **🤖 NEW** - Agent handoff prompt for notifications & booking UX context (Mar 2026)
 
 ### **🚨 Critical Error Prevention**
 - `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage

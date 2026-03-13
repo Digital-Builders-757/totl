@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Plus,
   User,
-  Bell,
   Settings,
   LogOut,
   Activity,
@@ -37,6 +36,7 @@ import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
+import { NotificationDropdown } from "@/components/notification-dropdown";
 import { SafeDate } from "@/components/safe-date";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -51,6 +51,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
+import { getTalentBookings } from "@/lib/actions/booking-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
 import { useSupabase } from "@/lib/hooks/use-supabase";
@@ -72,6 +73,24 @@ interface TalentApplication extends ApplicationRow {
   > & {
     client_profiles?: Pick<ClientProfileRow, "company_name"> | null;
   }) | null;
+}
+
+// Talent booking with real booking data (from getTalentBookings)
+interface TalentBooking {
+  id: string;
+  gig_id: string;
+  talent_id: string;
+  status: string;
+  compensation: number | null;
+  notes: string | null;
+  date: string;
+  created_at: string;
+  updated_at: string;
+  gigs: (Pick<
+    GigRow,
+    "id" | "title" | "description" | "category" | "location" | "compensation" | "image_url" | "date" | "client_id"
+  > & { client_profiles?: { company_name: string | null } | null }) | null;
+  application: { id: string; status: string; message: string | null; created_at: string } | null;
 }
 
 interface Gig {
@@ -132,6 +151,8 @@ function useTalentDashboardData({
     initialData?.applications ?? []
   );
   const [gigs, setGigs] = useState<Gig[]>(initialData?.gigs ?? []);
+  const [bookings, setBookings] = useState<TalentBooking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(!initialData); // Only load if no initial data
   const [dataError, setDataError] = useState<string | null>(null);
   
@@ -442,6 +463,23 @@ function useTalentDashboardData({
             setGigs((gigsData as Gig[]) ?? []);
           }
         }
+
+        // Fetch real booking data (date, compensation, notes) for talent
+        if (!cancelled) {
+          setBookingsLoading(true);
+          try {
+            const bookingsResult = await getTalentBookings();
+            if (!cancelled && bookingsResult.success && bookingsResult.bookings) {
+              setBookings(bookingsResult.bookings);
+            }
+          } catch (bookingsErr) {
+            if (!cancelled) {
+              logger.error("[talent-dashboard] Error fetching bookings", bookingsErr);
+            }
+          } finally {
+            if (!cancelled) setBookingsLoading(false);
+          }
+        }
       } catch (err) {
         if (!cancelled) {
           const errorMessage = err instanceof Error ? err.message : String(err);
@@ -525,6 +563,8 @@ function useTalentDashboardData({
     talentProfile,
     applications,
     gigs,
+    bookings,
+    bookingsLoading,
     dataLoading,
     dataError,
     // UPGRADE 2: Expose separate applications loading/error states
@@ -550,6 +590,8 @@ function TalentDashboardContent({
     talentProfile,
     applications,
     gigs,
+    bookings,
+    bookingsLoading,
     dataLoading,
     dataError,
     applicationsLoading,
@@ -569,6 +611,7 @@ function TalentDashboardContent({
 
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [selectedTalentApplication, setSelectedTalentApplication] = useState<TalentApplication | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<TalentBooking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const hasHandledVerificationRef = useRef<boolean>(false);
   const isInVerificationGracePeriodRef = useRef<boolean>(false);
@@ -639,7 +682,10 @@ function TalentDashboardContent({
     newApplications: applications.filter(
       (app) => app.status === "new" || app.status === "under_review"
     ).length,
-    acceptedTalentApplications: applications.filter((app) => app.status === "accepted").length,
+    acceptedTalentApplications:
+      bookings.length > 0
+        ? bookings.length
+        : applications.filter((app) => app.status === "accepted").length,
     activeGigs: gigs.filter((gig) => gig.status === "active").length,
     totalGigs: gigs.length,
   };
@@ -667,12 +713,30 @@ function TalentDashboardContent({
 
   const handleViewDetails = (application: TalentApplication) => {
     setSelectedTalentApplication(application);
+    setSelectedBooking(null);
+    setIsModalOpen(true);
+  };
+
+  const handleViewBookingDetails = (booking: TalentBooking) => {
+    if (!booking.application || !booking.gigs) return;
+    setSelectedTalentApplication({
+      id: booking.application.id,
+      status: booking.application.status as TalentApplication["status"],
+      message: booking.application.message,
+      created_at: booking.application.created_at,
+      updated_at: booking.application.created_at,
+      gig_id: booking.gig_id,
+      talent_id: booking.talent_id,
+      gigs: booking.gigs as TalentApplication["gigs"],
+    });
+    setSelectedBooking(booking);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedTalentApplication(null);
+    setSelectedBooking(null);
   };
 
   // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
@@ -801,16 +865,24 @@ function TalentDashboardContent({
     <PageShell topPadding={false} fullBleed>
       <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-2 sm:py-3">
-          <div className="flex min-h-12 items-center justify-between md:hidden">
+          <div className="flex min-h-12 items-center justify-between gap-2 md:hidden">
             <div className="min-w-0">
               <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
               <p className="truncate text-xs text-gray-300">
                 {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover opportunities"}
               </p>
             </div>
-            <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
-              <Link href="/gigs">Browse opportunities</Link>
-            </Button>
+            <div className="flex items-center gap-1">
+              <NotificationDropdown
+                viewAllHref="/talent/dashboard"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 text-white hover:bg-white/10"
+              />
+              <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+                <Link href="/gigs">Browse opportunities</Link>
+              </Button>
+            </div>
           </div>
 
           <div className="hidden md:flex md:flex-row justify-between items-start md:items-center gap-4">
@@ -846,14 +918,13 @@ function TalentDashboardContent({
                   </Link>
                 </Button>
               )}
-              <Button
+              <NotificationDropdown
+                viewAllHref="/talent/dashboard"
                 variant="outline"
                 size="sm"
                 className="border-gray-700 text-white hover:bg-gray-800"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
+                showLabel
+              />
               <Button
                 variant="outline"
                 size="sm"
@@ -1616,51 +1687,62 @@ function TalentDashboardContent({
                 <CardDescription>Your confirmed and upcoming opportunities</CardDescription>
               </CardHeader>
               <CardContent>
-                <>
-                  <div className="md:hidden space-y-3">
-                    {applications
-                      .filter((app) => app.status === "accepted")
-                      .map((app) => (
+                {bookingsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/70" />
+                  </div>
+                ) : bookings.length === 0 ? (
+                  <EmptyState
+                    icon={Calendar}
+                    title="No bookings yet"
+                    description="When you get accepted for an opportunity, it will appear here with the date, time, and details."
+                  />
+                ) : (
+                  <>
+                    <div className="md:hidden space-y-3">
+                      {bookings.map((booking) => (
                         <div
-                          key={`${app.id}-bookings-mobile`}
+                          key={`${booking.id}-bookings-mobile`}
                           className="elev-1 rounded-xl border border-white/10 p-3"
                         >
                           <div className="flex items-start gap-3">
                             <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
                               <SafeImage
-                                src={app.gigs?.image_url}
-                                alt={app.gigs?.title || "Unknown Opportunity"}
+                                src={booking.gigs?.image_url}
+                                alt={booking.gigs?.title || "Unknown Opportunity"}
                                 fallbackSrc="/images/totl-logo-transparent.png"
                                 fill
                                 className="object-cover"
-                                placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                                placeholderQuery={booking.gigs?.category?.toLowerCase() || "general"}
                               />
                             </div>
                             <div className="flex-1 min-w-0 space-y-1">
                               <p className="text-sm font-semibold text-white truncate">
-                                {app.gigs?.title}
+                                {booking.gigs?.title}
                               </p>
                               <p className="text-xs text-gray-300">
-                                {app.gigs?.client_profiles?.company_name || "Private Client"}
+                                {booking.gigs?.client_profiles?.company_name || "Private Client"}
                               </p>
                               <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-3 w-3" />
-                                  <SafeDate date={app.created_at} />
+                                  <SafeDate date={booking.date} format="datetime" />
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <DollarSign className="h-3 w-3" />
-                                  {app.gigs?.compensation || "TBD"}
+                                  {booking.compensation != null
+                                    ? `$${Number(booking.compensation).toLocaleString()}`
+                                    : booking.gigs?.compensation || "TBD"}
                                 </span>
                               </div>
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <ApplicationStatusBadge status={app.status} showIcon={false} />
+                              <ApplicationStatusBadge status="accepted" showIcon={false} />
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="text-gray-400 hover:bg-gray-700"
-                                onClick={() => handleViewDetails(app)}
+                                onClick={() => handleViewBookingDetails(booking)}
                               >
                                 <ChevronRight className="h-4 w-4" />
                               </Button>
@@ -1671,58 +1753,60 @@ function TalentDashboardContent({
                             <button
                               type="button"
                               className="text-[var(--oklch-text-primary)] hover:underline"
-                              onClick={() => handleViewDetails(app)}
+                              onClick={() => handleViewBookingDetails(booking)}
                             >
                               View details
                             </button>
                           </div>
                         </div>
                       ))}
-                  </div>
-                  <div className="hidden md:block space-y-4">
-                    {applications
-                      .filter((app) => app.status === "accepted")
-                      .map((app) => (
+                    </div>
+                    <div className="hidden md:block space-y-4">
+                      {bookings.map((booking) => (
                         <div
-                          key={app.id}
+                          key={booking.id}
                           className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
                         >
                           <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
-                              src={app.gigs?.image_url}
-                              alt={app.gigs?.title || "Unknown Opportunity"}
+                              src={booking.gigs?.image_url}
+                              alt={booking.gigs?.title || "Unknown Opportunity"}
                               fallbackSrc="/images/totl-logo-transparent.png"
                               fill
                               className="object-cover"
-                              placeholderQuery={app.gigs?.category?.toLowerCase() || "general"}
+                              placeholderQuery={booking.gigs?.category?.toLowerCase() || "general"}
                             />
                           </div>
                           <div className="flex-grow space-y-2">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                               <h4 className="font-semibold text-lg text-white">
-                                {app.gigs?.title}
+                                {booking.gigs?.title}
                               </h4>
-                              <ApplicationStatusBadge status={app.status} showIcon={true} />
+                              <ApplicationStatusBadge status="accepted" showIcon={true} />
                             </div>
                             <p className="text-gray-300 font-medium">
-                              {app.gigs?.client_profiles?.company_name || "Private Client"}
+                              {booking.gigs?.client_profiles?.company_name || "Private Client"}
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
-                                <SafeDate date={app.created_at} />
+                                <SafeDate date={booking.date} format="datetime" />
                               </div>
                               <div className="flex items-center gap-1">
                                 <Clock className="h-4 w-4" />
-                                {app.gigs?.compensation || "TBD"}
+                                {booking.compensation != null
+                                  ? `$${Number(booking.compensation).toLocaleString()}`
+                                  : booking.gigs?.compensation || "TBD"}
                               </div>
                               <div className="flex items-center gap-1">
                                 <MapPin className="h-4 w-4" />
-                                {app.gigs?.location}
+                                {booking.gigs?.location}
                               </div>
                               <div className="flex items-center gap-1">
                                 <DollarSign className="h-4 w-4" />
-                                {app.gigs?.compensation || "TBD"}
+                                {booking.compensation != null
+                                  ? `$${Number(booking.compensation).toLocaleString()}`
+                                  : booking.gigs?.compensation || "TBD"}
                               </div>
                             </div>
                           </div>
@@ -1731,7 +1815,7 @@ function TalentDashboardContent({
                               variant="outline"
                               size="sm"
                               className="flex-1 md:flex-none bg-transparent"
-                              onClick={() => handleViewDetails(app)}
+                              onClick={() => handleViewBookingDetails(booking)}
                             >
                               View Details
                             </Button>
@@ -1741,8 +1825,9 @@ function TalentDashboardContent({
                           </div>
                         </div>
                       ))}
-                  </div>
-                </>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1890,6 +1975,15 @@ function TalentDashboardContent({
         application={selectedTalentApplication}
         isOpen={isModalOpen}
         onClose={closeModal}
+        booking={
+          selectedBooking
+            ? {
+                date: selectedBooking.date,
+                compensation: selectedBooking.compensation,
+                notes: selectedBooking.notes,
+              }
+            : null
+        }
       />
     </PageShell>
   );

@@ -144,7 +144,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen">
-      <AdminHeader user={user} notificationCount={stats.byStatus.open} />
+      <AdminHeader user={user} />
       <div className="container mx-auto px-4 py-4 sm:py-6">
         {notice && (
           <Card className="mb-6 border-amber-500/40 bg-amber-500/10">
