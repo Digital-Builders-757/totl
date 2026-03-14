@@ -48,6 +48,9 @@ npm run build
   - **Root Cause:** Migration `20260313120000_add_user_notifications.sql` not applied yet
   - **Fix:** Run `supabase db push` (or `supabase db reset` for local) to apply the migration
   - **Prevention:** Apply migration before deploying notification feature code
+- **Portfolio images not loading (404 or broken):** `portfolio_items.image_url` stores the **storage path** (e.g. `user-id/portfolio-123.jpg`), not the full URL.
+  - **Fix:** Use `publicBucketUrl("portfolio", item.image_url)` when building image URLs for display. Applied in Settings page, portfolio-actions, admin talent dashboard.
+  - **Prevention:** All portfolio display paths must convert storage path to full URL via `publicBucketUrl`.
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **MVP tracker date is stale despite new updates:** `MVP_STATUS_NOTION.md` footer still shows an old "Last Updated" date

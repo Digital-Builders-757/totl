@@ -8,6 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Portfolio image fix + 50MB upload limit (March 14, 2026)**
+
+**PORTFOLIO / SETTINGS** - March 14, 2026
+- ✅ **Portfolio images not loading:** `portfolio_items.image_url` stores storage path, not full URL. Now use `publicBucketUrl("portfolio", path)` in Settings, portfolio-actions, admin talent dashboard.
+- ✅ **Upload limit 10MB → 50MB:** Portfolio images; serverActions bodySizeLimit 4mb → 55mb.
+- ✅ **Upload error logging:** Better diagnostics for permission/policy failures.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for portfolio image 404.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Talent dashboard v1 simplification — 3 KPI cards (March 14, 2026)**
 
 **UI / TALENT DASHBOARD** - March 14, 2026

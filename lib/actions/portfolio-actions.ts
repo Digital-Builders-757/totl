@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
+import { publicBucketUrl } from "@/lib/utils/storage-urls";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"];
@@ -42,7 +43,7 @@ export async function uploadPortfolioImage(formData: FormData) {
       return { error: "Invalid file type. Please use JPEG, PNG, GIF, or WebP" };
     }
 
-    const maxSize = 10 * 1024 * 1024; // 10MB for portfolio images
+    const maxSize = 50 * 1024 * 1024; // 50MB for portfolio images
     if (file.size > maxSize) {
       return { error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB` };
     }
@@ -67,7 +68,16 @@ export async function uploadPortfolioImage(formData: FormData) {
     });
 
     if (uploadError) {
-      logger.error("Portfolio upload error", uploadError);
+      logger.error("Portfolio upload error", uploadError, {
+        path,
+        bucket: "portfolio",
+        message: uploadError.message,
+        name: (uploadError as { name?: string }).name,
+      });
+      const msg = uploadError.message || "Unknown error";
+      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("policy")) {
+        return { error: "Permission denied. Check storage policies for the portfolio bucket." };
+      }
       return { error: "Failed to upload image. Please try again." };
     }
 
@@ -305,10 +315,10 @@ export async function getPortfolioItems(talentId: string): Promise<{
       return { items: [], error: "Failed to load portfolio items" };
     }
 
-    // Add imageUrl field to items (image_url already contains the correct URL)
+    // image_url stores storage path; convert to full public URL
     const itemsWithUrls = (items || []).map((item: PortfolioItem) => ({
       ...item,
-      imageUrl: item.image_url || undefined,
+      imageUrl: publicBucketUrl("portfolio", item.image_url) ?? item.image_url ?? undefined,
     }));
 
     return { items: itemsWithUrls };
