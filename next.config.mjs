@@ -45,7 +45,8 @@ const nextConfig = {
     serverActions: {
       // CRITICAL: Must be >= max file size + form data overhead
       // If uploads fail before logs appear, this limit is likely the cause
-      bodySizeLimit: '4mb',
+      // Portfolio images: 50MB; gig images: 4MB; avatar: 5MB
+      bodySizeLimit: '55mb',
     },
   },
   

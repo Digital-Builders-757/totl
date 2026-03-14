@@ -6,6 +6,7 @@ import { PageShell } from "@/components/layout/page-shell";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { publicBucketUrl } from "@/lib/utils/storage-urls";
 import {
   type ProfileRow,
   type TalentProfileRow,
@@ -89,10 +90,10 @@ export default async function SettingsPage() {
     avatarSrc = signed?.signedUrl ?? null;
   }
 
-  // Portfolio items already have image_url from the database
+  // Portfolio image_url stores the storage path; convert to full public URL
   const portfolioItemsWithUrls = (portfolioItems || []).map((item: Database["public"]["Tables"]["portfolio_items"]["Row"]) => ({
     ...item,
-    imageUrl: item.image_url || undefined,
+    imageUrl: publicBucketUrl("portfolio", item.image_url) ?? item.image_url ?? undefined,
   }));
 
   return (

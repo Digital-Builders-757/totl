@@ -40,12 +40,12 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
       return;
     }
 
-    // Validate file size (10MB)
-    const maxSize = 10 * 1024 * 1024;
+    // Validate file size (50MB)
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 10MB",
+        description: "Maximum file size is 50MB",
         variant: "destructive",
       });
       return;
@@ -234,7 +234,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
                     {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
                   </p>
                   <p className="text-sm text-zinc-400 mt-1">
-                    JPEG, PNG, GIF, or WebP (max 10MB)
+                    JPEG, PNG, GIF, or WebP (max 50MB)
                   </p>
                 </div>
               </div>

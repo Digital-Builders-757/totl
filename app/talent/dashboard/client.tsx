@@ -5,7 +5,6 @@ import {
   MapPin,
   DollarSign,
   Users,
-  Star,
   Briefcase,
   BarChart3,
   AlertCircle,
@@ -19,7 +18,6 @@ import {
   Search,
   Phone,
   Calendar,
-  TrendingUp,
   Target,
   Award,
   Globe,
@@ -977,128 +975,80 @@ function TalentDashboardContent({
           />
         </div>
 
-        <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Eye className="h-4 w-4 text-blue-400" />
-                  <span>Profile Views</span>
+        <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+            <CardContent className="flex flex-1 flex-col p-4">
+              <div className="flex-1 space-y-3">
+                <div className="card-header-row">
+                  <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
+                    <Users className="h-4 w-4 text-green-400" />
+                    <span>Total Applications</span>
+                  </div>
+                  <Badge variant="outline" className="status-chip">
+                    All time
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="status-chip">
-                  Total
-                </Badge>
+                <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
               </div>
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="card-footer-row">
+              <div className="card-footer-row mt-auto min-h-[2.5rem]">
                 <span>Next action</span>
-                <Link href="/talent/profile" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Improve profile
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Users className="h-4 w-4 text-green-400" />
-                  <span>Total Applications</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  All time
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                <Link
+                  href="/gigs"
+                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
+                >
                   Apply to more opportunities
                 </Link>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Calendar className="h-4 w-4 text-purple-400" />
-                  <span>Accepted</span>
+          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+            <CardContent className="flex flex-1 flex-col p-4">
+              <div className="flex-1 space-y-3">
+                <div className="card-header-row">
+                  <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
+                    <Calendar className="h-4 w-4 text-purple-400" />
+                    <span>Accepted</span>
+                  </div>
+                  <Badge variant="outline" className="status-chip">
+                    Active
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="status-chip">
-                  Active
-                </Badge>
+                <div className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</div>
               </div>
-              <div className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</div>
-              <div className="card-footer-row">
+              <div className="card-footer-row mt-auto min-h-[2.5rem]">
                 <span>Next action</span>
-                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                <Link
+                  href="/gigs"
+                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
+                >
                   Find new bookings
                 </Link>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <DollarSign className="h-4 w-4 text-yellow-400" />
-                  <span>Earnings</span>
+          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+            <CardContent className="flex flex-1 flex-col p-4">
+              <div className="flex-1 space-y-3">
+                <div className="card-header-row">
+                  <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
+                    <DollarSign className="h-4 w-4 text-yellow-400" />
+                    <span>Earnings</span>
+                  </div>
+                  <Badge variant="outline" className="status-chip">
+                    To date
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="status-chip">
-                  To date
-                </Badge>
+                <div className="text-2xl font-bold text-white">$0</div>
               </div>
-              <div className="text-2xl font-bold text-white">$0</div>
-              <div className="card-footer-row">
+              <div className="card-footer-row mt-auto min-h-[2.5rem]">
                 <span>Next action</span>
-                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
+                <Link
+                  href="/gigs"
+                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
+                >
                   Browse opportunities
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <Star className="h-4 w-4 text-orange-400" />
-                  <span>Rating</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Latest
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">0</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/settings" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Update profile
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
-              <div className="card-header-row">
-                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
-                  <TrendingUp className="h-4 w-4 text-teal-400" />
-                  <span>Success Rate</span>
-                </div>
-                <Badge variant="outline" className="status-chip">
-                  Rolling
-                </Badge>
-              </div>
-              <div className="text-2xl font-bold text-white">0%</div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/gigs" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Apply to more opportunities
                 </Link>
               </div>
             </CardContent>

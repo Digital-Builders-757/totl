@@ -119,6 +119,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - added Stripe errors, Jan 2026 - added Bugbot fixes)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
+- `features/TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md` - **✅ NEW** - v1 simplification: 3 KPI cards (Applications, Accepted, Earnings), footer alignment (March 2026)
 - `SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` - **✅ NEW** - Supabase API key diagnostics and environment variable detection implementation (Jan 2025)
 - `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)
 - `SUPABASE_API_KEY_FIX_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for Supabase API key diagnostics (Jan 2025)

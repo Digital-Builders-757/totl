@@ -30,6 +30,7 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import { createNameSlug } from "@/lib/utils/slug";
+import { publicBucketUrl } from "@/lib/utils/storage-urls";
 import {
   type TalentProfileRow,
   type ProfileRow,
@@ -192,7 +193,7 @@ export default async function TalentDashboard() {
 
   const portfolioHighlights =
     portfolioData?.map((item) => ({
-      image: item.image_url || "/placeholder.jpg",
+      image: publicBucketUrl("portfolio", item.image_url) || "/placeholder.jpg",
       caption: item.caption,
     })) || [];
 

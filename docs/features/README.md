@@ -11,6 +11,10 @@
 - `STATUS_BADGE_SYSTEM.md` - badge language and variants
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - client account flow product definition
 
+## Plans / In Progress
+
+- `TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md` - **NEW** - Reduce 6 KPI cards to 3 for v1 (Accepted, Earnings, Total Applications); fix "Next action" alignment
+
 ## Major Feature Areas
 
 - `BOOKING_FLOW_IMPLEMENTATION.md`

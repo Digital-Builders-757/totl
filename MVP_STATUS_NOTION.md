@@ -8,6 +8,28 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Portfolio image fix + 50MB upload limit (March 14, 2026)**
+
+**PORTFOLIO / SETTINGS** - March 14, 2026
+- ✅ **Portfolio images not loading:** `portfolio_items.image_url` stores storage path, not full URL. Now use `publicBucketUrl("portfolio", path)` in Settings, portfolio-actions, admin talent dashboard.
+- ✅ **Upload limit 10MB → 50MB:** Portfolio images; serverActions bodySizeLimit 4mb → 55mb.
+- ✅ **Upload error logging:** Better diagnostics for permission/policy failures.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for portfolio image 404.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+## 🚀 **Latest: Talent dashboard v1 simplification — 3 KPI cards (March 14, 2026)**
+
+**UI / TALENT DASHBOARD** - March 14, 2026
+- ✅ **Reduced 6 KPI cards to 3:** Profile Views, Rating, Success Rate removed for v1. Kept: Total Applications, Accepted, Earnings. Reduces cognitive load; focuses on actions + outcomes (companion energy).
+- ✅ **Grid:** `md:grid-cols-2 lg:grid-cols-3` (no xl:grid-cols-6).
+- ✅ **Footer alignment:** Card uses `flex h-full flex-col`; body `flex-1`; footer `mt-auto min-h-[2.5rem]`. Links use `text-sm leading-tight`. No globals.css changes.
+- ✅ **Docs:** TOTL_AGENCY_USER_GUIDE.md updated; TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md added.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint, talent-dashboard-route tests — all green.
+
+**Next (P1):** Primary CTA — one big "Browse gigs" / "Find gigs near me" button near top (see plan doc).
+
 ## 🚀 **Latest: UX polish — loading dark theme, Career Builder in settings, KPI alignment (March 14, 2026)**
 
 **UI / UX** - March 14, 2026

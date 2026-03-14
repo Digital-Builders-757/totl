@@ -85,13 +85,12 @@ As a **Talent user**, the platform helps you:
 
 **What You'll See:**
 
-**Top Stats Cards:**
-- 📊 **Profile Views**: How many times your profile was viewed
+**Top Stats Cards (v1):**
 - 📝 **Applications**: Total applications submitted
-- 📅 **Bookings**: Confirmed gigs
+- 📅 **Accepted**: Confirmed gigs
 - 💰 **Earnings**: Total compensation from completed gigs
-- ⭐ **Rating**: Your average Career Builder rating
-- 📈 **Success Rate**: Application acceptance rate
+
+More stats (profile views, rating, success rate) will appear later in Insights.
 
 **Main Tabs:**
 
