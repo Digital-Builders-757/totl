@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Fix TOTLMODELAGENCY-3B portfolio bucket not found (March 14, 2026)**
+
+**STORAGE / SENTRY** - March 14, 2026
+- ✅ **StorageApiError: Bucket not found (3B):** Portfolio upload on POST /settings failed in production — `portfolio` bucket missing.
+- ✅ **Migration:** `20260314031246_ensure_portfolio_bucket_exists.sql` — idempotent creation of portfolio bucket + policies. Run `supabase db push` to fix production.
+- ✅ **Error handling:** portfolio-actions returns user-friendly message when bucket not found.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for 3B.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint, supabase db reset — all green.
+
+**Next:** Deploy and run `supabase db push` on production to apply migration.
+
 ## 🚀 **Latest: Opportunity card alignment + a11y (March 14, 2026)**
 
 **UI / TALENT DASHBOARD** - March 14, 2026

@@ -51,6 +51,10 @@ npm run build
 - **Portfolio images not loading (404 or broken):** `portfolio_items.image_url` stores the **storage path** (e.g. `user-id/portfolio-123.jpg`), not the full URL.
   - **Fix:** Use `publicBucketUrl("portfolio", item.image_url)` when building image URLs for display. Applied in Settings page, portfolio-actions, admin talent dashboard.
   - **Prevention:** All portfolio display paths must convert storage path to full URL via `publicBucketUrl`.
+- **StorageApiError: Bucket not found (TOTLMODELAGENCY-3B):** Portfolio upload on POST /settings fails with "Bucket not found".
+  - **Root Cause:** The `portfolio` storage bucket does not exist in the production Supabase project (migration not applied or project set up before portfolio migration).
+  - **Fix:** Run `supabase db push` to apply migration `20260314031246_ensure_portfolio_bucket_exists.sql` which creates the portfolio bucket and policies idempotently.
+  - **Prevention:** Ensure all storage bucket migrations are applied to production before deploying portfolio upload features.
 - **Import Order Errors:** `import/order` warnings in linting
   - **Fix:** Run `npm run lint -- --fix` or manually reorder imports
 - **MVP tracker date is stale despite new updates:** `MVP_STATUS_NOTION.md` footer still shows an old "Last Updated" date
