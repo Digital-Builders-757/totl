@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -58,16 +59,21 @@ export function NotificationDropdown({
   const handleMarkAllRead = async () => {
     if (notificationCount === 0 || isMarkingAll) return;
     setIsMarkingAll(true);
-    const result = await markAllNotificationsRead();
-    setIsMarkingAll(false);
-    if (!result.error) {
-      router.refresh();
+    try {
+      const result = await markAllNotificationsRead();
+      if (!result?.error) router.refresh();
+    } catch {
+      // Best-effort; do not block UI
+    } finally {
+      setIsMarkingAll(false);
     }
   };
 
-  const handleItemClick = async (n: NotificationItem) => {
+  const handleItemClick = (n: NotificationItem) => {
     if (!n.read_at) {
-      await markNotificationRead(n.id);
+      void markNotificationRead(n.id).catch(() => {
+        // Best-effort; do not block navigation
+      });
     }
     router.push(viewAllHref);
   };
@@ -101,29 +107,23 @@ export function NotificationDropdown({
         ) : (
           <div className="py-1">
             {notifications.map((n: NotificationItem) => (
-              <div
-                key={n.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleItemClick(n)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleItemClick(n);
-                  }
-                }}
-                className={`px-3 py-2.5 text-sm hover:bg-accent cursor-pointer transition-colors ${
-                  !n.read_at ? "bg-accent/50" : ""
-                }`}
-              >
-                <p className="font-medium truncate">{n.title}</p>
-                {n.body ? (
-                  <p className="text-muted-foreground truncate mt-0.5">{n.body}</p>
-                ) : null}
-                <p className="text-xs text-muted-foreground mt-1">
-                  {formatNotificationTime(n.created_at)}
-                </p>
-              </div>
+              <DropdownMenuItem key={n.id} asChild>
+                <button
+                  type="button"
+                  className={`w-full text-left rounded-md px-3 py-2.5 text-sm hover:bg-accent cursor-pointer transition-colors ${
+                    !n.read_at ? "bg-accent/50" : ""
+                  }`}
+                  onClick={() => handleItemClick(n)}
+                >
+                  <p className="font-medium truncate">{n.title}</p>
+                  {n.body ? (
+                    <p className="text-muted-foreground truncate mt-0.5">{n.body}</p>
+                  ) : null}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatNotificationTime(n.created_at)}
+                  </p>
+                </button>
+              </DropdownMenuItem>
             ))}
           </div>
         )}

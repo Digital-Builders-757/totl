@@ -1,5 +1,6 @@
 "use client";
 
+import imageCompression from "browser-image-compression";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, type ChangeEvent, type DragEvent } from "react";
@@ -10,6 +11,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
+
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 5,
+  maxWidthOrHeight: 1920,
+  initialQuality: 0.8,
+  useWebWorker: true,
+  // No fileType = preserve original format (PNG keeps transparency)
+};
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 interface PortfolioUploadProps {
   onUploadSuccess?: () => void;
@@ -22,6 +39,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
   const [description, setDescription] = useState("");
   const [caption, setCaption] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -29,23 +47,21 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
   const handleFileSelect = (file: File | null) => {
     if (!file) return;
 
-    // Validate file type
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
+    // Validate file type (jpeg/png/webp; gif dropped for v1)
+    if (!ALLOWED_TYPES.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please select a JPEG, PNG, GIF, or WebP image",
+        description: "Please select a JPEG, PNG, or WebP image",
         variant: "destructive",
       });
       return;
     }
 
-    // Validate file size (50MB)
-    const maxSize = 50 * 1024 * 1024;
-    if (file.size > maxSize) {
+    // Validate file size (10MB; client compresses before upload)
+    if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50MB",
+        description: "Maximum file size is 10MB. Images are compressed before upload.",
         variant: "destructive",
       });
       return;
@@ -115,8 +131,14 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
     setIsUploading(true);
 
     try {
+      // Compress before upload: resize longest edge 1920px, quality 0.8, target ~1-5MB
+      // Preserves PNG transparency (no fileType = keep original format)
+      setIsCompressing(true);
+      const compressedFile = await imageCompression(selectedFile, COMPRESSION_OPTIONS);
+      setIsCompressing(false);
+
       const formData = new FormData();
-      formData.append("portfolio_image", selectedFile);
+      formData.append("portfolio_image", compressedFile);
       formData.append("title", title.trim());
       if (description.trim()) formData.append("description", description.trim());
       if (caption.trim()) formData.append("caption", caption.trim());
@@ -132,9 +154,13 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
         return;
       }
 
+      const sizeInfo =
+        compressedFile.size < selectedFile.size
+          ? ` (${formatFileSize(selectedFile.size)} → ${formatFileSize(compressedFile.size)})`
+          : "";
       toast({
         title: "Success!",
-        description: result.message || "Portfolio image uploaded successfully",
+        description: `${result.message || "Portfolio image uploaded successfully"}${sizeInfo}`,
       });
 
       // Reset form
@@ -157,6 +183,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
         variant: "destructive",
       });
     } finally {
+      setIsCompressing(false);
       setIsUploading(false);
     }
   };
@@ -190,10 +217,10 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept="image/jpeg,image/png,image/webp"
               onChange={handleFileInputChange}
               className="hidden"
-              disabled={isUploading}
+              disabled={isUploading || isCompressing}
             />
 
             {previewUrl ? (
@@ -234,7 +261,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
                     {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
                   </p>
                   <p className="text-sm text-zinc-400 mt-1">
-                    JPEG, PNG, GIF, or WebP (max 50MB)
+                    JPEG, PNG, or WebP (max 10MB, compressed before upload)
                   </p>
                 </div>
               </div>
@@ -253,7 +280,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g., Editorial Shoot - Vogue"
             required
-            disabled={isUploading}
+            disabled={isUploading || isCompressing}
             className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
           />
         </div>
@@ -268,7 +295,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
             placeholder="Short caption for the image"
-            disabled={isUploading}
+            disabled={isUploading || isCompressing}
             className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
           />
           <p className="text-sm text-zinc-400 mt-1">
@@ -287,7 +314,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Additional details about this portfolio item..."
             rows={3}
-            disabled={isUploading}
+            disabled={isUploading || isCompressing}
             className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
           />
           <p className="text-sm text-zinc-400 mt-1">
@@ -301,10 +328,15 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
           disabled={!selectedFile || !title.trim() || isUploading}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
         >
-          {isUploading ? (
+          {isCompressing ? (
             <>
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Uploading...
+              Optimizing image…
+            </>
+          ) : isUploading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Uploading…
             </>
           ) : (
             <>

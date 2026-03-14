@@ -10,7 +10,9 @@ import type { Database } from "@/types/supabase";
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"];
 
 /**
- * Upload a portfolio image to Supabase Storage and create a portfolio item
+ * Upload a portfolio image to Supabase Storage and create a portfolio item.
+ * TODO: Migrate to direct-to-Supabase signed uploads (client uploads to storage,
+ * server only inserts metadata) to eliminate large body payloads through Server Actions.
  */
 export async function uploadPortfolioImage(formData: FormData) {
   try {
@@ -37,15 +39,15 @@ export async function uploadPortfolioImage(formData: FormData) {
       return { error: "Title is required" };
     }
 
-    // Enhanced file validation
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    // Enhanced file validation (jpeg/png/webp; gif dropped for v1)
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      return { error: "Invalid file type. Please use JPEG, PNG, GIF, or WebP" };
+      return { error: "Invalid file type. Please use JPEG, PNG, or WebP" };
     }
 
-    const maxSize = 50 * 1024 * 1024; // 50MB for portfolio images
+    const maxSize = 10 * 1024 * 1024; // 10MB; client compresses before upload
     if (file.size > maxSize) {
-      return { error: `File too large. Maximum size is ${maxSize / (1024 * 1024)}MB` };
+      return { error: "File too large. Maximum size is 10MB." };
     }
 
     // Generate optimized path following user-specific folder pattern

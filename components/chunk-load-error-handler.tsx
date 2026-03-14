@@ -4,6 +4,20 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { logger } from "@/lib/utils/logger";
 
+const RELOAD_KEY = "stale_chunk_reload_ts";
+
+function canReloadOncePerMinute(): boolean {
+  try {
+    const last = Number(sessionStorage.getItem(RELOAD_KEY) || "0");
+    const now = Date.now();
+    if (now - last < 60_000) return false;
+    sessionStorage.setItem(RELOAD_KEY, String(now));
+    return true;
+  } catch {
+    return true; // fail open
+  }
+}
+
 /**
  * Handles chunk loading errors gracefully by retrying failed chunks
  * This is a common issue in Next.js development when hot reload fails
@@ -17,11 +31,11 @@ export function ChunkLoadErrorHandler() {
       const msg = error?.message ?? "";
 
       // Stale webpack chunk (e.g. after deployment while user has old JS cached).
-      // Next.js issue: f[e].call() where f[e] is undefined → "reading 'call'".
-      // Full reload fetches fresh chunks; router.refresh is insufficient.
-      const isStaleWebpackChunk =
-        msg.includes("Cannot read properties of undefined (reading 'call')") ||
-        msg.includes("reading 'call'");
+      // Next.js issue: f[e].call() where f[e] is undefined. Use exact message only;
+      // do not match generic "reading 'call'" which can mask unrelated bugs.
+      const isStaleWebpackChunk = msg.includes(
+        "Cannot read properties of undefined (reading 'call')"
+      );
 
       // Standard chunk loading errors
       const isChunkLoadError =
@@ -51,8 +65,11 @@ export function ChunkLoadErrorHandler() {
           if (document.visibilityState === "visible") {
             if (isStaleWebpackChunk) {
               // Stale chunks require full reload to fetch new JS
-              logger.info("[ChunkLoadErrorHandler] Full reload to recover from stale webpack chunks.");
-              window.location.reload();
+              // Guard: max 1 reload per 60s to prevent infinite reload loops
+              if (canReloadOncePerMinute()) {
+                logger.info("[ChunkLoadErrorHandler] Full reload to recover from stale webpack chunks.");
+                window.location.reload();
+              }
             } else {
               logger.info("[ChunkLoadErrorHandler] Refreshing route to recover from chunk error.");
               router.refresh();

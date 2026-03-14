@@ -331,6 +331,10 @@ npm run build
 - **Server Action 400 on File Upload:** Upload request fails before action runs (Network shows 400, no server logs)
   - **Root Cause:** Server Actions body limit defaults to 1MB
   - **Fix:** Set `experimental.serverActions.bodySizeLimit` in `next.config.mjs` (e.g., `4mb`), align client/server validation caps, and redeploy
+- **ChunkLoadErrorHandler infinite reload loop:** App reloads repeatedly, user locked out
+  - **Root Cause:** Broad error matcher (e.g. `msg.includes("reading 'call')`) matched unrelated bugs; no reload guard allowed repeated reload attempts
+  - **Fix:** ChunkLoadErrorHandler now uses exact matcher `"Cannot read properties of undefined (reading 'call')"` only; sessionStorage guard allows max 1 reload per 60s
+  - **Prevention:** Do not widen chunk error matchers; keep reload guard in place
 
 ## **6. REGRESSION GUARDS (AUDIT FINISH LINE)**
 - **Guard failure: `select('*')` reintroduced**
