@@ -8,6 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Opportunity card alignment + a11y (March 14, 2026)**
+
+**UI / TALENT DASHBOARD** - March 14, 2026
+- ✅ **Apply Now button alignment:** Available Opportunities cards now use flex layout (`flex flex-col h-full`, `mt-auto` on button row) so Apply Now + eye buttons align at bottom regardless of description length.
+- ✅ **Description clamp:** `line-clamp-2` on description for consistent card heights; title already `line-clamp-1`.
+- ✅ **Accessibility:** Eye icon link has `aria-label="View details for {title}"` for screen readers.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Next (P1):** Primary CTA — one big "Browse gigs" / "Find gigs near me" button near top (see plan doc).
+
 ## 🚀 **Latest: Portfolio image fix + 50MB upload limit (March 14, 2026)**
 
 **PORTFOLIO / SETTINGS** - March 14, 2026
