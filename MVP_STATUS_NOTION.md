@@ -8,6 +8,15 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: UX polish — loading dark theme, Career Builder in settings, KPI alignment (March 14, 2026)**
+
+**UI / UX** - March 14, 2026
+- ✅ **Loading states dark theme:** Replaced white/light-gray loading backgrounds with `bg-black page-ambient` across talent dashboard, client gigs, settings, auth callback, talent signup, dashboard, about, update-password, reset-password, verification-pending. Skeletons use `bg-white/10` for consistent dark immersion.
+- ✅ **Career Builder CTA in settings only:** Removed "Apply to be a Career Builder" button from talent dashboard header; Career Builder application remains in Settings → Account (CareerBuilderSection).
+- ✅ **KPI card footer alignment:** `.card-footer-row` now uses `flex-direction: column` so "Next action" and action link stack consistently on all cards (fixes wrap inconsistency for longer text like "Apply to more opportunities").
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Gig detail sidebar overlay fix (March 14, 2026)**
 
 **UI / GIGS** - March 14, 2026
@@ -4640,6 +4649,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 14, 2026*
-*Current Status: MVP Complete - Gig sidebar overlay fix; duplicate signup UX; notifications shipped*
+*Current Status: MVP Complete - Loading dark theme; Career Builder in settings; KPI alignment; gig sidebar fix*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*
