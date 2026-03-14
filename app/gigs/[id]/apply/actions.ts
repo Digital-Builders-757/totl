@@ -189,14 +189,22 @@ export async function applyToGig({ gigId, message }: ApplyToGigParams) {
     });
   }
 
-  // In-app notification for client (runs regardless of email success)
-  await insertNotification({
-    recipientId: gig.client_id,
-    type: "new_application",
-    referenceId: application.id,
-    title: "New application",
-    body: `Someone applied to "${gig.title}"`,
-  });
+  // In-app notification for client (best-effort; never block success)
+  try {
+    await insertNotification({
+      recipientId: gig.client_id,
+      type: "new_application",
+      referenceId: application.id,
+      title: "New application",
+      body: `Someone applied to "${gig.title}"`,
+    });
+  } catch (err) {
+    logger.error("Failed to insert in-app notification", err, {
+      feature: "in-app-notifications",
+      notification_type: "new_application",
+      reference_id: application.id,
+    });
+  }
 
   // Revalidate relevant paths
   revalidatePath("/gigs");

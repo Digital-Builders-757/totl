@@ -60,6 +60,14 @@
 
 ---
 
+## Future: Direct-to-Storage Uploads (recommended)
+- **Current:** Client → Server Action (parses full body) → Supabase Storage
+- **Target:** Client → signed upload URL → Supabase Storage (direct); Server Action → insert metadata only
+- **Benefit:** Eliminates need for large `bodySizeLimit`; faster uploads; reduced DoS surface
+- **See:** `next.config.mjs` and `lib/actions/portfolio-actions.ts` TODOs
+
+---
+
 ## Related docs (reference)
 - `docs/PORTFOLIO_GALLERY_IMPLEMENTATION.md`
 - `docs/PROFILE_IMAGE_UPLOAD_SETUP.md`

@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Security + UX hardening — portfolio, notifications, chunk handler (March 14, 2026)**
+
+**SECURITY / UX / NOTIFICATIONS** - March 14, 2026
+- ✅ **Portfolio upload hardening:** bodySizeLimit 55mb→15mb (restore global guardrail); client-side compression (browser-image-compression) max 10MB, resize 1920px, quality 0.8; drop GIF for v1; "Optimizing image…" / "Uploading…" states; before/after size in success toast. TODO: migrate to direct-to-Supabase signed uploads.
+- ✅ **Notification dropdown fixes:** Radix DropdownMenuItem asChild (closes reliably); try/finally for Mark all (no stuck disabled); best-effort mark-as-read (navigation always works).
+- ✅ **applyToGig:** insertNotification wrapped in try/catch — never block success on notification failure.
+- ✅ **ChunkLoadErrorHandler:** Narrowed stale-chunk matcher (exact "Cannot read properties of undefined (reading 'call')" only); sessionStorage reload guard (max 1 reload per 60s) to prevent infinite reload loops.
+- ✅ **Docs:** PORTFOLIO_UPLOADS_CONTRACT.md future direct-to-storage section; COMMON_ERRORS_QUICK_REFERENCE.md ChunkLoadErrorHandler entry.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
 ## 🚀 **Latest: Fix TOTLMODELAGENCY-3B portfolio bucket not found (March 14, 2026)**
 
 **STORAGE / SENTRY** - March 14, 2026
@@ -35,7 +48,7 @@
 
 **PORTFOLIO / SETTINGS** - March 14, 2026
 - ✅ **Portfolio images not loading:** `portfolio_items.image_url` stores storage path, not full URL. Now use `publicBucketUrl("portfolio", path)` in Settings, portfolio-actions, admin talent dashboard.
-- ✅ **Upload limit 10MB → 50MB:** Portfolio images; serverActions bodySizeLimit 4mb → 55mb.
+- ✅ **Upload limit:** Portfolio images now 10MB max with client compression; bodySizeLimit 15mb (see latest session for hardening).
 - ✅ **Upload error logging:** Better diagnostics for permission/policy failures.
 - ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for portfolio image 404.
 
@@ -4694,6 +4707,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 14, 2026*
-*Current Status: MVP Complete - Loading dark theme; Career Builder in settings; KPI alignment; gig sidebar fix*
+*Current Status: MVP Complete - Portfolio/notification/chunk hardening; bodySizeLimit 15mb; client compression*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*
+*Next Review: Direct-to-storage uploads; CRON_SECRET for booking reminders*

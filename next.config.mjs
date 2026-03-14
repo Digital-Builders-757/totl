@@ -44,9 +44,9 @@ const nextConfig = {
   experimental: {
     serverActions: {
       // CRITICAL: Must be >= max file size + form data overhead
-      // If uploads fail before logs appear, this limit is likely the cause
-      // Portfolio images: 50MB; gig images: 4MB; avatar: 5MB
-      bodySizeLimit: '55mb',
+      // Portfolio: 10MB (client compresses to ~1-5MB); gig: 4MB; avatar: 5MB
+      // TODO: Migrate to direct-to-Supabase signed uploads to eliminate large body payloads
+      bodySizeLimit: '15mb',
     },
   },
   
