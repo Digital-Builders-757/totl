@@ -14,40 +14,57 @@ export function ChunkLoadErrorHandler() {
   useEffect(() => {
     const handleChunkError = (event: ErrorEvent) => {
       const error = event.error;
-      
-      // Check if it's a chunk loading error
-      if (
-        error?.message?.includes("Loading chunk") ||
-        error?.message?.includes("Failed to fetch dynamically imported module") ||
-        error?.message?.includes("chunk load failed") ||
-        error?.name === "ChunkLoadError"
-      ) {
+      const msg = error?.message ?? "";
+
+      // Stale webpack chunk (e.g. after deployment while user has old JS cached).
+      // Next.js issue: f[e].call() where f[e] is undefined → "reading 'call'".
+      // Full reload fetches fresh chunks; router.refresh is insufficient.
+      const isStaleWebpackChunk =
+        msg.includes("Cannot read properties of undefined (reading 'call')") ||
+        msg.includes("reading 'call'");
+
+      // Standard chunk loading errors
+      const isChunkLoadError =
+        msg.includes("Loading chunk") ||
+        msg.includes("Failed to fetch dynamically imported module") ||
+        msg.includes("chunk load failed") ||
+        error?.name === "ChunkLoadError";
+
+      if (isStaleWebpackChunk || isChunkLoadError) {
         const isProduction = process.env.NODE_ENV === "production";
 
-        // Development chunk failures are usually HMR/cache turbulence on localhost.
-        // Keep the signal visible locally without promoting expected recovery attempts
-        // into Sentry warnings.
         if (isProduction) {
-          logger.warn("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
+          logger.warn(
+            "[ChunkLoadErrorHandler] Chunk/stale-asset error detected, attempting recovery.",
+            { isStaleWebpackChunk }
+          );
         } else {
-          logger.info("[ChunkLoadErrorHandler] Chunk loading error detected, attempting recovery.");
+          logger.info(
+            "[ChunkLoadErrorHandler] Chunk/stale-asset error detected, attempting recovery.",
+            { isStaleWebpackChunk }
+          );
         }
-        
-        // Try to refresh route data after a short delay.
-        // This keeps SPA navigation semantics instead of forcing a full document reload.
-        const retryDelay = 2000; // 2 seconds
-        
+
+        const retryDelay = isStaleWebpackChunk ? 500 : 2000;
+
         setTimeout(() => {
-          // Only refresh if we're still on the same page (user hasn't navigated away)
           if (document.visibilityState === "visible") {
-            logger.info("[ChunkLoadErrorHandler] Refreshing route to recover from chunk error.");
-            router.refresh();
+            if (isStaleWebpackChunk) {
+              // Stale chunks require full reload to fetch new JS
+              logger.info("[ChunkLoadErrorHandler] Full reload to recover from stale webpack chunks.");
+              window.location.reload();
+            } else {
+              logger.info("[ChunkLoadErrorHandler] Refreshing route to recover from chunk error.");
+              router.refresh();
+            }
           }
         }, retryDelay);
+
+        event.preventDefault();
+        event.stopPropagation();
       }
     };
 
-    // Listen for unhandled errors
     window.addEventListener("error", handleChunkError);
 
     return () => {

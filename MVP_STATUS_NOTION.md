@@ -28,8 +28,30 @@
 - ✅ **Cron locale:** booking-reminders uses explicit 'en-US' locale for date/time in emails.
 
 **Next (P1)**
-- [ ] Mark-as-read on dropdown item click (markNotificationRead server action).
+- [x] Mark-as-read on dropdown item click (markNotificationRead server action). — Done: NotificationDropdown item click calls markNotificationRead then navigates.
 - [ ] Add CRON_SECRET to Vercel env; confirm booking reminder cron runs in production.
+
+## 🚀 **Latest: Mark all as read in notification dropdown (March 13, 2026)**
+
+**NOTIFICATIONS** - March 13, 2026
+- ✅ **Mark all as read button:** NotificationDropdown shows "Mark all as read" when there are unread notifications. Calls `markAllNotificationsRead()` then `router.refresh()`; badge updates immediately.
+
+**Verification:** lint — green.
+
+## 🚀 **Latest: P1 mark-as-read on notification click (March 13, 2026)**
+
+**NOTIFICATIONS** - March 13, 2026
+- ✅ **Mark-as-read on dropdown item click:** NotificationDropdown item click calls `markNotificationRead(n.id)` then `router.push(viewAllHref)`. Unread items get marked before navigation; badge count updates on next page load.
+
+**Verification:** lint — green.
+
+## 🚀 **Latest: P0 login crash + P1 admin notification hygiene (March 13, 2026)**
+
+**RELIABILITY / NOTIFICATIONS** - March 13, 2026
+- ✅ **P0 /login crash (reading 'call'):** ChunkLoadErrorHandler now catches `Cannot read properties of undefined (reading 'call')` — known Next.js issue from stale webpack chunks after deployment. Triggers full page reload (500ms) to fetch fresh JS; prevents white-screen crash at launch.
+- ✅ **P1 Admin notification counts:** Removed hardcoded `notificationCount={0}` from `admin/applications/[id]` and `admin/gigs/create`; both now use AdminModerationCountProvider (real content_flags count) from layout.
+
+**Verification:** build, lint — green.
 
 ## 🚀 **Latest: Admin test helper fix for requireAdmin (March 12, 2026)**
 

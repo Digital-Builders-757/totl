@@ -37,7 +37,7 @@ export default async function CreateGigPage() {
 
   return (
     <>
-      <AdminHeader user={user} notificationCount={0} />
+      <AdminHeader user={user} />
       <CreateGigForm />
     </>
   );

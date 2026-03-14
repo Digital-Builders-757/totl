@@ -150,7 +150,7 @@ export default async function AdminApplicationDetailPage({
 
   return (
     <>
-      <AdminHeader user={user} notificationCount={0} />
+      <AdminHeader user={user} />
       <AdminApplicationDetailClient application={applicationWithDetails} user={user} />
     </>
   );
