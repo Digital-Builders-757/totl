@@ -94,6 +94,10 @@ npm run build
   - **Fix:** run `node scripts/ensure-ui-audit-users.mjs` immediately before rerun, then rerun capture; if process hangs, stop it and retry after validating login manually
   - **Fix:** Use `scripts/capture-admin-evidence.mjs` to unblock admin evidence while re-seeding non-admin accounts
   - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
+- **Gig detail right sidebar overlays main content:** On `/gigs/[id]`, the Apply/Quick Info sidebar overlaps Gig Details and Client Information when scrolling.
+  - **Root Cause:** Apply card used `sticky top-6`; sticky inside grid causes the sidebar to float over the main column.
+  - **Fix:** Remove `sticky top-6` from the Apply card; add `lg:self-start` to the sidebar wrapper for top alignment without overlay.
+  - **Prevention:** Avoid `position: sticky` in grid layouts unless parent has no `overflow: hidden/auto` and proper containment.
 - **Duplicate signup shows no browser feedback:** User tries to sign up with an existing email but sees nothing in the UI (error only in console).
   - **Root Cause:** Form checked only for "User already exists"; Supabase returns "User already registered" when confirmations are disabled. When confirmations are enabled, Supabase returns a fake user (empty `identities`) with no error.
   - **Fix:** Talent signup form now detects all duplicate-email variants and the fake-user case; shows toast + inline alert with "Sign in" link.

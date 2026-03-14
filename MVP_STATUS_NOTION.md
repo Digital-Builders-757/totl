@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig detail sidebar overlay fix (March 14, 2026)**
+
+**UI / GIGS** - March 14, 2026
+- ✅ **Right sidebar overlay:** Apply card on `/gigs/[id]` used `sticky top-6`, causing it to float over the main content (Gig Details, Client Information) when scrolling.
+- ✅ **Fix:** Removed sticky; added `lg:self-start` so sidebar aligns to top without overlay. Mobile layout unchanged (single column).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: Duplicate signup UX — browser notification (March 13, 2026)**
 
 **AUTH / SIGNUP UX** - March 13, 2026
@@ -4631,7 +4639,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 13, 2026*
-*Current Status: MVP Complete - Duplicate signup UX; notifications + booking UX shipped*
+*Last Updated: March 14, 2026*
+*Current Status: MVP Complete - Gig sidebar overlay fix; duplicate signup UX; notifications shipped*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*

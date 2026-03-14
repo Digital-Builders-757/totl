@@ -244,8 +244,8 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
         </div>
 
         {/* Sidebar - Application */}
-        <div className="space-y-6">
-          <Card className="sticky top-6">
+        <div className="space-y-6 lg:self-start">
+          <Card>
             <CardHeader>
               <CardTitle>Apply for this Opportunity</CardTitle>
               <CardDescription>
