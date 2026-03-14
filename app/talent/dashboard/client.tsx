@@ -1831,9 +1831,9 @@ function TalentDashboardContent({
                     {gigs.map((gig) => (
                       <Card
                         key={gig.id}
-                        className="overflow-hidden hover:shadow-lg transition-shadow group"
+                        className="overflow-hidden hover:shadow-lg transition-shadow group flex flex-col h-full"
                       >
-                        <div className="h-32 md:h-48 relative">
+                        <div className="h-32 md:h-48 relative shrink-0">
                           <SafeImage
                             src={gig.image_url}
                             alt={gig.title}
@@ -1855,44 +1855,48 @@ function TalentDashboardContent({
                             </Button>
                           </div>
                         </div>
-                        <CardContent className="p-4 space-y-3">
-                          <div>
-                            <h4 className="font-semibold text-lg text-white line-clamp-1">
-                              {gig.title}
-                            </h4>
-                            <p className="text-gray-300 text-sm">{gig.description}</p>
+                        <CardContent className="p-4 flex flex-col flex-1 min-h-0">
+                          <div className="flex-1 min-h-0 space-y-3">
+                            <div>
+                              <h4 className="font-semibold text-lg text-white line-clamp-1">
+                                {gig.title}
+                              </h4>
+                              <p className="text-gray-300 text-sm line-clamp-2">
+                                {gig.description}
+                              </p>
+                            </div>
+                            <div className="space-y-2">
+                              <Badge
+                                variant="outline"
+                                className={getCategoryColor(gig.category || "General")}
+                              >
+                                {getCategoryLabel(gig.category || "")}
+                              </Badge>
+                              <div className="flex items-center text-sm text-gray-300">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                {gig.location}
+                              </div>
+                              <div className="flex items-center text-sm text-gray-300">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                Deadline:{" "}
+                                {gig.application_deadline ? (
+                                  <SafeDate date={gig.application_deadline} />
+                                ) : (
+                                  "No deadline"
+                                )}
+                              </div>
+                              <div className="flex items-center text-sm font-medium text-white">
+                                <DollarSign className="h-4 w-4 mr-1" />
+                                {gig.compensation}
+                              </div>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Badge
-                              variant="outline"
-                              className={getCategoryColor(gig.category || "General")}
-                            >
-                              {getCategoryLabel(gig.category || "")}
-                            </Badge>
-                            <div className="flex items-center text-sm text-gray-300">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              {gig.location}
-                            </div>
-                            <div className="flex items-center text-sm text-gray-300">
-                              <Calendar className="h-4 w-4 mr-1" />
-                              Deadline:{" "}
-                              {gig.application_deadline ? (
-                                <SafeDate date={gig.application_deadline} />
-                              ) : (
-                                "No deadline"
-                              )}
-                            </div>
-                            <div className="flex items-center text-sm font-medium text-white">
-                              <DollarSign className="h-4 w-4 mr-1" />
-                              {gig.compensation}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 pt-2">
+                          <div className="flex gap-2 pt-2 mt-auto shrink-0">
                             <Button className="flex-1 button-glow border-0" asChild>
                               <Link href={`/gigs/${gig.id}/apply`}>Apply Now</Link>
                             </Button>
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/gigs/${gig.id}`}>
+                              <Link href={`/gigs/${gig.id}`} aria-label={`View details for ${gig.title}`}>
                                 <Eye className="h-4 w-4" />
                               </Link>
                             </Button>

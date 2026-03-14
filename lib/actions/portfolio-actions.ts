@@ -74,8 +74,14 @@ export async function uploadPortfolioImage(formData: FormData) {
         message: uploadError.message,
         name: (uploadError as { name?: string }).name,
       });
-      const msg = uploadError.message || "Unknown error";
-      if (msg.toLowerCase().includes("permission") || msg.toLowerCase().includes("policy")) {
+      const msg = (uploadError.message || "Unknown error").toLowerCase();
+      if (msg.includes("bucket not found") || msg.includes("bucket_not_found")) {
+        return {
+          error:
+            "Portfolio storage is not configured yet. Please contact support or try again later.",
+        };
+      }
+      if (msg.includes("permission") || msg.includes("policy")) {
         return { error: "Permission denied. Check storage policies for the portfolio bucket." };
       }
       return { error: "Failed to upload image. Please try again." };
