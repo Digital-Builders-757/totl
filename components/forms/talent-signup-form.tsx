@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -54,6 +55,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isDuplicateEmailError, setIsDuplicateEmailError] = useState(false);
   const [returnUrl, setReturnUrl] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,6 +93,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true);
     setServerError(null);
+    setIsDuplicateEmailError(false);
 
     try {
       // Include returnUrl in email redirect so it's preserved through email verification
@@ -98,7 +101,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         ? `${window.location.origin}/auth/callback?returnUrl=${encodeURIComponent(returnUrl)}`
         : `${window.location.origin}/auth/callback`;
 
-      const { error } = await signUp(data.email, data.password, {
+      const { data: signUpData, error } = await signUp(data.email, data.password, {
         data: {
           first_name: data.firstName,
           last_name: data.lastName,
@@ -107,15 +110,46 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         emailRedirectTo: callbackUrl,
       });
 
+      // Supabase returns error when confirmations are disabled; when enabled, it returns
+      // a fake user with empty identities instead of an error (to prevent email enumeration)
+      const hasFakeUserFromDuplicate =
+        !error &&
+        signUpData?.user &&
+        Array.isArray((signUpData.user as { identities?: unknown[] }).identities) &&
+        (signUpData.user as { identities: unknown[] }).identities.length === 0;
+
+      const msg = (error?.message ?? "").toLowerCase();
+      const isDuplicateFromError =
+        msg.includes("user already registered") ||
+        msg.includes("user already exists") ||
+        msg.includes("already been registered") ||
+        msg.includes("already registered") ||
+        msg.includes("email_exists");
+
+      const isDuplicateEmail = isDuplicateFromError || hasFakeUserFromDuplicate;
+
+      if (isDuplicateEmail) {
+        if (error) {
+          console.error("Signup error:", error);
+        }
+        const friendlyMessage =
+          "An account with this email already exists. Please sign in instead.";
+        setServerError(friendlyMessage);
+        setIsDuplicateEmailError(true);
+
+        toast({
+          title: "Account already exists",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+
+        setIsSubmitting(false);
+        return;
+      }
+
       if (error) {
         console.error("Signup error:", error);
-        if (error.message.includes("User already exists")) {
-          setServerError(
-            "A user with this email already exists. Please check your inbox for a verification email or try logging in."
-          );
-        } else {
-          setServerError(error.message);
-        }
+        setServerError(error.message);
         setIsSubmitting(false);
         return;
       }
@@ -168,7 +202,17 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       {serverError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{serverError}</AlertDescription>
+          <AlertDescription>
+            {serverError}
+            {isDuplicateEmailError && (
+              <>
+                {" "}
+                <Link href="/login" className="font-medium underline underline-offset-4 hover:no-underline">
+                  Sign in
+                </Link>
+              </>
+            )}
+          </AlertDescription>
         </Alert>
       )}
 

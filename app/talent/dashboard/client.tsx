@@ -905,19 +905,6 @@ function TalentDashboardContent({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {profile && profile.account_type !== "client" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="border-amber-500/50 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500"
-                >
-                  <Link href="/client/apply" className="flex items-center">
-                    <Briefcase className="h-4 w-4 mr-2" />
-                    Apply to be a Career Builder
-                  </Link>
-                </Button>
-              )}
               <NotificationDropdown
                 viewAllHref="/talent/dashboard"
                 variant="outline"

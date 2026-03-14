@@ -94,6 +94,16 @@ npm run build
   - **Fix:** run `node scripts/ensure-ui-audit-users.mjs` immediately before rerun, then rerun capture; if process hangs, stop it and retry after validating login manually
   - **Fix:** Use `scripts/capture-admin-evidence.mjs` to unblock admin evidence while re-seeding non-admin accounts
   - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
+- **Loading states flash white and break dark immersion:** Route loading skeletons used `bg-white`/`bg-gray-50`/`via-white` gradients, causing jarring white flashes during navigation.
+  - **Fix:** Use `bg-black page-ambient` for loading wrappers; skeletons use `bg-white/10`; spinners use `text-white`. Applied to talent dashboard, client gigs, settings, auth callback, talent signup, dashboard, about, update-password, reset-password, verification-pending.
+- **Gig detail right sidebar overlays main content:** On `/gigs/[id]`, the Apply/Quick Info sidebar overlaps Gig Details and Client Information when scrolling.
+  - **Root Cause:** Apply card used `sticky top-6`; sticky inside grid causes the sidebar to float over the main column.
+  - **Fix:** Remove `sticky top-6` from the Apply card; add `lg:self-start` to the sidebar wrapper for top alignment without overlay.
+  - **Prevention:** Avoid `position: sticky` in grid layouts unless parent has no `overflow: hidden/auto` and proper containment.
+- **Duplicate signup shows no browser feedback:** User tries to sign up with an existing email but sees nothing in the UI (error only in console).
+  - **Root Cause:** Form checked only for "User already exists"; Supabase returns "User already registered" when confirmations are disabled. When confirmations are enabled, Supabase returns a fake user (empty `identities`) with no error.
+  - **Fix:** Talent signup form now detects all duplicate-email variants and the fake-user case; shows toast + inline alert with "Sign in" link.
+  - **Prevention:** See `components/forms/talent-signup-form.tsx` — `isDuplicateFromError` and `hasFakeUserFromDuplicate` logic.
 - **Client Dashboard Error State Not Displayed:** Error state (`supabaseError`) is set but never rendered, leaving users with blank dashboard
   - **Fix:** Add error display banner/alert component that shows when `supabaseError` is set, with retry button to call `fetchDashboardData()` again
   - **Prevention:** Always render error states in UI, even if error handling exists in code
