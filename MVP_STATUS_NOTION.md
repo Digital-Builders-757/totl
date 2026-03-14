@@ -8,6 +8,16 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Duplicate signup UX — browser notification (March 13, 2026)**
+
+**AUTH / SIGNUP UX** - March 13, 2026
+- ✅ **Duplicate email signup feedback:** When a user tries to sign up with an existing email, they now see a clear in-browser notification (toast + inline alert) instead of only console output.
+- ✅ **Broader error detection:** Handles Supabase variants: "User already registered", "User already exists", "already been registered", "email_exists".
+- ✅ **Fake-user case:** When email confirmation is enabled, Supabase returns a fake user with empty `identities` instead of an error; form now detects this and shows the same friendly message.
+- ✅ **Sign-in link:** Alert includes a "Sign in" link to `/login` for quick navigation.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
 ## 🚀 **Latest: In-app notifications (Approach B) + handoff doc (March 13, 2026)**
 
 **NOTIFICATIONS / BOOKING UX** - March 13, 2026
@@ -4622,6 +4632,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: March 13, 2026*
-*Current Status: MVP Complete - Types regen; notifications + booking UX shipped*
+*Current Status: MVP Complete - Duplicate signup UX; notifications + booking UX shipped*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: After supabase db push for PostGIS migration, or mobile-guardrails CI hardening*

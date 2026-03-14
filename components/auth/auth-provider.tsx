@@ -73,7 +73,7 @@ type AuthContextType = {
     email: string,
     password: string,
     options?: SignUpOptions
-  ) => Promise<{ error: AuthError | null }>;
+  ) => Promise<{ data?: { user: User }; error: AuthError | null }>;
   signOut: () => Promise<{ error: AuthError | null }>;
   sendVerificationEmail: () => Promise<{ error: Error | null }>;
   resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
@@ -94,7 +94,7 @@ function FallbackAuthProvider({ children }: { children: React.ReactNode }) {
         isLoading: false,
         isEmailVerified: false,
         signIn: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
-        signUp: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
+        signUp: async () => ({ data: undefined, error: { message: "Supabase not configured" } as AuthError }),
         signOut: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
         sendVerificationEmail: async () => ({ error: new Error("Supabase not configured") }),
         resetPassword: async () => ({ error: { message: "Supabase not configured" } as AuthError }),
@@ -1578,16 +1578,19 @@ function SupabaseAuthProvider({ children }: { children: React.ReactNode }) {
     email: string,
     password: string,
     options?: SignUpOptions
-  ): Promise<{ error: AuthError | null }> => {
+  ): Promise<{ data?: { user: User }; error: AuthError | null }> => {
     // Event handler - safe to call getSupabase() after mount
     const supabase = getSupabase();
-    
-    const { error } = await supabase.auth.signUp({
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       ...options,
     });
-    return { error };
+    return {
+      data: data?.user ? { user: data.user } : undefined,
+      error,
+    };
   };
 
   const signOut = async (): Promise<{ error: AuthError | null }> => {
