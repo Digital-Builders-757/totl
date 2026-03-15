@@ -8,7 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Subscription in Settings, Career Builder responsiveness, gig card polish (March 15, 2026)**
+## 🚀 **Latest: Gig card images restored on /gigs (March 15, 2026)**
+
+**UI / GIGS** - March 15, 2026
+- ✅ **Gig card images visible again:** After adding spotlight glow border, images disappeared. Fixed by: (1) `z-index: -1` on spotlight pseudo-elements so glow sits behind card content; (2) nested `<a>` hydration error — View Details button was a Link inside card Link — replaced with span; (3) `aspect-4-3` only defined in mobile media query, so desktop image container collapsed — switched to Tailwind `aspect-[4/3]` for all viewports.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for gig card image + nested link issues.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
+## 🚀 **Subscription in Settings, Career Builder responsiveness, gig card polish (March 15, 2026)**
 
 **UI / NAVBAR / SETTINGS / DASHBOARDS / GIGS** - March 15, 2026
 - ✅ **Subscription moved to Settings:** Removed Subscription from header (desktop nav, My Account dropdown, mobile menu). Talent users access subscription via Settings → Account tab (SubscriptionSection). Cleaner header; subscription lives where account-related options belong.

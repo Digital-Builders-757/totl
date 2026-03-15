@@ -106,6 +106,8 @@ npm run build
   - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
 - **Loading states flash white and break dark immersion:** Route loading skeletons used `bg-white`/`bg-gray-50`/`via-white` gradients, causing jarring white flashes during navigation.
   - **Fix:** Use `bg-black page-ambient` for loading wrappers; skeletons use `bg-white/10`; spinners use `text-white`. Applied to talent dashboard, client gigs, settings, auth callback, talent signup, dashboard, about, update-password, reset-password, verification-pending.
+- **Gig card images not showing on /gigs:** After adding spotlight glow border, images disappeared. Root causes: (1) Spotlight pseudo-elements (`::before`/`::after`) stacked above card content — add `z-index: -1` so glow sits behind; (2) `aspect-4-3` class only defined in `@media (max-width: 768px)` — on desktop the image container had no aspect ratio and collapsed. Fix: use Tailwind `aspect-[4/3]` for all viewports.
+- **Hydration error: `<a> cannot be a descendant of <a>`:** Gig card had outer Link wrapping the card and inner Link on View Details button. Fix: For browse/featured variants, render the button as a `<span>` (no Link) since the parent card Link handles navigation.
 - **Gig detail right sidebar overlays main content:** On `/gigs/[id]`, the Apply/Quick Info sidebar overlaps Gig Details and Client Information when scrolling.
   - **Root Cause:** Apply card used `sticky top-6`; sticky inside grid causes the sidebar to float over the main column.
   - **Fix:** Remove `sticky top-6` from the Apply card; add `lg:self-start` to the sidebar wrapper for top alignment without overlay.

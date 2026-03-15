@@ -112,7 +112,7 @@ export function GigCard(props: GigCardProps) {
       : "/images/solo_logo.png";
 
   const imageBlock = (
-    <div className="relative aspect-4-3 overflow-hidden">
+    <div className="relative aspect-[4/3] w-full overflow-hidden">
       <SafeImage
         src={imageSrc}
         alt={gig.title}
@@ -177,11 +177,9 @@ export function GigCard(props: GigCardProps) {
           className="button-glow mt-3 w-full min-h-[48px] border-0 sm:mt-4"
           asChild
         >
-          <Link href={variant === "browse" ? href : "/choose-role"}>
-            <span>
-              {ctaText} <ArrowRight className="ml-2 h-4 w-4" />
-            </span>
-          </Link>
+          <span>
+            {ctaText} <ArrowRight className="ml-2 h-4 w-4" />
+          </span>
         </Button>
       )}
     </div>
