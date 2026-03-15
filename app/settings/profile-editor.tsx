@@ -9,6 +9,7 @@ import { ClientDetailsSection } from "./sections/client-details";
 import { PortfolioSection } from "./sections/portfolio-section";
 import { TalentDetailsSection } from "./sections/talent-details";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
+import { ProfileStrengthCard } from "@/components/talent/profile-strength-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Database } from "@/types/supabase";
@@ -46,11 +47,27 @@ interface ProfileEditorProps {
 export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfolioItems = [] }: ProfileEditorProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const isTalent = profile.role === "talent";
+
+  const needsProfileCompletion =
+    isTalent && (!talent?.first_name || !talent?.last_name || !talent?.location);
+  const contactComplete = !isTalent || !!talent?.phone;
+  const portfolioComplete = (portfolioItems?.length ?? 0) > 0;
+  const completionPercent = needsProfileCompletion ? 60 : 85;
+
   const triggerClassName =
     "min-h-10 rounded-lg px-3 py-2 text-sm text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white md:text-base md:px-4";
 
   return (
     <div className="space-y-6">
+      {isTalent && (
+        <ProfileStrengthCard
+          needsProfileCompletion={!!needsProfileCompletion}
+          completionPercent={completionPercent}
+          contactComplete={contactComplete}
+          portfolioComplete={portfolioComplete}
+        />
+      )}
+
       {/* Profile Header with Avatar */}
       <Card className="bg-gray-900 border-gray-700">
         <CardHeader className="gap-4">

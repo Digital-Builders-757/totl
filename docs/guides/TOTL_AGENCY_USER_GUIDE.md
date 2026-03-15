@@ -95,10 +95,10 @@ More stats (profile views, rating, success rate) will appear later in Insights.
 **Main Tabs:**
 
 **Overview Tab:**
-- **Profile Strength Widget**: Shows completion percentage with actionable items
-- **Available Gigs**: Quick count of active opportunities
+- **Available Gigs**: Quick count of active opportunities (primary CTA: Browse All Opportunities)
 - **Quick Stats**: Applications and acceptance metrics
 - **Upcoming Gigs**: Next confirmed bookings with details
+- **Profile Strength**: Moved to Settings — complete your profile from the Settings page
 
 **Applications Tab:**
 - View all your applications (New, Accepted, Rejected)

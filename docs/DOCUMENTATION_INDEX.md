@@ -114,6 +114,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `plans/STRIPE_WEBHOOK_ORPHANED_CUSTOMER_IMPLEMENTATION.md` - **✅ NEW** - Implementation summary for orphaned customer webhook handling (Feb 2026)
 - `plans/NOTIFICATIONS_IMPLEMENTATION_PLAN.md` - **✅ NEW** - In-app notification design (Approach A/B/C); Approach B implemented (Mar 2026)
 - `plans/GIG_CARD_GLOW_BORDER_PLAN.md` - **✅ NEW** - Gig card spotlight glow effect design (Approach C implemented, Mar 2026)
+- `plans/PROFILE_STRENGTH_TO_SETTINGS_PLAN.md` - **✅ NEW** - Profile Strength relocation from dashboard to Settings (Approach A implemented, Mar 2026)
 - `HANDOFF.md` - **🤖 NEW** - Agent handoff prompt for notifications & booking UX context (Mar 2026)
 
 ### **🚨 Critical Error Prevention**
