@@ -48,15 +48,9 @@ test.describe("Admin Dashboard: Paid Talent stats", () => {
 
     await expect(page).toHaveURL(/\/admin\/dashboard/, { timeout: 60_000 });
 
-    // Smoke: card renders and contains numeric values.
+    // Smoke: card renders and contains earning metrics.
     await expect(page.getByTestId("paid-talent-card")).toBeVisible();
     await expect(page.getByTestId("paid-talent-card-title")).toHaveText("Paid Talent");
-
-    // Stable selectors for metrics
-    await expect(page.getByTestId("paid-talent-total")).toBeVisible();
-    await expect(page.getByTestId("paid-talent-monthly")).toBeVisible();
-    await expect(page.getByTestId("paid-talent-annual")).toBeVisible();
-    await expect(page.getByTestId("paid-talent-unknown")).toBeVisible();
     await expect(page.getByTestId("paid-talent-mrr")).toBeVisible();
     await expect(page.getByTestId("paid-talent-arr")).toBeVisible();
   });

@@ -119,8 +119,9 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
     >
       {/* Mobile header */}
       <div className="h-14 px-4 md:hidden">
-        <div className="grid h-full grid-cols-[auto_1fr_auto] items-center gap-2">
-          <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <div className="relative flex h-full items-center justify-between">
+          <div className="flex min-w-[2.5rem] shrink-0 items-center">
+            <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <DialogTrigger asChild>
               <Button
                 type="button"
@@ -179,8 +180,11 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
               </div>
             </DialogContent>
           </Dialog>
-          <p className="truncate text-center text-base font-semibold text-white">{mobileTitle}</p>
-          <div className="flex items-center justify-end gap-1">
+          </div>
+          <p className="absolute left-0 right-0 truncate px-12 text-center text-base font-semibold text-white pointer-events-none">
+            {mobileTitle}
+          </p>
+          <div className="flex min-w-[5rem] shrink-0 items-center justify-end gap-1">
             <Button
               type="button"
               variant="ghost"

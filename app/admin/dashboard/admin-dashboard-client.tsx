@@ -222,25 +222,12 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                 </Badge>
               </div>
               <div className="text-2xl font-bold text-white">
-                <span data-testid="paid-talent-total">
-                  {paidTalentStats.monthlyCount + paidTalentStats.annualCount}
-                </span>
+                <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span>
+                <span className="text-base font-normal text-gray-400 ml-1">/mo</span>
               </div>
-              <div className="text-xs text-gray-300">
-                Monthly: <span data-testid="paid-talent-monthly">{paidTalentStats.monthlyCount}</span> · Annual:{" "}
-                <span data-testid="paid-talent-annual">{paidTalentStats.annualCount}</span> · Unknown:{" "}
-                <span data-testid="paid-talent-unknown">{paidTalentStats.unknownPlanCount}</span>
-              </div>
-              <div className="text-xs text-gray-300">
-                Est. MRR:{" "}
-                <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span> · Est. ARR:{" "}
+              <div className="text-sm text-gray-400">
                 <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
-              </div>
-              <div className="card-footer-row">
-                <span>Next action</span>
-                <Link href="/admin/talent" className="text-[var(--oklch-text-primary)] hover:underline">
-                  Review subscribers
-                </Link>
+                <span className="text-xs ml-1">/yr</span>
               </div>
             </CardContent>
           </Card>
@@ -248,34 +235,34 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
 
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <MobileTabRail>
-            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+          <MobileTabRail scrollClassName="flex justify-center">
+            <TabsList className="inline-flex h-auto min-w-max gap-3 rounded-xl border border-gray-800 bg-gray-900 p-1.5">
               <TabsTrigger
                 value="overview"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
               >
-                <Activity className="h-3.5 w-3.5" />
+                <Activity className="h-3.5 w-3.5 shrink-0" />
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="gigs"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
               >
-                <Briefcase className="h-3.5 w-3.5" />
+                <Briefcase className="h-3.5 w-3.5 shrink-0" />
                 Opportunities
               </TabsTrigger>
               <TabsTrigger
                 value="applications"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
               >
-                <Users className="h-3.5 w-3.5" />
+                <Users className="h-3.5 w-3.5 shrink-0" />
                 Applications
               </TabsTrigger>
               <TabsTrigger
                 value="analytics"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
               >
-                <BarChart className="h-3.5 w-3.5" />
+                <BarChart className="h-3.5 w-3.5 shrink-0" />
                 Analytics
               </TabsTrigger>
             </TabsList>
