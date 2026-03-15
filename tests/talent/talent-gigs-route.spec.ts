@@ -11,7 +11,14 @@ test.describe("Talent gigs/apply route contracts", () => {
     await expect(page).toHaveURL(/\/gigs(\?|$)/);
     await expect(page.getByRole("heading", { name: "Find Opportunities" })).toBeVisible();
     await expect(page.getByPlaceholder("Search keywords...")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Search" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Search", exact: true })).toBeVisible();
+
+    // When gigs exist, verify [data-testid="gig-card"] is present (test stability)
+    const noGigsHeading = page.getByRole("heading", { name: "No Active Opportunities" });
+    const hasGigs = !(await noGigsHeading.isVisible());
+    if (hasGigs) {
+      await expect(page.locator('[data-testid="gig-card"]').first()).toBeVisible();
+    }
   });
 
   test("gig details and apply route contracts stay reachable", async ({ page }) => {

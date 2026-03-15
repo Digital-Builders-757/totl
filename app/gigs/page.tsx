@@ -1,21 +1,20 @@
 export const dynamic = "force-dynamic";
 
-import { Search, MapPin, DollarSign, ArrowRight, Calendar, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
+import { Search, ArrowRight, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
+import { GigCard } from "@/components/gigs/gig-card";
 import { GigsFilterForm } from "@/components/gigs/gigs-filter-form";
 import { RetryButton } from "@/components/gigs/retry-button";
 import { SavedSearchesBar } from "@/components/gigs/saved-searches-bar";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SafeImage } from "@/components/ui/safe-image";
-import { getCategoryLabel, getCategoryFilterSet } from "@/lib/constants/gig-categories";
+import { getCategoryFilterSet } from "@/lib/constants/gig-categories";
 import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
 import { RADIUS_OPTIONS, type RadiusValue } from "@/lib/constants/radius-filter";
-import { getGigDisplayDescription, getGigDisplayTitle, shouldShowSubscriptionPrompt } from "@/lib/gig-access";
+import { shouldShowSubscriptionPrompt } from "@/lib/gig-access";
 import { geocode, milesToMeters } from "@/lib/server/geocode";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
@@ -436,67 +435,14 @@ export default async function GigsPage({
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-              {gigsList.map((gig) => {
-                // GigRow already includes title, description, category (all fields needed by helpers)
-                // No unsafe cast needed - types align perfectly
-                const displayTitle = getGigDisplayTitle(gig, profile);
-                const displayDescription = getGigDisplayDescription(gig, profile);
-
-                return (
-                <div
+              {gigsList.map((gig) => (
+                <GigCard
                   key={gig.id}
-                  className="card-backlit overflow-hidden group cursor-pointer active:scale-95 sm:hover:scale-[1.02] transition-all duration-200"
-                >
-                  <div className="relative aspect-4-3 overflow-hidden">
-                    <SafeImage
-                      src={gig.image_url}
-                      alt={gig.title}
-                      fill
-                      className="transition-transform duration-300 group-hover:scale-110 object-cover"
-                      context="gig-card"
-                      fallbackSrc="https://picsum.photos/800/600?random"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                    <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
-                      <Badge
-                        variant="secondary"
-                        className="text-xs bg-white/90 text-black font-semibold backdrop-blur-sm"
-                      >
-                        {getCategoryLabel(gig.category)}
-                      </Badge>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
-                      <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-white/90 transition-colors line-clamp-2">
-                        {displayTitle}
-                      </h3>
-                    </div>
-                  </div>
-                  <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
-                    <p className="text-[var(--oklch-text-secondary)] text-sm line-clamp-2 leading-relaxed">
-                      {displayDescription}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
-                        <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span className="truncate">{gig.location}</span>
-                      </div>
-                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
-                        <DollarSign className="h-4 w-4 mr-2 text-white flex-shrink-0" />
-                        <span className="text-white font-semibold">{gig.compensation}</span>
-                      </div>
-                      <div className="flex items-center text-xs sm:text-sm text-[var(--oklch-text-tertiary)]">
-                        <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
-                        <span className="truncate">{gig.date}</span>
-                      </div>
-                    </div>
-                    <Button className="w-full button-glow border-0 mt-3 sm:mt-4 min-h-[48px]" asChild>
-                      <Link href={`/gigs/${gig.id}`}>
-                        View Details <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              )})}
+                  gig={gig}
+                  profile={profile}
+                  variant="browse"
+                />
+              ))}
             </div>
           )}
 
