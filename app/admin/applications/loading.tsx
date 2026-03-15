@@ -1,20 +1,20 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { AdminLoadingShell } from "@/components/admin/admin-loading-shell";
 
-export default function Loading() {
+export default function AdminApplicationsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <AdminLoadingShell>
       <div className="mx-auto w-full max-w-6xl space-y-6">
         <div className="space-y-3">
-          <Skeleton className="h-9 w-64" />
-          <Skeleton className="h-5 w-96 max-w-full" />
+          <div className="h-9 w-64 bg-white/10 rounded animate-pulse" />
+          <div className="h-5 w-96 max-w-full bg-white/10 rounded animate-pulse" />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
         </div>
-        <Skeleton className="h-[420px] w-full rounded-xl" />
+        <div className="h-[420px] w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
       </div>
-    </div>
+    </AdminLoadingShell>
   );
 }

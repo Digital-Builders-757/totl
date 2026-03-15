@@ -27,7 +27,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { createNameSlug } from "@/lib/utils/slug";
 
 type TalentProfile = {
   id: string;
@@ -102,7 +101,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
       <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
         <DropdownMenuItem asChild>
           <Link
-            href={`/talent/${createNameSlug(talent.first_name, talent.last_name)}`}
+            href={`/talent/${talent.user_id}`}
             className="text-gray-300 hover:bg-gray-700 flex items-center"
           >
             <Eye className="mr-2 h-4 w-4" />

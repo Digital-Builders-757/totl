@@ -32,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
 import { logger } from "@/lib/utils/logger";
-import { createNameSlug } from "@/lib/utils/slug";
 import type { Database } from "@/types/supabase";
 
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {
@@ -176,10 +175,7 @@ export function AdminApplicationDetailClient({
     }
   };
 
-  const talentSlug =
-    talentProfile?.first_name && talentProfile?.last_name
-      ? createNameSlug(talentProfile.first_name, talentProfile.last_name)
-      : talent?.id;
+  const talentProfileHref = application.talent_id ? `/talent/${application.talent_id}` : null;
 
   return (
     <div className="min-h-screen bg-black">
@@ -422,7 +418,7 @@ export function AdminApplicationDetailClient({
                     </div>
                   )}
                   <Button variant="outline" className="w-full border-gray-700 text-white hover:bg-gray-800" asChild>
-                    <Link href={talentSlug ? `/talent/${talentSlug}` : `/talent/${talent.id}`}>
+                    <Link href={talentProfileHref ?? `/talent/${talent?.id}`}>
                       View Full Talent Profile
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
@@ -462,13 +458,13 @@ export function AdminApplicationDetailClient({
                     </Link>
                   </Button>
                 )}
-                {talentSlug && (
+                {talentProfileHref && (
                   <Button
                     variant="outline"
                     className="w-full border-gray-700 text-white hover:bg-gray-800"
                     asChild
                   >
-                    <Link href={`/talent/${talentSlug}`}>
+                    <Link href={talentProfileHref}>
                       <UserIcon className="mr-2 h-4 w-4" />
                       View Talent Profile
                     </Link>

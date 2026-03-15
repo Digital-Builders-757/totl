@@ -2,7 +2,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubscribeLoading() {
   return (
-    <div className="container mx-auto py-8">
+    <div className="min-h-screen bg-black page-ambient">
+      <div className="container mx-auto py-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12 space-y-4">
           <Skeleton className="h-12 w-96 mx-auto bg-zinc-800/50" />
@@ -29,6 +30,7 @@ export default function SubscribeLoading() {
         <div className="mt-12 text-center">
           <Skeleton className="h-4 w-64 mx-auto bg-zinc-800/50" />
         </div>
+      </div>
       </div>
     </div>
   );

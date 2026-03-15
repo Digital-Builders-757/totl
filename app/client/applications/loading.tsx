@@ -1,6 +1,6 @@
 export default function ClientApplicationsLoading() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black page-ambient text-white">
       <div className="border-b border-gray-800 bg-black/95 backdrop-blur">
         <div className="container mx-auto px-4 py-4">
           <div className="flex min-w-0 items-start justify-between gap-4">

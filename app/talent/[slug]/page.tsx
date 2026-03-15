@@ -110,12 +110,13 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
 
     let candidates: PublicTalentProfile[] = [];
 
-    // Strategy A: UUID path (exact match, fast, backward compatibility)
+    // Strategy A: UUID path (exact match, fast)
+    // Query user_id only - internal links always pass profiles.id (user_id). Reduces edge collisions.
     if (uuidRegex.test(slug)) {
       const { data, error: uuidError } = await supabase
         .from("talent_profiles")
         .select(PUBLIC_FIELDS)
-        .or(`id.eq.${slug},user_id.eq.${slug}`)
+        .eq("user_id", slug)
         .limit(1);
 
       if (uuidError) {

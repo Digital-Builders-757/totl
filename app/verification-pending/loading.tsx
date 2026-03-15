@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function VerificationPendingLoading() {
   return (
-    <div className="min-h-screen bg-black pt-24">
+    <div className="min-h-screen bg-black page-ambient pt-24">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-md mx-auto">
           <Card className="border-white/10 bg-white/5">

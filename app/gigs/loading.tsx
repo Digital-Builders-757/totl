@@ -1,9 +1,9 @@
-﻿import { GigCardSkeleton } from "@/components/ui/image-skeletons";
+import { GigCardSkeleton } from "@/components/ui/image-skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
+    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient pt-40">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb skeleton */}
