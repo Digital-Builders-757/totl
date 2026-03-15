@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig card glow border + navbar cleanup (March 15, 2026)**
+
+**UI / GIGS / NAVBAR** - March 15, 2026
+- ✅ **Gig card spotlight glow:** Cursor-following glow border on gig cards (`/gigs` + homepage Featured Opportunities). SpotlightCard component with per-card pointer tracking; styles in globals.css; respects prefers-reduced-motion. Shared GigCard with `data-testid="gig-card"`.
+- ✅ **Navbar redundancy fix:** When unsubscribed, hide "Subscription" nav link and dropdown item; keep only prominent "Subscribe" button. Avoids duplicate links to same page.
+- ✅ **About link removed:** Removed from header (desktop + mobile) per UX feedback.
+- ✅ **Tests:** talent-gigs-route.spec.ts — gig-card assertion when gigs exist; Search button selector fix (`exact: true`).
+- ✅ **Docs:** docs/plans/GIG_CARD_GLOW_BORDER_PLAN.md (Approach C implemented).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint, talent-gigs-route tests — all green.
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
 ## 🚀 **Latest: Loading dark theme + View Profile UUID fix (March 15, 2026)**
 
 **UI / ADMIN / PROFILE LINKS** - March 15, 2026

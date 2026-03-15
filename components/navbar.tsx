@@ -125,16 +125,6 @@ export default function Navbar() {
             )}
             {/* Talent directory removed per Approach B: no roster browsing */}
             {/* Admin-only: optional talent directory access via admin terminal */}
-            <Link
-              href="/about"
-              prefetch={shouldPrefetch}
-              className={`${textColor} hover:text-white font-medium transition-all duration-300 hover-lift relative group ${
-                isActive("/about") ? "nav-active" : ""
-              }`}
-            >
-              About
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-            </Link>
             {userRole === "admin" && (
               <Link
                 href={PATHS.ADMIN_DASHBOARD}
@@ -147,7 +137,8 @@ export default function Navbar() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
               </Link>
             )}
-            {isTalentUser && (
+            {/* Subscription nav: only show when subscribed (avoids redundancy with Subscribe CTA) */}
+            {isTalentUser && !shouldPromptSubscription && (
               <Link
                 href="/talent/subscribe"
                 prefetch={shouldPrefetch}
@@ -195,7 +186,7 @@ export default function Navbar() {
                       Talent Dashboard
                     </Link>
                   )}
-                  {isTalentUser && (
+                  {isTalentUser && !shouldPromptSubscription && (
                     <Link
                       href="/talent/subscribe"
                       prefetch={shouldPrefetch}
@@ -302,12 +293,6 @@ export default function Navbar() {
                 </Link>
               )}
               {/* Talent directory removed per Approach B: no roster browsing */}
-              <Link
-                href="/about"
-                className="text-white hover:text-gray-300 font-medium transition-colors py-2"
-              >
-                About
-              </Link>
               <div className="border-t border-white/10 pt-4 mt-2">
                 {user ? (
                   <>
@@ -319,7 +304,7 @@ export default function Navbar() {
                         Talent Dashboard
                       </Link>
                     )}
-                    {isTalentUser && (
+                    {isTalentUser && !shouldPromptSubscription && (
                       <Link
                         href="/talent/subscribe"
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"

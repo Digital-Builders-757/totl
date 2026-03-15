@@ -1140,6 +1140,83 @@ h1 {
   box-shadow: var(--elev-3-shadow);
 }
 
+/* ===========================
+   SPOTLIGHT CARD GLOW BORDER
+   ===========================
+   Accent effect for gig cards. Uses per-card pointer tracking.
+   Vars: --spotlight-x, --spotlight-y (card-relative px).
+   Respects prefers-reduced-motion: static center glow.
+   =========================== */
+
+[data-spotlight] {
+  position: relative;
+  --spotlight-base: 270;
+  --spotlight-spread: 80;
+  --spotlight-radius: 24;
+  --spotlight-border: 2;
+  --spotlight-size: 180;
+  --spotlight-xp: 0.5;
+  --spotlight-hue: calc(var(--spotlight-base) + (var(--spotlight-xp) * var(--spotlight-spread)));
+  --spotlight-border-size: calc(var(--spotlight-border) * 1px);
+  --spotlight-glow-size: calc(var(--spotlight-size) * 1px);
+  --spotlight-at-x: calc(var(--spotlight-x, 50) * 1px);
+  --spotlight-at-y: calc(var(--spotlight-y, 50) * 1px);
+}
+
+[data-spotlight]::before,
+[data-spotlight]::after {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  inset: calc(var(--spotlight-border-size) * -1);
+  border: var(--spotlight-border-size) solid transparent;
+  border-radius: calc(var(--spotlight-radius) * 1px);
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  mask: linear-gradient(transparent, transparent), linear-gradient(white, white);
+  mask-clip: padding-box, border-box;
+  mask-composite: intersect;
+}
+
+[data-spotlight]::before {
+  background-image: radial-gradient(
+    calc(var(--spotlight-glow-size) * 0.75) calc(var(--spotlight-glow-size) * 0.75) at
+      var(--spotlight-at-x) var(--spotlight-at-y),
+    hsl(var(--spotlight-hue, 270) 70% 55% / 0.9),
+    transparent 100%
+  );
+  filter: brightness(1.4);
+}
+
+[data-spotlight]::after {
+  background-image: radial-gradient(
+    calc(var(--spotlight-glow-size) * 0.5) calc(var(--spotlight-glow-size) * 0.5) at
+      var(--spotlight-at-x) var(--spotlight-at-y),
+    hsl(0 100% 100% / 0.6),
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-spotlight]::before,
+  [data-spotlight]::after {
+    background-image: radial-gradient(
+      calc(var(--spotlight-glow-size) * 0.6) at 50% 50%,
+      hsl(var(--spotlight-base, 270) 50% 60% / 0.4),
+      transparent 100%
+    );
+    filter: none;
+  }
+
+  [data-spotlight]::after {
+    background-image: radial-gradient(
+      calc(var(--spotlight-glow-size) * 0.4) at 50% 50%,
+      hsl(0 100% 100% / 0.3),
+      transparent 100%
+    );
+  }
+}
+
 /* Premium CTA Button - Pure White Glow (Apple-Style) */
 .button-glow {
   background: var(--oklch-brand-3);
