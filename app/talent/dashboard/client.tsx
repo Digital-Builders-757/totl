@@ -8,7 +8,6 @@ import {
   Briefcase,
   BarChart3,
   AlertCircle,
-  Plus,
   User,
   Settings,
   LogOut,
@@ -16,11 +15,8 @@ import {
   Eye,
   Filter,
   Search,
-  Phone,
   Calendar,
   Target,
-  Award,
-  Globe,
   MoreVertical,
   ChevronRight,
 } from "lucide-react";
@@ -42,7 +38,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Progress } from "@/components/ui/progress";
 import { SafeImage } from "@/components/ui/safe-image";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -958,21 +953,14 @@ function TalentDashboardContent({
           <SubscriptionPrompt profile={subscriptionProfile} variant="banner" context="general" />
         )}
         {needsProfileCompletion && (
-          <div className="mb-6 bg-amber-900/20 border border-amber-700 rounded-lg p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-400" />
-                <div>
-                  <h3 className="font-medium text-amber-200">Complete Your Profile</h3>
-                  <p className="text-sm text-amber-300">
-                    Add your name and contact information to make your profile visible to clients.
-                  </p>
-                </div>
-              </div>
-              <Button asChild size="sm" className="bg-amber-600 hover:bg-amber-700 text-white">
-                <Link href="/talent/profile">Complete Profile</Link>
-              </Button>
-            </div>
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-700/50 bg-amber-900/10 px-3 py-2 text-sm">
+            <span className="text-amber-200">Finish profile to get more opportunities</span>
+            <Link
+              href="/settings"
+              className="shrink-0 font-medium text-amber-400 hover:text-amber-300 hover:underline"
+            >
+              Finish profile →
+            </Link>
           </div>
         )}
 
@@ -1133,96 +1121,7 @@ function TalentDashboardContent({
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
-                <CardHeader>
-                  <div className="card-header-row">
-                    <CardTitle className="flex items-center gap-2 text-white">
-                      <Award className="h-5 w-5 text-blue-400" />
-                      Profile Strength
-                    </CardTitle>
-                    <Badge variant="outline" className="status-chip">
-                      {needsProfileCompletion ? "Needs work" : "Strong"}
-                    </Badge>
-                  </div>
-                  <CardDescription className="text-gray-300">
-                    Complete your profile to get more opportunities
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm text-white">
-                      <span>Profile Completion</span>
-                      <span className="font-medium">{needsProfileCompletion ? "60%" : "85%"}</span>
-                    </div>
-                    <Progress value={needsProfileCompletion ? 60 : 85} className="h-2" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-white">
-                        <User className="h-4 w-4" />
-                        Basic Information
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={
-                          needsProfileCompletion
-                            ? "bg-red-900/30 text-red-400 border-red-700"
-                            : "bg-green-900/30 text-green-400 border-green-700"
-                        }
-                      >
-                        {needsProfileCompletion ? "Incomplete" : "Complete"}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-white">
-                        <Phone className="h-4 w-4" />
-                        Contact Details
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-900/30 text-green-400 border-green-700"
-                      >
-                        Complete
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-white">
-                        <Globe className="h-4 w-4" />
-                        Portfolio
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-900/30 text-green-400 border-green-700"
-                      >
-                        Complete
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
-                      variant="outline"
-                      asChild
-                    >
-                      <Link href="/talent/profile" className="flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Complete Profile
-                      </Link>
-                    </Button>
-                    <Button
-                      className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
-                      variant="outline"
-                      asChild
-                    >
-                      <Link href="/settings" className="flex items-center gap-2">
-                        <Settings className="h-4 w-4" />
-                        Settings
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
+              {/* Primary CTA: Browse Opportunities first */}
               <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
                 <CardHeader>
                   <div className="card-header-row">

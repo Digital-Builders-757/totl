@@ -8,15 +8,29 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Gig card images restored on /gigs (March 15, 2026)**
+## 🚀 **Latest: Profile Strength → Settings relocation (March 15, 2026)**
 
-**UI / GIGS** - March 15, 2026
-- ✅ **Gig card images visible again:** After adding spotlight glow border, images disappeared. Fixed by: (1) `z-index: -1` on spotlight pseudo-elements so glow sits behind card content; (2) nested `<a>` hydration error — View Details button was a Link inside card Link — replaced with span; (3) `aspect-4-3` only defined in mobile media query, so desktop image container collapsed — switched to Tailwind `aspect-[4/3]` for all viewports.
-- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for gig card image + nested link issues.
+**UI / TALENT DASHBOARD / SETTINGS** - March 15, 2026
+- ✅ **Profile Strength moved to Settings:** Removed large Profile Strength card from talent dashboard Overview. Full card now lives at top of `/settings` for talent users only. Reduces dashboard real estate; aligns with "real app" pattern (profile work in Settings).
+- ✅ **Lightweight reminder:** When profile incomplete (missing name/location), show 1-line "Finish profile →" link to Settings. When Strong (85%+), show nothing — no nagging.
+- ✅ **Browse Opportunities primary CTA:** Available Opportunities card is now first in Overview grid. Job-to-be-done prioritized.
+- ✅ **ProfileStrengthCard component:** Presentational, read-only, props-only. No DB calls in client. Reusable and testable.
+- ✅ **Docs:** PROFILE_STRENGTH_TO_SETTINGS_PLAN.md (Approach A implemented); TOTL_AGENCY_USER_GUIDE.md updated.
 
 **Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
 
 **Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
+## 🚀 **Sentry noise reduction — CRON_SECRET, email link generation (March 15, 2026)**
+
+**SENTRY / CRON / EMAIL** - March 15, 2026
+- ✅ **TOTLMODELAGENCY-3D (cron unauthorized):** Added `docs/troubleshooting/CRON_SECRET_SETUP.md` with Vercel env setup steps. Route already validates `Authorization: Bearer <CRON_SECRET>`; fix is config-only (add CRON_SECRET to Vercel Production).
+- ✅ **TOTLMODELAGENCY-3A, 39 (email link generation):** Filter expected password-reset (user not found) and verification (already registered) failures in Sentry. `shouldFilterExpectedEmailLinkGenerationNoise` in noise-filter.ts; wired into sentry.server.config.ts.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entries for 3D, 3A, 39.
+
+**Verification:** schema:verify:comprehensive, types:check, lint — all green.
+
+**Next (P1):** Add CRON_SECRET to Vercel env (config); direct-to-Supabase signed uploads for portfolio.
 
 ## 🚀 **Subscription in Settings, Career Builder responsiveness, gig card polish (March 15, 2026)**
 
