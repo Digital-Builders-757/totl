@@ -51,10 +51,12 @@ function hasAutomationBrowserTag(event: SentryEventLike): boolean {
 }
 
 function isWebpackBootstrapError(event: SentryEventLike, errorMessage: string): boolean {
-  if (
-    !errorMessage.includes("Cannot read properties of undefined (reading 'call')") &&
-    !/Cannot find module '\.\/\d+\.js'/.test(errorMessage)
-  ) {
+  const isKnownChunkError =
+    errorMessage.includes("Cannot read properties of undefined (reading 'call')") ||
+    /Cannot find module '\.\/\d+\.js'/.test(errorMessage) ||
+    /e\[o\] is not a function/.test(errorMessage) ||
+    /^\w+\[\w+\] is not a function$/.test(errorMessage);
+  if (!isKnownChunkError) {
     return false;
   }
 
@@ -101,6 +103,20 @@ export function shouldFilterLocalWebpackNoise(
   if (!isLocalSignal) return false;
 
   return isWebpackBootstrapError(event, errorMessage);
+}
+
+/**
+ * Filter: Webpack chunk loading errors in production (e.g. "e[o] is not a function").
+ * Stale chunks after deployment or transient load failures. Not actionable.
+ * Sentry issues: TOTLMODELAGENCY-35, 33, 32, 34
+ */
+export function shouldFilterWebpackChunkLoadNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  if (!isWebpackBootstrapError(event, errorMessage)) return false;
+  // Only filter when stack clearly points to webpack/chunks (already checked in isWebpackBootstrapError)
+  return true;
 }
 
 export function shouldFilterLocalFailedFetchNoise(
@@ -309,6 +325,19 @@ export function shouldFilterLocalObjectCapturedAsExceptionNoise(
  * Client disconnected during HTTP request. Server-side, not actionable.
  * Sentry issue: TOTLMODELAGENCY-2M
  */
+/**
+ * Filter: [auth.onAuthStateChange] redirect timeout fallback telemetry
+ * Expected behavior when router.replace doesn't navigate in time - we fall back to hard reload.
+ * Informational, not actionable. Sentry issue: TOTLMODELAGENCY-2B
+ */
+export function shouldFilterAuthRedirectTimeoutTelemetry(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const normalizedMessage = getEventMessage(event, errorMessage);
+  return normalizedMessage.includes("[auth.onAuthStateChange] redirect timeout fallback telemetry");
+}
+
 export function shouldFilterServerAbortIncomingNoise(
   event: SentryEventLike,
   errorMessage: string
@@ -326,4 +355,30 @@ export function shouldFilterServerAbortIncomingNoise(
       filename.includes("node:net")
     );
   });
+}
+
+/**
+ * Filter: [totl][email] password reset / verification link generation failed
+ * Expected when: (1) password reset for non-existent email, (2) verification for already-registered user.
+ * Routes return success to avoid leaking user existence; these are not actionable.
+ * Sentry issues: TOTLMODELAGENCY-3A, TOTLMODELAGENCY-39
+ */
+export function shouldFilterExpectedEmailLinkGenerationNoise(
+  event: SentryEventLike,
+  _errorMessage: string
+): boolean {
+  const msg = getEventMessage(event, _errorMessage);
+  if (!msg.includes("[totl][email]") || !msg.includes("link generation failed")) {
+    return false;
+  }
+
+  const errorMsg = String(event.extra?.errorMessage ?? "").toLowerCase();
+  const isExpectedPasswordReset =
+    errorMsg.includes("user with this email not found") ||
+    errorMsg.includes("user not found");
+  const isExpectedVerification =
+    errorMsg.includes("already been registered") ||
+    errorMsg.includes("already registered");
+
+  return isExpectedPasswordReset || isExpectedVerification;
 }

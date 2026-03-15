@@ -15,6 +15,7 @@ import {
   serverIsProduction,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterExpectedEmailLinkGenerationNoise,
   shouldFilterLocalEmailDisabledNoise,
   shouldFilterLocalWebStreamNoise,
   shouldFilterLocalServerRenderNoise,
@@ -126,6 +127,11 @@ Sentry.init({
       error && typeof error === "object" && "message" in error
         ? String((error as { message?: unknown }).message)
         : event.message ?? event.logentry?.message ?? "";
+
+    if (shouldFilterExpectedEmailLinkGenerationNoise(event, String(errorMessage))) {
+      devLog("Expected email link generation noise filtered (3A, 39)");
+      return null;
+    }
 
     if (shouldFilterLocalEmailDisabledNoise(event, String(errorMessage))) {
       devLog("Local email-disabled noise filtered from server Sentry (2E)");

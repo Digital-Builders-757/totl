@@ -106,6 +106,14 @@ npm run build
   - **Verification:** Run `node scripts/capture-ui-audit.mjs` and confirm failures are not auth-related before treating as UI regressions
 - **Loading states flash white and break dark immersion:** Route loading skeletons used `bg-white`/`bg-gray-50`/`via-white` gradients, causing jarring white flashes during navigation.
   - **Fix:** Use `bg-black page-ambient` for loading wrappers; skeletons use `bg-white/10`; spinners use `text-white`. Applied to talent dashboard, client gigs, settings, auth callback, talent signup, dashboard, about, update-password, reset-password, verification-pending.
+- **Invalid input syntax for type uuid on /gigs/[id]:** Crawlers/bots hit /gigs/2, /gigs/4, etc. Supabase throws because `id` is not a valid UUID.
+  - **Fix:** Validate UUID format before querying in `app/gigs/[id]/page.tsx`. If invalid, call `notFound()` immediately. Sentry: TOTLMODELAGENCY-3C.
+- **[cron/booking-reminders] Unauthorized cron request (TOTLMODELAGENCY-3D):** Vercel Cron invokes the endpoint without `Authorization: Bearer <CRON_SECRET>` because `CRON_SECRET` is not set in Vercel Production env.
+  - **Fix:** Add `CRON_SECRET` to Vercel → Settings → Environment Variables (Production). Generate with `openssl rand -hex 32`. Redeploy. See `docs/troubleshooting/CRON_SECRET_SETUP.md`.
+- **[totl][email] password reset link generation failed (TOTLMODELAGENCY-3A):** User requests password reset for an email not in the system. Supabase returns "User with this email not found". Expected; route returns success to avoid leaking user existence.
+  - **Fix:** Filtered in Sentry via `shouldFilterExpectedEmailLinkGenerationNoise`. No code change needed; this is expected user behavior.
+- **[totl][email] verification link generation failed (TOTLMODELAGENCY-39):** User requests verification for an already-registered email. Supabase returns "A user with this email address has already been registered". Expected; route returns success.
+  - **Fix:** Filtered in Sentry via `shouldFilterExpectedEmailLinkGenerationNoise`. No code change needed; this is expected user behavior.
 - **Gig card images not showing on /gigs:** After adding spotlight glow border, images disappeared. Root causes: (1) Spotlight pseudo-elements (`::before`/`::after`) stacked above card content — add `z-index: -1` so glow sits behind; (2) `aspect-4-3` class only defined in `@media (max-width: 768px)` — on desktop the image container had no aspect ratio and collapsed. Fix: use Tailwind `aspect-[4/3]` for all viewports.
 - **Hydration error: `<a> cannot be a descendant of <a>`:** Gig card had outer Link wrapping the card and inner Link on View Details button. Fix: For browse/featured variants, render the button as a `<span>` (no Link) since the parent card Link handles navigation.
 - **Gig detail right sidebar overlays main content:** On `/gigs/[id]`, the Apply/Quick Info sidebar overlaps Gig Details and Client Information when scrolling.
@@ -1164,6 +1172,9 @@ if (errorMessage.includes("enableDidUserTypeOnKeyboardLogging")) {
 | `N+1 API Call` (Sentry) - Multiple profile queries | Duplicate profile queries in components | Use `profile` from `useAuth()` instead of fetching separately |
 | `PGRST200` - Foreign key relationship error | Invalid join between tables without direct FK | Fetch separately using intermediate table (e.g., profiles) |
 | `column 'first_name' does not exist on 'talent_id'` | Invalid join - talent_id references profiles, not talent_profiles | Use `talent_profiles.user_id = talent_id` instead of direct join |
+| `[cron/booking-reminders] Unauthorized cron request` (TOTLMODELAGENCY-3D) | CRON_SECRET not set in Vercel Production | Add CRON_SECRET to Vercel env vars; see `docs/troubleshooting/CRON_SECRET_SETUP.md` |
+| `[totl][email] password reset link generation failed` (TOTLMODELAGENCY-3A) | User requested reset for non-existent email | Expected; filtered in Sentry. Route returns success to avoid leaking user existence. |
+| `[totl][email] verification link generation failed` (TOTLMODELAGENCY-39) | User requested verification for already-registered email | Expected; filtered in Sentry. Route returns success. |
 | `import/order` warnings | Incorrect import order | Run `npm run lint -- --fix` or reorder: external → react → internal → types |
 | `@typescript-eslint/no-unused-vars` | Unused imports or variables | Remove unused imports, prefix unused variables with `_` |
 | `Type '... | undefined' is not assignable to type '... | null'` | `.find()` returns `undefined`, variable typed as `null` | Use `?? null` to convert: `array.find(...) ?? null` |

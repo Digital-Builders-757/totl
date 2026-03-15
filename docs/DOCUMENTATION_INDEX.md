@@ -36,6 +36,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 | | `AUTH_SESSION_MISSING_ERROR_FIX.md` | Fix for AuthSessionMissingError Sentry noise (session gate + route-aware handling) |
 | | `AUTH_SESSION_MISSING_ERROR_FIX_SUMMARY.md` | Final implementation summary with acceptance criteria |
 | | `SENTRY_AUTH_TOKEN_SETUP.md` | How to create a Sentry auth token for source map uploads and release creation |
+| | `CRON_SECRET_SETUP.md` | Fix TOTLMODELAGENCY-3D: add CRON_SECRET to Vercel for booking-reminders cron |
 | `docs/performance/` | Performance optimization documentation (`performance/README.md`) |
 | `docs/security/` | Security configuration and standards (`security/README.md`) |
 | `docs/audits/` | Audit reports and implementation summaries (`audits/README.md`) |
