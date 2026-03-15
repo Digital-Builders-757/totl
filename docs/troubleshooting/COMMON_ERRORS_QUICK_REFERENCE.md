@@ -40,6 +40,9 @@ npm run build
   - **Fix:** Ensure `/client/profile/page.tsx` accepts `userId` param and allows admin override
   - **Fix:** Ensure non-admin clients cannot view other clients (force `targetUserId = user.id` for non-admins)
   - **Prevention:** See `docs/ADMIN_VISIBILITY_AUDIT_REPORT.md` for full audit and fixes
+- **View Profile 404 / wrong person / breaks on special characters:** "View Profile" links using name slugs (`createNameSlug`) can fail for single-word names, empty parts, special chars (José, François), or duplicate names.
+  - **Fix:** Use `user_id` (UUID) for all View Profile links: `/talent/${user_id}`. Talent profile route supports UUID via `user_id.eq.${slug}`. Internal links in admin (talent, users, applications), client (applications, bookings), and talent dashboard now use UUID.
+  - **Prevention:** Never use `createNameSlug` for internal View Profile links; always use `user_id` or `talent_id` (profiles.id).
 - **Moderation Queue Fails to Load:** `/admin/moderation` throws "relation content_flags does not exist"
   - **Root Cause:** Missing `public.content_flags` table in the target Supabase project
   - **Fix:** Apply the moderation migration (`supabase db push`) that creates `content_flags` + policies

@@ -8,6 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Loading dark theme + View Profile UUID fix (March 15, 2026)**
+
+**UI / ADMIN / PROFILE LINKS** - March 15, 2026
+- ✅ **Loading screens dark theme:** Admin and all other loading states now use `bg-gray-900 page-ambient` (admin) or `bg-black page-ambient` (public) with `bg-white/10` skeletons. Eliminates white flash; maintains immersion. New `AdminLoadingShell` component; 40+ loading.tsx files updated.
+- ✅ **View Profile links use UUID:** "View Profile" / "Review profile" links now use `user_id` (UUID) instead of `createNameSlug(first_name, last_name)`. Fixes 404s, wrong person, special-character breakage, duplicate-name ambiguity. Talent profile route: UUID path now queries `user_id.eq.${slug}` only (no id.eq) for deterministic lookup.
+- ✅ **Docs:** COMMON_ERRORS_QUICK_REFERENCE.md entry for View Profile 404.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
 ## 🚀 **Latest: Security + UX hardening — portfolio, notifications, chunk handler (March 14, 2026)**
 
 **SECURITY / UX / NOTIFICATIONS** - March 14, 2026

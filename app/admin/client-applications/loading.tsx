@@ -1,32 +1,21 @@
-import { AdminHeader } from "@/components/admin/admin-header";
-import { Skeleton } from "@/components/ui/skeleton";
+import { AdminLoadingShell } from "@/components/admin/admin-loading-shell";
 
-export default function Loading() {
+export default function AdminClientApplicationsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
-      <div className="container mx-auto py-8 px-4">
-        <div className="mx-auto w-full max-w-6xl space-y-6">
-          <div className="space-y-3">
-            <Skeleton className="h-9 w-72" />
-            <Skeleton className="h-5 w-80 max-w-full" />
-          </div>
-          <div className="grid gap-4 md:grid-cols-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <Skeleton className="h-[420px] w-full rounded-xl" />
+    <AdminLoadingShell>
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <div className="space-y-3">
+          <div className="h-9 w-72 bg-white/10 rounded animate-pulse" />
+          <div className="h-5 w-80 max-w-full bg-white/10 rounded animate-pulse" />
         </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+          <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
+        </div>
+        <div className="h-[420px] w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
       </div>
-    </div>
+    </AdminLoadingShell>
   );
 }
-
-
-
-
-
-
-

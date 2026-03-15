@@ -6,7 +6,6 @@ import type { Booking } from "@/app/client/bookings/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookingStatusBadge } from "@/components/ui/status-badge";
-import { createNameSlug } from "@/lib/utils/slug";
 import type { Database } from "@/types/supabase";
 
 interface BookingsResultsContentProps {
@@ -86,13 +85,7 @@ export default function BookingsResultsContent({
 
             <div className="flex gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link
-                  href={
-                    booking.talent_profiles
-                      ? `/talent/${createNameSlug(booking.talent_profiles.first_name, booking.talent_profiles.last_name)}`
-                      : `/talent/${booking.talent_id}`
-                  }
-                >
+                <Link href={`/talent/${booking.talent_id}`}>
                   View Talent Profile
                 </Link>
               </Button>

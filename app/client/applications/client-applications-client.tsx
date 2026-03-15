@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getClientApplications } from "@/lib/actions/client-applications-actions";
-import { createNameSlug } from "@/lib/utils/slug";
 
 const AcceptApplicationDialog = dynamic(
   () =>
@@ -201,9 +200,7 @@ export default function ClientApplicationsClient({
   };
 
   const getTalentProfileHref = (application: Application) =>
-    application.talent_profiles
-      ? `/talent/${createNameSlug(application.talent_profiles.first_name, application.talent_profiles.last_name)}`
-      : `/talent/${application.talent_id}`;
+    `/talent/${application.talent_id}`;
 
   return (
     <div className="min-h-screen bg-black text-white">

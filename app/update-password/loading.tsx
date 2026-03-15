@@ -2,7 +2,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function UpdatePasswordLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
+    <div className="min-h-screen flex items-center justify-center bg-black page-ambient">
       <LoadingSpinner size="lg" className="text-white" />
     </div>
   );

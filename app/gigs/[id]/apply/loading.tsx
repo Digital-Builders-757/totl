@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ApplyToGigLoading() {
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
+    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient pt-40">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Back link skeleton */}

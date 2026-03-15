@@ -50,7 +50,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
 import { logger } from "@/lib/utils/logger";
-import { createNameSlug } from "@/lib/utils/slug";
 
 type UserProfile = {
   id: string;
@@ -298,11 +297,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
         {userProfile.role === "talent" && (
           <DropdownMenuItem asChild>
             <Link
-              href={
-                userProfile.talent_profiles
-                  ? `/talent/${createNameSlug(userProfile.talent_profiles.first_name, userProfile.talent_profiles.last_name)}`
-                  : `/talent/${userProfile.id}`
-              }
+              href={`/talent/${userProfile.id}`}
               className="text-gray-300 hover:bg-gray-700 flex items-center"
             >
               <Eye className="mr-2 h-4 w-4" />
