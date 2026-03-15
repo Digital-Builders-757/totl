@@ -1183,6 +1183,7 @@ h1 {
   content: "";
   position: absolute;
   inset: calc(var(--spotlight-border-size) * -1);
+  z-index: -1;
   border: var(--spotlight-border-size) solid transparent;
   border-radius: calc(var(--spotlight-radius) * 1px);
   background-repeat: no-repeat;
