@@ -22,7 +22,6 @@ import {
   Award,
   Globe,
   MoreVertical,
-  Heart,
   ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
@@ -31,6 +30,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { GigCard } from "@/components/gigs/gig-card";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
@@ -47,7 +47,6 @@ import { SafeImage } from "@/components/ui/safe-image";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { UrgentBadge } from "@/components/urgent-badge";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { getTalentBookings } from "@/lib/actions/booking-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
@@ -102,6 +101,7 @@ interface Gig {
   image_url?: string | null;
   created_at: string;
   application_deadline?: string | null;
+  date?: string;
 }
 
 function isLocalOrAutomationClient(): boolean {
@@ -864,11 +864,23 @@ function TalentDashboardContent({
       <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-2 sm:py-3">
           <div className="flex min-h-12 items-center justify-between gap-2 md:hidden">
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
-              <p className="truncate text-xs text-gray-300">
-                {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover opportunities"}
-              </p>
+            <div className="flex min-w-0 items-center gap-3">
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage
+                  src={profile?.avatar_url || "/images/totl-logo-transparent.png"}
+                  alt="Profile"
+                />
+                <AvatarFallback>
+                  {talentProfile?.first_name?.[0]}
+                  {talentProfile?.last_name?.[0] || "T"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
+                <p className="truncate text-xs text-gray-300">
+                  {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover opportunities"}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <NotificationDropdown
@@ -1829,80 +1841,11 @@ function TalentDashboardContent({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {gigs.map((gig) => (
-                      <Card
+                      <GigCard
                         key={gig.id}
-                        className="overflow-hidden hover:shadow-lg transition-shadow group flex flex-col h-full"
-                      >
-                        <div className="h-32 md:h-48 relative shrink-0">
-                          <SafeImage
-                            src={gig.image_url}
-                            alt={gig.title}
-                            fallbackSrc="/images/totl-logo-transparent.png"
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-300"
-                            placeholderQuery={gig.category?.toLowerCase() || "general"}
-                          />
-                          {gig.application_deadline && (
-                            <UrgentBadge deadline={gig.application_deadline} />
-                          )}
-                          <div className="absolute top-3 right-3 flex gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="bg-white/80 hover:bg-white"
-                            >
-                              <Heart className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        <CardContent className="p-4 flex flex-col flex-1 min-h-0">
-                          <div className="flex-1 min-h-0 space-y-3">
-                            <div>
-                              <h4 className="font-semibold text-lg text-white line-clamp-1">
-                                {gig.title}
-                              </h4>
-                              <p className="text-gray-300 text-sm line-clamp-2">
-                                {gig.description}
-                              </p>
-                            </div>
-                            <div className="space-y-2">
-                              <Badge
-                                variant="outline"
-                                className={getCategoryColor(gig.category || "General")}
-                              >
-                                {getCategoryLabel(gig.category || "")}
-                              </Badge>
-                              <div className="flex items-center text-sm text-gray-300">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                {gig.location}
-                              </div>
-                              <div className="flex items-center text-sm text-gray-300">
-                                <Calendar className="h-4 w-4 mr-1" />
-                                Deadline:{" "}
-                                {gig.application_deadline ? (
-                                  <SafeDate date={gig.application_deadline} />
-                                ) : (
-                                  "No deadline"
-                                )}
-                              </div>
-                              <div className="flex items-center text-sm font-medium text-white">
-                                <DollarSign className="h-4 w-4 mr-1" />
-                                {gig.compensation}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex gap-2 pt-2 mt-auto shrink-0">
-                            <Button className="flex-1 button-glow border-0" asChild>
-                              <Link href={`/gigs/${gig.id}/apply`}>Apply Now</Link>
-                            </Button>
-                            <Button variant="outline" size="sm" asChild>
-                              <Link href={`/gigs/${gig.id}`} aria-label={`View details for ${gig.title}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        gig={gig}
+                        variant="dashboard"
+                      />
                     ))}
                   </div>
                 )}
