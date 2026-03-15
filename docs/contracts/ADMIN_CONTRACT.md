@@ -51,11 +51,11 @@
   - `subscription_plan = 'annual'` → **annual**
   - anything else / NULL → **unknown** (must be surfaced; do not hide drift)
 
-**Dashboard display:**
-- Show counts (monthly/annual/unknown).
+**Dashboard display (Overview card):**
 - Show **Estimated** MRR/ARR derived from counts (no Stripe API calls):
   - MRR est. = `monthly * $20 + annual * ($200 / 12)` (display $16.67/mo per annual sub)
   - ARR est. = `monthly * $240 + annual * $200`
+- Full breakdown (monthly/annual/unknown counts) may be surfaced on admin talent page or settings; Overview card keeps focus on earnings.
 
 **Source of truth:** subscription fields are written by the Stripe webhook into `public.profiles`.
 

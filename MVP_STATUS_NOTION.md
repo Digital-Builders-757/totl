@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin dashboard UI polish — Paid Talent card, mobile tabs, header centering (March 15, 2026)**
+
+**UI / ADMIN DASHBOARD / MOBILE** - March 15, 2026
+- ✅ **Paid Talent card simplified:** Overview card now shows only MRR and ARR (e.g. $40.00/mo, $480.00/yr). Removed subscription breakdown (Monthly/Annual/Unknown) and "Review subscribers" footer per UX feedback. Full breakdown can be added to admin talent page later.
+- ✅ **Admin dashboard mobile tab rail:** Centered tabs (Overview, Opportunities, Applications, Analytics) with `scrollClassName="flex justify-center"`; increased gap-3 between tabs, gap-2 between icon and label, px-4 for touch targets.
+- ✅ **Admin header mobile title centered:** Route title (e.g. "Career Builder Applications") now truly centered using absolute positioning; matches Dashboard Mobile Density Guide ("centered route title").
+- ✅ **Tests:** paid-talent-stats.spec.ts updated to assert MRR/ARR only (removed monthly/annual/unknown selectors).
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Docs:** ADMIN_CONTRACT updated to reflect simplified Paid Talent card (MRR/ARR only; full breakdown optional elsewhere).
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
 ## 🚀 **Latest: Gig card glow border + navbar cleanup (March 15, 2026)**
 
 **UI / GIGS / NAVBAR** - March 15, 2026
