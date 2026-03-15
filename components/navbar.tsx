@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Button } from "@/components/ui/button";
 import { PATHS, isAuthRoute } from "@/lib/constants/routes";
-import { getSubscriptionStatusText, needsSubscription } from "@/lib/subscription";
+import { needsSubscription } from "@/lib/subscription";
 import { logger } from "@/lib/utils/logger";
 
 export default function Navbar() {
@@ -19,18 +19,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, userRole, profile, signOut } = useAuth();
   const isTalentUser = userRole === "talent";
-  const subscriptionStatus = profile?.subscription_status ?? null;
-  const subscriptionLabel = (() => {
-    if (!subscriptionStatus) return "Free";
-    if (subscriptionStatus === "canceled" || subscriptionStatus === "none") {
-      return "Free";
-    }
-    return getSubscriptionStatusText(subscriptionStatus);
-  })();
-  const subscriptionBadgeClass =
-    subscriptionStatus === "active"
-      ? "bg-green-500/20 text-green-200 border-green-500/40"
-      : "bg-yellow-500/20 text-yellow-100 border-yellow-500/40";
   const subscriptionAwareProfile =
     profile && profile.role
       ? {
@@ -137,22 +125,6 @@ export default function Navbar() {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
               </Link>
             )}
-            {/* Subscription nav: only show when subscribed (avoids redundancy with Subscribe CTA) */}
-            {isTalentUser && !shouldPromptSubscription && (
-              <Link
-                href="/talent/subscribe"
-                prefetch={shouldPrefetch}
-                data-testid="subscription-nav-pill"
-                className={`${textColor} hover:text-white font-medium transition-all duration-300 relative group flex items-center gap-2`}
-              >
-                Subscription
-                <span
-                  className={`text-xs px-2 py-0.5 rounded-full border ${subscriptionBadgeClass}`}
-                >
-                  {subscriptionLabel}
-                </span>
-              </Link>
-            )}
           </nav>
 
           {/* Desktop Auth Buttons */}
@@ -184,15 +156,6 @@ export default function Navbar() {
                       className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
                     >
                       Talent Dashboard
-                    </Link>
-                  )}
-                  {isTalentUser && !shouldPromptSubscription && (
-                    <Link
-                      href="/talent/subscribe"
-                      prefetch={shouldPrefetch}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                    >
-                      Subscription
                     </Link>
                   )}
                   {userRole === "client" && (
@@ -302,14 +265,6 @@ export default function Navbar() {
                         className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
                       >
                         Talent Dashboard
-                      </Link>
-                    )}
-                    {isTalentUser && !shouldPromptSubscription && (
-                      <Link
-                        href="/talent/subscribe"
-                        className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
-                      >
-                        Subscription ({subscriptionLabel})
                       </Link>
                     )}
                     {userRole === "client" && (

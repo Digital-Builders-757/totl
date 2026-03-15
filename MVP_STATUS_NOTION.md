@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Subscription in Settings, Career Builder responsiveness, gig card polish (March 15, 2026)**
+
+**UI / NAVBAR / SETTINGS / DASHBOARDS / GIGS** - March 15, 2026
+- ✅ **Subscription moved to Settings:** Removed Subscription from header (desktop nav, My Account dropdown, mobile menu). Talent users access subscription via Settings → Account tab (SubscriptionSection). Cleaner header; subscription lives where account-related options belong.
+- ✅ **Career Builder Dashboard responsiveness:** Client dashboard grid `xl:grid-cols-4 2xl:grid-cols-6`; ClientStatCard with `min-w-0`, `overflow-hidden`, column footer layout, `break-words` to prevent text overflow on smaller desktops.
+- ✅ **Gig card spotlight border:** Slowed animation with `@property` for `--spotlight-x`/`--spotlight-y` and `transition: 1.2s ease-out`.
+- ✅ **Gig card picture on Discover tab:** Restored image on paid-subscriber opportunities (talent dashboard Discover tab). GigCard `variant="dashboard"` with Apply Now + View buttons; mobile header avatar added.
+
+**Verification:** schema:verify:comprehensive, types:check, build, lint — all green.
+
+**Next (P1):** Direct-to-Supabase signed uploads for portfolio; CRON_SECRET in Vercel for booking reminders.
+
 ## 🚀 **Latest: Admin dashboard UI polish — Paid Talent card, mobile tabs, header centering (March 15, 2026)**
 
 **UI / ADMIN DASHBOARD / MOBILE** - March 15, 2026
@@ -4744,7 +4756,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 14, 2026*
-*Current Status: MVP Complete - Portfolio/notification/chunk hardening; bodySizeLimit 15mb; client compression*
+*Last Updated: March 15, 2026*
+*Current Status: MVP Complete - Subscription in Settings; Career Builder responsiveness; gig card polish*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: Direct-to-storage uploads; CRON_SECRET for booking reminders*
