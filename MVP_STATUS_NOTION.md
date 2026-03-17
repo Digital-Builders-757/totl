@@ -8,13 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Production walkthrough punchlists — Talent + Career Builder (March 17, 2026)**
+## 🚀 **Latest: Production walkthrough punchlists — Talent + Career Builder + Admin (March 17, 2026)**
 
 **UI / UX / PRODUCTION WALKTHROUGH** — March 17, 2026
 - ✅ **Talent punchlist saved:** `docs/plans/TALENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Talent production walkthrough (dashboard → gigs → apply → notifications).
-- ✅ **Career Builder walkthrough started:** Confirmed create opportunity route is `/post-gig` (not `/client/create-opportunity`). Applications empty-state "How applications work" currently routes to `/about` (public) — consider role-scoped help URL.
+- ✅ **Career Builder punchlist saved:** `docs/plans/CLIENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Career Builder production walkthrough (dashboard → my opportunities → applications → post-gig → notifications).
+- ✅ **Admin walkthrough (critical flows) executed:** opportunities list → create form; talent applications list → approve via inline action; client-applications list.
+- 🚨 **Admin detail routes appear broken in production (404):**
+  - `/admin/gigs/[id]` (View Opportunity) → 404
+  - `/admin/applications/[id]` (View Details) → 404
+  - `/admin/client-applications/[id]` (View Details) → 404
+  These block core admin workflows (reviewing records in detail).
 
-**Next:** Save the full Career Builder (Client) punchlist to `docs/plans/CLIENT_UX_POLISH_P0_P1.md` and implement P0 items (mobile-first, minimal-diff).
+**Next:** Save Admin punchlist to `docs/plans/ADMIN_UX_POLISH_P0_P1.md` and fix the 404 detail routes (P0) before launch.
 
 ## 🚀 **Latest: Profile Strength → Settings relocation (March 15, 2026)**
 
