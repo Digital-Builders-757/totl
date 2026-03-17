@@ -14,7 +14,7 @@
 - ✅ **Talent punchlist saved:** `docs/plans/TALENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Talent production walkthrough (dashboard → gigs → apply → notifications).
 - ✅ **Talent P0/P1 started (shipped):**
   - Talent dashboard: added clear desktop header CTA (**Browse opportunities**), removed repetitive KPI "Next action" footers.
-  - `/gigs`: reclaimed above-the-fold (shorter hero + mobile back link), collapsed advanced filters behind "More filters," improved saved searches empty state.
+  - `/gigs`: reclaimed above-the-fold (shorter hero + mobile back link), collapsed advanced filters behind "More filters," improved saved searches empty state; advanced filters auto-open when active (saved search/deep link).
   - Apply flow: added reassurance copy (profile + portfolio included automatically).
 - ✅ **Career Builder punchlist saved:** `docs/plans/CLIENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Career Builder production walkthrough (dashboard → my opportunities → applications → post-gig → notifications).
 - ✅ **Admin walkthrough (critical flows) executed:** opportunities list → create form; talent applications list → approve via inline action; client-applications list.

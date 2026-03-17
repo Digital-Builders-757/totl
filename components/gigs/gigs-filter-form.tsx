@@ -41,7 +41,15 @@ export function GigsFilterForm({
   sort,
   upcoming,
 }: GigsFilterFormProps) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(
+    Boolean(
+      radiusMiles ||
+        compensation ||
+        payRange ||
+        sort !== "newest" ||
+        upcoming
+    )
+  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     const form = e.currentTarget;
