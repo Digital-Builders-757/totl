@@ -12,6 +12,10 @@
 
 **UI / UX / PRODUCTION WALKTHROUGH** — March 17, 2026
 - ✅ **Talent punchlist saved:** `docs/plans/TALENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Talent production walkthrough (dashboard → gigs → apply → notifications).
+- ✅ **Talent P0/P1 started (shipped):**
+  - Talent dashboard: added clear desktop header CTA (**Browse opportunities**), removed repetitive KPI "Next action" footers.
+  - `/gigs`: reclaimed above-the-fold (shorter hero + mobile back link), collapsed advanced filters behind "More filters," improved saved searches empty state.
+  - Apply flow: added reassurance copy (profile + portfolio included automatically).
 - ✅ **Career Builder punchlist saved:** `docs/plans/CLIENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Career Builder production walkthrough (dashboard → my opportunities → applications → post-gig → notifications).
 - ✅ **Admin walkthrough (critical flows) executed:** opportunities list → create form; talent applications list → approve via inline action; client-applications list.
 - 🚨 **Admin detail routes appear broken in production (404):**
@@ -20,7 +24,7 @@
   - `/admin/client-applications/[id]` (View Details) → 404
   These block core admin workflows (reviewing records in detail).
 
-**Next:** Save Admin punchlist to `docs/plans/ADMIN_UX_POLISH_P0_P1.md` and fix the 404 detail routes (P0) before launch.
+**Next:** Fix the Admin 404 detail routes (P0) before launch, then finish remaining Talent P1 polish (sticky CTA / minor density) as needed.
 
 ## 🚀 **Latest: Profile Strength → Settings relocation (March 15, 2026)**
 

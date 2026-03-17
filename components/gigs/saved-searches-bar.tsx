@@ -103,62 +103,63 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
     router.push(url);
   };
 
+  const hasSearches = searches.length > 0;
+
   return (
-    <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-2 min-w-0">
         <Bookmark className="h-4 w-4 text-[var(--oklch-text-tertiary)] flex-shrink-0" />
-        <Select
-          onValueChange={(id) => {
-            const search = searches.find((s) => s.id === id);
-            if (search) handleLoad(search);
-          }}
-          disabled={loading || searches.length === 0}
-        >
-          <SelectTrigger
-            className="w-full sm:w-[220px] min-h-[44px] bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
-            aria-label="Load saved search"
+
+        {loading ? (
+          <div className="w-full sm:w-[220px] min-h-[44px] rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white px-3 flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span className="text-sm">Loading saved searches…</span>
+          </div>
+        ) : hasSearches ? (
+          <Select
+            onValueChange={(id) => {
+              const search = searches.find((s) => s.id === id);
+              if (search) handleLoad(search);
+            }}
           >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading...
-              </span>
-            ) : (
+            <SelectTrigger
+              className="w-full sm:w-[220px] min-h-[44px] bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+              aria-label="Load saved search"
+            >
               <SelectValue placeholder="Load saved search" />
-            )}
-          </SelectTrigger>
-          <SelectContent>
-            {searches.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            </SelectTrigger>
+            <SelectContent>
+              {searches.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <p className="text-sm text-[var(--oklch-text-secondary)]">Save your filters for 1‑click reuse.</p>
+        )}
       </div>
 
       <div className="flex gap-2">
-        <Dialog open={manageOpen} onOpenChange={setManageOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="min-h-[44px] border-[var(--oklch-border)] text-white hover:bg-white/10"
-              disabled={loading || searches.length === 0}
-            >
-              <Settings2 className="h-4 w-4 mr-2" />
-              Manage
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)] max-h-[80vh] overflow-hidden flex flex-col">
-            <DialogHeader>
-              <DialogTitle className="text-white">Manage saved searches</DialogTitle>
-            </DialogHeader>
-            <div className="overflow-y-auto flex-1 min-h-0 space-y-2 py-4">
-              {searches.length === 0 ? (
-                <p className="text-[var(--oklch-text-secondary)] text-sm">No saved searches yet.</p>
-              ) : (
-                searches.map((s) => (
+        {hasSearches && (
+          <Dialog open={manageOpen} onOpenChange={setManageOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px] border-[var(--oklch-border)] text-white hover:bg-white/10"
+              >
+                <Settings2 className="h-4 w-4 mr-2" />
+                Manage
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)] max-h-[80vh] overflow-hidden flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="text-white">Manage saved searches</DialogTitle>
+              </DialogHeader>
+              <div className="overflow-y-auto flex-1 min-h-0 space-y-2 py-4">
+                {searches.map((s) => (
                   <div
                     key={s.id}
                     className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/5 border border-white/10"
@@ -185,11 +186,11 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
                       )}
                     </Button>
                   </div>
-                ))
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
           <DialogTrigger asChild>
@@ -202,43 +203,44 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
               Save this search
             </Button>
           </DialogTrigger>
-        <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)]">
-          <DialogHeader>
-            <DialogTitle className="text-white">Save search</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="save-name" className="text-white">
-                Name
-              </Label>
-              <Input
-                id="save-name"
-                value={saveName}
-                onChange={(e) => setSaveName(e.target.value)}
-                placeholder="e.g. NYC modeling gigs"
-                className="bg-background text-foreground"
-                maxLength={64}
-              />
+          <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)]">
+            <DialogHeader>
+              <DialogTitle className="text-white">Save search</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="save-name" className="text-white">
+                  Name
+                </Label>
+                <Input
+                  id="save-name"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  placeholder="e.g. NYC modeling gigs"
+                  className="bg-background text-foreground"
+                  maxLength={64}
+                />
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSaveOpen(false)} disabled={saving}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSaveOpen(false)} disabled={saving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
 }
+

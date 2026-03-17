@@ -165,6 +165,9 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
         <label htmlFor="coverLetter" className="text-sm font-medium text-white">
           Cover Letter (Optional)
         </label>
+        <p className="text-xs text-gray-400">
+          Your profile and portfolio are included automatically.
+        </p>
         <Textarea
           id="coverLetter"
           value={coverLetter}

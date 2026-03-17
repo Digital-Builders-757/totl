@@ -917,6 +917,12 @@ function TalentDashboardContent({
                 className="border-gray-700 text-white hover:bg-gray-800"
                 showLabel
               />
+              <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+                <Link href="/gigs" className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Browse opportunities
+                </Link>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -990,15 +996,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Apply to more opportunities
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
 
@@ -1016,15 +1014,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Find new bookings
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
 
@@ -1042,15 +1032,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">$0</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Browse opportunities
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
         </div>
