@@ -423,9 +423,9 @@ export default function ClientApplicationsClient({
                   {!searchTerm && statusFilter === "all" && gigFilter === "all" && (
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                       <Button asChild>
-                        <Link href="/post-gig">Post an opportunity</Link>
+                        <Link href="/client/post-gig">Post an opportunity</Link>
                       </Button>
-                      <Link href="/about" className="text-sm text-gray-400 hover:text-white underline">
+                      <Link href="/client/help/applications" className="text-sm text-gray-400 hover:text-white underline">
                         How applications work
                       </Link>
                     </div>

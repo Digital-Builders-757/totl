@@ -8,6 +8,49 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder — role-scoped post + help (March 18, 2026)**
+
+- ✅ **Client P0:** `/post-gig` no longer uses public chrome; now redirects to canonical `/client/post-gig`.
+- ✅ **Client P0:** Client dashboard + gigs pages CTAs now link to `/client/post-gig`.
+- ✅ **Client P1:** `/client/applications` empty-state help link stays role-scoped (no `/about`).
+
+## 🚀 **Latest: Security maintenance — Next.js patch upgrade (March 17, 2026)**
+
+**SECURITY / DEPENDABOT / NEXT.JS** — March 17, 2026
+- ✅ **Upgraded Next.js:** `15.5.12` → `15.5.13` (Dependabot moderate advisory).
+- ⚠️ Note: `npm audit` still reports one moderate advisory requiring Next 16.x for full resolution; defer until post-launch unless we decide to take a breaking upgrade.
+
+**Verification:** lint + build — green.
+
+**ADMIN CONSISTENCY SWEEP** — March 18, 2026
+- ✅ Replace remaining Admin "Gigs" user-facing copy with "Opportunities" where appropriate (including `/admin/gigs/create`).
+- ✅ Ensure Admin-only flows never link to public `/gigs/[id]` when the intended action is admin detail.
+
+## 🚀 **Latest: Production walkthrough punchlists — Talent + Career Builder + Admin (March 17, 2026)**
+
+**UI / UX / PRODUCTION WALKTHROUGH** — March 17, 2026
+- ✅ **Talent punchlist saved:** `docs/plans/TALENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Talent production walkthrough (dashboard → gigs → apply → notifications).
+- ✅ **Talent P0/P1 started (shipped):**
+  - Talent dashboard: added clear desktop header CTA (**Browse opportunities**), added mobile sticky bottom CTA, removed repetitive KPI "Next action" footers.
+  - `/gigs`: reclaimed above-the-fold (shorter hero + mobile back link), collapsed advanced filters behind "More filters," improved saved searches empty state; advanced filters auto-open when active (saved search/deep link).
+  - Apply flow: added reassurance copy (profile + portfolio included automatically).
+- ✅ **Career Builder punchlist saved:** `docs/plans/CLIENT_UX_POLISH_P0_P1.md` (P0/P1/P2), from Career Builder production walkthrough (dashboard → my opportunities → applications → post-gig → notifications).
+- ✅ **Admin walkthrough (critical flows) executed:** opportunities list → create form; talent applications list → approve via inline action; client-applications list.
+- ✅ **Admin P0 started:** added missing Admin opportunity detail route `/admin/gigs/[id]` and updated Opportunities list to link to it.
+- ✅ **Admin P1 started:** Talent Applications list now shows real opportunity titles + talent names (IDs still available as secondary).
+- ✅ **Admin P1 started:** Users list now prefers real names (talent first/last) over raw IDs; search matches against names.
+- ✅ **Admin P1 started:** Admin Talent Applications list now links Opportunity → `/admin/gigs/[id]` and Talent → `/talent/[id]` for click-to-triage.
+- ✅ **Admin P1 started:** Admin Opportunity detail shows applications with status chips + direct links (talent + application).
+- ✅ **Admin P1 started:** Admin Opportunities list title is now clickable to open the admin detail view.
+- ⏳ **Admin P1 started:** Admin Opportunities mobile cards now include a clear "View details" CTA (no more ⋮-only navigation).
+- 🚨 **Admin detail routes appear broken in production (404):**
+  - `/admin/gigs/[id]` (View Opportunity) → 404
+  - `/admin/applications/[id]` (View Details) → 404
+  - `/admin/client-applications/[id]` (View Details) → 404
+  These block core admin workflows (reviewing records in detail).
+
+**Next:** Fix the Admin 404 detail routes (P0) before launch, then finish remaining Talent P1 polish (sticky CTA / minor density) as needed.
+
 ## 🚀 **Latest: Profile Strength → Settings relocation (March 15, 2026)**
 
 **UI / TALENT DASHBOARD / SETTINGS** - March 15, 2026

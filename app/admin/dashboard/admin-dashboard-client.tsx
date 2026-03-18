@@ -107,7 +107,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Briefcase className="h-4 w-4 text-blue-400" />
-                  <span>Total Gigs</span>
+                  <span>Total Opportunities</span>
                 </div>
                 <Badge variant="outline" className="status-chip">
                   All time
@@ -128,7 +128,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Zap className="h-4 w-4 text-green-400" />
-                  <span>Active Gigs</span>
+                  <span>Active Opportunities</span>
                 </div>
                 <Badge variant="outline" className="status-chip">
                   Live
@@ -483,7 +483,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                           className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
                           asChild
                         >
-                          <Link href={`/gigs/${gig.id}`}>
+                          <Link href={`/admin/gigs/${gig.id}`}>
                             <Eye className="h-4 w-4 mr-2" />
                             View
                           </Link>

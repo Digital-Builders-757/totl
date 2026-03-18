@@ -47,10 +47,9 @@ import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
-// Type for the joined application data
 type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"] & {
-  gigs: null;
-  talent: null;
+  gigs: { id: string; title: string; location: string | null } | null;
+  talent: { id: string; name: string; location: string | null } | null;
 };
 
 interface AdminApplicationsClientProps {
@@ -102,12 +101,22 @@ export function AdminApplicationsClient({
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (app) =>
+      filtered = filtered.filter((app) => {
+        const gigTitle = app.gigs?.title?.toLowerCase?.() ?? "";
+        const gigLocation = app.gigs?.location?.toLowerCase?.() ?? "";
+        const talentName = app.talent?.name?.toLowerCase?.() ?? "";
+        const talentLocation = app.talent?.location?.toLowerCase?.() ?? "";
+
+        return (
           app.gig_id.toLowerCase().includes(query) ||
           app.talent_id.toLowerCase().includes(query) ||
+          gigTitle.includes(query) ||
+          gigLocation.includes(query) ||
+          talentName.includes(query) ||
+          talentLocation.includes(query) ||
           app.status.toLowerCase().includes(query)
-      );
+        );
+      });
     }
 
     setFilteredApplications(filtered);
@@ -348,25 +357,25 @@ export function AdminApplicationsClient({
                     {filteredApplications.map((application) => (
                       <MobileListRowCard
                         key={application.id}
-                        title={`Application #${application.id.slice(0, 8)}`}
-                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        title={application.gigs?.title ?? `Application #${application.id.slice(0, 8)}`}
+                        subtitle={application.talent?.name ?? `Talent ${application.talent_id.slice(0, 8)}...`}
                         meta={[
-                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
-                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                          { label: "Location", value: application.gigs?.location ?? "—" },
+                          { label: "Applied", value: new Date(application.created_at).toLocaleDateString() },
                         ]}
                         badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
                         footer={renderInlineActions(application)}
                       />
                     ))}
                   </div>
+
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
@@ -374,9 +383,22 @@ export function AdminApplicationsClient({
                       <tbody className="divide-y divide-gray-700">
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
-                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4">
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
+                            <td className="px-6 py-4">
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">
@@ -437,25 +459,25 @@ export function AdminApplicationsClient({
                     {filteredApplications.map((application) => (
                       <MobileListRowCard
                         key={application.id}
-                        title={`Application #${application.id.slice(0, 8)}`}
-                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        title={application.gigs?.title ?? `Application #${application.id.slice(0, 8)}`}
+                        subtitle={application.talent?.name ?? `Talent ${application.talent_id.slice(0, 8)}...`}
                         meta={[
-                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
-                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                          { label: "Location", value: application.gigs?.location ?? "—" },
+                          { label: "Applied", value: new Date(application.created_at).toLocaleDateString() },
                         ]}
                         badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
                         footer={renderInlineActions(application)}
                       />
                     ))}
                   </div>
+
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
@@ -463,9 +485,22 @@ export function AdminApplicationsClient({
                       <tbody className="divide-y divide-gray-700">
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
-                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4">
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
+                            <td className="px-6 py-4">
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">{renderInlineActions(application)}</td>
@@ -490,25 +525,25 @@ export function AdminApplicationsClient({
                     {filteredApplications.map((application) => (
                       <MobileListRowCard
                         key={application.id}
-                        title={`Application #${application.id.slice(0, 8)}`}
-                        subtitle={`Gig ${application.gig_id.slice(0, 8)}...`}
+                        title={application.gigs?.title ?? `Application #${application.id.slice(0, 8)}`}
+                        subtitle={application.talent?.name ?? `Talent ${application.talent_id.slice(0, 8)}...`}
                         meta={[
-                          { label: "Talent", value: `${application.talent_id.slice(0, 8)}...` },
-                          { label: "Date", value: new Date(application.created_at).toLocaleDateString() },
+                          { label: "Location", value: application.gigs?.location ?? "—" },
+                          { label: "Applied", value: new Date(application.created_at).toLocaleDateString() },
                         ]}
                         badge={<ApplicationStatusBadge status={application.status} showIcon={true} />}
                         footer={renderInlineActions(application)}
                       />
                     ))}
                   </div>
+
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Application ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Gig ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent ID</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied Date</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
@@ -516,9 +551,22 @@ export function AdminApplicationsClient({
                       <tbody className="divide-y divide-gray-700">
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
-                            <td className="px-6 py-4 text-sm font-medium text-white">{application.id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.gig_id.slice(0, 8)}...</td>
-                            <td className="px-6 py-4 text-sm text-white">{application.talent_id.slice(0, 8)}...</td>
+                            <td className="px-6 py-4">
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
+                            <td className="px-6 py-4">
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
+                            </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">{renderInlineActions(application)}</td>

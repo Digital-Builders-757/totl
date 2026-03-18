@@ -56,7 +56,19 @@ if echo "$changed_files" | grep -q "^types/database.ts$"; then
   fi
 fi
 
-# 2. MVP STATUS DOCUMENTATION CHECK
+# 2. ARTIFACT GUARDRAIL (Playwright/Next build outputs must never be committed)
+echo "🧱 Guard: blocking build/test artifacts..."
+
+# If these ever get staged, they bloat the repo and create noisy diffs.
+# (This is especially common after running Playwright locally.)
+if git diff --cached --name-only | grep -E "^(test-results/|playwright-report/|\.next/)" > /dev/null 2>&1; then
+  echo "❌ ERROR: Attempting to commit build/test artifacts (.next/, test-results/, playwright-report/)"
+  echo "   Fix: Unstage them: git restore --staged .next test-results playwright-report"
+  echo "   Then ensure .gitignore includes them (it should)."
+  exit 1
+fi
+
+# 3. MVP STATUS DOCUMENTATION CHECK
 echo "📝 Checking MVP status documentation..."
 
 needs_doc=false

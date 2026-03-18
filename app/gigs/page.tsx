@@ -324,51 +324,81 @@ export default async function GigsPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] pt-40">
+    <div className="min-h-screen bg-[var(--oklch-bg)] pt-28 sm:pt-32">
       <div className="container mx-auto px-4 py-10 sm:py-14 md:py-16">
         <div className="max-w-6xl mx-auto">
-          {/* Breadcrumb Navigation */}
-          <div className="mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 text-xs sm:text-sm px-2 sm:px-0">
-            <Link 
-              href="/" 
-              className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
-            >
-              <Home className="h-4 w-4" />
-              <span className="hidden sm:inline">Home</span>
-            </Link>
-            <span className="text-[var(--oklch-text-muted)]">/</span>
-            {userRole === "talent" && (
-              <>
-                <Link 
-                  href="/talent/dashboard" 
-                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+          {/* Breadcrumb / Back */}
+          <div className="mb-5 sm:mb-8 px-2 sm:px-0">
+            <div className="sm:hidden">
+              {userRole === "talent" ? (
+                <Link
+                  href="/talent/dashboard"
+                  className="focus-hint inline-flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)] hover:text-white transition-colors min-h-[44px] py-2"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
                 </Link>
-                <span className="text-[var(--oklch-text-muted)]">/</span>
-              </>
-            )}
-            {userRole === "client" && (
-              <>
-                <Link 
-                  href="/client/dashboard" 
-                  className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+              ) : userRole === "client" ? (
+                <Link
+                  href="/client/dashboard"
+                  className="focus-hint inline-flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)] hover:text-white transition-colors min-h-[44px] py-2"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
                 </Link>
-                <span className="text-[var(--oklch-text-muted)]">/</span>
-              </>
-            )}
-            <span className="text-white font-medium">Find Opportunities</span>
+              ) : (
+                <Link
+                  href="/"
+                  className="focus-hint inline-flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)] hover:text-white transition-colors min-h-[44px] py-2"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Home
+                </Link>
+              )}
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+              <Link
+                href="/"
+                className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+              >
+                <Home className="h-4 w-4" />
+                <span className="hidden sm:inline">Home</span>
+              </Link>
+              <span className="text-[var(--oklch-text-muted)]">/</span>
+              {userRole === "talent" && (
+                <>
+                  <Link
+                    href="/talent/dashboard"
+                    className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Link>
+                  <span className="text-[var(--oklch-text-muted)]">/</span>
+                </>
+              )}
+              {userRole === "client" && (
+                <>
+                  <Link
+                    href="/client/dashboard"
+                    className="focus-hint text-[var(--oklch-text-tertiary)] hover:text-white transition-colors flex items-center gap-1 min-h-[44px] py-2"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    <span className="hidden sm:inline">Dashboard</span>
+                  </Link>
+                  <span className="text-[var(--oklch-text-muted)]">/</span>
+                </>
+              )}
+              <span className="text-white font-medium">Find Opportunities</span>
+            </div>
           </div>
 
-          <div className="mb-10 sm:mb-14 text-left md:text-center px-4 sm:px-0">
+          <div className="mb-6 sm:mb-10 text-left md:text-center px-4 sm:px-0">
             <div className="panel-frosted w-fit mx-0 md:mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-5 sm:mb-7 text-gradient-glow tracking-[-0.03em] animate-apple-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl font-bold mb-4 sm:mb-6 text-gradient-glow tracking-[-0.03em] animate-apple-fade-in">
               Find Opportunities
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-0 md:mx-auto leading-relaxed">

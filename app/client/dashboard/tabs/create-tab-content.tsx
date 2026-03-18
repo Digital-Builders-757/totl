@@ -45,7 +45,7 @@ export default function CreateTabContent() {
         </div>
 
         <Button size="lg" asChild>
-          <Link href="/post-gig">
+          <Link href="/client/post-gig">
             <Plus className="mr-2 h-5 w-5" />
             Start Creating Opportunity
           </Link>

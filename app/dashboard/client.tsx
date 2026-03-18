@@ -65,8 +65,8 @@ export function DashboardClient({ userRole }: { userRole: UserRole }) {
               <Button onClick={() => router.push(PATHS.CLIENT_DASHBOARD)} variant="outline">
                 Go to Career Builder Dashboard
               </Button>
-              <Button onClick={() => router.push("/post-gig")} variant="outline">
-                Post New Gig
+              <Button onClick={() => router.push("/client/post-gig")} variant="outline">
+                Post New Opportunity
               </Button>
             </>
           )}

@@ -85,6 +85,19 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const [disableReason, setDisableReason] = useState("");
   const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
 
+  const getUserDisplayName = (u: UserProfile) => {
+    const talentName = u.talent_profiles
+      ? `${u.talent_profiles.first_name ?? ""} ${u.talent_profiles.last_name ?? ""}`.trim()
+      : "";
+
+    return u.display_name || talentName || "No name";
+  };
+
+  const getUserInitial = (u: UserProfile) => {
+    const name = getUserDisplayName(u);
+    return name && name !== "No name" ? name.charAt(0).toUpperCase() : u.id.charAt(0).toUpperCase();
+  };
+
   // Filter users based on search query and active tab
   const filteredUsers = useMemo(() => {
     let filtered: typeof users;
@@ -108,12 +121,16 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
     // Filter by search query (within tab's dataset)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (u) =>
-          u.display_name?.toLowerCase().includes(query) ||
+      filtered = filtered.filter((u) => {
+        const displayName = getUserDisplayName(u).toLowerCase();
+        const roleName = getRoleDisplayName(u.role).toLowerCase();
+
+        return (
+          displayName.includes(query) ||
           u.id.toLowerCase().includes(query) ||
-          getRoleDisplayName(u.role).toLowerCase().includes(query)
-      );
+          roleName.includes(query)
+        );
+      });
     }
 
     return filtered;
@@ -368,7 +385,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           {filteredUsers.map((userProfile) => (
             <MobileListRowCard
               key={`mobile-${userProfile.id}`}
-              title={userProfile.display_name || "No name"}
+              title={getUserDisplayName(userProfile)}
               subtitle={getRoleDisplayName(userProfile.role)}
               meta={[
                 { label: "User ID", value: `${userProfile.id.slice(0, 8)}...` },
@@ -413,12 +430,11 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
-                        {userProfile.display_name?.charAt(0).toUpperCase() ||
-                          userProfile.id.charAt(0).toUpperCase()}
+                        {getUserInitial(userProfile)}
                       </div>
                       <div>
                         <div className="font-medium text-white text-sm">
-                          {userProfile.display_name || "No name"}
+                          {getUserDisplayName(userProfile)}
                         </div>
                         <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
                       </div>

@@ -124,7 +124,7 @@ export function TalentDashboardClient({ gigs }: TalentDashboardClientProps) {
                               </div>
                               <div>
                                 <Link
-                                  href={`/gigs/${application.gigId}`}
+                                  href={`/admin/gigs/${application.gigId}`}
                                   className="font-semibold text-black hover:underline"
                                 >
                                   {application.title}

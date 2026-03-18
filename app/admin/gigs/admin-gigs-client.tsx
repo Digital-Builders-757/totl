@@ -111,7 +111,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
             <Briefcase className="h-7 w-7 text-blue-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">No Gigs Found</h3>
+          <h3 className="text-lg font-semibold text-white">No Opportunities Found</h3>
           <p className="mt-2 text-sm text-gray-400">
             {searchQuery || locationFilter !== "all"
               ? "Try adjusting your search or filters."
@@ -135,6 +135,18 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                 { label: "Date", value: new Date(gig.date).toLocaleDateString() },
               ]}
               badge={<GigStatusBadge status={gig.status} showIcon />}
+              footer={
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="h-9 border-gray-700 bg-transparent text-white hover:bg-gray-700"
+                  >
+                    <Link href={`/admin/gigs/${gig.id}`}>View details</Link>
+                  </Button>
+                </div>
+              }
               trailing={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -142,13 +154,14 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       variant="ghost"
                       size="icon"
                       className="text-gray-400 hover:text-white hover:bg-gray-700"
+                      aria-label="Opportunity actions"
                     >
                       <MoreVertical size={16} />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
                     <DropdownMenuItem asChild>
-                      <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                      <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                         <Eye className="mr-2 h-4 w-4" />
                         View Opportunity
                       </Link>
@@ -190,8 +203,10 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
               {filteredGigs.map((gig) => (
                 <tr key={gig.id} className="hover:bg-gray-700/50 transition-colors duration-200">
                   <td className="py-4 px-6">
-                    <div className="font-medium text-white text-sm">{gig.title}</div>
-                    <div className="text-gray-400 text-xs mt-1">{gig.category}</div>
+                    <Link href={`/admin/gigs/${gig.id}`} className="block focus-hint">
+                      <div className="font-medium text-white text-sm hover:underline">{gig.title}</div>
+                      <div className="text-gray-400 text-xs mt-1">{gig.category}</div>
+                    </Link>
                   </td>
                   <td className="py-4 px-6">
                     <div className="text-white text-sm">{gig.client_profiles.company_name}</div>
@@ -222,7 +237,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
                         <DropdownMenuItem asChild>
-                          <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                          <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
                             View Opportunity
                           </Link>
@@ -285,7 +300,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
         <div className="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 shadow-2xl backdrop-blur-sm">
           <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
-              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Gigs</h2>
+              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Opportunities</h2>
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Search

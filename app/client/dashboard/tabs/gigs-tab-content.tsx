@@ -20,13 +20,13 @@ export default function GigsTabContent({ gigs, getCategoryColor }: GigsTabConten
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">My Gigs</h2>
-          <p className="text-gray-300">Manage your posted gigs and track their performance</p>
+          <h2 className="text-2xl font-bold text-white">My Opportunities</h2>
+          <p className="text-gray-300">Manage your posted opportunities and track their performance</p>
         </div>
         <Button asChild className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:opacity-90">
-          <Link href="/post-gig">
+          <Link href="/client/post-gig">
             <Plus className="mr-2 h-4 w-4" />
-            Post New Gig
+            Post New Opportunity
           </Link>
         </Button>
       </div>

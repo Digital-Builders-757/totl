@@ -917,6 +917,12 @@ function TalentDashboardContent({
                 className="border-gray-700 text-white hover:bg-gray-800"
                 showLabel
               />
+              <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+                <Link href="/gigs" className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Browse opportunities
+                </Link>
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -990,15 +996,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">{dashboardStats.totalApplications}</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Apply to more opportunities
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
 
@@ -1016,15 +1014,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">{dashboardStats.acceptedTalentApplications}</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Find new bookings
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
 
@@ -1042,15 +1032,7 @@ function TalentDashboardContent({
                 </div>
                 <div className="text-2xl font-bold text-white">$0</div>
               </div>
-              <div className="card-footer-row mt-auto min-h-[2.5rem]">
-                <span>Next action</span>
-                <Link
-                  href="/gigs"
-                  className="text-sm leading-tight text-[var(--oklch-text-primary)] hover:underline"
-                >
-                  Browse opportunities
-                </Link>
-              </div>
+              {/* Primary CTA lives in header + Opportunities card */}
             </CardContent>
           </Card>
         </div>
@@ -1752,6 +1734,18 @@ function TalentDashboardContent({
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Mobile spacer so the sticky bottom CTA doesn’t cover content */}
+        <div className="h-16 md:hidden" />
+      </div>
+
+      {/* Mobile sticky primary CTA */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+        <div className="container mx-auto px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+          <Button asChild className="w-full bg-white text-black hover:bg-gray-200">
+            <Link href="/gigs">Browse opportunities</Link>
+          </Button>
+        </div>
       </div>
 
       <ApplicationDetailsModal
