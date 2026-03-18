@@ -148,7 +148,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
                     <DropdownMenuItem asChild>
-                      <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                      <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                         <Eye className="mr-2 h-4 w-4" />
                         View Opportunity
                       </Link>
@@ -222,7 +222,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
                         <DropdownMenuItem asChild>
-                          <Link href={`/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                          <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
                             View Opportunity
                           </Link>
@@ -285,7 +285,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
         <div className="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 shadow-2xl backdrop-blur-sm">
           <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
-              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Gigs</h2>
+              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Opportunities</h2>
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Search
