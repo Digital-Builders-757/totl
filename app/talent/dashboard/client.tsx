@@ -1734,6 +1734,18 @@ function TalentDashboardContent({
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Mobile spacer so the sticky bottom CTA doesn’t cover content */}
+        <div className="h-16 md:hidden" />
+      </div>
+
+      {/* Mobile sticky primary CTA */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+        <div className="container mx-auto px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+          <Button asChild className="w-full bg-white text-black hover:bg-gray-200">
+            <Link href="/gigs">Browse opportunities</Link>
+          </Button>
+        </div>
       </div>
 
       <ApplicationDetailsModal
