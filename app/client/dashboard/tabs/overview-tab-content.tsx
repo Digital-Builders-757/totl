@@ -55,7 +55,7 @@ export default function OverviewTabContent({
           ]}
         />
         <div className="px-1">
-          <SecondaryActionLink href="/post-gig">Post a gig</SecondaryActionLink>
+          <SecondaryActionLink href="/client/post-gig">Post an opportunity</SecondaryActionLink>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ export default function OverviewTabContent({
                   className="totl-surface-card"
                   action={{
                     label: "Post Your First Gig",
-                    href: "/post-gig",
+                    href: "/client/post-gig",
                   }}
                 />
               )}

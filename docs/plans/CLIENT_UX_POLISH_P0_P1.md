@@ -30,7 +30,7 @@
 
 ---
 
-### P0.2 Ensure “Create Opportunity” navigation is consistent ⏳ (still pending)
+### P0.2 Ensure “Create Opportunity” navigation is consistent ✅ (fixed)
 **Observed:** “Create Opportunity” in the client terminal routes to `/post-gig`.
 
 **Problem:** `/post-gig` renders the public site header (Opportunities + My Account) instead of the client terminal header chrome, which risks role confusion and inconsistent navigation.
@@ -38,6 +38,11 @@
 **Fix options:**
 - Preferred: render `/post-gig` inside the client terminal chrome (Career Builder header/drawer style), or
 - Alternative: move create-opportunity route under `/client/...` and redirect `/post-gig` → canonical client route.
+
+**Implemented:**
+- ✅ Added canonical route: `/client/post-gig`
+- ✅ Kept `/post-gig` as a stable alias, but it now redirects → `/client/post-gig`
+- ✅ Updated client dashboard CTAs to link to `/client/post-gig`
 
 **Acceptance:** Career Builder always stays inside client-scoped navigation while posting.
 
