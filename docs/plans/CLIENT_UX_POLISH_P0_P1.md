@@ -94,7 +94,7 @@
 
 ---
 
-### P1.4 Applications empty-state link should stay role-scoped ⏳ (pending)
+### P1.4 Applications empty-state link should stay role-scoped ✅ (fixed)
 **Observed:** On `/client/applications`, the empty state includes “How applications work” which routes to `/about` (public page).
 
 **Problem:** Sends Career Builders to a public marketing page and breaks role-scoped navigation expectations.
@@ -102,6 +102,9 @@
 **Fix options:**
 - Replace with an in-terminal help route (e.g. `/client/help/applications`) or
 - Open a modal/side sheet explaining statuses (New → Under Review → Shortlisted → Accepted/Rejected)
+
+**Implemented:**
+- ✅ Replaced `/about` link with `/client/help/applications`.
 
 **Acceptance:** Help content remains inside the client terminal.
 

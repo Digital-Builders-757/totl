@@ -425,7 +425,7 @@ export default function ClientApplicationsClient({
                       <Button asChild>
                         <Link href="/client/post-gig">Post an opportunity</Link>
                       </Button>
-                      <Link href="/about" className="text-sm text-gray-400 hover:text-white underline">
+                      <Link href="/client/help/applications" className="text-sm text-gray-400 hover:text-white underline">
                         How applications work
                       </Link>
                     </div>

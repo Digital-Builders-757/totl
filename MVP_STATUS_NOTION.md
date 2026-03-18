@@ -8,10 +8,11 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
-## 🚀 **Latest: Career Builder — /post-gig stays inside client terminal chrome (March 18, 2026)**
+## 🚀 **Latest: Career Builder — role-scoped post + help (March 18, 2026)**
 
 - ✅ **Client P0:** `/post-gig` no longer uses public chrome; now redirects to canonical `/client/post-gig`.
 - ✅ **Client P0:** Client dashboard + gigs pages CTAs now link to `/client/post-gig`.
+- ✅ **Client P1:** `/client/applications` empty-state help link stays role-scoped (no `/about`).
 
 ## 🚀 **Latest: Security maintenance — Next.js patch upgrade (March 17, 2026)**
 
