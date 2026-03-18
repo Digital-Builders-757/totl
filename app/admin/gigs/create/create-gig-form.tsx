@@ -26,7 +26,7 @@ function SubmitButton() {
 
   return (
     <Button type="submit" disabled={pending} className="button-glow border-0">
-      {pending ? "Creating..." : "Create Gig"}
+      {pending ? "Creating..." : "Create Opportunity"}
     </Button>
   );
 }
@@ -83,9 +83,9 @@ export function CreateGigForm() {
         <div className="max-w-4xl mx-auto bg-gray-900 border border-gray-800 rounded-xl shadow-sm overflow-hidden">
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2 text-white">Create a New Gig</h1>
+              <h1 className="text-2xl font-bold mb-2 text-white">Create a New Opportunity</h1>
               <p className="text-gray-300">
-                Fill out the form below to create a new casting call or gig. Be as detailed as
+                Fill out the form below to create a new casting call or opportunity. Be as detailed as
                 possible to attract the right talent.
               </p>
             </div>

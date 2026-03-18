@@ -45,7 +45,7 @@
 
 ## P1 — High value polish (clarity + consistency)
 
-### P1.1 Terminology consistency: “Opportunities” vs “Gigs” ✅ (mostly fixed)
+### P1.1 Terminology consistency: “Opportunities” vs “Gigs” ✅ (fixed)
 **Observed:** `/admin/gigs` page header is “All Opportunities,” but a section heading still reads “Gigs.”
 
 **Fix:** Use a single term in admin UI (prefer “Opportunities” to match the rest of the product).
@@ -54,6 +54,7 @@
 
 **Status / notes:**
 - ✅ `/admin/gigs` list + empty state copy standardized to “Opportunities”.
+- ✅ `/admin/gigs/create` copy/button standardized to “Opportunity”.
 - ✅ `/admin/dashboard` opportunity cards no longer link to public `/gigs/[id]`.
 - ✅ `/admin/applications/[id]` no longer links to public gig page for admin triage.
 - ⏳ Remaining non-user-facing variable names (e.g. `filteredGigs`) can be left as-is.
