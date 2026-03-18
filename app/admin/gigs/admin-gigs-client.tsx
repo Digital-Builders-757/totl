@@ -135,6 +135,18 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                 { label: "Date", value: new Date(gig.date).toLocaleDateString() },
               ]}
               badge={<GigStatusBadge status={gig.status} showIcon />}
+              footer={
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="h-9 border-gray-700 bg-transparent text-white hover:bg-gray-700"
+                  >
+                    <Link href={`/admin/gigs/${gig.id}`}>View details</Link>
+                  </Button>
+                </div>
+              }
               trailing={
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -142,6 +154,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       variant="ghost"
                       size="icon"
                       className="text-gray-400 hover:text-white hover:bg-gray-700"
+                      aria-label="Opportunity actions"
                     >
                       <MoreVertical size={16} />
                     </Button>

@@ -23,7 +23,8 @@
 - ✅ **Admin P1 started:** Users list now prefers real names (talent first/last) over raw IDs; search matches against names.
 - ✅ **Admin P1 started:** Admin Talent Applications list now links Opportunity → `/admin/gigs/[id]` and Talent → `/talent/[id]` for click-to-triage.
 - ✅ **Admin P1 started:** Admin Opportunity detail shows applications with status chips + direct links (talent + application).
-- ⏳ **Admin P1 started:** Admin Opportunities list title is now clickable to open the admin detail view.
+- ✅ **Admin P1 started:** Admin Opportunities list title is now clickable to open the admin detail view.
+- ⏳ **Admin P1 started:** Admin Opportunities mobile cards now include a clear "View details" CTA (no more ⋮-only navigation).
 - 🚨 **Admin detail routes appear broken in production (404):**
   - `/admin/gigs/[id]` (View Opportunity) → 404
   - `/admin/applications/[id]` (View Details) → 404
