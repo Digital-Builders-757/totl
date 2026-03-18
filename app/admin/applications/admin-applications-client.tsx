@@ -384,14 +384,20 @@ export function AdminApplicationsClient({
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-white">
-                                {application.gigs?.title ?? "Unknown"}
-                              </div>
-                              <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm text-white">{application.talent?.name ?? "Unknown"}</div>
-                              <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
@@ -480,14 +486,20 @@ export function AdminApplicationsClient({
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-white">
-                                {application.gigs?.title ?? "Unknown"}
-                              </div>
-                              <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm text-white">{application.talent?.name ?? "Unknown"}</div>
-                              <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
@@ -540,14 +552,20 @@ export function AdminApplicationsClient({
                         {filteredApplications.map((application) => (
                           <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
                             <td className="px-6 py-4">
-                              <div className="text-sm font-medium text-white">
-                                {application.gigs?.title ?? "Unknown"}
-                              </div>
-                              <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
+                                <div className="text-sm font-medium text-white hover:underline">
+                                  {application.gigs?.title ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="text-sm text-white">{application.talent?.name ?? "Unknown"}</div>
-                              <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              <Link href={`/talent/${application.talent_id}`} className="block focus-hint">
+                                <div className="text-sm text-white hover:underline">
+                                  {application.talent?.name ?? "Unknown"}
+                                </div>
+                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                              </Link>
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>

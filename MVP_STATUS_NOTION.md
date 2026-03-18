@@ -20,7 +20,8 @@
 - ✅ **Admin walkthrough (critical flows) executed:** opportunities list → create form; talent applications list → approve via inline action; client-applications list.
 - ✅ **Admin P0 started:** added missing Admin opportunity detail route `/admin/gigs/[id]` and updated Opportunities list to link to it.
 - ✅ **Admin P1 started:** Talent Applications list now shows real opportunity titles + talent names (IDs still available as secondary).
-- ⏳ **Admin P1 started:** Users list now prefers real names (talent first/last) over raw IDs; search matches against names.
+- ✅ **Admin P1 started:** Users list now prefers real names (talent first/last) over raw IDs; search matches against names.
+- ⏳ **Admin P1 started:** Admin Talent Applications list now links Opportunity → `/admin/gigs/[id]` and Talent → `/talent/[id]` for click-to-triage.
 - 🚨 **Admin detail routes appear broken in production (404):**
   - `/admin/gigs/[id]` (View Opportunity) → 404
   - `/admin/applications/[id]` (View Details) → 404
