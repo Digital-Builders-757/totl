@@ -190,8 +190,10 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
               {filteredGigs.map((gig) => (
                 <tr key={gig.id} className="hover:bg-gray-700/50 transition-colors duration-200">
                   <td className="py-4 px-6">
-                    <div className="font-medium text-white text-sm">{gig.title}</div>
-                    <div className="text-gray-400 text-xs mt-1">{gig.category}</div>
+                    <Link href={`/admin/gigs/${gig.id}`} className="block focus-hint">
+                      <div className="font-medium text-white text-sm hover:underline">{gig.title}</div>
+                      <div className="text-gray-400 text-xs mt-1">{gig.category}</div>
+                    </Link>
                   </td>
                   <td className="py-4 px-6">
                     <div className="text-white text-sm">{gig.client_profiles.company_name}</div>
