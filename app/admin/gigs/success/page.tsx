@@ -66,7 +66,7 @@ export default function GigSuccessPage() {
                   Dashboard
                 </Link>
                 <Link href="/admin/gigs" className="text-black font-medium">
-                  My Gigs
+                  My Opportunities
                 </Link>
                 <Link href="/admin/applications" className="text-gray-600 hover:text-black">
                   Applications

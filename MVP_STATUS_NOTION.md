@@ -16,6 +16,10 @@
 
 **Verification:** lint + build — green.
 
+**ADMIN CONSISTENCY SWEEP** — March 18, 2026
+- ⏳ Replace remaining Admin "Gigs" user-facing copy with "Opportunities" where appropriate.
+- ⏳ Ensure Admin-only flows never link to public `/gigs/[id]` when the intended action is admin detail.
+
 ## 🚀 **Latest: Production walkthrough punchlists — Talent + Career Builder + Admin (March 17, 2026)**
 
 **UI / UX / PRODUCTION WALKTHROUGH** — March 17, 2026

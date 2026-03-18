@@ -111,7 +111,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
             <Briefcase className="h-7 w-7 text-blue-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">No Gigs Found</h3>
+          <h3 className="text-lg font-semibold text-white">No Opportunities Found</h3>
           <p className="mt-2 text-sm text-gray-400">
             {searchQuery || locationFilter !== "all"
               ? "Try adjusting your search or filters."

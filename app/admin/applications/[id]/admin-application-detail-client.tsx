@@ -317,8 +317,8 @@ export function AdminApplicationDetailClient({
                     </div>
                   )}
                   <Button variant="outline" className="w-full border-gray-700 text-white hover:bg-gray-800" asChild>
-                    <Link href={`/gigs/${gig.id}`}>
-                      View Gig Details
+                    <Link href={`/admin/gigs/${gig.id}`}>
+                      View Opportunity Details
                       <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
@@ -452,9 +452,9 @@ export function AdminApplicationDetailClient({
                     className="w-full border-gray-700 text-white hover:bg-gray-800"
                     asChild
                   >
-                    <Link href={`/gigs/${gig.id}`}>
+                    <Link href={`/admin/gigs/${gig.id}`}>
                       <Briefcase className="mr-2 h-4 w-4" />
-                      View Gig
+                      View Opportunity
                     </Link>
                   </Button>
                 )}

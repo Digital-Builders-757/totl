@@ -311,7 +311,7 @@ export default async function TalentDashboard() {
             <div className="mt-4 md:mt-0">
               <Button asChild className="bg-black text-white hover:bg-black/90">
                 <Link href="/gigs">
-                  <Briefcase className="mr-2 h-4 w-4" /> Browse Gigs
+                  <Briefcase className="mr-2 h-4 w-4" /> Browse Opportunities
                 </Link>
               </Button>
             </div>
@@ -406,7 +406,7 @@ export default async function TalentDashboard() {
                 <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-gray-500 text-sm">Gigs Completed</p>
+                <p className="text-gray-500 text-sm">Opportunities Completed</p>
                 <p className="text-2xl font-bold">12</p>
               </div>
             </div>
