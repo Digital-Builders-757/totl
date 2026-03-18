@@ -32,7 +32,7 @@ export default function GigsResultsContent({
           </p>
           {!searchTerm && (
             <Button asChild>
-              <Link href="/post-gig">
+              <Link href="/client/post-gig">
                 <Plus className="mr-2 h-4 w-4" />
                 Post Your First Opportunity
               </Link>

@@ -151,13 +151,13 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
         subtitle="Manage your posted opportunities and track applications"
         desktopPrimaryAction={
           <Button asChild>
-            <Link href="/post-gig">
+            <Link href="/client/post-gig">
               <Plus className="h-4 w-4 mr-2" />
               Post New Opportunity
             </Link>
           </Button>
         }
-        mobileSecondaryAction={<SecondaryActionLink href="/post-gig">Post new opportunity →</SecondaryActionLink>}
+        mobileSecondaryAction={<SecondaryActionLink href="/client/post-gig">Post new opportunity →</SecondaryActionLink>}
       />
 
       <div className="container mx-auto px-4 py-4 sm:py-6">

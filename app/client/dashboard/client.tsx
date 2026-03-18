@@ -234,7 +234,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               value={dashboardStats.totalGigs}
               footerLabel="Next action"
               footerActionText="Post an opportunity"
-              footerActionHref="/post-gig"
+              footerActionHref="/client/post-gig"
             />
 
             <ClientStatCard
