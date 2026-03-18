@@ -8,6 +8,14 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Security maintenance — Next.js patch upgrade (March 17, 2026)**
+
+**SECURITY / DEPENDABOT / NEXT.JS** — March 17, 2026
+- ✅ **Upgraded Next.js:** `15.5.12` → `15.5.13` (Dependabot moderate advisory).
+- ⚠️ Note: `npm audit` still reports one moderate advisory requiring Next 16.x for full resolution; defer until post-launch unless we decide to take a breaking upgrade.
+
+**Verification:** lint + build — green.
+
 ## 🚀 **Latest: Production walkthrough punchlists — Talent + Career Builder + Admin (March 17, 2026)**
 
 **UI / UX / PRODUCTION WALKTHROUGH** — March 17, 2026
