@@ -17,7 +17,7 @@
 
 ## P0 — Must-fix (blocks core admin workflows)
 
-### P0.1 Admin detail pages return 404 in production
+### P0.1 Admin detail pages return 404 in production ✅ (fixed)
 **Observed (production):**
 - Clicking **View Opportunity** from `/admin/gigs` actions menu navigates to `/admin/gigs/[id]` and returns **404**.
 - Clicking **View Details** from `/admin/applications` action menu navigates to `/admin/applications/[id]` and returns **404**.
@@ -26,9 +26,9 @@
 **Impact:** Admin can’t inspect or manage individual records in detail (hard blocker for launch operations).
 
 **Fix:** Ensure these routes exist and are deployed with the admin layout + auth gates:
-- `app/admin/gigs/[id]/page.tsx` (or equivalent)
-- `app/admin/applications/[id]/page.tsx`
-- `app/admin/client-applications/[id]/page.tsx`
+- ✅ `app/admin/gigs/[id]/page.tsx`
+- ✅ `app/admin/applications/[id]/page.tsx` (already existed)
+- ⏳ `app/admin/client-applications/[id]/page.tsx` (not required — client-applications uses drawer/modal; no route needed)
 
 **Acceptance:** Navigating to each detail page as an authenticated admin renders the detail UI (not public header, not 404) and supports intended actions.
 
@@ -45,16 +45,22 @@
 
 ## P1 — High value polish (clarity + consistency)
 
-### P1.1 Terminology consistency: “Opportunities” vs “Gigs”
+### P1.1 Terminology consistency: “Opportunities” vs “Gigs” ✅ (mostly fixed)
 **Observed:** `/admin/gigs` page header is “All Opportunities,” but a section heading still reads “Gigs.”
 
 **Fix:** Use a single term in admin UI (prefer “Opportunities” to match the rest of the product).
 
 **Acceptance:** No mixed “Gig/Gigs” headings on opportunity management pages.
 
+**Status / notes:**
+- ✅ `/admin/gigs` list + empty state copy standardized to “Opportunities”.
+- ✅ `/admin/dashboard` opportunity cards no longer link to public `/gigs/[id]`.
+- ✅ `/admin/applications/[id]` no longer links to public gig page for admin triage.
+- ⏳ Remaining non-user-facing variable names (e.g. `filteredGigs`) can be left as-is.
+
 ---
 
-### P1.2 Admin create opportunity form: validate no duplicate select artifact
+### P1.2 Admin create opportunity form: validate no duplicate select artifact ⏳ (not yet verified)
 **Observed:** The accessibility snapshot shows multiple combobox nodes around **Opportunity Type**.
 
 **Fix:** Confirm only one interactive control is rendered for Opportunity Type; remove redundant/hidden controls.
@@ -63,7 +69,7 @@
 
 ---
 
-### P1.3 Admin applications list: reduce reliance on IDs only
+### P1.3 Admin applications list: reduce reliance on IDs only ✅ (fixed)
 **Observed:** Talent Applications list table surfaces Application ID / Gig ID / Talent ID, which is operationally hard to use.
 
 **Fix:** Add human identifiers (opportunity title, talent name, company) as columns or in a secondary line within the cell.
@@ -72,13 +78,17 @@
 
 ---
 
-### P1.4 Users page: verify counts are internally consistent
+### P1.4 Users page: verify counts are internally consistent ✅ (improved display names + search)
 **Observed (example):** Header stats show **210 Suspended** while the All tab shows **98**. Could be “All excludes suspended,” but then the label should communicate that.
 
 **Fix:** Make counts clearly scoped:
 - If “All” excludes suspended, label it (e.g., “All Active”) or show both totals.
 
 **Acceptance:** An operator can trust counts without doing mental math.
+
+**Status / notes:**
+- ✅ Users list now prefers real names (display_name → talent profile → fallback) and search matches that display.
+- ⏳ The specific suspended-count mismatch should be re-verified in production data; may require relabeling or scoped counts depending on query semantics.
 
 ---
 

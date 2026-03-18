@@ -19,7 +19,7 @@
 
 ## P0 — Must-do (conversion + completion)
 
-### P0.1 Make the dashboard action model singular
+### P0.1 Make the dashboard action model singular ✅ (implemented for Talent; Client pending)
 **Problem:** The dashboard shows 6 KPI cards and each repeats a “Next action” link. This produces competing instructions and dilutes the primary job-to-be-done.
 
 **Fix:**
@@ -30,7 +30,7 @@
 
 ---
 
-### P0.2 Ensure “Create Opportunity” navigation is consistent
+### P0.2 Ensure “Create Opportunity” navigation is consistent ⏳ (still pending)
 **Observed:** “Create Opportunity” in the client terminal routes to `/post-gig`.
 
 **Problem:** `/post-gig` renders the public site header (Opportunities + My Account) instead of the client terminal header chrome, which risks role confusion and inconsistent navigation.
@@ -89,7 +89,7 @@
 
 ---
 
-### P1.4 Applications empty-state link should stay role-scoped
+### P1.4 Applications empty-state link should stay role-scoped ⏳ (pending)
 **Observed:** On `/client/applications`, the empty state includes “How applications work” which routes to `/about` (public page).
 
 **Problem:** Sends Career Builders to a public marketing page and breaks role-scoped navigation expectations.
