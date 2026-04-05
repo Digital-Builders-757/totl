@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder — “apply again” false prompt fix (April 5, 2026)**
+
+**AUTH / CLIENT ONBOARDING / UI** — April 5, 2026
+- ✅ **`GET /api/client-applications/status`:** Resolves the latest application by **`user_id` first, then by email**; if **`profiles.role === client`**, always returns **`approved`** so downstream UIs do not think the user still needs to apply.
+- ✅ **`/client/apply`:** Redirects existing Career Builders to **`/client/dashboard`**; blocks duplicate submissions via **`submitClientApplication`** guard.
+- ✅ **Talent public profile (contact locked):** Logged-in **`client`** users see **Career Builder dashboard** CTA instead of **Apply as Career Builder**; **`admin`** gets a short admin-console note.
+- ✅ **`/choose-role` + `/client/signup`:** Career Builders are routed/messaged toward the dashboard instead of the application funnel.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green.
+
+**Next (P0):** Execute first external real-user beta session and unblock Admin detail 404s if still present in production.
+
+**Next (P1):** Direct-to-Supabase signed portfolio uploads; **CRON_SECRET** in Vercel for booking reminders.
+
 ## 🚀 **Latest: Career Builder — role-scoped post + help (March 18, 2026)**
 
 - ✅ **Client P0:** `/post-gig` no longer uses public chrome; now redirects to canonical `/client/post-gig`.
@@ -4823,7 +4837,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: March 15, 2026*
-*Current Status: MVP Complete - Subscription in Settings; Career Builder responsiveness; gig card polish*
+*Last Updated: April 5, 2026*
+*Current Status: MVP Complete; Career Builder status/API + apply-flow prompts aligned with `profiles.role = client`*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Direct-to-storage uploads; CRON_SECRET for booking reminders*
+*Next Review: Beta evidence + Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*

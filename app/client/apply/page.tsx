@@ -66,7 +66,7 @@ export default function ClientApplicationPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const returnUrl = searchParams?.get("returnUrl") ?? null;
-  const { user } = useAuth();
+  const { user, profile, userRole, isLoading: authLoading } = useAuth();
   const [applicationStatus, setApplicationStatus] = useState<{
     status: string | null;
     applicationId?: string;
@@ -74,6 +74,13 @@ export default function ClientApplicationPage() {
   } | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+
+  const isCareerBuilder = userRole === "client" || profile?.role === "client";
+
+  useEffect(() => {
+    if (authLoading || !user || !isCareerBuilder) return;
+    router.replace("/client/dashboard");
+  }, [authLoading, user, isCareerBuilder, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -249,9 +256,28 @@ export default function ClientApplicationPage() {
     applicationStatus?.status &&
     applicationStatus.status !== "approved" &&
     user;
-  const shouldShowForm = (hasStartedEditing || !applicationStatus?.status) && !isCheckingStatus;
+  const shouldShowForm =
+    !isCareerBuilder &&
+    (hasStartedEditing || !applicationStatus?.status) &&
+    !isCheckingStatus;
   const labelClass = "text-sm font-semibold text-white/80";
   const inputClass = "bg-slate-900 text-white border-white/10 focus-visible:border-amber-500";
+
+  if (authLoading && user) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24 flex items-center justify-center px-4">
+        <p className="text-white/70 text-center">Loading your account…</p>
+      </div>
+    );
+  }
+
+  if (user && isCareerBuilder) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24 flex items-center justify-center px-4">
+        <p className="text-white/70 text-center">Redirecting to your Career Builder dashboard…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24">

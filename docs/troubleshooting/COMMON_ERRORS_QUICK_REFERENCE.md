@@ -260,6 +260,12 @@ npm run build
     - hash `token_hash + type` -> `verifyOtp({ token_hash, type })`
   - **Fix:** After session establishment, clear callback tokens from the URL and resolve destination via `getBootStateRedirect({ postAuth: true, returnUrlRaw })` with bounded retries.
   - **Prevention:** Never assume invite tokens are query-only; always support hash delivery modes and keep `returnUrl` handling safe (`safeReturnUrl`) with a local fallback route.
+- **Career Builder already approved but UI still says “Apply to be a Career Builder” (`/client/apply`, Settings, talent profile):**
+  - **Symptom:** `profiles.role` is **`client`** but the user still sees the application form, “apply” CTAs, or **Apply as Career Builder** on a public talent profile.
+  - **Root Cause:** **`GET /api/client-applications/status`** only looked up **`client_applications`** by **`user_id`**, so rows keyed mainly by **email** (or legacy linkage gaps) returned **`status: null`**. The talent profile CTA also treated every non-**talent** role as “needs to apply.”
+  - **Fix (shipped April 2026):** Status route loads by **user_id then email**, and if **`profiles.role === client`** returns **`approved`**. Apply page and related flows redirect or guard; talent profile shows **Career Builder dashboard** for **`client`**.
+  - **Prevention:** Any new “application status” UI must treat **`profiles.role === client`** as terminal Career Builder access, not only `client_applications.status`.
+
 - **Career Builder submit fails right after successful invite acceptance (`unexpected error` / `must be logged in`):**
   - **Symptom:** User reaches `/client/apply` from invite callback, fills form, then submit fails with auth-like error or generic unexpected failure.
   - **Root Cause:** Callback can establish browser session before server-side cookie visibility fully converges; server action `submitClientApplication()` calls `auth.getUser()` and may read `null` during this race.
