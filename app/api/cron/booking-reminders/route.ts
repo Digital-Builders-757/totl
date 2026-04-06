@@ -23,8 +23,14 @@ export async function GET(request: Request) {
     ? authHeader.slice(7)
     : cronHeader;
 
-  if (!cronSecret || providedSecret !== cronSecret) {
-    logger.warn("[cron/booking-reminders] Unauthorized cron request");
+  if (!cronSecret) {
+    logger.warn("[cron/booking-reminders] CRON_SECRET is not configured");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (providedSecret !== cronSecret) {
+    // Probes / wrong secret — do not spam Sentry (TOTLMODELAGENCY-3D). Use Vercel logs if needed.
+    logger.info("[cron/booking-reminders] Unauthorized cron request (ignored)");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

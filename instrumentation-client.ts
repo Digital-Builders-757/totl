@@ -16,6 +16,8 @@ import {
   projectIdMatches,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterCronUnauthorizedProbeNoise,
+  shouldFilterExpectedInvalidLoginCredentialsNoise,
   shouldFilterHandledLoadFailedNoise,
   shouldFilterLocalAuthCallbackInvalidTokenNoise,
   shouldFilterLocalFailedFetchNoise,
@@ -194,6 +196,16 @@ Sentry.init({
 
     if (shouldFilterLocalAuthCallbackInvalidTokenNoise(event, errorMessage)) {
       devLog("Local auth callback invalid token noise filtered (2X)");
+      return null;
+    }
+
+    if (shouldFilterExpectedInvalidLoginCredentialsNoise(event, errorMessage)) {
+      devLog("Expected invalid login credentials filtered (38, 3H)");
+      return null;
+    }
+
+    if (shouldFilterCronUnauthorizedProbeNoise(event, errorMessage)) {
+      devLog("Cron unauthorized probe filtered (3D)");
       return null;
     }
 

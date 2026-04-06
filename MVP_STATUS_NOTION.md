@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Sentry noise reduction + structured logging hygiene (April 6, 2026)**
+
+**OBSERVABILITY / STRIPE / CRON / UI** — April 6, 2026
+- ✅ **Sentry `beforeSend`:** Filter expected **invalid login credentials** (`AuthApiError`) and **cron unauthorized probe** messages (aligns with unresolved issues ~38, ~3H, ~3D).
+- ✅ **Stripe webhook:** Stop emitting **`logger.error` on every retry** when no profile is resolved; **one** contextual error on **`checkout.session.completed`** failures; **single** `logger.warn` for **live** orphaned subscription events after max attempts; test-mode orphan uses `logger.info` only.
+- ✅ **Booking reminders cron:** **`logger.warn`** only when **`CRON_SECRET` is missing**; wrong secret / probes use **`logger.info`** (no production Sentry spam).
+- ✅ **Client components:** **`talent-signup-form`** and **`portfolio-upload`** use **`logger`** instead of raw **`console.*`** (expected paths use **`logger.debug`**).
+- ✅ **Docs:** `COMMON_ERRORS_QUICK_REFERENCE.md` summarizes the above Sentry/Stripe/cron behaviors.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green.
+
+**Next (P0):** External beta evidence; confirm **Admin detail** routes in production if still blocking.
+
+**Next (P1):** Direct-to-Supabase portfolio uploads; set **CRON_SECRET** on Vercel for booking reminders.
+
 ## 🚀 **Latest: Career Builder — “apply again” false prompt fix (April 5, 2026)**
 
 **AUTH / CLIENT ONBOARDING / UI** — April 5, 2026
@@ -4837,7 +4852,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 5, 2026*
-*Current Status: MVP Complete; Career Builder status/API + apply-flow prompts aligned with `profiles.role = client`*
+*Last Updated: April 6, 2026*
+*Current Status: MVP Complete; Sentry noise filters + Stripe/cron logging hygiene + structured client logging*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Beta evidence + Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*
+*Next Review: Beta evidence; Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*

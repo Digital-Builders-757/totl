@@ -1,5 +1,6 @@
 type SentryEventLike = {
   message?: string;
+  transaction?: string;
   logentry?: {
     message?: string;
   };
@@ -10,6 +11,7 @@ type SentryEventLike = {
   extra?: Record<string, unknown>;
   exception?: {
     values?: Array<{
+      type?: string;
       stacktrace?: {
         frames?: Array<{
           filename?: string;
@@ -381,4 +383,41 @@ export function shouldFilterExpectedEmailLinkGenerationNoise(
     errorMsg.includes("already registered");
 
   return isExpectedPasswordReset || isExpectedVerification;
+}
+
+/**
+ * Filter: Supabase Auth invalid login (wrong password / bad credentials).
+ * Expected user error on /login — not actionable in Sentry.
+ * Sentry issues: TOTLMODELAGENCY-38, TOTLMODELAGENCY-3H
+ */
+export function shouldFilterExpectedInvalidLoginCredentialsNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const msg = getEventMessage(event, errorMessage).toLowerCase();
+  if (!msg.includes("invalid login credentials")) {
+    return false;
+  }
+
+  const url = getEventUrl(event)?.toLowerCase() ?? "";
+  const transaction = String(event.transaction ?? "").toLowerCase();
+  if (url.includes("/login") || transaction.includes("login")) {
+    return true;
+  }
+
+  const exceptionType = String(event.exception?.values?.[0]?.type ?? "");
+  return exceptionType === "AuthApiError";
+}
+
+/**
+ * Filter: Cron endpoint probed without valid CRON_SECRET.
+ * Bots and misconfigured schedulers — fix is config; spam should not page Sentry.
+ * Sentry issue: TOTLMODELAGENCY-3D
+ */
+export function shouldFilterCronUnauthorizedProbeNoise(
+  event: SentryEventLike,
+  errorMessage: string
+): boolean {
+  const msg = getEventMessage(event, errorMessage);
+  return msg.includes("[cron/booking-reminders] Unauthorized cron request");
 }

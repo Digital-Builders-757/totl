@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ensureProfilesAfterSignup } from "@/lib/actions/auth-actions";
+import { logger } from "@/lib/utils/logger";
 
 // Define the form schema with validation rules
 const signupSchema = z
@@ -130,7 +131,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
 
       if (isDuplicateEmail) {
         if (error) {
-          console.error("Signup error:", error);
+          logger.debug("Signup duplicate email (expected)", error);
         }
         const friendlyMessage =
           "An account with this email already exists. Please sign in instead.";
@@ -148,7 +149,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       }
 
       if (error) {
-        console.error("Signup error:", error);
+        logger.error("Talent signup failed", error);
         setServerError(error.message);
         setIsSubmitting(false);
         return;
@@ -163,17 +164,17 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
         
         let profileResult = await ensureProfilesAfterSignup();
         if (profileResult.error) {
-          console.warn("Error ensuring profiles after signup (first attempt):", profileResult.error);
+          logger.debug("Profile ensure after signup (first attempt)", profileResult.error);
           // Retry once more after additional delay
           await new Promise(resolve => setTimeout(resolve, 1000));
           profileResult = await ensureProfilesAfterSignup();
           if (profileResult.error) {
-            console.error("Error ensuring profiles after signup (retry failed):", profileResult.error);
+            logger.error("Profile ensure after signup failed after retry", profileResult.error);
             // Don't fail signup - user was created, profiles might be created by trigger
           }
         }
       } catch (profileError) {
-        console.error("Unexpected error ensuring profiles after signup:", profileError);
+        logger.error("Unexpected error ensuring profiles after signup", profileError);
         // Don't fail signup - user was created
       }
 
@@ -188,7 +189,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
 
       router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
-      console.error("Unexpected error during signup:", error);
+      logger.error("Unexpected error during talent signup", error);
       setServerError(
         error instanceof Error ? error.message : "An unexpected error occurred. Please try again."
       );

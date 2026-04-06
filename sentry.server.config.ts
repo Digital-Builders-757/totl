@@ -15,7 +15,9 @@ import {
   serverIsProduction,
 } from "@/lib/sentry/env";
 import {
+  shouldFilterCronUnauthorizedProbeNoise,
   shouldFilterExpectedEmailLinkGenerationNoise,
+  shouldFilterExpectedInvalidLoginCredentialsNoise,
   shouldFilterLocalEmailDisabledNoise,
   shouldFilterLocalWebStreamNoise,
   shouldFilterLocalServerRenderNoise,
@@ -130,6 +132,16 @@ Sentry.init({
 
     if (shouldFilterExpectedEmailLinkGenerationNoise(event, String(errorMessage))) {
       devLog("Expected email link generation noise filtered (3A, 39)");
+      return null;
+    }
+
+    if (shouldFilterExpectedInvalidLoginCredentialsNoise(event, String(errorMessage))) {
+      devLog("Expected invalid login credentials filtered (38, 3H)");
+      return null;
+    }
+
+    if (shouldFilterCronUnauthorizedProbeNoise(event, String(errorMessage))) {
+      devLog("Cron unauthorized probe filtered (3D)");
       return null;
     }
 
