@@ -24,9 +24,19 @@ export default function ClientSignup() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const returnUrl = searchParams?.get("returnUrl") ?? null;
-  const { user } = useAuth();
+  const { user, profile, userRole, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (authLoading || !user) return;
+    if (userRole === "client" || profile?.role === "client") {
+      router.replace("/client/dashboard");
+    }
+  }, [authLoading, user, userRole, profile?.role, router]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (user && (userRole === "client" || profile?.role === "client")) return;
+
     // Redirect to application page after brief delay to show message
     const timer = setTimeout(() => {
       const applicationUrl = returnUrl
@@ -36,9 +46,13 @@ export default function ClientSignup() {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [router, returnUrl]);
+  }, [router, returnUrl, authLoading, user, userRole, profile?.role]);
 
   const handleGoToApplication = () => {
+    if (user && (userRole === "client" || profile?.role === "client")) {
+      router.push("/client/dashboard");
+      return;
+    }
     const applicationUrl = returnUrl
       ? `/client/apply?returnUrl=${encodeURIComponent(returnUrl)}`
       : "/client/apply";
@@ -84,7 +98,13 @@ export default function ClientSignup() {
                 </ol>
               </div>
 
-              {user ? (
+              {user && (userRole === "client" || profile?.role === "client") ? (
+                <Alert className="bg-green-50 border-green-200">
+                  <AlertDescription className="text-green-800">
+                    You already have Career Builder access. We&apos;re taking you to your dashboard.
+                  </AlertDescription>
+                </Alert>
+              ) : user ? (
                 <Alert className="bg-green-50 border-green-200">
                   <AlertDescription className="text-green-800">
                     You&apos;re already logged in! You can apply to become a Career Builder now.
@@ -99,12 +119,16 @@ export default function ClientSignup() {
               )}
 
               <p className="text-center text-gray-500 text-sm">
-                Redirecting you to the Career Builder application page...
+                {user && (userRole === "client" || profile?.role === "client")
+                  ? "Redirecting you to your Career Builder dashboard..."
+                  : "Redirecting you to the Career Builder application page..."}
               </p>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2">
               <Button onClick={handleGoToApplication} className="w-full">
-                Go to Application Page Now
+                {user && (userRole === "client" || profile?.role === "client")
+                  ? "Go to dashboard now"
+                  : "Go to Application Page Now"}
               </Button>
               {!user && (
                 <Button variant="outline" asChild className="w-full">

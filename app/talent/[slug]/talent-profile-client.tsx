@@ -78,6 +78,14 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
               <p className="text-sm text-gray-500">
                 Clients unlock contact details after applying or booking talent.
               </p>
+            ) : user.role === "client" ? (
+              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+                <Link href="/client/dashboard">Career Builder dashboard</Link>
+              </Button>
+            ) : user.role === "admin" ? (
+              <p className="text-sm text-gray-500">
+                Use the admin console to manage talent relationships and contact access.
+              </p>
             ) : (
               <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
                 <Link href="/client/apply">Apply as Career Builder</Link>

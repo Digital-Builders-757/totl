@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
+import { logger } from "@/lib/utils/logger";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -176,7 +177,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
       // Notify parent component
       onUploadSuccess?.();
     } catch (error) {
-      console.error("Upload error:", error);
+      logger.error("Portfolio upload failed", error);
       toast({
         title: "Upload failed",
         description: "An unexpected error occurred",

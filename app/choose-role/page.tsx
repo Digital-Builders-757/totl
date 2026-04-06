@@ -25,11 +25,18 @@ export default function ChooseRolePage() {
   const [showCareerBuilderDialog, setShowCareerBuilderDialog] = useState(false);
   const [showTalentSignupDialog, setShowTalentSignupDialog] = useState(false);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, profile, userRole, isLoading: authLoading } = useAuth();
 
   useEffect(() => {
     setIsHydrated(true);
   }, [user, router]);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+    if (userRole === "client" || profile?.role === "client") {
+      router.replace("/client/dashboard");
+    }
+  }, [authLoading, user, userRole, profile?.role, router]);
 
   const handleCareerBuilderClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
@@ -187,7 +194,13 @@ export default function ChooseRolePage() {
             <p className="text-gray-300 text-sm leading-relaxed">
               Once you have a Talent account, you can apply to become a Career Builder. Our team will review your application and contact you within 2-3 business days.
             </p>
-            {user ? (
+            {user && (userRole === "client" || profile?.role === "client") ? (
+              <Alert className="bg-green-900/30 border-green-700">
+                <AlertDescription className="text-green-300">
+                  You already have Career Builder access. Use your dashboard to post opportunities and hire talent.
+                </AlertDescription>
+              </Alert>
+            ) : user ? (
               <Alert className="bg-green-900/30 border-green-700">
                 <AlertDescription className="text-green-300">
                   You&apos;re already logged in! You can apply to become a Career Builder now.
@@ -209,7 +222,17 @@ export default function ChooseRolePage() {
             >
               Cancel
             </Button>
-            {user ? (
+            {user && (userRole === "client" || profile?.role === "client") ? (
+              <Button
+                onClick={() => {
+                  setShowCareerBuilderDialog(false);
+                  router.push("/client/dashboard");
+                }}
+                className="bg-amber-500 text-black hover:bg-amber-400"
+              >
+                Open Career Builder dashboard
+              </Button>
+            ) : user ? (
               <Button
                 onClick={handleApplyAsCareerBuilder}
                 className="bg-amber-500 text-black hover:bg-amber-400"

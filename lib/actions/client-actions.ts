@@ -58,6 +58,23 @@ export async function submitClientApplication(data: ClientApplicationData) {
       return { error: "You must be logged in to apply as a Career Builder." };
     }
 
+    const { data: applicantProfile, error: profileReadError } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileReadError) {
+      logger.error("[client-apply] profile read failed", profileReadError, { traceId, userId: user.id });
+      return { error: "Could not verify your account. Please try again." };
+    }
+
+    if (applicantProfile?.role === "client") {
+      return {
+        error: "You already have Career Builder access. Open your Career Builder dashboard instead.",
+      };
+    }
+
     // Option 1 (finish-line truth): client_applications is UNIQUE(email).
     // `user_id` is optional linkage; never treat it as the uniqueness key.
     const canonicalEmail = user.email.trim().toLowerCase();

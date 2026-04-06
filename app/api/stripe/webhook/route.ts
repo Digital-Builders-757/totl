@@ -197,6 +197,15 @@ export async function POST(req: Request) {
           const result = await handleSubscriptionUpdate(supabase, subscription, event);
           
           if (!result.success) {
+            logger.error(
+              "Stripe webhook: no profile for customer (checkout.session.completed)",
+              undefined,
+              {
+                customerId: ledgerContext.customerId,
+                sessionId: session.id,
+                stripeEventId: event.id,
+              }
+            );
             // checkout.session.completed MUST resolve to a profile (this is a bug if it doesn't)
             // Return 500 to retry until profile mapping is fixed
             await markStripeWebhookEventLedgerRow(supabase, {
@@ -240,6 +249,19 @@ export async function POST(req: Request) {
 
           // If test mode or too many attempts, mark as orphaned and return 200
           if (!livemode || attemptCount >= 5) {
+            if (livemode) {
+              logger.warn("Stripe webhook: subscription event orphaned — no profile for customer", {
+                customerId: ledgerContext.customerId,
+                stripeEventId: event.id,
+                attemptCount,
+              });
+            } else {
+              logger.info("Stripe webhook: subscription event orphaned (test mode)", {
+                customerId: ledgerContext.customerId,
+                stripeEventId: event.id,
+                attemptCount,
+              });
+            }
             await markStripeWebhookEventLedgerRow(supabase, {
               eventId: event.id,
               status: "orphaned",
@@ -705,7 +727,7 @@ async function handleSubscriptionUpdate(
   const resolved = await resolveProfileFromStripeEvent(supabase, event, customerId);
 
   if (!resolved) {
-    logger.error("No profile found for customer", undefined, { customerId });
+    // Callers log + ledger at the right severity (avoid 5× Sentry errors per Stripe retry).
     return { success: false, profileId: null, resolutionMethod: null };
   }
 
