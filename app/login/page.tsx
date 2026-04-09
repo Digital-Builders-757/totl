@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { logger } from "@/lib/utils/logger";
+import { cn } from "@/lib/utils/utils";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -132,7 +133,7 @@ export default function Login() {
           Back to home
         </Link>
 
-        <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
           
           <div className="p-4 sm:p-6 md:p-8">
             <div className="text-center mb-6 sm:mb-8">
@@ -184,7 +185,10 @@ export default function Login() {
                       });
                     }
                   }}
-                  className={`bg-gray-900/60 text-white border-white/10 focus:border-white/20 text-base placeholder:text-gray-500 input-glow ${formErrors.email ? "border-red-500" : ""}`}
+                  className={cn(
+                    "text-base text-white placeholder:text-gray-500",
+                    formErrors.email && "border-red-500"
+                  )}
                 />
                 {formErrors.email && (
                   <p className="text-sm text-red-400 mt-1">{formErrors.email}</p>
@@ -224,7 +228,10 @@ export default function Login() {
                         });
                       }
                     }}
-                    className={`bg-gray-900/60 text-white border-white/10 focus:border-white/20 text-base placeholder:text-gray-500 input-glow ${formErrors.password ? "border-red-500" : ""}`}
+                    className={cn(
+                      "text-base text-white placeholder:text-gray-500",
+                      formErrors.password && "border-red-500"
+                    )}
                   />
                   <button
                     type="button"
@@ -262,10 +269,10 @@ export default function Login() {
             <div className="mt-6 sm:mt-8 mb-6 sm:mb-8">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-white/10"></div>
+                  <div className="w-full border-t border-border/35" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-black/40 border border-white/10 rounded px-2 text-gray-400">
+                  <span className="rounded-md border border-border/40 bg-card/30 px-2 text-sm text-muted-foreground">
                     New to TOTL?
                   </span>
                 </div>

@@ -75,7 +75,7 @@ export default function BookingsResultsContent({
 
           <CardContent>
             {booking.notes && (
-              <div className="mb-4 rounded-md border border-gray-700 bg-gray-800 p-3">
+              <div className="panel-frosted mb-4 rounded-md p-3">
                 <p className="text-sm text-gray-300">
                   <FileText className="mr-2 inline h-4 w-4" />
                   {booking.notes}

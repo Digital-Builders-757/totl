@@ -6,7 +6,7 @@ export default function ClientProfileLoading() {
           <div className="h-8 bg-white/10 rounded w-1/3 mb-2 animate-pulse" />
           <div className="h-4 bg-white/10 rounded w-2/3 animate-pulse" />
         </div>
-        <div className="rounded-lg border border-white/10 bg-white/5 p-6">
+        <div className="panel-frosted rounded-lg p-6">
           <div className="space-y-6">
             <div className="h-4 bg-white/10 rounded w-1/4 animate-pulse" />
             <div className="space-y-4">

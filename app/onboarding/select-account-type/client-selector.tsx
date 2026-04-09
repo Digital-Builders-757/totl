@@ -83,7 +83,7 @@ export function ClientAccountTypeSelector() {
 
       {/* Career Builder Dialog */}
       <Dialog open={showCareerBuilderDialog} onOpenChange={setShowCareerBuilderDialog}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-md">
+        <DialogContent className="panel-frosted border-border/50 text-white sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white text-xl font-bold">Create a Talent Account First</DialogTitle>
             <DialogDescription className="text-gray-300 pt-2">
@@ -99,7 +99,7 @@ export function ClientAccountTypeSelector() {
             <Button
               variant="outline"
               onClick={() => setShowCareerBuilderDialog(false)}
-              className="border-white/10 text-white hover:bg-white/10"
+              className="border-border/50 text-white hover:bg-white/10"
             >
               Cancel
             </Button>
@@ -115,7 +115,7 @@ export function ClientAccountTypeSelector() {
 
       {/* Talent Signup Form Dialog */}
       <Dialog open={showTalentSignupDialog} onOpenChange={setShowTalentSignupDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0 panel-frosted">
           <ScrollArea className="max-h-[90vh]">
             <div className="p-6">
               <DialogHeader className="mb-4">

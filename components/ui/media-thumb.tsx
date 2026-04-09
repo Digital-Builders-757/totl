@@ -24,7 +24,7 @@ export function MediaThumb({ src, alt, variant, fallbackText, className }: Media
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-white/10 bg-[var(--elev-1)] elev-1",
+        "relative overflow-hidden rounded-xl border border-border/45 bg-card/35",
         variantClasses[variant],
         className
       )}

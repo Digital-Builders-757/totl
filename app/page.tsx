@@ -34,7 +34,7 @@ export default function HomePage() {
           <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
             <div className="space-y-6 pt-4 text-left md:text-center lg:text-left">
               <div className="space-y-6">
-                <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto lg:mx-0">
+                <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto lg:mx-0">
                   <span className="text-white font-medium text-sm">
                     The Future of Talent Booking
                   </span>
@@ -77,7 +77,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative mt-8 lg:mt-0">
-              <div className="relative z-10 apple-card p-4 sm:p-6 md:p-8">
+              <div className="relative z-10 panel-frosted card-backlit grain-texture rounded-3xl p-4 sm:p-6 md:p-8">
                 <video
                   autoPlay
                   loop
@@ -100,7 +100,7 @@ export default function HomePage() {
       <section className="py-32 bg-seamless-secondary">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-left md:text-center mb-12 sm:mb-16">
-            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
+            <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
               <span className="text-white font-medium text-sm">Featured Opportunities</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
@@ -152,7 +152,7 @@ export default function HomePage() {
       <section className="py-32 bg-seamless-accent">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-left md:text-center mb-12 sm:mb-16">
-            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
+            <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
               <span className="text-white font-medium text-sm">How It Works</span>
             </div>
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
@@ -167,7 +167,7 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-3 gap-12">
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center apple-glass">
+              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
                 <Search className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-white">Discover</h3>
@@ -176,7 +176,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center apple-glass">
+              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
                 <Handshake className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-white">Connect</h3>
@@ -186,7 +186,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center apple-glass">
+              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
                 <Sparkles className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-2xl font-bold text-white">Create</h3>

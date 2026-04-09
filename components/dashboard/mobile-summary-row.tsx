@@ -16,7 +16,7 @@ interface MobileSummaryRowProps {
 export function MobileSummaryRow({ items, className }: MobileSummaryRowProps) {
   return (
     <div
-      className={`rounded-xl border border-white/10 bg-gray-900/70 px-3 py-3 text-white ${className ?? ""}`.trim()}
+      className={`rounded-xl border border-border/45 bg-card/45 px-3 py-3 text-foreground shadow-sm ${className ?? ""}`.trim()}
     >
       <div className="space-y-2">
         {items.map((item) => {

@@ -22,7 +22,7 @@ export function ClientDashboardSkeleton() {
             <div
               // eslint-disable-next-line react/no-array-index-key
               key={i}
-              className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm"
+              className="panel-frosted card-backlit rounded-2xl p-4"
             >
               <Skeleton className="h-4 w-24 bg-white/10" />
               <div className="mt-3 flex items-end justify-between">
@@ -40,7 +40,7 @@ export function ClientDashboardSkeleton() {
             <div
               // eslint-disable-next-line react/no-array-index-key
               key={i}
-              className="rounded-2xl border border-white/10 bg-white/5 shadow-sm"
+              className="panel-frosted card-backlit rounded-2xl"
             >
               <div className="p-6 space-y-3">
                 <div className="flex items-center justify-between">
@@ -54,7 +54,7 @@ export function ClientDashboardSkeleton() {
                   <div
                     // eslint-disable-next-line react/no-array-index-key
                     key={j}
-                    className="flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4"
+                    className="flex items-center gap-4 rounded-xl border border-border/35 bg-card/35 p-4"
                   >
                     <Skeleton className="h-12 w-12 rounded-lg bg-white/10" />
                     <div className="flex-1 space-y-2">
@@ -70,7 +70,7 @@ export function ClientDashboardSkeleton() {
         </div>
 
         {/* Tabs placeholder */}
-        <div className="rounded-2xl border border-white/10 bg-white/5 shadow-sm p-6 space-y-4">
+        <div className="panel-frosted card-backlit rounded-2xl p-6 space-y-4">
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
               // eslint-disable-next-line react/no-array-index-key

@@ -9,7 +9,7 @@ export function AdminLoadingShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-900 page-ambient text-white">
       {/* Skeleton header matching AdminHeader layout */}
-      <header className="sticky top-0 z-40 border-b border-gray-700 bg-gray-900/95 backdrop-blur">
+      <header className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-3">

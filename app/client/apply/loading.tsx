@@ -4,11 +4,11 @@ export default function ApplyLoading() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="h-5 w-28 bg-white/10 rounded animate-pulse" />
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="panel-frosted rounded-xl p-4">
             <div className="h-6 w-48 bg-white/10 rounded mb-2 animate-pulse" />
             <div className="h-4 w-full bg-white/10 rounded animate-pulse" />
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <div className="panel-frosted rounded-xl p-6 space-y-4">
             <div className="h-8 w-40 bg-white/10 rounded animate-pulse" />
             <div className="h-24 w-full bg-white/10 rounded animate-pulse" />
             <div className="h-24 w-full bg-white/10 rounded animate-pulse" />

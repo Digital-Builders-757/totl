@@ -27,7 +27,9 @@ export function MobileListRowCard({
   className,
 }: MobileListRowCardProps) {
   return (
-    <div className={`rounded-xl border border-white/10 bg-gray-900/70 p-3 text-white ${className ?? ""}`.trim()}>
+    <div
+      className={`rounded-xl border border-border/45 bg-card/45 p-3 text-foreground shadow-sm ${className ?? ""}`.trim()}
+    >
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-start justify-between gap-2">
@@ -46,7 +48,7 @@ export function MobileListRowCard({
         </div>
         {trailing ? <div className="shrink-0">{trailing}</div> : null}
       </div>
-      {footer ? <div className="mt-3 border-t border-white/10 pt-2">{footer}</div> : null}
+      {footer ? <div className="mt-3 border-t border-border/35 pt-2">{footer}</div> : null}
     </div>
   );
 }

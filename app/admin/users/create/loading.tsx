@@ -5,7 +5,7 @@ export default function CreateUserLoading() {
     <AdminLoadingShell>
       <div className="mx-auto w-full max-w-md space-y-6">
         <div className="h-8 w-48 bg-white/10 rounded animate-pulse" />
-        <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6 space-y-4">
+        <div className="panel-frosted rounded-xl p-6 space-y-4">
           <div className="space-y-2">
             <div className="h-6 w-40 bg-white/10 rounded animate-pulse" />
             <div className="h-4 w-60 bg-white/10 rounded animate-pulse" />

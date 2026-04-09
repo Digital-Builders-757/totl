@@ -246,7 +246,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
           <Link href="/">
             <Button
               variant="outline"
-              className="flex items-center border-white/30 text-white hover:bg-white/10 hover:border-white/50"
+              className="flex items-center border-border/50 bg-card/20 text-foreground hover:bg-card/30"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Home
@@ -255,7 +255,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="bg-black rounded-xl shadow-lg overflow-hidden border border-gray-600">
+          <div className="overflow-hidden rounded-xl border border-border/40 shadow-lg panel-frosted card-backlit">
             {/* Header Section */}
             <div className="relative aspect-16-9 sm:aspect-3-4 md:aspect-16-9 lg:h-96">
               <SafeImage
@@ -286,14 +286,14 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
             </div>
 
             {/* Content Section */}
-            <div className="p-4 sm:p-6 md:p-8 bg-black">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="bg-[var(--oklch-bg)]/92 p-4 sm:p-6 md:p-8">
+              <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
                 {/* Main Content */}
                 <div className="lg:col-span-2">
                   {/* About Section */}
                   <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-white mb-4">About</h2>
-                    <p className="text-gray-300 leading-relaxed">
+                    <h2 className="mb-4 text-2xl font-bold text-foreground">About</h2>
+                    <p className="leading-relaxed text-muted-foreground">
                       {talent.experience || "No experience details provided."}
                     </p>
                   </div>
@@ -304,12 +304,12 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                     if (specialtiesArray.length === 0) return null;
                     return (
                       <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-4">Specialties</h2>
+                        <h2 className="mb-4 text-2xl font-bold text-foreground">Specialties</h2>
                         <div className="flex flex-wrap gap-2">
                           {specialtiesArray.map((specialty, index) => (
                             <span
                               key={index}
-                              className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                              className="rounded-full border border-border/50 bg-card/40 px-3 py-1 text-sm font-medium text-foreground"
                             >
                               {specialty}
                             </span>
@@ -325,12 +325,12 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
                     if (languagesArray.length === 0) return null;
                     return (
                       <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-4">Languages</h2>
+                        <h2 className="mb-4 text-2xl font-bold text-foreground">Languages</h2>
                         <div className="flex flex-wrap gap-2">
                           {languagesArray.map((language, index) => (
                             <span
                               key={index}
-                              className="px-3 py-1 bg-white text-black rounded-full text-sm font-medium border border-gray-300"
+                              className="rounded-full border border-border/50 bg-card/40 px-3 py-1 text-sm font-medium text-foreground"
                             >
                               {language}
                             </span>

@@ -856,7 +856,7 @@ function TalentDashboardContent({
 
   return (
     <PageShell topPadding={false} fullBleed>
-      <div className="elev-2 border-b border-white/10 sticky top-0 z-40">
+      <div className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-2 sm:py-3">
           <div className="flex min-h-12 items-center justify-between gap-2 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
@@ -1189,7 +1189,7 @@ function TalentDashboardContent({
                         .map((app) => (
                           <div
                             key={`${app.id}-upcoming-mobile`}
-                            className="elev-1 rounded-xl border border-white/10 p-3"
+                            className="panel-frosted rounded-xl p-3"
                           >
                             <div className="flex items-start gap-3">
                               <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
@@ -1383,7 +1383,7 @@ function TalentDashboardContent({
                       {applications.map((app) => (
                         <div
                           key={`${app.id}-mobile`}
-                          className="elev-1 rounded-xl border border-white/10 p-3"
+                          className="panel-frosted rounded-xl p-3"
                         >
                           <div className="flex items-start gap-3">
                             <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
@@ -1533,7 +1533,7 @@ function TalentDashboardContent({
                       {bookings.map((booking) => (
                         <div
                           key={`${booking.id}-bookings-mobile`}
-                          className="elev-1 rounded-xl border border-white/10 p-3"
+                          className="panel-frosted rounded-xl p-3"
                         >
                           <div className="flex items-start gap-3">
                             <div className="h-12 w-12 relative rounded-lg overflow-hidden flex-shrink-0">
@@ -1740,7 +1740,7 @@ function TalentDashboardContent({
       </div>
 
       {/* Mobile sticky primary CTA */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-black/80 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+      <div className="panel-frosted md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40">
         <div className="container mx-auto px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
           <Button asChild className="w-full bg-white text-black hover:bg-gray-200">
             <Link href="/gigs">Browse opportunities</Link>

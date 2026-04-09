@@ -162,11 +162,11 @@ export function AdminGigDetailClient({
             {applications.length === 0 ? (
               <p className="text-sm text-gray-400">No applications yet.</p>
             ) : (
-              <div className="divide-y divide-gray-800">
+              <div className="divide-y divide-border/35">
                 {applications.map((a) => {
                   const tone = statusTone[a.status] ?? {
                     label: a.status,
-                    className: "bg-white/5 text-gray-200 border-white/10",
+                    className: "border-border/40 bg-card/35 text-gray-200",
                   };
 
                   return (

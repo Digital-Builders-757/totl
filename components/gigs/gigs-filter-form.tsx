@@ -78,14 +78,14 @@ export function GigsFilterForm({
           name="q"
           defaultValue={rawKeyword}
           placeholder="Search keywords..."
-          className="input-glow pl-10 sm:pl-12 py-4 sm:py-5 md:py-6 text-base sm:text-lg md:text-xl min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+          className="min-h-[52px] border-border/50 bg-card/45 py-4 pl-10 text-base text-white sm:h-14 sm:pl-12 sm:py-5 md:h-16 md:py-6 md:text-lg md:text-xl"
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full">
         <select
           name="category"
           defaultValue={category}
-          className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+          className="min-h-[52px] rounded-lg border border-border/50 bg-card/45 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-ring/40 sm:h-14 md:h-16"
         >
           <option value="">All opportunity types</option>
           {VISIBLE_GIG_CATEGORIES.map((cat) => (
@@ -99,14 +99,14 @@ export function GigsFilterForm({
           name="location"
           defaultValue={location}
           placeholder="City or address"
-          className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
+          className="min-h-[52px] border-border/50 bg-card/45 text-base text-white sm:h-14 md:h-16"
         />
 
         <div className="sm:col-span-2 flex flex-col gap-2">
           <Button
             type="button"
             variant="outline"
-            className="min-h-[44px] border-[var(--oklch-border)] text-white hover:bg-white/10 w-full sm:w-fit"
+            className="min-h-[44px] w-full border-border/50 text-white hover:bg-white/10 sm:w-fit"
             onClick={() => setAdvancedOpen((v) => !v)}
             aria-expanded={advancedOpen}
           >
@@ -119,7 +119,7 @@ export function GigsFilterForm({
             <select
               name="radius_miles"
               defaultValue={radiusMiles}
-              className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+              className="min-h-[52px] rounded-lg border border-border/50 bg-card/45 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-ring/40 sm:h-14 md:h-16"
               title="Within X miles of location (requires location)"
             >
               {RADIUS_OPTIONS.map((opt) => (
@@ -133,13 +133,13 @@ export function GigsFilterForm({
               name="compensation"
               defaultValue={compensation}
               placeholder="Compensation (keyword)"
-              className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white text-base"
+              className="min-h-[52px] border-border/50 bg-card/45 text-base text-white sm:h-14 md:h-16"
             />
 
             <select
               name="pay_range"
               defaultValue={payRange}
-              className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+              className="min-h-[52px] rounded-lg border border-border/50 bg-card/45 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-ring/40 sm:h-14 md:h-16"
             >
               {PAY_RANGE_OPTIONS.map((opt) => (
                 <option key={opt.value || "any"} value={opt.value}>
@@ -151,7 +151,7 @@ export function GigsFilterForm({
             <select
               name="sort"
               defaultValue={sort}
-              className="min-h-[52px] sm:h-14 md:h-16 bg-[var(--oklch-surface)] text-white border-[var(--oklch-border)] rounded-lg px-3 focus:ring-2 focus:ring-white/20 text-base"
+              className="min-h-[52px] rounded-lg border border-border/50 bg-card/45 px-3 text-base text-white focus:outline-none focus:ring-2 focus:ring-ring/40 sm:h-14 md:h-16"
             >
               {GIGS_SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -160,7 +160,7 @@ export function GigsFilterForm({
               ))}
             </select>
 
-            <label className="flex items-center gap-2 sm:gap-3 min-h-[52px] sm:h-14 px-3 rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white text-base cursor-pointer md:col-span-3">
+            <label className="flex min-h-[52px] cursor-pointer items-center gap-2 rounded-lg border border-border/50 bg-card/45 px-3 text-base text-white sm:h-14 sm:gap-3 md:col-span-3">
               <input
                 type="checkbox"
                 name="upcoming"

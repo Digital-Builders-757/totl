@@ -8,6 +8,31 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Global UI — frosted surfaces + ambient glow (April 9, 2026)**
+
+**UI / DESIGN SYSTEM** — April 9, 2026
+- ✅ **`glow-backplate`** on **`body`** (`app/layout.tsx`) plus utilities in **`app/globals.css`**: **`panel-frosted`**, **`card-backlit`**, **`button-glow`**, **`focus-glow`**, **`grain-texture`** (see **`docs/UI_CONSTITUTION.md`**, **`docs/features/UI_VISUAL_LANGUAGE.md`**).
+- ✅ **Primitives:** **`Button`**, **`Card`**, **`Input`**, **`Textarea`** use tokenized glow/frost/focus patterns.
+- ✅ **Breadth:** Admin chrome (header, tables, loading shells), client dashboard/signup/apply touches, marketing **`/`** + **`/about`** + **`/privacy`**, public talent profile, gigs listing/pagination, navbar, and shared layout components moved off ad hoc grays / **`apple-glass`** toward **`panel-frosted`** and **`border-border` / `bg-card`**.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run).
+
+**Next (P0):** External beta evidence; confirm **Admin detail** routes in production if still blocking.
+
+**Next (P1):** Remaining gray-heavy **Settings** / talent profile forms; optional perf review where **`panel-frosted`** stacks deeply.
+
+## 🚀 **Latest: Gig edit pages — Supabase count errors + shared date helpers (April 9, 2026)**
+
+**ADMIN / CLIENT / GIG EDIT** — April 9, 2026 (follow-up)
+- ✅ **`/admin/gigs/[id]/edit` and `/client/gigs/[id]/edit`:** After **`Promise.all`**, application **`count`** queries now check **`error`**; on failure we **`logger.error`** and apply a **fail-safe** (treat as having applicants / completed booking when the check cannot run) so we never silently show “zero applications” or “no completed booking” on transient Supabase failures.
+- ✅ **Shared formatting:** **`formatDateForDateInput`** and **`formatDeadlineForDatetimeLocal`** live in **`lib/utils/date-form.ts`** (single source for both edit routes).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run).
+
+**Next (P0):** External beta evidence; confirm **Admin detail** routes in production if still blocking.
+
+**Next (P1):** Optional cover-image update on edit; direct-to-Supabase portfolio uploads; **CRON_SECRET** on Vercel for booking reminders.
+
 ## 🚀 **Latest: Career Builder — edit posted opportunities (April 9, 2026)**
 
 **CLIENT TERMINAL / OPPORTUNITIES** — April 9, 2026
@@ -4869,7 +4894,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 6, 2026*
-*Current Status: MVP Complete; Sentry noise filters + Stripe/cron logging hygiene + structured client logging*
+*Last Updated: April 9, 2026*
+*Current Status: MVP Complete; gig edit Supabase error handling + shared date-form utils; prior: Career Builder + admin opportunity edit flows*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: Beta evidence; Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*

@@ -51,43 +51,43 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
   return (
     <div className="space-y-6">
       {/* Contact Information */}
-      <div className="bg-white rounded-lg p-6 border border-gray-300">
-        <h3 className="text-lg font-semibold text-black mb-4">Contact Information</h3>
+      <div className="rounded-xl border border-border/50 bg-card/35 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">Contact Information</h3>
 
         {hasPhone ? (
           <div className="space-y-3">
-            <div className="flex items-center text-black">
-              <Phone className="mr-3 h-4 w-4 text-black" />
+            <div className="flex items-center text-foreground">
+              <Phone className="mr-3 h-4 w-4 text-muted-foreground" />
               {talent.phone}
             </div>
-            <div className="flex items-center text-black">
-              <Mail className="mr-3 h-4 w-4 text-black" />
+            <div className="flex items-center text-foreground">
+              <Mail className="mr-3 h-4 w-4 text-muted-foreground" />
               Contact through TOTL
             </div>
           </div>
         ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">
+          <div className="py-8 text-center">
+            <p className="mb-4 text-muted-foreground">
               Contact details unlock after you&apos;ve applied to or booked talent through TOTL.
             </p>
             {!user ? (
-              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+              <Button asChild className="w-full">
                 <Link href="/login">Sign in to unlock</Link>
               </Button>
             ) : user.role === "talent" ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Clients unlock contact details after applying or booking talent.
               </p>
             ) : user.role === "client" ? (
-              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+              <Button asChild className="w-full">
                 <Link href="/client/dashboard">Career Builder dashboard</Link>
               </Button>
             ) : user.role === "admin" ? (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Use the admin console to manage talent relationships and contact access.
               </p>
             ) : (
-              <Button asChild className="w-full bg-black text-white hover:bg-gray-800">
+              <Button asChild className="w-full">
                 <Link href="/client/apply">Apply as Career Builder</Link>
               </Button>
             )}
@@ -96,43 +96,43 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
       </div>
 
       {/* Physical Attributes */}
-      <div className="bg-white rounded-lg p-6 border border-gray-300">
-        <h3 className="text-lg font-semibold text-black mb-4">Physical Attributes</h3>
+      <div className="rounded-xl border border-border/50 bg-card/35 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">Physical Attributes</h3>
         <div className="space-y-3 text-sm">
           {talent.height && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Height</span>
-              <span className="text-black font-medium">{talent.height}</span>
+              <span className="text-muted-foreground">Height</span>
+              <span className="font-medium text-foreground">{talent.height}</span>
             </div>
           )}
           {talent.weight && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Weight</span>
-              <span className="text-black font-medium">{talent.weight} lbs</span>
+              <span className="text-muted-foreground">Weight</span>
+              <span className="font-medium text-foreground">{talent.weight} lbs</span>
             </div>
           )}
           {talent.hair_color && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Hair Color</span>
-              <span className="text-black font-medium">{talent.hair_color}</span>
+              <span className="text-muted-foreground">Hair Color</span>
+              <span className="font-medium text-foreground">{talent.hair_color}</span>
             </div>
           )}
           {talent.eye_color && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Eye Color</span>
-              <span className="text-black font-medium">{talent.eye_color}</span>
+              <span className="text-muted-foreground">Eye Color</span>
+              <span className="font-medium text-foreground">{talent.eye_color}</span>
             </div>
           )}
           {talent.shoe_size && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Shoe Size</span>
-              <span className="text-black font-medium">{talent.shoe_size}</span>
+              <span className="text-muted-foreground">Shoe Size</span>
+              <span className="font-medium text-foreground">{talent.shoe_size}</span>
             </div>
           )}
           {talent.measurements && (
             <div className="flex justify-between">
-              <span className="text-gray-600">Measurements</span>
-              <span className="text-black font-medium">{talent.measurements}</span>
+              <span className="text-muted-foreground">Measurements</span>
+              <span className="font-medium text-foreground">{talent.measurements}</span>
             </div>
           )}
         </div>
@@ -140,21 +140,21 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
 
       {/* Experience */}
       {talent.experience_years && (
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <h3 className="text-lg font-semibold text-black mb-2">Experience</h3>
-          <p className="text-black">{talent.experience_years} years</p>
+        <div className="rounded-xl border border-border/50 bg-card/35 p-6">
+          <h3 className="mb-2 text-lg font-semibold text-foreground">Experience</h3>
+          <p className="text-foreground">{talent.experience_years} years</p>
         </div>
       )}
 
       {/* Portfolio Link */}
       {talent.portfolio_url && (
-        <div className="bg-white rounded-lg p-6 border border-gray-300">
-          <h3 className="text-lg font-semibold text-black mb-4">Portfolio</h3>
+        <div className="rounded-xl border border-border/50 bg-card/35 p-6">
+          <h3 className="mb-4 text-lg font-semibold text-foreground">Portfolio</h3>
           <a
             href={talent.portfolio_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-600 hover:underline"
+            className="text-primary hover:underline"
           >
             View Portfolio
           </a>
@@ -162,12 +162,12 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
       )}
 
       {/* Moderation */}
-      <div className="bg-white rounded-lg p-6 border border-gray-300 space-y-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+      <div className="space-y-3 rounded-xl border border-border/50 bg-card/35 p-6">
+        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
           <Flag className="h-4 w-4" />
           Safety & Moderation
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           See something off about this profile? Let the TOTL moderation team know so we can keep the
           marketplace safe.
         </p>

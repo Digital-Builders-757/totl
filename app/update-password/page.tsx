@@ -42,7 +42,7 @@ export default async function UpdatePasswordPage({
                 Back to login
               </Link>
 
-              <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+              <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
                 <div className="p-8">
                   <div className="text-center mb-8">
                     <Image
@@ -58,7 +58,7 @@ export default async function UpdatePasswordPage({
                     </p>
                   </div>
                   <div className="text-center">
-                    <Button asChild variant="outline" className="w-full border-gray-700 text-white hover:bg-white/10">
+                    <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
                       <Link href="/login">Return to Login</Link>
                     </Button>
                   </div>
@@ -81,7 +81,7 @@ export default async function UpdatePasswordPage({
               Back to login
             </Link>
 
-            <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+            <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
               <div className="p-8">
                 <div className="text-center mb-8">
                   <Image
@@ -131,7 +131,7 @@ export default async function UpdatePasswordPage({
               Back to login
             </Link>
 
-            <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+            <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
               <div className="p-8">
                 <div className="text-center mb-8">
                   <Image
@@ -171,7 +171,7 @@ export default async function UpdatePasswordPage({
           Back to login
         </Link>
 
-        <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
           <div className="p-8">
             <div className="text-center mb-8">
               <Image

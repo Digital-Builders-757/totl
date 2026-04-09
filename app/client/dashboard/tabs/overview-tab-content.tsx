@@ -82,7 +82,7 @@ export default function OverviewTabContent({
                 <>
                   <div className="space-y-3 md:hidden">
                     {gigs.slice(0, 3).map((gig) => (
-                      <div key={`${gig.id}-mobile`} className="elev-1 rounded-xl border border-white/10 p-3">
+                      <div key={`${gig.id}-mobile`} className="panel-frosted rounded-xl p-3">
                         <div className="flex items-start gap-3">
                           <SafeImage
                             src={gig.image_url || "/images/totl-logo.png"}
@@ -102,7 +102,7 @@ export default function OverviewTabContent({
                               {gig.applications_count || 0} applications
                             </p>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700">
+                          <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-card/30">
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -117,7 +117,7 @@ export default function OverviewTabContent({
                   </div>
                   <div className="hidden space-y-4 md:block">
                     {gigs.slice(0, 3).map((gig) => (
-                      <div key={gig.id} className="flex items-center gap-4 rounded-lg border border-gray-700 p-3">
+                      <div key={gig.id} className="flex items-center gap-4 rounded-lg border border-border/40 bg-card/15 p-3">
                         <SafeImage
                           src={gig.image_url || "/images/totl-logo.png"}
                           alt={gig.title}
@@ -160,7 +160,11 @@ export default function OverviewTabContent({
               )}
 
               {gigs.length > 0 ? (
-                <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
+                <Button
+                  variant="outline"
+                  className="w-full border-border/50 bg-card/30 text-white backdrop-blur-sm"
+                  asChild
+                >
                   <Link href="/client/gigs">View All Gigs</Link>
                 </Button>
               ) : (
@@ -201,7 +205,7 @@ export default function OverviewTabContent({
                     {applications.slice(0, 3).map((application) => (
                       <div
                         key={`${application.id}-mobile`}
-                        className="elev-1 rounded-xl border border-white/10 p-3"
+                        className="panel-frosted rounded-xl p-3"
                       >
                         <div className="flex items-start gap-3">
                           <div className="min-w-0 flex-1 space-y-1">
@@ -257,7 +261,7 @@ export default function OverviewTabContent({
                   className="totl-surface-card"
                 />
               )}
-              <Button variant="outline" className="w-full apple-glass border-white/30 text-white" asChild>
+              <Button variant="outline" className="w-full border border-border/50 bg-card/20 text-foreground hover:bg-card/30" asChild>
                 <Link href="/client/applications">View All Applications</Link>
               </Button>
             </CardContent>

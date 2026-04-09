@@ -7,8 +7,8 @@ export default function ChooseRoleLoading() {
           <div className="h-4 w-80 mx-auto bg-white/10 rounded animate-pulse" />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="h-32 rounded-xl border border-white/10 bg-white/5 animate-pulse" />
-          <div className="h-32 rounded-xl border border-white/10 bg-white/5 animate-pulse" />
+          <div className="h-32 animate-pulse rounded-xl panel-frosted" />
+          <div className="h-32 animate-pulse rounded-xl panel-frosted" />
         </div>
       </div>
     </div>

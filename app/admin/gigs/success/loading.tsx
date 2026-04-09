@@ -4,7 +4,7 @@ export default function GigSuccessLoading() {
   return (
     <AdminLoadingShell>
       <div className="mx-auto w-full max-w-4xl space-y-8">
-        <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-8">
+        <div className="panel-frosted rounded-xl p-8">
           <div className="flex flex-col items-center">
             <div className="h-16 w-16 rounded-full bg-white/10 animate-pulse mb-4" />
             <div className="h-8 w-64 bg-white/10 rounded animate-pulse mb-2" />
@@ -13,7 +13,7 @@ export default function GigSuccessLoading() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-gray-700 bg-gray-800/50 overflow-hidden">
+        <div className="panel-frosted rounded-xl overflow-hidden">
           <div className="p-6 border-b border-gray-700">
             <div className="flex items-center justify-between">
               <div className="h-6 w-32 bg-white/10 rounded animate-pulse" />
@@ -44,7 +44,7 @@ export default function GigSuccessLoading() {
           <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
         </div>
 
-        <div className="h-64 w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
+        <div className="h-64 w-full panel-frosted rounded-xl animate-pulse" />
       </div>
     </AdminLoadingShell>
   );

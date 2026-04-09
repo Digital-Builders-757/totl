@@ -9,11 +9,11 @@ export default function AdminDiagnosticLoading() {
           <div className="h-5 w-96 max-w-full bg-white/10 rounded animate-pulse" />
         </div>
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="h-24 w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
-          <div className="h-24 w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
-          <div className="h-24 w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
+          <div className="h-24 w-full panel-frosted rounded-xl animate-pulse" />
+          <div className="h-24 w-full panel-frosted rounded-xl animate-pulse" />
+          <div className="h-24 w-full panel-frosted rounded-xl animate-pulse" />
         </div>
-        <div className="h-[420px] w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
+        <div className="h-[420px] w-full panel-frosted rounded-xl animate-pulse" />
       </div>
     </AdminLoadingShell>
   );

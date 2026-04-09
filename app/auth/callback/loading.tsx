@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function AuthCallbackLoading() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black page-ambient p-4">
-      <Card className="w-full max-w-md border-white/10 bg-white/5">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-white">Email Verification</CardTitle>
           <CardDescription className="text-center text-gray-400">Verifying your email address...</CardDescription>

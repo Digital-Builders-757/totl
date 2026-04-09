@@ -217,6 +217,10 @@ When creating new components:
 - [ ] Implement responsive design
 - [ ] Add proper error states
 
+## Rollout status (April 2026)
+
+Shipped in-app: global **`glow-backplate`** on **`body`**, shared CSS utilities in **`app/globals.css`**, and shadcn primitives wired to **`button-glow`** / **`card-backlit`** / **`focus-glow`** as documented above. Loading shells and major admin, client, and marketing surfaces use **`panel-frosted`** and token borders (`border-border/*`, `bg-card/*`) instead of legacy **`apple-glass`** or raw gray panels on most paths. **P1 remainder:** dense settings/talent forms that still use **`bg-gray-*`** utilities; audit remaining **`hover:bg-gray-*`** row actions.
+
 ## Resources
 
 - [shadcn/ui Documentation](https://ui.shadcn.com/)

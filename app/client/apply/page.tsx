@@ -261,11 +261,12 @@ export default function ClientApplicationPage() {
     (hasStartedEditing || !applicationStatus?.status) &&
     !isCheckingStatus;
   const labelClass = "text-sm font-semibold text-white/80";
-  const inputClass = "bg-slate-900 text-white border-white/10 focus-visible:border-amber-500";
+  const inputClass =
+    "border-border/50 bg-card/45 text-white placeholder:text-white/45 focus-visible:border-amber-500";
 
   if (authLoading && user) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24 flex items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--oklch-bg)] px-4 pt-20 text-white sm:pt-24">
         <p className="text-white/70 text-center">Loading your account…</p>
       </div>
     );
@@ -273,14 +274,14 @@ export default function ClientApplicationPage() {
 
   if (user && isCareerBuilder) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24 flex items-center justify-center px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--oklch-bg)] px-4 pt-20 text-white sm:pt-24">
         <p className="text-white/70 text-center">Redirecting to your Career Builder dashboard…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white pt-20 sm:pt-24">
+    <div className="min-h-screen bg-[var(--oklch-bg)] pt-20 text-white sm:pt-24">
       <div className="container mx-auto px-4 py-4 sm:py-12">
         <Link
           href={returnUrl ? decodeURIComponent(returnUrl) : "/"}
@@ -290,10 +291,10 @@ export default function ClientApplicationPage() {
           Back
         </Link>
 
-        <div className="max-w-4xl mx-auto bg-slate-900/80 border border-white/10 shadow-2xl ring-1 ring-white/5 rounded-3xl overflow-hidden">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl panel-frosted card-backlit shadow-xl">
           {statusMessage && (
-            <div className="p-4 bg-slate-900 border-b border-white/5">
-              <Alert className="bg-slate-950 text-white">
+            <div className="border-b border-border/40 bg-card/25 p-4">
+              <Alert className="border-border/40 bg-card/25 text-white">
                 <AlertTitle className="text-white">Career Builder Application</AlertTitle>
                 <AlertDescription className="text-white/80">{statusMessage}</AlertDescription>
               </Alert>
@@ -319,7 +320,7 @@ export default function ClientApplicationPage() {
               </div>
             </div>
 
-            <div className="md:col-span-3 p-8 bg-slate-950">
+            <div className="bg-card/10 p-8 md:col-span-3">
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-2">Career Builder Application</h1>
                 <p className="text-white/70">
@@ -329,7 +330,7 @@ export default function ClientApplicationPage() {
               </div>
 
               {showStatusPanel ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-inner shadow-black/30">
+                <div className="panel-frosted card-backlit rounded-2xl p-6 text-left">
                   <p className="text-white font-semibold mb-2">Application Under Review</p>
                   <p className="text-white/70 text-sm">
                     {applicationStatus.status === 'pending'
@@ -340,7 +341,7 @@ export default function ClientApplicationPage() {
                   </p>
                 </div>
               ) : isCheckingStatus ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-left shadow-inner shadow-black/30">
+                <div className="panel-frosted card-backlit rounded-2xl p-6 text-left">
                   <p className="text-white font-semibold mb-2">Checking application status</p>
                   <p className="text-white/70 text-sm">
                     Finalizing your sign-in and checking whether you already have a Career Builder application on file.
@@ -425,10 +426,7 @@ export default function ClientApplicationPage() {
                       Industry
                     </Label>
                     <Select value={formData.industry} onValueChange={handleSelectChange}>
-                      <SelectTrigger
-                        id="industry"
-                        className="border border-white/10 bg-slate-900 text-white"
-                      >
+                      <SelectTrigger id="industry" className="border-border/50 bg-card/45 text-white">
                         <SelectValue placeholder="Select your industry" />
                       </SelectTrigger>
                       <SelectContent>
@@ -447,7 +445,7 @@ export default function ClientApplicationPage() {
                       Business Description
                     </Label>
                     <Textarea
-                      className="bg-slate-900 text-white border-white/10 focus-visible:border-amber-500"
+                      className={inputClass}
                       id="businessDescription"
                       placeholder="Tell us about your business and what you do"
                       rows={3}
@@ -462,7 +460,7 @@ export default function ClientApplicationPage() {
                       Talent Needs
                     </Label>
                     <Textarea
-                      className="bg-slate-900 text-white border-white/10 focus-visible:border-amber-500"
+                      className={inputClass}
                       id="needsDescription"
                       placeholder="Describe the types of talent you&apos;re looking for and your typical projects"
                       rows={4}

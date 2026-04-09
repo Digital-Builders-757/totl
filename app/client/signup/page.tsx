@@ -60,21 +60,21 @@ export default function ClientSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 sm:pt-24 flex items-center justify-center">
+    <div className="flex min-h-dvh items-center justify-center bg-[var(--oklch-bg)] pt-20 text-foreground sm:pt-24">
       <div className="container mx-auto px-4 py-4 sm:py-12">
         <Link
           href={returnUrl ? `/choose-role?returnUrl=${returnUrl}` : "/"}
-          className="inline-flex items-center text-gray-600 hover:text-black mb-4 sm:mb-8"
+          className="mb-4 inline-flex items-center text-muted-foreground hover:text-foreground sm:mb-8"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Link>
 
-        <div className="max-w-md mx-auto">
+        <div className="mx-auto max-w-md">
           <Card>
             <CardHeader>
-              <div className="w-16 h-16 bg-amber-100 rounded-full mx-auto flex items-center justify-center mb-4">
-                <Info className="h-8 w-8 text-amber-600" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/35 bg-amber-500/15">
+                <Info className="h-8 w-8 text-amber-400" />
               </div>
               <CardTitle className="text-center">Career Builder Signup Requires Approval</CardTitle>
               <CardDescription className="text-center">
@@ -88,8 +88,8 @@ export default function ClientSignup() {
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-3 text-sm text-gray-600">
-                <p className="font-semibold text-gray-800">Here&apos;s how it works:</p>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <p className="font-semibold text-foreground">Here&apos;s how it works:</p>
                 <ol className="list-decimal list-inside space-y-2 ml-2">
                   <li>Create a Talent account (if you haven&apos;t already)</li>
                   <li>Apply to become a Career Builder</li>
@@ -99,26 +99,26 @@ export default function ClientSignup() {
               </div>
 
               {user && (userRole === "client" || profile?.role === "client") ? (
-                <Alert className="bg-green-50 border-green-200">
-                  <AlertDescription className="text-green-800">
+                <Alert className="border-emerald-500/40 bg-emerald-500/10">
+                  <AlertDescription className="text-emerald-100">
                     You already have Career Builder access. We&apos;re taking you to your dashboard.
                   </AlertDescription>
                 </Alert>
               ) : user ? (
-                <Alert className="bg-green-50 border-green-200">
-                  <AlertDescription className="text-green-800">
+                <Alert className="border-emerald-500/40 bg-emerald-500/10">
+                  <AlertDescription className="text-emerald-100">
                     You&apos;re already logged in! You can apply to become a Career Builder now.
                   </AlertDescription>
                 </Alert>
               ) : (
-                <Alert className="bg-blue-50 border-blue-200">
-                  <AlertDescription className="text-blue-800">
+                <Alert className="border-sky-500/40 bg-sky-500/10">
+                  <AlertDescription className="text-sky-100">
                     Don&apos;t have an account yet? Create a Talent account first, then apply to become a Career Builder.
                   </AlertDescription>
                 </Alert>
               )}
 
-              <p className="text-center text-gray-500 text-sm">
+              <p className="text-center text-sm text-muted-foreground">
                 {user && (userRole === "client" || profile?.role === "client")
                   ? "Redirecting you to your Career Builder dashboard..."
                   : "Redirecting you to the Career Builder application page..."}

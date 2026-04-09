@@ -70,18 +70,18 @@ export default function Navbar() {
 
   // Determine navbar background color based on scroll position and current page
   const navbarBg = isScrolled
-    ? "apple-glass shadow-lg shadow-white/10"
+    ? "panel-frosted shadow-lg shadow-black/25"
     : isHomepage
-      ? "apple-glass"
+      ? "panel-frosted"
       : "bg-black";
-  const navbarBorder = isScrolled ? "border-b border-white/15" : "border-b border-transparent";
+  const navbarBorder = isScrolled ? "border-b border-border/35" : "border-b border-transparent";
 
   // Determine text color based on scroll position and current page
   const textColor = isScrolled || !isHomepage ? "text-white" : "text-white";
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navbarBg} ${navbarBorder} backdrop-blur-md`}
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${navbarBg} ${navbarBorder}`}
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
@@ -148,7 +148,7 @@ export default function Navbar() {
                   My Account
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
-                <div className="absolute right-0 mt-2 w-48 bg-black/95 rounded-md shadow-lg shadow-white/10 overflow-hidden z-20 opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 backdrop-blur-sm border border-white/10">
+                <div className="absolute right-0 mt-2 z-20 w-48 overflow-hidden rounded-md panel-frosted shadow-lg opacity-0 shadow-black/30 transition-all duration-200 invisible group-hover:visible group-hover:opacity-100">
                   {userRole === "talent" && (
                     <Link
                       href={PATHS.TALENT_DASHBOARD}
@@ -235,7 +235,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
           {isMenuOpen && (
-        <div className="md:hidden bg-black/95 shadow-lg shadow-white/10 backdrop-blur-sm border-t border-white/10">
+        <div className="panel-frosted border-t border-border/40 shadow-lg shadow-black/25 md:hidden">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
                   {showPersistentSubscribeCta && (
@@ -256,7 +256,7 @@ export default function Navbar() {
                 </Link>
               )}
               {/* Talent directory removed per Approach B: no roster browsing */}
-              <div className="border-t border-white/10 pt-4 mt-2">
+              <div className="mt-2 border-t border-border/35 pt-4">
                 {user ? (
                   <>
                     {userRole === "talent" && (

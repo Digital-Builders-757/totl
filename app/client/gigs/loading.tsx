@@ -1,7 +1,7 @@
 export default function ClientGigsLoading() {
   return (
     <div className="min-h-screen bg-black page-ambient text-white">
-      <div className="border-b border-white/10 bg-black/95 backdrop-blur sticky top-0 z-40">
+      <div className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <div className="h-8 w-8 bg-white/10 rounded animate-pulse" />
@@ -16,7 +16,7 @@ export default function ClientGigsLoading() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="rounded-lg border border-white/10 bg-white/5 p-4">
+            <div key={i} className="panel-frosted rounded-lg p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="h-4 bg-white/10 rounded w-16 mb-2 animate-pulse" />
@@ -35,7 +35,7 @@ export default function ClientGigsLoading() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-lg border border-white/10 bg-white/5">
+            <div key={i} className="panel-frosted rounded-lg">
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">

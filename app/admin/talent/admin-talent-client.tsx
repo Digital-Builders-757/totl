@@ -98,7 +98,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
           <MoreVertical size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+      <DropdownMenuContent align="end" className="panel-frosted border-border/50">
         <DropdownMenuItem asChild>
           <Link
             href={`/talent/${talent.user_id}`}
@@ -160,7 +160,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
         <DataTableShell className="hidden md:block">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+              <tr className="bg-gradient-to-r from-card/45 to-card/28">
                 <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
                   Talent
                 </th>
@@ -184,9 +184,9 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-border/40">
               {filteredTalent.map((talent) => (
-                <tr key={talent.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                <tr key={talent.id} className="hover:bg-card/22 transition-colors duration-200">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
@@ -293,8 +293,8 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
           </div>
         </div>
 
-        <div className="mb-8 overflow-hidden rounded-2xl border border-gray-700 bg-gray-800/50 shadow-2xl backdrop-blur-sm">
-          <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
+        <div className="mb-8 overflow-hidden rounded-2xl panel-frosted card-backlit shadow-lg">
+          <div className="border-b border-border/40 bg-gradient-to-r from-card/40 to-card/25 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Talent Profiles</h2>
               <div className="flex items-center space-x-3">

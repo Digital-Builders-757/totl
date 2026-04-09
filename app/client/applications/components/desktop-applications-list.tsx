@@ -79,7 +79,7 @@ export default function DesktopApplicationsList({
                     </div>
                     <ApplicationStatusBadge status={application.status} showIcon={true} />
                   </div>
-                  <div className="flex items-center justify-between border-t border-white/10 pt-3 text-sm">
+                  <div className="flex items-center justify-between border-t border-border/35 pt-3 text-sm">
                     <span className="text-xs text-gray-400">Next action</span>
                     <div className="flex items-center gap-2">
                       <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
@@ -97,7 +97,7 @@ export default function DesktopApplicationsList({
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                          <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                             <DropdownMenuItem
                               data-test="accept-application"
                               onClick={() => onAccept(application)}

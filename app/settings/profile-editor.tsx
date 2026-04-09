@@ -99,7 +99,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <MobileTabRail className="pb-1" edgeColorClassName="from-gray-900">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-800 p-1">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl panel-frosted p-1">
                 <TabsTrigger value="basic" className={triggerClassName}>
                   Basic Info
                 </TabsTrigger>
@@ -118,7 +118,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
             </MobileTabRail>
 
             <TabsList
-              className={`hidden h-auto w-full rounded-xl border border-gray-700 bg-gray-800 p-1 md:grid ${
+              className={`hidden h-auto w-full rounded-xl panel-frosted p-1 md:grid ${
                 isTalent ? "md:grid-cols-4" : "md:grid-cols-3"
               }`}
             >

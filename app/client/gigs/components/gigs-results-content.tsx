@@ -105,7 +105,7 @@ export default function GigsResultsContent({
               <Button
                 variant="outline"
                 size="sm"
-                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
+                className="min-w-[6.5rem] flex-1 border-border/50 bg-card/30 text-white backdrop-blur-sm"
                 asChild
               >
                 <Link href={`/gigs/${gig.id}`}>
@@ -116,7 +116,7 @@ export default function GigsResultsContent({
               <Button
                 variant="outline"
                 size="sm"
-                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
+                className="min-w-[6.5rem] flex-1 border-border/50 bg-card/30 text-white backdrop-blur-sm"
                 asChild
               >
                 <Link href={`/client/gigs/${gig.id}/edit`} data-testid="edit-gig">
@@ -127,7 +127,7 @@ export default function GigsResultsContent({
               <Button
                 variant="outline"
                 size="sm"
-                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
+                className="min-w-[6.5rem] flex-1 border-border/50 bg-card/30 text-white backdrop-blur-sm"
                 asChild
               >
                 <Link href={`/client/applications?gig=${gig.id}`}>
