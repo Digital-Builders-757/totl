@@ -13,6 +13,7 @@
 **CLIENT TERMINAL / OPPORTUNITIES** — April 9, 2026
 - ✅ **`/client/gigs/[id]/edit`:** Server-rendered load for the signed-in owner; **`updateGigAction`** persists changes (explicit columns; RLS unchanged).
 - ✅ **Dashboard — My Opportunities:** **View** links to public **`/gigs/[id]`**; **Edit** links to the edit route (`data-testid="edit-gig"` on the Edit link).
+- ✅ **`/client/gigs` (Manage opportunities):** Card **Edit** is wired to **`/client/gigs/[id]/edit`**; non-functional placeholder **Edit** / **Delete** row removed (single row: View \| Edit \| Applications).
 - ✅ **Applications:** Non-blocking warning when the opportunity already has applications (applicants may have relied on prior details).
 - ✅ **Lock:** Editing unavailable when any related booking is **`completed`** (blocked in UI + server action).
 - ✅ **Deferred:** Cover image is not editable in this pass (post/create flow unchanged).

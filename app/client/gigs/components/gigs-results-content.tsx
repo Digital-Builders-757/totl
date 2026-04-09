@@ -1,6 +1,6 @@
 "use client";
 
-import { Building, Edit, Eye, MapPin, MoreVertical, Plus, Trash2, Users } from "lucide-react";
+import { Building, Eye, MapPin, MoreVertical, Pencil, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -101,11 +101,11 @@ export default function GigsResultsContent({
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="apple-glass flex-1 border-white/30 text-white"
+                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
                 asChild
               >
                 <Link href={`/gigs/${gig.id}`}>
@@ -116,24 +116,24 @@ export default function GigsResultsContent({
               <Button
                 variant="outline"
                 size="sm"
-                className="apple-glass flex-1 border-white/30 text-white"
+                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
+                asChild
+              >
+                <Link href={`/client/gigs/${gig.id}/edit`} data-testid="edit-gig">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="apple-glass min-w-[6.5rem] flex-1 border-white/30 text-white"
                 asChild
               >
                 <Link href={`/client/applications?gig=${gig.id}`}>
                   <Users className="mr-2 h-4 w-4" />
                   Applications
                 </Link>
-              </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="apple-glass flex-1 border-white/30 text-white">
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" className="apple-glass flex-1 border-white/30 text-white">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
               </Button>
             </div>
           </CardContent>
