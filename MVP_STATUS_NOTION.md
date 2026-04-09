@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder — edit posted opportunities (April 9, 2026)**
+
+**CLIENT TERMINAL / OPPORTUNITIES** — April 9, 2026
+- ✅ **`/client/gigs/[id]/edit`:** Server-rendered load for the signed-in owner; **`updateGigAction`** persists changes (explicit columns; RLS unchanged).
+- ✅ **Dashboard — My Opportunities:** **View** links to public **`/gigs/[id]`**; **Edit** links to the edit route (`data-testid="edit-gig"` on the Edit link).
+- ✅ **Applications:** Non-blocking warning when the opportunity already has applications (applicants may have relied on prior details).
+- ✅ **Lock:** Editing unavailable when any related booking is **`completed`** (blocked in UI + server action).
+- ✅ **Deferred:** Cover image is not editable in this pass (post/create flow unchanged).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green.
+
+**Next (P0):** External beta evidence; confirm **Admin detail** routes in production if still blocking.
+
+**Next (P1):** Optional cover-image update on edit; direct-to-Supabase portfolio uploads; **CRON_SECRET** on Vercel for booking reminders.
+
 ## 🚀 **Latest: Sentry noise reduction + structured logging hygiene (April 6, 2026)**
 
 **OBSERVABILITY / STRIPE / CRON / UI** — April 6, 2026

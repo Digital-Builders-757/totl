@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, MoreVertical, Plus, Users } from "lucide-react";
+import { Eye, MoreVertical, Pencil, Plus, Users } from "lucide-react";
 import Link from "next/link";
 import type { DashboardGig } from "@/app/client/dashboard/types";
 import { Badge } from "@/components/ui/badge";
@@ -80,12 +80,20 @@ export default function GigsTabContent({ gigs, getCategoryColor }: GigsTabConten
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 border-gray-700 text-white hover:bg-white/5">
-                  <Eye className="mr-2 h-4 w-4" />
-                  View
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
+                  <Link href={`/gigs/${gig.id}`}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    View
+                  </Link>
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 border-gray-700 text-white hover:bg-white/5">
+                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
+                  <Link href={`/client/gigs/${gig.id}/edit`} data-testid="edit-gig">
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
                   <Users className="mr-2 h-4 w-4" />
                   Applications
                 </Button>
