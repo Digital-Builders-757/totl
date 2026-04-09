@@ -8,7 +8,7 @@ export default function CreateGigLoading() {
           <div className="h-9 w-48 bg-white/10 rounded animate-pulse" />
           <div className="h-5 w-72 max-w-full bg-white/10 rounded animate-pulse" />
         </div>
-        <div className="rounded-xl border border-gray-700 bg-gray-800/50 p-6 space-y-6">
+        <div className="panel-frosted rounded-xl p-6 space-y-6">
           <div className="space-y-2">
             <div className="h-4 w-24 bg-white/10 rounded animate-pulse" />
             <div className="h-10 w-full bg-white/10 rounded animate-pulse" />

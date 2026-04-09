@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Global UI — frosted surfaces + ambient glow (April 9, 2026)**
+
+**UI / DESIGN SYSTEM** — April 9, 2026
+- ✅ **`glow-backplate`** on **`body`** (`app/layout.tsx`) plus utilities in **`app/globals.css`**: **`panel-frosted`**, **`card-backlit`**, **`button-glow`**, **`focus-glow`**, **`grain-texture`** (see **`docs/UI_CONSTITUTION.md`**, **`docs/features/UI_VISUAL_LANGUAGE.md`**).
+- ✅ **Primitives:** **`Button`**, **`Card`**, **`Input`**, **`Textarea`** use tokenized glow/frost/focus patterns.
+- ✅ **Breadth:** Admin chrome (header, tables, loading shells), client dashboard/signup/apply touches, marketing **`/`** + **`/about`** + **`/privacy`**, public talent profile, gigs listing/pagination, navbar, and shared layout components moved off ad hoc grays / **`apple-glass`** toward **`panel-frosted`** and **`border-border` / `bg-card`**.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run).
+
+**Next (P0):** External beta evidence; confirm **Admin detail** routes in production if still blocking.
+
+**Next (P1):** Remaining gray-heavy **Settings** / talent profile forms; optional perf review where **`panel-frosted`** stacks deeply.
+
 ## 🚀 **Latest: Gig edit pages — Supabase count errors + shared date helpers (April 9, 2026)**
 
 **ADMIN / CLIENT / GIG EDIT** — April 9, 2026 (follow-up)

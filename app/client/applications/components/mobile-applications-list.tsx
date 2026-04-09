@@ -69,7 +69,7 @@ export default function MobileApplicationsList({
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
+                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                   <DropdownMenuItem asChild className="text-gray-200 focus:text-white">
                     <Link href={profileHref}>Review profile</Link>
                   </DropdownMenuItem>

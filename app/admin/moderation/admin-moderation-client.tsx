@@ -202,7 +202,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
           </Card>
         </div>
 
-          <Card className="border-gray-700 bg-gray-800/60">
+          <Card>
           <CardHeader>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
               <div>
@@ -259,7 +259,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700">
+                  <tbody className="divide-y divide-border/40">
                     {filteredFlags.map((flag) => (
                       <tr key={flag.id} className="hover:bg-gray-800/60 text-sm text-gray-200">
                         <td className="py-4 px-6">

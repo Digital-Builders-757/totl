@@ -318,7 +318,7 @@ export default async function TalentDashboard() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-            <div className="relative h-40 md:h-48 bg-gradient-to-r from-gray-900 to-gray-700">
+            <div className="relative h-40 bg-gradient-to-r from-[var(--oklch-bg)] to-card/50 md:h-48">
               <div className="absolute inset-0 opacity-30 mix-blend-overlay">
                 <SafeImage
                   src="/vibrant-runway-show.png"

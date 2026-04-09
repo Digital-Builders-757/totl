@@ -103,7 +103,7 @@ export function UpdatePasswordForm() {
         <p className="text-gray-300 mb-4">
           Your password has been updated successfully. Redirecting to login...
         </p>
-        <Button asChild variant="outline" className="w-full border-gray-700 text-white hover:bg-white/10">
+        <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
           <a href={PATHS.LOGIN}>Go to Login</a>
         </Button>
       </div>
@@ -156,11 +156,7 @@ export function UpdatePasswordForm() {
         </div>
       </div>
 
-      <Button
-        type="submit"
-        className="w-full bg-black text-white hover:bg-black/90"
-        disabled={isSubmitting}
-      >
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? "Updating..." : "Update Password"}
       </Button>
     </form>

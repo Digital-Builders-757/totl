@@ -14,13 +14,13 @@ export default function AdminLayoutLoading() {
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="rounded-xl border border-gray-700 bg-gray-800/50 p-4">
+            <div key={i} className="panel-frosted rounded-xl p-4">
               <div className="h-4 w-20 bg-white/10 rounded mb-2 animate-pulse" />
               <div className="h-8 w-16 bg-white/10 rounded animate-pulse" />
             </div>
           ))}
         </div>
-        <div className="h-64 rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
+        <div className="h-64 panel-frosted rounded-xl animate-pulse" />
       </div>
     </AdminLoadingShell>
   );

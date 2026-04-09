@@ -485,7 +485,7 @@ export default async function GigsPage({
               <div className="flex gap-3 w-full sm:w-auto order-1 sm:order-2">
                 <Button 
                   variant="outline" 
-                  className="apple-glass border-white/30 flex-1 sm:flex-none min-h-[48px]"
+                  className="min-h-[48px] flex-1 border-border/50 bg-card/25 text-white hover:bg-card/35 sm:flex-none"
                   asChild 
                   disabled={page <= 1}
                 >
@@ -497,7 +497,7 @@ export default async function GigsPage({
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="apple-glass border-white/30 flex-1 sm:flex-none min-h-[48px]" 
+                  className="min-h-[48px] flex-1 border-border/50 bg-card/25 text-white hover:bg-card/35 sm:flex-none" 
                   asChild 
                   disabled={page >= totalPages}
                 >

@@ -167,7 +167,7 @@ export function AdminClientApplicationsClient({
           <MoreVertical size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+      <DropdownMenuContent align="end" className="panel-frosted border-border/50">
         <DropdownMenuItem
           onClick={() => {
             setSelectedApplication(application);
@@ -250,7 +250,7 @@ export function AdminClientApplicationsClient({
         <DataTableShell className="hidden md:block">
           <table className="w-full">
             <thead>
-              <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+              <tr className="bg-gradient-to-r from-card/45 to-card/28">
                 <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
                   Company Name
                 </th>
@@ -277,9 +277,9 @@ export function AdminClientApplicationsClient({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-700">
+            <tbody className="divide-y divide-border/40">
               {filteredApplications.map((application) => (
-                <tr key={application.id} className="hover:bg-gray-700/50 transition-colors duration-200">
+                <tr key={application.id} className="hover:bg-card/22 transition-colors duration-200">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-gray-400" />
@@ -657,7 +657,7 @@ export function AdminClientApplicationsClient({
           }
         />
 
-        <SectionCard className="border-gray-700 bg-gray-800/50 p-4 sm:p-6">
+        <SectionCard className="p-4 sm:p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-end">
             <div className="flex-1">
               <Label htmlFor="vip-invite-email" className="text-gray-300">
@@ -728,8 +728,8 @@ export function AdminClientApplicationsClient({
         </div>
 
         {/* Applications Section */}
-        <SectionCard className="border-gray-700 bg-gray-800/50" paddingClassName="p-0">
-          <div className="border-b border-gray-700 bg-gradient-to-r from-gray-800/80 to-gray-700/80 p-4 sm:p-6">
+        <SectionCard paddingClassName="p-0">
+          <div className="border-b border-border/40 bg-gradient-to-r from-card/40 to-card/25 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Applications</h2>
               <div className="flex items-center space-x-3">

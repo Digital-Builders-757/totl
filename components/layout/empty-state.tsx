@@ -14,9 +14,9 @@ export interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
   return (
-    <div className={cn("text-center panel-frosted card-backlit rounded-2xl border border-white/10 p-6 sm:p-8", className)}>
+    <div className={cn("text-center panel-frosted card-backlit rounded-2xl p-6 sm:p-8", className)}>
       {Icon ? (
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 border border-white/10">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-border/40 bg-card/30">
           <Icon className="h-6 w-6 text-[var(--oklch-text-secondary)]" aria-hidden="true" />
         </div>
       ) : null}

@@ -8,7 +8,7 @@ export default function TalentSignupLoading() {
           <Skeleton className="h-full w-full bg-white/10" />
         </div>
 
-        <div className="max-w-4xl mx-auto rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+        <div className="panel-frosted mx-auto max-w-4xl overflow-hidden rounded-xl">
           <div className="grid md:grid-cols-5">
             <div className="md:col-span-2 relative hidden md:block">
               <div className="aspect-3-4 bg-white/10" />

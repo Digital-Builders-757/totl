@@ -281,7 +281,7 @@ export function AdminApplicationsClient({
           <Badge className="bg-red-500/20 text-red-300 border-red-500/40">{rejectedCount} Rejected</Badge>
         </div>
 
-        <div className="rounded-2xl border border-gray-700 bg-gray-800/50 p-4 sm:p-6">
+        <div className="rounded-2xl panel-frosted card-backlit p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
@@ -326,7 +326,7 @@ export function AdminApplicationsClient({
 
           <Tabs defaultValue="new" className="w-full space-y-4" onValueChange={setActiveTab}>
             <MobileTabRail edgeColorClassName="from-gray-900">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl panel-frosted p-1">
                 <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                   New ({newCount})
                 </TabsTrigger>
@@ -339,7 +339,7 @@ export function AdminApplicationsClient({
               </TabsList>
             </MobileTabRail>
 
-            <TabsList className="hidden h-11 border border-gray-700 bg-gray-900 p-1 md:grid md:grid-cols-3">
+            <TabsList className="hidden h-11 panel-frosted p-1 md:grid md:grid-cols-3">
               <TabsTrigger value="new">New ({newCount})</TabsTrigger>
               <TabsTrigger value="approved">Approved ({approvedCount})</TabsTrigger>
               <TabsTrigger value="rejected">Rejected ({rejectedCount})</TabsTrigger>
@@ -372,7 +372,7 @@ export function AdminApplicationsClient({
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <tr className="bg-gradient-to-r from-card/45 to-card/28">
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
@@ -380,9 +380,9 @@ export function AdminApplicationsClient({
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-700">
+                      <tbody className="divide-y divide-border/40">
                         {filteredApplications.map((application) => (
-                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-card/22">
                             <td className="px-6 py-4">
                               <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
                                 <div className="text-sm font-medium text-white hover:underline">
@@ -408,7 +408,7 @@ export function AdminApplicationsClient({
                                     <MoreVertical size={16} />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="border-gray-700 bg-gray-800">
+                                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setSelectedApplication(application);
@@ -474,7 +474,7 @@ export function AdminApplicationsClient({
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <tr className="bg-gradient-to-r from-card/45 to-card/28">
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
@@ -482,9 +482,9 @@ export function AdminApplicationsClient({
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-700">
+                      <tbody className="divide-y divide-border/40">
                         {filteredApplications.map((application) => (
-                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-card/22">
                             <td className="px-6 py-4">
                               <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
                                 <div className="text-sm font-medium text-white hover:underline">
@@ -540,7 +540,7 @@ export function AdminApplicationsClient({
                   <DataTableShell className="hidden md:block">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gradient-to-r from-gray-800 to-gray-700">
+                        <tr className="bg-gradient-to-r from-card/45 to-card/28">
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
@@ -548,9 +548,9 @@ export function AdminApplicationsClient({
                           <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-700">
+                      <tbody className="divide-y divide-border/40">
                         {filteredApplications.map((application) => (
-                          <tr key={application.id} className="transition-colors duration-200 hover:bg-gray-700/50">
+                          <tr key={application.id} className="transition-colors duration-200 hover:bg-card/22">
                             <td className="px-6 py-4">
                               <Link href={`/admin/gigs/${application.gig_id}`} className="block focus-hint">
                                 <div className="text-sm font-medium text-white hover:underline">

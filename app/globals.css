@@ -197,6 +197,11 @@
     /* Ambient spotlight (route-tinted via data-role) */
     --spotlight-color: hsla(0, 0%, 100%, 0.08);
     --ambient-spotlight: radial-gradient(1100px 520px at 50% -10%, var(--spotlight-color), transparent 65%);
+
+    /* Global viewport glow backplate (radial orbs; token-driven) */
+    --glow-backplate-tl: var(--oklch-accent-soft);
+    --glow-backplate-tr: var(--totl-violet-glow-soft);
+    --glow-backplate-b: hsl(var(--foreground) / 0.06);
     
     /* ============================================ */
     /* 🎨 HSL TOKENS (Legacy - Backward Compatible) */
@@ -543,6 +548,138 @@
     background: radial-gradient(circle, var(--totl-violet-glow-soft), transparent 70%);
     filter: blur(6px);
     z-index: -1;
+  }
+
+  /* --- Back-lit minimalism: canonical primitives (Phase A + B) --- */
+
+  /**
+   * Global ambient glow behind app content. Attach to `body` (or one shell wrapper).
+   * Pseudo is fixed + non-interactive; z-index stays behind in-flow UI via isolation.
+   */
+  .glow-backplate {
+    position: relative;
+    isolation: isolate;
+    min-height: 100%;
+  }
+
+  .glow-backplate::before {
+    content: "";
+    position: fixed;
+    inset: -25% -15% -20% -15%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 88% 58% at 0% 0%, var(--glow-backplate-tl), transparent 58%),
+      radial-gradient(ellipse 82% 52% at 100% 0%, var(--glow-backplate-tr), transparent 55%),
+      radial-gradient(ellipse 92% 48% at 50% 118%, var(--glow-backplate-b), transparent 62%);
+    filter: blur(72px);
+    opacity: 0.5;
+  }
+
+  /** Optional film grain; keep opacity very low for performance */
+  .grain-texture {
+    position: relative;
+  }
+
+  .grain-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.35;
+  }
+
+  /**
+   * Frosted panel: one blur budget for composed surfaces (e.g. SectionCard + card-backlit).
+   * Radius comes from Tailwind on the element (rounded-2xl / rounded-lg).
+   */
+  .panel-frosted {
+    position: relative;
+    background-color: hsl(var(--card) / 0.52);
+    border: 1px solid hsl(var(--border) / 0.38);
+    box-shadow:
+      0 0 0 1px hsl(var(--ring) / 0.04) inset,
+      0 10px 34px hsl(0 0% 0% / 0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /**
+   * Backlit surface treatment. Stacks with .panel-frosted without a second backdrop blur.
+   * Alone (e.g. shadcn Card), provides a single modest blur.
+   */
+  .card-backlit {
+    position: relative;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--foreground) / 0.045) 0%,
+      transparent 52%,
+      hsl(var(--primary) / 0.05) 100%
+    );
+    box-shadow:
+      0 0 0 1px hsl(var(--ring) / 0.07) inset,
+      0 12px 38px hsl(0 0% 0% / 0.18);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+
+  .card-backlit:not(.panel-frosted) {
+    background-color: hsl(var(--card) / 0.68);
+    border: 1px solid hsl(var(--border) / 0.42);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-backlit:hover {
+      border-color: hsl(var(--border) / 0.55);
+      box-shadow:
+        0 0 0 1px hsl(var(--ring) / 0.1) inset,
+        0 14px 42px hsl(0 0% 0% / 0.22);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-backlit {
+      transition: none;
+    }
+  }
+
+  /**
+   * Primary CTA glow (compose with Button variant — shadow only; no layout/sizing).
+   */
+  .button-glow {
+    transition: box-shadow 200ms ease, background-color 200ms ease;
+    box-shadow:
+      0 0 0 1px hsl(var(--primary-foreground) / 0.12) inset,
+      0 2px 8px hsl(0 0% 0% / 0.28),
+      0 0 28px var(--oklch-accent-soft);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .button-glow:hover:not(:disabled):not([aria-disabled="true"]) {
+      box-shadow:
+        0 0 0 1px hsl(var(--ring) / 0.25) inset,
+        0 6px 22px hsl(0 0% 0% / 0.38),
+        0 0 46px var(--oklch-accent-glow);
+    }
+  }
+
+  .button-glow:disabled,
+  .button-glow[aria-disabled="true"] {
+    box-shadow: 0 1px 3px hsl(0 0% 0% / 0.2);
+  }
+
+  /** Shared focus-visible ring + soft outer glow (inputs, buttons, links with utility) */
+  .focus-glow:focus-visible {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px hsl(var(--ring)),
+      0 0 0 4px hsl(var(--background)),
+      0 0 22px var(--oklch-accent-soft);
   }
 }
 
@@ -1111,34 +1248,8 @@ h1 {
 .stagger-10 { animation-delay: 1.0s; }
 
 /* ============================================ */
-/* 🎨 OKLCH UTILITY CLASSES - Premium Components */
+/* 🎨 OKLCH — gig card spotlight + badges (panels/cards: @layer utilities) */
 /* ============================================ */
-
-/* Frosted Glass Panel - Premium Elevated Surface */
-.panel-frosted {
-  background: var(--elev-2-bg);
-  backdrop-filter: blur(var(--elev-2-blur));
-  -webkit-backdrop-filter: blur(var(--elev-2-blur));
-  border: 1px solid var(--elev-2-border);
-  border-radius: 1.5rem;
-  box-shadow: var(--elev-2-shadow);
-}
-
-/* Back-Lit Card - Inner Glow + Outer Bloom (Pure White) */
-.card-backlit {
-  background: var(--elev-2-bg);
-  border-radius: 1.5rem;
-  border: 1px solid var(--elev-2-border);
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--elev-2-shadow);
-}
-
-.card-backlit:hover {
-  transform: translateY(-4px);
-  border-color: hsla(0, 0%, 100%, 0.12);
-  box-shadow: var(--elev-3-shadow);
-}
 
 /* ===========================
    SPOTLIGHT CARD GLOW BORDER
@@ -1232,41 +1343,6 @@ h1 {
   }
 }
 
-/* Premium CTA Button - Pure White Glow (Apple-Style) */
-.button-glow {
-  background: var(--oklch-brand-3);
-  color: var(--oklch-bg);
-  font-weight: 600;
-  border-radius: 1rem;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow:
-    0 0 0 1px var(--oklch-accent-soft) inset,
-    0 8px 24px rgba(0, 0, 0, 0.35),
-    0 0 40px var(--oklch-accent-glow);
-}
-
-.button-glow:hover {
-  background: var(--oklch-brand-2);
-  transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px var(--oklch-accent) inset,
-    0 12px 32px rgba(0, 0, 0, 0.45),
-    0 0 70px var(--oklch-accent-glow);
-}
-
-.button-glow:active {
-  transform: translateY(0);
-}
-
-.button-glow:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
 /* Status Badge with OKLCH */
 .badge-status-new {
   background: var(--oklch-status-new);
@@ -1329,16 +1405,6 @@ h1 {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* Grain Texture Overlay (for premium feel) */
-.grain-texture::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* ============================================ */

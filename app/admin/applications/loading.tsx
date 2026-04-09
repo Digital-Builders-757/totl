@@ -13,7 +13,7 @@ export default function AdminApplicationsLoading() {
           <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
           <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
         </div>
-        <div className="h-[420px] w-full rounded-xl border border-gray-700 bg-gray-800/50 animate-pulse" />
+        <div className="h-[420px] w-full panel-frosted rounded-xl animate-pulse" />
       </div>
     </AdminLoadingShell>
   );

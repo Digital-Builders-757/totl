@@ -111,7 +111,7 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
         <Bookmark className="h-4 w-4 text-[var(--oklch-text-tertiary)] flex-shrink-0" />
 
         {loading ? (
-          <div className="w-full sm:w-[220px] min-h-[44px] rounded-lg bg-[var(--oklch-surface)] border border-[var(--oklch-border)] text-white px-3 flex items-center gap-2">
+          <div className="flex min-h-[44px] w-full items-center gap-2 rounded-lg border border-border/45 bg-card/40 px-3 text-foreground sm:w-[220px]">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm">Loading saved searches…</span>
           </div>
@@ -123,7 +123,7 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
             }}
           >
             <SelectTrigger
-              className="w-full sm:w-[220px] min-h-[44px] bg-[var(--oklch-surface)] border-[var(--oklch-border)] text-white"
+              className="h-auto min-h-[44px] w-full border-border/45 bg-card/40 text-foreground sm:w-[220px]"
               aria-label="Load saved search"
             >
               <SelectValue placeholder="Load saved search" />
@@ -154,7 +154,7 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
                 Manage
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)] max-h-[80vh] overflow-hidden flex flex-col">
+            <DialogContent className="panel-frosted card-backlit flex max-h-[80vh] flex-col overflow-hidden border-border/50">
               <DialogHeader>
                 <DialogTitle className="text-white">Manage saved searches</DialogTitle>
               </DialogHeader>
@@ -162,7 +162,7 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
                 {searches.map((s) => (
                   <div
                     key={s.id}
-                    className="flex items-center justify-between gap-3 p-3 rounded-lg bg-white/5 border border-white/10"
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-card/35 p-3"
                   >
                     <button
                       type="button"
@@ -203,7 +203,7 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
               Save this search
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[var(--oklch-surface)] border-[var(--oklch-border)]">
+          <DialogContent className="panel-frosted border-border/50">
             <DialogHeader>
               <DialogTitle className="text-white">Save search</DialogTitle>
             </DialogHeader>

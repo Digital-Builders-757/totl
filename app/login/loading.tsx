@@ -6,7 +6,7 @@ export default function LoginLoading() {
           <div className="h-10 w-48 mx-auto bg-white/10 rounded animate-pulse" />
           <div className="h-4 w-64 mx-auto bg-white/10 rounded animate-pulse" />
         </div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-6 space-y-4">
+        <div className="panel-frosted rounded-xl p-6 space-y-4">
           <div className="space-y-2">
             <div className="h-4 w-16 bg-white/10 rounded animate-pulse" />
             <div className="h-10 w-full bg-white/10 rounded animate-pulse" />

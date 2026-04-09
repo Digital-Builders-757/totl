@@ -71,13 +71,22 @@ export default function UIShowcasePage() {
           <section>
             <h2 className="text-3xl font-bold mb-6">3. Glow Buttons</h2>
             <div className="flex flex-wrap gap-4">
-              <button className="button-glow">
+              <button
+                type="button"
+                className="button-glow rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              >
                 Apply Now
               </button>
-              <button className="button-glow px-8 py-3 text-lg">
+              <button
+                type="button"
+                className="button-glow rounded-md bg-primary px-8 py-3 text-lg font-medium text-primary-foreground"
+              >
                 Book Talent
               </button>
-              <button className="button-glow">
+              <button
+                type="button"
+                className="button-glow rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              >
                 Post a Gig
               </button>
             </div>

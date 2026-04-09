@@ -101,7 +101,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
           {filteredTalent.map((person) => (
             <div
               key={person.id}
-              className="group apple-card hover-lift cursor-pointer overflow-hidden scroll-fade-in scroll-stagger-1"
+              className="group panel-frosted card-backlit grain-texture cursor-pointer overflow-hidden rounded-2xl scroll-fade-in scroll-stagger-1 hover-lift"
               onClick={() => router.push(`/talent/${person.user_id}`)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

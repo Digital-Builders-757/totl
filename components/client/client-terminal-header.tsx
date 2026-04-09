@@ -43,7 +43,7 @@ export function ClientTerminalHeader({
 
   return (
     <>
-      <div data-testid="client-header-root" className="elev-2 sticky top-0 z-40 border-b border-white/10">
+      <div data-testid="client-header-root" className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-2 pt-[env(safe-area-inset-top)] md:py-4">
           <div className="flex h-14 items-center justify-between md:hidden">
             <Button
@@ -105,10 +105,10 @@ export function ClientTerminalHeader({
       <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DialogContent
           data-testid="client-drawer-panel"
-          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-black p-0 pb-[env(safe-area-inset-bottom)] text-white"
+          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-border/40 bg-background p-0 pb-[env(safe-area-inset-bottom)] text-white panel-frosted"
         >
           <div className="flex h-full flex-col">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-black/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-card/20 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-sm">
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold">Career Builder</p>
                 <p className="text-xs text-gray-300">Navigation</p>
@@ -139,7 +139,7 @@ export function ClientTerminalHeader({
               ))}
             </nav>
 
-            <div className="border-t border-white/10 px-3 py-3">
+            <div className="border-t border-border/35 px-3 py-3">
               <button
                 type="button"
                 disabled={isSigningOut}

@@ -64,7 +64,7 @@ export default function ResetPassword() {
           Back to login
         </Link>
 
-        <div className="max-w-md mx-auto panel-frosted overflow-hidden">
+        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
           <div className="p-8">
             <div className="text-center mb-8">
               <Image
@@ -96,11 +96,7 @@ export default function ResetPassword() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-black text-white hover:bg-black/90"
-                  disabled={isSubmitting}
-                >
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send Reset Link"}
                 </Button>
               </form>
@@ -110,7 +106,7 @@ export default function ResetPassword() {
                   If an account exists with the email you entered, you will receive a password reset
                   link shortly.
                 </p>
-                <Button asChild variant="outline" className="w-full border-gray-700 text-white hover:bg-white/10">
+                <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
                   <Link href={PATHS.LOGIN}>Return to Login</Link>
                 </Button>
               </div>

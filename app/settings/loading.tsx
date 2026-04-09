@@ -10,7 +10,7 @@ export default function SettingsLoading() {
 
           <div className="space-y-6">
             {/* Account Information Card */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-6">
+            <div className="panel-frosted rounded-lg p-6">
               <div className="h-6 bg-white/10 rounded w-40 mb-4 animate-pulse" />
               <div className="h-4 bg-white/10 rounded w-64 mb-6 animate-pulse" />
               <div className="space-y-4">
@@ -26,7 +26,7 @@ export default function SettingsLoading() {
             </div>
 
             {/* Role-Specific Card */}
-            <div className="rounded-lg border border-white/10 bg-white/5 p-6">
+            <div className="panel-frosted rounded-lg p-6">
               <div className="h-6 bg-white/10 rounded w-32 mb-4 animate-pulse" />
               <div className="h-4 bg-white/10 rounded w-80 mb-6 animate-pulse" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

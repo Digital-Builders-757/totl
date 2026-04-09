@@ -17,7 +17,7 @@ export default function PrivacyPolicyPage() {
             </p>
           </div>
 
-          <div className="apple-glass rounded-2xl p-8 lg:p-12 shadow-lg space-y-8 text-white">
+          <div className="space-y-8 rounded-2xl p-8 text-white shadow-lg panel-frosted card-backlit lg:p-12">
             {/* Introduction */}
             <section>
               <p className="text-gray-300 leading-relaxed">

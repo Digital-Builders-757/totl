@@ -115,7 +115,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
   return (
     <header
       data-testid="admin-header"
-      className="sticky top-0 z-40 border-b border-gray-700 bg-gray-900/95 backdrop-blur supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
+      className="sticky top-0 z-40 border-b border-border/50 bg-card/40 backdrop-blur-xl supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
     >
       {/* Mobile header */}
       <div className="h-14 px-4 md:hidden">
@@ -129,21 +129,21 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 size="icon"
                 aria-label="Open admin navigation"
                 data-testid="admin-drawer-trigger"
-                className="text-gray-100 hover:bg-gray-800"
+                className="text-foreground hover:bg-card/30"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </DialogTrigger>
             <DialogContent
               data-testid="admin-drawer-panel"
-              className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-gray-700 bg-gray-900 p-0 pb-[env(safe-area-inset-bottom)] text-white"
+              className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-border/50 bg-[var(--oklch-bg)] p-0 pb-[env(safe-area-inset-bottom)] text-foreground"
             >
               <DialogTitle className="sr-only">Admin Navigation</DialogTitle>
               <div className="flex h-full flex-col">
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-700 bg-gray-900/95 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/50 bg-card/35 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
                   <div className="min-w-0">
                     <p className="truncate text-base font-semibold">Admin</p>
-                    <p className="text-xs text-gray-400">Platform Management</p>
+                    <p className="text-xs text-muted-foreground">Platform Management</p>
                   </div>
                   <Button
                     type="button"
@@ -151,7 +151,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     size="icon"
                     data-testid="admin-drawer-close"
                     aria-label="Close admin navigation"
-                    className="h-11 w-11 text-gray-100 hover:bg-gray-800"
+                    className="h-11 w-11 text-foreground hover:bg-card/30"
                     onClick={() => setIsDrawerOpen(false)}
                   >
                     <X className="h-5 w-5" />
@@ -165,7 +165,9 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                         key={item.href}
                         variant="ghost"
                         className={`h-11 justify-start gap-3 px-3 ${
-                          isActive(item.href) ? "bg-gray-800 text-white" : "text-gray-300 hover:bg-gray-800"
+                          isActive(item.href)
+                            ? "border border-border/50 bg-card/40 text-foreground"
+                            : "text-muted-foreground hover:bg-card/25"
                         }`}
                         asChild
                       >
@@ -181,7 +183,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
             </DialogContent>
           </Dialog>
           </div>
-          <p className="absolute left-0 right-0 truncate px-12 text-center text-base font-semibold text-white pointer-events-none">
+          <p className="pointer-events-none absolute left-0 right-0 truncate px-12 text-center text-base font-semibold text-foreground">
             {mobileTitle}
           </p>
           <div className="flex min-w-[5rem] shrink-0 items-center justify-end gap-1">
@@ -190,7 +192,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
               variant="ghost"
               size="icon"
               aria-label="Notifications"
-              className="relative text-gray-100 hover:bg-gray-800"
+              className="relative text-foreground hover:bg-card/30"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 ? (
@@ -207,26 +209,26 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                   size="icon"
                   aria-label="Admin actions"
                   data-testid="admin-overflow-trigger"
-                  className="text-gray-100 hover:bg-gray-800"
+                  className="text-foreground hover:bg-card/30"
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="border-gray-700 bg-gray-900">
+                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" className="text-white hover:bg-gray-800">
+                  <Link href="/settings" className="text-foreground focus:bg-card/30">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/talent" className="text-white hover:bg-gray-800">
+                  <Link href="/talent" className="text-foreground focus:bg-card/30">
                     <UserIcon className="mr-2 h-4 w-4" />
                     Public Site View
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="cursor-pointer text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="cursor-pointer text-foreground hover:bg-card/30 focus:bg-card/30 disabled:cursor-not-allowed disabled:opacity-50"
                   onClick={handleSignOut}
                   disabled={isSigningOut}
                 >
@@ -251,12 +253,12 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <h1 className="truncate text-xl font-bold text-white">Admin Portal</h1>
-                <p className="truncate text-sm text-gray-300">Platform Management Dashboard</p>
+                <h1 className="truncate text-xl font-bold text-foreground">Admin Portal</h1>
+                <p className="truncate text-sm text-muted-foreground">Platform Management Dashboard</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="sm" className="border-gray-700 text-white hover:bg-gray-800">
+              <Button type="button" variant="outline" size="sm" className="border-border/50 text-foreground hover:bg-card/30">
                 <Bell className="mr-2 h-4 w-4" />
                 Notifications
                 {notificationCount > 0 ? (
@@ -270,7 +272,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 variant="outline"
                 size="sm"
                 asChild
-                className="border-gray-700 text-white hover:bg-gray-800"
+                className="border-border/50 text-foreground hover:bg-card/30"
               >
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
@@ -283,7 +285,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-gray-700 text-white hover:bg-gray-800"
+                    className="border-border/50 text-foreground hover:bg-card/30"
                   >
                     <Avatar className="mr-2 h-6 w-6">
                       <AvatarImage
@@ -298,21 +300,21 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     <span className="max-w-[220px] truncate">{user.email || "Admin"}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="border-gray-700 bg-gray-900">
+                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                   <DropdownMenuItem asChild>
-                    <Link href="/settings" className="text-white hover:bg-gray-800">
+                    <Link href="/settings" className="text-foreground focus:bg-card/30">
                       <UserIcon className="mr-2 h-4 w-4" />
                       Profile Settings
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/talent" className="text-white hover:bg-gray-800">
+                    <Link href="/talent" className="text-foreground focus:bg-card/30">
                       <UserIcon className="mr-2 h-4 w-4" />
                       Public Site View
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    className="cursor-pointer text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="cursor-pointer text-foreground hover:bg-card/30 focus:bg-card/30 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={handleSignOut}
                     disabled={isSigningOut}
                   >
@@ -332,8 +334,8 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                   href={item.href}
                   className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
-                      ? "border border-gray-600 bg-gray-800 text-white"
-                      : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                      ? "border border-border/50 bg-card/40 text-foreground"
+                      : "text-muted-foreground hover:bg-card/25 hover:text-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />

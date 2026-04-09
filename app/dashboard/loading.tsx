@@ -9,7 +9,7 @@ export default function DashboardLoading() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
-            <Card className="border-white/10 bg-white/5">
+            <Card>
               <CardHeader>
                 <Skeleton className="h-6 w-36 mb-2 bg-white/10" />
                 <Skeleton className="h-4 w-48 bg-white/10" />
@@ -31,7 +31,7 @@ export default function DashboardLoading() {
           </div>
 
           <div className="md:col-span-2">
-            <Card className="border-white/10 bg-white/5">
+            <Card>
               <CardHeader>
                 <Skeleton className="h-6 w-48 mb-2 bg-white/10" />
                 <Skeleton className="h-4 w-64 bg-white/10" />

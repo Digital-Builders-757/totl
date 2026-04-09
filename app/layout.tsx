@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={`${inter.className} glow-backplate min-h-dvh`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

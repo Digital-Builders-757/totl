@@ -8,17 +8,21 @@ import * as React from "react";
 import { cn } from "@/lib/utils/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-hint disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98]",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98]",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.98]",
-        ghost: "hover:bg-accent hover:text-accent-foreground active:scale-[0.98]",
-        link: "text-primary underline-offset-4 hover:underline",
-        success: "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]",
+        default:
+          "border border-primary/20 bg-primary/95 text-primary-foreground shadow-sm hover:bg-primary/88 active:scale-[0.98] button-glow focus-glow",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:scale-[0.98] focus-glow",
+        outline:
+          "border border-input bg-background/55 text-foreground shadow-sm backdrop-blur-sm hover:bg-accent/90 hover:text-accent-foreground active:scale-[0.98] focus-glow",
+        secondary:
+          "border border-border/45 bg-secondary/90 text-secondary-foreground shadow-sm hover:bg-secondary/75 active:scale-[0.98] focus-glow",
+        ghost: "hover:bg-accent/85 hover:text-accent-foreground active:scale-[0.98] focus-glow",
+        link: "text-primary underline-offset-4 hover:underline focus-glow",
+        success: "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98] focus-glow",
       },
       size: {
         // Normalize to 40px min touch target across standard controls.

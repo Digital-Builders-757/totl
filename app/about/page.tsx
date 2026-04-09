@@ -32,7 +32,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="relative">
-              <div className="relative z-10 apple-card p-8">
+              <div className="relative z-10 panel-frosted card-backlit grain-texture rounded-3xl p-8">
                 <video
                   autoPlay
                   loop
@@ -55,7 +55,7 @@ export default function AboutPage() {
       <section className="py-32 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center space-y-12 animate-apple-fade-in">
-            <div className="apple-glass rounded-2xl px-6 py-3 w-fit mx-auto">
+            <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-auto">
               <span className="text-white font-medium text-sm flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 Our Story
@@ -67,7 +67,7 @@ export default function AboutPage() {
             </h2>
             
             <div className="space-y-8 text-lg text-gray-300 leading-relaxed">
-              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+              <div className="panel-frosted p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-lg">2020</span>
@@ -83,7 +83,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+              <div className="panel-frosted p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-lg">TOTL</span>
@@ -100,7 +100,7 @@ export default function AboutPage() {
                 </div>
               </div>
 
-              <div className="apple-glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
+              <div className="panel-frosted p-8 rounded-2xl hover:bg-white/5 transition-all duration-300">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold text-lg">∞</span>
@@ -146,7 +146,7 @@ export default function AboutPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div
-              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              className="panel-frosted p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
               style={{ animationDelay: "0s" }}
             >
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -159,7 +159,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div
-              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              className="panel-frosted p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
               style={{ animationDelay: "0.1s" }}
             >
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -172,7 +172,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div
-              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              className="panel-frosted p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
               style={{ animationDelay: "0.2s" }}
             >
               <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -185,7 +185,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div
-              className="apple-glass p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
+              className="panel-frosted p-8 rounded-2xl group hover:bg-white/10 transition-all duration-300 animate-apple-scale-in"
               style={{ animationDelay: "0.3s" }}
             >
               <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
@@ -212,7 +212,7 @@ export default function AboutPage() {
             <h2 className="text-5xl lg:text-6xl font-bold text-white">Our Services</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+            <div className="panel-frosted p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
               <div className="flex gap-6">
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -229,7 +229,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+            <div className="panel-frosted p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
               <div className="flex gap-6">
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -246,7 +246,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+            <div className="panel-frosted p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
               <div className="flex gap-6">
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-orange-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -263,7 +263,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="apple-glass p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
+            <div className="panel-frosted p-10 rounded-2xl hover:bg-white/10 transition-all duration-300 group">
               <div className="flex gap-6">
                 <div className="flex-shrink-0">
                   <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -345,7 +345,7 @@ export default function AboutPage() {
                 <p>Sunday: Closed</p>
               </div>
             </div>
-            <div className="apple-glass p-8 rounded-2xl">
+            <div className="panel-frosted p-8 rounded-2xl">
               <h3 className="text-2xl font-bold mb-6 text-white">Send Us a Message</h3>
               <form className="space-y-6">
                 <div>
@@ -427,7 +427,7 @@ export default function AboutPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 apple-glass px-10 py-6 text-xl font-semibold"
+                  className="border-2 border-white/20 text-white hover:bg-white/5 hover:border-white/30 panel-frosted px-10 py-6 text-xl font-semibold"
                 >
                   Become a Career Builder
                 </Button>

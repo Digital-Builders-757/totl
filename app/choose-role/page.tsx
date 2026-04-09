@@ -92,7 +92,7 @@ export default function ChooseRolePage() {
 
           <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
             {/* Talent Card */}
-            <div className="apple-glass rounded-2xl overflow-hidden flex flex-col hover:bg-white/10 transition-all duration-300 group animate-apple-scale-in">
+            <div className="panel-frosted card-backlit flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:bg-white/5 group animate-apple-scale-in">
               <div className="relative h-64">
                 <Image src="/images/talent-professional.png" alt="Professional model portrait" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
@@ -130,8 +130,8 @@ export default function ChooseRolePage() {
             </div>
 
             {/* Client Card - Disabled */}
-            <div 
-              className="apple-glass rounded-2xl overflow-hidden flex flex-col opacity-60 cursor-not-allowed transition-all duration-300 animate-apple-scale-in" 
+            <div
+              className="panel-frosted card-backlit flex flex-col cursor-not-allowed overflow-hidden rounded-2xl opacity-60 transition-all duration-300 animate-apple-scale-in" 
               style={{ animationDelay: "0.1s" }}
               onClick={handleCareerBuilderClick}
               onKeyDown={handleCareerBuilderKeyDown}
@@ -183,7 +183,7 @@ export default function ChooseRolePage() {
 
       {/* Career Builder Dialog */}
       <Dialog open={showCareerBuilderDialog} onOpenChange={setShowCareerBuilderDialog}>
-        <DialogContent className="bg-slate-900 border-white/10 text-white sm:max-w-md">
+        <DialogContent className="panel-frosted border-border/50 text-white sm:max-w-md">
           <DialogHeader data-testid="career-builder-dialog">
             <DialogTitle className="text-white text-xl font-bold">Apply to Become a Career Builder</DialogTitle>
             <DialogDescription className="text-gray-300 pt-2">
@@ -207,7 +207,7 @@ export default function ChooseRolePage() {
                 </AlertDescription>
               </Alert>
             ) : (
-              <div className="bg-slate-800/50 rounded-lg p-3">
+              <div className="rounded-lg panel-frosted p-3">
                 <p className="text-gray-300 text-xs">
                   <strong className="text-white">Note:</strong> Career Builder access requires approval. You&apos;ll need to create a Talent account first, then submit an application.
                 </p>
@@ -218,7 +218,7 @@ export default function ChooseRolePage() {
             <Button
               variant="outline"
               onClick={() => setShowCareerBuilderDialog(false)}
-              className="border-white/10 text-white hover:bg-white/10"
+              className="border-border/50 text-white hover:bg-white/10"
             >
               Cancel
             </Button>
@@ -253,7 +253,7 @@ export default function ChooseRolePage() {
 
       {/* Talent Signup Form Dialog */}
       <Dialog open={showTalentSignupDialog} onOpenChange={setShowTalentSignupDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+        <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden p-0 panel-frosted">
           <ScrollArea className="max-h-[90vh]">
             <div className="p-6">
               <DialogHeader className="mb-4">
