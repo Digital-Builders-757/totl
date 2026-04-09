@@ -3,23 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import { PostGigClient } from "@/app/post-gig/post-gig-client";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
 import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
 
 export const dynamic = "force-dynamic";
-
-function formatDateForDateInput(date: string): string {
-  if (!date) return "";
-  return date.length >= 10 ? date.slice(0, 10) : date;
-}
-
-function formatDeadlineForDatetimeLocal(iso: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 interface AdminEditGigPageProps {
   params: Promise<{ id: string }>;
@@ -44,7 +32,11 @@ export default async function AdminEditGigPage({ params }: AdminEditGigPageProps
     redirect(`/login?returnUrl=${encodeURIComponent(`/admin/gigs/${gigId}/edit`)}`);
   }
 
-  const [{ data: gig, error: gigError }, applicationsCountResult, { data: completedBooking }] = await Promise.all([
+  const [
+    { data: gig, error: gigError },
+    applicationsCountResult,
+    { data: completedBooking, error: completedBookingError },
+  ] = await Promise.all([
     supabase
       .from("gigs")
       .select(
@@ -65,9 +57,17 @@ export default async function AdminEditGigPage({ params }: AdminEditGigPageProps
     notFound();
   }
 
-  const applicationsCount = applicationsCountResult.count ?? 0;
-  const hasApplications = applicationsCount > 0;
-  const hasCompletedBookings = Boolean(completedBooking);
+  if (applicationsCountResult.error) {
+    logger.error("[admin/gigs/edit] applications count error", applicationsCountResult.error, { gigId });
+  }
+  if (completedBookingError) {
+    logger.error("[admin/gigs/edit] completed booking check error", completedBookingError, { gigId });
+  }
+
+  const hasApplications =
+    Boolean(applicationsCountResult.error) || (applicationsCountResult.count ?? 0) > 0;
+  const hasCompletedBookings =
+    Boolean(completedBookingError) || Boolean(completedBooking);
 
   const initialValues = {
     title: gig.title,

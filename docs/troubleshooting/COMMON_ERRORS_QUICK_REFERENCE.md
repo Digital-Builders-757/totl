@@ -20,6 +20,9 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **Supabase head count query looks like “zero rows” on failure:** `.select("id", { count: "exact", head: true })` can return **`error`** with **`count: null`**. Using **`result.count ?? 0`** hides outages and wrong-sides UX (e.g. missing “existing applicants” warning).
+  - **Fix:** Check **`result.error`**, log it, and choose a **fail-safe** (e.g. assume count > 0 for warnings) or return an error state—not **`?? 0`** alone.
+  - **Prevention:** Any **`head: true`** count used for gating or warnings must branch on **`error`** first.
 - **Admin API routes return 401/403:** `POST /api/admin/create-user`, `GET /api/admin/test-connection`, `GET /api/admin/check-auth-schema` require authenticated admin.
   - **Fix:** Ensure caller is signed in with `profiles.role = 'admin'`. Use `requireAdmin()` from `@/lib/api/require-admin` for new admin routes.
   - **Prevention:** All admin API routes must call `requireAdmin()` (or equivalent) before performing admin operations.

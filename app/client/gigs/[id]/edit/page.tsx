@@ -5,23 +5,11 @@ import { getBootState } from "@/lib/actions/boot-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { isRedirectError } from "@/lib/is-redirect-error";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
 import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-function formatDateForDateInput(date: string): string {
-  if (!date) return "";
-  return date.length >= 10 ? date.slice(0, 10) : date;
-}
-
-function formatDeadlineForDatetimeLocal(iso: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 
 export default async function ClientEditGigPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: gigId } = await params;
@@ -40,21 +28,21 @@ export default async function ClientEditGigPage({ params }: { params: Promise<{ 
 
     const supabase = await createSupabaseServer();
 
-    const [{ data: gig, error: gigError }, { data: completedBooking }, applicationsCountResult] =
-      await Promise.all([
-        supabase
-          .from("gigs")
-          .select(
-            "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status"
-          )
-          .eq("id", gigId)
-          .maybeSingle(),
-        supabase.from("bookings").select("id").eq("gig_id", gigId).eq("status", "completed").limit(1).maybeSingle(),
-        supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .eq("gig_id", gigId),
-      ]);
+    const [
+      { data: gig, error: gigError },
+      { data: completedBooking, error: completedBookingError },
+      applicationsCountResult,
+    ] = await Promise.all([
+      supabase
+        .from("gigs")
+        .select(
+          "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status"
+        )
+        .eq("id", gigId)
+        .maybeSingle(),
+      supabase.from("bookings").select("id").eq("gig_id", gigId).eq("status", "completed").limit(1).maybeSingle(),
+      supabase.from("applications").select("id", { count: "exact", head: true }).eq("gig_id", gigId),
+    ]);
 
     if (gigError) {
       logger.error("[client/gigs/edit] gig fetch error", gigError);
@@ -65,9 +53,17 @@ export default async function ClientEditGigPage({ params }: { params: Promise<{ 
       notFound();
     }
 
-    const hasCompletedBooking = Boolean(completedBooking);
-    const applicationsCount = applicationsCountResult.count ?? 0;
-    const hasApplications = applicationsCount > 0;
+    if (completedBookingError) {
+      logger.error("[client/gigs/edit] completed booking check error", completedBookingError, { gigId });
+    }
+    if (applicationsCountResult.error) {
+      logger.error("[client/gigs/edit] applications count error", applicationsCountResult.error, { gigId });
+    }
+
+    const hasCompletedBooking =
+      Boolean(completedBookingError) || Boolean(completedBooking);
+    const hasApplications =
+      Boolean(applicationsCountResult.error) || (applicationsCountResult.count ?? 0) > 0;
 
     if (hasCompletedBooking) {
       return (
