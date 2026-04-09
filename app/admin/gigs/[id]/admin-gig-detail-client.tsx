@@ -1,7 +1,7 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { ArrowLeft, Eye, MapPin, Calendar, DollarSign, Building2, Users } from "lucide-react";
+import { ArrowLeft, Eye, MapPin, Calendar, DollarSign, Building2, Pencil, Users } from "lucide-react";
 import Link from "next/link";
 
 import { PageHeader } from "@/components/layout/page-header";
@@ -83,12 +83,20 @@ export function AdminGigDetailClient({
           title={gig.title}
           subtitle="Opportunity details and applicant activity"
           actions={
-            <Button asChild variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
-              <Link href={`/gigs/${gig.id}`}>
-                <Eye className="h-4 w-4 mr-2" />
-                View public page
-              </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button asChild className="bg-purple-600 text-white hover:bg-purple-700">
+                <Link href={`/admin/gigs/${gig.id}/edit`}>
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+                <Link href={`/gigs/${gig.id}`}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View public page
+                </Link>
+              </Button>
+            </div>
           }
         />
 

@@ -9,6 +9,7 @@ import type React from "react";
 import { useState } from "react";
 
 import { createGigAction, updateGigAction } from "./actions";
+import { updateGigAsAdminAction } from "@/app/admin/gigs/edit-actions";
 import { useAuth } from "@/components/auth/auth-provider";
 import { GigImageUploader } from "@/components/gigs/gig-image-uploader";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -41,8 +42,12 @@ const emptyForm = {
 export type PostGigClientProps = {
   mode?: "create" | "edit";
   gigId?: string;
+  /** Career Builder (default) vs platform admin edit surface */
+  surface?: "client" | "admin";
   initialValues?: typeof emptyForm;
   hasApplications?: boolean;
+  /** Admin only: at least one completed booking exists (informational warning; save still allowed) */
+  hasCompletedBookings?: boolean;
   editLocked?: boolean;
   editLockedReason?: string;
 };
@@ -50,8 +55,10 @@ export type PostGigClientProps = {
 export function PostGigClient({
   mode = "create",
   gigId,
+  surface = "client",
   initialValues,
   hasApplications = false,
+  hasCompletedBookings = false,
   editLocked = false,
   editLockedReason,
 }: PostGigClientProps = {}) {
@@ -63,6 +70,10 @@ export function PostGigClient({
 
   const [formData, setFormData] = useState(() => initialValues ?? emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const isAdminSurface = surface === "admin";
+  const backHref = isAdminSurface ? "/admin/gigs" : "/client/dashboard";
+  const backLabel = isAdminSurface ? "Back to All Opportunities" : "Back to Dashboard";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -91,7 +102,7 @@ export function PostGigClient({
     try {
       if (mode === "edit") {
         if (!gigId) throw new Error("Missing opportunity identifier");
-        const result = await updateGigAction({
+        const payload = {
           gigId,
           title: formData.title,
           description: formData.description,
@@ -101,11 +112,14 @@ export function PostGigClient({
           duration: formData.duration,
           date: formData.date,
           application_deadline: formData.application_deadline || null,
-        });
+        };
+        const result = isAdminSurface ? await updateGigAsAdminAction(payload) : await updateGigAction(payload);
         if (!result.ok) throw new Error(result.error);
         toast({
           title: "Opportunity updated",
-          description: "Your changes have been saved.",
+          description: isAdminSurface
+            ? "Changes saved as administrator."
+            : "Your changes have been saved.",
         });
       } else {
         const result = await createGigAction({
@@ -128,7 +142,12 @@ export function PostGigClient({
         });
       }
 
-      router.push("/client/dashboard");
+      if (mode === "edit" && isAdminSurface && gigId) {
+        /** Navigate to admin detail so you can verify applicant context after save */
+        router.push(`/admin/gigs/${gigId}`);
+      } else {
+        router.push("/client/dashboard");
+      }
     } catch (err) {
       logger.error(mode === "edit" ? "Error updating gig" : "Error creating gig", err);
       setError(
@@ -150,7 +169,11 @@ export function PostGigClient({
           <div className="max-w-md mx-auto text-center">
             <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-foreground mb-2">Authentication Required</h2>
-            <p className="text-muted-foreground mb-4">You must be logged in to post a gig.</p>
+            <p className="text-muted-foreground mb-4">
+              {isAdminSurface
+                ? "You must be logged in as an administrator to edit this opportunity."
+                : "You must be logged in to post a gig."}
+            </p>
             <Button asChild>
               <Link href="/login">Log In</Link>
             </Button>
@@ -165,11 +188,11 @@ export function PostGigClient({
       <div className="min-h-screen">
         <div className="container mx-auto px-4 py-12">
           <Link
-            href="/client/dashboard"
+            href={backHref}
             className="inline-flex items-center text-muted-foreground hover:text-foreground mb-8 transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
+            {backLabel}
           </Link>
 
           <div className="max-w-3xl mx-auto rounded-3xl border border-border bg-card/80 shadow-2xl shadow-black/40 backdrop-blur overflow-hidden">
@@ -183,7 +206,7 @@ export function PostGigClient({
                 </AlertDescription>
               </Alert>
               <Button asChild>
-                <Link href="/client/dashboard">Back to Dashboard</Link>
+                <Link href={backHref}>{backLabel}</Link>
               </Button>
             </div>
           </div>
@@ -198,25 +221,41 @@ export function PostGigClient({
     <div className="min-h-screen" data-testid={isEdit ? "edit-gig-page" : undefined}>
       <div className="container mx-auto px-4 py-12">
         <Link
-          href="/client/dashboard"
+          href={backHref}
           className="inline-flex items-center text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
+          {backLabel}
         </Link>
 
         <div className="max-w-3xl mx-auto rounded-3xl border border-border bg-card/80 shadow-2xl shadow-black/40 backdrop-blur overflow-hidden">
           <div className="p-10 space-y-8">
             <div className="space-y-3">
               <h1 className="text-3xl font-bold text-foreground">
-                {isEdit ? "Edit opportunity" : "Post a New Opportunity"}
+                {isEdit
+                  ? isAdminSurface
+                    ? "Edit opportunity (admin)"
+                    : "Edit opportunity"
+                  : "Post a New Opportunity"}
               </h1>
               <p className="text-muted-foreground">
                 {isEdit
-                  ? "Update the details below. Changes apply immediately for talent viewing this opportunity."
+                  ? isAdminSurface
+                    ? "You are editing as a platform administrator. Changes apply immediately on the public listing."
+                    : "Update the details below. Changes apply immediately for talent viewing this opportunity."
                   : "Fill out the form below to create a new casting call or opportunity. Be as detailed as possible to attract the right talent."}
               </p>
             </div>
+
+            {isEdit && isAdminSurface && hasCompletedBookings && (
+              <Alert className="border-amber-500/50 bg-amber-500/10">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-950 dark:text-amber-100">
+                  This opportunity has at least one completed booking. Editing may affect how historical records align with
+                  what talent and clients saw—use extra care.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {isEdit && hasApplications && (
               <Alert className="border-amber-500/50 bg-amber-500/10">
@@ -370,7 +409,7 @@ export function PostGigClient({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push("/client/dashboard")}
+                  onClick={() => router.push(backHref)}
                   disabled={isSubmitting}
                 >
                   Cancel

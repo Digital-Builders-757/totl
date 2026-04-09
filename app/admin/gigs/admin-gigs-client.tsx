@@ -7,6 +7,7 @@ import {
   Briefcase,
   MapPin,
   Eye,
+  Pencil,
   Plus,
   SlidersHorizontal,
   Calendar,
@@ -145,6 +146,13 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   >
                     <Link href={`/admin/gigs/${gig.id}`}>View details</Link>
                   </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="h-9 bg-purple-600 text-white hover:bg-purple-700"
+                  >
+                    <Link href={`/admin/gigs/${gig.id}/edit`}>Edit</Link>
+                  </Button>
                 </div>
               }
               trailing={
@@ -164,6 +172,15 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                         <Eye className="mr-2 h-4 w-4" />
                         View Opportunity
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/admin/gigs/${gig.id}/edit`}
+                        className="text-gray-300 hover:bg-gray-700 flex items-center"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        Edit Opportunity
                       </Link>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -240,6 +257,15 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                           <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
                             <Eye className="mr-2 h-4 w-4" />
                             View Opportunity
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/gigs/${gig.id}/edit`}
+                            className="text-gray-300 hover:bg-gray-700 flex items-center"
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit Opportunity
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuContent>

@@ -16,6 +16,7 @@
 - ✅ **`/client/gigs` (Manage opportunities):** Card **Edit** is wired to **`/client/gigs/[id]/edit`**; non-functional placeholder **Edit** / **Delete** row removed (single row: View \| Edit \| Applications).
 - ✅ **Applications:** Non-blocking warning when the opportunity already has applications (applicants may have relied on prior details).
 - ✅ **Lock:** Editing unavailable when any related booking is **`completed`** (blocked in UI + server action).
+- ✅ **Admin — All Opportunities:** **`/admin/gigs/[id]/edit`** with **`updateGigAsAdminAction`** (explicit **`profiles.role === admin`** + RLS); ⋮ menu and opportunity detail **Edit**; completed-booking **warning** only (admin may still save). **`PostGigClient`** supports `surface="admin"` vs Career Builder.
 - ✅ **Deferred:** Cover image is not editable in this pass (post/create flow unchanged).
 
 **Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green.
