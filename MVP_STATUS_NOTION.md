@@ -8,6 +8,13 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: CI — admin users mobile Playwright selector (April 10, 2026)**
+
+**QA / PLAYWRIGHT** — April 10, 2026
+- ✅ **`tests/admin/admin-users-route.spec.ts` (mobile 390×844):** Suspended-tab assertion now targets **`MobileListRowCard`** rows (`div.space-y-3.md:hidden > div.panel-frosted.rounded-2xl`) instead of **`div.rounded-xl`**, which matched the **desktop-only** table shell (`hidden md:block`) and failed with “Received: hidden” after responsive admin UI landed.
+
+**Verification:** `npx playwright test tests/admin/admin-users-route.spec.ts --grep "suspended user appears"` — pass.
+
 ## 🚀 **Latest: Opportunities — reference & inspiration links (April 10, 2026)**
 
 **GIGS / CLIENT / TALENT** — April 10, 2026
@@ -4930,6 +4937,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: April 10, 2026*
-*Current Status: MVP Complete; opportunities reference_links (jsonb) shipped to develop; migration applied to dev Supabase + types regen; prior: visual cohesion + gig edit resilience*
+*Current Status: MVP Complete; admin users mobile guardrail test fix for Suspended tab; opportunities reference_links on develop; prior: visual cohesion + gig edit resilience*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: PR develop→main; smoke reference links in staging/prod; beta evidence; CRON_SECRET for booking reminders*

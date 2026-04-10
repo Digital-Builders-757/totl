@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { loginAsAdmin } from "../helpers/admin-auth";
 import { safeGoto } from "../helpers/navigation";
 import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
@@ -119,6 +119,13 @@ test.describe("Admin users route contracts", () => {
 test.describe("Admin users route contracts (mobile 390x844)", () => {
   test.use({ viewport: { width: 390, height: 844 } });
 
+  /** Mobile stacks use `MobileListRowCard` under `.space-y-3.md:hidden`; desktop table uses `rounded-xl` + `hidden md:block`—generic `div.rounded-xl` matched the hidden table first. */
+  function mobileUserListCard(page: Page, displayName: string) {
+    return page
+      .locator("div.space-y-3.md\\:hidden > div.panel-frosted.rounded-2xl")
+      .filter({ hasText: displayName });
+  }
+
   test("mobile users shell remains reachable without horizontal overflow", async ({ page }) => {
     await loginAsAdmin(page);
     await safeGoto(page, "/admin/users");
@@ -146,13 +153,12 @@ test.describe("Admin users route contracts (mobile 390x844)", () => {
     // Suspended user must NOT appear in Career Builders tab
     await page.getByRole("tab", { name: /Career Builders \(/i }).first().click();
     await page.getByPlaceholder("Search by name, ID, or role...").fill(seededClient.displayName);
-    const careerBuildersCard = page.locator("div.rounded-xl", { hasText: seededClient.displayName });
-    await expect(careerBuildersCard).toHaveCount(0);
+    await expect(mobileUserListCard(page, seededClient.displayName)).toHaveCount(0);
 
     // Suspended user MUST appear in Suspended tab
     await page.getByRole("tab", { name: /Suspended \(/i }).first().click();
     await page.getByPlaceholder("Search by name, ID, or role...").fill(seededClient.displayName);
-    const suspendedCard = page.locator("div.rounded-xl", { hasText: seededClient.displayName }).first();
+    const suspendedCard = mobileUserListCard(page, seededClient.displayName).first();
     await expect(suspendedCard).toBeVisible();
     await expect
       .poll(async () => {
