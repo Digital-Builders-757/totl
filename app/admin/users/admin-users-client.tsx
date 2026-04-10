@@ -261,7 +261,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
       case "talent":
         return <Users className="h-4 w-4 text-green-400" />;
       default:
-        return <UserIcon className="h-4 w-4 text-gray-400" />;
+        return <UserIcon className="h-4 w-4 text-[var(--oklch-text-tertiary)]" />;
     }
   };
 
@@ -306,7 +306,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const renderUserActions = (userProfile: UserProfile) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+        <Button variant="ghost" size="icon" className="text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white">
           <MoreVertical size={16} />
         </Button>
       </DropdownMenuTrigger>
@@ -315,7 +315,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           <DropdownMenuItem asChild>
             <Link
               href={`/talent/${userProfile.id}`}
-              className="text-gray-300 hover:bg-gray-700 flex items-center"
+              className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               <Eye className="mr-2 h-4 w-4" />
               View Talent Profile
@@ -326,7 +326,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           <DropdownMenuItem asChild>
             <Link
               href={`/client/profile?userId=${userProfile.id}`}
-              className="text-gray-300 hover:bg-gray-700 flex items-center"
+              className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               <Eye className="mr-2 h-4 w-4" />
               View Career Builder Profile
@@ -337,7 +337,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           <DropdownMenuItem
             onClick={() => handleUpdateRole(userProfile.id, "talent")}
             disabled={isUpdatingRole === userProfile.id}
-            className="text-green-400 hover:bg-gray-700 flex items-center"
+            className="flex items-center text-green-300 hover:bg-white/10"
           >
             {isUpdatingRole === userProfile.id ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -349,11 +349,11 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
         )}
         {userProfile.id !== user.id && userProfile.role === "client" && (
           <>
-            <DropdownMenuSeparator className="bg-gray-700" />
+            <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem
               onClick={() => openDisableDialog(userProfile)}
               disabled={Boolean(userProfile.is_suspended)}
-              className="text-amber-300 hover:bg-gray-700 flex items-center"
+              className="flex items-center text-amber-300 hover:bg-white/10"
             >
               <Shield className="mr-2 h-4 w-4" />
               {userProfile.is_suspended ? "Already Suspended" : "Disable Career Builder"}
@@ -372,7 +372,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             <UserIcon className="h-7 w-7 text-blue-400" />
           </div>
           <h3 className="text-lg font-semibold text-white">No Users Found</h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-[var(--oklch-text-secondary)]">
             {searchQuery ? "Try adjusting your search query." : "No users have been created yet."}
           </p>
         </div>
@@ -404,22 +404,22 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   User
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Role
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Email Verified
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Joined
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   User ID
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Actions
                 </th>
               </tr>
@@ -436,7 +436,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                         <div className="font-medium text-white text-sm">
                           {getUserDisplayName(userProfile)}
                         </div>
-                        <div className="text-gray-400 text-xs">{userProfile.id.slice(0, 8)}...</div>
+                        <div className="text-xs text-[var(--oklch-text-tertiary)]">{userProfile.id.slice(0, 8)}...</div>
                       </div>
                     </div>
                   </td>
@@ -460,11 +460,11 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                       </div>
                     )}
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">
                     <SafeDate date={userProfile.created_at} />
                   </td>
                   <td className="py-4 px-6">
-                    <div className="font-mono text-xs text-gray-400">{userProfile.id.slice(0, 8)}...</div>
+                    <div className="font-mono text-xs text-[var(--oklch-text-tertiary)]">{userProfile.id.slice(0, 8)}...</div>
                   </td>
                   <td className="py-4 px-6">{renderUserActions(userProfile)}</td>
                 </tr>
@@ -528,17 +528,17 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                     size={16}
                   />
                   <Input
                     placeholder="Search by name, ID, or role..."
-                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    className="w-full pl-9 md:w-64"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button variant="outline" size="icon" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                <Button variant="outline" size="icon" className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
                   <Filter size={16} />
                 </Button>
               </div>
@@ -546,9 +546,9 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           </div>
 
           <Tabs defaultValue="all" className="w-full space-y-4" onValueChange={setActiveTab}>
-            <div className="border-b border-gray-700 px-4 sm:px-6">
-              <MobileTabRail edgeColorClassName="from-gray-900">
-                <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+            <div className="border-b border-white/10 px-4 sm:px-6">
+              <MobileTabRail edgeColorClassName="from-[rgba(6,8,18,0.98)]">
+                <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
                   <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                     All ({activeAllCount})
                   </TabsTrigger>
@@ -566,34 +566,34 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                   </TabsTrigger>
                 </TabsList>
               </MobileTabRail>
-              <TabsList className="hidden h-12 border border-gray-600 bg-gray-700/50 md:grid md:grid-cols-5">
+              <TabsList className="panel-frosted hidden h-12 border border-white/10 bg-white/5 md:grid md:grid-cols-5">
                 <TabsTrigger
                   value="all"
-                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
                   All ({activeAllCount})
                 </TabsTrigger>
                 <TabsTrigger
                   value="talent"
-                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
                 >
                   Talent ({talentUsers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="career-builders"
-                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
                   Career Builders ({careerBuilderUsers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="admins"
-                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
                 >
                   Admins ({adminUsers.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="suspended"
-                  className="text-gray-300 transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-rose-600 data-[state=active]:text-white"
                 >
                   Suspended ({suspendedUsers.length})
                 </TabsTrigger>
@@ -625,26 +625,26 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
 
       {/* Disable Confirmation Dialog */}
       <Dialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-amber-300">Disable Career Builder</DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
               This will suspend the selected Career Builder account and prevent access to protected
               routes until reinstated.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <p className="text-sm text-gray-300">Optional reason shown on the suspended page:</p>
+              <p className="text-sm text-[var(--oklch-text-secondary)]">Optional reason shown on the suspended page:</p>
               <Input
                 value={disableReason}
                 onChange={(event) => setDisableReason(event.target.value)}
                 placeholder="Policy violation, fraud risk, or internal note..."
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className=""
                 disabled={isDisabling}
               />
             </div>
-            <div className="flex items-start gap-3 text-sm text-gray-300">
+            <div className="flex items-start gap-3 text-sm text-[var(--oklch-text-secondary)]">
               <Checkbox
                 aria-label="Confirm disable Career Builder account"
                 checked={disableConfirmChecked}
@@ -664,7 +664,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 setDisableReason("");
               }}
               disabled={isDisabling}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
