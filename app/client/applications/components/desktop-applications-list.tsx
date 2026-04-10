@@ -47,7 +47,10 @@ export default function DesktopApplicationsList({
           publicBucketUrl("avatars", application.profiles?.avatar_path);
 
         return (
-          <Card key={application.id} className="hover:shadow-md transition-shadow bg-gray-900 border-gray-700">
+          <Card
+            key={application.id}
+            className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] transition-shadow hover:shadow-md"
+          >
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-start">
                 <MediaThumb
@@ -61,8 +64,10 @@ export default function DesktopApplicationsList({
                   <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
                       <h3 className="text-lg font-semibold text-white">{talentName}</h3>
-                      <p className="text-sm text-gray-300">{application.gigs?.title || "Gig"}</p>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                      <p className="text-sm text-[var(--oklch-text-secondary)]">
+                        {application.gigs?.title || "Gig"}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--oklch-text-tertiary)]">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
                           {application.gigs?.location || "Location TBD"}
@@ -80,7 +85,7 @@ export default function DesktopApplicationsList({
                     <ApplicationStatusBadge status={application.status} showIcon={true} />
                   </div>
                   <div className="flex items-center justify-between border-t border-border/35 pt-3 text-sm">
-                    <span className="text-xs text-gray-400">Next action</span>
+                    <span className="text-xs text-[var(--oklch-text-tertiary)]">Next action</span>
                     <div className="flex items-center gap-2">
                       <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
                         Review profile
@@ -92,7 +97,7 @@ export default function DesktopApplicationsList({
                               variant="ghost"
                               size="icon"
                               aria-label="More actions"
-                              className="h-11 w-11 text-gray-400 hover:bg-gray-700"
+                              className="h-11 w-11 text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -101,14 +106,14 @@ export default function DesktopApplicationsList({
                             <DropdownMenuItem
                               data-test="accept-application"
                               onClick={() => onAccept(application)}
-                              className="text-gray-200 focus:text-white"
+                              className="text-[var(--oklch-text-secondary)] focus:text-white"
                             >
                               <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
                               Accept
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => onReject(application)}
-                              className="text-gray-200 focus:text-white"
+                              className="text-[var(--oklch-text-secondary)] focus:text-white"
                             >
                               <XCircle className="mr-2 h-4 w-4 text-red-400" />
                               Reject
@@ -116,7 +121,7 @@ export default function DesktopApplicationsList({
                           </DropdownMenuContent>
                         </DropdownMenu>
                       ) : (
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-[var(--oklch-text-tertiary)]">
                           {application.status === "accepted" ? "Accepted" : "Rejected"}
                         </span>
                       )}
