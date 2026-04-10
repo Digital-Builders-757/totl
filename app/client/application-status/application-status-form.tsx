@@ -27,21 +27,21 @@ const STATUS_STYLES: Record<
 > = {
   pending: {
     label: "Pending Review",
-    badge: "bg-yellow-500/15 text-yellow-600 border-yellow-500/30",
+    badge: "border-yellow-400/30 bg-yellow-500/12 text-yellow-100",
     helper: "Our team is reviewing your application. We'll reach out soon.",
-    icon: <Clock className="h-5 w-5 text-yellow-500" />,
+    icon: <Clock className="h-5 w-5 text-yellow-300" />,
   },
   approved: {
     label: "Approved",
-    badge: "bg-green-500/15 text-green-600 border-green-500/30",
+    badge: "border-emerald-400/30 bg-emerald-500/12 text-emerald-100",
     helper: "You're all set! Check your email for onboarding instructions.",
-    icon: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+    icon: <CheckCircle2 className="h-5 w-5 text-emerald-300" />,
   },
   rejected: {
     label: "Needs More Info",
-    badge: "bg-red-500/15 text-red-600 border-red-500/30",
+    badge: "border-rose-400/30 bg-rose-500/12 text-rose-100",
     helper: "We couldn't approve this submission. Review the notes below.",
-    icon: <XCircle className="h-5 w-5 text-red-500" />,
+    icon: <XCircle className="h-5 w-5 text-rose-300" />,
   },
 };
 
@@ -94,10 +94,10 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
     <div className="space-y-6">
       <form
         onSubmit={handleSubmit}
-        className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 space-y-6"
+        className="panel-frosted space-y-6 rounded-[26px] border border-white/10 bg-[var(--totl-surface-glass-strong)] p-6 shadow-[0_20px_70px_rgba(8,12,24,0.32)]"
       >
-        <div className="space-y-1">
-          <Label htmlFor="applicationId" className="text-sm font-medium text-gray-700">
+        <div className="space-y-2">
+          <Label htmlFor="applicationId" className="text-sm font-medium text-white">
             Application ID (optional)
           </Label>
           <Input
@@ -105,40 +105,43 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
             value={applicationId}
             onChange={(event) => setApplicationId(event.target.value)}
             placeholder="e.g. 4f4e99aa-..."
+            className="md:max-w-md"
           />
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-[var(--oklch-text-tertiary)]">
             Leave this blank to check your most recent application.
           </p>
         </div>
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">
             {error}
           </div>
         )}
 
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-black text-white hover:bg-black/90"
-        >
+        <Button type="submit" disabled={isPending} className="button-glow w-full sm:w-auto sm:min-w-[14rem]">
           {isPending ? (
             <span className="inline-flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" />
               Checking status…
             </span>
           ) : (
-            "Check Application Status"
+            "Check application status"
           )}
         </Button>
       </form>
 
       {result && (
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 space-y-6">
+        <div className="panel-frosted space-y-6 rounded-[26px] border border-white/10 bg-[var(--totl-surface-glass-strong)] p-6 shadow-[0_24px_80px_rgba(8,12,24,0.35)]">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0">
-              <p className="text-xs uppercase tracking-wide text-gray-500">Application ID</p>
-              <LongToken as="p" value={result.id} className="font-mono text-sm text-gray-800" />
+              <p className="text-xs uppercase tracking-[0.28em] text-[var(--oklch-text-tertiary)]">
+                Application ID
+              </p>
+              <LongToken
+                as="p"
+                value={result.id}
+                className="font-mono text-sm text-[var(--oklch-text-secondary)]"
+              />
             </div>
             {statusMeta && (
               <div className="flex items-center gap-3">
@@ -149,53 +152,65 @@ export function ApplicationStatusForm({ defaultApplicationId = "" }: Application
           </div>
 
           {statusMeta && (
-            <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-sm text-gray-700">
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-[var(--oklch-text-secondary)]">
               {statusMeta.helper}
             </div>
           )}
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-gray-100 p-4">
-              <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-[var(--oklch-text-tertiary)]">
                 <Building2 className="h-4 w-4" />
                 Company
               </div>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{result.companyName}</p>
-              <p className="text-sm text-gray-500">{result.contactName}</p>
+              <p className="mt-1 text-lg font-semibold text-white">{result.companyName}</p>
+              <p className="text-sm text-[var(--oklch-text-secondary)]">{result.contactName}</p>
             </div>
-            <div className="rounded-xl border border-gray-100 p-4">
-              <div className="flex items-center gap-2 text-gray-500 text-sm font-medium">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-[var(--oklch-text-tertiary)]">
                 <Mail className="h-4 w-4" />
                 Timeline
               </div>
-              <dl className="mt-2 space-y-1 text-sm text-gray-700">
-                <div className="flex justify-between">
+              <dl className="mt-2 space-y-1 text-sm text-[var(--oklch-text-secondary)]">
+                <div className="flex justify-between gap-4">
                   <dt>Submitted</dt>
-                  <dd className="font-medium">{formatDate(result.submittedAt)}</dd>
+                  <dd className="font-medium text-white">{formatDate(result.submittedAt)}</dd>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-4">
                   <dt>Last updated</dt>
-                  <dd className="font-medium">{formatDate(result.updatedAt)}</dd>
+                  <dd className="font-medium text-white">{formatDate(result.updatedAt)}</dd>
                 </div>
               </dl>
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-xl border border-gray-100 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">About your business</p>
-              <p className="text-sm text-gray-700 whitespace-pre-line">{result.businessDescription}</p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="mb-2 text-xs uppercase tracking-[0.24em] text-[var(--oklch-text-tertiary)]">
+                About your business
+              </p>
+              <p className="whitespace-pre-line text-sm leading-6 text-[var(--oklch-text-secondary)]">
+                {result.businessDescription}
+              </p>
             </div>
-            <div className="rounded-xl border border-gray-100 p-4">
-              <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Talent needs</p>
-              <p className="text-sm text-gray-700 whitespace-pre-line">{result.needsDescription}</p>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+              <p className="mb-2 text-xs uppercase tracking-[0.24em] text-[var(--oklch-text-tertiary)]">
+                Talent needs
+              </p>
+              <p className="whitespace-pre-line text-sm leading-6 text-[var(--oklch-text-secondary)]">
+                {result.needsDescription}
+              </p>
             </div>
           </div>
 
           {result.adminNotes && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-              <p className="text-xs uppercase tracking-wide text-amber-700 mb-1">Admin notes</p>
-              <p className="text-sm text-amber-900 whitespace-pre-line">{result.adminNotes}</p>
+            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4">
+              <p className="mb-1 text-xs uppercase tracking-[0.24em] text-amber-100/80">
+                Admin notes
+              </p>
+              <p className="whitespace-pre-line text-sm leading-6 text-amber-50">
+                {result.adminNotes}
+              </p>
             </div>
           )}
         </div>
