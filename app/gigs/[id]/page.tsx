@@ -2,6 +2,7 @@ import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
 import { FlagGigDialog } from "@/components/moderation/flag-gig-dialog";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -181,6 +182,8 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               </div>
             </CardContent>
           </Card>
+
+          <GigReferenceLinksSection referenceLinks={gig.reference_links} />
 
           {/* Client Information - Only visible to authenticated users */}
           {user ? (

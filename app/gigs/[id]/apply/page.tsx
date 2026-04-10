@@ -2,6 +2,7 @@ import { ArrowLeft, Send, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ApplyToGigForm } from "./apply-to-gig-form";
+import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -122,6 +123,8 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
                 </div>
               </CardContent>
             </Card>
+
+            <GigReferenceLinksSection referenceLinks={gig.reference_links} variant="dark" />
 
             {/* Application Form */}
             <Card className="bg-gray-900 border-gray-700">

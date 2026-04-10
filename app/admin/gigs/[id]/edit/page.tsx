@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { PostGigClient } from "@/app/post-gig/post-gig-client";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { referenceLinksToFormRows } from "@/lib/gig-reference-links";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
 import { logger } from "@/lib/utils/logger";
@@ -40,7 +41,7 @@ export default async function AdminEditGigPage({ params }: AdminEditGigPageProps
     supabase
       .from("gigs")
       .select(
-        "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status"
+        "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status,reference_links"
       )
       .eq("id", gigId)
       .maybeSingle(),
@@ -78,6 +79,7 @@ export default async function AdminEditGigPage({ params }: AdminEditGigPageProps
     duration: gig.duration,
     date: formatDateForDateInput(gig.date),
     application_deadline: formatDeadlineForDatetimeLocal(gig.application_deadline),
+    referenceLinks: referenceLinksToFormRows(gig.reference_links),
   };
 
   return (

@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Opportunities — reference & inspiration links (April 10, 2026)**
+
+**GIGS / CLIENT / TALENT** — April 10, 2026
+- ✅ **`gigs.reference_links`:** JSONB array on opportunities (max 15); kinds: company, reel, social, portfolio, press, other; Zod + `validate_gig_reference_links` CHECK; migration `20260410183000_add_gigs_reference_links.sql` applied to dev project + types regenerated.
+- ✅ **Career Builder / admin:** `PostGigClient` add/remove links on create and edit; server actions persist via explicit columns (`createGigAction`, `updateGigAction`, `updateGigAsAdminAction`).
+- ✅ **Talent:** `GigReferenceLinksSection` on public **`/gigs/[id]`** and **`/gigs/[id]/apply`** (not on browse cards in this slice).
+- ✅ **Tests:** `lib/gig-reference-links.test.ts` (Vitest).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx vitest run lib/gig-reference-links.test.ts` — green (ship run, April 10, 2026).
+
+**Next (P0):** PR **develop → main**; smoke reference links on staging/production after merge (create/edit gig, verify detail + apply pages).
+
+**Next (P1):** Optional surfacing on client “manage opportunities” preview cards; link analytics later if needed.
+
 ## 🚀 **Latest: TOTL visual cohesion pass — homepage, admin/settings, shared primitives (April 10, 2026)**
 
 **UI / UX / DESIGN SYSTEM** — April 10, 2026
@@ -4915,7 +4929,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 9, 2026*
-*Current Status: MVP Complete; gig edit Supabase error handling + shared date-form utils; prior: Career Builder + admin opportunity edit flows*
+*Last Updated: April 10, 2026*
+*Current Status: MVP Complete; opportunities reference_links (jsonb) shipped to develop; migration applied to dev Supabase + types regen; prior: visual cohesion + gig edit resilience*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Beta evidence; Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*
+*Next Review: PR develop→main; smoke reference links in staging/prod; beta evidence; CRON_SECRET for booking reminders*

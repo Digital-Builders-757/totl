@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { GigReferenceLinkFormRow } from "@/lib/gig-reference-links";
+import { parseReferenceLinksForDatabase } from "@/lib/gig-reference-links";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -18,6 +20,7 @@ export async function updateGigAsAdminAction(input: {
   duration: string;
   date: string;
   application_deadline?: string | null;
+  referenceLinks?: GigReferenceLinkFormRow[];
 }): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createSupabaseServer();
 
@@ -53,9 +56,22 @@ export async function updateGigAsAdminAction(input: {
     return { ok: false, error: "Opportunity not found" };
   }
 
+  const linksResult = parseReferenceLinksForDatabase(input.referenceLinks ?? []);
+  if (!linksResult.ok) {
+    return { ok: false, error: linksResult.error };
+  }
+
   const updatePayload: Pick<
     GigUpdate,
-    "title" | "description" | "category" | "location" | "compensation" | "duration" | "date" | "application_deadline"
+    | "title"
+    | "description"
+    | "category"
+    | "location"
+    | "compensation"
+    | "duration"
+    | "date"
+    | "application_deadline"
+    | "reference_links"
   > = {
     title: input.title,
     description: input.description,
@@ -67,6 +83,7 @@ export async function updateGigAsAdminAction(input: {
     application_deadline: input.application_deadline?.trim()
       ? input.application_deadline.trim()
       : null,
+    reference_links: linksResult.data,
   };
 
   const { error: gigUpdateError } = await supabase.from("gigs").update(updatePayload).eq("id", input.gigId);
