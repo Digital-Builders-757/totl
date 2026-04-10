@@ -29,7 +29,7 @@ Admin/ops
 ## Canonical server actions/services
 
 - `app/admin/gigs/create/actions.ts`
-  - `createGig(formData)`
+  - `createGig(formData, referenceLinkRows?)` — second arg optional; persisted as `gigs.reference_links` when valid.
 
 - `app/gigs/[id]/apply/actions.ts`
   - `applyToGig({ gigId, message? })`

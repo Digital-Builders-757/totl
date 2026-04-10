@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useActionState } from "react";
@@ -20,6 +20,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
+import {
+  GIG_REFERENCE_LINK_KINDS,
+  type GigReferenceLinkFormRow,
+  referenceLinkKindLabel,
+} from "@/lib/gig-reference-links";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -31,10 +36,13 @@ function SubmitButton() {
   );
 }
 
+const MAX_REFERENCE_LINKS = 15;
+
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [category, setCategory] = useState<string>("modeling");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [referenceLinks, setReferenceLinks] = useState<GigReferenceLinkFormRow[]>([]);
   const router = useRouter();
   const [state, formAction] = useActionState(
     async (prevState: { error?: string; success?: boolean } | null, formData: FormData) => {
@@ -42,7 +50,7 @@ export function CreateGigForm() {
       if (imageFile) {
         formData.append("gig_image", imageFile);
       }
-      const result = await createGig(formData);
+      const result = await createGig(formData, referenceLinks);
       if (result?.success) {
         // Redirect to dashboard on success
         router.push("/admin/dashboard");
@@ -67,6 +75,26 @@ export function CreateGigForm() {
     const newRequirements = [...requirements];
     newRequirements[index] = value;
     setRequirements(newRequirements);
+  };
+
+  const updateReferenceLink = (index: number, patch: Partial<GigReferenceLinkFormRow>) => {
+    setReferenceLinks((prev) => {
+      const next = [...prev];
+      const row = next[index] ?? { url: "", label: "", kind: "" };
+      next[index] = { ...row, ...patch };
+      return next;
+    });
+  };
+
+  const addReferenceLinkRow = () => {
+    setReferenceLinks((prev) => {
+      if (prev.length >= MAX_REFERENCE_LINKS) return prev;
+      return [...prev, { url: "", label: "", kind: "" }];
+    });
+  };
+
+  const removeReferenceLinkRow = (index: number) => {
+    setReferenceLinks((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -216,6 +244,106 @@ export function CreateGigForm() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-gray-700/80 bg-gray-800/40 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <Label className="text-base text-white">Reference links (optional)</Label>
+                    <p className="text-sm text-gray-400">
+                      Company site, reels, social, portfolio—help talent see the vibe. Up to {MAX_REFERENCE_LINKS}{" "}
+                      links, http(s) only.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addReferenceLinkRow}
+                    disabled={referenceLinks.length >= MAX_REFERENCE_LINKS || state?.success === true}
+                    className="shrink-0 border-gray-600 text-gray-200 hover:bg-gray-800"
+                  >
+                    <Plus className="mr-1 h-4 w-4" />
+                    Add link
+                  </Button>
+                </div>
+                {referenceLinks.length === 0 ? (
+                  <p className="text-sm text-gray-500">No reference links yet.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {referenceLinks.map((row, idx) => (
+                      <li
+                        key={idx}
+                        className="grid grid-cols-1 gap-3 rounded-md border border-gray-700/60 bg-gray-900/50 p-3 md:grid-cols-12 md:items-end"
+                      >
+                        <div className="md:col-span-5 space-y-2">
+                          <Label htmlFor={`ref-url-${idx}`} className="text-white">
+                            URL
+                          </Label>
+                          <Input
+                            id={`ref-url-${idx}`}
+                            placeholder="https://…"
+                            value={row.url}
+                            onChange={(e) => updateReferenceLink(idx, { url: e.target.value })}
+                            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                          />
+                        </div>
+                        <div className="md:col-span-4 space-y-2">
+                          <Label htmlFor={`ref-label-${idx}`} className="text-white">
+                            Label
+                          </Label>
+                          <Input
+                            id={`ref-label-${idx}`}
+                            placeholder="e.g. Brand reel"
+                            value={row.label}
+                            onChange={(e) => updateReferenceLink(idx, { label: e.target.value })}
+                            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                          />
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                          <Label htmlFor={`ref-kind-${idx}`} className="text-white">
+                            Type
+                          </Label>
+                          <Select
+                            value={row.kind || undefined}
+                            onValueChange={(value) =>
+                              updateReferenceLink(idx, {
+                                kind: value as GigReferenceLinkFormRow["kind"],
+                              })
+                            }
+                          >
+                            <SelectTrigger
+                              id={`ref-kind-${idx}`}
+                              className="bg-gray-800 border-gray-700 text-white data-[placeholder]:text-gray-500"
+                            >
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                              {GIG_REFERENCE_LINK_KINDS.map((k) => (
+                                <SelectItem key={k} value={k} className="focus:bg-gray-700 focus:text-white">
+                                  {referenceLinkKindLabel(k)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex md:col-span-1 md:justify-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeReferenceLinkRow(idx)}
+                            disabled={state?.success === true}
+                            className="text-rose-400 hover:bg-gray-800 hover:text-rose-300"
+                            aria-label="Remove link"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="space-y-4">

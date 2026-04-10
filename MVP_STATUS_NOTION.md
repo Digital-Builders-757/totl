@@ -19,7 +19,7 @@
 
 **GIGS / CLIENT / TALENT** — April 10, 2026
 - ✅ **`gigs.reference_links`:** JSONB array on opportunities (max 15); kinds: company, reel, social, portfolio, press, other; Zod + `validate_gig_reference_links` CHECK; migration `20260410183000_add_gigs_reference_links.sql` applied to dev project + types regenerated.
-- ✅ **Career Builder / admin:** `PostGigClient` add/remove links on create and edit; server actions persist via explicit columns (`createGigAction`, `updateGigAction`, `updateGigAsAdminAction`).
+- ✅ **Career Builder / admin:** `PostGigClient` and **`/admin/gigs/create` (`CreateGigForm`)** add/remove links on create and edit; server actions persist via explicit columns (`createGigAction`, `updateGigAction`, `updateGigAsAdminAction`, `createGig` with `referenceLinkRows`).
 - ✅ **Talent:** `GigReferenceLinksSection` on public **`/gigs/[id]`** and **`/gigs/[id]/apply`** (not on browse cards in this slice).
 - ✅ **Tests:** `lib/gig-reference-links.test.ts` (Vitest).
 
