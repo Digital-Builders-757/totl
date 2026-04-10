@@ -64,13 +64,13 @@ export default function MobileApplicationsList({
                     variant="ghost"
                     size="icon"
                     aria-label="More actions"
-                    className="h-11 w-11 text-gray-400 hover:bg-gray-700"
+                    className="h-11 w-11 text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white"
                   >
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="panel-frosted border-border/50">
-                  <DropdownMenuItem asChild className="text-gray-200 focus:text-white">
+                  <DropdownMenuItem asChild className="text-[var(--oklch-text-secondary)] focus:text-white">
                     <Link href={profileHref}>Review profile</Link>
                   </DropdownMenuItem>
                   {showDecisionMenu ? (
@@ -78,14 +78,14 @@ export default function MobileApplicationsList({
                       <DropdownMenuItem
                         data-test="accept-application"
                         onClick={() => onAccept(application)}
-                        className="text-gray-200 focus:text-white"
+                        className="text-[var(--oklch-text-secondary)] focus:text-white"
                       >
                         <CheckCircle2 className="mr-2 h-4 w-4 text-green-400" />
                         Accept
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => onReject(application)}
-                        className="text-gray-200 focus:text-white"
+                        className="text-[var(--oklch-text-secondary)] focus:text-white"
                       >
                         <XCircle className="mr-2 h-4 w-4 text-red-400" />
                         Reject
@@ -97,7 +97,7 @@ export default function MobileApplicationsList({
             }
             footer={
               <div className="flex items-center justify-between text-xs">
-                <span className="text-gray-400">Next action</span>
+                <span className="text-[var(--oklch-text-tertiary)]">Next action</span>
                 <Link href={profileHref} className="text-[var(--oklch-text-primary)] hover:underline">
                   Review profile
                 </Link>

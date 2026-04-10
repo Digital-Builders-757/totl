@@ -218,10 +218,10 @@ export default function ClientApplicationsClient({
       <div className="container mx-auto px-4 py-4 sm:py-6">
         <div className="mb-4 md:mb-8 md:hidden">
           <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+            <summary className="cursor-pointer list-none text-sm font-medium text-[var(--oklch-text-secondary)]">
               <span className="inline-flex items-center gap-2">
                 Show stats
-                <span className="text-xs text-gray-500">({applications.length} total)</span>
+                <span className="text-xs text-[var(--oklch-text-tertiary)]">({applications.length} total)</span>
               </span>
             </summary>
             <div className="mt-2">
@@ -231,59 +231,59 @@ export default function ClientApplicationsClient({
         </div>
 
         <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-4">
-          <Card className="min-w-0 bg-gray-900 border-gray-700">
+          <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Total Applications</p>
+                  <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Total Applications</p>
                   <p className="text-2xl font-bold text-white">{applications.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-700">
+          <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Under Review</p>
+                  <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Under Review</p>
                   <p className="text-2xl font-bold text-white">
                     {applicationsByStatus.under_review}
                   </p>
                 </div>
-                <div className="bg-yellow-500/20 p-2 rounded-full">
+                <div className="rounded-full bg-yellow-500/20 p-2">
                   <Clock className="h-4 w-4 text-yellow-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-700">
+          <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Interviews</p>
+                  <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Interviews</p>
                   <p className="text-2xl font-bold text-white">
                     {applicationsByStatus.shortlisted}
                   </p>
                 </div>
-                <div className="bg-purple-500/20 p-2 rounded-full">
+                <div className="rounded-full bg-purple-500/20 p-2">
                   <Clock className="h-4 w-4 text-purple-300" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-700">
+          <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-300">Hired</p>
+                  <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Hired</p>
                   <p className="text-2xl font-bold text-white">
                     {applicationsByStatus.accepted}
                   </p>
                 </div>
-                <div className="bg-green-500/20 p-2 rounded-full">
+                <div className="rounded-full bg-green-500/20 p-2">
                   <DollarSign className="h-4 w-4 text-green-300" />
                 </div>
               </div>
@@ -291,20 +291,20 @@ export default function ClientApplicationsClient({
           </Card>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-4 md:mb-6">
-          <div className="flex-1 relative">
+        <div className="mb-4 flex flex-col gap-3 md:mb-6 md:flex-row md:gap-4">
+          <div className="relative flex-1">
             <input
               placeholder="Search by talent name, opportunity title, or location..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="pl-10 bg-gray-800 border-gray-600 text-white placeholder-gray-400 rounded-md px-3 py-2 border"
+              className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-white placeholder:text-[var(--oklch-text-tertiary)] focus:border-[var(--oklch-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
             />
           </div>
-          <div className="hidden md:flex gap-2">
+          <div className="hidden gap-2 md:flex">
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value)}
-              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-[var(--oklch-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
             >
               <option value="all">All Status</option>
               <option value="new">New</option>
@@ -316,7 +316,7 @@ export default function ClientApplicationsClient({
             <select
               value={gigFilter}
               onChange={(event) => setGigFilter(event.target.value)}
-              className="px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-[var(--oklch-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
             >
               <option value="all">All Opportunities</option>
               {uniqueGigs.map((gigId) => {
@@ -334,17 +334,17 @@ export default function ClientApplicationsClient({
               open={isFiltersOpen}
               onOpenChange={setIsFiltersOpen}
               activeCount={activeFilterCount}
-              className="border-gray-700 text-white hover:bg-white/5"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               <div className="space-y-2">
-                <label htmlFor="mobile-opportunity-filter" className="text-sm text-gray-300">
+                <label htmlFor="mobile-opportunity-filter" className="text-sm text-[var(--oklch-text-secondary)]">
                   Opportunity
                 </label>
                 <select
                   id="mobile-opportunity-filter"
                   value={gigFilter}
                   onChange={(event) => setGigFilter(event.target.value)}
-                  className="w-full rounded-md border border-gray-600 bg-gray-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-[var(--oklch-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--ring)]"
                 >
                   <option value="all">All Opportunities</option>
                   {uniqueGigs.map((gigId) => {
@@ -360,7 +360,7 @@ export default function ClientApplicationsClient({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-gray-700 text-white hover:bg-white/5"
+                className="w-full border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                 onClick={() => {
                   setGigFilter("all");
                   setIsFiltersOpen(false);
@@ -374,7 +374,7 @@ export default function ClientApplicationsClient({
 
         {selectedGigLabel ? (
           <div className="mb-3 flex flex-wrap gap-2 md:hidden">
-            <span className="rounded-full border border-white/15 bg-gray-800 px-3 py-1 text-xs text-gray-200">
+            <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-[var(--oklch-text-secondary)]">
               Gig: {selectedGigLabel}
             </span>
           </div>
@@ -382,7 +382,7 @@ export default function ClientApplicationsClient({
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <MobileTabRail>
-            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+            <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
               <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                 All ({applications.length})
               </TabsTrigger>
@@ -397,7 +397,7 @@ export default function ClientApplicationsClient({
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="hidden w-full grid-cols-4 md:grid">
+          <TabsList className="panel-frosted hidden w-full grid-cols-4 border border-white/10 bg-white/5 md:grid">
             <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
             <TabsTrigger value="new">
               New ({applicationsByStatus.new})
@@ -412,20 +412,20 @@ export default function ClientApplicationsClient({
 
           <TabsContent value={activeTab} className="space-y-6">
             {filteredApplications.length === 0 ? (
-              <Card className="bg-gray-900 border-gray-700">
+              <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
                 <CardContent className="p-12 text-center">
-                  <h3 className="text-lg font-medium text-white mb-2">No applications yet</h3>
-                  <p className="text-gray-300 mb-6">
+                  <h3 className="mb-2 text-lg font-medium text-white">No applications yet</h3>
+                  <p className="mb-6 text-[var(--oklch-text-secondary)]">
                     {searchTerm || statusFilter !== "all" || gigFilter !== "all"
                       ? "Try adjusting your search or filters"
                       : "When talent applies to your opportunities, their applications will show up here."}
                   </p>
                   {!searchTerm && statusFilter === "all" && gigFilter === "all" && (
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                       <Button asChild>
                         <Link href="/client/post-gig">Post an opportunity</Link>
                       </Button>
-                      <Link href="/client/help/applications" className="text-sm text-gray-400 hover:text-white underline">
+                      <Link href="/client/help/applications" className="text-sm text-[var(--oklch-text-tertiary)] underline hover:text-white">
                         How applications work
                       </Link>
                     </div>
@@ -435,8 +435,8 @@ export default function ClientApplicationsClient({
             ) : (
               <>
                 {isDesktop === null ? (
-                  <Card className="bg-gray-900 border-gray-700">
-                    <CardContent className="p-6 text-sm text-gray-300">
+                  <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
+                    <CardContent className="p-6 text-sm text-[var(--oklch-text-secondary)]">
                       Loading applications view...
                     </CardContent>
                   </Card>

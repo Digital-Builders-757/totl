@@ -142,7 +142,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     asChild
                     size="sm"
                     variant="outline"
-                    className="h-9 border-gray-700 bg-transparent text-white hover:bg-gray-700"
+                    className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
                   >
                     <Link href={`/admin/gigs/${gig.id}`}>View details</Link>
                   </Button>
@@ -161,7 +161,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-gray-400 hover:text-white hover:bg-gray-700"
+                      className="text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white"
                       aria-label="Opportunity actions"
                     >
                       <MoreVertical size={16} />
@@ -169,7 +169,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                     <DropdownMenuItem asChild>
-                      <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                      <Link href={`/admin/gigs/${gig.id}`} className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
                         <Eye className="mr-2 h-4 w-4" />
                         View Opportunity
                       </Link>
@@ -177,7 +177,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     <DropdownMenuItem asChild>
                       <Link
                         href={`/admin/gigs/${gig.id}/edit`}
-                        className="text-gray-300 hover:bg-gray-700 flex items-center"
+                        className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                       >
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit Opportunity
@@ -193,25 +193,25 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Title
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Career Builder
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Location
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Compensation
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Date
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Status
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Actions
                 </th>
               </tr>
@@ -222,20 +222,20 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   <td className="py-4 px-6">
                     <Link href={`/admin/gigs/${gig.id}`} className="block focus-hint">
                       <div className="font-medium text-white text-sm hover:underline">{gig.title}</div>
-                      <div className="text-gray-400 text-xs mt-1">{gig.category}</div>
+                      <div className="mt-1 text-xs text-[var(--oklch-text-tertiary)]">{gig.category}</div>
                     </Link>
                   </td>
                   <td className="py-4 px-6">
                     <div className="text-white text-sm">{gig.client_profiles.company_name}</div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)]">
                       <MapPin className="h-3 w-3" />
                       {gig.location}
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">{gig.compensation}</td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">{gig.compensation}</td>
+                  <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">
                     {new Date(gig.date).toLocaleDateString()}
                   </td>
                   <td className="py-4 px-6">
@@ -247,14 +247,14 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-gray-400 hover:text-white hover:bg-gray-700"
+                          className="text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white"
                         >
                           <MoreVertical size={16} />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="panel-frosted border-border/50">
                         <DropdownMenuItem asChild>
-                          <Link href={`/admin/gigs/${gig.id}`} className="text-gray-300 hover:bg-gray-700 flex items-center">
+                          <Link href={`/admin/gigs/${gig.id}`} className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
                             <Eye className="mr-2 h-4 w-4" />
                             View Opportunity
                           </Link>
@@ -262,7 +262,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <DropdownMenuItem asChild>
                           <Link
                             href={`/admin/gigs/${gig.id}/edit`}
-                            className="text-gray-300 hover:bg-gray-700 flex items-center"
+                            className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Opportunity
@@ -330,12 +330,12 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                     size={16}
                   />
                   <Input
                     placeholder="Search by title, location, opportunity type, or company..."
-                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    className="w-full pl-9 md:w-72"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -346,15 +346,15 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                     onOpenChange={setIsFiltersOpen}
                     activeCount={activeFilterCount}
                     title="Opportunity Filters"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                   >
                     <div className="space-y-2">
-                      <p className="text-xs text-gray-400">Location</p>
+                      <p className="text-xs text-[var(--oklch-text-tertiary)]">Location</p>
                       <div className="grid grid-cols-2 gap-2">
                         <Button
                           type="button"
                           variant={locationFilter === "all" ? "default" : "outline"}
-                          className={locationFilter === "all" ? "" : "border-gray-600 text-gray-300"}
+                          className={locationFilter === "all" ? "" : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setLocationFilter("all")}
                         >
                           All ({initialGigs.length})
@@ -362,7 +362,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <Button
                           type="button"
                           variant={locationFilter === "remote" ? "default" : "outline"}
-                          className={locationFilter === "remote" ? "" : "border-gray-600 text-gray-300"}
+                          className={locationFilter === "remote" ? "" : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setLocationFilter("remote")}
                         >
                           Remote ({remoteGigs})
@@ -370,7 +370,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <Button
                           type="button"
                           variant={locationFilter === "new york" ? "default" : "outline"}
-                          className={locationFilter === "new york" ? "" : "border-gray-600 text-gray-300"}
+                          className={locationFilter === "new york" ? "" : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setLocationFilter("new york")}
                         >
                           New York ({nycGigs})
@@ -378,7 +378,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         <Button
                           type="button"
                           variant={locationFilter === "los angeles" ? "default" : "outline"}
-                          className={locationFilter === "los angeles" ? "" : "border-gray-600 text-gray-300"}
+                          className={locationFilter === "los angeles" ? "" : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setLocationFilter("los angeles")}
                         >
                           Los Angeles ({laGigs})
@@ -391,7 +391,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   <Button
                     variant="outline"
                     onClick={() => setLocationFilter("all")}
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                   >
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     {activeFilterCount > 0 ? "Filters (1)" : "Filters"}
@@ -402,9 +402,9 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
           </div>
 
           <Tabs defaultValue="all" className="w-full space-y-4" onValueChange={setActiveTab}>
-            <div className="border-b border-gray-700 px-4 sm:px-6">
-              <MobileTabRail edgeColorClassName="from-gray-900">
-                <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-700 bg-gray-900 p-1">
+            <div className="border-b border-white/10 px-4 sm:px-6">
+              <MobileTabRail edgeColorClassName="from-[rgba(6,8,18,0.98)]">
+                <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
                   <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                     All ({initialGigs.length})
                   </TabsTrigger>
@@ -422,25 +422,25 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
               <TabsList className="hidden h-12 panel-frosted md:grid md:grid-cols-4">
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
                 >
                   All ({initialGigs.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="active"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
                 >
                   Active ({activeGigs.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="draft"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white"
                 >
                   Draft ({draftGigs.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="closed"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-600 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500 data-[state=active]:to-gray-600 data-[state=active]:text-white"
                 >
                   Closed ({closedGigs.length})
                 </TabsTrigger>
