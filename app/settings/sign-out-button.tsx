@@ -28,7 +28,7 @@ export function SignOutButton() {
       disabled={isSigningOut}
       variant="outline"
       size="sm"
-      className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="panel-frosted min-w-[9rem] justify-center border-white/10 bg-white/5 text-white hover:bg-white/10 disabled:cursor-not-allowed"
     >
       <LogOut className="h-4 w-4 mr-2" />
       {isSigningOut ? "Signing Out..." : "Sign Out"}

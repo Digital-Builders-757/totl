@@ -222,6 +222,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 | `requirements` | `text[]` | YES | - | Array of requirements |
 | `status` | `text` | NO | `'draft'` | Current status |
 | `image_url` | `text` | YES | - | Gig image URL |
+| `reference_links` | `jsonb` | NO | `'[]'` | Reference / inspiration links (`{url,label,kind,sort_order}`; kinds: company, reel, social, portfolio, press, other; legacy `campaign` may exist in older JSON; max 15; app + DB CHECK) |
 | `created_at` | `timestamp with time zone` | NO | `now()` | Record creation timestamp |
 | `updated_at` | `timestamp with time zone` | NO | `now()` | Record update timestamp |
 
@@ -229,6 +230,7 @@ CREATE TYPE public.flag_status AS ENUM ('open', 'in_review', 'resolved', 'dismis
 - Primary Key: `id`
 - Foreign Key: `client_id` → `profiles.id` **ON DELETE CASCADE**
 - Check: `status IN ('draft', 'active', 'closed', 'featured', 'urgent')`
+- Check: `gigs_reference_links_valid` — `reference_links` is a valid array (shape, lengths, `http(s)` URLs only); see migration `20260410183000_add_gigs_reference_links.sql`
 
 **Indexes:**
 - `gigs_pkey` (Primary Key)
@@ -961,6 +963,7 @@ USING ((EXISTS (SELECT 1 FROM profiles WHERE (profiles.id = (SELECT auth.uid()))
 - ✅ **Admin dashboard comment fix (Nov 27, 2025)** — Added migration `20251127162000_fix_admin_dashboard_comments.sql` to remove `'||'` concatenation from COMMENT statements that caused local resets to fail
 - ✅ **Query stats view fix (Nov 27, 2025)** — Added migration `20251127173000_fix_query_stats_view.sql` so the view aliases `relname`/`indexrelname` (Postgres 15 catalogs) and no longer references nonexistent `tablename` columns
 - ✅ **Query stats view removal (Dec 17, 2025)** — Added migration `20251217200615_drop_query_stats_view.sql` to remove `public.query_stats` entirely since it is not needed and was generating security advisor warnings
+- ✅ **Opportunity reference links (Apr 10, 2026)** — Added migration `20260410183000_add_gigs_reference_links.sql`: `gigs.reference_links` jsonb (validated array of showcase URLs for talent). **Release checklist:** apply migration to the Supabase project (`supabase db push` or equivalent), then run **`npm run types:regen:dev`** so `types/database.ts` matches the live schema (regen before push omits `reference_links` until the column exists remotely).
 - ✅ **Moderation tooling repair (Feb 2, 2026)** — Added migration `20260202204142_recreate_content_flags.sql` to recreate `public.content_flags` and its RLS policies when missing in production
 - ✅ **Cascading delete alignment (Nov 23, 2025)** — All user-centric foreign keys now use `ON DELETE CASCADE` with supporting indexes:
   - `profiles.id` → `auth.users.id`

@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { ApplyAsTalentButton } from "@/components/apply-as-talent-button";
 import { useAuth } from "@/components/auth/auth-provider";
 import TalentSignupForm from "@/components/forms/talent-signup-form";
+import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +20,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PATHS } from "@/lib/constants/routes";
 
 export default function ChooseRolePage() {
   const [isHydrated, setIsHydrated] = useState(false);
@@ -34,7 +38,7 @@ export default function ChooseRolePage() {
   useEffect(() => {
     if (authLoading || !user) return;
     if (userRole === "client" || profile?.role === "client") {
-      router.replace("/client/dashboard");
+      router.replace(PATHS.CLIENT_DASHBOARD);
     }
   }, [authLoading, user, userRole, profile?.role, router]);
 
@@ -58,125 +62,150 @@ export default function ChooseRolePage() {
 
   const handleApplyAsCareerBuilder = () => {
     setShowCareerBuilderDialog(false);
-    router.push("/client/apply");
+    router.push(PATHS.CLIENT_APPLY);
   };
 
   return (
-    <div className="min-h-screen bg-black pt-20 sm:pt-24">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3"></div>
-      <div className="absolute top-0 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-3xl animate-apple-float"></div>
+    <PageShell
+      fullBleed
+      className="grain-texture glow-backplate relative overflow-x-hidden text-white"
+    >
+      <FloatingPathsBackground opacity={0.08} color="white" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-white/3 via-white/8 to-white/3" />
+      <div className="pointer-events-none absolute top-0 left-1/4 z-[1] h-72 w-72 rounded-full bg-white/3 blur-3xl animate-apple-float" />
       <div
-        className="absolute bottom-0 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl animate-apple-float"
+        className="pointer-events-none absolute bottom-0 right-1/4 z-[1] h-96 w-96 rounded-full bg-white/3 blur-3xl animate-apple-float"
         style={{ animationDelay: "1s" }}
-      ></div>
+      />
 
-      <div className="container mx-auto px-4 py-4 sm:py-12 relative z-10">
+      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
         {/* Hydration marker for E2E stability */}
         <span data-testid="choose-role-hydrated" className="sr-only">
           {isHydrated ? "ready" : "loading"}
         </span>
-        <Link href="/" className="inline-flex items-center text-gray-300 hover:text-white mb-4 sm:mb-8 transition-colors">
+        <Link
+          href={PATHS.HOME}
+          className="focus-hint mb-4 inline-flex items-center text-gray-300 transition-colors hover:text-white sm:mb-8"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Home
         </Link>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8 sm:mb-16 animate-apple-fade-in">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-white font-display">Choose Your Role</h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-8 animate-apple-fade-in text-center sm:mb-16">
+            <h1 className="mb-4 font-display text-3xl font-bold text-white sm:mb-6 sm:text-5xl lg:text-6xl">
+              Choose Your Role
+            </h1>
+            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-300 sm:text-xl">
               Select whether you&apos;re joining as talent looking for opportunities or a client
               looking to hire talent.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
+          <div className="grid gap-4 sm:gap-8 md:grid-cols-2">
             {/* Talent Card */}
-            <div className="panel-frosted card-backlit flex flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:bg-white/5 group animate-apple-scale-in">
+            <SectionCard
+              className="group flex flex-col overflow-hidden transition-all duration-300 hover:bg-white/5 animate-apple-scale-in"
+              paddingClassName="p-0"
+            >
               <div className="relative h-64">
-                <Image src="/images/talent-professional.png" alt="Professional model portrait" fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                <Image
+                  src="/images/talent-professional.png"
+                  alt="Professional model portrait"
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-6">
-                  <h2 className="text-white text-2xl font-bold mb-2">Join as Talent</h2>
-                  <p className="text-gray-200 text-sm">Create your professional profile</p>
+                  <h2 className="mb-2 text-2xl font-bold text-white">Join as Talent</h2>
+                  <p className="text-sm text-gray-200">Create your professional profile</p>
                 </div>
               </div>
-              <div className="p-4 sm:p-8 flex flex-col flex-grow">
-                <p className="text-gray-300 mb-6 leading-relaxed">
+              <div className="flex flex-grow flex-col p-4 sm:p-8">
+                <p className="mb-6 leading-relaxed text-gray-300">
                   Create a profile, showcase your portfolio, and get discovered by top clients
                   looking for talent like you.
                 </p>
-                <ul className="space-y-3 mb-8">
+                <ul className="mb-8 space-y-3">
                   <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
+                    <span className="mr-3 text-lg text-green-400">✓</span>
                     <span className="text-gray-300">Apply to exclusive opportunities</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
+                    <span className="mr-3 text-lg text-green-400">✓</span>
                     <span className="text-gray-300">Build a professional portfolio</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
+                    <span className="mr-3 text-lg text-green-400">✓</span>
                     <span className="text-gray-300">Get discovered by top brands and agencies</span>
                   </li>
                 </ul>
                 <div className="mt-auto">
                   <ApplyAsTalentButton
                     data-testid="choose-role-talent"
-                    className="w-full apple-button py-4 text-lg font-semibold"
+                    className="apple-button w-full py-4 text-lg font-semibold"
                   />
                 </div>
               </div>
-            </div>
+            </SectionCard>
 
             {/* Client Card - Disabled */}
-            <div
-              className="panel-frosted card-backlit flex flex-col cursor-not-allowed overflow-hidden rounded-2xl opacity-60 transition-all duration-300 animate-apple-scale-in" 
-              style={{ animationDelay: "0.1s" }}
-              onClick={handleCareerBuilderClick}
-              onKeyDown={handleCareerBuilderKeyDown}
-              role="button"
-              tabIndex={0}
-              aria-label="Apply as Career Builder - requires Talent account first"
+            <SectionCard
+              className="flex flex-col overflow-hidden opacity-60 transition-all duration-300 [animation-delay:100ms] animate-apple-scale-in"
+              paddingClassName="p-0"
             >
-              <div className="relative h-64">
-                <Image src="/images/client-professional.png" alt="Professional woman working on laptop" fill className="object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6">
-                  <h2 className="text-white text-2xl font-bold mb-2">Join as Career Builder</h2>
-                  <p className="text-gray-200 text-sm">Find the perfect talent for your projects</p>
+              <div
+                className="flex cursor-not-allowed flex-col outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+                onClick={handleCareerBuilderClick}
+                onKeyDown={handleCareerBuilderKeyDown}
+                role="button"
+                tabIndex={0}
+                aria-label="Apply as Career Builder - requires Talent account first"
+              >
+                <div className="relative h-64">
+                  <Image
+                    src="/images/client-professional.png"
+                    alt="Professional woman working on laptop"
+                    fill
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-6">
+                    <h2 className="mb-2 text-2xl font-bold text-white">Join as Career Builder</h2>
+                    <p className="text-sm text-gray-200">Find the perfect talent for your projects</p>
+                  </div>
+                </div>
+                <div className="flex flex-grow flex-col p-4 sm:p-8">
+                  <p className="mb-6 leading-relaxed text-gray-300">
+                    Post gigs, connect with talent, and find the perfect professionals for your
+                    projects, campaigns, and events.
+                  </p>
+                  <ul className="mb-8 space-y-3">
+                    <li className="flex items-start">
+                      <span className="mr-3 text-lg text-green-400">✓</span>
+                      <span className="text-gray-300">Post opportunities</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-3 text-lg text-green-400">✓</span>
+                      <span className="text-gray-300">Connect with verified talent through applications</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-3 text-lg text-green-400">✓</span>
+                      <span className="text-gray-300">Manage bookings and communications</span>
+                    </li>
+                  </ul>
+                  <div className="mt-auto">
+                    <Button
+                      className="apple-button w-full cursor-not-allowed py-4 text-lg font-semibold opacity-50"
+                      disabled
+                      onClick={handleCareerBuilderClick}
+                    >
+                      Apply as Career Builder
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="p-4 sm:p-8 flex flex-col flex-grow">
-                <p className="text-gray-300 mb-6 leading-relaxed">
-                  Post gigs, connect with talent, and find the perfect professionals for your
-                  projects, campaigns, and events.
-                </p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Post opportunities</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Connect with verified talent through applications</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-green-400 mr-3 text-lg">✓</span>
-                    <span className="text-gray-300">Manage bookings and communications</span>
-                  </li>
-                </ul>
-                <div className="mt-auto">
-                  <Button 
-                    className="w-full apple-button py-4 text-lg font-semibold opacity-50 cursor-not-allowed" 
-                    disabled
-                    onClick={handleCareerBuilderClick}
-                  >
-                    Apply as Career Builder
-                  </Button>
-                </div>
-              </div>
-            </div>
+            </SectionCard>
           </div>
         </div>
       </div>
@@ -226,7 +255,7 @@ export default function ChooseRolePage() {
               <Button
                 onClick={() => {
                   setShowCareerBuilderDialog(false);
-                  router.push("/client/dashboard");
+                  router.push(PATHS.CLIENT_DASHBOARD);
                 }}
                 className="bg-amber-500 text-black hover:bg-amber-400"
               >
@@ -268,6 +297,6 @@ export default function ChooseRolePage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageShell>
   );
 }

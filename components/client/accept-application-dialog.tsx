@@ -91,13 +91,13 @@ export function AcceptApplicationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-700 text-white">
+      <DialogContent className="panel-frosted sm:max-w-[500px] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <CheckCircle2 className="h-5 w-5 text-green-500" />
             Accept Application
           </DialogTitle>
-          <DialogDescription className="text-gray-300">
+          <DialogDescription className="text-[var(--oklch-text-secondary)]">
             Accept <span className="font-semibold">{talentName}</span> for{" "}
             <span className="font-semibold">{gigTitle}</span> and create a booking.
           </DialogDescription>
@@ -107,7 +107,7 @@ export function AcceptApplicationDialog({
           <div className="space-y-4 py-4">
             {/* Date */}
             <div className="space-y-2">
-              <Label htmlFor="date" className="flex items-center gap-2 text-gray-200">
+              <Label htmlFor="date" className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
                 <Calendar className="h-4 w-4" />
                 Booking Date
               </Label>
@@ -116,17 +116,17 @@ export function AcceptApplicationDialog({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="bg-gray-800 border-gray-600 text-white"
+                className=""
                 min={new Date().toISOString().split("T")[0]}
               />
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--oklch-text-tertiary)]">
                 Leave empty to default to 7 days from now
               </p>
             </div>
 
             {/* Time */}
             <div className="space-y-2">
-              <Label htmlFor="time" className="flex items-center gap-2 text-gray-200">
+              <Label htmlFor="time" className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
                 <Clock className="h-4 w-4" />
                 Call Time
               </Label>
@@ -135,16 +135,16 @@ export function AcceptApplicationDialog({
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="bg-gray-800 border-gray-600 text-white"
+                className=""
               />
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--oklch-text-tertiary)]">
                 When should talent arrive (optional)
               </p>
             </div>
 
             {/* Compensation */}
             <div className="space-y-2">
-              <Label htmlFor="compensation" className="flex items-center gap-2 text-gray-200">
+              <Label htmlFor="compensation" className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
                 <DollarSign className="h-4 w-4" />
                 Compensation
               </Label>
@@ -154,16 +154,16 @@ export function AcceptApplicationDialog({
                 placeholder="e.g., 5000 or $5,000"
                 value={compensation}
                 onChange={(e) => setCompensation(e.target.value)}
-                className="bg-gray-800 border-gray-600 text-white"
+                className=""
               />
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--oklch-text-tertiary)]">
                 Final agreed compensation amount
               </p>
             </div>
 
             {/* Notes */}
             <div className="space-y-2">
-              <Label htmlFor="notes" className="flex items-center gap-2 text-gray-200">
+              <Label htmlFor="notes" className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
                 <FileText className="h-4 w-4" />
                 Booking Notes (Optional)
               </Label>
@@ -173,7 +173,7 @@ export function AcceptApplicationDialog({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="bg-gray-800 border-gray-600 text-white resize-none"
+                className="resize-none"
               />
             </div>
 
@@ -190,7 +190,7 @@ export function AcceptApplicationDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              className="border-white/10 bg-white/5 text-white hover:bg-white/10"
             >
               Cancel
             </Button>

@@ -3,6 +3,7 @@ import { ProfileEditor } from "./profile-editor";
 import { SignOutButton } from "./sign-out-button";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
+import { Button } from "@/components/ui/button";
 import { PrefetchLink } from "@/components/ui/prefetch-link";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -21,15 +22,17 @@ export default async function SettingsPage() {
   // Check if Supabase is configured
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <div className="h-12 w-12 text-red-500 mx-auto mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Configuration Error</h2>
-          <p className="text-gray-600 mb-4">
+      <PageShell className="grain-texture" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+        <div className="panel-frosted max-w-md rounded-2xl p-8 text-center">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-destructive/35 bg-destructive/10 text-destructive">
+            ⚠️
+          </div>
+          <h2 className="text-xl font-semibold text-[var(--oklch-text-primary)]">Configuration Error</h2>
+          <p className="mt-2 text-sm text-[var(--oklch-text-secondary)]">
             Supabase is not configured. Please check your environment variables.
           </p>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -97,90 +100,57 @@ export default async function SettingsPage() {
   }));
 
   return (
-    <PageShell className="bg-black" containerClassName="py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <PageShell className="grain-texture" containerClassName="py-8">
+      <div className="mx-auto max-w-4xl space-y-6">
         <PageHeader
           title="Settings"
           subtitle="Manage your account and profile information"
           breadcrumbs={
-            <nav className="flex items-center gap-2 text-sm text-gray-400">
+            <nav className="flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)]">
               {profile?.role === "talent" && (
                 <>
                   <PrefetchLink
                     href={PATHS.TALENT_DASHBOARD}
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-[var(--oklch-text-primary)]"
                   >
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
-                  <span className="text-white">Settings</span>
+                  <span className="text-[var(--oklch-text-primary)]">Settings</span>
                 </>
               )}
               {profile?.role === "client" && (
                 <>
                   <PrefetchLink
                     href={PATHS.CLIENT_DASHBOARD}
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-[var(--oklch-text-primary)]"
                   >
                     Dashboard
                   </PrefetchLink>
                   <span>→</span>
-                  <span className="text-white">Settings</span>
+                  <span className="text-[var(--oklch-text-primary)]">Settings</span>
                 </>
               )}
               {profile?.role === "admin" && (
                 <>
                   <PrefetchLink
                     href={PATHS.ADMIN_DASHBOARD}
-                    className="hover:text-white transition-colors"
+                    className="transition-colors hover:text-[var(--oklch-text-primary)]"
                   >
                     Admin Dashboard
                   </PrefetchLink>
                   <span>→</span>
-                  <span className="text-white">Settings</span>
+                  <span className="text-[var(--oklch-text-primary)]">Settings</span>
                 </>
               )}
             </nav>
           }
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {profile?.role === "talent" ? (
-                <PrefetchLink
-                  href={PATHS.TALENT_DASHBOARD}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  Back to Dashboard
-                </PrefetchLink>
-              ) : profile?.role === "client" ? (
-                <PrefetchLink
-                  href={PATHS.CLIENT_DASHBOARD}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                  </svg>
-                  Back to Dashboard
-                </PrefetchLink>
-              ) : (
-                <>
-                  <PrefetchLink
-                    href={PATHS.ADMIN_DASHBOARD}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <Button asChild variant="outline" className="panel-frosted min-w-[11rem] justify-center">
+                  <PrefetchLink href={PATHS.TALENT_DASHBOARD}>
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -188,8 +158,38 @@ export default async function SettingsPage() {
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                       />
                     </svg>
-                    Back to Admin
+                    Back to Dashboard
                   </PrefetchLink>
+                </Button>
+              ) : profile?.role === "client" ? (
+                <Button asChild variant="outline" className="panel-frosted min-w-[11rem] justify-center">
+                  <PrefetchLink href={PATHS.CLIENT_DASHBOARD}>
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                      />
+                    </svg>
+                    Back to Dashboard
+                  </PrefetchLink>
+                </Button>
+              ) : (
+                <>
+                  <Button asChild variant="outline" className="panel-frosted min-w-[11rem] justify-center">
+                    <PrefetchLink href={PATHS.ADMIN_DASHBOARD}>
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                        />
+                      </svg>
+                      Back to Admin
+                    </PrefetchLink>
+                  </Button>
                   <SignOutButton />
                 </>
               )}

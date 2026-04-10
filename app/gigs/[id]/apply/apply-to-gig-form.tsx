@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logger } from "@/lib/utils/logger";
+import type { Json } from "@/types/database";
 
 interface ApplyToGigFormProps {
   gig: {
@@ -21,6 +22,7 @@ interface ApplyToGigFormProps {
     date?: string;
     image_url: string | null;
     client_id: string;
+    reference_links?: Json | null;
   };
 }
 

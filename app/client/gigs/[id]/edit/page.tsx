@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { PostGigClient } from "@/app/post-gig/post-gig-client";
 import { getBootState } from "@/lib/actions/boot-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
+import { referenceLinksToFormRows } from "@/lib/gig-reference-links";
 import { isRedirectError } from "@/lib/is-redirect-error";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
@@ -36,7 +37,7 @@ export default async function ClientEditGigPage({ params }: { params: Promise<{ 
       supabase
         .from("gigs")
         .select(
-          "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status"
+          "id,client_id,title,description,category,location,compensation,duration,date,application_deadline,status,reference_links"
         )
         .eq("id", gigId)
         .maybeSingle(),
@@ -85,6 +86,7 @@ export default async function ClientEditGigPage({ params }: { params: Promise<{ 
       duration: gig.duration,
       date: formatDateForDateInput(gig.date),
       application_deadline: formatDeadlineForDatetimeLocal(gig.application_deadline),
+      referenceLinks: referenceLinksToFormRows(gig.reference_links),
     };
 
     return (

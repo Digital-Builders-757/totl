@@ -55,7 +55,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
   const completionPercent = needsProfileCompletion ? 60 : 85;
 
   const triggerClassName =
-    "min-h-10 rounded-lg px-3 py-2 text-sm text-gray-400 data-[state=active]:bg-gray-700 data-[state=active]:text-white md:text-base md:px-4";
+    "min-h-10 rounded-xl px-3 py-2 text-sm text-[var(--oklch-text-tertiary)] transition-all data-[state=active]:bg-white/10 data-[state=active]:text-[var(--oklch-text-primary)] data-[state=active]:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.05),0_12px_28px_rgba(10,10,18,0.2)] md:px-4 md:text-base";
 
   return (
     <div className="space-y-6">
@@ -68,15 +68,14 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         />
       )}
 
-      {/* Profile Header with Avatar */}
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="rounded-[1.75rem] border-white/10">
         <CardHeader className="gap-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="min-w-0 flex-1">
-              <CardTitle className="text-2xl font-bold text-white">
+              <CardTitle className="text-2xl font-bold text-[var(--oklch-text-primary)]">
                 {profile.display_name || "Profile"}
               </CardTitle>
-              <CardDescription className="mt-1 break-all text-sm text-gray-400">
+              <CardDescription className="mt-1 break-all text-sm text-[var(--oklch-text-tertiary)]">
                 {user.email}
               </CardDescription>
             </div>
@@ -89,17 +88,16 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
         </CardHeader>
       </Card>
 
-      {/* Tabbed Interface */}
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="rounded-[1.75rem] border-white/10">
         <CardHeader>
-          <CardDescription className="text-gray-300">
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
             Manage your profile information and account settings
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <MobileTabRail className="pb-1" edgeColorClassName="from-gray-900">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl panel-frosted p-1">
+            <MobileTabRail className="pb-1" edgeColorClassName="from-[var(--oklch-bg)]">
+              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-white/8 panel-frosted p-1">
                 <TabsTrigger value="basic" className={triggerClassName}>
                   Basic Info
                 </TabsTrigger>
@@ -118,7 +116,7 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
             </MobileTabRail>
 
             <TabsList
-              className={`hidden h-auto w-full rounded-xl panel-frosted p-1 md:grid ${
+              className={`hidden h-auto w-full rounded-2xl border border-white/8 panel-frosted p-1 md:grid ${
                 isTalent ? "md:grid-cols-4" : "md:grid-cols-3"
               }`}
             >
@@ -148,8 +146,8 @@ export function ProfileEditor({ user, profile, talent, client, avatarSrc, portfo
               ) : profile.role === "client" ? (
                 <ClientDetailsSection client={client} />
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-400">No role-specific details available.</p>
+                <div className="py-8 text-center">
+                  <p className="text-[var(--oklch-text-tertiary)]">No role-specific details available.</p>
                 </div>
               )}
             </TabsContent>

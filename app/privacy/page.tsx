@@ -1,29 +1,29 @@
-export const metadata = {
+﻿export const metadata = {
   title: "Privacy Policy - TOTL Agency",
   description: "Privacy Policy for TOTL Agency - How we protect your data",
 };
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-black pt-40 pb-20">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+    <div className="page-ambient grain-texture min-h-screen bg-black pt-32 pb-20">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="mx-auto max-w-5xl">
           <div className="mb-16 text-center">
             <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
               Privacy Policy
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed animate-apple-slide-up">
+            <p className="mx-auto max-w-3xl text-xl leading-relaxed text-[var(--oklch-text-secondary)] animate-apple-slide-up">
               Last Updated: October 19, 2025
             </p>
           </div>
 
-          <div className="space-y-8 rounded-2xl p-8 text-white shadow-lg panel-frosted card-backlit lg:p-12">
+          <div className="panel-frosted card-backlit space-y-8 rounded-[2rem] border border-white/10 bg-[var(--totl-surface-glass-strong)] p-8 text-white shadow-[0_28px_70px_rgba(4,6,16,0.45)] lg:p-12">
             {/* Introduction */}
             <section>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                 At TOTL Agency (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), we are committed to protecting your privacy and personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our platform and services.
               </p>
-              <p className="text-gray-300 leading-relaxed mt-4">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed mt-4">
                 By using TOTL Agency, you consent to the practices described in this Privacy Policy.
               </p>
             </section>
@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
             {/* 1. Information We Collect */}
             <section>
               <h2 className="text-3xl font-bold mb-4">1. Information We Collect</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <h3 className="text-xl font-semibold text-white">Information You Provide</h3>
                 <p>When you register and use our Services, we collect information you provide directly:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
@@ -64,7 +64,7 @@ export default function PrivacyPolicyPage() {
             {/* 2. How We Use Your Information */}
             <section>
               <h2 className="text-3xl font-bold mb-4">2. How We Use Your Information</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>We use the information we collect to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong className="text-white">Provide Services:</strong> Create and manage your account, facilitate bookings, process applications</li>
@@ -81,7 +81,7 @@ export default function PrivacyPolicyPage() {
             {/* 3. How We Share Your Information */}
             <section>
               <h2 className="text-3xl font-bold mb-4">3. How We Share Your Information</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>We may share your information in the following circumstances:</p>
 
                 <h3 className="text-xl font-semibold text-white">With Other Users</h3>
@@ -118,7 +118,7 @@ export default function PrivacyPolicyPage() {
             {/* 4. Data Security */}
             <section>
               <h2 className="text-3xl font-bold mb-4">4. Data Security</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>We implement industry-standard security measures to protect your information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Encrypted data transmission (SSL/TLS)</li>
@@ -136,7 +136,7 @@ export default function PrivacyPolicyPage() {
             {/* 5. Your Rights and Choices */}
             <section>
               <h2 className="text-3xl font-bold mb-4">5. Your Rights and Choices</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>You have the following rights regarding your personal information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong className="text-white">Access:</strong> Request a copy of your personal data</li>
@@ -155,7 +155,7 @@ export default function PrivacyPolicyPage() {
             {/* 6. Data Retention */}
             <section>
               <h2 className="text-3xl font-bold mb-4">6. Data Retention</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                 We retain your personal information for as long as your account is active or as needed to provide Services. We may retain certain information after account closure for legal, regulatory, or legitimate business purposes, such as fraud prevention, resolving disputes, or enforcing our Terms.
               </p>
             </section>
@@ -163,7 +163,7 @@ export default function PrivacyPolicyPage() {
             {/* 7. Children's Privacy */}
             <section>
               <h2 className="text-3xl font-bold mb-4">7. Children&apos;s Privacy</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                 Our Services are not intended for individuals under 18 years of age. We do not knowingly collect personal information from children. If we become aware that a child has provided us with personal information, we will take steps to delete such information.
               </p>
             </section>
@@ -171,7 +171,7 @@ export default function PrivacyPolicyPage() {
             {/* 8. International Users */}
             <section>
               <h2 className="text-3xl font-bold mb-4">8. International Users</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                 TOTL Agency is based in the United States. If you access our Services from outside the United States, your information may be transferred to, stored, and processed in the United States. By using our Services, you consent to such transfer and processing.
               </p>
             </section>
@@ -179,7 +179,7 @@ export default function PrivacyPolicyPage() {
             {/* 9. Cookies and Tracking */}
             <section>
               <h2 className="text-3xl font-bold mb-4">9. Cookies and Tracking Technologies</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>We use cookies and similar tracking technologies to:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Remember your preferences and settings</li>
@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
             {/* 10. California Privacy Rights */}
             <section>
               <h2 className="text-3xl font-bold mb-4">10. California Privacy Rights (CCPA)</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA):</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Right to know what personal information we collect and how we use it</li>
@@ -213,7 +213,7 @@ export default function PrivacyPolicyPage() {
             {/* 11. GDPR Rights */}
             <section>
               <h2 className="text-3xl font-bold mb-4">11. GDPR Rights (European Users)</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>If you are located in the European Economic Area (EEA), you have rights under the General Data Protection Regulation (GDPR):</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li>Right of access to your personal data</li>
@@ -233,7 +233,7 @@ export default function PrivacyPolicyPage() {
             {/* 12. Changes to Privacy Policy */}
             <section>
               <h2 className="text-3xl font-bold mb-4">12. Changes to This Privacy Policy</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                   We may update this Privacy Policy from time to time to reflect changes in our practices or for legal, regulatory, or operational reasons. We will notify you of material changes by email or by posting a notice on our platform. The &quot;Last Updated&quot; date at the top indicates when this policy was last revised.
               </p>
             </section>
@@ -241,7 +241,7 @@ export default function PrivacyPolicyPage() {
             {/* 13. Third-Party Services */}
             <section>
               <h2 className="text-3xl font-bold mb-4">13. Third-Party Services</h2>
-              <div className="text-gray-300 leading-relaxed space-y-4">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-4">
                 <p>We use the following third-party services that may collect information:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
                   <li><strong className="text-white">Supabase:</strong> Database and authentication (privacy policy: supabase.com/privacy)</li>
@@ -258,7 +258,7 @@ export default function PrivacyPolicyPage() {
             {/* 14. Do Not Track */}
             <section>
               <h2 className="text-3xl font-bold mb-4">14. Do Not Track Signals</h2>
-              <p className="text-gray-300 leading-relaxed">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed">
                 Some browsers support &quot;Do Not Track&quot; signals. Currently, we do not respond to Do Not Track signals, as there is no industry standard for compliance. We will continue to monitor developments in this area.
               </p>
             </section>
@@ -266,14 +266,14 @@ export default function PrivacyPolicyPage() {
             {/* 15. Contact Us */}
             <section>
               <h2 className="text-3xl font-bold mb-4">15. Contact Us About Privacy</h2>
-              <div className="text-gray-300 leading-relaxed space-y-2">
+              <div className="text-[var(--oklch-text-secondary)] leading-relaxed space-y-2">
                 <p>If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
                 <p className="mt-4">
                   <strong className="text-white">TOTL Agency - Privacy Team</strong><br />
                   Email: privacy@thetotlagency.com<br />
                   Data Protection Officer: dpo@thetotlagency.com<br />
                   General Support: support@thetotlagency.com<br />
-                  Website: <a href="https://www.thetotlagency.com" className="text-blue-400 hover:text-blue-300 underline">www.thetotlagency.com</a>
+                  Website: <a href="https://www.thetotlagency.com" className="text-[var(--oklch-text-primary)] underline transition-colors hover:text-white">www.thetotlagency.com</a>
                 </p>
                 <p className="mt-6">
                   For GDPR-related inquiries (European users), please contact our Data Protection Officer at dpo@thetotlagency.com.
@@ -286,7 +286,7 @@ export default function PrivacyPolicyPage() {
 
             {/* Acknowledgment */}
             <section className="border-t border-white/20 pt-8">
-              <p className="text-gray-300 leading-relaxed italic">
+              <p className="text-[var(--oklch-text-secondary)] leading-relaxed italic">
                 By using TOTL Agency, you acknowledge that you have read and understood this Privacy Policy and agree to our collection, use, and disclosure of your information as described herein.
               </p>
             </section>

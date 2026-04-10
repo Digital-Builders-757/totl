@@ -32,6 +32,9 @@ npm run build
 - **Schema Sync Errors:** `types/database.ts is out of sync with remote schema`
   - **Fix:** Run `npm run types:regen:dev` (development) or `npm run types:regen:prod` (production)
   - **Prevention:** After applying migrations to remote, always regenerate types and commit. Manual type edits drift from remote.
+- **Types stay stale after adding a migration:** Code references a new column but `npm run types:check` still fails.
+  - **Fix:** Apply migrations to the target Supabase project first (`supabase db push --linked` or your deploy pipeline), then run `npm run types:regen:dev` and commit the regenerated `types/database.ts`.
+  - **Prevention:** Do not patch `types/database.ts` by hand for schema you have not pushed yet; the generator is the source of truth once the column exists remotely.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`

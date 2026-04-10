@@ -1,336 +1,365 @@
 "use client";
 
-// Note: Client components cannot use ISR/revalidate
-// This page is mostly static but requires client-side interactivity
-// For true ISR, would need to split into server component wrapper + client component
-
-import { ArrowRight, Search, Handshake, Sparkles } from "lucide-react";
-// import Image from "next/image";
+import { ArrowRight, Briefcase, CheckCircle2, Clock3, Search, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
+
 import { GigCard } from "@/components/gigs/gig-card";
 import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Button } from "@/components/ui/button";
-import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { SafeImage } from "@/components/ui/safe-image";
+import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
+import { TotlSectionDivider } from "@/components/ui/totl-section-divider";
 
+const featuredGigs = [
+  {
+    title: "Fitness Campaign · 2 Day Shoot",
+    category: "Campaign",
+    location: "Los Angeles",
+    compensation: "$450/day",
+    date: "Mar 10–11",
+    imageUrl:
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=800&fit=crop",
+  },
+  {
+    title: "Beauty Editorial · Studio Session",
+    category: "Editorial",
+    location: "Miami",
+    compensation: "$400/day",
+    date: "Mar 18",
+    imageUrl:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop",
+  },
+  {
+    title: "Commercial Lifestyle · On Location",
+    category: "Commercial",
+    location: "Chicago",
+    compensation: "$350/day",
+    date: "Apr 2",
+    imageUrl:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop",
+  },
+];
+
+const processCards = [
+  {
+    title: "Post with clarity",
+    description:
+      "Create premium opportunities with the right role, timing, and creative requirements from day one.",
+    icon: Briefcase,
+  },
+  {
+    title: "Review with confidence",
+    description:
+      "Filter serious applicants, compare fit, and keep the shortlist organized without inbox chaos.",
+    icon: Search,
+  },
+  {
+    title: "Book cleanly",
+    description:
+      "Move from opportunity to confirmed booking inside one controlled system built for agency operations.",
+    icon: ShieldCheck,
+  },
+];
+
+const statHighlights = [
+  { value: "500+", label: "Verified professionals" },
+  { value: "1K+", label: "Projects completed" },
+  { value: "50+", label: "Cities covered" },
+  { value: "4.9", label: "Average satisfaction" },
+];
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-seamless-primary text-white pt-20">
-      {/* Hero Section */}
-      <section className="relative py-16 sm:py-24 md:py-32 lg:py-40 overflow-hidden">
-        {/* Animated Floating Paths Background - Premium Back-Lit Effect */}
-        <FloatingPathsBackground opacity={0.08} color="white" />
-        
-        {/* Apple-Inspired Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/3 via-white/8 to-white/3 z-[1]"></div>
-        <div className="absolute top-0 left-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"></div>
-        <div
-          className="absolute bottom-0 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-white/3 rounded-full blur-3xl animate-apple-float z-[1]"
-          style={{ animationDelay: "1s" }}
-        ></div>
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-20 items-start">
-            <div className="space-y-6 pt-4 text-left md:text-center lg:text-left">
-              <div className="space-y-6">
-                <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto lg:mx-0">
-                  <span className="text-white font-medium text-sm">
-                    The Future of Talent Booking
-                  </span>
+    <TotlAtmosphereShell className="text-white">
+      <main className="relative">
+        <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
+          <div className="container mx-auto px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24">
+            <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)] lg:gap-16">
+              <div className="max-w-2xl space-y-8">
+                <div className="panel-frosted inline-flex items-center gap-3 rounded-full px-4 py-2 text-xs uppercase tracking-[0.22em] text-[var(--totl-text-soft)] sm:px-5">
+                  <span className="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_18px_rgba(196,181,253,0.8)]" />
+                  TOTL Agency · Premium booking infrastructure
                 </div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.02] tracking-[-0.03em] font-display">
-                  Connect with
-                  <span className="apple-text-gradient"> Great Talent</span>
-                  <br />
-                  <span className="text-gray-200">Instantly</span>
-                </h1>
-                <p className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed max-w-lg mx-0 md:mx-auto lg:mx-0">
-                  TOTL Agency is the fastest way to post opportunities, book talent, and manage projects end-to-end.
-                  No public directory — discovery happens through opportunities and invite-only links.
+
+                <div className="space-y-5">
+                  <h1 className="max-w-3xl font-display text-5xl font-semibold leading-[0.95] tracking-[-0.05em] text-white sm:text-6xl lg:text-7xl">
+                    Book exceptional talent with
+                    <span className="totl-text-gradient"> clarity, control, and speed.</span>
+                  </h1>
+                  <p className="max-w-xl text-base leading-7 text-[var(--totl-text-soft)] sm:text-lg sm:leading-8">
+                    TOTL helps brands post opportunities, review applicants, and move from discovery to confirmed booking inside one premium terminal.
+                    No clutter, no generic marketplace feel, just clean agency operations.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      className="button-glow h-14 w-full rounded-full bg-white px-8 text-base font-semibold text-black hover:bg-white/95 sm:w-auto"
+                    >
+                      Start booking
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/about" className="w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="panel-frosted h-14 w-full rounded-full border-white/10 bg-white/5 px-8 text-base font-medium text-white hover:bg-white/10 sm:w-auto"
+                    >
+                      Explore the system
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="panel-frosted card-backlit rounded-2xl px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white">
+                      <CheckCircle2 className="h-4 w-4 text-violet-300" />
+                      Verified talent
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-[var(--totl-text-soft)]">
+                      Trusted professionals and cleaner submissions from the start.
+                    </p>
+                  </div>
+                  <div className="panel-frosted card-backlit rounded-2xl px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white">
+                      <Clock3 className="h-4 w-4 text-violet-300" />
+                      Faster decisions
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-[var(--totl-text-soft)]">
+                      Keep opportunities moving without losing track of applicants.
+                    </p>
+                  </div>
+                  <div className="panel-frosted card-backlit rounded-2xl px-4 py-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-white">
+                      <Sparkles className="h-4 w-4 text-violet-300" />
+                      Premium workflow
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-[var(--totl-text-soft)]">
+                      A luxury agency feel built around clarity, polish, and execution.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative lg:justify-self-end">
+                <div className="panel-frosted card-backlit grain-texture relative overflow-hidden rounded-[2rem] border border-white/10 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.4)] sm:p-6">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_42%),linear-gradient(180deg,rgba(139,92,246,0.08),transparent_55%)]" />
+                  <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="relative z-[1] w-full rounded-[1.5rem] object-contain"
+                  >
+                    <source src="/videos/slowmo_woman.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+
+                <div className="panel-frosted card-backlit absolute -bottom-6 left-4 right-4 rounded-[1.5rem] border border-white/10 px-5 py-4 sm:-bottom-8 sm:left-auto sm:right-6 sm:w-72">
+                  <p className="text-xs uppercase tracking-[0.18em] text-[var(--totl-text-soft)]">Agency mode</p>
+                  <p className="mt-2 text-lg font-semibold text-white">Opportunities-first booking workflow</p>
+                  <p className="mt-2 text-sm leading-6 text-[var(--totl-text-soft)]">
+                    Discovery, review, and booking all stay inside one premium operating layer.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <TotlSectionDivider variant="hero" />
+
+        <section className="py-16 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="max-w-2xl space-y-4">
+                <div className="panel-frosted inline-flex w-fit items-center rounded-full px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--totl-text-soft)]">
+                  Featured opportunities
+                </div>
+                <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
+                  Discovery that feels curated, not chaotic.
+                </h2>
+                <p className="text-base leading-7 text-[var(--totl-text-soft)] sm:text-lg">
+                  TOTL is built around premium opportunities, cleaner applicant review, and a tighter path from creative brief to confirmed talent.
                 </p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-start md:justify-center lg:justify-start">
-                <Link href="/choose-role" prefetch={false} className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="button-glow w-full px-8 sm:px-10 py-5 text-lg sm:text-xl font-semibold border-0 min-h-[56px]"
-                  >
-                    Start Booking <ArrowRight className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-                  </Button>
-                </Link>
-                {/* Removed "Browse Talent" CTA per Approach B: no talent directory exists */}
-                {/* Public users can discover talent only via shared profile links (/talent/[slug]) */}
+              <div className="panel-frosted rounded-2xl px-5 py-4 text-sm leading-6 text-[var(--totl-text-soft)] lg:max-w-sm">
+                No public directory. No messy browsing experience. Just structured opportunities and invite-led discovery.
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-start md:justify-center lg:justify-start gap-4 sm:gap-8 md:gap-12 text-xs sm:text-sm text-gray-400">
-                <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-apple-glow"></div>
-                  <span className="font-medium">500+ Verified Professionals</span>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+              {featuredGigs.map((gig) => (
+                <GigCard key={gig.title} gig={gig} variant="featured" />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <TotlSectionDivider />
+
+        <section className="py-16 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl space-y-4">
+              <div className="panel-frosted inline-flex w-fit items-center rounded-full px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--totl-text-soft)]">
+                How TOTL works
+              </div>
+              <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
+                Structured like an agency, not a template.
+              </h2>
+              <p className="text-base leading-7 text-[var(--totl-text-soft)] sm:text-lg">
+                Every step is designed to reduce ambiguity, tighten review, and keep booking operations in motion.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 lg:grid-cols-3 lg:gap-6">
+              {processCards.map((card, index) => {
+                const Icon = card.icon;
+                return (
+                  <div key={card.title} className="panel-frosted card-backlit rounded-[1.75rem] border border-white/10 p-6 sm:p-7">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-violet-200 ring-1 ring-white/10">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="text-xs uppercase tracking-[0.2em] text-[var(--totl-text-soft)]">0{index + 1}</span>
+                    </div>
+                    <h3 className="mt-6 text-2xl font-semibold text-white">{card.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-[var(--totl-text-soft)] sm:text-base">
+                      {card.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <TotlSectionDivider variant="soft" />
+
+        <section className="py-16 sm:py-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {statHighlights.map((stat) => (
+                <div key={stat.label} className="panel-frosted card-backlit rounded-[1.5rem] border border-white/10 px-6 py-6">
+                  <div className="text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">{stat.value}</div>
+                  <div className="mt-2 text-sm uppercase tracking-[0.18em] text-[var(--totl-text-soft)]">{stat.label}</div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-3 h-3 bg-white rounded-full animate-apple-glow"
-                    style={{ animationDelay: "0.5s" }}
-                  ></div>
-                  <span className="font-medium">1000+ Projects Completed</span>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="pb-16 pt-6 sm:pb-20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="panel-frosted card-backlit overflow-hidden rounded-[2rem] border border-white/10 px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+                <div className="max-w-2xl space-y-4">
+                  <div className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[var(--totl-text-soft)]">
+                    Ready to move faster
+                  </div>
+                  <h2 className="font-display text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
+                    Give your booking workflow a world that matches the talent.
+                  </h2>
+                  <p className="text-base leading-7 text-[var(--totl-text-soft)] sm:text-lg">
+                    Join brands and operators using TOTL to post cleaner opportunities, review stronger talent, and run premium bookings without the usual friction.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Link href="/choose-role" prefetch={false}>
+                    <Button size="lg" className="button-glow h-14 rounded-full bg-white px-8 text-base font-semibold text-black hover:bg-white/95">
+                      Start booking
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link href="/about">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="h-14 rounded-full border-white/10 bg-transparent px-8 text-base text-white hover:bg-white/10"
+                    >
+                      Learn more
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </div>
-            <div className="relative mt-8 lg:mt-0">
-              <div className="relative z-10 panel-frosted card-backlit grain-texture rounded-3xl p-4 sm:p-6 md:p-8">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-auto object-contain rounded-lg"
-                >
-                  <source src="/videos/slowmo_woman.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+          </div>
+        </section>
+
+        <footer className="border-t border-white/6 pb-12 pt-10">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-10 md:grid-cols-4">
+              <div className="space-y-5">
+                <SafeImage
+                  src="/images/solo_logo.png"
+                  alt="TOTL Agency"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto brightness-0 invert"
+                />
+                <p className="max-w-xs text-sm leading-6 text-[var(--totl-text-soft)]">
+                  Premium opportunity management for brands that want better talent operations.
+                </p>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-white/5 rounded-3xl transform rotate-2"></div>
-              <div className="absolute -inset-4 bg-gradient-to-tr from-white/5 to-white/2 rounded-3xl transform -rotate-2 hidden sm:block"></div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Featured Opportunities Section (Gigs-only discovery) */}
-      <section className="py-32 bg-seamless-secondary">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left md:text-center mb-12 sm:mb-16">
-            <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
-              <span className="text-white font-medium text-sm">Featured Opportunities</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
-              Book Faster.
-              <span className="apple-text-gradient"> Manage Cleaner.</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
-              TOTL is opportunities-first: brands post opportunities, talent applies, and booking stays organized.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {[
-              {
-                title: "Fitness Campaign — 2 Day Shoot",
-                category: "Campaign",
-                location: "Los Angeles",
-                compensation: "$450/day",
-                date: "Mar 10–11",
-                imageUrl:
-                  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1200&h=800&fit=crop",
-              },
-              {
-                title: "Beauty Editorial — Studio Session",
-                category: "Editorial",
-                location: "Miami",
-                compensation: "$400/day",
-                date: "Mar 18",
-                imageUrl:
-                  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1200&h=800&fit=crop",
-              },
-              {
-                title: "Commercial Lifestyle — On Location",
-                category: "Commercial",
-                location: "Chicago",
-                compensation: "$350/day",
-                date: "Apr 2",
-                imageUrl:
-                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&h=800&fit=crop",
-              },
-            ].map((gig) => (
-              <GigCard key={gig.title} gig={gig} variant="featured" />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-32 bg-seamless-accent">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-left md:text-center mb-12 sm:mb-16">
-            <div className="panel-frosted rounded-2xl px-6 py-3 w-fit mx-0 md:mx-auto mb-8">
-              <span className="text-white font-medium text-sm">How It Works</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-5 sm:mb-6 tracking-[-0.02em] font-display">
-              Simple
-              <span className="apple-text-gradient"> Process</span>
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-0 md:mx-auto leading-relaxed">
-              From discovery to booking, we&apos;ve streamlined the entire process to make talent
-              acquisition effortless and efficient.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
-                <Search className="h-10 w-10 text-white" />
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">Platform</h3>
+                <div className="space-y-3 text-sm text-[var(--totl-text-soft)]">
+                  <Link href="/about" className="block transition-colors hover:text-white">
+                    About us
+                  </Link>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Discover</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Browse opportunities and apply quickly — gigs are the discovery layer.
-              </p>
-            </div>
-            <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
-                <Handshake className="h-10 w-10 text-white" />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">Support</h3>
+                <div className="space-y-3 text-sm text-[var(--totl-text-soft)]">
+                  <Link href="/help" className="block transition-colors hover:text-white">
+                    Help center
+                  </Link>
+                  <Link href="/contact" className="block transition-colors hover:text-white">
+                    Contact us
+                  </Link>
+                  <Link href="/terms" className="block transition-colors hover:text-white">
+                    Terms of service
+                  </Link>
+                  <Link href="/privacy" className="block transition-colors hover:text-white">
+                    Privacy policy
+                  </Link>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Connect</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Reach out directly to talent or let us facilitate the perfect match for your
-                project.
-              </p>
-            </div>
-            <div className="text-center space-y-6">
-              <div className="w-20 h-20 mx-auto bg-white/10 rounded-full flex items-center justify-center panel-frosted">
-                <Sparkles className="h-10 w-10 text-white" />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white">Get started</h3>
+                <div className="space-y-3 text-sm text-[var(--totl-text-soft)]">
+                  <Link href="/choose-role" prefetch={false} className="block transition-colors hover:text-white">
+                    Apply as talent
+                  </Link>
+                  <PostGigFooterLink />
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-white">Create</h3>
-              <p className="text-gray-300 leading-relaxed">
-                Bring your vision to life with professional talent and seamless project management.
-              </p>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Stats Section */}
-      <section className="py-32 bg-seamless-radial">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-12 text-center">
-            <div className="space-y-4">
-              <div className="text-5xl font-bold text-white font-display">500+</div>
-              <div className="text-gray-300 text-lg">Verified Professionals</div>
-            </div>
-            <div className="space-y-4">
-              <div className="text-5xl font-bold text-white font-display">1000+</div>
-              <div className="text-gray-300 text-lg">Projects Completed</div>
-            </div>
-            <div className="space-y-4">
-              <div className="text-5xl font-bold text-white font-display">50+</div>
-              <div className="text-gray-300 text-lg">Cities Covered</div>
-            </div>
-            <div className="space-y-4">
-              <div className="text-5xl font-bold text-white font-display">4.9</div>
-              <div className="text-gray-300 text-lg">Average Rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-32 bg-seamless-primary">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <h2 className="text-5xl lg:text-6xl font-bold text-white font-display">
-              Ready to
-              <span className="apple-text-gradient"> Get Started?</span>
-            </h2>
-            <p className="text-xl text-gray-300 leading-relaxed">
-              Join thousands of brands and creators who trust TOTL Agency for their talent needs.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/choose-role" prefetch={false}>
-                <Button
-                  size="lg"
-                  className="button-glow w-full sm:w-auto px-10 py-5 text-xl font-semibold border-0"
-                >
-                  Start Booking <ArrowRight className="ml-3 h-6 w-6" />
-                </Button>
-              </Link>
-              {/* Removed "Browse Talent" CTA per Approach B: no talent directory exists */}
-              {/* Public users can discover talent only via shared profile links (/talent/[slug]) */}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-black py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-12">
-            <div className="space-y-6">
-              <SafeImage
-                src="/images/solo_logo.png"
-                alt="TOTL Agency"
-                width={120}
-                height={40}
-                className="h-8 w-auto brightness-0 invert"
-              />
-              <p className="text-gray-400 leading-relaxed">
-                The gigs-first way to book talent and run clean projects.
-              </p>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-white font-semibold">Platform</h3>
-              <div className="space-y-2">
-                {/* Removed "Browse Talent" per Approach B: no talent directory exists */}
-                {/* Removed "Find Gigs" per G1: gig list requires sign-in (not discoverable for signed-out) */}
-                <Link
-                  href="/about"
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  About Us
+            <div className="mt-10 flex flex-col gap-3 border-t border-white/6 pt-6 text-sm text-[var(--totl-text-soft)] sm:flex-row sm:items-center sm:justify-between">
+              <p>© 2025 TOTL Agency. All rights reserved.</p>
+              <div className="flex items-center gap-3">
+                <Link href="/terms" className="transition-colors hover:text-white">
+                  Terms
+                </Link>
+                <span className="text-white/20">•</span>
+                <Link href="/privacy" className="transition-colors hover:text-white">
+                  Privacy
                 </Link>
               </div>
             </div>
-            <div className="space-y-4">
-              <h3 className="text-white font-semibold">Support</h3>
-              <div className="space-y-2">
-                <Link
-                  href="/help"
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  Help Center
-                </Link>
-                <Link
-                  href="/contact"
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  Contact Us
-                </Link>
-                <Link
-                  href="/terms"
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  Terms of Service
-                </Link>
-                <Link
-                  href="/privacy"
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-white font-semibold">Get Started</h3>
-              <div className="space-y-2">
-                <Link
-                  href="/choose-role"
-                  prefetch={false}
-                  className="focus-hint block text-gray-400 hover:text-white transition-colors"
-                >
-                  Apply as Talent
-                </Link>
-                <PostGigFooterLink />
-              </div>
-            </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 TOTL Agency. All rights reserved.</p>
-            <p className="mt-2 text-sm">
-              <Link href="/terms" className="focus-hint hover:text-white transition-colors">Terms of Service</Link>
-              {" · "}
-              <Link href="/privacy" className="focus-hint hover:text-white transition-colors">Privacy Policy</Link>
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </main>
+    </TotlAtmosphereShell>
   );
 }

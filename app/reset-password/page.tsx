@@ -1,12 +1,12 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type React from "react";
 
 import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { AuthEntryShell } from "@/components/layout/auth-entry-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,66 +54,54 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-24 relative overflow-hidden grain-texture">
-      <div className="container mx-auto px-4 py-12">
-        <Link
-          href={PATHS.LOGIN}
-          className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to login
-        </Link>
-
-        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-          <div className="p-8">
-            <div className="text-center mb-8">
-              <Image
-                src="/images/totl-logo-transparent.png"
-                alt="TOTL Agency"
-                width={120}
-                height={50}
-                className="mx-auto mb-6"
-              />
-              <h1 className="text-2xl font-bold mb-2 text-white">Reset Password</h1>
-              <p className="text-gray-300">
-                {isSubmitted
-                  ? "Check your email for a link to reset your password."
-                  : "Enter your email address and we'll send you a link to reset your password."}
-              </p>
-            </div>
-
-            {!isSubmitted ? (
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-white">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? "Sending..." : "Send Reset Link"}
-                </Button>
-              </form>
-            ) : (
-              <div className="text-center">
-                <p className="mb-6 text-gray-300">
-                  If an account exists with the email you entered, you will receive a password reset
-                  link shortly.
-                </p>
-                <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
-                  <Link href={PATHS.LOGIN}>Return to Login</Link>
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
+    <AuthEntryShell backHref={PATHS.LOGIN} backLabel="Back to login">
+      <div className="mb-8 text-center">
+        <Image
+          src="/images/totl-logo-transparent.png"
+          alt="TOTL Agency"
+          width={120}
+          height={50}
+          className="mx-auto mb-6"
+        />
+        <h1 className="mb-2 text-2xl font-bold text-white">Reset Password</h1>
+        <p className="text-gray-300">
+          {isSubmitted
+            ? "Check your email for a link to reset your password."
+            : "Enter your email address and we'll send you a link to reset your password."}
+        </p>
       </div>
-    </div>
+
+      {!isSubmitted ? (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <Button type="submit" className="w-full button-glow" disabled={isSubmitting}>
+            {isSubmitting ? "Sending..." : "Send Reset Link"}
+          </Button>
+        </form>
+      ) : (
+        <div className="text-center">
+          <p className="mb-6 text-gray-300">
+            If an account exists with the email you entered, you will receive a password reset link
+            shortly.
+          </p>
+          <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
+            <Link href={PATHS.LOGIN}>Return to Login</Link>
+          </Button>
+        </div>
+      )}
+    </AuthEntryShell>
   );
 }

@@ -2,7 +2,7 @@
 
 // NOTE: This component is shared by both /post-gig (legacy alias) and /client/post-gig (canonical).
 
-import { ArrowLeft, AlertCircle } from "lucide-react";
+import { ArrowLeft, AlertCircle, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type React from "react";
@@ -26,6 +26,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { VISIBLE_GIG_CATEGORIES, getCategoryLabel } from "@/lib/constants/gig-categories";
+import {
+  GIG_REFERENCE_LINK_KINDS,
+  type GigReferenceLinkFormRow,
+  referenceLinkKindLabel,
+} from "@/lib/gig-reference-links";
 import { logger } from "@/lib/utils/logger";
 
 const emptyForm = {
@@ -37,6 +42,7 @@ const emptyForm = {
   duration: "",
   date: "",
   application_deadline: "",
+  referenceLinks: [] as GigReferenceLinkFormRow[],
 };
 
 export type PostGigClientProps = {
@@ -68,7 +74,11 @@ export function PostGigClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState(() => initialValues ?? emptyForm);
+  const [formData, setFormData] = useState(() => ({
+    ...emptyForm,
+    ...initialValues,
+    referenceLinks: initialValues?.referenceLinks ?? emptyForm.referenceLinks,
+  }));
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   const isAdminSurface = surface === "admin";
@@ -82,6 +92,34 @@ export function PostGigClient({
 
   const handleSelectChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value }));
+  };
+
+  const MAX_REFERENCE_LINKS = 15;
+
+  const updateReferenceLink = (index: number, patch: Partial<GigReferenceLinkFormRow>) => {
+    setFormData((prev) => {
+      const next = [...prev.referenceLinks];
+      const row = next[index] ?? { url: "", label: "", kind: "" };
+      next[index] = { ...row, ...patch };
+      return { ...prev, referenceLinks: next };
+    });
+  };
+
+  const addReferenceLinkRow = () => {
+    setFormData((prev) => {
+      if (prev.referenceLinks.length >= MAX_REFERENCE_LINKS) return prev;
+      return {
+        ...prev,
+        referenceLinks: [...prev.referenceLinks, { url: "", label: "", kind: "" }],
+      };
+    });
+  };
+
+  const removeReferenceLinkRow = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      referenceLinks: prev.referenceLinks.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,6 +150,7 @@ export function PostGigClient({
           duration: formData.duration,
           date: formData.date,
           application_deadline: formData.application_deadline || null,
+          referenceLinks: formData.referenceLinks,
         };
         const result = isAdminSurface ? await updateGigAsAdminAction(payload) : await updateGigAction(payload);
         if (!result.ok) throw new Error(result.error);
@@ -132,6 +171,7 @@ export function PostGigClient({
           date: formData.date,
           application_deadline: formData.application_deadline || null,
           imageFile: imageFile,
+          referenceLinks: formData.referenceLinks,
         });
 
         if (!result.ok) throw new Error(result.error);
@@ -356,6 +396,100 @@ export function PostGigClient({
                     className="bg-background text-foreground placeholder:text-muted-foreground/70"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-4 rounded-lg border border-border/80 bg-muted/20 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <Label className="text-base">Reference links (optional)</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Company site, reels, social, portfolio—help talent see the vibe. Up to {MAX_REFERENCE_LINKS}{" "}
+                      links, http(s) only.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addReferenceLinkRow}
+                    disabled={isSubmitting || formData.referenceLinks.length >= MAX_REFERENCE_LINKS}
+                    className="shrink-0"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add link
+                  </Button>
+                </div>
+
+                {formData.referenceLinks.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No reference links yet.</p>
+                ) : (
+                  <ul className="space-y-4">
+                    {formData.referenceLinks.map((row, idx) => (
+                      <li
+                        key={idx}
+                        className="grid grid-cols-1 gap-3 md:grid-cols-12 md:items-end border border-border/60 rounded-md p-3 bg-background/50"
+                      >
+                        <div className="md:col-span-5 space-y-2">
+                          <Label htmlFor={`ref-url-${idx}`}>URL</Label>
+                          <Input
+                            id={`ref-url-${idx}`}
+                            placeholder="https://…"
+                            value={row.url}
+                            onChange={(e) => updateReferenceLink(idx, { url: e.target.value })}
+                            className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                          />
+                        </div>
+                        <div className="md:col-span-4 space-y-2">
+                          <Label htmlFor={`ref-label-${idx}`}>Label</Label>
+                          <Input
+                            id={`ref-label-${idx}`}
+                            placeholder="e.g. Brand reel"
+                            value={row.label}
+                            onChange={(e) => updateReferenceLink(idx, { label: e.target.value })}
+                            className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                          />
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                          <Label htmlFor={`ref-kind-${idx}`}>Type</Label>
+                          <Select
+                            value={row.kind || undefined}
+                            onValueChange={(value) =>
+                              updateReferenceLink(idx, {
+                                kind: value as GigReferenceLinkFormRow["kind"],
+                              })
+                            }
+                          >
+                            <SelectTrigger
+                              id={`ref-kind-${idx}`}
+                              className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                            >
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {GIG_REFERENCE_LINK_KINDS.map((k) => (
+                                <SelectItem key={k} value={k}>
+                                  {referenceLinkKindLabel(k)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="md:col-span-1 flex md:justify-end">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeReferenceLinkRow(idx)}
+                            disabled={isSubmitting}
+                            aria-label="Remove link"
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

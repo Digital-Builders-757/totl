@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ChevronDown, ChevronUp, Save, User, FileText } from "lucide-react";
@@ -229,13 +229,13 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       )}
 
       {/* Basic Information */}
-      <Card className="bg-gray-900 border-gray-700">
+      <Card className="border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <User className="h-5 w-5" />
             Basic Information
           </CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardDescription className="text-[var(--oklch-text-tertiary)]">
             Your name and contact information
           </CardDescription>
         </CardHeader>
@@ -244,7 +244,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <div className="space-y-2">
               <Label
                 htmlFor="first_name"
-                className={errors.first_name ? "text-red-400" : "text-gray-300"}
+                className={errors.first_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 First Name *
               </Label>
@@ -254,8 +254,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("first_name")}
                 className={
                   errors.first_name
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -266,7 +266,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <div className="space-y-2">
               <Label
                 htmlFor="last_name"
-                className={errors.last_name ? "text-red-400" : "text-gray-300"}
+                className={errors.last_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Last Name *
               </Label>
@@ -276,8 +276,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("last_name")}
                 className={
                   errors.last_name
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -289,7 +289,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone" className={errors.phone ? "text-red-400" : "text-gray-300"}>
+              <Label htmlFor="phone" className={errors.phone ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
                 Phone Number
               </Label>
               <Input
@@ -298,8 +298,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("phone")}
                 className={
                   errors.phone
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -308,7 +308,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <div className="space-y-2">
               <Label
                 htmlFor="location"
-                className={errors.location ? "text-red-400" : "text-gray-300"}
+                className={errors.location ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Location
               </Label>
@@ -318,8 +318,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("location")}
                 className={
                   errors.location
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -330,7 +330,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           <div className="space-y-2">
             <Label
               htmlFor="portfolio_url"
-              className={errors.portfolio_url ? "text-red-400" : "text-gray-300"}
+              className={errors.portfolio_url ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
             >
               Portfolio URL
             </Label>
@@ -341,8 +341,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               {...register("portfolio_url")}
               className={
                 errors.portfolio_url
-                  ? "border-red-500 bg-gray-800 text-white"
-                  : "bg-gray-800 border-gray-600 text-white"
+                  ? "border-red-500/80"
+                  : ""
               }
               disabled={isSubmitting}
             />
@@ -353,11 +353,11 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
         </CardContent>
       </Card>
 
-      <div className="rounded-xl border border-gray-700/80 bg-gray-900/50 p-3">
+      <div className="panel-frosted rounded-2xl border border-white/10 bg-white/[0.03] p-3">
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-between px-2 py-2 text-left text-gray-100 hover:bg-gray-800/80"
+          className="h-auto w-full justify-between px-2 py-2 text-left text-white hover:bg-white/10"
           onClick={() => setShowAdvanced((current) => !current)}
         >
           <span>
@@ -365,27 +365,27 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           </span>
           {showAdvanced ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
-        <p className="px-2 pt-1 text-xs text-gray-400">
+        <p className="px-2 pt-1 text-xs text-[var(--oklch-text-tertiary)]">
           Keep this compact on mobile and expand only when you are ready.
         </p>
       </div>
 
       {/* Physical Characteristics */}
       {showAdvanced ? (
-        <Card className="bg-gray-900 border-gray-700">
+        <Card className="border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-white">
             <User className="h-5 w-5" />
             Physical Characteristics
           </CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardDescription className="text-[var(--oklch-text-tertiary)]">
             Your physical measurements and characteristics
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="age" className={errors.age ? "text-red-400" : "text-gray-300"}>
+              <Label htmlFor="age" className={errors.age ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
                 Age
               </Label>
               <Input
@@ -395,8 +395,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("age")}
                 className={
                   errors.age
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -406,7 +406,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             {showModelingFields && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="height" className={errors.height ? "text-red-400" : "text-gray-300"}>
+                  <Label htmlFor="height" className={errors.height ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
                     Height
                   </Label>
                   <Input
@@ -415,8 +415,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                     {...register("height")}
                     className={
                       errors.height
-                        ? "border-red-500 bg-gray-800 text-white"
-                        : "bg-gray-800 border-gray-600 text-white"
+                        ? "border-red-500/80"
+                        : ""
                     }
                     disabled={isSubmitting}
                   />
@@ -425,7 +425,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 <div className="space-y-2">
                   <Label
                     htmlFor="shoe_size"
-                    className={errors.shoe_size ? "text-red-400" : "text-gray-300"}
+                    className={errors.shoe_size ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
                   >
                     Shoe Size
                   </Label>
@@ -435,8 +435,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                     {...register("shoe_size")}
                     className={
                       errors.shoe_size
-                        ? "border-red-500 bg-gray-800 text-white"
-                        : "bg-gray-800 border-gray-600 text-white"
+                        ? "border-red-500/80"
+                        : ""
                     }
                     disabled={isSubmitting}
                   />
@@ -454,7 +454,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               <div className="space-y-2">
                 <Label
                   htmlFor="hair_color"
-                  className={errors.hair_color ? "text-red-400" : "text-gray-300"}
+                  className={errors.hair_color ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
                 >
                   Hair Color
                 </Label>
@@ -464,8 +464,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                   {...register("hair_color")}
                   className={
                     errors.hair_color
-                      ? "border-red-500 bg-gray-800 text-white"
-                      : "bg-gray-800 border-gray-600 text-white"
+                      ? "border-red-500/80"
+                      : ""
                   }
                   disabled={isSubmitting}
                 />
@@ -476,7 +476,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               <div className="space-y-2">
                 <Label
                   htmlFor="eye_color"
-                  className={errors.eye_color ? "text-red-400" : "text-gray-300"}
+                  className={errors.eye_color ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
                 >
                   Eye Color
                 </Label>
@@ -486,8 +486,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                   {...register("eye_color")}
                   className={
                     errors.eye_color
-                      ? "border-red-500 bg-gray-800 text-white"
-                      : "bg-gray-800 border-gray-600 text-white"
+                      ? "border-red-500/80"
+                      : ""
                   }
                   disabled={isSubmitting}
                 />
@@ -503,7 +503,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
             <div className="space-y-2">
               <Label
                 htmlFor="measurements"
-                className={errors.measurements ? "text-red-400" : "text-gray-300"}
+                className={errors.measurements ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Measurements
               </Label>
@@ -513,8 +513,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
                 {...register("measurements")}
                 className={
                   errors.measurements
-                    ? "border-red-500 bg-gray-800 text-white"
-                    : "bg-gray-800 border-gray-600 text-white"
+                    ? "border-red-500/80"
+                    : ""
                 }
                 disabled={isSubmitting}
               />
@@ -529,19 +529,19 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
 
       {/* Additional Information */}
       {showAdvanced ? (
-      <Card>
+      <Card className="border-white/10">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-white">
             <FileText className="h-5 w-5" />
             Additional Information
           </CardTitle>
-          <CardDescription>Your experience and languages</CardDescription>
+          <CardDescription className="text-[var(--oklch-text-tertiary)]">Your experience and languages</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label
               htmlFor="experience"
-              className={errors.experience ? "text-red-400" : "text-gray-300"}
+              className={errors.experience ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
             >
               Experience
             </Label>
@@ -551,8 +551,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               {...register("experience")}
               className={
                 errors.experience
-                  ? "border-red-500 bg-gray-800 text-white"
-                  : "bg-gray-800 border-gray-600 text-white"
+                  ? "border-red-500/80"
+                  : ""
               }
               disabled={isSubmitting}
               rows={4}
@@ -565,7 +565,7 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           <div className="space-y-2">
             <Label
               htmlFor="languages"
-              className={errors.languages ? "text-red-400" : "text-gray-300"}
+              className={errors.languages ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
             >
               Languages (comma-separated)
             </Label>
@@ -575,8 +575,8 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               {...register("languages")}
               className={
                 errors.languages
-                  ? "border-red-500 bg-gray-800 text-white"
-                  : "bg-gray-800 border-gray-600 text-white"
+                  ? "border-red-500/80"
+                  : ""
               }
               disabled={isSubmitting}
             />
@@ -587,21 +587,21 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       ) : null}
 
       {/* Submit Button */}
-      <div className="sticky bottom-3 z-10 -mx-1 rounded-xl border border-gray-700 bg-black/95 p-3 backdrop-blur supports-[backdrop-filter]:bg-black/80">
+      <div className="panel-frosted sticky bottom-3 z-10 -mx-1 rounded-2xl border border-white/10 bg-[rgba(10,10,18,0.82)] p-3 backdrop-blur supports-[backdrop-filter]:bg-[rgba(10,10,18,0.72)]">
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-4">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.push(PATHS.TALENT_DASHBOARD)}
           disabled={isSubmitting}
-          className="border-gray-600 text-gray-300 hover:bg-gray-800"
+          className="border-white/10 bg-white/5 text-white hover:bg-white/10"
         >
           Cancel
         </Button>
         <Button
           type="submit"
           disabled={isSubmitting || !isDirty}
-          className="bg-white text-black hover:bg-gray-200"
+          className="button-glow"
         >
           {isSubmitting ? (
             <>

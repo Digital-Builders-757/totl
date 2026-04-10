@@ -102,8 +102,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
 
         {/* Quick Stats */}
         <div className="mb-6 hidden grid-cols-2 gap-3 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-6">
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+          <Card className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Briefcase className="h-4 w-4 text-blue-400" />
@@ -123,8 +123,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+          <Card className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Zap className="h-4 w-4 text-green-400" />
@@ -144,8 +144,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+          <Card className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Users className="h-4 w-4 text-purple-400" />
@@ -165,8 +165,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+          <Card className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Clock className="h-4 w-4 text-yellow-400" />
@@ -186,8 +186,8 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
             </CardContent>
           </Card>
 
-          <Card className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
-            <CardContent className="p-4 space-y-3">
+          <Card className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <CheckCircle className="h-4 w-4 text-emerald-400" />
@@ -208,10 +208,10 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </Card>
 
           <Card
-            className="min-w-0 bg-gray-900 border-gray-800 transition-shadow hover:shadow-md"
+            className="min-w-0 border-white/10 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)]"
             data-testid="paid-talent-card"
           >
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="space-y-3 p-4">
               <div className="card-header-row">
                 <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <DollarSign className="h-4 w-4 text-orange-400" />
@@ -223,9 +223,9 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               </div>
               <div className="text-2xl font-bold text-white">
                 <span data-testid="paid-talent-mrr">{money(paidTalentStats.estimatedMrrCents)}</span>
-                <span className="text-base font-normal text-gray-400 ml-1">/mo</span>
+                <span className="ml-1 text-base font-normal text-[var(--oklch-text-tertiary)]">/mo</span>
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-[var(--oklch-text-tertiary)]">
                 <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
                 <span className="text-xs ml-1">/yr</span>
               </div>
@@ -236,62 +236,62 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
         {/* Main Content */}
         <Tabs defaultValue="overview" className="space-y-6">
           <MobileTabRail scrollClassName="flex justify-center">
-            <TabsList className="inline-flex h-auto min-w-max gap-3 rounded-xl border border-gray-800 bg-gray-900 p-1.5">
+            <TabsList className="inline-flex h-auto min-w-max gap-3 rounded-2xl border border-white/10 panel-frosted p-1.5">
               <TabsTrigger
                 value="overview"
-                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
                 <Activity className="h-3.5 w-3.5 shrink-0" />
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="gigs"
-                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
                 <Briefcase className="h-3.5 w-3.5 shrink-0" />
                 Opportunities
               </TabsTrigger>
               <TabsTrigger
                 value="applications"
-                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
                 <Users className="h-3.5 w-3.5 shrink-0" />
                 Applications
               </TabsTrigger>
               <TabsTrigger
                 value="analytics"
-                className="min-h-10 flex items-center gap-2 whitespace-nowrap px-4 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 flex items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-xs text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
               >
                 <BarChart className="h-3.5 w-3.5 shrink-0" />
                 Analytics
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="hidden w-full grid-cols-4 border-gray-800 bg-gray-900 md:grid lg:w-auto lg:grid-cols-4">
+          <TabsList className="hidden w-full grid-cols-4 rounded-2xl border border-white/10 panel-frosted p-1 md:grid lg:w-auto lg:grid-cols-4">
             <TabsTrigger
               value="overview"
-              className="flex items-center gap-2 text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 rounded-xl text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
             >
               <Activity className="h-4 w-4" />
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="gigs"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 rounded-xl text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
             >
               <Briefcase className="h-4 w-4" />
               Opportunities
             </TabsTrigger>
             <TabsTrigger
               value="applications"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 rounded-xl text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
             >
               <Users className="h-4 w-4" />
               Applications
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex items-center gap-2 rounded-xl text-[var(--oklch-text-tertiary)] data-[state=active]:bg-white/10 data-[state=active]:text-white"
             >
               <BarChart className="h-4 w-4" />
               Analytics
@@ -301,7 +301,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Quick Actions */}
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
+              <Card className="lg:col-span-1 border-white/10">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -312,7 +312,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       Admin
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-300">
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">
                     Manage your platform efficiently
                   </CardDescription>
                 </CardHeader>
@@ -323,13 +323,13 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       Create New Opportunity
                     </Link>
                   </Button>
-                  <Button className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800" variant="outline" asChild>
+                  <Button className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
                     <Link href="/admin/applications" className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       Review Applications
                     </Link>
                   </Button>
-                  <Button className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800" variant="outline" asChild>
+                  <Button className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
                     <Link href="/" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
                       Public Site View
@@ -339,7 +339,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               </Card>
 
               {/* Platform Health */}
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
+              <Card className="lg:col-span-1 border-white/10">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -350,7 +350,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       Stable
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-300">
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">
                     System status and performance
                   </CardDescription>
                 </CardHeader>
@@ -388,7 +388,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               </Card>
 
               {/* Recent Activity */}
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
+              <Card className="lg:col-span-1 border-white/10">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -399,7 +399,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       Today
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-300">
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">
                     Latest platform updates
                   </CardDescription>
                 </CardHeader>
@@ -418,9 +418,9 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </TabsContent>
 
           <TabsContent value="gigs" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="border-white/10">
               <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                   <div>
                     <CardTitle className="text-white">Opportunity Management</CardTitle>
                     <CardDescription className="text-gray-300">
@@ -432,12 +432,12 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                       <Input
                         placeholder="Search opportunities"
-                        className="pl-9 w-full md:w-60 bg-gray-800 border-gray-700 text-white"
+                        className="w-full pl-9 md:w-60"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    <Button variant="outline" size="icon" className="border-gray-700 text-white hover:bg-gray-800">
+                    <Button variant="outline" size="icon" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
                       <Filter size={16} />
                     </Button>
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white" asChild>
@@ -454,7 +454,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                   {filteredGigs.map((gig) => (
                     <div
                       key={gig.id}
-                      className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
+                      className="panel-frosted flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)] md:flex-row"
                     >
                       <div className="flex-grow space-y-2">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -480,7 +480,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                         <Button
                           variant="outline"
                           size="sm"
-                          className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                          className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10 md:flex-none"
                           asChild
                         >
                           <Link href={`/admin/gigs/${gig.id}`}>
@@ -491,7 +491,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:bg-gray-700"
+                          className="text-[var(--oklch-text-tertiary)] hover:bg-white/10"
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
@@ -504,9 +504,9 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="border-white/10">
               <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
                   <div>
                     <CardTitle className="text-white">Application Management</CardTitle>
                     <CardDescription className="text-gray-300">
@@ -514,7 +514,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="icon" className="border-gray-700 text-white hover:bg-gray-800">
+                    <Button variant="outline" size="icon" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
                       <Filter size={16} />
                     </Button>
                     <Button className="bg-purple-600 hover:bg-purple-700 text-white" asChild>
@@ -537,7 +537,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                     applications.map((application) => (
                       <div
                         key={application.id}
-                        className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
+                        className="panel-frosted flex flex-col gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition-shadow hover:shadow-[0_18px_38px_rgba(10,10,18,0.22)] md:flex-row"
                       >
                         <div className="flex-grow space-y-2">
                           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
@@ -571,7 +571,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                            className="flex-1 border-white/10 bg-white/5 text-white hover:bg-white/10 md:flex-none"
                             asChild
                           >
                             <Link href={`/admin/applications/${application.id}`}>
@@ -589,7 +589,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="border-white/10">
               <CardHeader>
                 <CardTitle className="text-white">Platform Analytics</CardTitle>
                 <CardDescription className="text-gray-300">

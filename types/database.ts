@@ -471,6 +471,7 @@ export type Database = {
           location: string
           location_lat: number | null
           location_lng: number | null
+          reference_links: Json
           search_vector: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
@@ -491,6 +492,7 @@ export type Database = {
           location: string
           location_lat?: number | null
           location_lng?: number | null
+          reference_links?: Json
           search_vector?: unknown
           status: Database["public"]["Enums"]["gig_status"]
           title: string
@@ -511,6 +513,7 @@ export type Database = {
           location?: string
           location_lat?: number | null
           location_lng?: number | null
+          reference_links?: Json
           search_vector?: unknown
           status?: Database["public"]["Enums"]["gig_status"]
           title?: string
@@ -1032,6 +1035,7 @@ export type Database = {
       }
       test_enum_casting: { Args: { test_role: string }; Returns: string }
       test_trigger_function_exists: { Args: never; Returns: boolean }
+      validate_gig_reference_links: { Args: { links: Json }; Returns: boolean }
     }
     Enums: {
       account_type_enum: "unassigned" | "talent" | "client"

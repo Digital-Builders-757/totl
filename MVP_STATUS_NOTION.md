@@ -8,6 +8,48 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: CI — admin users mobile Playwright selector (April 10, 2026)**
+
+**QA / PLAYWRIGHT** — April 10, 2026
+- ✅ **`tests/admin/admin-users-route.spec.ts` (mobile 390×844):** Suspended-tab assertion now targets **`MobileListRowCard`** rows (`div.space-y-3.md:hidden > div.panel-frosted.rounded-2xl`) instead of **`div.rounded-xl`**, which matched the **desktop-only** table shell (`hidden md:block`) and failed with “Received: hidden” after responsive admin UI landed.
+
+**Verification:** `npx playwright test tests/admin/admin-users-route.spec.ts --grep "suspended user appears"` — pass.
+
+## 🚀 **Latest: Opportunities — reference & inspiration links (April 10, 2026)**
+
+**GIGS / CLIENT / TALENT** — April 10, 2026
+- ✅ **`gigs.reference_links`:** JSONB array on opportunities (max 15); kinds: company, reel, social, portfolio, press, other; Zod + `validate_gig_reference_links` CHECK; migration `20260410183000_add_gigs_reference_links.sql` applied to dev project + types regenerated.
+- ✅ **Career Builder / admin:** `PostGigClient` add/remove links on create and edit; server actions persist via explicit columns (`createGigAction`, `updateGigAction`, `updateGigAsAdminAction`).
+- ✅ **Talent:** `GigReferenceLinksSection` on public **`/gigs/[id]`** and **`/gigs/[id]/apply`** (not on browse cards in this slice).
+- ✅ **Tests:** `lib/gig-reference-links.test.ts` (Vitest).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx vitest run lib/gig-reference-links.test.ts` — green (ship run, April 10, 2026).
+
+**Next (P0):** PR **develop → main**; smoke reference links on staging/production after merge (create/edit gig, verify detail + apply pages).
+
+**Next (P1):** Optional surfacing on client “manage opportunities” preview cards; link analytics later if needed.
+
+## 🚀 **Latest: TOTL visual cohesion pass — homepage, admin/settings, shared primitives (April 10, 2026)**
+
+**UI / UX / DESIGN SYSTEM** — April 10, 2026
+- ✅ **Homepage rebuilt:** `app/page.tsx` now uses a more authored dark-glass landing composition with stronger hierarchy, atmosphere layers, section transitions, and a more premium TOTL-specific tone.
+- ✅ **Shared shell primitives:** added `components/ui/totl-atmosphere-shell.tsx` and `components/ui/totl-section-divider.tsx`, then wired `components/layout/page-shell.tsx` and `app/layout.tsx` into the new dark ambient world.
+- ✅ **Global tokens expanded:** `app/globals.css` now carries the new TOTL surface, divider, input, focus, and gradient utilities so route work can inherit the same visual language instead of ad hoc grays.
+- ✅ **Shared UI primitives tightened:** `Button`, `Card`, `Input`, `Select`, and `Textarea` now default to the frosted/glass treatment with more consistent spacing, radius, and focus behavior.
+- ✅ **Admin + Settings polish:** `components/admin/admin-header.tsx`, `app/admin/dashboard/admin-dashboard-client.tsx`, `app/settings/page.tsx`, `app/settings/profile-editor.tsx`, and `app/settings/sign-out-button.tsx` were brought onto the same panel system with cleaner tabs, cards, and action states.
+- ✅ **Role dashboards aligned:** `app/choose-role/page.tsx`, `app/login/page.tsx`, `app/client/dashboard/client.tsx`, and `app/talent/dashboard/client.tsx` now sit closer to the new homepage/admin/settings visual system.
+- ✅ **Secondary authenticated surfaces tightened:** `app/settings/avatar-upload.tsx`, `components/client/client-profile-details.tsx`, `components/client/client-terminal-header.tsx`, and `components/forms/talent-profile-form.tsx` now inherit the same glass treatment, calmer metadata hierarchy, and stronger sticky action patterns.
+- ✅ **Legal pages brought forward:** `app/privacy/page.tsx` and `app/terms/page.tsx` now use the ambient page shell, larger glass container, and the updated text/link token system so they no longer feel visually detached from the rebuilt homepage.
+- ✅ **About page aligned:** `app/about/page.tsx` now uses the ambient shell, upgraded frosted section cards, shared form controls in the contact form, and cleaner CTA styling instead of older mixed gray treatments.
+- ✅ **Client micro-surfaces tightened:** `components/client/accept-application-dialog.tsx`, `components/client/reject-application-dialog.tsx`, `components/dashboard/mobile-list-row-card.tsx`, and `components/dashboard/mobile-summary-row.tsx` now use the same glass/dialog language, calmer metadata contrast, and shared input/button primitives.
+- ✅ **Auth-entry / recovery / onboarding lane:** `AuthEntryShell` now supports `omitBackLink`, login-aligned container rhythm, and horizontal overflow guard; `app/suspended/page.tsx` and `app/talent/signup/client.tsx` use the shared shell; `app/onboarding/loading.tsx` and `app/onboarding/select-account-type/loading.tsx` match the onboarding/on-auth transition pattern; `/login` and `/choose-role` use `overflow-x-hidden` for mobile safety; `docs/features/UI_VISUAL_LANGUAGE.md` updated.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — green (develop ship run, April 10, 2026).
+
+**Next (P0):** Open **PR develop → main**; smoke auth-entry cluster (login, choose-role, reset/update password, verification-pending, signups, onboarding loaders) plus admin/settings/dashboard in staging/production as needed.
+
+**Next (P1):** Route-by-route density polish on any secondary authenticated pages that still read flat or gray-heavy after the PR lands.
+
 ## 🚀 **Latest: Global UI — frosted surfaces + ambient glow (April 9, 2026)**
 
 **UI / DESIGN SYSTEM** — April 9, 2026
@@ -4894,7 +4936,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 9, 2026*
-*Current Status: MVP Complete; gig edit Supabase error handling + shared date-form utils; prior: Career Builder + admin opportunity edit flows*
+*Last Updated: April 10, 2026*
+*Current Status: MVP Complete; admin users mobile guardrail test fix for Suspended tab; opportunities reference_links on develop; prior: visual cohesion + gig edit resilience*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Beta evidence; Admin detail routes; direct-to-storage uploads; CRON_SECRET for booking reminders*
+*Next Review: PR develop→main; smoke reference links in staging/prod; beta evidence; CRON_SECRET for booking reminders*
