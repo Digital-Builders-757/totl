@@ -30,6 +30,7 @@ import { GigCard } from "@/components/gigs/gig-card";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { NotificationDropdown } from "@/components/notification-dropdown";
 import { SafeDate } from "@/components/safe-date";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
@@ -46,6 +47,7 @@ import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { getTalentBookings } from "@/lib/actions/booking-actions";
 import type { TalentDashboardData } from "@/lib/actions/dashboard-actions";
 import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -665,7 +667,9 @@ function TalentDashboardContent({
     }
 
     if (!user) {
-      router.replace(`/login?returnUrl=${encodeURIComponent("/talent/dashboard")}`);
+      router.replace(
+        `${PATHS.LOGIN}?returnUrl=${encodeURIComponent(PATHS.TALENT_DASHBOARD)}`
+      );
       return;
     }
   }, [user, authLoading, router]);
@@ -780,13 +784,13 @@ function TalentDashboardContent({
   // No fatalError check needed - component won't render if client creation fails
   if (authLoading || dataLoading || isInVerificationGracePeriodRef.current) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white/70 mx-auto" />
-          <p className="mt-4 text-gray-300">Loading your dashboard...</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-white/70" />
+          <p className="mt-4 text-[var(--oklch-text-secondary)]">Loading your dashboard...</p>
           {dataError && (
-            <div className="mt-4 max-w-md mx-auto">
-              <p className="text-red-400 text-sm">{dataError}</p>
+            <div className="mx-auto mt-4 max-w-md">
+              <p className="text-sm text-red-400">{dataError}</p>
               <Button
                 onClick={() => {
                   refetch();
@@ -800,57 +804,51 @@ function TalentDashboardContent({
             </div>
           )}
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   if (user && !profile) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Finishing your setup</h2>
-          <p className="text-gray-300 mb-4">
+      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+        <SectionCard className="mx-auto w-full max-w-md text-center">
+          <AlertCircle className="mx-auto mb-4 h-12 w-12 text-amber-400" aria-hidden />
+          <h2 className="mb-2 text-xl font-semibold text-[var(--oklch-text-primary)]">Finishing your setup</h2>
+          <p className="mb-4 text-[var(--oklch-text-secondary)]">
             We’re creating your profile. This usually takes a moment.
           </p>
           <Button onClick={handleRetrySetup} variant="outline">
             Retry setup
           </Button>
-        </div>
-      </div>
+        </SectionCard>
+      </PageShell>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 opacity-50" />
+      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+        <SectionCard className="mx-auto w-full max-w-md text-center">
+          <User className="mx-auto mb-6 h-16 w-16 text-[var(--oklch-text-secondary)]" aria-hidden />
+          <h2 className="mb-3 text-2xl font-bold text-[var(--oklch-text-primary)]">Welcome back</h2>
+          <p className="mb-6 text-lg text-[var(--oklch-text-secondary)]">
+            You need to be logged in to access your talent dashboard.
+          </p>
+          <Button asChild className="w-full button-glow sm:w-auto">
+            <Link href={PATHS.LOGIN}>Sign in to continue</Link>
+          </Button>
 
-        <div className="text-center max-w-md mx-auto p-8 relative z-10">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl shadow-2xl shadow-white/5 p-8 backdrop-blur-sm">
-            <div className="h-1 bg-gradient-to-r from-gray-600 via-white to-gray-600 mb-6" />
-
-            <User className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
-            <p className="text-gray-400 mb-6 text-lg">
-              You need to be logged in to access your talent dashboard.
-            </p>
-            <Button asChild className="bg-white text-black hover:bg-gray-200 font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
-              <Link href="/login">Sign In to Continue</Link>
-            </Button>
-
-            <div className="mt-6 pt-6 border-t border-gray-800">
-              <p className="text-sm text-gray-500 mb-3">New to TOTL?</p>
-              <Link
-                href="/choose-role"
-                className="text-white hover:text-gray-300 transition-colors text-sm font-medium"
-              >
-                Create an account →
-              </Link>
-            </div>
+          <div className="mt-6 border-t border-[var(--oklch-border-alpha)] pt-6">
+            <p className="mb-3 text-sm text-[var(--oklch-text-tertiary)]">New to TOTL?</p>
+            <Link
+              href={PATHS.CHOOSE_ROLE}
+              className="focus-hint text-sm font-medium text-[var(--oklch-text-primary)] underline-offset-4 hover:underline"
+            >
+              Create an account →
+            </Link>
           </div>
-        </div>
-      </div>
+        </SectionCard>
+      </PageShell>
     );
   }
 
@@ -1776,9 +1774,9 @@ export function DashboardClient({
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-black flex items-center justify-center">
-          <div className="text-white text-xl">Loading...</div>
-        </div>
+        <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+          <p className="text-xl text-[var(--oklch-text-primary)]">Loading...</p>
+        </PageShell>
       }
     >
       <TalentDashboardContent initialData={initialData} disableClientFetch={disableClientFetch} />

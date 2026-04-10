@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: TOTL visual cohesion pass — homepage, admin/settings, shared primitives (April 10, 2026)**
+
+**UI / UX / DESIGN SYSTEM** — April 10, 2026
+- ✅ **Homepage rebuilt:** `app/page.tsx` now uses a more authored dark-glass landing composition with stronger hierarchy, atmosphere layers, section transitions, and a more premium TOTL-specific tone.
+- ✅ **Shared shell primitives:** added `components/ui/totl-atmosphere-shell.tsx` and `components/ui/totl-section-divider.tsx`, then wired `components/layout/page-shell.tsx` and `app/layout.tsx` into the new dark ambient world.
+- ✅ **Global tokens expanded:** `app/globals.css` now carries the new TOTL surface, divider, input, focus, and gradient utilities so route work can inherit the same visual language instead of ad hoc grays.
+- ✅ **Shared UI primitives tightened:** `Button`, `Card`, `Input`, `Select`, and `Textarea` now default to the frosted/glass treatment with more consistent spacing, radius, and focus behavior.
+- ✅ **Admin + Settings polish:** `components/admin/admin-header.tsx`, `app/admin/dashboard/admin-dashboard-client.tsx`, `app/settings/page.tsx`, `app/settings/profile-editor.tsx`, and `app/settings/sign-out-button.tsx` were brought onto the same panel system with cleaner tabs, cards, and action states.
+- ✅ **Role dashboards aligned:** `app/choose-role/page.tsx`, `app/login/page.tsx`, `app/client/dashboard/client.tsx`, and `app/talent/dashboard/client.tsx` now sit closer to the new homepage/admin/settings visual system.
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green.
+
+**Next (P0):** Production walkthrough on admin/settings/dashboard routes to catch any remaining gray-heavy or spacing-regression surfaces.
+
+**Next (P1):** Continue route-by-route density polish for secondary authenticated pages that still rely on older flat panel treatments.
+
 ## 🚀 **Latest: Global UI — frosted surfaces + ambient glow (April 9, 2026)**
 
 **UI / DESIGN SYSTEM** — April 9, 2026

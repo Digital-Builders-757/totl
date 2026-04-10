@@ -23,10 +23,12 @@ import { ClientDashboardSkeleton } from "@/components/dashboard/client-dashboard
 import { ClientStatCard } from "@/components/dashboard/client-stat-card";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ClientDashboardData } from "@/lib/actions/dashboard-actions";
+import { PATHS } from "@/lib/constants/routes";
 import { logEmptyState, logFallbackUsage } from "@/lib/utils/error-logger";
 
 const OverviewTabContent = dynamic(() => import("./tabs/overview-tab-content"), { ssr: false });
@@ -155,30 +157,27 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   // Show login prompt if no user
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center relative overflow-hidden">
-        <div className="text-center max-w-md mx-auto p-8 relative z-10">
-          <div className="bg-gray-900/80 border border-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-3xl">
-            <div className="h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mb-6 rounded-full" />
-            <User className="h-16 w-16 text-white/80 mx-auto mb-6" />
-            <h2 className="text-2xl font-bold text-white mb-3">Welcome Back</h2>
-            <p className="text-gray-300 mb-6 text-lg">
-              You need to be logged in to access your Career Builder dashboard.
-            </p>
-            <Button
-              asChild
-              className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+        <SectionCard className="mx-auto w-full max-w-md text-center">
+          <User className="mx-auto mb-6 h-16 w-16 text-[var(--oklch-text-secondary)]" aria-hidden />
+          <h2 className="mb-3 text-2xl font-bold text-[var(--oklch-text-primary)]">Welcome back</h2>
+          <p className="mb-6 text-lg text-[var(--oklch-text-secondary)]">
+            You need to be logged in to access your Career Builder dashboard.
+          </p>
+          <Button asChild className="w-full button-glow sm:w-auto">
+            <Link href={PATHS.LOGIN}>Sign in to continue</Link>
+          </Button>
+          <div className="mt-6 border-t border-[var(--oklch-border-alpha)] pt-6">
+            <p className="mb-3 text-sm text-[var(--oklch-text-tertiary)]">New to TOTL?</p>
+            <Link
+              href={PATHS.CLIENT_APPLY}
+              className="focus-hint text-sm font-medium text-[var(--oklch-text-primary)] underline-offset-4 hover:underline"
             >
-              <Link href="/login">Sign In to Continue</Link>
-            </Button>
-            <div className="mt-6 pt-6 border-t border-gray-800">
-              <p className="text-sm text-gray-400 mb-3">New to TOTL?</p>
-              <Link href="/client/apply" className="text-blue-400 hover:text-blue-200 transition-colors text-sm font-medium">
-                Apply to become a Career Builder →
-              </Link>
-            </div>
+              Apply to become a Career Builder →
+            </Link>
           </div>
-        </div>
-      </div>
+        </SectionCard>
+      </PageShell>
     );
   }
 

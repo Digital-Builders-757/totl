@@ -6,11 +6,15 @@ import { useSearchParams } from "next/navigation";
 import type React from "react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { PATHS } from "@/lib/constants/routes";
 import { logger } from "@/lib/utils/logger";
 import { cn } from "@/lib/utils/utils";
 
@@ -119,23 +123,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black pt-24 sm:pt-28 relative overflow-hidden grain-texture">
-      {/* Quiet “airlock” backdrop: subtle gradient + grain, no blob animations */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40 z-[1]" />
-      
-      <div className="container mx-auto px-4 py-4 sm:py-6 md:py-8 relative z-10">
+    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-hidden text-white">
+      <FloatingPathsBackground opacity={0.08} color="white" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
+
+      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-6 md:py-8 lg:px-8">
         {/* Hydration marker for E2E stability (element exists pre-hydration). */}
         <span data-testid="login-hydrated" className="sr-only">
           {isHydrated ? "ready" : "loading"}
         </span>
-        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-4 sm:mb-6 md:mb-6 transition-colors">
+        <Link
+          href={PATHS.HOME}
+          className="focus-hint mb-4 inline-flex items-center text-gray-400 transition-colors hover:text-white sm:mb-6 md:mb-6"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
 
-        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-          
-          <div className="p-4 sm:p-6 md:p-8">
+        <SectionCard className="mx-auto max-w-md overflow-hidden" paddingClassName="p-4 sm:p-6 md:p-8">
             <div className="text-center mb-6 sm:mb-8">
               <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">Welcome back</h1>
               <p className="text-sm sm:text-base text-gray-300">Sign in to continue to your dashboard</p>
@@ -200,7 +205,10 @@ export default function Login() {
                   <Label htmlFor="password" className={`text-white text-sm sm:text-base ${formErrors.password ? "text-red-400" : ""}`}>
                     Password
                   </Label>
-                  <Link href="/reset-password" className="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors">
+                  <Link
+                    href={PATHS.RESET_PASSWORD}
+                    className="focus-hint text-xs text-gray-400 transition-colors hover:text-white sm:text-sm"
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -284,17 +292,20 @@ export default function Login() {
                 <p className="text-sm sm:text-base text-gray-300">
                   Don&apos;t have an account?{" "}
                   <Link
-                    href={returnUrl ? `/choose-role?returnUrl=${encodeURIComponent(returnUrl)}` : "/choose-role"}
-                    className="text-white/90 font-medium hover:text-white inline-block transition-colors"
+                    href={
+                      returnUrl
+                        ? `${PATHS.CHOOSE_ROLE}?returnUrl=${encodeURIComponent(returnUrl)}`
+                        : PATHS.CHOOSE_ROLE
+                    }
+                    className="focus-hint inline-block font-medium text-white/90 transition-colors hover:text-white"
                   >
                     Create an account →
                   </Link>
                 </p>
               </div>
             </div>
-          </div>
-        </div>
+        </SectionCard>
       </div>
-    </div>
+    </PageShell>
   );
 }

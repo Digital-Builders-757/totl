@@ -1,5 +1,6 @@
 import type React from "react";
 
+import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { cn } from "@/lib/utils/utils";
 
 export interface PageShellProps {
@@ -26,12 +27,9 @@ export function PageShell({
   fullBleed = false,
 }: PageShellProps) {
   return (
-    <div
-      className={cn(
-        "min-h-screen bg-[var(--oklch-bg)] text-[var(--oklch-text-primary)] page-ambient",
-        topPadding && "pt-20 sm:pt-24",
-        className
-      )}
+    <TotlAtmosphereShell
+      className={cn("text-[var(--oklch-text-primary)]", className)}
+      contentClassName={cn(topPadding && "pt-20 sm:pt-24")}
     >
       {fullBleed ? (
         children
@@ -40,7 +38,7 @@ export function PageShell({
           {children}
         </div>
       )}
-    </div>
+    </TotlAtmosphereShell>
   );
 }
 

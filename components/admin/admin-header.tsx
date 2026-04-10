@@ -115,7 +115,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
   return (
     <header
       data-testid="admin-header"
-      className="sticky top-0 z-40 border-b border-border/50 bg-card/40 backdrop-blur-xl supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
+      className="panel-frosted sticky top-0 z-40 border-b border-white/10 bg-[rgba(9,9,14,0.74)] backdrop-blur-xl supports-[padding:max(0px)]:pt-[env(safe-area-inset-top)]"
     >
       {/* Mobile header */}
       <div className="h-14 px-4 md:hidden">
@@ -129,18 +129,18 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 size="icon"
                 aria-label="Open admin navigation"
                 data-testid="admin-drawer-trigger"
-                className="text-foreground hover:bg-card/30"
+                className="text-foreground hover:bg-white/10"
               >
                 <Menu className="h-5 w-5" />
               </Button>
             </DialogTrigger>
             <DialogContent
               data-testid="admin-drawer-panel"
-              className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-border/50 bg-[var(--oklch-bg)] p-0 pb-[env(safe-area-inset-bottom)] text-foreground"
+              className="panel-frosted left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-foreground"
             >
               <DialogTitle className="sr-only">Admin Navigation</DialogTitle>
               <div className="flex h-full flex-col">
-                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/50 bg-card/35 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
+                <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[rgba(10,10,18,0.72)] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur">
                   <div className="min-w-0">
                     <p className="truncate text-base font-semibold">Admin</p>
                     <p className="text-xs text-muted-foreground">Platform Management</p>
@@ -151,7 +151,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     size="icon"
                     data-testid="admin-drawer-close"
                     aria-label="Close admin navigation"
-                    className="h-11 w-11 text-foreground hover:bg-card/30"
+                    className="h-11 w-11 text-foreground hover:bg-white/10"
                     onClick={() => setIsDrawerOpen(false)}
                   >
                     <X className="h-5 w-5" />
@@ -166,8 +166,8 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                         variant="ghost"
                         className={`h-11 justify-start gap-3 px-3 ${
                           isActive(item.href)
-                            ? "border border-border/50 bg-card/40 text-foreground"
-                            : "text-muted-foreground hover:bg-card/25"
+                            ? "border border-white/10 bg-white/10 text-foreground"
+                            : "text-muted-foreground hover:bg-white/5"
                         }`}
                         asChild
                       >
@@ -192,7 +192,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
               variant="ghost"
               size="icon"
               aria-label="Notifications"
-              className="relative text-foreground hover:bg-card/30"
+              className="relative text-foreground hover:bg-white/10"
             >
               <Bell className="h-5 w-5" />
               {notificationCount > 0 ? (
@@ -209,12 +209,12 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                   size="icon"
                   aria-label="Admin actions"
                   data-testid="admin-overflow-trigger"
-                  className="text-foreground hover:bg-card/30"
+                  className="text-foreground hover:bg-white/10"
                 >
                   <MoreHorizontal className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
+                <DropdownMenuContent align="end" className="panel-frosted border-white/10">
                 <DropdownMenuItem asChild>
                   <Link href="/settings" className="text-foreground focus:bg-card/30">
                     <Settings className="mr-2 h-4 w-4" />
@@ -258,7 +258,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="sm" className="border-border/50 text-foreground hover:bg-card/30">
+              <Button type="button" variant="outline" size="sm" className="border-white/10 bg-white/5 text-foreground hover:bg-white/10">
                 <Bell className="mr-2 h-4 w-4" />
                 Notifications
                 {notificationCount > 0 ? (
@@ -272,7 +272,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 variant="outline"
                 size="sm"
                 asChild
-                className="border-border/50 text-foreground hover:bg-card/30"
+                className="border-white/10 bg-white/5 text-foreground hover:bg-white/10"
               >
                 <Link href="/settings">
                   <Settings className="mr-2 h-4 w-4" />
@@ -285,7 +285,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-border/50 text-foreground hover:bg-card/30"
+                    className="border-white/10 bg-white/5 text-foreground hover:bg-white/10"
                   >
                     <Avatar className="mr-2 h-6 w-6">
                       <AvatarImage
@@ -300,7 +300,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                     <span className="max-w-[220px] truncate">{user.email || "Admin"}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="panel-frosted border-border/50">
+                <DropdownMenuContent align="end" className="panel-frosted border-white/10">
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="text-foreground focus:bg-card/30">
                       <UserIcon className="mr-2 h-4 w-4" />
@@ -332,10 +332,10 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                  className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
                     isActive(item.href)
-                      ? "border border-border/50 bg-card/40 text-foreground"
-                      : "text-muted-foreground hover:bg-card/25 hover:text-foreground"
+                      ? "border border-white/10 bg-white/10 text-foreground"
+                      : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
