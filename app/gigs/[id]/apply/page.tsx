@@ -3,12 +3,13 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ApplyToGigForm } from "./apply-to-gig-form";
 import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
+import { PageShell } from "@/components/layout/page-shell";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { getCategoryBadgeVariant, getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIG_PUBLIC_SELECT } from "@/lib/db/selects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -68,106 +69,95 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
 
   const alreadyApplied = !!existingApplication;
 
-  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
-  // For now, keeping a simple fallback since badge styling may vary
-  const getCategoryColor = () => {
-    // Default fallback - can be enhanced with getCategoryBadgeVariant
-    return "bg-gray-100 text-gray-800";
-  };
-
   return (
-    <div className="min-h-screen bg-black pt-24">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          {/* Back Button */}
-          <div className="mb-6">
-            <Button variant="ghost" asChild className="text-white hover:bg-gray-800">
-              <Link href={`/gigs/${gig.id}`} className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Opportunity Details
-              </Link>
-            </Button>
-          </div>
+    <PageShell ambientTone="lifted" routeRole="talent" containerClassName="py-8 sm:py-12">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <Button variant="ghost" asChild>
+            <Link href={`/gigs/${gig.id}`} className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Opportunity Details
+            </Link>
+          </Button>
+        </div>
 
-          {/* Main Content */}
-          <div className="space-y-6">
-            {/* Gig Summary Card */}
-            <Card className="bg-gray-900 border-gray-700">
-              <CardHeader>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-white">{gig.title}</CardTitle>
-                    <CardDescription className="text-lg mt-2 text-gray-300">{gig.description}</CardDescription>
-                  </div>
-                  <Badge className={getCategoryColor()}>
-                    {getCategoryLabel(gig.category || "")}
-                  </Badge>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <CardTitle className="text-2xl font-bold">{gig.title}</CardTitle>
+                  <CardDescription className="text-base mt-2">{gig.description}</CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-300">Location:</span>
-                    <p className="text-gray-400">{gig.location}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-300">Compensation:</span>
-                    <p className="text-gray-400">${gig.compensation}</p>
-                  </div>
-                  {gig.date && (
-                    <div>
-                      <span className="font-medium text-gray-300">Date:</span>
-                      <p className="text-gray-400">{new Date(gig.date).toLocaleDateString()}</p>
-                    </div>
-                  )}
+                <Badge variant={getCategoryBadgeVariant(gig.category || "")}>
+                  {getCategoryLabel(gig.category || "")}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-[var(--oklch-text-secondary)]">Location:</span>
+                  <p className="text-[var(--oklch-text-tertiary)]">{gig.location}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <GigReferenceLinksSection referenceLinks={gig.reference_links} variant="dark" />
-
-            {/* Application Form */}
-            <Card className="bg-gray-900 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Send className="h-5 w-5" />
-                  Submit Application
-                </CardTitle>
-                <CardDescription className="text-gray-300">
-                  Complete your application for this gig. Your profile information will be
-                  automatically included.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {alreadyApplied ? (
-                  <Alert className="bg-green-500/10 border-green-500/20">
-                    <CheckCircle className="h-4 w-4 text-green-400" />
-                    <AlertDescription className="text-green-300">
-                      You have already applied for this gig. Check your dashboard for updates on
-                      your application status.
-                    </AlertDescription>
-                  </Alert>
-                ) : hasActiveSubscription ? (
-                  <ApplyToGigForm gig={gig} />
-                ) : (
-                  <div className="space-y-4" data-testid="subscription-apply-form-gate">
-                    <Alert className="bg-amber-500/10 border-amber-500/20">
-                      <AlertDescription className="text-amber-100">
-                        Subscribe to unlock applications. You can still browse gigs, but applying
-                        requires an active plan.
-                      </AlertDescription>
-                    </Alert>
-                    <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-apply" />
-                    <Button asChild className="w-full button-glow border-0">
-                      <Link href="/talent/subscribe">View Plans</Link>
-                    </Button>
+                <div>
+                  <span className="font-medium text-[var(--oklch-text-secondary)]">Compensation:</span>
+                  <p className="text-[var(--oklch-text-tertiary)]">${gig.compensation}</p>
+                </div>
+                {gig.date && (
+                  <div>
+                    <span className="font-medium text-[var(--oklch-text-secondary)]">Date:</span>
+                    <p className="text-[var(--oklch-text-tertiary)]">
+                      {new Date(gig.date).toLocaleDateString()}
+                    </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <GigReferenceLinksSection referenceLinks={gig.reference_links} />
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Send className="h-5 w-5 text-[var(--oklch-accent)]" aria-hidden />
+                Submit Application
+              </CardTitle>
+              <CardDescription>
+                Complete your application for this gig. Your profile information will be automatically
+                included.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {alreadyApplied ? (
+                <Alert className="border-emerald-500/35 bg-emerald-500/10">
+                  <CheckCircle className="h-4 w-4 text-emerald-400" />
+                  <AlertDescription className="text-[var(--oklch-text-secondary)]">
+                    You have already applied for this gig. Check your dashboard for updates on your
+                    application status.
+                  </AlertDescription>
+                </Alert>
+              ) : hasActiveSubscription ? (
+                <ApplyToGigForm gig={gig} />
+              ) : (
+                <div className="space-y-4" data-testid="subscription-apply-form-gate">
+                  <Alert className="border-amber-400/35 bg-amber-500/10">
+                    <AlertDescription className="text-[var(--oklch-text-secondary)]">
+                      Subscribe to unlock applications. You can still browse gigs, but applying requires an
+                      active plan.
+                    </AlertDescription>
+                  </Alert>
+                  <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-apply" />
+                  <Button asChild className="w-full button-glow border-0">
+                    <Link href="/talent/subscribe">View Plans</Link>
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

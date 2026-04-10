@@ -8,6 +8,18 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Application flows — lifted ambient + glass (April 10, 2026)**
+
+**UI / VIZB** — April 10, 2026
+- ✅ **`ambientTone="lifted"`** on **`TotlAtmosphereShell`** / **`PageShell`**: higher-key background and richer sky/violet wash via **`.totl-atmosphere-shell--lifted`** in `app/globals.css` for long forms (not a full light theme).
+- ✅ **Talent apply:** **`/gigs/[id]/apply`** uses **`PageShell`** + **`routeRole="talent"`**, frosted **`Card`**s (removed flat black/gray-900), **`getCategoryBadgeVariant`**, **`apply-to-gig-form`** uses token text + default **`Textarea`/`totl-input-shell`**; loading skeleton matches the shell.
+- ✅ **Career Builder apply:** **`/client/apply`** uses **`PageShell`** + lifted tone; form column gets a soft violet/sky wash; inputs use **`oklch`** + violet focus; submit CTA uses glow + gradient; fixed pending copy (“You’ll”).
+- ✅ **`GigReferenceLinksSection`:** single frosted treatment; links use **`--oklch-accent`** (removed **`variant="dark"`**).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — run as part of ship.
+
+**Next (P1):** Reuse **`ambientTone="lifted"`** on other dense flows (e.g. onboarding, applications lists) for consistency.
+
 ## 🚀 **Latest: CI — admin users mobile Playwright selector (April 10, 2026)**
 
 **QA / PLAYWRIGHT** — April 10, 2026

@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
+import { PageShell } from "@/components/layout/page-shell";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -260,43 +261,46 @@ export default function ClientApplicationPage() {
     !isCareerBuilder &&
     (hasStartedEditing || !applicationStatus?.status) &&
     !isCheckingStatus;
-  const labelClass = "text-sm font-semibold text-white/80";
+  const labelClass = "text-sm font-semibold text-[var(--oklch-text-secondary)]";
   const inputClass =
-    "border-border/50 bg-card/45 text-white placeholder:text-white/45 focus-visible:border-amber-500";
+    "border-border/45 bg-card/50 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)] focus-visible:border-[var(--totl-violet-light)]";
 
   if (authLoading && user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--oklch-bg)] px-4 pt-20 text-white sm:pt-24">
-        <p className="text-white/70 text-center">Loading your account…</p>
-      </div>
+      <PageShell ambientTone="lifted">
+        <div className="flex min-h-[50vh] items-center justify-center px-4">
+          <p className="text-[var(--oklch-text-muted)] text-center">Loading your account…</p>
+        </div>
+      </PageShell>
     );
   }
 
   if (user && isCareerBuilder) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[var(--oklch-bg)] px-4 pt-20 text-white sm:pt-24">
-        <p className="text-white/70 text-center">Redirecting to your Career Builder dashboard…</p>
-      </div>
+      <PageShell ambientTone="lifted">
+        <div className="flex min-h-[50vh] items-center justify-center px-4">
+          <p className="text-[var(--oklch-text-muted)] text-center">Redirecting to your Career Builder dashboard…</p>
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] pt-20 text-white sm:pt-24">
-      <div className="container mx-auto px-4 py-4 sm:py-12">
-        <Link
-          href={returnUrl ? decodeURIComponent(returnUrl) : "/"}
-          className="inline-flex items-center text-white/70 hover:text-white mb-4 sm:mb-8"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Link>
+    <PageShell ambientTone="lifted" containerClassName="py-4 sm:py-12">
+      <Link
+        href={returnUrl ? decodeURIComponent(returnUrl) : "/"}
+        className="inline-flex items-center text-[var(--oklch-text-muted)] hover:text-[var(--oklch-text-primary)] mb-4 sm:mb-8 transition-colors"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Link>
 
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl panel-frosted card-backlit shadow-xl">
+      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl panel-frosted card-backlit shadow-xl">
           {statusMessage && (
             <div className="border-b border-border/40 bg-card/25 p-4">
-              <Alert className="border-border/40 bg-card/25 text-white">
-                <AlertTitle className="text-white">Career Builder Application</AlertTitle>
-                <AlertDescription className="text-white/80">{statusMessage}</AlertDescription>
+              <Alert className="border-border/40 bg-card/20">
+                <AlertTitle className="text-[var(--oklch-text-primary)]">Career Builder Application</AlertTitle>
+                <AlertDescription className="text-[var(--oklch-text-muted)]">{statusMessage}</AlertDescription>
               </Alert>
             </div>
           )}
@@ -309,8 +313,8 @@ export default function ClientApplicationPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-900/35 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-950/25 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-8 text-white">
                   <h2 className="text-2xl font-bold mb-2">Apply to Become a Career Builder</h2>
                   <p className="text-white/80">
@@ -320,10 +324,10 @@ export default function ClientApplicationPage() {
               </div>
             </div>
 
-            <div className="bg-card/10 p-8 md:col-span-3">
+            <div className="bg-gradient-to-br from-violet-500/[0.08] via-card/16 to-sky-500/[0.05] p-8 md:col-span-3">
               <div className="mb-8">
                 <h1 className="text-2xl font-bold mb-2">Career Builder Application</h1>
-                <p className="text-white/70">
+                <p className="text-[var(--oklch-text-muted)]">
                   Complete the form below to apply as a Career Builder with TOTL Agency. Our team will
                   review your application and contact you within 2-3 business days.
                 </p>
@@ -331,10 +335,10 @@ export default function ClientApplicationPage() {
 
               {showStatusPanel ? (
                 <div className="panel-frosted card-backlit rounded-2xl p-6 text-left">
-                  <p className="text-white font-semibold mb-2">Application Under Review</p>
-                  <p className="text-white/70 text-sm">
-                    {applicationStatus.status === 'pending'
-                      ? "We received your application and our admin team is reviewing it. You&apos;ll be notified when we have an update."
+                  <p className="text-[var(--oklch-text-primary)] font-semibold mb-2">Application Under Review</p>
+                  <p className="text-[var(--oklch-text-muted)] text-sm">
+                    {applicationStatus.status === "pending"
+                      ? "We received your application and our admin team is reviewing it. You'll be notified when we have an update."
                       : applicationStatus.status === 'rejected'
                         ? 'Your application was rejected. Please reach out to hello@thetotlagency.com to reapply.'
                         : 'We found an existing application. Check your email for the latest status.'}
@@ -342,13 +346,13 @@ export default function ClientApplicationPage() {
                 </div>
               ) : isCheckingStatus ? (
                 <div className="panel-frosted card-backlit rounded-2xl p-6 text-left">
-                  <p className="text-white font-semibold mb-2">Checking application status</p>
-                  <p className="text-white/70 text-sm">
+                  <p className="text-[var(--oklch-text-primary)] font-semibold mb-2">Checking application status</p>
+                  <p className="text-[var(--oklch-text-muted)] text-sm">
                     Finalizing your sign-in and checking whether you already have a Career Builder application on file.
                   </p>
                 </div>
               ) : shouldShowForm ? (
-                <form className="space-y-6 text-white" onSubmit={handleSubmit}>
+                <form className="space-y-6 text-[var(--oklch-text-primary)]" onSubmit={handleSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label className={labelClass} htmlFor="firstName">
@@ -426,7 +430,7 @@ export default function ClientApplicationPage() {
                       Industry
                     </Label>
                     <Select value={formData.industry} onValueChange={handleSelectChange}>
-                      <SelectTrigger id="industry" className="border-border/50 bg-card/45 text-white">
+                      <SelectTrigger id="industry" className={inputClass}>
                         <SelectValue placeholder="Select your industry" />
                       </SelectTrigger>
                       <SelectContent>
@@ -486,7 +490,7 @@ export default function ClientApplicationPage() {
                   <div className="pt-4">
                     <Button
                       type="submit"
-                      className="w-full bg-amber-500 text-black hover:bg-amber-400"
+                      className="w-full button-glow border-0 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400"
                       disabled={
                         isSubmitting ||
                         applicationStatus?.status === "pending"
@@ -494,13 +498,13 @@ export default function ClientApplicationPage() {
                     >
                       {isSubmitting ? "Submitting..." : "Submit Application"}
                     </Button>
-                    <p className="text-sm text-white/60 mt-4 text-left">
+                    <p className="text-sm text-[var(--oklch-text-muted)] mt-4 text-left">
                       By submitting this form, you agree to our{" "}
-                      <Link href="/terms" className="underline text-white/70">
+                      <Link href="/terms" className="underline text-[var(--oklch-accent)] hover:brightness-110">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link href="/privacy" className="underline text-white/70">
+                      <Link href="/privacy" className="underline text-[var(--oklch-accent)] hover:brightness-110">
                         Privacy Policy
                       </Link>
                       .
@@ -511,7 +515,6 @@ export default function ClientApplicationPage() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

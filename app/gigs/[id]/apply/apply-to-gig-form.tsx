@@ -164,10 +164,10 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
   return (
     <form onSubmit={handleApply} className="space-y-6">
       <div className="space-y-2">
-        <label htmlFor="coverLetter" className="text-sm font-medium text-white">
+        <label htmlFor="coverLetter" className="text-sm font-medium text-[var(--oklch-text-primary)]">
           Cover Letter (Optional)
         </label>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-[var(--oklch-text-muted)]">
           Your profile and portfolio are included automatically.
         </p>
         <Textarea
@@ -175,10 +175,10 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
           value={coverLetter}
           onChange={(e) => setCoverLetter(e.target.value)}
           placeholder="Tell the client why you're perfect for this opportunity. Include any relevant experience, availability, or special skills..."
-          className="min-h-[120px] bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+          className="min-h-[120px]"
           maxLength={1000}
         />
-        <p className="text-xs text-gray-400">{coverLetter.length}/1000 characters</p>
+        <p className="text-xs text-[var(--oklch-text-muted)]">{coverLetter.length}/1000 characters</p>
       </div>
 
       <div className="flex gap-3">
@@ -195,20 +195,14 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
             </>
           )}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={submitting}
-          onClick={() => router.push(`/gigs/${gig.id}`)}
-          className="border-gray-600 text-gray-300 hover:bg-gray-800"
-        >
+        <Button type="button" variant="outline" disabled={submitting} onClick={() => router.push(`/gigs/${gig.id}`)}>
           Cancel
         </Button>
       </div>
 
       {error && (
-        <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
-          <AlertDescription className="text-red-300">{error}</AlertDescription>
+        <Alert variant="destructive" className="bg-red-500/10 border-red-500/30">
+          <AlertDescription className="text-[var(--oklch-text-secondary)]">{error}</AlertDescription>
         </Alert>
       )}
     </form>
