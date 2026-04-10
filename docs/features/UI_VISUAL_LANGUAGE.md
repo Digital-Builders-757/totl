@@ -68,6 +68,15 @@ if (!user) {
 - Uses existing shadcn/ui Button component
 - Lucide React icons (Lock, Users, Sparkles)
 
+### Layout shells (marketing + routes)
+
+Use these when composing full-page or section-level structure so surfaces stay consistent with the homepage and authenticated shells:
+
+- **`TotlAtmosphereShell`** — `components/ui/totl-atmosphere-shell.tsx` — optional full-page atmosphere wrapper (gradients, paths, glow) for marketing-style routes.
+- **`TotlSectionDivider`** — `components/ui/totl-section-divider.tsx` — consistent section transitions between bands.
+- **`PageShell`** — `components/layout/page-shell.tsx` — default route wrapper (`page-ambient`, container width, nav top offset); use `fullBleed` when the page controls its own horizontal layout.
+- **`SectionCard`** — `components/layout/section-card.tsx` — canonical frosted panel stack (`panel-frosted` + `card-backlit` + `grain-texture`) for grouped content.
+
 ## Mobile UX Guidelines
 
 ### App-Like Experience
