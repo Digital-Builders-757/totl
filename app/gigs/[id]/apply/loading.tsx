@@ -1,31 +1,31 @@
+import { PageShell } from "@/components/layout/page-shell";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ApplyToGigLoading() {
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient pt-40">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Back link skeleton */}
-          <Skeleton className="h-5 w-28 bg-zinc-800/50" />
+    <PageShell ambientTone="lifted" routeRole="talent" containerClassName="py-8 sm:py-12">
+      <div className="max-w-2xl mx-auto space-y-6">
+        <Skeleton className="h-10 w-56 rounded-lg bg-muted/40" />
 
-          {/* Gig summary skeleton */}
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-4">
-            <Skeleton className="h-6 w-48 mb-2 bg-zinc-800/50" />
-            <Skeleton className="h-4 w-full bg-zinc-800/50" />
+        <div className="panel-frosted card-backlit rounded-[1.5rem] p-6 space-y-4">
+          <Skeleton className="h-8 w-3/4 max-w-md rounded-lg bg-muted/40" />
+          <Skeleton className="h-4 w-full rounded-lg bg-muted/30" />
+          <Skeleton className="h-4 w-full rounded-lg bg-muted/30" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <Skeleton className="h-14 rounded-xl bg-muted/35" />
+            <Skeleton className="h-14 rounded-xl bg-muted/35" />
           </div>
+        </div>
 
-          {/* Form skeleton */}
-          <div className="space-y-4 rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-6">
-            <Skeleton className="h-8 w-40 bg-zinc-800/50" />
-            <Skeleton className="h-24 w-full bg-zinc-800/50" />
-            <Skeleton className="h-24 w-full bg-zinc-800/50" />
-            <div className="flex justify-end gap-2 pt-4">
-              <Skeleton className="h-10 w-24 bg-zinc-800/50" />
-              <Skeleton className="h-10 w-32 bg-zinc-800/50" />
-            </div>
+        <div className="panel-frosted card-backlit rounded-[1.5rem] p-6 space-y-4">
+          <Skeleton className="h-7 w-48 rounded-lg bg-muted/40" />
+          <Skeleton className="h-28 w-full rounded-xl bg-muted/35" />
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <Skeleton className="h-11 flex-1 rounded-xl bg-muted/35 sm:max-w-[140px]" />
+            <Skeleton className="h-11 flex-1 rounded-xl bg-muted/35" />
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

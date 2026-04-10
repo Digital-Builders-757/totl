@@ -2,11 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
+import type { GigReferenceLinkFormRow } from "@/lib/gig-reference-links";
+import { parseReferenceLinksForDatabase } from "@/lib/gig-reference-links";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
-export async function createGig(formData: FormData) {
+export async function createGig(formData: FormData, referenceLinkRows: GigReferenceLinkFormRow[] = []) {
   const supabase = await createSupabaseServer();
 
   // Get authenticated user
@@ -58,6 +60,11 @@ export async function createGig(formData: FormData) {
   const maxComp = parseInt(compensationMax) || 0;
   const compensation = maxComp > minComp ? `$${minComp} - $${maxComp}` : `$${minComp}`;
 
+  const linksResult = parseReferenceLinksForDatabase(referenceLinkRows);
+  if (!linksResult.ok) {
+    return { error: linksResult.error };
+  }
+
   // Upload image if provided (before DB insert to enable cleanup on failure)
   let imageUrl: string | null = null;
   if (imageFile && imageFile.size > 0) {
@@ -86,8 +93,9 @@ export async function createGig(formData: FormData) {
       date: startDate || new Date().toISOString().split("T")[0],
       image_url: imageUrl,
       status: "active" as const,
+      reference_links: linksResult.data,
     })
-    .select()
+    .select("id")
     .single();
 
   // If DB insert fails but image was uploaded, clean up orphaned image

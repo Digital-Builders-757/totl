@@ -1,6 +1,10 @@
 import type React from "react";
 
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
+import {
+  TotlAtmosphereShell,
+  type TotlAmbientTone,
+  type TotlRouteRole,
+} from "@/components/ui/totl-atmosphere-shell";
 import { cn } from "@/lib/utils/utils";
 
 export interface PageShellProps {
@@ -17,6 +21,8 @@ export interface PageShellProps {
    * Default is false (containerized pages).
    */
   fullBleed?: boolean;
+  ambientTone?: TotlAmbientTone;
+  routeRole?: TotlRouteRole;
 }
 
 export function PageShell({
@@ -25,9 +31,13 @@ export function PageShell({
   className,
   containerClassName,
   fullBleed = false,
+  ambientTone = "default",
+  routeRole,
 }: PageShellProps) {
   return (
     <TotlAtmosphereShell
+      ambientTone={ambientTone}
+      routeRole={routeRole}
       className={cn("text-[var(--oklch-text-primary)]", className)}
       contentClassName={cn(topPadding && "pt-20 sm:pt-24")}
     >
