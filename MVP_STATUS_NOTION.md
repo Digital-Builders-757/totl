@@ -18,6 +18,7 @@
 - ✅ **Admin + Settings polish:** `components/admin/admin-header.tsx`, `app/admin/dashboard/admin-dashboard-client.tsx`, `app/settings/page.tsx`, `app/settings/profile-editor.tsx`, and `app/settings/sign-out-button.tsx` were brought onto the same panel system with cleaner tabs, cards, and action states.
 - ✅ **Role dashboards aligned:** `app/choose-role/page.tsx`, `app/login/page.tsx`, `app/client/dashboard/client.tsx`, and `app/talent/dashboard/client.tsx` now sit closer to the new homepage/admin/settings visual system.
 - ✅ **Secondary authenticated surfaces tightened:** `app/settings/avatar-upload.tsx`, `components/client/client-profile-details.tsx`, `components/client/client-terminal-header.tsx`, and `components/forms/talent-profile-form.tsx` now inherit the same glass treatment, calmer metadata hierarchy, and stronger sticky action patterns.
+- ✅ **Legal pages brought forward:** `app/privacy/page.tsx` and `app/terms/page.tsx` now use the ambient page shell, larger glass container, and the updated text/link token system so they no longer feel visually detached from the rebuilt homepage.
 
 **Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — green (ship run, April 10, 2026).
 
