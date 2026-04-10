@@ -23,11 +23,11 @@
 - ✅ **Client micro-surfaces tightened:** `components/client/accept-application-dialog.tsx`, `components/client/reject-application-dialog.tsx`, `components/dashboard/mobile-list-row-card.tsx`, and `components/dashboard/mobile-summary-row.tsx` now use the same glass/dialog language, calmer metadata contrast, and shared input/button primitives.
 - ✅ **Auth-entry / recovery / onboarding lane:** `AuthEntryShell` now supports `omitBackLink`, login-aligned container rhythm, and horizontal overflow guard; `app/suspended/page.tsx` and `app/talent/signup/client.tsx` use the shared shell; `app/onboarding/loading.tsx` and `app/onboarding/select-account-type/loading.tsx` match the onboarding/on-auth transition pattern; `/login` and `/choose-role` use `overflow-x-hidden` for mobile safety; `docs/features/UI_VISUAL_LANGUAGE.md` updated.
 
-**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — green (ship run, April 10, 2026).
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — green (develop ship run, April 10, 2026).
 
-**Next (P0):** Production walkthrough on admin/settings/dashboard routes to catch any remaining gray-heavy or spacing-regression surfaces.
+**Next (P0):** Open **PR develop → main**; smoke auth-entry cluster (login, choose-role, reset/update password, verification-pending, signups, onboarding loaders) plus admin/settings/dashboard in staging/production as needed.
 
-**Next (P1):** Continue route-by-route density polish for secondary authenticated pages that still rely on older flat panel treatments.
+**Next (P1):** Route-by-route density polish on any secondary authenticated pages that still read flat or gray-heavy after the PR lands.
 
 ## 🚀 **Latest: Global UI — frosted surfaces + ambient glow (April 9, 2026)**
 
