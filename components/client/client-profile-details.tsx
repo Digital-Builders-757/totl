@@ -16,7 +16,7 @@ export function ClientProfileDetails({ clientProfile }: ClientProfileDetailsProp
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-gray-400 text-sm">No client profile data available.</p>
+          <p className="text-sm text-[var(--oklch-text-tertiary)]">No client profile data available.</p>
         </CardContent>
       </Card>
     );
@@ -35,26 +35,26 @@ export function ClientProfileDetails({ clientProfile }: ClientProfileDetailsProp
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label className="text-gray-400">Company Name</Label>
+          <Label className="text-[var(--oklch-text-tertiary)]">Company Name</Label>
           <p className="text-white">{clientProfile.company_name || "—"}</p>
         </div>
 
         {clientProfile.industry && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Industry</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Industry</Label>
             <p className="text-white">{clientProfile.industry}</p>
           </div>
         )}
 
         {clientProfile.website && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Website</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Website</Label>
             <p className="text-white">
               <a
                 href={clientProfile.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline"
+                className="text-[var(--oklch-text-primary)] underline transition-colors hover:text-white"
               >
                 {clientProfile.website}
               </a>
@@ -64,18 +64,18 @@ export function ClientProfileDetails({ clientProfile }: ClientProfileDetailsProp
 
         {clientProfile.contact_name && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Contact Name</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Contact Name</Label>
             <p className="text-white">{clientProfile.contact_name}</p>
           </div>
         )}
 
         {clientProfile.contact_email && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Contact Email</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Contact Email</Label>
             <p className="text-white">
               <a
                 href={`mailto:${clientProfile.contact_email}`}
-                className="text-blue-400 hover:text-blue-300 underline"
+                className="text-[var(--oklch-text-primary)] underline transition-colors hover:text-white"
               >
                 {clientProfile.contact_email}
               </a>
@@ -85,11 +85,11 @@ export function ClientProfileDetails({ clientProfile }: ClientProfileDetailsProp
 
         {clientProfile.contact_phone && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Contact Phone</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Contact Phone</Label>
             <p className="text-white">
               <a
                 href={`tel:${clientProfile.contact_phone}`}
-                className="text-blue-400 hover:text-blue-300 underline"
+                className="text-[var(--oklch-text-primary)] underline transition-colors hover:text-white"
               >
                 {clientProfile.contact_phone}
               </a>
@@ -99,18 +99,18 @@ export function ClientProfileDetails({ clientProfile }: ClientProfileDetailsProp
 
         {clientProfile.company_size && (
           <div className="space-y-2">
-            <Label className="text-gray-400">Company Size</Label>
+            <Label className="text-[var(--oklch-text-tertiary)]">Company Size</Label>
             <p className="text-white">{clientProfile.company_size}</p>
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-700">
-          <div className="flex justify-between text-sm text-gray-400">
+        <div className="border-t border-white/10 pt-4">
+          <div className="flex justify-between text-sm text-[var(--oklch-text-tertiary)]">
             <span>Created:</span>
             <span>{clientProfile.created_at ? new Date(clientProfile.created_at).toLocaleDateString() : "—"}</span>
           </div>
           {clientProfile.updated_at && (
-            <div className="flex justify-between text-sm text-gray-400 mt-2">
+            <div className="mt-2 flex justify-between text-sm text-[var(--oklch-text-tertiary)]">
               <span>Last Updated:</span>
               <span>{new Date(clientProfile.updated_at).toLocaleDateString()}</span>
             </div>

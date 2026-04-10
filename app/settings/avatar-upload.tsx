@@ -155,17 +155,17 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
         <div className="hidden flex-1 space-y-2 md:block">
           <button
             type="button"
-            className="w-full rounded-lg border-2 border-dashed border-gray-600 bg-gray-800 p-4 text-left transition-colors hover:border-gray-500"
+            className="panel-frosted w-full rounded-2xl border-2 border-dashed border-white/12 bg-white/[0.03] p-4 text-left transition-colors hover:border-white/20 hover:bg-white/[0.05]"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
           >
             <div className="text-center">
-              <Upload className="mx-auto mb-2 h-6 w-6 text-gray-400" />
-              <p className="text-sm text-gray-300">
+              <Upload className="mx-auto mb-2 h-6 w-6 text-[var(--oklch-text-tertiary)]" />
+              <p className="text-sm text-[var(--oklch-text-secondary)]">
                 {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
               </p>
-              <p className="mt-1 text-xs text-gray-400">JPG, PNG or GIF. Max 1MB.</p>
+              <p className="mt-1 text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG or GIF. Max 1MB.</p>
             </div>
           </button>
         </div>
@@ -174,14 +174,14 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
+            className="min-h-11 border-white/10 bg-white/5 text-white hover:bg-white/10"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
           >
             <Upload className="mr-2 h-4 w-4" />
             {previewUrl || currentAvatarUrl ? "Change photo" : "Upload photo"}
           </Button>
-          <p className="text-xs text-gray-400">JPG, PNG or GIF. Max 1MB.</p>
+          <p className="text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG or GIF. Max 1MB.</p>
         </div>
       </div>
 
@@ -205,7 +205,7 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
               "Save photo"
             )}
           </Button>
-          <Button size="sm" variant="outline" onClick={clearPreview} disabled={isUploading}>
+          <Button size="sm" variant="outline" onClick={clearPreview} disabled={isUploading} className="border-white/10 bg-white/5 text-white hover:bg-white/10">
             <X className="mr-2 h-4 w-4 sm:mr-0" />
             <span className="sm:hidden">Cancel</span>
           </Button>

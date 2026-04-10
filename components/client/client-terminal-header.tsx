@@ -43,7 +43,7 @@ export function ClientTerminalHeader({
 
   return (
     <>
-      <div data-testid="client-header-root" className="panel-frosted sticky top-0 z-40 border-b border-border/40">
+      <div data-testid="client-header-root" className="panel-frosted sticky top-0 z-40 border-b border-white/10 bg-[rgba(9,9,14,0.74)]">
         <div className="container mx-auto px-4 py-2 pt-[env(safe-area-inset-top)] md:py-4">
           <div className="flex h-14 items-center justify-between md:hidden">
             <Button
@@ -59,7 +59,7 @@ export function ClientTerminalHeader({
             </Button>
             <div className="min-w-0 px-3 text-center">
               <p className="truncate text-base font-semibold text-white">{title}</p>
-              <p className="truncate text-xs text-gray-300">{subtitle}</p>
+              <p className="truncate text-xs text-[var(--oklch-text-tertiary)]">{subtitle}</p>
             </div>
             <div className="flex items-center gap-1">
               <NotificationDropdown
@@ -85,14 +85,14 @@ export function ClientTerminalHeader({
           <div className="hidden items-center justify-between gap-4 md:flex">
             <div>
               <h1 className="text-2xl font-bold text-white">{title}</h1>
-              <p className="text-gray-300">{subtitle}</p>
+              <p className="text-[var(--oklch-text-secondary)]">{subtitle}</p>
             </div>
             <div className="flex items-center gap-2">
               <NotificationDropdown
                 viewAllHref="/client/applications"
                 variant="outline"
                 size="sm"
-                className="border-white/20 text-white hover:bg-white/10"
+                className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                 showLabel
               />
               {desktopPrimaryAction}
@@ -105,13 +105,13 @@ export function ClientTerminalHeader({
       <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DialogContent
           data-testid="client-drawer-panel"
-          className="left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-border/40 bg-background p-0 pb-[env(safe-area-inset-bottom)] text-white panel-frosted"
+          className="panel-frosted left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-white"
         >
           <div className="flex h-full flex-col">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border/40 bg-card/20 px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-sm">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[rgba(10,10,18,0.72)] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-sm">
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold">Career Builder</p>
-                <p className="text-xs text-gray-300">Navigation</p>
+                <p className="text-xs text-[var(--oklch-text-tertiary)]">Navigation</p>
               </div>
               <Button
                 type="button"
@@ -131,7 +131,7 @@ export function ClientTerminalHeader({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex min-h-11 items-center rounded-lg px-3 py-3 text-base text-white hover:bg-white/10"
+                  className="flex min-h-11 items-center rounded-xl px-3 py-3 text-base text-white hover:bg-white/10"
                   onClick={() => setIsDrawerOpen(false)}
                 >
                   {item.label}
