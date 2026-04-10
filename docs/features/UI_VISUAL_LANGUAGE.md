@@ -76,6 +76,7 @@ Use these when composing full-page or section-level structure so surfaces stay c
 - **`TotlSectionDivider`** — `components/ui/totl-section-divider.tsx` — consistent section transitions between bands.
 - **`PageShell`** — `components/layout/page-shell.tsx` — default route wrapper (`page-ambient`, container width, nav top offset); use `fullBleed` when the page controls its own horizontal layout.
 - **`SectionCard`** — `components/layout/section-card.tsx` — canonical frosted panel stack (`panel-frosted` + `card-backlit` + `grain-texture`) for grouped content.
+- **`AuthEntryShell`** — `components/layout/auth-entry-shell.tsx` — full-bleed auth/recovery entry (atmosphere + optional back link + `SectionCard`). Props: `omitBackLink`, `panelClassName` / `panelPaddingClassName` for wider holds (e.g. suspended). Container spacing aligns with `/login` (`py-4 sm:py-6 md:py-8`).
 
 ## Mobile UX Guidelines
 

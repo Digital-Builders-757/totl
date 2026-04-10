@@ -1,23 +1,33 @@
+import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
+import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
+
 export default function ClientSignupLoading() {
   return (
-    <div className="min-h-screen bg-black page-ambient text-white pt-24">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto space-y-6">
-          <div className="space-y-2">
-            <div className="h-9 w-48 bg-white/10 rounded animate-pulse" />
-            <div className="h-4 w-64 bg-white/10 rounded animate-pulse" />
+    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-x-hidden text-white">
+      <FloatingPathsBackground opacity={0.08} color="white" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
+
+      <div className="relative z-10 container mx-auto px-4 py-8 sm:py-12 lg:px-8">
+        <div className="mb-8 h-4 w-16 animate-pulse rounded bg-white/10" />
+
+        <SectionCard className="mx-auto max-w-md overflow-hidden" paddingClassName="p-6 sm:p-8">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="mx-auto h-16 w-16 animate-pulse rounded-full bg-white/10" />
+              <div className="mx-auto h-6 w-4/5 animate-pulse rounded bg-white/10" />
+              <div className="mx-auto h-4 w-full animate-pulse rounded bg-white/10" />
+            </div>
+            <div className="h-20 animate-pulse rounded-lg bg-white/10" />
+            <div className="space-y-3">
+              <div className="h-4 w-full animate-pulse rounded bg-white/10" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-white/10" />
+            </div>
+            <div className="h-10 w-full animate-pulse rounded bg-white/10" />
+            <div className="h-10 w-full animate-pulse rounded bg-white/10" />
           </div>
-          <div className="panel-frosted rounded-xl p-6 space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="space-y-2">
-                <div className="h-4 w-20 bg-white/10 rounded animate-pulse" />
-                <div className="h-10 w-full bg-white/10 rounded animate-pulse" />
-              </div>
-            ))}
-            <div className="h-10 w-full bg-white/10 rounded animate-pulse pt-2" />
-          </div>
-        </div>
+        </SectionCard>
       </div>
-    </div>
+    </PageShell>
   );
 }

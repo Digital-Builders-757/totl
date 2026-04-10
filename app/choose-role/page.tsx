@@ -68,7 +68,7 @@ export default function ChooseRolePage() {
   return (
     <PageShell
       fullBleed
-      className="grain-texture glow-backplate relative overflow-hidden text-white"
+      className="grain-texture glow-backplate relative overflow-x-hidden text-white"
     >
       <FloatingPathsBackground opacity={0.08} color="white" />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-white/3 via-white/8 to-white/3" />

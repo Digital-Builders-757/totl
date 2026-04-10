@@ -1,10 +1,11 @@
-import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UpdatePasswordClientGate } from "./update-password-client-gate";
 import { UpdatePasswordForm } from "./update-password-form";
+import { AuthEntryShell } from "@/components/layout/auth-entry-shell";
 import { Button } from "@/components/ui/button";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 
@@ -32,78 +33,50 @@ export default async function UpdatePasswordPage({
 
       if (error) {
         return (
-          <div className="min-h-screen bg-black pt-24 relative overflow-hidden grain-texture">
-            <div className="container mx-auto px-4 py-12">
-              <Link
-                href="/login"
-                className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to login
-              </Link>
-
-              <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-                <div className="p-8">
-                  <div className="text-center mb-8">
-                    <Image
-                      src="/images/totl-logo-transparent.png"
-                      alt="TOTL Agency"
-                      width={120}
-                      height={50}
-                      className="mx-auto mb-6"
-                    />
-                    <h1 className="text-2xl font-bold mb-2 text-white">Invalid Reset Link</h1>
-                    <p className="text-gray-300">
-                      This password reset link has expired or is invalid. Please request a new one.
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
-                      <Link href="/login">Return to Login</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          <AuthEntryShell backHref={PATHS.LOGIN} backLabel="Back to login">
+            <div className="mb-8 text-center">
+              <Image
+                src="/images/totl-logo-transparent.png"
+                alt="TOTL Agency"
+                width={120}
+                height={50}
+                className="mx-auto mb-6"
+              />
+              <h1 className="mb-2 text-2xl font-bold text-white">Invalid Reset Link</h1>
+              <p className="text-gray-300">
+                This password reset link has expired or is invalid. Please request a new one.
+              </p>
             </div>
-          </div>
+            <div className="text-center">
+              <Button asChild variant="outline" className="w-full border-border/50 text-white hover:bg-white/10">
+                <Link href={PATHS.LOGIN}>Return to Login</Link>
+              </Button>
+            </div>
+          </AuthEntryShell>
         );
       }
 
       // Token is valid - show password reset form
       return (
-        <div className="min-h-screen bg-black pt-24 relative overflow-hidden grain-texture">
-          <div className="container mx-auto px-4 py-12">
-            <Link
-              href="/login"
-              className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to login
-            </Link>
-
-            <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <Image
-                    src="/images/totl-logo-transparent.png"
-                    alt="TOTL Agency"
-                    width={120}
-                    height={50}
-                    className="mx-auto mb-6"
-                  />
-                  <h1 className="text-2xl font-bold mb-2 text-white">Set New Password</h1>
-                  <p className="text-gray-300">Create a new password for your account.</p>
-                </div>
-
-                <UpdatePasswordForm />
-              </div>
-            </div>
+        <AuthEntryShell backHref={PATHS.LOGIN} backLabel="Back to login">
+          <div className="mb-8 text-center">
+            <Image
+              src="/images/totl-logo-transparent.png"
+              alt="TOTL Agency"
+              width={120}
+              height={50}
+              className="mx-auto mb-6"
+            />
+            <h1 className="mb-2 text-2xl font-bold text-white">Set New Password</h1>
+            <p className="text-gray-300">Create a new password for your account.</p>
           </div>
-        </div>
+
+          <UpdatePasswordForm />
+        </AuthEntryShell>
       );
     } catch (error) {
       logger.error("Token verification error:", error);
-      redirect("/login?error=invalid_token");
+      redirect(`${PATHS.LOGIN}?error=invalid_token`);
     }
   }
 
@@ -116,44 +89,30 @@ export default async function UpdatePasswordPage({
       } = await supabase.auth.getUser(accessToken);
 
       if (error || !user) {
-        redirect("/login?error=invalid_token");
+        redirect(`${PATHS.LOGIN}?error=invalid_token`);
       }
 
       // User is authenticated - show password reset form
       return (
-        <div className="min-h-screen bg-black pt-24 relative overflow-hidden grain-texture">
-          <div className="container mx-auto px-4 py-12">
-            <Link
-              href="/login"
-              className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to login
-            </Link>
-
-            <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <Image
-                    src="/images/totl-logo-transparent.png"
-                    alt="TOTL Agency"
-                    width={120}
-                    height={50}
-                    className="mx-auto mb-6"
-                  />
-                  <h1 className="text-2xl font-bold mb-2 text-white">Update Password</h1>
-                  <p className="text-gray-300">Create a new password for your account.</p>
-                </div>
-
-                <UpdatePasswordForm />
-              </div>
-            </div>
+        <AuthEntryShell backHref={PATHS.LOGIN} backLabel="Back to login">
+          <div className="mb-8 text-center">
+            <Image
+              src="/images/totl-logo-transparent.png"
+              alt="TOTL Agency"
+              width={120}
+              height={50}
+              className="mx-auto mb-6"
+            />
+            <h1 className="mb-2 text-2xl font-bold text-white">Update Password</h1>
+            <p className="text-gray-300">Create a new password for your account.</p>
           </div>
-        </div>
+
+          <UpdatePasswordForm />
+        </AuthEntryShell>
       );
     } catch (error) {
       logger.error("Access token verification error:", error);
-      redirect("/login?error=invalid_token");
+      redirect(`${PATHS.LOGIN}?error=invalid_token`);
     }
   }
 
@@ -161,35 +120,20 @@ export default async function UpdatePasswordPage({
   // Supabase recovery links may use URL hash tokens, which server components cannot access.
   // Render a client gate to exchange/store session from the hash and only show an error if it fails.
   return (
-    <div className="min-h-screen bg-black pt-24 relative overflow-hidden grain-texture">
-      <div className="container mx-auto px-4 py-12">
-        <Link
-          href="/login"
-          className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to login
-        </Link>
-
-        <div className="mx-auto max-w-md overflow-hidden rounded-2xl panel-frosted card-backlit">
-          <div className="p-8">
-            <div className="text-center mb-8">
-              <Image
-                src="/images/totl-logo-transparent.png"
-                alt="TOTL Agency"
-                width={120}
-                height={50}
-                className="mx-auto mb-6"
-              />
-              <h1 className="text-2xl font-bold mb-2 text-white">Update Password</h1>
-              <p className="text-gray-300">We&apos;re preparing your reset link…</p>
-            </div>
-
-            <UpdatePasswordClientGate />
-          </div>
-        </div>
+    <AuthEntryShell backHref={PATHS.LOGIN} backLabel="Back to login">
+      <div className="mb-8 text-center">
+        <Image
+          src="/images/totl-logo-transparent.png"
+          alt="TOTL Agency"
+          width={120}
+          height={50}
+          className="mx-auto mb-6"
+        />
+        <h1 className="mb-2 text-2xl font-bold text-white">Update Password</h1>
+        <p className="text-gray-300">We&apos;re preparing your reset link…</p>
       </div>
-    </div>
+
+      <UpdatePasswordClientGate />
+    </AuthEntryShell>
   );
 }
-

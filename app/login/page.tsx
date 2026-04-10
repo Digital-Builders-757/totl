@@ -123,7 +123,7 @@ export default function Login() {
   };
 
   return (
-    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-hidden text-white">
+    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-x-hidden text-white">
       <FloatingPathsBackground opacity={0.08} color="white" />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
 

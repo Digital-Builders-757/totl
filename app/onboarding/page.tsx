@@ -1,6 +1,7 @@
 ﻿import { redirect } from "next/navigation";
 import { OnboardingForm } from "./onboarding-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageShell } from "@/components/layout/page-shell";
+import { SectionCard } from "@/components/layout/section-card";
 import { getBootState } from "@/lib/actions/boot-actions";
 import { PATHS } from "@/lib/constants/routes";
 
@@ -15,16 +16,19 @@ export default async function OnboardingPage() {
   if (!boot.needsOnboarding) redirect(boot.nextPath);
 
   return (
-    <div className="container mx-auto py-10 px-4 max-w-3xl">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription>Please provide some basic information to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <OnboardingForm />
-        </CardContent>
-      </Card>
-    </div>
+    <PageShell
+      className="grain-texture glow-backplate overflow-x-hidden"
+      containerClassName="mx-auto max-w-3xl px-4 py-10 sm:px-6"
+    >
+      <SectionCard paddingClassName="p-6 sm:p-8">
+        <div className="mb-6 text-center">
+          <h1 className="text-2xl font-semibold text-[var(--oklch-text-primary)]">Complete Your Profile</h1>
+          <p className="text-[var(--oklch-text-secondary)]">
+            Please provide some basic information to get started
+          </p>
+        </div>
+        <OnboardingForm />
+      </SectionCard>
+    </PageShell>
   );
 }
