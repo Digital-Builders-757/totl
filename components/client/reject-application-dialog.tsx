@@ -66,13 +66,13 @@ export function RejectApplicationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-gray-900 border-gray-700 text-white">
+      <DialogContent className="panel-frosted sm:max-w-[500px] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <XCircle className="h-5 w-5 text-red-500" />
             Reject Application
           </DialogTitle>
-          <DialogDescription className="text-gray-300">
+          <DialogDescription className="text-[var(--oklch-text-secondary)]">
             Reject <span className="font-semibold">{talentName}</span>&apos;s application
             for <span className="font-semibold">{gigTitle}</span>.
           </DialogDescription>
@@ -82,7 +82,7 @@ export function RejectApplicationDialog({
           <div className="space-y-4 py-4">
             {/* Reason */}
             <div className="space-y-2">
-              <Label htmlFor="reason" className="flex items-center gap-2 text-gray-200">
+              <Label htmlFor="reason" className="flex items-center gap-2 text-[var(--oklch-text-secondary)]">
                 <FileText className="h-4 w-4" />
                 Reason (Optional)
               </Label>
@@ -92,9 +92,9 @@ export function RejectApplicationDialog({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={4}
-                className="bg-gray-800 border-gray-600 text-white resize-none"
+                className="resize-none"
               />
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--oklch-text-tertiary)]">
                 This reason will be recorded for internal tracking
               </p>
             </div>
@@ -105,7 +105,7 @@ export function RejectApplicationDialog({
               </div>
             )}
 
-            <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-md">
+            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
               <p className="text-sm text-yellow-400">
                 ⚠️ This action will mark the application as rejected and cannot be undone.
               </p>
@@ -118,7 +118,7 @@ export function RejectApplicationDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              className="border-white/10 bg-white/5 text-white hover:bg-white/10"
             >
               Cancel
             </Button>

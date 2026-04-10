@@ -28,7 +28,7 @@ export function MobileListRowCard({
 }: MobileListRowCardProps) {
   return (
     <div
-      className={`rounded-xl border border-border/45 bg-card/45 p-3 text-foreground shadow-sm ${className ?? ""}`.trim()}
+      className={`panel-frosted rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-foreground shadow-sm ${className ?? ""}`.trim()}
     >
       <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1 space-y-1">
@@ -36,12 +36,12 @@ export function MobileListRowCard({
             <p className="truncate text-sm font-semibold">{title}</p>
             {badge ? <div className="shrink-0">{badge}</div> : null}
           </div>
-          {subtitle ? <p className="truncate text-xs text-gray-300">{subtitle}</p> : null}
+          {subtitle ? <p className="truncate text-xs text-[var(--oklch-text-secondary)]">{subtitle}</p> : null}
           <div className="space-y-1 pt-1">
             {meta.slice(0, 3).map((item) => (
               <div key={item.label} className="flex items-center justify-between gap-2 text-xs">
-                <span className="w-24 text-gray-400">{item.label}</span>
-                <span className="flex-1 text-right font-medium text-gray-100">{item.value}</span>
+                <span className="w-24 text-[var(--oklch-text-tertiary)]">{item.label}</span>
+                <span className="flex-1 text-right font-medium text-white">{item.value}</span>
               </div>
             ))}
           </div>

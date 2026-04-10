@@ -20,6 +20,7 @@
 - ✅ **Secondary authenticated surfaces tightened:** `app/settings/avatar-upload.tsx`, `components/client/client-profile-details.tsx`, `components/client/client-terminal-header.tsx`, and `components/forms/talent-profile-form.tsx` now inherit the same glass treatment, calmer metadata hierarchy, and stronger sticky action patterns.
 - ✅ **Legal pages brought forward:** `app/privacy/page.tsx` and `app/terms/page.tsx` now use the ambient page shell, larger glass container, and the updated text/link token system so they no longer feel visually detached from the rebuilt homepage.
 - ✅ **About page aligned:** `app/about/page.tsx` now uses the ambient shell, upgraded frosted section cards, shared form controls in the contact form, and cleaner CTA styling instead of older mixed gray treatments.
+- ✅ **Client micro-surfaces tightened:** `components/client/accept-application-dialog.tsx`, `components/client/reject-application-dialog.tsx`, `components/dashboard/mobile-list-row-card.tsx`, and `components/dashboard/mobile-summary-row.tsx` now use the same glass/dialog language, calmer metadata contrast, and shared input/button primitives.
 
 **Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — green (ship run, April 10, 2026).
 
