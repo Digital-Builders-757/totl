@@ -23,10 +23,10 @@ export default function BookingsResultsContent({
 }: BookingsResultsContentProps) {
   if (filteredBookings.length === 0) {
     return (
-      <Card>
+      <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
         <CardContent className="p-12 text-center">
-          <Calendar className="mx-auto mb-4 h-12 w-12 text-[var(--oklch-text-muted)]" />
-          <h3 className="mb-2 text-lg font-medium">No bookings found</h3>
+          <Calendar className="mx-auto mb-4 h-12 w-12 text-[var(--oklch-text-tertiary)]" />
+          <h3 className="mb-2 text-lg font-medium text-white">No bookings found</h3>
           <p className="mb-6 text-[var(--oklch-text-secondary)]">
             {activeTab === "all"
               ? "Accept applications to create bookings"
@@ -43,11 +43,14 @@ export default function BookingsResultsContent({
   return (
     <div className="space-y-4">
       {filteredBookings.map((booking) => (
-        <Card key={booking.id} className="transition-shadow hover:shadow-md">
+        <Card
+          key={booking.id}
+          className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] transition-shadow hover:shadow-md"
+        >
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="mb-2 text-xl">{booking.gigs?.title}</CardTitle>
+                <CardTitle className="mb-2 text-xl text-white">{booking.gigs?.title}</CardTitle>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--oklch-text-secondary)]">
                   <span className="flex items-center gap-1">
                     <User className="h-4 w-4" />
@@ -83,8 +86,8 @@ export default function BookingsResultsContent({
               </div>
             )}
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" asChild>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" className="border-white/10 bg-white/5 hover:bg-white/10" asChild>
                 <Link href={`/talent/${booking.talent_id}`}>
                   View Talent Profile
                 </Link>

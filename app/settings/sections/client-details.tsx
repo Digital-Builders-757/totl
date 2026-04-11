@@ -135,7 +135,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
   ];
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
+    <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
       <CardHeader>
         <CardTitle className="text-white">Client Details</CardTitle>
         <CardDescription className="text-[var(--oklch-text-tertiary)]">
@@ -161,8 +161,8 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                 {...register("company_name")}
                 className={
                   errors.company_name
-                    ? "border-red-500 bg-gray-700 text-white"
-                    : "bg-gray-700 border-gray-600 text-white"
+                    ? "border-red-500 bg-white/5 text-white"
+                    : "border-white/10 bg-white/5 text-white"
                 }
                 disabled={isSubmitting}
               />
@@ -181,15 +181,15 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                   onValueChange={(value) => setValue("industry", value)}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectTrigger className="border-white/10 bg-white/5 text-white">
                     <SelectValue placeholder="Select industry" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-700 border-gray-600">
+                  <SelectContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
                     {industryOptions.map((industry) => (
                       <SelectItem
                         key={industry}
                         value={industry}
-                        className="text-white hover:bg-gray-600"
+                        className="text-white hover:bg-white/10"
                       >
                         {industry}
                       </SelectItem>
@@ -207,12 +207,12 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                   onValueChange={(value) => setValue("company_size", value)}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                  <SelectTrigger className="border-white/10 bg-white/5 text-white">
                     <SelectValue placeholder="Select company size" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-700 border-gray-600">
+                  <SelectContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
                     {companySizeOptions.map((size) => (
-                      <SelectItem key={size} value={size} className="text-white hover:bg-gray-600">
+                      <SelectItem key={size} value={size} className="text-white hover:bg-white/10">
                         {size}
                       </SelectItem>
                     ))}
@@ -235,8 +235,8 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                 {...register("website")}
                 className={
                   errors.website
-                    ? "border-red-500 bg-gray-700 text-white"
-                    : "bg-gray-700 border-gray-600 text-white"
+                    ? "border-red-500 bg-white/5 text-white"
+                    : "border-white/10 bg-white/5 text-white"
                 }
                 disabled={isSubmitting}
               />
@@ -261,8 +261,8 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                 {...register("contact_name")}
                 className={
                   errors.contact_name
-                    ? "border-red-500 bg-gray-700 text-white"
-                    : "bg-gray-700 border-gray-600 text-white"
+                    ? "border-red-500 bg-white/5 text-white"
+                    : "border-white/10 bg-white/5 text-white"
                 }
                 disabled={isSubmitting}
               />
@@ -286,8 +286,8 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                   {...register("contact_email")}
                   className={
                     errors.contact_email
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
+                      ? "border-red-500 bg-white/5 text-white"
+                      : "border-white/10 bg-white/5 text-white"
                   }
                   disabled={isSubmitting}
                 />
@@ -305,7 +305,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
                   placeholder="Enter contact phone number"
                   {...register("contact_phone")}
                   disabled={isSubmitting}
-                  className="bg-gray-700 border-gray-600 text-white"
+                  className="border-white/10 bg-white/5 text-white"
                 />
               </div>
             </div>
@@ -315,7 +315,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
             <Button
               type="submit"
               disabled={isSubmitting || !isDirty}
-              className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+              className="min-w-[100px] bg-white text-black hover:bg-white/90"
             >
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>

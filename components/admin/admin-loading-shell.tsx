@@ -7,7 +7,7 @@ import type React from "react";
  */
 export function AdminLoadingShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-900 page-ambient text-white">
+    <div className="page-ambient min-h-screen text-white">
       {/* Skeleton header matching AdminHeader layout */}
       <header className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-4">

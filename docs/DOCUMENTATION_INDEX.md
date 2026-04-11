@@ -59,6 +59,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `docs/archive/DEBUG_MISSING_API_KEY_PLAN_JAN_2025.md`
 - `docs/archive/SDA_DELIVERABLES_REPORT.md`
 - `docs/archive/SDA_EXECUTIVE_SUMMARY.md`
+- `docs/archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` (completed ViZB visual catch-up punch list, April 11, 2026)
 
 ---
 

@@ -8,6 +8,25 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: ViZB catch-up — bookings, admin terminals, gig success, settings shells (April 11, 2026)**
+
+**UI / VIZB** — April 11, 2026
+- ✅ **Client bookings:** Stats cards, tabs, list/empty cards, and loading skeletons match the **Applications** glass language (`panel-frosted`, `border-white/10`, `bg-[var(--totl-surface-glass-strong)]`, OKLCH text).
+- ✅ **Admin talent applications:** List terminal + approve/reject dialogs + detail page use the same frosted/OKLCH system as **admin users** (`TotlAtmosphereShell` on detail).
+- ✅ **Admin Career Builder applications:** Full pass on filters, tabs, tables, VIP invite row, and all dialogs/detail overlay (removed flat gray gradient page shell).
+- ✅ **Admin gig detail + success:** Opportunity detail cards and **`/admin/gigs/success`** use lifted atmosphere + glass panels; success page no longer uses light-gray marketing chrome or broken bullet encoding.
+- ✅ **Settings / loading:** **`app/settings/sections/client-details.tsx`** frosted card + inputs/selects; **`app/talent/settings/billing/loading.tsx`** and **`components/admin/admin-loading-shell`** use glass-aligned skeletons and ambient shell.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run typecheck`, `npm run build`, `npm run lint` — run as part of ship.
+
+**Next (P0):** PR **develop → main**; smoke **client/bookings**, **admin/applications**, **admin/client-applications**, **admin gig detail**, **admin/gigs/success**, **settings** client details, **talent billing** loading.
+
+**Next (P1):** Long-tail polish on any remaining secondary routes after mobile spot-checks.
+
+**Archived plan:** `docs/archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` (completed punch list).
+
+---
+
 ## 🚀 **Latest: Casting module — admin lifecycle, homepage data, labels, QA (April 11, 2026)**
 
 **GIGS / ADMIN / MARKETING / QA** — April 11, 2026
@@ -25,8 +44,6 @@
 
 **Next (P1):** Optional Playwright contract tests for admin close/delete menus; optional stricter homepage filtering (e.g. hide listings by **`gigs.date`** past production) if product wants it.
 
-**Next-session handoff:** `docs/plans/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` captures the ranked visual catch-up plan for the next Cursor session.
-
 ## 🚀 **Latest: OKLCH + frosted pass — dashboards, admin, loading shells (April 11, 2026)**
 
 **UI / DESIGN SYSTEM** — April 11, 2026
@@ -40,7 +57,7 @@
 
 **Next (P0):** Merge **develop → main** via PR; smoke **admin/gigs/create**, **admin/moderation**, **client/dashboard** loading handoff, **settings** loading, and **talent/dashboard** on staging/production.
 
-**Next (P1):** **`settings/sections/client-details.tsx`** card shell still uses legacy gray inputs—optional full frosted pass; **`talent/settings/billing/loading.tsx`** could mirror **`settings/loading`**.
+**Next (P1):** Spot-check other settings sub-routes for any leftover flat controls after the ViZB catch-up merge.
 
 ## 🚀 **Latest: Application flows — lifted ambient + glass (April 10, 2026)**
 

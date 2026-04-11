@@ -145,11 +145,11 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
               <Skeleton className="h-4 w-72 max-w-full rounded-lg bg-muted/35" />
             </div>
             <div className="grid gap-4 md:grid-cols-3">
-              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
-              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
-              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
+              <Skeleton className="h-24 w-full rounded-xl border border-white/10 bg-white/5" />
+              <Skeleton className="h-24 w-full rounded-xl border border-white/10 bg-white/5" />
+              <Skeleton className="h-24 w-full rounded-xl border border-white/10 bg-white/5" />
             </div>
-            <Skeleton className="h-[420px] w-full rounded-xl bg-muted/35" />
+            <Skeleton className="h-[420px] w-full rounded-2xl border border-white/10 bg-white/5" />
           </div>
         </div>
       </TotlAtmosphereShell>
@@ -198,7 +198,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <MobileTabRail>
-            <TabsList className="tabs-list-surface inline-flex h-auto min-w-max gap-1 rounded-xl p-1">
+            <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
               <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                 All ({bookingStats.total})
               </TabsTrigger>
@@ -216,7 +216,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="tabs-list-surface hidden w-full grid-cols-5 md:grid">
+          <TabsList className="panel-frosted hidden w-full grid-cols-5 border border-white/10 bg-white/5 md:grid">
             <TabsTrigger value="all">All ({bookingStats.total})</TabsTrigger>
             <TabsTrigger value="pending">Pending ({bookingStats.pending})</TabsTrigger>
             <TabsTrigger value="confirmed">Confirmed ({bookingStats.confirmed})</TabsTrigger>

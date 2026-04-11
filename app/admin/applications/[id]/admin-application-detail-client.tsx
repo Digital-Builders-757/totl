@@ -29,6 +29,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
+import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
 import { logger } from "@/lib/utils/logger";
@@ -178,13 +179,13 @@ export function AdminApplicationDetailClient({
   const talentProfileHref = application.talent_id ? `/talent/${application.talent_id}` : null;
 
   return (
-    <div className="min-h-screen bg-black">
+    <TotlAtmosphereShell ambientTone="lifted" className="min-h-screen text-[var(--oklch-text-primary)]">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href="/admin/applications"
-            className="inline-flex items-center text-gray-300 hover:text-white mb-4 transition-colors"
+            className="mb-4 inline-flex items-center text-[var(--oklch-text-secondary)] transition-colors hover:text-white"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Applications
@@ -192,7 +193,9 @@ export function AdminApplicationDetailClient({
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-white mb-2">Application Details</h1>
-              <p className="text-gray-300">Application ID: {application.id.slice(0, 8)}...</p>
+              <p className="text-[var(--oklch-text-secondary)]">
+                Application ID: {application.id.slice(0, 8)}...
+              </p>
             </div>
             <div className="flex gap-2">
               {application.status === "new" || application.status === "under_review" ? (
@@ -223,7 +226,7 @@ export function AdminApplicationDetailClient({
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Application Info */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Briefcase className="h-5 w-5 text-purple-400" />
@@ -232,11 +235,11 @@ export function AdminApplicationDetailClient({
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-400">Status</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Status</Label>
                   <ApplicationStatusBadge status={application.status} showIcon={true} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-400">Applied Date</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Applied Date</Label>
                   <span className="text-white">
                     {new Date(application.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -246,7 +249,7 @@ export function AdminApplicationDetailClient({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <Label className="text-gray-400">Last Updated</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Last Updated</Label>
                   <span className="text-white">
                     {new Date(application.updated_at).toLocaleDateString("en-US", {
                       year: "numeric",
@@ -256,9 +259,9 @@ export function AdminApplicationDetailClient({
                   </span>
                 </div>
                 {application.message && (
-                  <div className="pt-4 border-t border-gray-700">
-                    <Label className="text-gray-400 mb-2 block">Application Message</Label>
-                    <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                  <div className="pt-4 border-t border-white/10">
+                    <Label className="text-[var(--oklch-text-secondary)] mb-2 block">Application Message</Label>
+                    <div className="rounded-lg border border-white/10 bg-white/5 p-4">
                       <p className="text-white whitespace-pre-wrap">{application.message}</p>
                     </div>
                   </div>
@@ -268,7 +271,7 @@ export function AdminApplicationDetailClient({
 
             {/* Gig Information */}
             {gig && (
-              <Card className="bg-gray-900 border-gray-800">
+              <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center gap-2">
                     <Briefcase className="h-5 w-5 text-blue-400" />
@@ -278,29 +281,29 @@ export function AdminApplicationDetailClient({
                 <CardContent className="space-y-4">
                   <div>
                     <h3 className="text-xl font-semibold text-white mb-2">{gig.title}</h3>
-                    <p className="text-gray-300 mb-4">{gig.description}</p>
+                    <p className="text-[var(--oklch-text-secondary)] mb-4">{gig.description}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-gray-400">Category</Label>
+                      <Label className="text-[var(--oklch-text-secondary)]">Category</Label>
                       <p className="text-white capitalize">{gig.category}</p>
                     </div>
                     <div>
-                      <Label className="text-gray-400">Location</Label>
+                      <Label className="text-[var(--oklch-text-secondary)]">Location</Label>
                       <p className="text-white flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
                         {gig.location}
                       </p>
                     </div>
                     <div>
-                      <Label className="text-gray-400">Compensation</Label>
+                      <Label className="text-[var(--oklch-text-secondary)]">Compensation</Label>
                       <p className="text-white flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
                         {gig.compensation || "Not specified"}
                       </p>
                     </div>
                     <div>
-                      <Label className="text-gray-400">Gig Date</Label>
+                      <Label className="text-[var(--oklch-text-secondary)]">Gig Date</Label>
                       <p className="text-white flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
                         {new Date(gig.date).toLocaleDateString()}
@@ -308,15 +311,15 @@ export function AdminApplicationDetailClient({
                     </div>
                   </div>
                   {gig.client_profiles && (
-                    <div className="pt-4 border-t border-gray-700">
-                      <Label className="text-gray-400 mb-2 block">Client</Label>
+                    <div className="pt-4 border-t border-white/10">
+                      <Label className="text-[var(--oklch-text-secondary)] mb-2 block">Client</Label>
                       <p className="text-white">{gig.client_profiles.company_name || "N/A"}</p>
                       {gig.client_profiles.contact_name && (
-                        <p className="text-gray-400 text-sm">{gig.client_profiles.contact_name}</p>
+                        <p className="text-[var(--oklch-text-secondary)] text-sm">{gig.client_profiles.contact_name}</p>
                       )}
                     </div>
                   )}
-                  <Button variant="outline" className="w-full border-gray-700 text-white hover:bg-gray-800" asChild>
+                  <Button variant="outline" className="w-full border-white/10 text-white hover:bg-white/10" asChild>
                     <Link href={`/admin/gigs/${gig.id}`}>
                       View Opportunity Details
                       <ExternalLink className="ml-2 h-4 w-4" />
@@ -328,13 +331,13 @@ export function AdminApplicationDetailClient({
 
                 {/* Talent Profile */}
                 {talent && talentProfile && (
-                  <Card className="bg-gray-900 border-gray-800">
+                  <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
                     <CardHeader>
                       <CardTitle className="text-white flex items-center gap-2">
                         <UserIcon className="h-5 w-5 text-green-400" />
                         Talent Profile: {talent?.display_name || (talentProfile ? `${talentProfile.first_name} ${talentProfile.last_name}` : "Unknown")}
                       </CardTitle>
-                      <CardDescription className="text-gray-300">
+                      <CardDescription className="text-[var(--oklch-text-secondary)]">
                         Details about the talent who submitted this application.
                       </CardDescription>
                     </CardHeader>
@@ -351,14 +354,14 @@ export function AdminApplicationDetailClient({
                             {talentProfile?.first_name || ""} {talentProfile?.last_name || ""}
                           </p>
                           {talent?.display_name && (
-                            <p className="text-gray-400">{talent.display_name}</p>
+                            <p className="text-[var(--oklch-text-secondary)]">{talent.display_name}</p>
                           )}
                         </div>
                       </div>
                   <div className="grid grid-cols-2 gap-4 pt-4">
                     {talentProfile.location && (
                       <div>
-                        <Label className="text-gray-400">Location</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Location</Label>
                         <p className="text-white flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
                           {talentProfile.location}
@@ -367,44 +370,44 @@ export function AdminApplicationDetailClient({
                     )}
                     {talentProfile.age && (
                       <div>
-                        <Label className="text-gray-400">Age</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Age</Label>
                         <p className="text-white">{talentProfile.age}</p>
                       </div>
                     )}
                     {talentProfile.experience_years && (
                       <div>
-                        <Label className="text-gray-400">Experience</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Experience</Label>
                         <p className="text-white">{talentProfile.experience_years} years</p>
                       </div>
                     )}
                     {talentProfile.height && (
                       <div>
-                        <Label className="text-gray-400">Height</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Height</Label>
                         <p className="text-white">{talentProfile.height}</p>
                       </div>
                     )}
                     {talentProfile.hair_color && (
                       <div>
-                        <Label className="text-gray-400">Hair Color</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Hair Color</Label>
                         <p className="text-white">{talentProfile.hair_color}</p>
                       </div>
                     )}
                     {talentProfile.eye_color && (
                       <div>
-                        <Label className="text-gray-400">Eye Color</Label>
+                        <Label className="text-[var(--oklch-text-secondary)]">Eye Color</Label>
                         <p className="text-white">{talentProfile.eye_color}</p>
                       </div>
                     )}
                   </div>
                   {talentProfile.experience && (
-                    <div className="pt-4 border-t border-gray-700">
-                      <Label className="text-gray-400 mb-2 block">Experience</Label>
+                    <div className="pt-4 border-t border-white/10">
+                      <Label className="text-[var(--oklch-text-secondary)] mb-2 block">Experience</Label>
                       <p className="text-white">{talentProfile.experience}</p>
                     </div>
                   )}
                   {talentProfile.specialties && talentProfile.specialties.length > 0 && (
-                    <div className="pt-4 border-t border-gray-700">
-                      <Label className="text-gray-400 mb-2 block">Specialties</Label>
+                    <div className="pt-4 border-t border-white/10">
+                      <Label className="text-[var(--oklch-text-secondary)] mb-2 block">Specialties</Label>
                       <div className="flex flex-wrap gap-2">
                         {talentProfile.specialties.map((specialty: string, index: number) => (
                           <span
@@ -417,7 +420,7 @@ export function AdminApplicationDetailClient({
                       </div>
                     </div>
                   )}
-                  <Button variant="outline" className="w-full border-gray-700 text-white hover:bg-gray-800" asChild>
+                  <Button variant="outline" className="w-full border-white/10 text-white hover:bg-white/10" asChild>
                     <Link href={talentProfileHref ?? `/talent/${talent?.id}`}>
                       View Full Talent Profile
                       <ExternalLink className="ml-2 h-4 w-4" />
@@ -431,14 +434,14 @@ export function AdminApplicationDetailClient({
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
               <CardHeader>
                 <CardTitle className="text-white">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full border-gray-700 text-white hover:bg-gray-800"
+                  className="w-full border-white/10 text-white hover:bg-white/10"
                   asChild
                 >
                   <Link href="/admin/applications">
@@ -449,7 +452,7 @@ export function AdminApplicationDetailClient({
                 {gig && (
                   <Button
                     variant="outline"
-                    className="w-full border-gray-700 text-white hover:bg-gray-800"
+                    className="w-full border-white/10 text-white hover:bg-white/10"
                     asChild
                   >
                     <Link href={`/admin/gigs/${gig.id}`}>
@@ -461,7 +464,7 @@ export function AdminApplicationDetailClient({
                 {talentProfileHref && (
                   <Button
                     variant="outline"
-                    className="w-full border-gray-700 text-white hover:bg-gray-800"
+                    className="w-full border-white/10 text-white hover:bg-white/10"
                     asChild
                   >
                     <Link href={talentProfileHref}>
@@ -474,21 +477,21 @@ export function AdminApplicationDetailClient({
             </Card>
 
             {/* Application Metadata */}
-            <Card className="bg-gray-900 border-gray-800">
+            <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
               <CardHeader>
                 <CardTitle className="text-white">Metadata</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div>
-                  <Label className="text-gray-400">Application ID</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Application ID</Label>
                   <p className="text-white font-mono text-xs break-all">{application.id}</p>
                 </div>
                 <div>
-                  <Label className="text-gray-400">Gig ID</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Gig ID</Label>
                   <p className="text-white font-mono text-xs break-all">{application.gig_id}</p>
                 </div>
                 <div>
-                  <Label className="text-gray-400">Talent ID</Label>
+                  <Label className="text-[var(--oklch-text-secondary)]">Talent ID</Label>
                   <p className="text-white font-mono text-xs break-all">{application.talent_id}</p>
                 </div>
               </CardContent>
@@ -499,24 +502,26 @@ export function AdminApplicationDetailClient({
 
       {/* Approve Dialog */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent className="bg-gray-900 border-gray-700">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Approve Talent Application</DialogTitle>
-            <DialogDescription className="text-gray-300">
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
               Are you sure you want to approve this talent application? This will notify the talent
               and client.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="adminNotes" className="text-white">Admin Notes (Optional)</Label>
+              <Label htmlFor="adminNotes" className="text-[var(--oklch-text-secondary)]">
+                Admin Notes (Optional)
+              </Label>
               <Textarea
                 id="adminNotes"
                 placeholder="Add any notes about this application"
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                className="border-white/10 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
             </div>
           </div>
@@ -525,7 +530,7 @@ export function AdminApplicationDetailClient({
               variant="outline"
               onClick={() => setShowApproveDialog(false)}
               disabled={isProcessing}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
@@ -542,16 +547,18 @@ export function AdminApplicationDetailClient({
 
       {/* Reject Dialog */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent className="bg-gray-900 border-gray-700">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-white">Reject Talent Application</DialogTitle>
-            <DialogDescription className="text-gray-300">
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
               Are you sure you want to reject this talent application? This will notify the talent.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="rejectReason" className="text-white">Rejection Reason *</Label>
+              <Label htmlFor="rejectReason" className="text-[var(--oklch-text-secondary)]">
+                Rejection Reason *
+              </Label>
               <Textarea
                 id="rejectReason"
                 placeholder="Please provide a reason for rejecting this application"
@@ -559,7 +566,7 @@ export function AdminApplicationDetailClient({
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                className="border-white/10 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
             </div>
           </div>
@@ -568,7 +575,7 @@ export function AdminApplicationDetailClient({
               variant="outline"
               onClick={() => setShowRejectDialog(false)}
               disabled={isProcessing}
-              className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
@@ -582,7 +589,7 @@ export function AdminApplicationDetailClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </TotlAtmosphereShell>
   );
 }
 

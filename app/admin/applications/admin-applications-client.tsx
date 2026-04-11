@@ -248,7 +248,7 @@ export function AdminApplicationsClient({
         type="button"
         size="sm"
         variant="outline"
-        className="h-9 border-gray-700 bg-transparent text-white hover:bg-gray-700"
+        className="h-9 border-white/10 bg-white/5 text-white hover:bg-white/10"
         asChild
       >
         <Link href={`/admin/applications/${application.id}`}>View details</Link>
@@ -284,10 +284,10 @@ export function AdminApplicationsClient({
         <div className="rounded-2xl panel-frosted card-backlit p-4 sm:p-6">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]" size={16} />
               <Input
                 placeholder="Search applications"
-                className="w-full border-gray-600 bg-gray-700 pl-9 text-white placeholder-gray-400 focus:border-blue-500"
+                className="w-full border-white/10 bg-white/5 pl-9 text-white placeholder:text-[var(--oklch-text-tertiary)]"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -315,7 +315,7 @@ export function AdminApplicationsClient({
                 type="button"
                 variant={onlyWithMessage ? "default" : "outline"}
                 size="sm"
-                className="hidden border-gray-600 text-gray-200 hover:bg-gray-700 md:inline-flex"
+                className="hidden border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white md:inline-flex"
                 onClick={() => setOnlyWithMessage((prev) => !prev)}
               >
                 <Filter className="mr-2 h-4 w-4" />
@@ -325,8 +325,8 @@ export function AdminApplicationsClient({
           </div>
 
           <Tabs defaultValue="new" className="w-full space-y-4" onValueChange={setActiveTab}>
-            <MobileTabRail edgeColorClassName="from-gray-900">
-              <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl panel-frosted p-1">
+            <MobileTabRail edgeColorClassName="from-[rgba(6,8,18,0.98)]">
+              <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
                 <TabsTrigger value="new" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                   New ({newCount})
                 </TabsTrigger>
@@ -339,17 +339,32 @@ export function AdminApplicationsClient({
               </TabsList>
             </MobileTabRail>
 
-            <TabsList className="hidden h-11 panel-frosted p-1 md:grid md:grid-cols-3">
-              <TabsTrigger value="new">New ({newCount})</TabsTrigger>
-              <TabsTrigger value="approved">Approved ({approvedCount})</TabsTrigger>
-              <TabsTrigger value="rejected">Rejected ({rejectedCount})</TabsTrigger>
+            <TabsList className="panel-frosted hidden h-11 border border-white/10 bg-white/5 p-1 md:grid md:grid-cols-3">
+              <TabsTrigger
+                value="new"
+                className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-yellow-500 data-[state=active]:text-white"
+              >
+                New ({newCount})
+              </TabsTrigger>
+              <TabsTrigger
+                value="approved"
+                className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white"
+              >
+                Approved ({approvedCount})
+              </TabsTrigger>
+              <TabsTrigger
+                value="rejected"
+                className="text-[var(--oklch-text-secondary)] transition-all duration-200 hover:text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500 data-[state=active]:to-red-500 data-[state=active]:text-white"
+              >
+                Rejected ({rejectedCount})
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="new" className="space-y-3">
               {filteredApplications.length === 0 ? (
                 <div className="py-10 text-center">
                   <Clock className="mx-auto mb-3 h-8 w-8 text-amber-400" />
-                  <p className="text-sm text-gray-300">No new applications found.</p>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">No new applications found.</p>
                 </div>
               ) : (
                 <>
@@ -373,11 +388,11 @@ export function AdminApplicationsClient({
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Applied</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
@@ -388,7 +403,7 @@ export function AdminApplicationsClient({
                                 <div className="text-sm font-medium text-white hover:underline">
                                   {application.gigs?.title ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.gig_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
                             <td className="px-6 py-4">
@@ -396,15 +411,15 @@ export function AdminApplicationsClient({
                                 <div className="text-sm text-white hover:underline">
                                   {application.talent?.name ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.talent_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-gray-700 hover:text-white">
+                                  <Button variant="ghost" size="icon" className="text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white">
                                     <MoreVertical size={16} />
                                   </Button>
                                 </DropdownMenuTrigger>
@@ -414,7 +429,7 @@ export function AdminApplicationsClient({
                                       setSelectedApplication(application);
                                       setShowApproveDialog(true);
                                     }}
-                                    className="text-gray-300 hover:bg-gray-700"
+                                    className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                                   >
                                     <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
                                     <span>Approve</span>
@@ -424,12 +439,12 @@ export function AdminApplicationsClient({
                                       setSelectedApplication(application);
                                       setShowRejectDialog(true);
                                     }}
-                                    className="text-gray-300 hover:bg-gray-700"
+                                    className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                                   >
                                     <XCircle className="mr-2 h-4 w-4 text-red-400" />
                                     <span>Reject</span>
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem asChild className="text-gray-300 hover:bg-gray-700">
+                                  <DropdownMenuItem asChild className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
                                     <Link href={`/admin/applications/${application.id}`}>
                                       <Search className="mr-2 h-4 w-4" />
                                       <span>View Details</span>
@@ -451,7 +466,7 @@ export function AdminApplicationsClient({
               {filteredApplications.length === 0 ? (
                 <div className="py-10 text-center">
                   <CheckCircle className="mx-auto mb-3 h-8 w-8 text-green-400" />
-                  <p className="text-sm text-gray-300">No approved applications found.</p>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">No approved applications found.</p>
                 </div>
               ) : (
                 <>
@@ -475,11 +490,11 @@ export function AdminApplicationsClient({
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Applied</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
@@ -490,7 +505,7 @@ export function AdminApplicationsClient({
                                 <div className="text-sm font-medium text-white hover:underline">
                                   {application.gigs?.title ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.gig_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
                             <td className="px-6 py-4">
@@ -498,10 +513,10 @@ export function AdminApplicationsClient({
                                 <div className="text-sm text-white hover:underline">
                                   {application.talent?.name ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.talent_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">{renderInlineActions(application)}</td>
                           </tr>
@@ -517,7 +532,7 @@ export function AdminApplicationsClient({
               {filteredApplications.length === 0 ? (
                 <div className="py-10 text-center">
                   <XCircle className="mx-auto mb-3 h-8 w-8 text-red-400" />
-                  <p className="text-sm text-gray-300">No rejected applications found.</p>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">No rejected applications found.</p>
                 </div>
               ) : (
                 <>
@@ -541,11 +556,11 @@ export function AdminApplicationsClient({
                     <table className="w-full">
                       <thead>
                         <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Opportunity</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Talent</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Applied</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-gray-300">Actions</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Opportunity</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Talent</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Applied</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Status</th>
+                          <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
@@ -556,7 +571,7 @@ export function AdminApplicationsClient({
                                 <div className="text-sm font-medium text-white hover:underline">
                                   {application.gigs?.title ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.gig_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.gig_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
                             <td className="px-6 py-4">
@@ -564,10 +579,10 @@ export function AdminApplicationsClient({
                                 <div className="text-sm text-white hover:underline">
                                   {application.talent?.name ?? "Unknown"}
                                 </div>
-                                <div className="text-xs text-gray-500">{application.talent_id.slice(0, 8)}…</div>
+                                <div className="text-xs text-[var(--oklch-text-tertiary)]">{application.talent_id.slice(0, 8)}…</div>
                               </Link>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-400">{new Date(application.created_at).toLocaleDateString()}</td>
+                            <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">{new Date(application.created_at).toLocaleDateString()}</td>
                             <td className="px-6 py-4"><ApplicationStatusBadge status={application.status} showIcon={true} /></td>
                             <td className="px-6 py-4">{renderInlineActions(application)}</td>
                           </tr>
@@ -584,23 +599,26 @@ export function AdminApplicationsClient({
 
       {/* Approve Dialog */}
       <Dialog open={showApproveDialog} onOpenChange={setShowApproveDialog}>
-        <DialogContent>
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle>Approve Talent Application</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
               Are you sure you want to approve this talent application? This will notify the talent
               and client.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="adminNotes">Admin Notes (Optional)</Label>
+              <Label htmlFor="adminNotes" className="text-[var(--oklch-text-secondary)]">
+                Admin Notes (Optional)
+              </Label>
               <Textarea
                 id="adminNotes"
                 placeholder="Add any notes about this application"
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
+                className="border-white/10 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
             </div>
           </div>
@@ -609,6 +627,7 @@ export function AdminApplicationsClient({
               variant="outline"
               onClick={() => setShowApproveDialog(false)}
               disabled={isProcessing}
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
@@ -625,16 +644,18 @@ export function AdminApplicationsClient({
 
       {/* Reject Dialog */}
       <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
-        <DialogContent>
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle>Reject Talent Application</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
               Are you sure you want to reject this talent application? This will notify the talent.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="rejectReason">Rejection Reason</Label>
+              <Label htmlFor="rejectReason" className="text-[var(--oklch-text-secondary)]">
+                Rejection Reason
+              </Label>
               <Textarea
                 id="rejectReason"
                 placeholder="Please provide a reason for rejecting this application"
@@ -642,6 +663,7 @@ export function AdminApplicationsClient({
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
                 required
+                className="border-white/10 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
             </div>
           </div>
@@ -650,6 +672,7 @@ export function AdminApplicationsClient({
               variant="outline"
               onClick={() => setShowRejectDialog(false)}
               disabled={isProcessing}
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
