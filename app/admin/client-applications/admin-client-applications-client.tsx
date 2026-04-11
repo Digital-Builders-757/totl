@@ -163,7 +163,7 @@ export function AdminClientApplicationsClient({
   const renderApplicationActions = (application: ClientApplication) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+        <Button variant="ghost" size="icon" className="text-[var(--oklch-text-tertiary)] hover:text-white hover:bg-white/10">
           <MoreVertical size={16} />
         </Button>
       </DropdownMenuTrigger>
@@ -173,7 +173,7 @@ export function AdminClientApplicationsClient({
             setSelectedApplication(application);
             setIsDetailsDialogOpen(true);
           }}
-          className="text-gray-300 hover:bg-gray-700"
+          className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
         >
           <Eye className="mr-2 h-4 w-4" />
           View Details
@@ -186,7 +186,7 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
                 setIsApproveDialogOpen(true);
               }}
-              className="text-gray-300 hover:bg-gray-700"
+              className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               <CheckCircle className="mr-2 h-4 w-4 text-green-400" />
               Approve
@@ -197,7 +197,7 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
                 setIsRejectDialogOpen(true);
               }}
-              className="text-gray-300 hover:bg-gray-700"
+              className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               <XCircle className="mr-2 h-4 w-4 text-red-400" />
               Reject
@@ -219,7 +219,7 @@ export function AdminClientApplicationsClient({
             <Clock className="h-7 w-7 text-yellow-400" />
           </div>
           <h3 className="text-lg font-semibold text-white">{emptyTitle}</h3>
-          <p className="mt-2 text-sm text-gray-400">{emptyDescription}</p>
+          <p className="mt-2 text-sm text-[var(--oklch-text-tertiary)]">{emptyDescription}</p>
         </div>
       );
     }
@@ -251,28 +251,28 @@ export function AdminClientApplicationsClient({
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Company Name
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Contact
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Email
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Industry
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Applied Date
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Status
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Follow-Up
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Actions
                 </th>
               </tr>
@@ -282,7 +282,7 @@ export function AdminClientApplicationsClient({
                 <tr key={application.id} className="hover:bg-card/22 transition-colors duration-200">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-gray-400" />
+                      <Building2 className="h-4 w-4 text-[var(--oklch-text-tertiary)]" />
                       <div className="font-medium text-white text-sm">{application.company_name}</div>
                     </div>
                   </td>
@@ -292,15 +292,15 @@ export function AdminClientApplicationsClient({
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <div className="flex items-center gap-2 text-gray-400 text-sm">
+                    <div className="flex items-center gap-2 text-[var(--oklch-text-tertiary)] text-sm">
                       <Mail className="h-3 w-3" />
                       {application.email}
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="py-4 px-6 text-[var(--oklch-text-tertiary)] text-sm">
                     {application.industry || "—"}
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="py-4 px-6 text-[var(--oklch-text-tertiary)] text-sm">
                     {new Date(application.created_at).toLocaleDateString()}
                   </td>
                   <td className="py-4 px-6">{getStatusBadge(application.status)}</td>
@@ -310,7 +310,7 @@ export function AdminClientApplicationsClient({
                         Sent {formatFollowUpDate(application.follow_up_sent_at)}
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-500">Not sent</span>
+                      <span className="text-sm text-[var(--oklch-text-tertiary)]">Not sent</span>
                     )}
                   </td>
                   <td className="py-4 px-6">{renderApplicationActions(application)}</td>
@@ -614,11 +614,7 @@ export function AdminClientApplicationsClient({
   };
 
   return (
-    <PageShell
-      topPadding={false}
-      fullBleed
-      className="bg-gradient-to-br from-gray-900 via-black to-gray-800"
-    >
+    <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} />
 
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
@@ -639,7 +635,7 @@ export function AdminClientApplicationsClient({
               <Button
                 onClick={handleSendFollowUps}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+                className="gap-2 border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                 disabled={isSendingFollowUps}
               >
                 <Mail className="h-4 w-4" />
@@ -648,7 +644,7 @@ export function AdminClientApplicationsClient({
               <Button
                 onClick={handleExport}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 gap-2"
+                className="gap-2 border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
               >
                 <Download className="h-4 w-4" />
                 Export CSV
@@ -660,7 +656,7 @@ export function AdminClientApplicationsClient({
         <SectionCard className="p-4 sm:p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-end">
             <div className="flex-1">
-              <Label htmlFor="vip-invite-email" className="text-gray-300">
+              <Label htmlFor="vip-invite-email" className="text-[var(--oklch-text-secondary)]">
                 Invite VIP Career Builder Applicant
               </Label>
               <Input
@@ -669,7 +665,7 @@ export function AdminClientApplicationsClient({
                 placeholder="client@company.com"
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
-                className="mt-2 bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="mt-2 bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
             </div>
             <Button
@@ -682,7 +678,7 @@ export function AdminClientApplicationsClient({
               {isSendingInvite ? "Sending invite..." : "Send invite"}
             </Button>
           </div>
-          <p className="mt-2 text-xs text-gray-400">
+          <p className="mt-2 text-xs text-[var(--oklch-text-tertiary)]">
             Invite links land recipients on the Career Builder application flow after auth.
           </p>
           {existingAccountInviteEmail ? (
@@ -708,7 +704,7 @@ export function AdminClientApplicationsClient({
                   type="button"
                   variant="outline"
                   onClick={() => setExistingAccountInviteEmail(null)}
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  className="border-white/10 text-[var(--oklch-text-secondary)] hover:bg-white/10"
                 >
                   Dismiss
                 </Button>
@@ -735,12 +731,12 @@ export function AdminClientApplicationsClient({
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                     size={16}
                   />
                   <Input
                     placeholder="Search by company, name, email, or industry..."
-                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    className="w-full border-white/10 bg-white/5 pl-9 text-white placeholder:text-[var(--oklch-text-tertiary)] focus:border-[var(--oklch-accent)] md:w-60"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -751,15 +747,15 @@ export function AdminClientApplicationsClient({
                     onOpenChange={setIsFiltersOpen}
                     activeCount={activeFilterCount}
                     title="Application Filters"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 text-[var(--oklch-text-secondary)] hover:bg-white/10"
                   >
                     <div className="space-y-2">
-                      <p className="text-xs text-gray-400">Follow-up status</p>
+                      <p className="text-xs text-[var(--oklch-text-tertiary)]">Follow-up status</p>
                       <div className="grid grid-cols-1 gap-2">
                         <Button
                           type="button"
                           variant={followUpFilter === "all" ? "default" : "outline"}
-                          className={followUpFilter === "all" ? "" : "border-gray-600 text-gray-300"}
+                          className={followUpFilter === "all" ? "" : "border-white/10 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setFollowUpFilter("all")}
                         >
                           All ({applications.length})
@@ -767,7 +763,7 @@ export function AdminClientApplicationsClient({
                         <Button
                           type="button"
                           variant={followUpFilter === "sent" ? "default" : "outline"}
-                          className={followUpFilter === "sent" ? "" : "border-gray-600 text-gray-300"}
+                          className={followUpFilter === "sent" ? "" : "border-white/10 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setFollowUpFilter("sent")}
                         >
                           Follow-up sent ({followUpSentCount})
@@ -775,7 +771,7 @@ export function AdminClientApplicationsClient({
                         <Button
                           type="button"
                           variant={followUpFilter === "not_sent" ? "default" : "outline"}
-                          className={followUpFilter === "not_sent" ? "" : "border-gray-600 text-gray-300"}
+                          className={followUpFilter === "not_sent" ? "" : "border-white/10 text-[var(--oklch-text-secondary)]"}
                           onClick={() => setFollowUpFilter("not_sent")}
                         >
                           Follow-up not sent ({followUpNotSentCount})
@@ -788,7 +784,7 @@ export function AdminClientApplicationsClient({
                   <Button
                     variant="outline"
                     onClick={() => setFollowUpFilter("all")}
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 text-[var(--oklch-text-secondary)] hover:bg-white/10"
                   >
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     {activeFilterCount > 0 ? "Filters (1)" : "Filters"}
@@ -799,23 +795,23 @@ export function AdminClientApplicationsClient({
           </div>
 
           <Tabs defaultValue="pending" className="w-full" onValueChange={setActiveTab}>
-            <div className="border-b border-gray-700 px-4 sm:px-6">
-              <TabsList className="h-12 bg-gray-700/50 border border-gray-600">
+            <div className="border-b border-white/10 px-4 sm:px-6">
+              <TabsList className="panel-frosted h-12 border border-white/10 bg-white/5">
                 <TabsTrigger
                   value="pending"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-amber-500 data-[state=active]:text-white text-[var(--oklch-text-secondary)] hover:text-white transition-all duration-200"
                 >
                   Pending ({pendingApplications.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="approved"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white text-[var(--oklch-text-secondary)] hover:text-white transition-all duration-200"
                 >
                   Approved ({approvedApplications.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="rejected"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-gray-300 hover:text-white transition-all duration-200"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-[var(--oklch-text-secondary)] hover:text-white transition-all duration-200"
                 >
                   Rejected ({rejectedApplications.length})
                 </TabsTrigger>
@@ -850,13 +846,13 @@ export function AdminClientApplicationsClient({
 
       {/* Approve Dialog */}
       <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <CheckCircle className="h-5 w-5 text-green-400" />
               Approve Career Builder Application
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[var(--oklch-text-tertiary)]">
               Approve <strong className="text-white">{selectedApplication?.company_name}</strong> as a Career Builder. They will
               receive an email with instructions to access the platform.
             </DialogDescription>
@@ -864,16 +860,16 @@ export function AdminClientApplicationsClient({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="approve-notes" className="text-gray-300">Welcome Message (Optional)</Label>
+              <Label htmlFor="approve-notes" className="text-[var(--oklch-text-secondary)]">Welcome Message (Optional)</Label>
               <Textarea
                 id="approve-notes"
                 placeholder="Add a personalized welcome message for the Career Builder..."
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
-                className="resize-none bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="resize-none bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[var(--oklch-text-tertiary)]">
                 This message will be included in the approval email
               </p>
             </div>
@@ -887,7 +883,7 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
               }}
               disabled={isProcessing}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
@@ -914,13 +910,13 @@ export function AdminClientApplicationsClient({
 
       {/* Reject Dialog */}
       <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <XCircle className="h-5 w-5 text-red-400" />
               Reject Career Builder Application
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[var(--oklch-text-tertiary)]">
               Reject <strong className="text-white">{selectedApplication?.company_name}</strong>&apos;s application. They will
               receive a professional decline email.
             </DialogDescription>
@@ -928,16 +924,16 @@ export function AdminClientApplicationsClient({
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="reject-notes" className="text-gray-300">Feedback (Optional)</Label>
+              <Label htmlFor="reject-notes" className="text-[var(--oklch-text-secondary)]">Feedback (Optional)</Label>
               <Textarea
                 id="reject-notes"
                 placeholder="Optionally provide feedback for internal tracking or to share with the applicant..."
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
                 rows={4}
-                className="resize-none bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="resize-none bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]"
               />
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[var(--oklch-text-tertiary)]">
                 If provided, this will be included in the rejection email
               </p>
             </div>
@@ -957,7 +953,7 @@ export function AdminClientApplicationsClient({
                 setAdminNotes("");
               }}
               disabled={isProcessing}
-              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
@@ -985,13 +981,13 @@ export function AdminClientApplicationsClient({
 
       {/* Details Dialog */}
       <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700 text-white">
+        <DialogContent className="panel-frosted max-h-[90vh] overflow-y-auto border-white/10 bg-[var(--totl-surface-glass-strong)] text-white sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <Building2 className="h-5 w-5" />
               Career Builder Application Details
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[var(--oklch-text-tertiary)]">
               Submitted {selectedApplication && new Date(selectedApplication.created_at).toLocaleDateString()}
             </DialogDescription>
           </DialogHeader>
@@ -1004,20 +1000,20 @@ export function AdminClientApplicationsClient({
                   <Building2 className="h-5 w-5" />
                   Company Information
                 </h3>
-                <div className="space-y-2 bg-gray-700/50 p-4 rounded-lg">
+                <div className="space-y-2 bg-white/5 p-4 rounded-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-400">Company Name</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Company Name</p>
                       <p className="font-medium text-white">{selectedApplication.company_name}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Industry</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Industry</p>
                       <p className="font-medium text-white">{selectedApplication.industry || "Not specified"}</p>
                     </div>
                   </div>
                   {selectedApplication.website && (
                     <div>
-                      <p className="text-sm text-gray-400">Website</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Website</p>
                       <LongToken
                         as="a"
                         value={selectedApplication.website}
@@ -1034,22 +1030,22 @@ export function AdminClientApplicationsClient({
               {/* Contact Information */}
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-white">Contact Information</h3>
-                <div className="space-y-2 bg-gray-700/50 p-4 rounded-lg">
+                <div className="space-y-2 bg-white/5 p-4 rounded-lg">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-400">Name</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Name</p>
                       <p className="font-medium text-white">
                         {selectedApplication.first_name} {selectedApplication.last_name}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-400">Email</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Email</p>
                       <p className="font-medium text-white">{selectedApplication.email}</p>
                     </div>
                   </div>
                   {selectedApplication.phone && (
                     <div>
-                      <p className="text-sm text-gray-400">Phone</p>
+                      <p className="text-sm text-[var(--oklch-text-tertiary)]">Phone</p>
                       <p className="font-medium text-white">{selectedApplication.phone}</p>
                     </div>
                   )}
@@ -1059,8 +1055,8 @@ export function AdminClientApplicationsClient({
               {/* Business Description */}
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-white">Business Description</h3>
-                <div className="bg-gray-700/50 p-4 rounded-lg">
-                  <p className="text-gray-300 whitespace-pre-wrap">
+                <div className="bg-white/5 p-4 rounded-lg">
+                  <p className="text-[var(--oklch-text-secondary)] whitespace-pre-wrap">
                     {selectedApplication.business_description}
                   </p>
                 </div>
@@ -1069,8 +1065,8 @@ export function AdminClientApplicationsClient({
               {/* Talent Needs */}
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-white">Talent Needs</h3>
-                <div className="bg-gray-700/50 p-4 rounded-lg">
-                  <p className="text-gray-300 whitespace-pre-wrap">
+                <div className="bg-white/5 p-4 rounded-lg">
+                  <p className="text-[var(--oklch-text-secondary)] whitespace-pre-wrap">
                     {selectedApplication.needs_description}
                   </p>
                 </div>
@@ -1079,26 +1075,26 @@ export function AdminClientApplicationsClient({
               {/* Application Metadata */}
               <div>
                 <h3 className="font-semibold text-lg mb-3 text-white">Application Metadata</h3>
-                <div className="bg-gray-700/50 p-4 rounded-lg space-y-2 text-sm">
+                <div className="bg-white/5 p-4 rounded-lg space-y-2 text-sm">
                   <div className="flex justify-between gap-4 min-w-0">
-                    <span className="text-gray-400">Application ID</span>
+                    <span className="text-[var(--oklch-text-tertiary)]">Application ID</span>
                     <LongToken
                       as="span"
                       value={selectedApplication.id}
-                      className="font-mono text-xs text-gray-300 text-right min-w-0"
+                      className="font-mono text-xs text-[var(--oklch-text-secondary)] text-right min-w-0"
                     />
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Status</span>
+                    <span className="text-[var(--oklch-text-tertiary)]">Status</span>
                     {getStatusBadge(selectedApplication.status)}
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Submitted</span>
-                    <span className="text-gray-300">{new Date(selectedApplication.created_at).toLocaleString()}</span>
+                    <span className="text-[var(--oklch-text-tertiary)]">Submitted</span>
+                    <span className="text-[var(--oklch-text-secondary)]">{new Date(selectedApplication.created_at).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Last Updated</span>
-                    <span className="text-gray-300">{new Date(selectedApplication.updated_at).toLocaleString()}</span>
+                    <span className="text-[var(--oklch-text-tertiary)]">Last Updated</span>
+                    <span className="text-[var(--oklch-text-secondary)]">{new Date(selectedApplication.updated_at).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
@@ -1108,7 +1104,7 @@ export function AdminClientApplicationsClient({
                 <div>
                   <h3 className="font-semibold text-lg mb-3 text-white">Admin Notes</h3>
                   <div className="bg-blue-500/20 border border-blue-500/50 p-4 rounded-lg">
-                    <p className="text-gray-300 whitespace-pre-wrap">
+                    <p className="text-[var(--oklch-text-secondary)] whitespace-pre-wrap">
                       {selectedApplication.admin_notes}
                     </p>
                   </div>
@@ -1117,7 +1113,7 @@ export function AdminClientApplicationsClient({
 
               {/* Quick Actions */}
               {selectedApplication.status === "pending" && (
-                <div className="flex gap-3 pt-4 border-t border-gray-700">
+                <div className="flex gap-3 pt-4 border-t border-white/10">
                   <Button
                     onClick={() => {
                       setIsDetailsDialogOpen(false);

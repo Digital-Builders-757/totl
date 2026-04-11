@@ -22,7 +22,7 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
           <summary className="cursor-pointer list-none text-sm font-medium text-[var(--oklch-text-secondary)]">
             <span className="inline-flex items-center gap-2">
               Show stats
-              <span className="text-xs text-[var(--oklch-text-muted)]">({stats.total} total)</span>
+              <span className="text-xs text-[var(--oklch-text-tertiary)]">({stats.total} total)</span>
             </span>
           </summary>
           <div className="mt-2">
@@ -40,62 +40,72 @@ export default function BookingsStatsOverview({ stats }: BookingsStatsOverviewPr
       </div>
 
       <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Card className="min-w-0">
+        <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Total</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+                <p className="text-2xl font-bold text-white">{stats.total}</p>
               </div>
-              <Calendar className="h-8 w-8 text-[var(--oklch-text-muted)]" />
+              <div className="rounded-full bg-white/10 p-2">
+                <Calendar className="h-4 w-4 text-[var(--oklch-text-tertiary)]" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Pending</p>
-                <p className="text-2xl font-bold">{stats.pending}</p>
+                <p className="text-2xl font-bold text-white">{stats.pending}</p>
               </div>
-              <Clock className="h-8 w-8 text-yellow-400" />
+              <div className="rounded-full bg-yellow-500/20 p-2">
+                <Clock className="h-4 w-4 text-yellow-300" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Confirmed</p>
-                <p className="text-2xl font-bold">{stats.confirmed}</p>
+                <p className="text-2xl font-bold text-white">{stats.confirmed}</p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-400" />
+              <div className="rounded-full bg-green-500/20 p-2">
+                <CheckCircle2 className="h-4 w-4 text-green-300" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Completed</p>
-                <p className="text-2xl font-bold">{stats.completed}</p>
+                <p className="text-2xl font-bold text-white">{stats.completed}</p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-blue-400" />
+              <div className="rounded-full bg-blue-500/20 p-2">
+                <CheckCircle2 className="h-4 w-4 text-blue-300" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="min-w-0">
+        <Card className="panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Cancelled</p>
-                <p className="text-2xl font-bold">{stats.cancelled}</p>
+                <p className="text-2xl font-bold text-white">{stats.cancelled}</p>
               </div>
-              <XCircle className="h-8 w-8 text-red-400" />
+              <div className="rounded-full bg-red-500/20 p-2">
+                <XCircle className="h-4 w-4 text-red-300" />
+              </div>
             </div>
           </CardContent>
         </Card>

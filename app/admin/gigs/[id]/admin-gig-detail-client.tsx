@@ -122,10 +122,10 @@ export function AdminGigDetailClient({
   };
 
   return (
-    <PageShell topPadding={false} fullBleed className="bg-gradient-to-br from-gray-900 via-black to-gray-800">
+    <PageShell topPadding={false} fullBleed>
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/10">
+          <Button asChild variant="ghost" className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
             <Link href="/admin/gigs">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -144,7 +144,7 @@ export function AdminGigDetailClient({
                   Edit
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+              <Button asChild variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
                 <Link href={`/gigs/${gig.id}`}>
                   <Eye className="h-4 w-4 mr-2" />
                   View public page
@@ -155,25 +155,25 @@ export function AdminGigDetailClient({
         />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2 bg-gray-900/50 border-gray-800">
+          <Card className="panel-frosted lg:col-span-2 border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardHeader>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <CardTitle className="text-white">Details</CardTitle>
                 <GigStatusBadge status={gig.status} showIcon />
               </div>
             </CardHeader>
-            <CardContent className="space-y-4 text-gray-200">
+            <CardContent className="space-y-4 text-[var(--oklch-text-secondary)]">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-2 text-sm text-gray-300">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <MapPin className="h-4 w-4" />
                   <span>{gig.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-300">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Calendar className="h-4 w-4" />
                   <span>Production: {new Date(gig.date).toLocaleDateString()}</span>
                 </div>
                 {gig.application_deadline ? (
-                  <div className="flex items-center gap-2 text-sm text-gray-300 sm:col-span-2">
+                  <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)] sm:col-span-2">
                     <Clock className="h-4 w-4" />
                     <span>
                       Submission deadline:{" "}
@@ -184,55 +184,55 @@ export function AdminGigDetailClient({
                     </span>
                   </div>
                 ) : null}
-                <div className="flex items-center gap-2 text-sm text-gray-300">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <DollarSign className="h-4 w-4" />
                   <span>{gig.compensation}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-300">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
                   <Users className="h-4 w-4" />
                   <span>{applications.length} application{applications.length === 1 ? "" : "s"}</span>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-gray-400 mb-2">Description</p>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap">{gig.description}</p>
+                <p className="mb-2 text-sm text-[var(--oklch-text-tertiary)]">Description</p>
+                <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{gig.description}</p>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900/50 border-gray-800">
+          <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-gray-300" />
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Building2 className="h-5 w-5 text-[var(--oklch-text-secondary)]" />
                 Career Builder
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-gray-300">
-              <p className="text-white font-medium">{clientProfile?.company_name ?? "N/A"}</p>
+            <CardContent className="space-y-2 text-sm text-[var(--oklch-text-secondary)]">
+              <p className="font-medium text-white">{clientProfile?.company_name ?? "N/A"}</p>
               {clientProfile?.contact_name ? <p>{clientProfile.contact_name}</p> : null}
               {clientProfile?.contact_email ? <p>{clientProfile.contact_email}</p> : null}
-              <p className="text-gray-500 break-all">{gig.client_id}</p>
+              <p className="break-all text-[var(--oklch-text-tertiary)]">{gig.client_id}</p>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="bg-gray-900/50 border-gray-800">
+        <Card className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)]">
           <CardHeader>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-white">Applications</CardTitle>
-              <div className="text-xs text-gray-400">{applications.length} total</div>
+              <div className="text-xs text-[var(--oklch-text-tertiary)]">{applications.length} total</div>
             </div>
           </CardHeader>
           <CardContent>
             {applications.length === 0 ? (
-              <p className="text-sm text-gray-400">No applications yet.</p>
+              <p className="text-sm text-[var(--oklch-text-secondary)]">No applications yet.</p>
             ) : (
               <div className="divide-y divide-border/35">
                 {applications.map((a) => {
                   const tone = statusTone[a.status] ?? {
                     label: a.status,
-                    className: "border-border/40 bg-card/35 text-gray-200",
+                    className: "border-border/40 bg-card/35 text-[var(--oklch-text-secondary)]",
                   };
 
                   return (
@@ -254,12 +254,12 @@ export function AdminGigDetailClient({
                             {tone.label}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-400 truncate">
+                        <p className="truncate text-xs text-[var(--oklch-text-tertiary)]">
                           {a.talent.location ?? "Location unknown"} • {new Date(a.created_at).toLocaleDateString()} • {a.id.slice(0, 8)}…
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button asChild size="sm" variant="outline" className="border-gray-700 text-white hover:bg-gray-800">
+                        <Button asChild size="sm" variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
                           <Link href={`/admin/applications/${a.id}`}>View application</Link>
                         </Button>
                       </div>
@@ -274,7 +274,7 @@ export function AdminGigDetailClient({
         <Card className="border-rose-500/25 bg-rose-950/20">
           <CardHeader>
             <CardTitle className="text-white text-base">Remove listing</CardTitle>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--oklch-text-secondary)]">
               Closing keeps the record but hides it from active talent listings. Permanent delete is only
               available when there are no applications.
             </p>
@@ -292,7 +292,7 @@ export function AdminGigDetailClient({
                 Close opportunity
               </Button>
             ) : (
-              <p className="text-sm text-gray-400">This opportunity is already closed.</p>
+              <p className="text-sm text-[var(--oklch-text-secondary)]">This opportunity is already closed.</p>
             )}
             <Button
               type="button"

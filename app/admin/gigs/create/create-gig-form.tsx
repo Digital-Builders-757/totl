@@ -2,10 +2,9 @@
 
 import { ArrowLeft, Plus, Minus, Calendar, Clock, DollarSign, MapPin, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { createGig } from "./actions";
+import { createGigFormAction } from "./actions";
 import { GigImageUploader } from "@/components/gigs/gig-image-uploader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,25 +40,8 @@ const MAX_REFERENCE_LINKS = 15;
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [category, setCategory] = useState<string>("modeling");
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [referenceLinks, setReferenceLinks] = useState<GigReferenceLinkFormRow[]>([]);
-  const router = useRouter();
-  const [state, formAction] = useActionState(
-    async (prevState: { error?: string; success?: boolean } | null, formData: FormData) => {
-      // Add image file to FormData if present
-      if (imageFile) {
-        formData.append("gig_image", imageFile);
-      }
-      const result = await createGig(formData, referenceLinks);
-      if (result?.success) {
-        // Redirect to dashboard on success
-        router.push("/admin/dashboard");
-        router.refresh();
-      }
-      return result || null;
-    },
-    null
-  );
+  const [state, formAction] = useActionState(createGigFormAction, null);
 
   const addRequirement = () => {
     setRequirements([...requirements, ""]);
@@ -121,6 +103,7 @@ export function CreateGigForm() {
             </div>
 
             <form action={formAction} className="space-y-6">
+              <input type="hidden" name="reference_links_json" value={JSON.stringify(referenceLinks)} readOnly />
               {state?.error && (
                 <div className="p-4 bg-red-900/20 border border-red-800 rounded-md text-red-400">
                   {state.error}
@@ -286,7 +269,7 @@ export function CreateGigForm() {
                     variant="outline"
                     size="sm"
                     onClick={addReferenceLinkRow}
-                    disabled={referenceLinks.length >= MAX_REFERENCE_LINKS || state?.success === true}
+                    disabled={referenceLinks.length >= MAX_REFERENCE_LINKS}
                     className="shrink-0 border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                   >
                     <Plus className="mr-1 h-4 w-4" />
@@ -359,7 +342,6 @@ export function CreateGigForm() {
                             variant="ghost"
                             size="icon"
                             onClick={() => removeReferenceLinkRow(idx)}
-                            disabled={state?.success === true}
                             className="text-rose-400 hover:bg-white/10 hover:text-rose-300"
                             aria-label="Remove link"
                           >
@@ -427,10 +409,7 @@ export function CreateGigForm() {
 
               {/* Gig Cover Image Upload */}
               <div className="space-y-2">
-                <GigImageUploader
-                  onFileSelect={setImageFile}
-                  disabled={state?.success === true}
-                />
+                <GigImageUploader formFieldName="gig_image" />
               </div>
 
               <div className="flex justify-end space-x-4">

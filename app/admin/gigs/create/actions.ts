@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
 import type { GigReferenceLinkFormRow } from "@/lib/gig-reference-links";
 import { parseReferenceLinksForDatabase } from "@/lib/gig-reference-links";
@@ -8,7 +9,39 @@ import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
-export async function createGig(formData: FormData, referenceLinkRows: GigReferenceLinkFormRow[] = []) {
+function parseReferenceLinksFromFormData(
+  formData: FormData
+): GigReferenceLinkFormRow[] | { error: string } {
+  const raw = formData.get("reference_links_json");
+  if (raw == null || raw === "") return [];
+  if (typeof raw !== "string") return { error: "Invalid reference links payload" };
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return { error: "Invalid reference links payload" };
+    return parsed as GigReferenceLinkFormRow[];
+  } catch {
+    return { error: "Invalid reference links payload" };
+  }
+}
+
+export async function createGigFormAction(
+  _prev: { error?: string } | null,
+  formData: FormData
+): Promise<{ error?: string } | null> {
+  const result = await createGig(formData);
+  if ("error" in result) {
+    return { error: result.error };
+  }
+  redirect("/admin/dashboard");
+}
+
+export async function createGig(formData: FormData) {
+  const referenceLinkRowsParsed = parseReferenceLinksFromFormData(formData);
+  if ("error" in referenceLinkRowsParsed) {
+    return { error: referenceLinkRowsParsed.error };
+  }
+  const referenceLinkRows = referenceLinkRowsParsed;
+
   const supabase = await createSupabaseServer();
 
   // Get authenticated user
@@ -106,12 +139,12 @@ export async function createGig(formData: FormData, referenceLinkRows: GigRefere
   if (insertError && imageUrl) {
     logger.error("Error creating gig", insertError);
     await deleteGigImage(imageUrl);
-    throw new Error(`Failed to create gig: ${insertError.message}`);
+    return { error: `Failed to create gig: ${insertError.message}` };
   }
 
   if (insertError) {
     logger.error("Error creating gig", insertError);
-    throw new Error(`Failed to create gig: ${insertError.message}`);
+    return { error: `Failed to create gig: ${insertError.message}` };
   }
 
   // Revalidate relevant pages

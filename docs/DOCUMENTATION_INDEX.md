@@ -59,6 +59,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `docs/archive/DEBUG_MISSING_API_KEY_PLAN_JAN_2025.md`
 - `docs/archive/SDA_DELIVERABLES_REPORT.md`
 - `docs/archive/SDA_EXECUTIVE_SUMMARY.md`
+- `docs/archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` (completed ViZB visual catch-up punch list, April 11, 2026)
 
 ---
 
@@ -116,12 +117,13 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `plans/NOTIFICATIONS_IMPLEMENTATION_PLAN.md` - **✅ NEW** - In-app notification design (Approach A/B/C); Approach B implemented (Mar 2026)
 - `plans/GIG_CARD_GLOW_BORDER_PLAN.md` - **✅ NEW** - Gig card spotlight glow effect design (Approach C implemented, Mar 2026)
 - `plans/PROFILE_STRENGTH_TO_SETTINGS_PLAN.md` - **✅ NEW** - Profile Strength relocation from dashboard to Settings (Approach A implemented, Mar 2026)
+- `plans/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` - **✅ NEW** - Ranked next-session visual catch-up handoff for making TOTL feel closer to ViZB (Apr 2026)
 - `HANDOFF.md` - **🤖 NEW** - Agent handoff prompt for notifications & booking UX context (Mar 2026)
 
 ### **🚨 Critical Error Prevention**
 - `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling; Apr 2026 - Sentry admin gigs RLS, cron CRON_SECRET, Next server actions)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
 - `features/TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md` - **✅ NEW** - v1 simplification: 3 KPI cards (Applications, Accepted, Earnings), footer alignment (March 2026)
