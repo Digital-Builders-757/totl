@@ -51,14 +51,14 @@ export function FiltersSheet({
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-base font-semibold">{title}</p>
-                  <p className="truncate text-xs text-gray-300">Refine results</p>
+                  <p className="truncate text-xs text-[var(--oklch-text-tertiary)]">Refine results</p>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   data-testid="filters-sheet-close"
-                  className="h-10 w-10 shrink-0 text-white hover:bg-white/10"
+                  className="h-10 w-10 shrink-0 text-[var(--oklch-text-primary)] hover:bg-white/10"
                   onClick={() => onOpenChange(false)}
                   aria-label="Close filters"
                 >

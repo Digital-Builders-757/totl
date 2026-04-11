@@ -72,7 +72,7 @@ export default function ClientSignup() {
           <Info className="h-8 w-8 text-amber-400" />
         </div>
         <CardTitle className="text-center text-white">Career Builder Signup Requires Approval</CardTitle>
-        <CardDescription className="text-center text-gray-300">
+        <CardDescription className="text-center text-[var(--oklch-text-secondary)]">
           To become a Career Builder, you must apply through our approval process.
         </CardDescription>
       </CardHeader>
@@ -84,7 +84,7 @@ export default function ClientSignup() {
           </AlertDescription>
         </Alert>
 
-        <div className="space-y-3 text-sm text-gray-300">
+        <div className="space-y-3 text-sm text-[var(--oklch-text-secondary)]">
           <p className="font-semibold text-white">Here&apos;s how it works:</p>
           <ol className="ml-2 list-inside list-decimal space-y-2">
             <li>Create a Talent account (if you haven&apos;t already)</li>
@@ -113,7 +113,7 @@ export default function ClientSignup() {
           </Alert>
         )}
 
-        <p className="text-center text-sm text-gray-400">
+        <p className="text-center text-sm text-[var(--oklch-text-tertiary)]">
           {user && (userRole === "client" || profile?.role === "client")
             ? "Redirecting you to your Career Builder dashboard..."
             : "Redirecting you to the Career Builder application page..."}

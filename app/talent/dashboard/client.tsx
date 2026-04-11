@@ -784,7 +784,11 @@ function TalentDashboardContent({
   // No fatalError check needed - component won't render if client creation fails
   if (authLoading || dataLoading || isInVerificationGracePeriodRef.current) {
     return (
-      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+      <PageShell
+        ambientTone="lifted"
+        className="grain-texture glow-backplate text-[var(--oklch-text-primary)]"
+        containerClassName="flex min-h-[70vh] items-center justify-center py-8"
+      >
         <div className="text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-white/70" />
           <p className="mt-4 text-[var(--oklch-text-secondary)]">Loading your dashboard...</p>
@@ -810,7 +814,11 @@ function TalentDashboardContent({
 
   if (user && !profile) {
     return (
-      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+      <PageShell
+        ambientTone="lifted"
+        className="grain-texture glow-backplate text-[var(--oklch-text-primary)]"
+        containerClassName="flex min-h-[70vh] items-center justify-center py-8"
+      >
         <SectionCard className="mx-auto w-full max-w-md text-center">
           <AlertCircle className="mx-auto mb-4 h-12 w-12 text-amber-400" aria-hidden />
           <h2 className="mb-2 text-xl font-semibold text-[var(--oklch-text-primary)]">Finishing your setup</h2>
@@ -827,7 +835,11 @@ function TalentDashboardContent({
 
   if (!user) {
     return (
-      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+      <PageShell
+        ambientTone="lifted"
+        className="grain-texture glow-backplate text-[var(--oklch-text-primary)]"
+        containerClassName="flex min-h-[70vh] items-center justify-center py-8"
+      >
         <SectionCard className="mx-auto w-full max-w-md text-center">
           <User className="mx-auto mb-6 h-16 w-16 text-[var(--oklch-text-secondary)]" aria-hidden />
           <h2 className="mb-3 text-2xl font-bold text-[var(--oklch-text-primary)]">Welcome back</h2>
@@ -853,7 +865,7 @@ function TalentDashboardContent({
   }
 
   return (
-    <PageShell topPadding={false} fullBleed>
+    <PageShell ambientTone="lifted" topPadding={false} fullBleed>
       <div className="panel-frosted sticky top-0 z-40 border-b border-border/40">
         <div className="container mx-auto px-4 py-2 sm:py-3">
           <div className="flex min-h-12 items-center justify-between gap-2 md:hidden">
@@ -870,7 +882,7 @@ function TalentDashboardContent({
               </Avatar>
               <div className="min-w-0">
                 <p className="truncate text-base font-semibold text-white">Talent Dashboard</p>
-                <p className="truncate text-xs text-gray-300">
+                <p className="truncate text-xs text-[var(--oklch-text-secondary)]">
                   {talentProfile?.first_name ? `Welcome back, ${talentProfile.first_name}` : "Ready to discover opportunities"}
                 </p>
               </div>
@@ -904,7 +916,7 @@ function TalentDashboardContent({
                 <h1 className="text-2xl font-bold text-white">
                   Welcome back, {talentProfile?.first_name || "Talent"}!
                 </h1>
-                <p className="text-gray-300">Ready to discover your next opportunity?</p>
+                <p className="text-[var(--oklch-text-secondary)]">Ready to discover your next opportunity?</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -912,7 +924,7 @@ function TalentDashboardContent({
                 viewAllHref="/talent/dashboard"
                 variant="outline"
                 size="sm"
-                className="border-gray-700 text-white hover:bg-gray-800"
+                className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
                 showLabel
               />
               <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
@@ -925,7 +937,7 @@ function TalentDashboardContent({
                 variant="outline"
                 size="sm"
                 asChild
-                className="border-gray-700 text-white hover:bg-gray-800"
+                className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
               >
                 <Link href="/settings" className="flex items-center">
                   <Settings className="h-4 w-4 mr-2" />
@@ -937,7 +949,7 @@ function TalentDashboardContent({
                 size="sm"
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 {isSigningOut ? "Signing Out..." : "Sign Out"}
@@ -980,7 +992,7 @@ function TalentDashboardContent({
         </div>
 
         <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
-          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -998,7 +1010,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -1016,7 +1028,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="flex h-full min-w-0 flex-col bg-gray-900 border-gray-800 transition-shadow hover:shadow-md">
+          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -1037,62 +1049,62 @@ function TalentDashboardContent({
 
         <Tabs defaultValue="overview" className="space-y-6">
           <MobileTabRail>
-            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl p-1">
               <TabsTrigger
                 value="overview"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs"
               >
                 <Activity className="h-3.5 w-3.5" />
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="applications"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs"
               >
                 <Target className="h-3.5 w-3.5" />
                 Applications
               </TabsTrigger>
               <TabsTrigger
                 value="bookings"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs"
               >
                 <Calendar className="h-3.5 w-3.5" />
                 Bookings
               </TabsTrigger>
               <TabsTrigger
                 value="discover"
-                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+                className="min-h-10 whitespace-nowrap px-3 py-2 text-xs"
               >
                 <Search className="h-3.5 w-3.5" />
                 Discover
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="hidden w-full grid-cols-4 border-gray-800 bg-gray-900 md:grid lg:w-auto lg:grid-cols-4">
+          <TabsList className="hidden w-full grid-cols-4 md:grid lg:w-auto lg:grid-cols-4">
             <TabsTrigger
               value="overview"
-              className="flex items-center gap-2 text-white data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex min-h-10 items-center gap-2 px-3 py-2"
             >
               <Activity className="h-4 w-4" />
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="applications"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex min-h-10 items-center gap-2 px-3 py-2"
             >
               <Target className="h-4 w-4" />
               Applications
             </TabsTrigger>
             <TabsTrigger
               value="bookings"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex min-h-10 items-center gap-2 px-3 py-2"
             >
               <Calendar className="h-4 w-4" />
               Bookings
             </TabsTrigger>
             <TabsTrigger
               value="discover"
-              className="flex items-center gap-2 text-gray-300 data-[state=active]:bg-gray-800 data-[state=active]:text-white"
+              className="flex min-h-10 items-center gap-2 px-3 py-2"
             >
               <Search className="h-4 w-4" />
               Discover
@@ -1102,7 +1114,7 @@ function TalentDashboardContent({
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Primary CTA: Browse Opportunities first */}
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
+              <Card className="lg:col-span-1">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -1113,7 +1125,7 @@ function TalentDashboardContent({
                       Live
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-300">
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">
                     Discover new opportunities
                   </CardDescription>
                 </CardHeader>
@@ -1131,7 +1143,7 @@ function TalentDashboardContent({
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-1 bg-gray-900 border-gray-800">
+              <Card className="lg:col-span-1">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -1142,7 +1154,7 @@ function TalentDashboardContent({
                       Snapshot
                     </Badge>
                   </div>
-                  <CardDescription className="text-gray-300">Your activity summary</CardDescription>
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">Your activity summary</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -1163,7 +1175,7 @@ function TalentDashboardContent({
               </Card>
             </div>
 
-            <Card className="lg:col-span-2 bg-gray-900 border-gray-800">
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <div className="card-header-row">
                   <CardTitle className="flex items-center gap-2 text-white">
@@ -1174,7 +1186,7 @@ function TalentDashboardContent({
                     Confirmed
                   </Badge>
                 </div>
-                <CardDescription className="text-gray-300">
+                <CardDescription className="text-[var(--oklch-text-secondary)]">
                   Your confirmed and pending bookings
                 </CardDescription>
               </CardHeader>
@@ -1204,10 +1216,10 @@ function TalentDashboardContent({
                                 <p className="text-sm font-semibold text-white truncate">
                                   {app.gigs?.title}
                                 </p>
-                                <p className="text-xs text-gray-300">
+                                <p className="text-xs text-[var(--oklch-text-secondary)]">
                                   {app.gigs?.client_profiles?.company_name || "Private Client"}
                                 </p>
-                                <div className="flex items-center gap-2 text-xs text-gray-400">
+                                <div className="flex items-center gap-2 text-xs text-[var(--oklch-text-tertiary)]">
                                   <span className="flex items-center gap-1">
                                     <Calendar className="h-3 w-3" />
                                     <SafeDate date={app.created_at} />
@@ -1220,7 +1232,7 @@ function TalentDashboardContent({
                               </div>
                               <div className="flex flex-col items-end gap-2">
                                 <ApplicationStatusBadge status={app.status} showIcon={false} />
-                                <Button variant="ghost" size="icon" className="text-gray-400">
+                                <Button variant="ghost" size="icon" className="text-[var(--oklch-text-muted)]">
                                   <ChevronRight className="h-4 w-4" />
                                 </Button>
                               </div>
@@ -1240,7 +1252,7 @@ function TalentDashboardContent({
                         .map((app) => (
                           <div
                             key={app.id}
-                            className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                            className="flex flex-col gap-4 rounded-lg border border-border/40 p-4 transition-shadow hover:shadow-md md:flex-row"
                           >
                             <div className="w-full md:w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
                               <SafeImage
@@ -1259,10 +1271,10 @@ function TalentDashboardContent({
                                 </h4>
                                 <ApplicationStatusBadge status={app.status} showIcon={true} />
                               </div>
-                              <p className="text-gray-300 font-medium">
+                              <p className="text-[var(--oklch-text-secondary)] font-medium">
                                 {app.gigs?.client_profiles?.company_name || "Private Client"}
                               </p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-[var(--oklch-text-secondary)]">
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
                                   <SafeDate date={app.created_at} />
@@ -1299,8 +1311,8 @@ function TalentDashboardContent({
                   </>
                 ) : (
                   <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-300 mb-4">You don&apos;t have any upcoming opportunities.</p>
+                    <Calendar className="h-12 w-12 text-[var(--oklch-text-tertiary)] mx-auto mb-4" />
+                    <p className="text-[var(--oklch-text-secondary)] mb-4">You don&apos;t have any upcoming opportunities.</p>
                     <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
                       <Link href="/gigs">Browse Available Opportunities</Link>
                     </Button>
@@ -1311,17 +1323,17 @@ function TalentDashboardContent({
           </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">
-            <Card className="bg-gray-900 border-gray-800">
+            <Card>
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="space-y-2">
                     <div className="card-header-row">
-                      <CardTitle className="text-white">My TalentApplications</CardTitle>
+                      <CardTitle>My Applications</CardTitle>
                       <Badge variant="outline" className="status-chip">
                         Active
                       </Badge>
                     </div>
-                    <CardDescription className="text-gray-300">
+                    <CardDescription className="text-[var(--oklch-text-secondary)]">
                       Track all your opportunity applications and their status
                     </CardDescription>
                   </div>
@@ -1329,7 +1341,7 @@ function TalentDashboardContent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-gray-700 text-white hover:bg-gray-800"
+                      className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
                     >
                       <Filter className="h-4 w-4 mr-2" />
                       Filter
@@ -1337,7 +1349,7 @@ function TalentDashboardContent({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-gray-700 text-white hover:bg-gray-800"
+                      className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
                     >
                       Export
                     </Button>
@@ -1349,7 +1361,7 @@ function TalentDashboardContent({
                 {applicationsLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-300">Loading your applications...</p>
+                    <p className="mt-4 text-[var(--oklch-text-secondary)]">Loading your applications...</p>
                   </div>
                 ) : applicationsError ? (
                   <EmptyState
@@ -1398,10 +1410,10 @@ function TalentDashboardContent({
                               <p className="text-sm font-semibold text-white truncate">
                                 {app.gigs?.title}
                               </p>
-                              <p className="text-xs text-gray-300">
+                              <p className="text-xs text-[var(--oklch-text-secondary)]">
                                 {app.gigs?.client_profiles?.company_name || "Private Client"}
                               </p>
-                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <div className="flex items-center gap-2 text-xs text-[var(--oklch-text-tertiary)]">
                                 <span className="flex items-center gap-1">
                                   <DollarSign className="h-3 w-3" />
                                   {app.gigs?.compensation || "TBD"}
@@ -1417,7 +1429,7 @@ function TalentDashboardContent({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-gray-400 hover:bg-gray-700"
+                                className="text-[var(--oklch-text-muted)] hover:bg-white/10"
                                 onClick={() => handleViewDetails(app)}
                               >
                                 <ChevronRight className="h-4 w-4" />
@@ -1441,7 +1453,7 @@ function TalentDashboardContent({
                       {applications.map((app) => (
                         <div
                           key={app.id}
-                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-700 rounded-lg hover:shadow-md transition-shadow bg-gray-800"
+                          className="panel-frosted flex flex-col gap-4 rounded-lg border border-border/40 p-4 transition-shadow hover:shadow-md md:flex-row"
                         >
                           <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
@@ -1458,10 +1470,10 @@ function TalentDashboardContent({
                               <h4 className="font-semibold text-lg text-white">{app.gigs?.title}</h4>
                               <ApplicationStatusBadge status={app.status} showIcon={true} />
                             </div>
-                            <p className="text-gray-300 font-medium">
+                            <p className="text-[var(--oklch-text-secondary)] font-medium">
                               {app.gigs?.client_profiles?.company_name || "Private Client"}
                             </p>
-                            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                            <div className="flex flex-wrap gap-4 text-sm text-[var(--oklch-text-tertiary)]">
                               <Badge
                                 variant="outline"
                                 className={getCategoryColor(app.gigs?.category || "General")}
@@ -1481,7 +1493,7 @@ function TalentDashboardContent({
                             <Button
                               variant="outline"
                               size="sm"
-                              className="flex-1 md:flex-none bg-transparent border-gray-700 text-white hover:bg-gray-700"
+                              className="flex-1 border-white/15 bg-transparent md:flex-none hover:bg-white/10"
                               onClick={() => handleViewDetails(app)}
                             >
                               View Details
@@ -1489,7 +1501,7 @@ function TalentDashboardContent({
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="text-gray-400 hover:bg-gray-700"
+                              className="text-[var(--oklch-text-muted)] hover:bg-white/10"
                             >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -1548,10 +1560,10 @@ function TalentDashboardContent({
                               <p className="text-sm font-semibold text-white truncate">
                                 {booking.gigs?.title}
                               </p>
-                              <p className="text-xs text-gray-300">
+                              <p className="text-xs text-[var(--oklch-text-secondary)]">
                                 {booking.gigs?.client_profiles?.company_name || "Private Client"}
                               </p>
-                              <div className="flex items-center gap-2 text-xs text-gray-400">
+                              <div className="flex items-center gap-2 text-xs text-[var(--oklch-text-tertiary)]">
                                 <span className="flex items-center gap-1">
                                   <Calendar className="h-3 w-3" />
                                   <SafeDate date={booking.date} format="datetime" />
@@ -1569,7 +1581,7 @@ function TalentDashboardContent({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-gray-400 hover:bg-gray-700"
+                                className="text-[var(--oklch-text-muted)] hover:bg-white/10"
                                 onClick={() => handleViewBookingDetails(booking)}
                               >
                                 <ChevronRight className="h-4 w-4" />
@@ -1593,7 +1605,7 @@ function TalentDashboardContent({
                       {bookings.map((booking) => (
                         <div
                           key={booking.id}
-                          className="flex flex-col md:flex-row gap-4 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+                          className="flex flex-col gap-4 rounded-lg border border-border/40 p-4 transition-shadow hover:shadow-md md:flex-row"
                         >
                           <div className="w-full md:w-24 h-24 relative rounded-lg overflow-hidden flex-shrink-0">
                             <SafeImage
@@ -1612,10 +1624,10 @@ function TalentDashboardContent({
                               </h4>
                               <ApplicationStatusBadge status="accepted" showIcon={true} />
                             </div>
-                            <p className="text-gray-300 font-medium">
+                            <p className="text-[var(--oklch-text-secondary)] font-medium">
                               {booking.gigs?.client_profiles?.company_name || "Private Client"}
                             </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-300">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-[var(--oklch-text-secondary)]">
                               <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 <SafeDate date={booking.date} format="datetime" />
@@ -1697,7 +1709,7 @@ function TalentDashboardContent({
                 {dataLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-300">Loading available opportunities...</p>
+                    <p className="mt-4 text-[var(--oklch-text-secondary)]">Loading available opportunities...</p>
                   </div>
                 ) : dataError ? (
                   <EmptyState

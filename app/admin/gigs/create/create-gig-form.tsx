@@ -98,21 +98,23 @@ export function CreateGigForm() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient text-[var(--oklch-text-primary)]">
       <div className="container mx-auto px-4 py-12">
         <Link
           href="/admin/dashboard"
-          className="inline-flex items-center text-gray-300 hover:text-white mb-8 transition-colors"
+          className="mb-8 inline-flex items-center text-[var(--oklch-text-secondary)] transition-colors hover:text-[var(--oklch-text-primary)]"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to dashboard
         </Link>
 
-        <div className="max-w-4xl mx-auto bg-gray-900 border border-gray-800 rounded-xl shadow-sm overflow-hidden">
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-border/40 bg-card/25 shadow-sm backdrop-blur-md">
           <div className="p-8">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold mb-2 text-white">Create a New Opportunity</h1>
-              <p className="text-gray-300">
+              <h1 className="mb-2 text-2xl font-bold text-[var(--oklch-text-primary)]">
+                Create a New Opportunity
+              </h1>
+              <p className="text-[var(--oklch-text-secondary)]">
                 Fill out the form below to create a new casting call or opportunity. Be as detailed as
                 possible to attract the right talent.
               </p>
@@ -125,40 +127,40 @@ export function CreateGigForm() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-white">Opportunity Title</Label>
+                <Label htmlFor="title" className="text-[var(--oklch-text-primary)]">Opportunity Title</Label>
                 <Input
                   id="title"
                   name="title"
                   placeholder="e.g., Luxury Jewelry Campaign"
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                  className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company" className="text-white">Company/Brand Name</Label>
+                <Label htmlFor="company" className="text-[var(--oklch-text-primary)]">Company/Brand Name</Label>
                 <Input
                   id="company"
                   name="company"
                   placeholder="Your company or brand name"
                   defaultValue="Admin Company"
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                  className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-white">Opportunity Type</Label>
+                  <Label htmlFor="category" className="text-[var(--oklch-text-primary)]">Opportunity Type</Label>
                   <Select value={category} onValueChange={setCategory}>
                     <SelectTrigger 
                       id="category"
-                      className="bg-gray-800 border-gray-700 text-white data-[placeholder]:text-gray-500"
+                      className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] data-[placeholder]:text-[var(--oklch-text-muted)]"
                     >
                       <SelectValue placeholder="Select opportunity type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectContent className="border-border/40 bg-card/95 text-[var(--oklch-text-primary)] backdrop-blur-md">
                       {VISIBLE_GIG_CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat} className="text-white focus:bg-gray-700 focus:text-white">
+                        <SelectItem key={cat} value={cat} className="focus:bg-white/10 focus:text-[var(--oklch-text-primary)]">
                           {getCategoryLabel(cat)}
                         </SelectItem>
                       ))}
@@ -167,17 +169,17 @@ export function CreateGigForm() {
                   <input type="hidden" name="category" value={category} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-white">Location</Label>
+                  <Label htmlFor="location" className="text-[var(--oklch-text-primary)]">Location</Label>
                   <div className="relative">
                     <MapPin
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                       size={16}
                     />
                     <Input
                       id="location"
                       name="location"
                       placeholder="e.g., New York, NY"
-                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                       required
                     />
                   </div>
@@ -185,38 +187,38 @@ export function CreateGigForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-white">Description</Label>
+                <Label htmlFor="description" className="text-[var(--oklch-text-primary)]">Description</Label>
                 <Textarea
                   id="description"
                   name="description"
                   placeholder="Describe the opportunity, requirements, and what you're looking for..."
                   rows={4}
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                  className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="start_date" className="text-white">Start Date</Label>
+                  <Label htmlFor="start_date" className="text-[var(--oklch-text-primary)]">Start Date</Label>
                   <div className="relative">
                     <Calendar
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                       size={16}
                     />
                     <Input 
                       id="start_date" 
                       name="start_date" 
                       type="date" 
-                      className="pl-9 bg-gray-800 border-gray-700 text-white" 
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)]" 
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compensation_min" className="text-white">Min Compensation</Label>
+                  <Label htmlFor="compensation_min" className="text-[var(--oklch-text-primary)]">Min Compensation</Label>
                   <div className="relative">
                     <DollarSign
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                       size={16}
                     />
                     <Input
@@ -224,15 +226,15 @@ export function CreateGigForm() {
                       name="compensation_min"
                       type="number"
                       placeholder="0"
-                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compensation_max" className="text-white">Max Compensation</Label>
+                  <Label htmlFor="compensation_max" className="text-[var(--oklch-text-primary)]">Max Compensation</Label>
                   <div className="relative">
                     <DollarSign
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                       size={16}
                     />
                     <Input
@@ -240,17 +242,17 @@ export function CreateGigForm() {
                       name="compensation_max"
                       type="number"
                       placeholder="1000"
-                      className="pl-9 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4 rounded-lg border border-gray-700/80 bg-gray-800/40 p-4">
+              <div className="space-y-4 rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <Label className="text-base text-white">Reference links (optional)</Label>
-                    <p className="text-sm text-gray-400">
+                    <Label className="text-base text-[var(--oklch-text-primary)]">Reference links (optional)</Label>
+                    <p className="text-sm text-[var(--oklch-text-tertiary)]">
                       Company site, reels, social, portfolio—help talent see the vibe. Up to {MAX_REFERENCE_LINKS}{" "}
                       links, http(s) only.
                     </p>
@@ -261,23 +263,23 @@ export function CreateGigForm() {
                     size="sm"
                     onClick={addReferenceLinkRow}
                     disabled={referenceLinks.length >= MAX_REFERENCE_LINKS || state?.success === true}
-                    className="shrink-0 border-gray-600 text-gray-200 hover:bg-gray-800"
+                    className="shrink-0 border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                   >
                     <Plus className="mr-1 h-4 w-4" />
                     Add link
                   </Button>
                 </div>
                 {referenceLinks.length === 0 ? (
-                  <p className="text-sm text-gray-500">No reference links yet.</p>
+                  <p className="text-sm text-[var(--oklch-text-muted)]">No reference links yet.</p>
                 ) : (
                   <ul className="space-y-4">
                     {referenceLinks.map((row, idx) => (
                       <li
                         key={idx}
-                        className="grid grid-cols-1 gap-3 rounded-md border border-gray-700/60 bg-gray-900/50 p-3 md:grid-cols-12 md:items-end"
+                        className="grid grid-cols-1 gap-3 rounded-lg border border-border/40 bg-card/30 p-3 md:grid-cols-12 md:items-end"
                       >
                         <div className="md:col-span-5 space-y-2">
-                          <Label htmlFor={`ref-url-${idx}`} className="text-white">
+                          <Label htmlFor={`ref-url-${idx}`} className="text-[var(--oklch-text-primary)]">
                             URL
                           </Label>
                           <Input
@@ -285,11 +287,11 @@ export function CreateGigForm() {
                             placeholder="https://…"
                             value={row.url}
                             onChange={(e) => updateReferenceLink(idx, { url: e.target.value })}
-                            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                            className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                           />
                         </div>
                         <div className="md:col-span-4 space-y-2">
-                          <Label htmlFor={`ref-label-${idx}`} className="text-white">
+                          <Label htmlFor={`ref-label-${idx}`} className="text-[var(--oklch-text-primary)]">
                             Label
                           </Label>
                           <Input
@@ -297,11 +299,11 @@ export function CreateGigForm() {
                             placeholder="e.g. Brand reel"
                             value={row.label}
                             onChange={(e) => updateReferenceLink(idx, { label: e.target.value })}
-                            className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                            className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                           />
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                          <Label htmlFor={`ref-kind-${idx}`} className="text-white">
+                          <Label htmlFor={`ref-kind-${idx}`} className="text-[var(--oklch-text-primary)]">
                             Type
                           </Label>
                           <Select
@@ -314,13 +316,13 @@ export function CreateGigForm() {
                           >
                             <SelectTrigger
                               id={`ref-kind-${idx}`}
-                              className="bg-gray-800 border-gray-700 text-white data-[placeholder]:text-gray-500"
+                              className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] data-[placeholder]:text-[var(--oklch-text-muted)]"
                             >
                               <SelectValue placeholder="Select" />
                             </SelectTrigger>
-                            <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                            <SelectContent className="border-border/40 bg-card/95 text-[var(--oklch-text-primary)] backdrop-blur-md">
                               {GIG_REFERENCE_LINK_KINDS.map((k) => (
-                                <SelectItem key={k} value={k} className="focus:bg-gray-700 focus:text-white">
+                                <SelectItem key={k} value={k} className="focus:bg-white/10 focus:text-[var(--oklch-text-primary)]">
                                   {referenceLinkKindLabel(k)}
                                 </SelectItem>
                               ))}
@@ -334,7 +336,7 @@ export function CreateGigForm() {
                             size="icon"
                             onClick={() => removeReferenceLinkRow(idx)}
                             disabled={state?.success === true}
-                            className="text-rose-400 hover:bg-gray-800 hover:text-rose-300"
+                            className="text-rose-400 hover:bg-white/10 hover:text-rose-300"
                             aria-label="Remove link"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -347,7 +349,7 @@ export function CreateGigForm() {
               </div>
 
               <div className="space-y-4">
-                <Label className="text-white">Requirements</Label>
+                <Label className="text-[var(--oklch-text-primary)]">Requirements</Label>
                 {requirements.map((requirement, index) => (
                   <div key={index} className="flex space-x-2">
                     <Input
@@ -355,7 +357,7 @@ export function CreateGigForm() {
                       placeholder="e.g., Female, 18-25, athletic build"
                       value={requirement}
                       onChange={(e) => updateRequirement(index, e.target.value)}
-                      className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
+                      className="border-border/40 bg-white/5 text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-muted)]"
                     />
                     {requirements.length > 1 && (
                       <Button
@@ -363,7 +365,7 @@ export function CreateGigForm() {
                         variant="outline"
                         size="icon"
                         onClick={() => removeRequirement(index)}
-                        className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                        className="border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                       >
                         <Minus size={16} />
                       </Button>
@@ -374,7 +376,7 @@ export function CreateGigForm() {
                   type="button" 
                   variant="outline" 
                   onClick={addRequirement} 
-                  className="w-full border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                  className="w-full border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Add Requirement
@@ -385,18 +387,18 @@ export function CreateGigForm() {
                 <Switch 
                   id="urgent" 
                   name="urgent"
-                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-700"
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-white/20"
                 />
-                <Label htmlFor="urgent" className="text-white">Mark as urgent</Label>
+                <Label htmlFor="urgent" className="text-[var(--oklch-text-primary)]">Mark as urgent</Label>
               </div>
 
               <div className="flex items-center space-x-2">
                 <Switch 
                   id="featured" 
                   name="featured"
-                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-700"
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-white/20"
                 />
-                <Label htmlFor="featured" className="text-white">Feature this gig</Label>
+                <Label htmlFor="featured" className="text-[var(--oklch-text-primary)]">Feature this gig</Label>
               </div>
 
               {/* Gig Cover Image Upload */}
@@ -412,7 +414,7 @@ export function CreateGigForm() {
                   type="button" 
                   variant="outline" 
                   asChild
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white"
+                  className="border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                 >
                   <Link href="/admin/dashboard">Cancel</Link>
                 </Button>

@@ -13,7 +13,7 @@ export function SecondaryActionLink({ href, children, className }: SecondaryActi
   return (
     <Link
       href={href}
-      className={`text-sm text-gray-300 underline-offset-4 hover:text-white hover:underline ${className ?? ""}`.trim()}
+      className={`text-sm text-[var(--oklch-text-secondary)] underline-offset-4 hover:text-[var(--oklch-text-primary)] hover:underline ${className ?? ""}`.trim()}
     >
       {children}
     </Link>

@@ -138,7 +138,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
     <Card className="bg-gray-800 border-gray-700">
       <CardHeader>
         <CardTitle className="text-white">Client Details</CardTitle>
-        <CardDescription className="text-gray-400">
+        <CardDescription className="text-[var(--oklch-text-tertiary)]">
           Update your company and contact information
         </CardDescription>
       </CardHeader>
@@ -151,7 +151,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="company_name"
-                className={errors.company_name ? "text-red-400" : "text-gray-300"}
+                className={errors.company_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Company Name *
               </Label>
@@ -173,7 +173,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="industry" className="text-gray-300">
+                <Label htmlFor="industry" className="text-[var(--oklch-text-secondary)]">
                   Industry
                 </Label>
                 <Select
@@ -199,7 +199,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company_size" className="text-gray-300">
+                <Label htmlFor="company_size" className="text-[var(--oklch-text-secondary)]">
                   Company Size
                 </Label>
                 <Select
@@ -224,7 +224,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="website"
-                className={errors.website ? "text-red-400" : "text-gray-300"}
+                className={errors.website ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Company Website
               </Label>
@@ -251,7 +251,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="contact_name"
-                className={errors.contact_name ? "text-red-400" : "text-gray-300"}
+                className={errors.contact_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
                 Contact Person Name *
               </Label>
@@ -275,7 +275,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
               <div className="space-y-2">
                 <Label
                   htmlFor="contact_email"
-                  className={errors.contact_email ? "text-red-400" : "text-gray-300"}
+                  className={errors.contact_email ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
                 >
                   Contact Email *
                 </Label>
@@ -297,7 +297,7 @@ export function ClientDetailsSection({ client }: ClientDetailsSectionProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contact_phone" className="text-gray-300">
+                <Label htmlFor="contact_phone" className="text-[var(--oklch-text-secondary)]">
                   Contact Phone
                 </Label>
                 <Input

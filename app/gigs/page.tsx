@@ -8,6 +8,7 @@ import { GigCard } from "@/components/gigs/gig-card";
 import { GigsFilterForm } from "@/components/gigs/gigs-filter-form";
 import { RetryButton } from "@/components/gigs/retry-button";
 import { SavedSearchesBar } from "@/components/gigs/saved-searches-bar";
+import { PageShell } from "@/components/layout/page-shell";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Button } from "@/components/ui/button";
 import { getCategoryFilterSet } from "@/lib/constants/gig-categories";
@@ -258,39 +259,37 @@ export default async function GigsPage({
   if (error && error.code !== "PGRST103") {
     logger.error("Error fetching gigs", error);
     return (
-      <div className="min-h-screen bg-black pt-40">
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-16 text-center">
-              <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-white animate-apple-fade-in">
-                Find Opportunities
-              </h1>
-              <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
-                Browse through available opportunities. Filter by opportunity type,
-                location, and more to find the perfect match for your talents.
-              </p>
-            </div>
-            <div className="text-center py-20">
-              <div className="max-w-2xl mx-auto">
-                <div className="mb-8 animate-apple-scale-in">
-                  <div className="w-24 h-24 mx-auto bg-red-500/10 rounded-full flex items-center justify-center mb-6">
-                    <Search className="h-12 w-12 text-red-400" />
-                  </div>
+      <PageShell ambientTone="lifted" containerClassName="py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-16 text-center">
+            <h1 className="text-6xl lg:text-7xl font-bold mb-8 text-[var(--oklch-text-primary)] animate-apple-fade-in">
+              Find Opportunities
+            </h1>
+            <p className="text-xl text-[var(--oklch-text-secondary)] max-w-4xl mx-auto leading-relaxed animate-apple-slide-up">
+              Browse through available opportunities. Filter by opportunity type, location, and more to find the
+              perfect match for your talents.
+            </p>
+          </div>
+          <div className="text-center py-20">
+            <div className="max-w-2xl mx-auto">
+              <div className="mb-8 animate-apple-scale-in">
+                <div className="w-24 h-24 mx-auto bg-red-500/10 rounded-full flex items-center justify-center mb-6">
+                  <Search className="h-12 w-12 text-red-400" />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
-                  Unable to Load Opportunities
-                </h3>
-                <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
-                  We&apos;re experiencing technical difficulties. Please try again later.
-                </p>
-                <RetryButton className="apple-button px-8 py-4 text-lg animate-apple-glow">
-                  Try Again
-                </RetryButton>
               </div>
+              <h3 className="text-3xl font-bold text-[var(--oklch-text-primary)] mb-4 animate-apple-fade-in">
+                Unable to Load Opportunities
+              </h3>
+              <p className="text-xl text-[var(--oklch-text-secondary)] mb-8 leading-relaxed animate-apple-slide-up">
+                We&apos;re experiencing technical difficulties. Please try again later.
+              </p>
+              <RetryButton className="apple-button px-8 py-4 text-lg animate-apple-glow">
+                Try Again
+              </RetryButton>
             </div>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
@@ -324,9 +323,12 @@ export default async function GigsPage({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--oklch-bg)] pt-28 sm:pt-32">
-      <div className="container mx-auto px-4 py-10 sm:py-14 md:py-16">
-        <div className="max-w-6xl mx-auto">
+    <PageShell
+      ambientTone="lifted"
+      routeRole={userRole === "talent" ? "talent" : userRole === "client" ? "client" : undefined}
+      containerClassName="py-10 sm:py-14 md:py-16"
+    >
+      <div className="max-w-6xl mx-auto">
           {/* Breadcrumb / Back */}
           <div className="mb-5 sm:mb-8 px-2 sm:px-0">
             <div className="sm:hidden">
@@ -456,7 +458,7 @@ export default async function GigsPage({
                   <h3 className="text-3xl font-bold text-white mb-4 animate-apple-fade-in">
                     No Active Opportunities
                   </h3>
-                  <p className="text-xl text-gray-300 mb-8 leading-relaxed animate-apple-slide-up">
+                  <p className="mb-8 text-xl leading-relaxed text-[var(--oklch-text-secondary)] animate-apple-slide-up">
                     There are currently no active opportunities available. Check back later for new
                     opportunities!
                   </p>
@@ -511,7 +513,6 @@ export default async function GigsPage({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

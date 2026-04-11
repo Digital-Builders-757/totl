@@ -14,6 +14,7 @@ import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { cancelBooking, getClientBookings, updateBookingStatus } from "@/lib/actions/booking-actions";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -136,38 +137,44 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black px-4 py-8">
-        <div className="mx-auto w-full max-w-6xl space-y-6">
-          <div className="space-y-3">
-            <Skeleton className="h-9 w-56 bg-zinc-800/70" />
-            <Skeleton className="h-4 w-72 max-w-full bg-zinc-800/60" />
+      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+        <div className="px-4 py-8">
+          <div className="mx-auto w-full max-w-6xl space-y-6">
+            <div className="space-y-3">
+              <Skeleton className="h-9 w-56 rounded-lg bg-muted/40" />
+              <Skeleton className="h-4 w-72 max-w-full rounded-lg bg-muted/35" />
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
+              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
+              <Skeleton className="h-24 w-full rounded-xl bg-muted/35" />
+            </div>
+            <Skeleton className="h-[420px] w-full rounded-xl bg-muted/35" />
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />
-            <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />
-            <Skeleton className="h-24 w-full rounded-xl bg-zinc-800/60" />
-          </div>
-          <Skeleton className="h-[420px] w-full rounded-xl bg-zinc-800/60" />
         </div>
-      </div>
+      </TotlAtmosphereShell>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Error</h2>
-          <p className="text-gray-300 mb-4">{error instanceof Error ? error.message : "Failed to load bookings"}</p>
-          <Button onClick={() => mutate()}>Try Again</Button>
+      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+        <div className="flex min-h-[100dvh] items-center justify-center px-4">
+          <div className="panel-frosted card-backlit max-w-md rounded-2xl p-8 text-center">
+            <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
+            <h2 className="mb-2 text-xl font-semibold">Error</h2>
+            <p className="mb-4 text-[var(--oklch-text-muted)]">
+              {error instanceof Error ? error.message : "Failed to load bookings"}
+            </p>
+            <Button onClick={() => mutate()}>Try Again</Button>
+          </div>
         </div>
-      </div>
+      </TotlAtmosphereShell>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
       <ClientTerminalHeader
         title="Bookings"
         subtitle="Manage your confirmed talent bookings"
@@ -191,7 +198,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <MobileTabRail>
-            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1">
+            <TabsList className="tabs-list-surface inline-flex h-auto min-w-max gap-1 rounded-xl p-1">
               <TabsTrigger value="all" className="min-h-10 whitespace-nowrap px-3 py-2 text-xs">
                 All ({bookingStats.total})
               </TabsTrigger>
@@ -209,7 +216,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="hidden w-full grid-cols-5 md:grid">
+          <TabsList className="tabs-list-surface hidden w-full grid-cols-5 md:grid">
             <TabsTrigger value="all">All ({bookingStats.total})</TabsTrigger>
             <TabsTrigger value="pending">Pending ({bookingStats.pending})</TabsTrigger>
             <TabsTrigger value="confirmed">Confirmed ({bookingStats.confirmed})</TabsTrigger>
@@ -227,6 +234,6 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </TotlAtmosphereShell>
   );
 }

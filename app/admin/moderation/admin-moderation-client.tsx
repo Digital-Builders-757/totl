@@ -47,7 +47,10 @@ const STATUS_META: Record<FlagStatus, { label: string; badgeClass: string }> = {
   open: { label: "Open", badgeClass: "bg-red-500/15 text-red-400 border-red-500/30" },
   in_review: { label: "In Review", badgeClass: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
   resolved: { label: "Resolved", badgeClass: "bg-green-500/15 text-green-400 border-green-500/30" },
-  dismissed: { label: "Dismissed", badgeClass: "bg-gray-500/15 text-gray-400 border-gray-500/30" },
+  dismissed: {
+    label: "Dismissed",
+    badgeClass: "border-white/20 bg-white/10 text-[var(--oklch-text-tertiary)]",
+  },
 };
 
 const RESOURCE_META: Record<FlagResourceType, { label: string; badgeClass: string }> = {
@@ -143,7 +146,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-900 min-h-screen">
+    <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient text-[var(--oklch-text-primary)]">
       <AdminHeader user={user} />
       <div className="container mx-auto px-4 py-4 sm:py-6">
         {notice && (
@@ -156,10 +159,10 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
         )}
         <div className="mb-4 md:hidden">
           <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+            <summary className="cursor-pointer list-none text-sm font-medium text-[var(--oklch-text-secondary)]">
               <span className="inline-flex items-center gap-2">
                 Show stats
-                <span className="text-xs text-gray-500">({stats.total} total)</span>
+                <span className="text-xs text-[var(--oklch-text-muted)]">({stats.total} total)</span>
               </span>
             </summary>
             <div className="mt-2">
@@ -176,38 +179,40 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
         </div>
 
         <div className="mb-6 hidden gap-4 md:mb-8 md:grid md:grid-cols-2 lg:grid-cols-4">
-          <Card className="min-w-0 bg-gray-800/40 border-gray-700">
+          <Card className="panel-frosted min-w-0 border-border/40">
             <CardHeader className="pb-2">
-              <CardDescription>Total Reports</CardDescription>
-              <CardTitle className="text-3xl text-white">{stats.total}</CardTitle>
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">Total Reports</CardDescription>
+              <CardTitle className="text-3xl text-[var(--oklch-text-primary)]">{stats.total}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="min-w-0 bg-red-950/30 border-red-900/50">
             <CardHeader className="pb-2">
-              <CardDescription>Open</CardDescription>
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">Open</CardDescription>
               <CardTitle className="text-3xl text-red-200">{stats.byStatus.open}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="min-w-0 bg-amber-900/30 border-amber-900/40">
             <CardHeader className="pb-2">
-              <CardDescription>In Review</CardDescription>
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">In Review</CardDescription>
               <CardTitle className="text-3xl text-amber-100">{stats.byStatus.in_review}</CardTitle>
             </CardHeader>
           </Card>
           <Card className="min-w-0 bg-emerald-900/30 border-emerald-900/40">
             <CardHeader className="pb-2">
-              <CardDescription>Resolved</CardDescription>
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">Resolved</CardDescription>
               <CardTitle className="text-3xl text-emerald-100">{stats.byStatus.resolved}</CardTitle>
             </CardHeader>
           </Card>
         </div>
 
-          <Card>
+        <Card className="border-border/40 bg-card/25 backdrop-blur-md">
           <CardHeader>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:gap-4">
               <div>
-                <CardTitle className="text-white">Moderation Queue</CardTitle>
-                <CardDescription>Review reported gigs and take action</CardDescription>
+                <CardTitle className="text-[var(--oklch-text-primary)]">Moderation Queue</CardTitle>
+                <CardDescription className="text-[var(--oklch-text-tertiary)]">
+                  Review reported gigs and take action
+                </CardDescription>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(["all", "open", "in_review", "resolved", "dismissed"] as const).map((key) => {
@@ -219,7 +224,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                       className={
                         activeTab === key
                           ? "bg-white text-black"
-                          : "border-gray-600 text-gray-300 hover:text-white"
+                          : "border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                       }
                       onClick={() => setActiveTab(key)}
                     >
@@ -233,37 +238,37 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
           </CardHeader>
           <CardContent className="p-0">
             {filteredFlags.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">No reports in this bucket.</div>
+              <div className="py-16 text-center text-[var(--oklch-text-tertiary)]">No reports in this bucket.</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-800">
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                    <tr className="bg-card/40">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Resource
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Reporter
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Reason
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Status
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Created
                       </th>
-                      <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                      <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-tertiary)]">
                         Actions
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
                     {filteredFlags.map((flag) => (
-                      <tr key={flag.id} className="hover:bg-gray-800/60 text-sm text-gray-200">
+                      <tr key={flag.id} className="text-sm text-[var(--oklch-text-secondary)] hover:bg-white/5">
                         <td className="py-4 px-6">
-                          <div className="font-medium">
+                          <div className="font-medium text-[var(--oklch-text-primary)]">
                             {flag.gig?.title ??
                               flag.target_profile?.display_name ??
                               `${flag.resource_type} ${flag.resource_id}`}
@@ -272,7 +277,9 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                             <Badge className={`border ${RESOURCE_META[flag.resource_type].badgeClass}`}>
                               {RESOURCE_META[flag.resource_type].label}
                             </Badge>
-                            {flag.gig?.location && <span className="text-gray-400">{flag.gig.location}</span>}
+                            {flag.gig?.location && (
+                              <span className="text-[var(--oklch-text-tertiary)]">{flag.gig.location}</span>
+                            )}
                           </div>
                         </td>
                         <td className="py-4 px-6">
@@ -293,7 +300,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                           <Button
                             size="sm"
                             variant="outline"
-                            className="border-gray-600 text-gray-200 hover:text-white"
+                            className="border-white/15 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-[var(--oklch-text-primary)]"
                             onClick={() => setSelectedFlag(flag)}
                           >
                             Review
@@ -310,7 +317,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
       </div>
 
       <Dialog open={!!selectedFlag} onOpenChange={(open) => !open && setSelectedFlag(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl border-border/40 bg-card/95 text-[var(--oklch-text-primary)] backdrop-blur-md">
           {selectedFlag && (
             <>
               <DialogHeader>
@@ -324,34 +331,36 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
               </DialogHeader>
 
               <div className="grid gap-6">
-                <div className="rounded-xl border border-gray-200 p-4 bg-gray-50">
-                  <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Reason</p>
-                  <p className="text-gray-900 font-medium">{selectedFlag.reason}</p>
+                <div className="rounded-xl border border-border/40 bg-card/30 p-4">
+                  <p className="mb-2 text-xs uppercase tracking-wide text-[var(--oklch-text-tertiary)]">Reason</p>
+                  <p className="font-medium text-[var(--oklch-text-primary)]">{selectedFlag.reason}</p>
                   {selectedFlag.details && (
-                    <p className="mt-2 text-sm text-gray-700 whitespace-pre-line">
+                    <p className="mt-2 whitespace-pre-line text-sm text-[var(--oklch-text-secondary)]">
                       {selectedFlag.details}
                     </p>
                   )}
                 </div>
 
                 {selectedFlag.gig && (
-                  <div className="rounded-xl border border-gray-200 p-4">
-                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Gig</p>
-                    <p className="font-semibold text-gray-900">{selectedFlag.gig.title}</p>
-                    <p className="text-sm text-gray-600">{selectedFlag.gig.location}</p>
-                    <p className="text-sm text-gray-600">
+                  <div className="rounded-xl border border-border/40 bg-card/30 p-4">
+                    <p className="mb-1 text-xs uppercase tracking-wide text-[var(--oklch-text-tertiary)]">Gig</p>
+                    <p className="font-semibold text-[var(--oklch-text-primary)]">{selectedFlag.gig.title}</p>
+                    <p className="text-sm text-[var(--oklch-text-secondary)]">{selectedFlag.gig.location}</p>
+                    <p className="text-sm text-[var(--oklch-text-secondary)]">
                       Client: {selectedFlag.gig.client_profile?.display_name || "N/A"}
                     </p>
                   </div>
                 )}
 
                 {selectedFlag.target_profile && (
-                  <div className="rounded-xl border border-gray-200 p-4 space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Account</p>
-                    <p className="font-semibold text-gray-900">
+                  <div className="space-y-1 rounded-xl border border-border/40 bg-card/30 p-4">
+                    <p className="mb-1 text-xs uppercase tracking-wide text-[var(--oklch-text-tertiary)]">Account</p>
+                    <p className="font-semibold text-[var(--oklch-text-primary)]">
                       {selectedFlag.target_profile.display_name || "Unknown user"}
                     </p>
-                    <p className="text-sm text-gray-600">Role: {selectedFlag.target_profile.role || "N/A"}</p>
+                    <p className="text-sm text-[var(--oklch-text-secondary)]">
+                      Role: {selectedFlag.target_profile.role || "N/A"}
+                    </p>
                     {selectedFlag.target_profile.is_suspended && (
                       <p className="text-sm text-rose-600">
                         Currently suspended
@@ -396,12 +405,12 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                 </div>
 
                 {(selectedFlag.gig || selectedFlag.target_profile) && (
-                  <div className="rounded-xl border border-gray-200 p-4 space-y-4">
-                    <Label className="text-sm font-semibold text-gray-800">Automations</Label>
+                  <div className="space-y-4 rounded-xl border border-border/40 bg-card/30 p-4">
+                    <Label className="text-sm font-semibold text-[var(--oklch-text-primary)]">Automations</Label>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Close this gig</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="font-medium text-[var(--oklch-text-primary)]">Close this gig</p>
+                        <p className="text-sm text-[var(--oklch-text-secondary)]">
                           Sets gig status to closed and removes it from listings.
                         </p>
                       </div>
@@ -409,8 +418,8 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900">Suspend account</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="font-medium text-[var(--oklch-text-primary)]">Suspend account</p>
+                        <p className="text-sm text-[var(--oklch-text-secondary)]">
                           Prevents the account from signing in until reinstated.
                         </p>
                       </div>
@@ -437,10 +446,12 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
                       </div>
                     )}
                     {selectedFlag.target_profile?.is_suspended && (
-                      <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                      <div className="flex items-center justify-between border-t border-border/40 pt-3">
                         <div>
-                          <p className="font-medium text-gray-900">Reinstate account</p>
-                          <p className="text-sm text-gray-600">Lift the current suspension immediately.</p>
+                          <p className="font-medium text-[var(--oklch-text-primary)]">Reinstate account</p>
+                          <p className="text-sm text-[var(--oklch-text-secondary)]">
+                            Lift the current suspension immediately.
+                          </p>
                         </div>
                         <Switch
                           checked={reinstateAccount}
@@ -458,7 +469,7 @@ export function AdminModerationClient({ flags, user, notice }: AdminModerationCl
               </div>
 
               <DialogFooter className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
+                <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-tertiary)]">
                   {STATUS_META[selectedFlag.status].label}
                   {selectedFlag.status === "resolved" && <BadgeCheck className="h-4 w-4 text-green-500" />}
                 </div>

@@ -22,7 +22,7 @@ export default function ApplicationsTabContent({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Applications</h2>
-          <p className="text-gray-300">Review and manage talent applications for your gigs</p>
+          <p className="text-[var(--oklch-text-secondary)]">Review and manage talent applications for your gigs</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
@@ -53,7 +53,7 @@ export default function ApplicationsTabContent({
             {applications.map((application) => (
               <Card
                 key={application.id}
-                className="border border-gray-800 bg-gray-900/80 text-white transition-shadow hover:shadow-md"
+                className="transition-shadow hover:shadow-md"
               >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
@@ -81,17 +81,17 @@ export default function ApplicationsTabContent({
                               ? `${application.talent_profiles.first_name} ${application.talent_profiles.last_name}`
                               : application.profiles?.display_name || "Talent User"}
                           </h3>
-                          <p className="text-gray-300">{application.gigs?.title}</p>
+                          <p className="text-[var(--oklch-text-secondary)]">{application.gigs?.title}</p>
                           <div className="mt-2 flex items-center gap-4">
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-[var(--oklch-text-tertiary)]">
                               <MapPin className="mr-1 inline h-4 w-4" />
                               {application.talent_profiles?.location || "Location not specified"}
                             </span>
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-[var(--oklch-text-tertiary)]">
                               <Clock className="mr-1 inline h-4 w-4" />
                               {application.talent_profiles?.experience || "Experience not specified"}
                             </span>
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-[var(--oklch-text-tertiary)]">
                               Applied {new Date(application.created_at).toLocaleDateString()}
                             </span>
                             {application.profiles?.email_verified && (
@@ -107,11 +107,11 @@ export default function ApplicationsTabContent({
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
+                      <Button variant="outline" size="sm" className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10">
                         <UserCheck className="mr-2 h-4 w-4" />
                         Review
                       </Button>
-                      <Button variant="outline" size="sm" className="border-gray-700 text-white hover:bg-white/5">
+                      <Button variant="outline" size="sm" className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10">
                         <Phone className="mr-2 h-4 w-4" />
                         Contact
                       </Button>

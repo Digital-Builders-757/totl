@@ -113,7 +113,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
             <Briefcase className="h-7 w-7 text-blue-400" />
           </div>
           <h3 className="text-lg font-semibold text-white">No Opportunities Found</h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-[var(--oklch-text-tertiary)]">
             {searchQuery || locationFilter !== "all"
               ? "Try adjusting your search or filters."
               : "No opportunities have been posted yet."}

@@ -21,7 +21,7 @@ export default function GigsTabContent({ gigs, getCategoryColor }: GigsTabConten
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">My Opportunities</h2>
-          <p className="text-gray-300">Manage your posted opportunities and track their performance</p>
+          <p className="text-[var(--oklch-text-secondary)]">Manage your posted opportunities and track their performance</p>
         </div>
         <Button asChild className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:opacity-90">
           <Link href="/client/post-gig">
@@ -35,13 +35,13 @@ export default function GigsTabContent({ gigs, getCategoryColor }: GigsTabConten
         {gigs.map((gig) => (
           <Card
             key={gig.id}
-            className="border border-gray-800 bg-gray-900/80 text-white transition-shadow hover:shadow-lg"
+            className="transition-shadow hover:shadow-lg"
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <CardTitle className="text-lg text-white">{gig.title}</CardTitle>
-                  <CardDescription className="mt-1 text-gray-400">{gig.location}</CardDescription>
+                  <CardDescription className="mt-1 text-[var(--oklch-text-tertiary)]">{gig.location}</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm">
                   <MoreVertical className="h-4 w-4" />
@@ -67,33 +67,33 @@ export default function GigsTabContent({ gigs, getCategoryColor }: GigsTabConten
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Compensation:</span>
+                  <span className="text-[var(--oklch-text-tertiary)]">Compensation:</span>
                   <span className="font-medium">{gig.compensation}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Applications:</span>
+                  <span className="text-[var(--oklch-text-tertiary)]">Applications:</span>
                   <span className="font-medium">{gig.applications_count}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-400">Posted:</span>
+                  <span className="text-[var(--oklch-text-tertiary)]">Posted:</span>
                   <span className="font-medium">{gig.created_at}</span>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
+                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10">
                   <Link href={`/gigs/${gig.id}`}>
                     <Eye className="mr-2 h-4 w-4" />
                     View
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
+                <Button variant="outline" size="sm" asChild className="flex-1 min-w-[7rem] border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10">
                   <Link href={`/client/gigs/${gig.id}/edit`} data-testid="edit-gig">
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 min-w-[7rem] border-gray-700 text-white hover:bg-white/5">
+                <Button variant="outline" size="sm" className="flex-1 min-w-[7rem] border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10">
                   <Users className="mr-2 h-4 w-4" />
                   Applications
                 </Button>
