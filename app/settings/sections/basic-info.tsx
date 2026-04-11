@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@supabase/supabase-js";
+import { User as UserIcon } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -24,6 +25,15 @@ const basicInfoSchema = z.object({
 });
 
 type BasicInfoFormData = z.infer<typeof basicInfoSchema>;
+
+const settingsGlassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] shadow-none";
+const fieldInput =
+  "bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]";
+const fieldInputError =
+  "border-red-500/80 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]";
+const fieldDisabled =
+  "border-white/10 bg-white/[0.04] text-[var(--oklch-text-tertiary)] opacity-90";
 
 interface BasicInfoSectionProps {
   user: User;
@@ -91,50 +101,40 @@ export function BasicInfoSection({ user, profile }: BasicInfoSectionProps) {
   };
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <div className="h-5 w-5">👤</div>
-          Basic Information
+    <Card className={settingsGlassCard}>
+      <CardHeader className="space-y-1">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-white">
+          <UserIcon className="h-5 w-5 text-[var(--oklch-accent)]" aria-hidden />
+          Basic information
         </CardTitle>
-        <CardDescription className="text-gray-400">
-          Update your basic profile information
+        <CardDescription className="text-[var(--oklch-text-secondary)]">
+          Update how your name appears across TOTL
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-300">
+            <Label htmlFor="email" className="text-[var(--oklch-text-secondary)]">
               Email
             </Label>
-            <Input
-              id="email"
-              type="email"
-              value={user.email || ""}
-              disabled
-              className="bg-gray-700 border-gray-600 text-gray-400"
-            />
-            <p className="text-sm text-gray-400">
-              Email cannot be changed. Contact support if you need to update your email.
+            <Input id="email" type="email" value={user.email || ""} disabled className={fieldDisabled} />
+            <p className="text-sm text-[var(--oklch-text-tertiary)]">
+              Email can&apos;t be changed here. Contact support if you need a new address on file.
             </p>
           </div>
 
           <div className="space-y-2">
             <Label
               htmlFor="display_name"
-              className={errors.display_name ? "text-red-400" : "text-gray-300"}
+              className={errors.display_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
             >
-              Display Name *
+              Display name *
             </Label>
             <Input
               id="display_name"
               placeholder="Enter your display name"
               {...register("display_name")}
-              className={
-                errors.display_name
-                  ? "border-red-500 bg-gray-700 text-white"
-                  : "bg-gray-700 border-gray-600 text-white"
-              }
+              className={errors.display_name ? fieldInputError : fieldInput}
               disabled={isSubmitting}
             />
             {errors.display_name && (
@@ -142,21 +142,21 @@ export function BasicInfoSection({ user, profile }: BasicInfoSectionProps) {
             )}
           </div>
 
-          <div className="flex items-center justify-between pt-4">
-            <div className="text-sm text-gray-400">
+          <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-[var(--oklch-text-secondary)]">
               {profile.email_verified ? (
-                <span className="text-green-400">✅ Email verified</span>
+                <span className="text-emerald-400">Email verified</span>
               ) : (
-                <span className="text-yellow-400">⚠️ Email not verified</span>
+                <span className="text-amber-400">Email not verified — check your inbox</span>
               )}
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting || !isDirty}
-              className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+              className="min-w-[120px] shrink-0 border-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting ? "Saving..." : "Save changes"}
             </Button>
           </div>
         </form>

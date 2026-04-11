@@ -22,6 +22,15 @@ import type { Database } from "@/types/supabase";
 type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type MinimalProfile = Pick<Profile, "role" | "subscription_status" | "subscription_plan" | "subscription_current_period_end">;
 
+const settingsGlassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] shadow-none";
+const fieldInput =
+  "bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]";
+const fieldInputError =
+  "border-red-500/80 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]";
+const fieldDisabled =
+  "border-white/10 bg-white/[0.04] text-[var(--oklch-text-tertiary)] opacity-90";
+
 const passwordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
@@ -113,12 +122,12 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
     if (/[0-9]/.test(password)) strength++;
     if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-    const colors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+    const colors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-emerald-500"];
     const texts = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
 
     return {
       strength: Math.min(strength, 5),
-      color: colors[strength - 1] || "bg-gray-200",
+      color: colors[strength - 1] || "bg-white/25",
       text: texts[strength - 1] || "",
     };
   };
@@ -146,49 +155,44 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
   return (
     <div className="space-y-6">
       {/* Account Information */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Account Information</CardTitle>
-          <CardDescription className="text-gray-400">
+      <Card className={settingsGlassCard}>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-lg font-semibold text-white">Account information</CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
             Your account details and verification status
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-gray-300">Email Address</Label>
-              <Input
-                value={user.email || ""}
-                disabled
-                className="bg-gray-700 border-gray-600 text-gray-400"
-              />
+              <Label className="text-[var(--oklch-text-secondary)]">Email address</Label>
+              <Input value={user.email || ""} disabled className={fieldDisabled} />
             </div>
             <div className="space-y-2">
-              <Label className="text-gray-300">Account Created</Label>
+              <Label className="text-[var(--oklch-text-secondary)]">Account created</Label>
               <Input
                 value={user.created_at ? new Date(user.created_at).toLocaleDateString() : "Unknown"}
                 disabled
-                className="bg-gray-700 border-gray-600 text-gray-400"
+                className={fieldDisabled}
               />
             </div>
           </div>
 
-          <Alert className="bg-gray-700 border-gray-600">
-            <AlertTriangle className="h-4 w-4 text-yellow-400" />
-            <AlertDescription className="text-gray-300">
-              For security reasons, email changes require contacting support. Password changes are
-              handled securely through Supabase authentication.
+          <Alert className="border-amber-500/25 bg-amber-500/10 text-[var(--oklch-text-secondary)]">
+            <AlertTriangle className="h-4 w-4 text-amber-400" />
+            <AlertDescription>
+              Email changes require support. Password updates use secure authentication.
             </AlertDescription>
           </Alert>
         </CardContent>
       </Card>
 
       {/* Password Change */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Change Password</CardTitle>
-          <CardDescription className="text-gray-400">
-            Update your account password securely
+      <Card className={settingsGlassCard}>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-lg font-semibold text-white">Change password</CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
+            Update your password securely
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -196,9 +200,11 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
             <div className="space-y-2">
               <Label
                 htmlFor="currentPassword"
-                className={errors.currentPassword ? "text-red-400" : "text-gray-300"}
+                className={
+                  errors.currentPassword ? "text-red-400" : "text-[var(--oklch-text-secondary)]"
+                }
               >
-                Current Password
+                Current password
               </Label>
               <div className="relative">
                 <Input
@@ -206,18 +212,14 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
                   type={showCurrentPassword ? "text" : "password"}
                   placeholder="Enter your current password"
                   {...register("currentPassword")}
-                  className={
-                    errors.currentPassword
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
-                  }
+                  className={errors.currentPassword ? fieldInputError : fieldInput}
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                  className="absolute right-0 top-0 h-full px-3 py-2 text-[var(--oklch-text-tertiary)] hover:bg-transparent hover:text-white"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                 >
                   {showCurrentPassword ? (
@@ -235,9 +237,9 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
             <div className="space-y-2">
               <Label
                 htmlFor="newPassword"
-                className={errors.newPassword ? "text-red-400" : "text-gray-300"}
+                className={errors.newPassword ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
               >
-                New Password
+                New password
               </Label>
               <div className="relative">
                 <Input
@@ -245,18 +247,14 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
                   type={showNewPassword ? "text" : "password"}
                   placeholder="Enter your new password"
                   {...register("newPassword")}
-                  className={
-                    errors.newPassword
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
-                  }
+                  className={errors.newPassword ? fieldInputError : fieldInput}
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                  className="absolute right-0 top-0 h-full px-3 py-2 text-[var(--oklch-text-tertiary)] hover:bg-transparent hover:text-white"
                   onClick={() => setShowNewPassword(!showNewPassword)}
                 >
                   {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -270,40 +268,32 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
               {newPassword && (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-700 rounded-full h-2">
+                    <div className="h-2 flex-1 rounded-full bg-white/10">
                       <div
                         className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                         style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
                       />
                     </div>
-                    <span className="text-sm text-gray-300">{passwordStrength.text}</span>
+                    <span className="text-sm text-[var(--oklch-text-secondary)]">
+                      {passwordStrength.text}
+                    </span>
                   </div>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <p>Password must contain:</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li className={newPassword.length >= 8 ? "text-green-400" : "text-gray-500"}>
+                  <div className="space-y-1 text-xs text-[var(--oklch-text-tertiary)]">
+                    <p className="text-[var(--oklch-text-secondary)]">Password must contain:</p>
+                    <ul className="list-inside list-disc space-y-1">
+                      <li className={newPassword.length >= 8 ? "text-emerald-400" : ""}>
                         At least 8 characters
                       </li>
-                      <li
-                        className={/[A-Z]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
-                      >
+                      <li className={/[A-Z]/.test(newPassword) ? "text-emerald-400" : ""}>
                         One uppercase letter
                       </li>
-                      <li
-                        className={/[a-z]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
-                      >
+                      <li className={/[a-z]/.test(newPassword) ? "text-emerald-400" : ""}>
                         One lowercase letter
                       </li>
-                      <li
-                        className={/[0-9]/.test(newPassword) ? "text-green-400" : "text-gray-500"}
-                      >
+                      <li className={/[0-9]/.test(newPassword) ? "text-emerald-400" : ""}>
                         One number
                       </li>
-                      <li
-                        className={
-                          /[^A-Za-z0-9]/.test(newPassword) ? "text-green-400" : "text-gray-500"
-                        }
-                      >
+                      <li className={/[^A-Za-z0-9]/.test(newPassword) ? "text-emerald-400" : ""}>
                         One special character
                       </li>
                     </ul>
@@ -315,9 +305,11 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
             <div className="space-y-2">
               <Label
                 htmlFor="confirmPassword"
-                className={errors.confirmPassword ? "text-red-400" : "text-gray-300"}
+                className={
+                  errors.confirmPassword ? "text-red-400" : "text-[var(--oklch-text-secondary)]"
+                }
               >
-                Confirm New Password
+                Confirm new password
               </Label>
               <div className="relative">
                 <Input
@@ -325,18 +317,14 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your new password"
                   {...register("confirmPassword")}
-                  className={
-                    errors.confirmPassword
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
-                  }
+                  className={errors.confirmPassword ? fieldInputError : fieldInput}
                   disabled={isSubmitting}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400"
+                  className="absolute right-0 top-0 h-full px-3 py-2 text-[var(--oklch-text-tertiary)] hover:bg-transparent hover:text-white"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -355,9 +343,9 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
               <Button
                 type="submit"
                 disabled={isSubmitting || !isDirty}
-                className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+                className="min-w-[120px] border-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
               >
-                {isSubmitting ? "Updating..." : "Update Password"}
+                {isSubmitting ? "Updating..." : "Update password"}
               </Button>
             </div>
           </form>
@@ -371,19 +359,19 @@ export function AccountSettingsSection({ user, profile }: AccountSettingsSection
       <CareerBuilderSection userEmail={user.email} />
 
       {/* Sign Out */}
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Sign Out</CardTitle>
-          <CardDescription className="text-gray-400">
-            Sign out of your account securely
+      <Card className={settingsGlassCard}>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-lg font-semibold text-white">Sign out</CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
+            End your session on this device
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button
             onClick={handleSignOut}
             disabled={isSigningOut}
-            variant="destructive"
-            className="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white"
+            variant="outline"
+            className="w-full border-red-500/40 bg-red-500/10 text-red-200 hover:bg-red-500/20 hover:text-white md:w-auto"
           >
             {isSigningOut ? (
               <>

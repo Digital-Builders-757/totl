@@ -50,14 +50,14 @@ export function getSubscriptionStatusText(status: SubscriptionStatus): string {
 export function getSubscriptionStatusColor(status: SubscriptionStatus): string {
   switch (status) {
     case 'active':
-      return 'text-green-600';
+      return 'border-emerald-500/35 bg-emerald-500/15 text-emerald-200';
     case 'past_due':
-      return 'text-yellow-600';
+      return 'border-amber-500/35 bg-amber-500/15 text-amber-200';
     case 'canceled':
     case 'none':
-      return 'text-gray-600';
+      return 'border-white/15 bg-white/5 text-[var(--oklch-text-secondary)]';
     default:
-      return 'text-gray-600';
+      return 'border-white/15 bg-white/5 text-[var(--oklch-text-secondary)]';
   }
 }
 

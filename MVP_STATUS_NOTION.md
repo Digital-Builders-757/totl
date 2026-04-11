@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Premium authenticated surfaces — settings, application modal, billing (April 11, 2026)**
+
+**UI / SETTINGS / TALENT** — April 11, 2026
+- ✅ **Application details modal (`components/application-details-modal.tsx`):** Frosted dialog and inner cards use `panel-frosted`, `--totl-surface-glass-strong`, and OKLCH text tokens; duplicate header close removed; application ID row is mobile-safe; "What happens next" copy is status-aware with single CTAs via `PATHS`.
+- ✅ **Settings sections:** `account-settings`, `basic-info`, `subscription-section`, `talent-details`, and `career-builder-section` use glass cards and glass inputs (`bg-white/5`, `border-white/10`); cohesive gradient primaries; sign-out and security alert surfaces match the dark glass band; subscription links use `PATHS` / `PREFIXES`.
+- ✅ **Talent billing + profile loading:** `app/talent/settings/billing/billing-settings.tsx` aligned with subscription glass/OKLCH; `app/talent/profile/loading.tsx` uses a frosted skeleton shell.
+- ✅ **Subscription badge styling:** `getSubscriptionStatusColor` in `lib/subscription.ts` returns border/background/text classes that read correctly on dark glass (settings + billing).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run, April 11, 2026).
+
+**Next (P0):** PR **develop → main**; smoke **`/settings`**, **talent dashboard → application details modal**, **`/talent/settings/billing`**, **talent profile** loading.
+
+**Next (P1):** Mobile spot-check for any remaining gray-heavy secondary routes; align stragglers with `panel-frosted` + OKLCH metadata scale.
+
+---
+
 ## 🚀 **Latest: ViZB catch-up — bookings, admin terminals, gig success, settings shells (April 11, 2026)**
 
 **UI / VIZB** — April 11, 2026
