@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Plus, Minus, Calendar, DollarSign, MapPin, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Minus, Calendar, Clock, DollarSign, MapPin, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useActionState } from "react";
@@ -198,22 +198,46 @@ export function CreateGigForm() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="start_date" className="text-[var(--oklch-text-primary)]">Start Date</Label>
+                  <Label htmlFor="start_date" className="text-[var(--oklch-text-primary)]">
+                    Production Date
+                  </Label>
                   <div className="relative">
                     <Calendar
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                       size={16}
                     />
-                    <Input 
-                      id="start_date" 
-                      name="start_date" 
-                      type="date" 
-                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)]" 
+                    <Input
+                      id="start_date"
+                      name="start_date"
+                      type="date"
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)]"
                     />
                   </div>
+                  <p className="text-xs text-[var(--oklch-text-tertiary)]">When the shoot or production takes place.</p>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="application_deadline" className="text-[var(--oklch-text-primary)]">
+                    Submission Deadline
+                  </Label>
+                  <div className="relative">
+                    <Clock
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
+                      size={16}
+                    />
+                    <Input
+                      id="application_deadline"
+                      name="application_deadline"
+                      type="datetime-local"
+                      className="border-border/40 bg-white/5 pl-9 text-[var(--oklch-text-primary)]"
+                    />
+                  </div>
+                  <p className="text-xs text-[var(--oklch-text-tertiary)]">Last day/time talent can apply (optional).</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="compensation_min" className="text-[var(--oklch-text-primary)]">Min Compensation</Label>
                   <div className="relative">

@@ -1,8 +1,24 @@
 "use client";
 
 import type { User } from "@supabase/supabase-js";
-import { ArrowLeft, Eye, MapPin, Calendar, DollarSign, Building2, Pencil, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Eye,
+  MapPin,
+  Calendar,
+  Clock,
+  DollarSign,
+  Building2,
+  Pencil,
+  Users,
+  Archive,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+
+import { closeGigAsAdminAction, deleteGigAsAdminAction } from "@/app/admin/gigs/gig-lifecycle-actions";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
@@ -66,6 +82,44 @@ export function AdminGigDetailClient({
   applications: GigApplication[];
 }) {
   void user;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+
+  const confirmClose = () => {
+    if (
+      !window.confirm(
+        `Close “${gig.title}”? It will no longer appear as an active opportunity for talent.`
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await closeGigAsAdminAction(gig.id);
+      if (result.ok) router.refresh();
+      else window.alert(result.error);
+    });
+  };
+
+  const confirmDelete = () => {
+    if (applications.length > 0) {
+      window.alert(
+        "This listing has applications and cannot be permanently deleted. Close it instead."
+      );
+      return;
+    }
+    if (
+      !window.confirm(
+        `Permanently delete “${gig.title}”? This cannot be undone. There must be zero applications.`
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await deleteGigAsAdminAction(gig.id);
+      if (result.ok) router.push("/admin/gigs");
+      else window.alert(result.error);
+    });
+  };
 
   return (
     <PageShell topPadding={false} fullBleed className="bg-gradient-to-br from-gray-900 via-black to-gray-800">
@@ -116,8 +170,20 @@ export function AdminGigDetailClient({
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <Calendar className="h-4 w-4" />
-                  <span>{new Date(gig.date).toLocaleDateString()}</span>
+                  <span>Production: {new Date(gig.date).toLocaleDateString()}</span>
                 </div>
+                {gig.application_deadline ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-300 sm:col-span-2">
+                    <Clock className="h-4 w-4" />
+                    <span>
+                      Submission deadline:{" "}
+                      {new Date(gig.application_deadline).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </span>
+                  </div>
+                ) : null}
                 <div className="flex items-center gap-2 text-sm text-gray-300">
                   <DollarSign className="h-4 w-4" />
                   <span>{gig.compensation}</span>
@@ -202,6 +268,42 @@ export function AdminGigDetailClient({
                 })}
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-rose-500/25 bg-rose-950/20">
+          <CardHeader>
+            <CardTitle className="text-white text-base">Remove listing</CardTitle>
+            <p className="text-sm text-gray-400">
+              Closing keeps the record but hides it from active talent listings. Permanent delete is only
+              available when there are no applications.
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            {gig.status !== "closed" ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending}
+                className="border-amber-500/40 text-amber-100 hover:bg-amber-500/10"
+                onClick={confirmClose}
+              >
+                <Archive className="mr-2 h-4 w-4" />
+                Close opportunity
+              </Button>
+            ) : (
+              <p className="text-sm text-gray-400">This opportunity is already closed.</p>
+            )}
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={pending || applications.length > 0}
+              className="bg-rose-600 hover:bg-rose-700"
+              onClick={confirmDelete}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete permanently
+            </Button>
           </CardContent>
         </Card>
       </div>

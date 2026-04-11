@@ -494,7 +494,7 @@ export function PostGigClient({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="date">Opportunity Date *</Label>
+                  <Label htmlFor="date">Production Date *</Label>
                   <Input
                     id="date"
                     type="date"
@@ -505,7 +505,7 @@ export function PostGigClient({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="application_deadline">Application Deadline</Label>
+                  <Label htmlFor="application_deadline">Submission Deadline</Label>
                   <Input
                     id="application_deadline"
                     type="datetime-local"

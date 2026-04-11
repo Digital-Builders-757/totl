@@ -93,6 +93,7 @@ export async function updateGigAsAdminAction(input: {
     return { ok: false, error: gigUpdateError.message ?? "Failed to update opportunity" };
   }
 
+  revalidatePath("/");
   revalidatePath("/admin/gigs");
   revalidatePath(`/admin/gigs/${input.gigId}`);
   revalidatePath("/client/dashboard");

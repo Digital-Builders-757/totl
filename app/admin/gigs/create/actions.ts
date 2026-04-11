@@ -38,6 +38,9 @@ export async function createGig(formData: FormData, referenceLinkRows: GigRefere
   const location = formData.get("location") as string;
   const description = formData.get("description") as string;
   const startDate = formData.get("start_date") as string;
+  const applicationDeadlineRaw = formData.get("application_deadline") as string | null;
+  const applicationDeadline =
+    applicationDeadlineRaw?.trim() ? applicationDeadlineRaw.trim() : null;
   const compensationMin = formData.get("compensation_min") as string;
   const compensationMax = formData.get("compensation_max") as string;
   const imageFile = formData.get("gig_image") as File | null;
@@ -91,6 +94,7 @@ export async function createGig(formData: FormData, referenceLinkRows: GigRefere
       compensation,
       duration: "TBD", // Default duration
       date: startDate || new Date().toISOString().split("T")[0],
+      application_deadline: applicationDeadline,
       image_url: imageUrl,
       status: "active" as const,
       reference_links: linksResult.data,
@@ -111,7 +115,9 @@ export async function createGig(formData: FormData, referenceLinkRows: GigRefere
   }
 
   // Revalidate relevant pages
+  revalidatePath("/");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/gigs");
   revalidatePath("/gigs");
   revalidatePath("/admin/gigs/create");
 

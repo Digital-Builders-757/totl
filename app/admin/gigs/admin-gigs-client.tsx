@@ -11,9 +11,14 @@ import {
   Plus,
   SlidersHorizontal,
   Calendar,
+  Archive,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useMemo, useTransition } from "react";
+
+import { closeGigAsAdminAction, deleteGigAsAdminAction } from "@/app/admin/gigs/gig-lifecycle-actions";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { FiltersSheet } from "@/components/dashboard/filters-sheet";
 import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
@@ -48,6 +53,7 @@ type Gig = {
   image_url: string | null;
   created_at: string;
   updated_at: string;
+  applications_count: number;
   client_profiles: {
     company_name: string;
   };
@@ -59,10 +65,48 @@ interface AdminGigsClientProps {
 }
 
 export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProps) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [locationFilter, setLocationFilter] = useState("all");
+
+  const confirmClose = (gig: Gig) => {
+    if (
+      !window.confirm(
+        `Close “${gig.title}”? It will no longer appear as an active opportunity for talent.`
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await closeGigAsAdminAction(gig.id);
+      if (result.ok) router.refresh();
+      else window.alert(result.error);
+    });
+  };
+
+  const confirmDelete = (gig: Gig) => {
+    if (gig.applications_count > 0) {
+      window.alert(
+        "This listing has applications and cannot be permanently deleted. Close it instead."
+      );
+      return;
+    }
+    if (
+      !window.confirm(
+        `Permanently delete “${gig.title}”? This cannot be undone. There must be zero applications.`
+      )
+    ) {
+      return;
+    }
+    startTransition(async () => {
+      const result = await deleteGigAsAdminAction(gig.id);
+      if (result.ok) router.refresh();
+      else window.alert(result.error);
+    });
+  };
 
   // Filter gigs based on search query and active tab
   const filteredGigs = useMemo(() => {
@@ -133,7 +177,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
               meta={[
                 { label: "Location", value: gig.location },
                 { label: "Comp", value: gig.compensation },
-                { label: "Date", value: new Date(gig.date).toLocaleDateString() },
+                { label: "Production", value: new Date(gig.date).toLocaleDateString() },
               ]}
               badge={<GigStatusBadge status={gig.status} showIcon />}
               footer={
@@ -183,6 +227,30 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                         Edit Opportunity
                       </Link>
                     </DropdownMenuItem>
+                    {gig.status !== "closed" ? (
+                      <DropdownMenuItem
+                        disabled={pending}
+                        className="flex items-center text-[var(--oklch-text-secondary)] focus:bg-white/10 focus:text-white"
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          confirmClose(gig);
+                        }}
+                      >
+                        <Archive className="mr-2 h-4 w-4" />
+                        Close opportunity
+                      </DropdownMenuItem>
+                    ) : null}
+                    <DropdownMenuItem
+                      disabled={pending || gig.applications_count > 0}
+                      className="flex items-center text-rose-300 focus:bg-rose-500/15 focus:text-rose-200"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        confirmDelete(gig);
+                      }}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete permanently
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               }
@@ -206,7 +274,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                   Compensation
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
-                  Date
+                  Production
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Status
@@ -267,6 +335,30 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit Opportunity
                           </Link>
+                        </DropdownMenuItem>
+                        {gig.status !== "closed" ? (
+                          <DropdownMenuItem
+                            disabled={pending}
+                            className="flex items-center text-[var(--oklch-text-secondary)] focus:bg-white/10 focus:text-white"
+                            onSelect={(e) => {
+                              e.preventDefault();
+                              confirmClose(gig);
+                            }}
+                          >
+                            <Archive className="mr-2 h-4 w-4" />
+                            Close opportunity
+                          </DropdownMenuItem>
+                        ) : null}
+                        <DropdownMenuItem
+                          disabled={pending || gig.applications_count > 0}
+                          className="flex items-center text-rose-300 focus:bg-rose-500/15 focus:text-rose-200"
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            confirmDelete(gig);
+                          }}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete permanently
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -57,6 +57,13 @@ export default async function AdminGigsPage() {
     return <AdminGigsClient gigs={[]} user={user} />;
   }
 
+  const { data: applicationRows } = await supabase.from("applications").select("gig_id");
+  const applicationsByGig = new Map<string, number>();
+  for (const row of applicationRows ?? []) {
+    const gid = row.gig_id as string;
+    applicationsByGig.set(gid, (applicationsByGig.get(gid) ?? 0) + 1);
+  }
+
   // Fetch client profiles separately and combine
   const clientIds = gigs?.map((gig) => gig.client_id) || [];
   const { data: clientProfiles } = await supabase
@@ -72,6 +79,7 @@ export default async function AdminGigsPage() {
   // Combine gigs with client profile data
   const gigsWithClient = (gigs || []).map((gig) => ({
     ...gig,
+    applications_count: applicationsByGig.get(gig.id) ?? 0,
     client_profiles: {
       company_name: clientProfilesMap.get(gig.client_id) || "N/A",
     },

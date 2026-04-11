@@ -8,6 +8,23 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Casting module — admin lifecycle, homepage data, labels, QA (April 11, 2026)**
+
+**GIGS / ADMIN / MARKETING / QA** — April 11, 2026
+- ✅ **Admin lifecycle:** Close listings (`status: closed`) and permanently delete when **zero applications** (`app/admin/gigs/gig-lifecycle-actions.ts`); wired in admin gigs list (desktop + mobile) and opportunity detail danger zone; `revalidatePath` for `/`, `/gigs`, `/admin/gigs`, and gig routes.
+- ✅ **Fields & copy:** **Production Date** + **Submission Deadline** on admin create (`CreateGigForm` + `create/actions`), post-gig client, public **`/gigs/[id]`** and **`/gigs/[id]/apply`**; `application_deadline` added to public gig selects in **`lib/db/selects.ts`**; admin table column **Production**.
+- ✅ **Homepage:** Featured grid loads live opportunities via **`getFeaturedOpportunitiesForHome`** + **`HomePageClient`** (no hardcoded Unsplash cards); featured **`GigCard`** links to **`/gigs/[id]`**; empty state CTA to **`/gigs`**.
+- ✅ **Homepage fallback hardening:** `getFeaturedOpportunitiesForHome` now safely returns an empty featured state when Supabase env vars are unavailable, so env-light QA / Playwright webserver boots do not crash on `/`.
+- ✅ **Client create cache:** **`createGigAction`** revalidates **`/`** and **`/gigs`** after insert.
+- ✅ **Ops:** **`docs/runbooks/production-gig-cleanup.md`** — backup, inventory SQL, soft-close vs hard-delete guidance for scrubbing test/placeholder gigs in production.
+- ✅ **Playwright:** Talent applications + dashboard route specs aligned with **My Applications** / opportunity copy (mobile guardrails).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run, April 11, 2026).
+
+**Next (P0):** Merge **develop → main** via PR; smoke **admin gigs** (create with deadline, close, delete empty listing), **homepage** featured section, and **gig detail** deadline rows on staging/production.
+
+**Next (P1):** Optional Playwright contract tests for admin close/delete menus; optional stricter homepage filtering (e.g. hide listings by **`gigs.date`** past production) if product wants it.
+
 ## 🚀 **Latest: OKLCH + frosted pass — dashboards, admin, loading shells (April 11, 2026)**
 
 **UI / DESIGN SYSTEM** — April 11, 2026
