@@ -21,10 +21,10 @@ export default function GigsStatsOverview({
     <>
       <div className="mb-4 md:hidden">
         <details>
-          <summary className="cursor-pointer list-none text-sm font-medium text-gray-300">
+          <summary className="cursor-pointer list-none text-sm font-medium text-[var(--oklch-text-secondary)]">
             <span className="inline-flex items-center gap-2">
               Show stats
-              <span className="text-xs text-gray-500">({totalGigs} total)</span>
+              <span className="text-xs text-[var(--oklch-text-muted)]">({totalGigs} total)</span>
             </span>
           </summary>
           <div className="mt-2">
@@ -41,12 +41,12 @@ export default function GigsStatsOverview({
       </div>
 
       <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-4">
-        <Card className="min-w-0 border-gray-700 bg-gray-900">
+        <Card className="min-w-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-300">Total Opportunities</p>
-                <p className="text-2xl font-bold text-white">{totalGigs}</p>
+                <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Total Opportunities</p>
+                <p className="text-2xl font-bold">{totalGigs}</p>
               </div>
               <div className="rounded-full bg-blue-500/20 p-2">
                 <Building className="h-4 w-4 text-blue-300" />
@@ -55,12 +55,12 @@ export default function GigsStatsOverview({
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 border-gray-700 bg-gray-900">
+        <Card className="min-w-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-300">Active</p>
-                <p className="text-2xl font-bold text-white">{activeCount}</p>
+                <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Active</p>
+                <p className="text-2xl font-bold">{activeCount}</p>
               </div>
               <div className="rounded-full bg-green-500/20 p-2">
                 <CheckCircle className="h-4 w-4 text-green-300" />
@@ -69,12 +69,12 @@ export default function GigsStatsOverview({
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 border-gray-700 bg-gray-900">
+        <Card className="min-w-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-300">Total Applications</p>
-                <p className="text-2xl font-bold text-white">{totalApplications}</p>
+                <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Total Applications</p>
+                <p className="text-2xl font-bold">{totalApplications}</p>
               </div>
               <div className="rounded-full bg-purple-500/20 p-2">
                 <Users className="h-4 w-4 text-purple-300" />
@@ -83,12 +83,12 @@ export default function GigsStatsOverview({
           </CardContent>
         </Card>
 
-        <Card className="min-w-0 border-gray-700 bg-gray-900">
+        <Card className="min-w-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-300">Completed</p>
-                <p className="text-2xl font-bold text-white">{completedCount}</p>
+                <p className="text-sm font-medium text-[var(--oklch-text-secondary)]">Completed</p>
+                <p className="text-2xl font-bold">{completedCount}</p>
               </div>
               <div className="rounded-full bg-emerald-500/20 p-2">
                 <CheckCircle className="h-4 w-4 text-emerald-300" />

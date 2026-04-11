@@ -25,7 +25,6 @@ interface OverviewTabContentProps {
   gigs: DashboardGig[];
   applications: DashboardApplication[];
   upcomingDeadlines: DashboardGig[];
-  panelCardClass: string;
   getCategoryColor: (category: string | undefined) => string;
 }
 
@@ -35,7 +34,6 @@ export default function OverviewTabContent({
   gigs,
   applications,
   upcomingDeadlines,
-  panelCardClass,
   getCategoryColor,
 }: OverviewTabContentProps) {
   return (
@@ -61,7 +59,7 @@ export default function OverviewTabContent({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="totl-border-violet totl-hover-glow">
-          <Card className={`${panelCardClass} totl-border-violet-inner`}>
+          <Card className="totl-border-violet-inner">
             <CardHeader>
               <div className="card-header-row">
                 <CardTitle className="flex items-center gap-2 text-white">
@@ -73,7 +71,7 @@ export default function OverviewTabContent({
                   className="status-chip shrink-0 whitespace-nowrap border-[var(--totl-violet-border)]"
                 />
               </div>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">
                 Your latest gig postings and their status
               </CardDescription>
             </CardHeader>
@@ -94,15 +92,15 @@ export default function OverviewTabContent({
                           />
                           <div className="min-w-0 flex-1 space-y-1">
                             <p className="truncate text-sm font-semibold text-white">{gig.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <div className="flex items-center gap-2 text-xs text-[var(--oklch-text-tertiary)]">
                               <GigStatusBadge status={gig.status ?? "draft"} />
                               <span>{gig.location}</span>
                             </div>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-[var(--oklch-text-tertiary)]">
                               {gig.applications_count || 0} applications
                             </p>
                           </div>
-                          <Button variant="ghost" size="icon" className="text-gray-400 hover:bg-card/30">
+                          <Button variant="ghost" size="icon" className="text-[var(--oklch-text-tertiary)] hover:bg-card/30">
                             <ChevronRight className="h-4 w-4" />
                           </Button>
                         </div>
@@ -134,13 +132,13 @@ export default function OverviewTabContent({
                             </Badge>
                             <GigStatusBadge status={gig.status ?? "draft"} />
                           </div>
-                          <p className="mt-1 text-sm text-gray-400">
+                          <p className="mt-1 text-sm text-[var(--oklch-text-tertiary)]">
                             {gig.applications_count || 0} applications - {gig.location}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium text-white">{gig.compensation}</p>
-                          <p className="text-sm text-gray-400">{gig.created_at}</p>
+                          <p className="text-sm text-[var(--oklch-text-tertiary)]">{gig.created_at}</p>
                         </div>
                       </div>
                     ))}
@@ -177,7 +175,7 @@ export default function OverviewTabContent({
         </div>
 
         <div className="totl-border-violet totl-hover-glow">
-          <Card className={`${panelCardClass} totl-border-violet-inner`}>
+          <Card className="totl-border-violet-inner">
             <CardHeader>
               <div className="card-header-row">
                 <CardTitle className="flex items-center gap-2 text-white">
@@ -191,12 +189,12 @@ export default function OverviewTabContent({
                   New
                 </Badge>
               </div>
-              <CardDescription className="text-gray-400">
+              <CardDescription className="text-[var(--oklch-text-tertiary)]">
                 Latest talent applications to review
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[var(--oklch-text-tertiary)]">
                 Clients only see talent who applied to their gigs—no public directory is exposed.
               </p>
               {applications.length > 0 ? (
@@ -212,8 +210,8 @@ export default function OverviewTabContent({
                             <p className="text-sm font-semibold text-white">
                               {application.talent_profiles?.first_name} {application.talent_profiles?.last_name}
                             </p>
-                            <p className="truncate text-xs text-gray-400">{application.gigs?.title}</p>
-                            <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <p className="truncate text-xs text-[var(--oklch-text-tertiary)]">{application.gigs?.title}</p>
+                            <div className="flex items-center gap-2 text-xs text-[var(--oklch-text-tertiary)]">
                               <ApplicationStatusBadge status={application.status} showIcon={false} />
                               <span>{application.talent_profiles?.location}</span>
                             </div>
@@ -230,24 +228,24 @@ export default function OverviewTabContent({
                   </div>
                   <div className="hidden space-y-4 md:block">
                     {applications.slice(0, 3).map((application) => (
-                      <div key={application.id} className="flex items-center gap-4 rounded-lg border border-gray-700 p-3">
+                      <div key={application.id} className="flex items-center gap-4 rounded-lg border border-border/40 p-3">
                         <div className="min-w-0 flex-1">
                           <h4 className="font-medium text-white">
                             {application.talent_profiles?.first_name} {application.talent_profiles?.last_name}
                           </h4>
-                          <p className="truncate text-sm text-gray-400">{application.gigs?.title}</p>
+                          <p className="truncate text-sm text-[var(--oklch-text-tertiary)]">{application.gigs?.title}</p>
                           <div className="mt-1 flex items-center gap-2">
                             <ApplicationStatusBadge status={application.status} showIcon={true} />
-                            <span className="text-sm text-gray-400">
+                            <span className="text-sm text-[var(--oklch-text-tertiary)]">
                               {application.talent_profiles?.location}
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-[var(--oklch-text-tertiary)]">
                             {new Date(application.created_at).toLocaleDateString()}
                           </p>
-                          <p className="text-xs text-gray-400">{application.talent_profiles?.experience}</p>
+                          <p className="text-xs text-[var(--oklch-text-tertiary)]">{application.talent_profiles?.experience}</p>
                         </div>
                       </div>
                     ))}
@@ -270,7 +268,7 @@ export default function OverviewTabContent({
       </div>
 
       <div className="totl-border-violet totl-hover-glow">
-        <Card className={`${panelCardClass} totl-border-violet-inner`}>
+        <Card className="totl-border-violet-inner">
           <CardHeader>
             <div className="card-header-row">
               <CardTitle className="flex items-center gap-2">
@@ -293,16 +291,18 @@ export default function OverviewTabContent({
                   {upcomingDeadlines.map((deadline) => (
                     <div
                       key={deadline.id}
-                      className="flex items-center justify-between rounded-lg border border-gray-800 p-4"
+                      className="flex items-center justify-between rounded-lg border border-border/40 bg-card/20 p-4"
                     >
                       <div className="flex-1">
-                        <h4 className="font-medium text-white">{deadline.title}</h4>
-                        <p className="text-sm text-gray-400">
+                        <h4 className="font-medium text-[var(--oklch-text-primary)]">{deadline.title}</h4>
+                        <p className="text-sm text-[var(--oklch-text-muted)]">
                           {deadline.applications_count || 0} applications received
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-white">Due {deadline.application_deadline}</p>
+                        <p className="font-medium text-[var(--oklch-text-primary)]">
+                          Due {deadline.application_deadline}
+                        </p>
                         <GigStatusBadge status={deadline.status ?? "draft"} />
                       </div>
                     </div>

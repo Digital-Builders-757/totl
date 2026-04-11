@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
+import { PageShell } from "@/components/layout/page-shell";
 import { FlagGigDialog } from "@/components/moderation/flag-gig-dialog";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -10,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SafeImage } from "@/components/ui/safe-image";
-import { getCategoryLabel } from "@/lib/constants/gig-categories";
+import { getCategoryBadgeVariant, getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from "@/lib/db/selects";
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -85,15 +86,12 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
       ? profile
       : null;
 
-  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
-  // For now, keeping a simple fallback since badge styling may vary
-  const getCategoryColor = () => {
-    // Default fallback - can be enhanced with getCategoryBadgeVariant
-    return "bg-gray-100 text-gray-800";
-  };
+  const routeRole =
+    profile?.role === "talent" ? "talent" : profile?.role === "client" ? "client" : undefined;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <PageShell ambientTone="lifted" routeRole={routeRole} containerClassName="py-8 sm:py-10">
+      <div className="mx-auto max-w-4xl">
       {/* Back Button */}
       <div className="mb-6">
         <Button variant="ghost" asChild>
@@ -115,7 +113,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   <CardTitle className="text-3xl font-bold">{displayTitle}</CardTitle>
                   <CardDescription className="text-lg mt-2">{displayDescription}</CardDescription>
                 </div>
-                <Badge className={getCategoryColor()}>
+                <Badge variant={getCategoryBadgeVariant(gig.category || "")}>
                   {getCategoryLabel(gig.category || "")}
                 </Badge>
               </div>
@@ -147,36 +145,38 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-gray-500" />
+                  <MapPin className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
                     <p className="font-medium">Location</p>
-                    <p className="text-gray-600">{gig.location}</p>
+                    <p className="text-[var(--oklch-text-tertiary)]">{gig.location}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <DollarSign className="h-5 w-5 text-gray-500" />
+                  <DollarSign className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
                     <p className="font-medium">Compensation</p>
-                    <p className="text-gray-600">${gig.compensation}</p>
+                    <p className="text-[var(--oklch-text-tertiary)]">${gig.compensation}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="h-5 w-5 text-gray-500" />
+                  <Calendar className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
                     <p className="font-medium">Date</p>
-                    <p className="text-gray-600">
+                    <p className="text-[var(--oklch-text-tertiary)]">
                       {gig.date ? new Date(gig.date).toLocaleDateString() : "TBD"}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-gray-500" />
+                  <Clock className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
                     <p className="font-medium">Posted</p>
-                    <p className="text-gray-600">{new Date(gig.created_at).toLocaleDateString()}</p>
+                    <p className="text-[var(--oklch-text-tertiary)]">
+                      {new Date(gig.created_at).toLocaleDateString()}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -199,12 +199,12 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   <div className="space-y-3">
                     <div>
                       <p className="font-medium">Company</p>
-                      <p className="text-gray-600">{gig.profiles.display_name}</p>
+                      <p className="text-[var(--oklch-text-tertiary)]">{gig.profiles.display_name}</p>
                     </div>
                     {gig.profiles.role && (
                       <div>
                         <p className="font-medium">Role</p>
-                        <p className="text-gray-600">{gig.profiles.role}</p>
+                        <p className="text-[var(--oklch-text-tertiary)]">{gig.profiles.role}</p>
                       </div>
                     )}
                   </div>
@@ -236,7 +236,9 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <p className="text-gray-500 mb-4">Client details are only visible to registered users</p>
+                  <p className="text-[var(--oklch-text-muted)] mb-4">
+                    Client details are only visible to registered users
+                  </p>
                   <Button asChild className="apple-button">
                     <Link href="/login">Sign In to View Client Info</Link>
                   </Button>
@@ -258,23 +260,23 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             <CardContent className="space-y-4">
               {!user ? (
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
-                    Sign in to apply for this opportunity.
-                  </p>
-                  <Link
-                    data-testid="gig-signin-link"
-                    href={`/login?returnUrl=${encodeURIComponent(`/gigs/${gig.id}`)}`}
-                    className="inline-flex w-full items-center justify-center rounded-lg border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+                  <p className="text-sm text-[var(--oklch-text-tertiary)]">Sign in to apply for this opportunity.</p>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full border-[var(--oklch-accent)]/40 bg-card/30 text-[var(--oklch-text-primary)] hover:bg-card/45"
                   >
-                    Sign in to apply
-                  </Link>
+                    <Link data-testid="gig-signin-link" href={`/login?returnUrl=${encodeURIComponent(`/gigs/${gig.id}`)}`}>
+                      Sign in to apply
+                    </Link>
+                  </Button>
                 </div>
               ) : hasApplied ? (
                 <div className="text-center space-y-3">
                   <Badge variant="secondary" className="w-full">
                     Application Submitted
                   </Badge>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-[var(--oklch-text-tertiary)]">
                     You&apos;ve already applied for this opportunity. Check your dashboard for updates.
                   </p>
                   <Button asChild variant="outline" className="w-full">
@@ -282,13 +284,13 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                   </Button>
                 </div>
               ) : profile?.role !== "talent" ? (
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3 text-sm text-[var(--oklch-text-tertiary)]">
                   Only talent accounts can submit applications.
                 </div>
               ) : !canApply ? (
                 <div className="space-y-4" data-testid="subscription-apply-gate">
-                  <Alert className="bg-amber-500/10 border-amber-500/30">
-                    <AlertDescription className="text-amber-100 text-sm">
+                  <Alert className="border-amber-400/35 bg-amber-500/10">
+                    <AlertDescription className="text-[var(--oklch-text-secondary)] text-sm">
                       You need an active subscription to apply to this opportunity and see full client
                       details.
                     </AlertDescription>
@@ -302,7 +304,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-[var(--oklch-text-tertiary)]">
                     Ready to apply? Click below to submit your application.
                   </p>
                   <Button asChild className="w-full button-glow border-0">
@@ -323,15 +325,15 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-600">Opportunity Type</span>
+                <span className="text-[var(--oklch-text-tertiary)]">Opportunity Type</span>
                 <span className="font-medium">{getCategoryLabel(gig.category || "")}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Compensation</span>
+                <span className="text-[var(--oklch-text-tertiary)]">Compensation</span>
                 <span className="font-medium">${gig.compensation}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Location</span>
+                <span className="text-[var(--oklch-text-tertiary)]">Location</span>
                 <span className="font-medium">{gig.location}</span>
               </div>
             </CardContent>
@@ -356,6 +358,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </PageShell>
   );
 }

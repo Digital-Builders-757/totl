@@ -157,7 +157,11 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   // Show login prompt if no user
   if (!user) {
     return (
-      <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
+      <PageShell
+        ambientTone="lifted"
+        className="grain-texture glow-backplate text-[var(--oklch-text-primary)]"
+        containerClassName="flex min-h-[70vh] items-center justify-center py-8"
+      >
         <SectionCard className="mx-auto w-full max-w-md text-center">
           <User className="mx-auto mb-6 h-16 w-16 text-[var(--oklch-text-secondary)]" aria-hidden />
           <h2 className="mb-3 text-2xl font-bold text-[var(--oklch-text-primary)]">Welcome back</h2>
@@ -181,12 +185,10 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
     );
   }
 
-  const quickStatCardClass = "text-white";
-  const panelCardClass = "text-white";
   const tabTriggerClass =
-    "flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-transparent px-3 py-2 text-xs text-gray-200 transition hover:bg-gray-800 data-[state=active]:bg-indigo-600 data-[state=active]:text-white data-[state=active]:shadow-lg sm:text-sm";
+    "flex min-h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs sm:text-sm";
   return (
-    <PageShell topPadding={false} fullBleed>
+    <PageShell ambientTone="lifted" topPadding={false} fullBleed>
       <ClientTerminalHeader
         title="Career Builder Dashboard"
         subtitle={clientProfile?.company_name || "Manage opportunities and applications"}
@@ -204,7 +206,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               }
             }}
             disabled={isSigningOut}
-            className="border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <LogOut className="mr-2 h-4 w-4" />
             {isSigningOut ? "Signing Out..." : "Sign Out"}
@@ -226,7 +228,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
           <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             <ClientStatCard
-              className={quickStatCardClass}
               title="Total Opportunities"
               icon={<Briefcase className="h-4 w-4 text-blue-300" />}
               badgeLabel="All time"
@@ -237,7 +238,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
 
             <ClientStatCard
-              className={quickStatCardClass}
               title="Active Opportunities"
               icon={<Activity className="h-4 w-4 text-green-300" />}
               badgeLabel="Live"
@@ -248,7 +248,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
 
             <ClientStatCard
-              className={quickStatCardClass}
               title="Applications"
               icon={<Users className="h-4 w-4 text-purple-300" />}
               badgeLabel="Total"
@@ -259,7 +258,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
 
             <ClientStatCard
-              className={quickStatCardClass}
               title="New"
               icon={<ClockIcon className="h-4 w-4 text-yellow-300" />}
               badgeLabel="Incoming"
@@ -270,7 +268,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
 
             <ClientStatCard
-              className={quickStatCardClass}
               title="Closed"
               icon={<CheckCircle className="h-4 w-4 text-green-300" />}
               badgeLabel="Closed"
@@ -281,7 +278,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
 
             <ClientStatCard
-              className={quickStatCardClass}
               title="Total Spent"
               icon={<DollarSign className="h-4 w-4 text-emerald-300" />}
               badgeLabel="To date"
@@ -292,7 +288,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
             />
           </div>
           <MobileTabRail>
-            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-gray-800 bg-gray-900 p-1">
+            <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl p-1">
               <TabsTrigger value="overview" className={tabTriggerClass}>
                 <BarChart3 className="h-3.5 w-3.5" />
                 Overview
@@ -311,7 +307,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               </TabsTrigger>
             </TabsList>
           </MobileTabRail>
-          <TabsList className="hidden w-full grid-cols-4 gap-2 rounded-2xl border border-gray-800 bg-gray-900 p-1 md:grid">
+          <TabsList className="hidden w-full grid-cols-4 gap-2 rounded-2xl p-1 md:grid">
             <TabsTrigger value="overview" className={tabTriggerClass}>
               <BarChart3 className="h-4 w-4" />
               Overview
@@ -337,7 +333,6 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
               gigs={gigs}
               applications={applications}
               upcomingDeadlines={upcomingDeadlines}
-              panelCardClass={panelCardClass}
               getCategoryColor={getCategoryColor}
             />
           </TabsContent>

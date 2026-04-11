@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: OKLCH + frosted pass — dashboards, admin, loading shells (April 11, 2026)**
+
+**UI / DESIGN SYSTEM** — April 11, 2026
+- ✅ **Token typography:** Replaced ad hoc **`text-gray-*`** with **`--oklch-text-*`** across Career Builder dashboard tabs, talent dashboard copy, public **`/gigs`** hero, client gigs results, signup, profile admin empty state, settings client-details labels, admin gigs empty state, and shared **`SecondaryActionLink`** / **`FiltersSheet`** chrome.
+- ✅ **Admin create opportunity:** **`CreateGigForm`** uses **`page-ambient`**, frosted main panel, **`bg-white/5`** inputs/selects, and glass reference-link blocks (no flat gray-800 slab).
+- ✅ **Admin moderation:** Queue/table/filter chrome and **review dialog** use dark frosted panels + oklch text (removed light gray-50 dialog islands); outer shell uses **`oklch-bg`** + ambient.
+- ✅ **Loading alignment:** **`ClientDashboardSkeleton`** wraps **`PageShell ambientTone="lifted"`** (matches live Career Builder shell); **`app/settings/loading.tsx`** uses **`PageShell` + `grain-texture`** and **`panel-frosted`** placeholders.
+- ✅ **Breadth:** Client bookings/applications/gigs surfaces and talent dashboard loading in this batch stay consistent with lifted/frosted language.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — all green (ship run, April 11, 2026).
+
+**Next (P0):** Merge **develop → main** via PR; smoke **admin/gigs/create**, **admin/moderation**, **client/dashboard** loading handoff, **settings** loading, and **talent/dashboard** on staging/production.
+
+**Next (P1):** **`settings/sections/client-details.tsx`** card shell still uses legacy gray inputs—optional full frosted pass; **`talent/settings/billing/loading.tsx`** could mirror **`settings/loading`**.
+
 ## 🚀 **Latest: Application flows — lifted ambient + glass (April 10, 2026)**
 
 **UI / VIZB** — April 10, 2026

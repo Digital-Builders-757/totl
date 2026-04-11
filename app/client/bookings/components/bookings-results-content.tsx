@@ -23,11 +23,11 @@ export default function BookingsResultsContent({
 }: BookingsResultsContentProps) {
   if (filteredBookings.length === 0) {
     return (
-      <Card className="border-gray-700 bg-gray-900">
+      <Card>
         <CardContent className="p-12 text-center">
-          <Calendar className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-          <h3 className="mb-2 text-lg font-medium text-white">No bookings found</h3>
-          <p className="mb-6 text-gray-300">
+          <Calendar className="mx-auto mb-4 h-12 w-12 text-[var(--oklch-text-muted)]" />
+          <h3 className="mb-2 text-lg font-medium">No bookings found</h3>
+          <p className="mb-6 text-[var(--oklch-text-secondary)]">
             {activeTab === "all"
               ? "Accept applications to create bookings"
               : `No ${activeTab} bookings at the moment`}
@@ -43,12 +43,12 @@ export default function BookingsResultsContent({
   return (
     <div className="space-y-4">
       {filteredBookings.map((booking) => (
-        <Card key={booking.id} className="border-gray-700 bg-gray-900 transition-shadow hover:shadow-md">
+        <Card key={booking.id} className="transition-shadow hover:shadow-md">
           <CardHeader>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="mb-2 text-xl text-white">{booking.gigs?.title}</CardTitle>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+                <CardTitle className="mb-2 text-xl">{booking.gigs?.title}</CardTitle>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--oklch-text-secondary)]">
                   <span className="flex items-center gap-1">
                     <User className="h-4 w-4" />
                     {booking.profiles?.display_name || "Unknown Talent"}
@@ -76,7 +76,7 @@ export default function BookingsResultsContent({
           <CardContent>
             {booking.notes && (
               <div className="panel-frosted mb-4 rounded-md p-3">
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-[var(--oklch-text-secondary)]">
                   <FileText className="mr-2 inline h-4 w-4" />
                   {booking.notes}
                 </p>

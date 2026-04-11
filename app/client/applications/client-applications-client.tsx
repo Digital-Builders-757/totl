@@ -14,6 +14,7 @@ import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { getClientApplications } from "@/lib/actions/client-applications-actions";
 
 const AcceptApplicationDialog = dynamic(
@@ -203,7 +204,7 @@ export default function ClientApplicationsClient({
     `/talent/${application.talent_id}`;
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
       <ClientTerminalHeader
         title="Applications"
         subtitle="Review and manage talent applications for your opportunities"
@@ -485,6 +486,6 @@ export default function ClientApplicationsClient({
           />
         </>
       )}
-    </div>
+    </TotlAtmosphereShell>
   );
 }

@@ -78,8 +78,8 @@ export default async function ClientProfilePage({
             title="Client Profile (Admin View)"
             subtitle="This user does not have a client profile yet."
           />
-          <div className="p-6 bg-gray-900 rounded-lg border border-gray-700">
-            <p className="text-gray-400 text-sm">
+          <div className="rounded-lg border border-border/40 bg-card/25 p-6 backdrop-blur-sm">
+            <p className="text-sm text-[var(--oklch-text-tertiary)]">
               The client profile has not been created for this user. They may need to complete their profile setup.
             </p>
           </div>

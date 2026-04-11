@@ -23,11 +23,11 @@ export default function GigsResultsContent({
 }: GigsResultsContentProps) {
   if (filteredGigs.length === 0) {
     return (
-      <Card className="border-gray-700 bg-gray-900">
+      <Card>
         <CardContent className="p-12 text-center">
-          <Building className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-          <h3 className="mb-2 text-lg font-medium text-white">No opportunities found</h3>
-          <p className="mb-6 text-gray-300">
+          <Building className="mx-auto mb-4 h-12 w-12 text-[var(--oklch-text-muted)]" />
+          <h3 className="mb-2 text-lg font-medium">No opportunities found</h3>
+          <p className="mb-6 text-[var(--oklch-text-secondary)]">
             {searchTerm ? "Try adjusting your search or filters" : "Get started by posting your first opportunity"}
           </p>
           {!searchTerm && (
@@ -46,7 +46,7 @@ export default function GigsResultsContent({
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {filteredGigs.map((gig) => (
-        <Card key={gig.id} className="border-gray-700 bg-gray-900 transition-shadow hover:shadow-lg">
+        <Card key={gig.id} className="transition-shadow hover:shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -71,7 +71,7 @@ export default function GigsResultsContent({
               fallbackSrc="/images/totl-logo-transparent.png"
             />
 
-            <p className="line-clamp-2 text-sm text-gray-300">{gig.description}</p>
+            <p className="line-clamp-2 text-sm text-[var(--oklch-text-secondary)]">{gig.description}</p>
 
             <div className="flex items-center justify-between">
               <Badge variant="outline" className={getCategoryColor(gig.category || "")}>
@@ -82,21 +82,21 @@ export default function GigsResultsContent({
 
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-300">Pay Rate:</span>
-                <span className="font-medium text-white">{gig.compensation}</span>
+                <span className="text-[var(--oklch-text-secondary)]">Pay Rate:</span>
+                <span className="font-medium text-[var(--oklch-text-primary)]">{gig.compensation}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-300">Applications:</span>
-                <span className="font-medium text-white">{gig.applications_count || 0}</span>
+                <span className="text-[var(--oklch-text-secondary)]">Applications:</span>
+                <span className="font-medium text-[var(--oklch-text-primary)]">{gig.applications_count || 0}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-300">Posted:</span>
-                <span className="font-medium text-white">{gig.created_at}</span>
+                <span className="text-[var(--oklch-text-secondary)]">Posted:</span>
+                <span className="font-medium text-[var(--oklch-text-primary)]">{gig.created_at}</span>
               </div>
               {gig.application_deadline && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-300">Deadline:</span>
-                  <span className="font-medium text-white">{gig.application_deadline}</span>
+                  <span className="text-[var(--oklch-text-secondary)]">Deadline:</span>
+                  <span className="font-medium text-[var(--oklch-text-primary)]">{gig.application_deadline}</span>
                 </div>
               )}
             </div>
