@@ -41,6 +41,7 @@ type DashboardGig = {
 };
 
 type FeaturedGig = {
+  id?: string;
   title: string;
   category: string;
   location: string;
@@ -91,13 +92,17 @@ export function GigCard(props: GigCardProps) {
       ? `/gigs/${gig.id}`
       : variant === "dashboard"
         ? `/gigs/${gig.id}`
-        : "/choose-role";
+        : gig.id
+          ? `/gigs/${gig.id}`
+          : "/choose-role";
   const ctaText =
     variant === "browse"
       ? "View Details"
       : variant === "dashboard"
         ? "Apply Now"
-        : "View opportunities (sign in)";
+        : gig.id
+          ? "View details"
+          : "View opportunities (sign in)";
   const applyHref = variant === "dashboard" ? `/gigs/${gig.id}/apply` : href;
 
   const imageContext =

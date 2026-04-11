@@ -1,4 +1,4 @@
-import { MapPin, Calendar, DollarSign, Clock, Building, ArrowLeft, Send } from "lucide-react";
+import { MapPin, Calendar, DollarSign, Clock, History, Building, ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -163,15 +163,30 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
-                    <p className="font-medium">Date</p>
+                    <p className="font-medium">Production Date</p>
                     <p className="text-[var(--oklch-text-tertiary)]">
                       {gig.date ? new Date(gig.date).toLocaleDateString() : "TBD"}
                     </p>
                   </div>
                 </div>
 
+                {gig.application_deadline ? (
+                  <div className="flex items-center gap-3">
+                    <Clock className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
+                    <div>
+                      <p className="font-medium">Submission Deadline</p>
+                      <p className="text-[var(--oklch-text-tertiary)]">
+                        {new Date(gig.application_deadline).toLocaleString(undefined, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+
                 <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
+                  <History className="h-5 w-5 shrink-0 text-[var(--oklch-accent)]" />
                   <div>
                     <p className="font-medium">Posted</p>
                     <p className="text-[var(--oklch-text-tertiary)]">

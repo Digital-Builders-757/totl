@@ -106,9 +106,20 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
                 </div>
                 {gig.date && (
                   <div>
-                    <span className="font-medium text-[var(--oklch-text-secondary)]">Date:</span>
+                    <span className="font-medium text-[var(--oklch-text-secondary)]">Production Date:</span>
                     <p className="text-[var(--oklch-text-tertiary)]">
                       {new Date(gig.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+                {gig.application_deadline && (
+                  <div>
+                    <span className="font-medium text-[var(--oklch-text-secondary)]">Submission Deadline:</span>
+                    <p className="text-[var(--oklch-text-tertiary)]">
+                      {new Date(gig.application_deadline).toLocaleString(undefined, {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
                     </p>
                   </div>
                 )}

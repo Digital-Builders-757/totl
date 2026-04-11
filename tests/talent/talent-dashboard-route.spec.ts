@@ -20,7 +20,7 @@ test.describe("Talent dashboard route contracts", () => {
     await safeGoto(page, "/talent/dashboard");
 
     await page.getByRole("tab", { name: /Applications/i }).first().click();
-    await expect(page.getByText(/My TalentApplications/i).first()).toBeVisible();
+    await expect(page.getByRole("heading", { name: "My Applications" })).toBeVisible();
   });
 });
 

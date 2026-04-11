@@ -86,6 +86,9 @@ export async function createGigAction(input: {
 
   if (error || !data) return { ok: false, error: error?.message ?? "Failed to create gig" };
 
+  revalidatePath("/");
+  revalidatePath("/gigs");
+
   return { ok: true, gigId: data.id };
 }
 

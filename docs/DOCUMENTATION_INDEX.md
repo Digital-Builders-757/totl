@@ -45,6 +45,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 | `docs/diagrams/` | Architecture diagrams and visual documentation (`diagrams/README.md`) |
 | `docs/tests/` | Test documentation and matrices (`tests/README.md`) |
 | `docs/plans/` | Design plans and implementation summaries (`plans/README.md`) |
+| `docs/runbooks/` | Operational runbooks (one-off production procedures, data hygiene) |
 | `docs/archive/` | Historical / superseded documentation (`archive/README.md`) |
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.
@@ -132,6 +133,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `INFINITE_LOADING_DEBUG_PLAN.md` - **✅ NEW** - Debug plan for infinite loading spinner issues (Jan 2025)
 
 ### **👨‍💼 Admin & User Management**
+- `runbooks/production-gig-cleanup.md` - **NEW** - Scrub test/placeholder opportunities in production (backup, inventory SQL, soft-close vs cascade delete) (Apr 2026)
 - `ADMIN_ACCOUNT_GUIDE.md` - Complete admin account setup and management
 - `ADMIN_VISIBILITY_AUDIT_REPORT.md` - **✅ NEW** - Comprehensive audit report for admin profile viewing fixes (Dec 2025)
 - `ADMIN_VISIBILITY_IMPLEMENTATION_SUMMARY.md` - **✅ NEW** - Implementation summary for admin profile visibility feature (Dec 2025)

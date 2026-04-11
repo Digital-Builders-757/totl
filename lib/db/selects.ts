@@ -18,7 +18,7 @@ export const PROFILE_ROUTING_SELECT = "id,role,account_type,is_suspended" as con
 export const PROFILE_GIG_VIEWER_SELECT = "id,role,subscription_status" as const;
 
 export const GIG_PUBLIC_SELECT =
-  "id,client_id,title,description,category,location,compensation,date,image_url,status,created_at,reference_links" as const;
+  "id,client_id,title,description,category,location,compensation,date,application_deadline,image_url,status,created_at,reference_links" as const;
 
 export const GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT = `
   id,
@@ -29,6 +29,7 @@ export const GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT = `
   location,
   compensation,
   date,
+  application_deadline,
   image_url,
   status,
   created_at,
