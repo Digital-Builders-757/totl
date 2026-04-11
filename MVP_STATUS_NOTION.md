@@ -14,6 +14,7 @@
 - ✅ **Admin lifecycle:** Close listings (`status: closed`) and permanently delete when **zero applications** (`app/admin/gigs/gig-lifecycle-actions.ts`); wired in admin gigs list (desktop + mobile) and opportunity detail danger zone; `revalidatePath` for `/`, `/gigs`, `/admin/gigs`, and gig routes.
 - ✅ **Fields & copy:** **Production Date** + **Submission Deadline** on admin create (`CreateGigForm` + `create/actions`), post-gig client, public **`/gigs/[id]`** and **`/gigs/[id]/apply`**; `application_deadline` added to public gig selects in **`lib/db/selects.ts`**; admin table column **Production**.
 - ✅ **Homepage:** Featured grid loads live opportunities via **`getFeaturedOpportunitiesForHome`** + **`HomePageClient`** (no hardcoded Unsplash cards); featured **`GigCard`** links to **`/gigs/[id]`**; empty state CTA to **`/gigs`**.
+- ✅ **Homepage fallback hardening:** `getFeaturedOpportunitiesForHome` now safely returns an empty featured state when Supabase env vars are unavailable, so env-light QA / Playwright webserver boots do not crash on `/`.
 - ✅ **Client create cache:** **`createGigAction`** revalidates **`/`** and **`/gigs`** after insert.
 - ✅ **Ops:** **`docs/runbooks/production-gig-cleanup.md`** — backup, inventory SQL, soft-close vs hard-delete guidance for scrubbing test/placeholder gigs in production.
 - ✅ **Playwright:** Talent applications + dashboard route specs aligned with **My Applications** / opportunity copy (mobile guardrails).
