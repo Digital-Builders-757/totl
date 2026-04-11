@@ -60,6 +60,16 @@ npm run build
 - **Portfolio images not loading (404 or broken):** `portfolio_items.image_url` stores the **storage path** (e.g. `user-id/portfolio-123.jpg`), not the full URL.
   - **Fix:** Use `publicBucketUrl("portfolio", item.image_url)` when building image URLs for display. Applied in Settings page, portfolio-actions, admin talent dashboard.
   - **Prevention:** All portfolio display paths must convert storage path to full URL via `publicBucketUrl`.
+- **Admin cannot close gig — `42501` RLS on `gigs` (TOTLMODELAGENCY-3N):** `closeGigAsAdminAction` or similar returns “new row violates row-level security policy for table \"gigs\"”.
+  - **Root Cause:** Legacy admin policies that subquery `profiles` under RLS can deny the **updated** row’s `WITH CHECK` in some cases.
+  - **Fix:** Apply migration `20260411220101_fix_admin_gigs_rls_and_helpers.sql` (adds `public.totl_user_is_admin()` and explicit admin gig policies). Run `supabase db push` on the target project.
+  - **Prevention:** Prefer `SECURITY DEFINER` admin helpers + explicit `USING`/`WITH CHECK` on admin `UPDATE` policies for tables clients also update.
+- **Sentry: `[cron/booking-reminders] CRON_SECRET is not configured` (TOTLMODELAGENCY-3K):** Preview or branch deploys hit the cron URL without `CRON_SECRET`.
+  - **Fix:** Set `CRON_SECRET` on environments that should run reminders; ignore noise from previews or disable cron there. Code path uses `console.warn` (not `logger.warn`) so this no longer opens Sentry issues for expected misconfig.
+  - **Prevention:** Document required cron env vars in Vercel project settings.
+- **Next.js `UnrecognizedActionError` / failed to find server action on `/admin/gigs/create` (TOTLMODELAGENCY-3G):** Client bundle references a stale server-action id after deploy or uses a client-wrapped action.
+  - **Fix:** Bind forms to an exported server action from a `"use server"` module (e.g. `useActionState(createGigFormAction, null)`); include file fields via named `<input type="file" name="...">` where possible. Users with old tabs may need a hard refresh after deploy.
+  - **Prevention:** Avoid inline client `useActionState` wrappers that indirectly invoke server actions for critical submits.
 - **StorageApiError: Bucket not found (TOTLMODELAGENCY-3B):** Portfolio upload on POST /settings fails with "Bucket not found".
   - **Root Cause:** The `portfolio` storage bucket does not exist in the production Supabase project (migration not applied or project set up before portfolio migration).
   - **Fix:** Run `supabase db push` to apply migration `20260314031246_ensure_portfolio_bucket_exists.sql` which creates the portfolio bucket and policies idempotently.

@@ -123,7 +123,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 ### **🚨 Critical Error Prevention**
 - `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling; Apr 2026 - Sentry admin gigs RLS, cron CRON_SECRET, Next server actions)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
 - `features/TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md` - **✅ NEW** - v1 simplification: 3 KPI cards (Applications, Accepted, Earnings), footer alignment (March 2026)

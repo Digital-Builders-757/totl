@@ -27,6 +27,21 @@
 
 ---
 
+## **Latest: Production hardening — Sentry TOTLMODELAGENCY-3G/3K/3N (April 11, 2026)**
+
+**SENTRY / ADMIN GIGS / CRON** — April 11, 2026
+- ✅ **Admin gigs RLS (3N):** Migration `20260411220101_fix_admin_gigs_rls_and_helpers.sql` adds `public.totl_user_is_admin()` (`SECURITY DEFINER`) and explicit admin **SELECT / INSERT / UPDATE / DELETE** policies on `public.gigs` so admin lifecycle actions (e.g. close listing) do not fail with `42501 new row violates row-level security policy for table "gigs"`.
+- ✅ **Cron Sentry noise (3K):** `GET /api/cron/booking-reminders` logs missing `CRON_SECRET` with `console.warn` instead of `logger.warn` so preview or misconfigured environments do not create recurring Sentry issues; set `CRON_SECRET` in production for real reminder runs.
+- ✅ **Admin create form server action (3G):** `createGigFormAction` is the `useActionState` target; reference links ship as hidden `reference_links_json`; `GigImageUploader` supports optional `formFieldName` for native multipart file fields; success uses `redirect("/admin/dashboard")`; gig insert errors return `{ error }` instead of throwing.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 11, 2026.
+
+**Next (P0):** Apply the new migration to production Supabase (`supabase db push` / pipeline); merge **develop → main**; smoke **admin close gig**, **`/admin/gigs/create`**, and cron with `CRON_SECRET` on prod.
+
+**Next (P1):** Mark the three Sentry issues resolved after production verification; optional note for users to hard refresh after deploy if a stale server-action error appears.
+
+---
+
 ## 🚀 **Latest: Casting module — admin lifecycle, homepage data, labels, QA (April 11, 2026)**
 
 **GIGS / ADMIN / MARKETING / QA** — April 11, 2026
@@ -5002,7 +5017,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 10, 2026*
-*Current Status: MVP Complete; admin users mobile guardrail test fix for Suspended tab; opportunities reference_links on develop; prior: visual cohesion + gig edit resilience*
+*Last Updated: April 11, 2026*
+*Current Status: MVP Complete; Sentry-driven fixes for admin gigs RLS migration, cron logging, and admin create server action; ViZB/casting work on develop*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: PR develop→main; smoke reference links in staging/prod; beta evidence; CRON_SECRET for booking reminders*
+*Next Review: Push migration 20260411220101 to prod; PR develop→main; smoke admin gigs + cron; resolve Sentry 3G/3K/3N after verify*

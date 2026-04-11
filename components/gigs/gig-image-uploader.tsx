@@ -8,12 +8,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { OPPORTUNITY_IMAGE_SPEC_NOTICE } from "@/lib/constants/opportunity-image-specs";
 
 interface GigImageUploaderProps {
-  onFileSelect: (file: File | null) => void;
+  /** When set, the file input participates in form submission (multipart FormData). */
+  formFieldName?: string;
+  onFileSelect?: (file: File | null) => void;
   currentImageUrl?: string | null;
   disabled?: boolean;
 }
 
 export function GigImageUploader({
+  formFieldName,
   onFileSelect,
   currentImageUrl,
   disabled = false,
@@ -28,7 +31,7 @@ export function GigImageUploader({
     if (!file) {
       setSelectedFile(null);
       setPreviewUrl(null);
-      onFileSelect(null);
+      onFileSelect?.(null);
       return;
     }
 
@@ -64,7 +67,7 @@ export function GigImageUploader({
     reader.readAsDataURL(file);
 
     // Notify parent
-    onFileSelect(file);
+    onFileSelect?.(file);
   };
 
   const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +98,7 @@ export function GigImageUploader({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    onFileSelect(null);
+    onFileSelect?.(null);
   };
 
   const displayImage = previewUrl || currentImageUrl;
@@ -140,6 +143,7 @@ export function GigImageUploader({
           id="gig-image-upload"
           ref={fileInputRef}
           type="file"
+          name={formFieldName}
           accept="image/jpeg,image/png,image/gif,image/webp"
           onChange={handleFileInputChange}
           className="hidden"
