@@ -25,6 +25,8 @@
 
 **Next (P1):** Optional Playwright contract tests for admin close/delete menus; optional stricter homepage filtering (e.g. hide listings by **`gigs.date`** past production) if product wants it.
 
+**Next-session handoff:** `docs/plans/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` captures the ranked visual catch-up plan for the next Cursor session.
+
 ## 🚀 **Latest: OKLCH + frosted pass — dashboards, admin, loading shells (April 11, 2026)**
 
 **UI / DESIGN SYSTEM** — April 11, 2026
