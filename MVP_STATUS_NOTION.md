@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Talent dashboard core cards + profile strength (April 12, 2026)**
+
+**UI / TALENT DASHBOARD** — April 12, 2026
+- ✅ **`app/dashboard/talent-data.tsx` & `profile-data.tsx`:** Frosted `grain-texture` cards, OKLCH typography, primary CTAs (**Complete talent profile** → `PATHS.TALENT_PROFILE`, **Browse opportunities**); application status badges use semantic variants; fixed dead link to non-existent `/talent/create-profile`.
+- ✅ **`app/talent/dashboard/client.tsx`:** Stat and tab cards use **`grain-texture`**; profile-completion strip uses **`panel-frosted`** + outline **Finish profile** button; primary CTAs use **`Button variant="default"`** + **`rounded-full`** (replaced flat white / ad-hoc green-purple); category chips use token surface (no light-gray badge on dark); non-functional **Filter** / **Export** controls **disabled** to avoid misleading affordances; **EmptyState** bookings + discover empty states get a single clear action (**Browse opportunities** / **Refresh**).
+- ✅ **`components/talent/profile-strength-card.tsx`:** Removed `bg-gray-900` override; OKLCH row badges + **Complete profile** as primary, **Settings** outline; stacked CTAs on mobile.
+- ✅ **`components/ui/empty-state.tsx`:** OKLCH text/icon, **`grain-texture`**, primary **rounded-full** action button (fixes gray-900 copy on dark shells).
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green, April 12, 2026.
+
+**Next (P1):** **`/talent/profile`** page shell parity; talent **applications** desktop rows that still use mixed `border-border/40` without `grain-texture` if product wants full consistency.
+
+---
+
 ## 🚀 **Latest: Public entry funnel, frosted loaders, talent discovery client (April 12, 2026)**
 
 **UI / PUBLIC** — April 12, 2026

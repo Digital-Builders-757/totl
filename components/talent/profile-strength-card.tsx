@@ -18,6 +18,11 @@ export interface ProfileStrengthCardProps {
   portfolioComplete?: boolean;
 }
 
+const rowBadge = (ok: boolean) =>
+  ok
+    ? "border-[var(--oklch-border-alpha)] bg-[var(--oklch-success)]/15 text-[var(--oklch-success)]"
+    : "border-[var(--oklch-border-alpha)] bg-[var(--oklch-error)]/12 text-[var(--oklch-error)]";
+
 /**
  * Presentational, read-only Profile Strength card.
  * Renders completion status and links to Complete Profile / Settings.
@@ -32,98 +37,73 @@ export function ProfileStrengthCard({
   const basicInfoComplete = !needsProfileCompletion;
 
   return (
-    <Card className="bg-gray-900 border-gray-800">
+    <Card className="grain-texture">
       <CardHeader>
         <div className="card-header-row">
-          <CardTitle className="flex items-center gap-2 text-white">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-500/20">
-              <User className="h-3.5 w-3.5 text-blue-400" />
+          <CardTitle className="flex items-center gap-2 font-display text-lg text-[var(--oklch-text-primary)] sm:text-xl">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--oklch-border-alpha)] bg-white/[0.06]">
+              <User className="h-4 w-4 text-[var(--oklch-accent)]" />
             </span>
-            Profile Strength
+            Profile strength
           </CardTitle>
           <Badge variant="outline" className="status-chip">
             {needsProfileCompletion ? "Needs work" : "Strong"}
           </Badge>
         </div>
-        <CardDescription className="text-gray-300">
-          Complete your profile to get more opportunities
+        <CardDescription className="text-[var(--oklch-text-secondary)]">
+          Complete your profile to get better-matched opportunities
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <div className="flex justify-between text-sm text-white">
-            <span>Profile Completion</span>
-            <span className="font-medium">{completionPercent}%</span>
+          <div className="flex justify-between text-sm text-[var(--oklch-text-secondary)]">
+            <span>Profile completion</span>
+            <span className="font-medium tabular-nums text-[var(--oklch-text-primary)]">{completionPercent}%</span>
           </div>
-          <Progress value={completionPercent} className="h-2" />
+          <Progress value={completionPercent} className="h-2 bg-white/10" />
         </div>
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-white">
-              <User className="h-4 w-4" />
-              Basic Information
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-primary)]">
+              <User className="h-4 w-4 shrink-0 text-[var(--oklch-text-muted)]" />
+              <span className="truncate">Basic information</span>
             </span>
-            <Badge
-              variant="outline"
-              className={
-                basicInfoComplete
-                  ? "bg-green-900/30 text-green-400 border-green-700"
-                  : "bg-red-900/30 text-red-400 border-red-700"
-              }
-            >
+            <Badge variant="outline" className={`shrink-0 ${rowBadge(basicInfoComplete)}`}>
               {basicInfoComplete ? "Complete" : "Incomplete"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-white">
-              <Phone className="h-4 w-4" />
-              Contact Details
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-primary)]">
+              <Phone className="h-4 w-4 shrink-0 text-[var(--oklch-text-muted)]" />
+              <span className="truncate">Contact details</span>
             </span>
-            <Badge
-              variant="outline"
-              className={
-                contactComplete
-                  ? "bg-green-900/30 text-green-400 border-green-700"
-                  : "bg-red-900/30 text-red-400 border-red-700"
-              }
-            >
+            <Badge variant="outline" className={`shrink-0 ${rowBadge(contactComplete)}`}>
               {contactComplete ? "Complete" : "Incomplete"}
             </Badge>
           </div>
-          <div className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2 text-white">
-              <Globe className="h-4 w-4" />
-              Portfolio
+          <div className="flex items-center justify-between gap-2 text-sm">
+            <span className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-primary)]">
+              <Globe className="h-4 w-4 shrink-0 text-[var(--oklch-text-muted)]" />
+              <span className="truncate">Portfolio</span>
             </span>
-            <Badge
-              variant="outline"
-              className={
-                portfolioComplete
-                  ? "bg-green-900/30 text-green-400 border-green-700"
-                  : "bg-red-900/30 text-red-400 border-red-700"
-              }
-            >
+            <Badge variant="outline" className={`shrink-0 ${rowBadge(portfolioComplete)}`}>
               {portfolioComplete ? "Complete" : "Incomplete"}
             </Badge>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
-            variant="outline"
-            asChild
-          >
-            <Link href="/talent/profile" className="flex items-center gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="default" className="flex-1 rounded-full font-semibold" asChild>
+            <Link href="/talent/profile" className="flex items-center justify-center gap-2">
               <Plus className="h-4 w-4" />
-              Complete Profile
+              Complete profile
             </Link>
           </Button>
           <Button
-            className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
             variant="outline"
+            className="flex-1 rounded-full border-border/50 font-semibold"
             asChild
           >
-            <Link href="/settings" className="flex items-center gap-2">
+            <Link href="/settings" className="flex items-center justify-center gap-2">
               <Settings className="h-4 w-4" />
               Settings
             </Link>
