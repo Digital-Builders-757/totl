@@ -101,15 +101,14 @@ export function AdminGigDetailClient({
   };
 
   const confirmDelete = () => {
-    if (applications.length > 0) {
-      window.alert(
-        "This listing has applications and cannot be permanently deleted. Close it instead."
-      );
-      return;
-    }
+    const n = applications.length;
+    const detail =
+      n > 0
+        ? `This will permanently remove ${n} application${n === 1 ? "" : "s"} and the listing.`
+        : "There are no applications on this listing.";
     if (
       !window.confirm(
-        `Permanently delete “${gig.title}”? This cannot be undone. There must be zero applications.`
+        `Permanently delete “${gig.title}”? ${detail} This cannot be undone.`
       )
     ) {
       return;
@@ -275,8 +274,8 @@ export function AdminGigDetailClient({
           <CardHeader>
             <CardTitle className="text-white text-base">Remove listing</CardTitle>
             <p className="text-sm text-[var(--oklch-text-secondary)]">
-              Closing keeps the record but hides it from active talent listings. Permanent delete is only
-              available when there are no applications.
+              Closing keeps the record but hides it from active talent listings. Permanent delete removes
+              the listing and all associated applications (you will be asked to confirm).
             </p>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -297,7 +296,7 @@ export function AdminGigDetailClient({
             <Button
               type="button"
               variant="destructive"
-              disabled={pending || applications.length > 0}
+              disabled={pending}
               className="bg-rose-600 hover:bg-rose-700"
               onClick={confirmDelete}
             >

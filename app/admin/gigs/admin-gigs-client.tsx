@@ -88,15 +88,14 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
   };
 
   const confirmDelete = (gig: Gig) => {
-    if (gig.applications_count > 0) {
-      window.alert(
-        "This listing has applications and cannot be permanently deleted. Close it instead."
-      );
-      return;
-    }
+    const n = gig.applications_count;
+    const detail =
+      n > 0
+        ? `This will permanently remove ${n} application${n === 1 ? "" : "s"} and the listing.`
+        : "There are no applications on this listing.";
     if (
       !window.confirm(
-        `Permanently delete “${gig.title}”? This cannot be undone. There must be zero applications.`
+        `Permanently delete “${gig.title}”? ${detail} This cannot be undone.`
       )
     ) {
       return;
@@ -241,7 +240,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                       </DropdownMenuItem>
                     ) : null}
                     <DropdownMenuItem
-                      disabled={pending || gig.applications_count > 0}
+                      disabled={pending}
                       className="flex items-center text-rose-300 focus:bg-rose-500/15 focus:text-rose-200"
                       onSelect={(e) => {
                         e.preventDefault();
@@ -350,7 +349,7 @@ export function AdminGigsClient({ gigs: initialGigs, user }: AdminGigsClientProp
                           </DropdownMenuItem>
                         ) : null}
                         <DropdownMenuItem
-                          disabled={pending || gig.applications_count > 0}
+                          disabled={pending}
                           className="flex items-center text-rose-300 focus:bg-rose-500/15 focus:text-rose-200"
                           onSelect={(e) => {
                             e.preventDefault();

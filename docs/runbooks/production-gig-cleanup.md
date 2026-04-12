@@ -55,13 +55,17 @@ WHERE id IN (/* approved ids */);
 
 ## Hard delete (only with zero applications)
 
-Deleting a gig **cascades** to `applications`, `gig_requirements`, and related rows. Use only when `application_count = 0` and policy allows:
+Deleting a gig **cascades** to `applications`, `gig_requirements`, `bookings`, and related rows. Use only when `application_count = 0` and policy allows:
 
 ```sql
 DELETE FROM public.gigs
 WHERE id IN (/* approved ids */)
   AND NOT EXISTS (SELECT 1 FROM public.applications a WHERE a.gig_id = gigs.id);
 ```
+
+### Admin UI (app) vs SQL
+
+The **admin** “Delete permanently” flow can delete a gig **with** applications after explicit confirmation (destructive). That relies on FK cascades and RLS policies, including **`20260411220101_fix_admin_gigs_rls_and_helpers.sql`** on `gigs` and **`20260412180000_admin_delete_bookings_for_gig_cascade.sql`** on `bookings` (cascaded child deletes must pass RLS). For bulk or audited cleanup in production, prefer the SQL patterns above after backup and sign-off.
 
 ## After changes
 

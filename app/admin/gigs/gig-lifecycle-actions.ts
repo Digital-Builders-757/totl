@@ -91,24 +91,6 @@ export async function deleteGigAsAdminAction(
     return { ok: false, error: "Opportunity not found" };
   }
 
-  const { count, error: countError } = await supabase
-    .from("applications")
-    .select("id", { count: "exact", head: true })
-    .eq("gig_id", gigId);
-
-  if (countError) {
-    logger.error("[deleteGigAsAdminAction] count failed", countError, { gigId });
-    return { ok: false, error: "Unable to verify applications. Try again." };
-  }
-
-  if (count && count > 0) {
-    return {
-      ok: false,
-      error:
-        "This opportunity has applications and cannot be permanently deleted. Close it instead, or contact support.",
-    };
-  }
-
   const { error: deleteError } = await supabase.from("gigs").delete().eq("id", gigId);
 
   if (deleteError) {

@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin gig delete — applications + bookings RLS cascade (April 12, 2026)**
+
+**ADMIN / GIGS / SUPABASE** — April 12, 2026
+- ✅ **`deleteGigAsAdminAction`:** Removed the server-side refusal when a gig has applications; dependent rows are removed via FK **`ON DELETE CASCADE`** after admin confirmation (destructive).
+- ✅ **Admin UI (`admin-gigs-client`, `admin-gig-detail-client`):** **Delete permanently** is no longer disabled only because **`applications_count > 0`**; confirmations state how many applications will be removed; detail **Remove listing** copy updated.
+- ✅ **RLS:** Migration **`20260412180000_admin_delete_bookings_for_gig_cascade.sql`** adds **`Admins can delete bookings`** on **`public.bookings`** so cascaded deletes from **`gigs`** are not blocked (the table previously had no **`DELETE`** policy under RLS).
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** (admin gig delete / cascade); **`docs/runbooks/production-gig-cleanup.md`** (admin UI vs raw SQL).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Apply **`20260411220101`** (if not already on prod) and **`20260412180000`** via **`supabase db push`** (or pipeline); smoke **admin → Delete permanently** on staging for a gig with test applications (and with a booking if available).
+
+**Next (P1):** Optional Playwright coverage for the two-step confirmation when **`applications_count > 0`**.
+
+---
+
 ## 🚀 **Latest: Portfolio storage — UUID paths + `exists()` finalize (April 12, 2026)**
 
 **STORAGE / PORTFOLIO** — April 12, 2026
