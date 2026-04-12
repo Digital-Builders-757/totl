@@ -113,6 +113,13 @@ export async function finalizePortfolioImage(input: {
     // O(1) existence check on the exact object path (avoids list() pagination / sort limits).
     const { data: fileExists, error: existsError } = await supabase.storage.from("portfolio").exists(path);
 
+    // supabase-js may return data: false together with a non-null error when the object is missing (#1363).
+    if (fileExists === false) {
+      return {
+        error: "We could not confirm your file in storage. Please try uploading again.",
+      };
+    }
+
     if (existsError) {
       logger.error("Portfolio finalize exists check error", existsError, { path });
       return {

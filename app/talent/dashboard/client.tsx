@@ -1716,7 +1716,7 @@ function TalentDashboardContent({
                   <EmptyState
                     icon={Briefcase}
                     title="No opportunities right now"
-                    description="There aren&apos;t any active listings at the moment. Check back soon or refresh."
+                    description={"There aren't any active listings at the moment. Check back soon or refresh."}
                     action={{
                       label: "Refresh",
                       onClick: () => {

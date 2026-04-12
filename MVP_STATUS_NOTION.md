@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Bugbot triage — portfolio `exists()`, talent empty state, `PageShell` padding (April 12, 2026)**
+
+**QUALITY / UX** — April 12, 2026
+- ✅ **`finalizePortfolioImage`:** Handles **`storage.from("portfolio").exists(path)`** by checking **`data === false`** before treating **`error`** as a generic verification failure (supabase-js can return both for a missing object; see [supabase-js#1363](https://github.com/supabase/supabase-js/issues/1363)).
+- ✅ **`app/talent/dashboard/client.tsx`:** EmptyState **`description`** uses a JavaScript string (avoids `&apos;` inside a JSX attribute).
+- ✅ **`components/layout/page-shell.tsx`:** Top padding **`pt-16 sm:pt-20`** only — removed **`lg:pt-24`** so large breakpoints do not exceed the fixed navbar (**`h-16 sm:h-20`**).
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — `exists()` false + error quirk.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** None for this patch.
+
+**Next (P1):** When upgrading supabase-js, re-check **`exists()`** behavior; optional regression test for finalize messaging.
+
+---
+
 ## 🚀 **Latest: Gig marketing copy paywall — guests + unpaid talent (April 12, 2026)**
 
 **GIGS / SUBSCRIPTION** — April 12, 2026
