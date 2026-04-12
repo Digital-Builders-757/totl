@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PATHS } from "@/lib/constants/routes";
 import { logger } from "@/lib/utils/logger";
 
 interface ApplicationStatus {
@@ -19,6 +20,9 @@ interface ApplicationStatus {
 interface CareerBuilderSectionProps {
   userEmail: string | undefined;
 }
+
+const glassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] shadow-none";
 
 export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
   const { user, profile } = useAuth();
@@ -72,23 +76,32 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
     switch (status) {
       case "approved":
         return (
-          <Badge className="bg-green-600 text-white">
-            <CheckCircle className="h-3 w-3 mr-1" />
+          <Badge
+            variant="outline"
+            className="border-emerald-500/35 bg-emerald-500/15 font-medium text-emerald-200"
+          >
+            <CheckCircle className="mr-1 h-3 w-3" />
             Approved
           </Badge>
         );
       case "pending":
         return (
-          <Badge className="bg-yellow-600 text-white">
-            <Clock className="h-3 w-3 mr-1" />
-            Under Review
+          <Badge
+            variant="outline"
+            className="border-amber-500/35 bg-amber-500/15 font-medium text-amber-200"
+          >
+            <Clock className="mr-1 h-3 w-3" />
+            Under review
           </Badge>
         );
       case "rejected":
         return (
-          <Badge className="bg-red-600 text-white">
-            <XCircle className="h-3 w-3 mr-1" />
-            Rejected
+          <Badge
+            variant="outline"
+            className="border-red-500/35 bg-red-500/15 font-medium text-red-200"
+          >
+            <XCircle className="mr-1 h-3 w-3" />
+            Not approved
           </Badge>
         );
       default:
@@ -99,83 +112,102 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
   const getStatusMessage = (status: string | null) => {
     switch (status) {
       case "approved":
-        return "Your application has been approved! You now have access to the Career Builder dashboard.";
+        return "Your application has been approved. Open the Career Builder dashboard to post work and hire talent.";
       case "pending":
-        return "Your application is being reviewed by our team. You'll be notified when we have an update.";
+        return "Our team is reviewing your application. We’ll notify you when there’s an update.";
       case "rejected":
-        return "Your previous application was not approved. Please reach out to hello@thetotlagency.com to reapply.";
+        return "This application wasn’t approved. Reach out to hello@thetotlagency.com if you’d like to discuss next steps.";
       default:
         return null;
     }
   };
 
   return (
-    <Card className="bg-gray-800 border-gray-700">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Briefcase className="h-5 w-5" />
+    <Card className={glassCard}>
+      <CardHeader className="space-y-1">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold text-white">
+          <Briefcase className="h-5 w-5 text-[var(--oklch-accent)]" aria-hidden />
           Become a Career Builder
         </CardTitle>
-        <CardDescription className="text-gray-400">
+        <CardDescription className="text-[var(--oklch-text-secondary)]">
           Post opportunities and hire talent through TOTL Agency
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
-          <div className="text-center py-4">
-            <p className="text-gray-400">Checking application status...</p>
+          <div className="py-6 text-center">
+            <p className="text-sm text-[var(--oklch-text-secondary)]">Checking application status…</p>
           </div>
         ) : applicationStatus?.status ? (
           <>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-300 font-medium">Application Status:</span>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">Status</span>
               {getStatusBadge(applicationStatus.status)}
             </div>
 
             {getStatusMessage(applicationStatus.status) && (
-              <Alert className="bg-gray-700 border-gray-600">
-                <AlertDescription className="text-gray-300">
-                  {getStatusMessage(applicationStatus.status)}
-                </AlertDescription>
+              <Alert className="border-white/10 bg-white/[0.04] text-[var(--oklch-text-secondary)]">
+                <AlertDescription>{getStatusMessage(applicationStatus.status)}</AlertDescription>
               </Alert>
             )}
 
             {applicationStatus.status === "approved" && (
-              <Button asChild className="w-full bg-green-600 hover:bg-green-700 text-white">
-                <Link href="/client/dashboard">
-                  Go to Career Builder Dashboard
-                  <ArrowRight className="h-4 w-4 ml-2" />
+              <Button
+                asChild
+                className="w-full border-0 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-400 hover:to-teal-500"
+              >
+                <Link href={PATHS.CLIENT_DASHBOARD}>
+                  Open Career Builder
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             )}
 
+            {applicationStatus.status === "pending" && (
+              <Button
+                asChild
+                variant="outline"
+                className="w-full border-white/15 bg-white/5 text-white hover:bg-white/10"
+              >
+                <Link href={PATHS.TALENT_DASHBOARD}>Back to talent dashboard</Link>
+              </Button>
+            )}
+
             {applicationStatus.status === "rejected" && (
-              <Button asChild variant="outline" className="w-full border-gray-600 text-white hover:bg-gray-700">
-                <Link href="/client/apply">
-                  Reapply to be a Career Builder
-                  <ArrowRight className="h-4 w-4 ml-2" />
+              <Button
+                asChild
+                variant="outline"
+                className="w-full border-white/15 bg-white/5 text-white hover:bg-white/10"
+              >
+                <Link href={PATHS.CLIENT_APPLY}>
+                  Reapply
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             )}
           </>
         ) : (
           <>
-            <div className="text-sm text-gray-400 space-y-2">
+            <div className="space-y-2 text-sm text-[var(--oklch-text-secondary)]">
               <p>
-                Career Builders can post opportunities and hire talent through TOTL Agency. Apply now to join our exclusive network.
+                Career Builders post opportunities and book talent on TOTL. Apply once to unlock the
+                client workspace.
               </p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
+              <ul className="ml-1 list-inside list-disc space-y-1 marker:text-[var(--oklch-text-tertiary)]">
                 <li>Post unlimited opportunities</li>
-                <li>Access our premium talent roster</li>
+                <li>Access our talent roster</li>
                 <li>Manage applications and bookings</li>
-                <li>Direct communication with talent</li>
+                <li>Message talent directly</li>
               </ul>
             </div>
 
-            <Button asChild className="w-full bg-white text-black hover:bg-gray-200">
-              <Link href="/client/apply">
+            <Button
+              asChild
+              className="w-full border-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400"
+            >
+              <Link href={PATHS.CLIENT_APPLY}>
                 Apply to be a Career Builder
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </>
@@ -184,4 +216,3 @@ export function CareerBuilderSection({ userEmail }: CareerBuilderSectionProps) {
     </Card>
   );
 }
-

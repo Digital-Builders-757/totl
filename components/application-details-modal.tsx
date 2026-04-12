@@ -1,11 +1,13 @@
 "use client";
 
-import { Calendar, Clock, DollarSign, MapPin, MessageSquare, X } from "lucide-react";
+import { Calendar, Clock, DollarSign, MapPin, MessageSquare } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SafeImage } from "@/components/ui/safe-image";
+import { PATHS } from "@/lib/constants/routes";
 import { Database } from "@/types/supabase";
 
 // Use generated database types
@@ -39,6 +41,9 @@ interface ApplicationDetailsModalProps {
   booking?: BookingData | null;
 }
 
+const glassCardClass =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] shadow-none";
+
 export function ApplicationDetailsModal({
   application,
   isOpen,
@@ -50,58 +55,51 @@ export function ApplicationDetailsModal({
   const getStatusColor = (status: Database["public"]["Enums"]["application_status"]) => {
     switch (status) {
       case "accepted":
-        return "bg-green-900/30 text-green-400 border-green-700";
+        return "border-emerald-500/35 bg-emerald-500/15 text-emerald-300";
       case "rejected":
-        return "bg-red-900/30 text-red-400 border-red-700";
+        return "border-red-500/35 bg-red-500/15 text-red-300";
       case "new":
-        return "bg-yellow-900/30 text-yellow-400 border-yellow-700";
+        return "border-amber-500/35 bg-amber-500/15 text-amber-200";
       case "under_review":
-        return "bg-blue-900/30 text-blue-400 border-blue-700";
+        return "border-sky-500/35 bg-sky-500/15 text-sky-200";
       case "shortlisted":
-        return "bg-purple-900/30 text-purple-400 border-purple-700";
+        return "border-violet-500/35 bg-violet-500/15 text-violet-200";
       default:
-        return "bg-gray-900/30 text-gray-400 border-gray-700";
+        return "border-white/15 bg-white/5 text-[var(--oklch-text-secondary)]";
     }
   };
 
   const getCategoryColor = (category: string) => {
     const colors = {
-      "e-commerce": "bg-blue-900/30 text-blue-400 border-blue-700",
-      commercial: "bg-green-900/30 text-green-400 border-green-700",
-      editorial: "bg-purple-900/30 text-purple-400 border-purple-700",
-      runway: "bg-pink-900/30 text-pink-400 border-pink-700",
-      sportswear: "bg-orange-900/30 text-orange-400 border-orange-700",
-      beauty: "bg-yellow-900/30 text-yellow-400 border-yellow-700",
+      "e-commerce": "border-sky-500/35 bg-sky-500/15 text-sky-200",
+      commercial: "border-emerald-500/35 bg-emerald-500/15 text-emerald-200",
+      editorial: "border-violet-500/35 bg-violet-500/15 text-violet-200",
+      runway: "border-pink-500/35 bg-pink-500/15 text-pink-200",
+      sportswear: "border-orange-500/35 bg-orange-500/15 text-orange-200",
+      beauty: "border-amber-500/35 bg-amber-500/15 text-amber-200",
     };
     return (
-      colors[category as keyof typeof colors] || "bg-gray-900/30 text-gray-400 border-gray-700"
+      colors[category as keyof typeof colors] ||
+      "border-white/15 bg-white/5 text-[var(--oklch-text-secondary)]"
     );
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-900 border-gray-800">
-        <DialogHeader>
-          <DialogTitle className="text-white flex items-center justify-between">
-            Application Details
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+      <DialogContent className="panel-frosted max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto border-white/10 bg-[var(--totl-surface-glass-strong)] p-4 text-white sm:w-full sm:p-6">
+        <DialogHeader className="space-y-1 pr-8 text-left">
+          <DialogTitle className="text-lg font-semibold tracking-tight text-white sm:text-xl">
+            Application details
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Gig Information */}
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader>
-              <div className="flex items-start gap-4">
+          <Card className={glassCardClass}>
+            <CardHeader className="space-y-3">
+              <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start">
                 {application.gigs?.image_url && (
-                  <div className="w-20 h-20 relative rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-white/10">
                     <SafeImage
                       src={application.gigs.image_url}
                       alt={application.gigs.title}
@@ -111,17 +109,22 @@ export function ApplicationDetailsModal({
                     />
                   </div>
                 )}
-                <div className="flex-grow">
-                  <CardTitle className="text-white text-xl">{application.gigs?.title}</CardTitle>
-                  <CardDescription className="text-gray-300">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <CardTitle className="text-lg font-semibold text-white sm:text-xl">
+                    {application.gigs?.title}
+                  </CardTitle>
+                  <CardDescription className="text-[var(--oklch-text-secondary)]">
                     {application.gigs?.client_profiles?.company_name || "Private Client"}
                   </CardDescription>
-                  <div className="flex gap-2 mt-2">
-                    <Badge className={getCategoryColor(application.gigs?.category || "General")}>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Badge
+                      variant="outline"
+                      className={getCategoryColor(application.gigs?.category || "General")}
+                    >
                       {application.gigs?.category || "General"}
                     </Badge>
-                    <Badge className={getStatusColor(application.status)}>
-                      {application.status}
+                    <Badge variant="outline" className={getStatusColor(application.status)}>
+                      {application.status.replace(/_/g, " ")}
                     </Badge>
                   </div>
                 </div>
@@ -129,16 +132,18 @@ export function ApplicationDetailsModal({
             </CardHeader>
             <CardContent className="space-y-4">
               {application.gigs?.description && (
-                <p className="text-gray-300">{application.gigs.description}</p>
+                <p className="text-sm leading-relaxed text-[var(--oklch-text-secondary)]">
+                  {application.gigs.description}
+                </p>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-2 text-gray-300">
-                  <MapPin className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm">{application.gigs?.location}</span>
+              <div className="grid min-w-0 grid-cols-1 gap-3 md:grid-cols-2 md:gap-4">
+                <div className="flex min-w-0 items-start gap-2 text-[var(--oklch-text-secondary)]">
+                  <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--oklch-text-tertiary)]" />
+                  <span className="text-sm leading-snug">{application.gigs?.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <DollarSign className="h-4 w-4 text-gray-400" />
+                <div className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-secondary)]">
+                  <DollarSign className="h-4 w-4 flex-shrink-0 text-[var(--oklch-text-tertiary)]" />
                   <span className="text-sm">
                     {booking?.compensation != null
                       ? `$${Number(booking.compensation).toLocaleString()}`
@@ -148,8 +153,8 @@ export function ApplicationDetailsModal({
                   </span>
                 </div>
                 {(booking?.date || application.gigs?.date) && (
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <Calendar className="h-4 w-4 text-gray-400" />
+                  <div className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-secondary)]">
+                    <Calendar className="h-4 w-4 flex-shrink-0 text-[var(--oklch-text-tertiary)]" />
                     <span className="text-sm">
                       {booking?.date
                         ? new Date(booking.date).toLocaleString(undefined, {
@@ -162,50 +167,62 @@ export function ApplicationDetailsModal({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-gray-300">
-                  <Clock className="h-4 w-4 text-gray-400" />
+                <div className="flex min-w-0 items-center gap-2 text-[var(--oklch-text-secondary)]">
+                  <Clock className="h-4 w-4 flex-shrink-0 text-[var(--oklch-text-tertiary)]" />
                   <span className="text-sm">
                     Applied {new Date(application.created_at).toLocaleDateString()}
                   </span>
                 </div>
               </div>
               {booking?.notes && (
-                <div className="mt-4 p-4 bg-gray-900/50 border border-gray-700 rounded-lg">
-                  <p className="text-sm font-medium text-gray-300 mb-4">Booking Notes</p>
-                  <p className="text-gray-300 text-sm whitespace-pre-wrap">{booking.notes}</p>
+                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                  <p className="mb-2 text-sm font-medium text-white">Booking notes</p>
+                  <p className="whitespace-pre-wrap text-sm text-[var(--oklch-text-secondary)]">
+                    {booking.notes}
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Application Details */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className={glassCardClass}>
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-blue-400" />
-                Your Application
+              <CardTitle className="flex items-center gap-2 text-lg font-semibold text-white">
+                <MessageSquare className="h-5 w-5 text-[var(--oklch-accent)]" aria-hidden />
+                Your application
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-300">Application ID</span>
-                  <span className="text-sm text-gray-400 font-mono">{application.id}</span>
+              <div className="space-y-3">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">
+                    Application ID
+                  </span>
+                  <span className="break-all text-right font-mono text-xs text-[var(--oklch-text-tertiary)] sm:max-w-[60%] sm:text-sm">
+                    {application.id}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-300">Status</span>
-                  <Badge className={getStatusColor(application.status)}>{application.status}</Badge>
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">Status</span>
+                  <Badge variant="outline" className={getStatusColor(application.status)}>
+                    {application.status.replace(/_/g, " ")}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-300">Applied Date</span>
-                  <span className="text-sm text-gray-400">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                  <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">
+                    Applied
+                  </span>
+                  <span className="text-sm text-[var(--oklch-text-tertiary)]">
                     {new Date(application.created_at).toLocaleString()}
                   </span>
                 </div>
                 {application.updated_at !== application.created_at && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-300">Last Updated</span>
-                    <span className="text-sm text-gray-400">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">
+                      Last updated
+                    </span>
+                    <span className="text-sm text-[var(--oklch-text-tertiary)]">
                       {new Date(application.updated_at).toLocaleString()}
                     </span>
                   </div>
@@ -214,9 +231,11 @@ export function ApplicationDetailsModal({
 
               {application.message && (
                 <div className="space-y-2">
-                  <span className="text-sm font-medium text-gray-300">Cover Letter</span>
-                  <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
-                    <p className="text-gray-300 text-sm whitespace-pre-wrap">
+                  <span className="text-sm font-medium text-[var(--oklch-text-secondary)]">
+                    Cover letter
+                  </span>
+                  <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+                    <p className="whitespace-pre-wrap text-sm text-[var(--oklch-text-secondary)]">
                       {application.message}
                     </p>
                   </div>
@@ -224,67 +243,116 @@ export function ApplicationDetailsModal({
               )}
 
               {!application.message && (
-                <div className="bg-gray-900 border border-gray-700 rounded-lg p-4 text-center">
-                  <MessageSquare className="h-8 w-8 text-gray-500 mx-auto mb-2" />
-                  <p className="text-gray-400 text-sm">No cover letter provided</p>
+                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-6 text-center">
+                  <MessageSquare
+                    className="mx-auto mb-2 h-8 w-8 text-[var(--oklch-text-tertiary)]"
+                    aria-hidden
+                  />
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">
+                    No cover letter on file for this application.
+                  </p>
+                  <p className="mt-2 text-xs text-[var(--oklch-text-tertiary)]">
+                    Future applications can include a short note from the apply flow.
+                  </p>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Next Steps */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className={glassCardClass}>
             <CardHeader>
-              <CardTitle className="text-white">What&apos;s Next?</CardTitle>
+              <CardTitle className="text-lg font-semibold text-white">What happens next</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {(application.status === "new" || application.status === "under_review") && (
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="text-gray-300 text-sm font-medium">
-                        {application.status === "new" ? "Submitted" : "Under Review"}
+                    <div
+                      className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-amber-400"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 space-y-2">
+                      <p className="text-sm font-medium text-white">
+                        {application.status === "new" ? "Submitted" : "Under review"}
                       </p>
-                      <p className="text-gray-400 text-sm">
-                        The client is reviewing your application. You&apos;ll be notified when they
-                        make a decision.
+                      <p className="text-sm text-[var(--oklch-text-secondary)]">
+                        The client is reviewing your application. We&apos;ll notify you here when the
+                        status changes—no need to follow up unless they reach out.
                       </p>
+                      <Button
+                        asChild
+                        size="sm"
+                        className="mt-1 border-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400"
+                      >
+                        <Link href={PATHS.GIGS}>Browse open gigs</Link>
+                      </Button>
                     </div>
                   </div>
                 )}
                 {application.status === "shortlisted" && (
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="text-gray-300 text-sm font-medium">Shortlisted!</p>
-                      <p className="text-gray-400 text-sm">
-                        Great news! You&apos;ve been shortlisted. The client will reach out soon with next steps.
+                    <div
+                      className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-violet-400"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 space-y-2">
+                      <p className="text-sm font-medium text-white">Shortlisted</p>
+                      <p className="text-sm text-[var(--oklch-text-secondary)]">
+                        You&apos;re in the running. Watch your inbox and this dashboard—the client may
+                        request more details or next steps soon.
                       </p>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="border-white/15 bg-white/5 text-white hover:bg-white/10"
+                      >
+                        <Link href={PATHS.TALENT_DASHBOARD}>Back to dashboard</Link>
+                      </Button>
                     </div>
                   </div>
                 )}
                 {application.status === "accepted" && (
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="text-gray-300 text-sm font-medium">Congratulations!</p>
-                      <p className="text-gray-400 text-sm">
-                        Your application has been accepted. The client will contact you with next
-                        steps.
+                    <div
+                      className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400"
+                      aria-hidden
+                    />
+                    <div className="min-w-0 space-y-2">
+                      <p className="text-sm font-medium text-white">Accepted</p>
+                      <p className="text-sm text-[var(--oklch-text-secondary)]">
+                        Confirmed details and booking notes (if any) appear above. Check your
+                        dashboard for scheduling and follow up with the client through the agreed
+                        channel.
                       </p>
+                      <Button
+                        asChild
+                        size="sm"
+                        className="border-0 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-400 hover:to-teal-500"
+                      >
+                        <Link href={PATHS.TALENT_DASHBOARD}>Open dashboard</Link>
+                      </Button>
                     </div>
                   </div>
                 )}
                 {application.status === "rejected" && (
                   <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 bg-red-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <div>
-                      <p className="text-gray-300 text-sm font-medium">Application Not Selected</p>
-                      <p className="text-gray-400 text-sm">
-                        Unfortunately, this application wasn&apos;t selected. Keep applying to other
-                        opportunities!
+                    <div className="mt-2 h-2 w-2 flex-shrink-0 rounded-full bg-red-400" aria-hidden />
+                    <div className="min-w-0 space-y-2">
+                      <p className="text-sm font-medium text-white">Not selected</p>
+                      <p className="text-sm text-[var(--oklch-text-secondary)]">
+                        This role went another direction. Your profile stays visible for future
+                        opportunities—keep momentum with roles that fit you.
                       </p>
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="border-white/15 bg-white/5 text-white hover:bg-white/10"
+                      >
+                        <Link href={PATHS.GIGS}>Find your next gig</Link>
+                      </Button>
                     </div>
                   </div>
                 )}

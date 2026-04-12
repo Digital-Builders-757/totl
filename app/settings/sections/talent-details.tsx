@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -40,6 +41,13 @@ const talentSchema = z.object({
 });
 
 type TalentFormData = z.infer<typeof talentSchema>;
+
+const settingsGlassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] shadow-none";
+const fieldInput =
+  "bg-white/5 border-white/10 text-white placeholder:text-[var(--oklch-text-tertiary)]";
+const fieldInputError =
+  "border-red-500/80 bg-white/5 text-white placeholder:text-[var(--oklch-text-tertiary)]";
 
 interface TalentDetailsSectionProps {
   talent: Talent | null;
@@ -125,32 +133,33 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
 
   return (
     <div className="space-y-6">
-      <Card className="bg-gray-800 border-gray-700">
-        <CardHeader>
-          <CardTitle className="text-white">Talent Details</CardTitle>
-          <CardDescription className="text-gray-400">
-            Update your talent-specific information
+      <Card className={settingsGlassCard}>
+        <CardHeader className="space-y-1">
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-white">
+            <Sparkles className="h-5 w-5 text-[var(--oklch-accent)]" aria-hidden />
+            Talent details
+          </CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
+            Information clients see when you apply and get booked
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label
                   htmlFor="first_name"
-                  className={errors.first_name ? "text-red-400" : "text-gray-300"}
+                  className={
+                    errors.first_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"
+                  }
                 >
-                  First Name *
+                  First name *
                 </Label>
                 <Input
                   id="first_name"
                   placeholder="Enter your first name"
                   {...register("first_name")}
-                  className={
-                    errors.first_name
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
-                  }
+                  className={errors.first_name ? fieldInputError : fieldInput}
                   disabled={isSubmitting}
                 />
                 {errors.first_name && (
@@ -161,19 +170,17 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
               <div className="space-y-2">
                 <Label
                   htmlFor="last_name"
-                  className={errors.last_name ? "text-red-400" : "text-gray-300"}
+                  className={
+                    errors.last_name ? "text-red-400" : "text-[var(--oklch-text-secondary)]"
+                  }
                 >
-                  Last Name *
+                  Last name *
                 </Label>
                 <Input
                   id="last_name"
                   placeholder="Enter your last name"
                   {...register("last_name")}
-                  className={
-                    errors.last_name
-                      ? "border-red-500 bg-gray-700 text-white"
-                      : "bg-gray-700 border-gray-600 text-white"
-                  }
+                  className={errors.last_name ? fieldInputError : fieldInput}
                   disabled={isSubmitting}
                 />
                 {errors.last_name && (
@@ -183,7 +190,7 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="experience" className="text-gray-300">
+              <Label htmlFor="experience" className="text-[var(--oklch-text-secondary)]">
                 Experience
               </Label>
               <Textarea
@@ -192,17 +199,17 @@ export function TalentDetailsSection({ talent }: TalentDetailsSectionProps) {
                 {...register("experience")}
                 disabled={isSubmitting}
                 rows={4}
-                className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-500"
+                className={`${fieldInput} min-h-[120px] resize-y`}
               />
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-end pt-2">
               <Button
                 type="submit"
                 disabled={isSubmitting || !isDirty}
-                className="min-w-[100px] bg-white text-black hover:bg-gray-200"
+                className="min-w-[120px] border-0 bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-400 hover:to-orange-400 disabled:opacity-50"
               >
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? "Saving..." : "Save changes"}
               </Button>
             </div>
           </form>
