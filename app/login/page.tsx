@@ -123,27 +123,38 @@ export default function Login() {
   };
 
   return (
-    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-x-hidden text-white">
+    <PageShell
+      fullBleed
+      ambientTone="lifted"
+      className="grain-texture glow-backplate relative overflow-x-hidden text-white"
+    >
       <FloatingPathsBackground opacity={0.08} color="white" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-white/3 via-white/8 to-white/3" />
+      <div className="pointer-events-none absolute left-1/4 top-0 z-[1] h-72 w-72 animate-apple-float rounded-full bg-white/3 blur-3xl" />
+      <div
+        className="pointer-events-none absolute bottom-0 right-1/4 z-[1] h-96 w-96 animate-apple-float rounded-full bg-white/3 blur-3xl"
+        style={{ animationDelay: "1s" }}
+      />
 
-      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-6 md:py-8 lg:px-8">
+      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
         {/* Hydration marker for E2E stability (element exists pre-hydration). */}
         <span data-testid="login-hydrated" className="sr-only">
           {isHydrated ? "ready" : "loading"}
         </span>
         <Link
           href={PATHS.HOME}
-          className="focus-hint mb-4 inline-flex items-center text-gray-400 transition-colors hover:text-white sm:mb-6 md:mb-6"
+          className="focus-hint mb-4 inline-flex items-center text-[var(--oklch-text-tertiary)] transition-colors hover:text-white sm:mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to home
         </Link>
 
         <SectionCard className="mx-auto max-w-md overflow-hidden" paddingClassName="p-4 sm:p-6 md:p-8">
-            <div className="text-center mb-6 sm:mb-8">
-              <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">Welcome back</h1>
-              <p className="text-sm sm:text-base text-gray-300">Sign in to continue to your dashboard</p>
+            <div className="mb-6 text-center sm:mb-7">
+              <h1 className="mb-2 font-display text-2xl font-bold text-white sm:text-3xl">Welcome back</h1>
+              <p className="text-base text-[var(--oklch-text-secondary)] sm:text-lg">
+                Sign in to open your dashboard.
+              </p>
             </div>
 
             {verified && (
@@ -279,8 +290,8 @@ export default function Login() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border/35" />
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="rounded-md border border-border/40 bg-card/30 px-2 text-sm text-muted-foreground">
+                <div className="relative flex justify-center text-xs uppercase tracking-wide">
+                  <span className="rounded-md border border-border/40 bg-white/[0.06] px-3 py-1 text-[0.7rem] text-[var(--oklch-text-muted)] backdrop-blur-sm">
                     New to TOTL?
                   </span>
                 </div>
@@ -289,7 +300,7 @@ export default function Login() {
 
             <div className="space-y-3 sm:space-y-4">
               <div className="text-center">
-                <p className="text-sm sm:text-base text-gray-300">
+                <p className="text-sm text-[var(--oklch-text-secondary)] sm:text-base">
                   Don&apos;t have an account?{" "}
                   <Link
                     href={
@@ -297,9 +308,9 @@ export default function Login() {
                         ? `${PATHS.CHOOSE_ROLE}?returnUrl=${encodeURIComponent(returnUrl)}`
                         : PATHS.CHOOSE_ROLE
                     }
-                    className="focus-hint inline-block font-medium text-white/90 transition-colors hover:text-white"
+                    className="focus-hint inline-block font-medium text-white underline-offset-4 transition-colors hover:underline"
                   >
-                    Create an account →
+                    Create account →
                   </Link>
                 </p>
               </div>

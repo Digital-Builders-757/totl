@@ -68,37 +68,37 @@ export default function ChooseRolePage() {
   return (
     <PageShell
       fullBleed
+      ambientTone="lifted"
       className="grain-texture glow-backplate relative overflow-x-hidden text-white"
     >
       <FloatingPathsBackground opacity={0.08} color="white" />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-white/3 via-white/8 to-white/3" />
-      <div className="pointer-events-none absolute top-0 left-1/4 z-[1] h-72 w-72 rounded-full bg-white/3 blur-3xl animate-apple-float" />
+      <div className="pointer-events-none absolute left-1/4 top-0 z-[1] h-72 w-72 animate-apple-float rounded-full bg-white/3 blur-3xl" />
       <div
-        className="pointer-events-none absolute bottom-0 right-1/4 z-[1] h-96 w-96 rounded-full bg-white/3 blur-3xl animate-apple-float"
+        className="pointer-events-none absolute bottom-0 right-1/4 z-[1] h-96 w-96 animate-apple-float rounded-full bg-white/3 blur-3xl"
         style={{ animationDelay: "1s" }}
       />
 
-      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <div className="relative z-10 container mx-auto px-4 py-4 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         {/* Hydration marker for E2E stability */}
         <span data-testid="choose-role-hydrated" className="sr-only">
           {isHydrated ? "ready" : "loading"}
         </span>
         <Link
           href={PATHS.HOME}
-          className="focus-hint mb-4 inline-flex items-center text-gray-300 transition-colors hover:text-white sm:mb-8"
+          className="focus-hint mb-4 inline-flex items-center text-[var(--oklch-text-tertiary)] transition-colors hover:text-white sm:mb-6"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Home
+          Back to home
         </Link>
 
         <div className="mx-auto max-w-4xl">
-          <div className="mb-8 animate-apple-fade-in text-center sm:mb-16">
-            <h1 className="mb-4 font-display text-3xl font-bold text-white sm:mb-6 sm:text-5xl lg:text-6xl">
+          <div className="mb-8 animate-apple-fade-in text-center sm:mb-12">
+            <h1 className="mb-3 font-display text-3xl font-bold text-white sm:mb-5 sm:text-5xl lg:text-6xl">
               Choose Your Role
             </h1>
-            <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-300 sm:text-xl">
-              Select whether you&apos;re joining as talent looking for opportunities or a client
-              looking to hire talent.
+            <p className="mx-auto max-w-2xl text-base leading-relaxed text-[var(--oklch-text-secondary)] sm:text-lg">
+              Join as talent to find opportunities, or as a Career Builder to hire talent.
             </p>
           </div>
 

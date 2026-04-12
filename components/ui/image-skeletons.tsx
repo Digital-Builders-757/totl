@@ -1,4 +1,9 @@
+import type { ComponentType } from "react";
+
 import { Skeleton } from "./skeleton";
+
+const shellSurface =
+  "overflow-hidden rounded-xl border border-[var(--oklch-border-alpha)] bg-[var(--oklch-panel-alpha)]";
 
 /**
  * Portfolio Item Skeleton
@@ -6,24 +11,24 @@ import { Skeleton } from "./skeleton";
  */
 export function PortfolioItemSkeleton() {
   return (
-    <div className="relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-lg">
+    <div className={`relative ${shellSurface}`}>
       {/* Image skeleton */}
-      <Skeleton className="w-full h-64 rounded-none bg-zinc-800/50" />
-      
+      <Skeleton className="h-64 w-full rounded-none" />
+
       {/* Content skeleton */}
-      <div className="p-4 space-y-3">
+      <div className="space-y-3 p-4">
         {/* Title */}
-        <Skeleton className="h-6 w-3/4 bg-zinc-800/50" />
-        
+        <Skeleton className="h-6 w-3/4" />
+
         {/* Caption */}
-        <Skeleton className="h-4 w-full bg-zinc-800/50" />
-        <Skeleton className="h-4 w-2/3 bg-zinc-800/50" />
-        
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+
         {/* Buttons */}
         <div className="flex gap-2 pt-2">
-          <Skeleton className="h-9 flex-1 bg-zinc-800/50" />
-          <Skeleton className="h-9 w-9 bg-zinc-800/50" />
-          <Skeleton className="h-9 w-9 bg-zinc-800/50" />
+          <Skeleton className="h-9 flex-1" />
+          <Skeleton className="h-9 w-9" />
+          <Skeleton className="h-9 w-9" />
         </div>
       </div>
     </div>
@@ -36,8 +41,8 @@ export function PortfolioItemSkeleton() {
  */
 export function PortfolioPreviewSkeleton() {
   return (
-    <div className="relative overflow-hidden bg-zinc-900 border border-zinc-800 rounded-lg">
-      <Skeleton className="w-full aspect-square rounded-none bg-zinc-800/50" />
+    <div className={shellSurface}>
+      <Skeleton className="aspect-square w-full rounded-none" />
     </div>
   );
 }
@@ -48,30 +53,30 @@ export function PortfolioPreviewSkeleton() {
  */
 export function GigCardSkeleton() {
   return (
-    <div className="overflow-hidden bg-zinc-900 border border-zinc-800 rounded-lg">
+    <div className={shellSurface}>
       {/* Image skeleton */}
-      <Skeleton className="w-full aspect-[4/3] rounded-none bg-zinc-800/50" />
-      
+      <Skeleton className="aspect-[4/3] w-full rounded-none" />
+
       {/* Content skeleton */}
-      <div className="p-6 space-y-4">
+      <div className="space-y-4 p-6">
         {/* Title */}
-        <Skeleton className="h-6 w-5/6 bg-zinc-800/50" />
-        
+        <Skeleton className="h-6 w-5/6" />
+
         {/* Description */}
         <div className="space-y-2">
-          <Skeleton className="h-4 w-full bg-zinc-800/50" />
-          <Skeleton className="h-4 w-4/5 bg-zinc-800/50" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-4/5" />
         </div>
-        
+
         {/* Metadata */}
         <div className="space-y-2">
-          <Skeleton className="h-4 w-2/3 bg-zinc-800/50" />
-          <Skeleton className="h-4 w-1/2 bg-zinc-800/50" />
-          <Skeleton className="h-4 w-3/5 bg-zinc-800/50" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-4 w-3/5" />
         </div>
-        
+
         {/* Button */}
-        <Skeleton className="h-12 w-full bg-zinc-800/50" />
+        <Skeleton className="h-12 w-full" />
       </div>
     </div>
   );
@@ -83,15 +88,13 @@ export function GigCardSkeleton() {
  */
 export function AvatarSkeleton({ size = "md" }: { size?: "sm" | "md" | "lg" | "xl" }) {
   const sizeClasses = {
-    sm: "w-8 h-8",
-    md: "w-12 h-12",
-    lg: "w-16 h-16",
-    xl: "w-24 h-24",
+    sm: "h-8 w-8",
+    md: "h-12 w-12",
+    lg: "h-16 w-16",
+    xl: "h-24 w-24",
   };
 
-  return (
-    <Skeleton className={`${sizeClasses[size]} rounded-full bg-zinc-800/50`} />
-  );
+  return <Skeleton className={`${sizeClasses[size]} rounded-full`} />;
 }
 
 /**
@@ -100,12 +103,12 @@ export function AvatarSkeleton({ size = "md" }: { size?: "sm" | "md" | "lg" | "x
  */
 export function CardSkeleton() {
   return (
-    <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-lg space-y-4">
-      <Skeleton className="h-6 w-3/4 bg-zinc-800/50" />
+    <div className={`space-y-4 rounded-xl border border-[var(--oklch-border-alpha)] bg-[var(--oklch-panel-alpha)] p-6`}>
+      <Skeleton className="h-6 w-3/4" />
       <div className="space-y-2">
-        <Skeleton className="h-4 w-full bg-zinc-800/50" />
-        <Skeleton className="h-4 w-5/6 bg-zinc-800/50" />
-        <Skeleton className="h-4 w-4/6 bg-zinc-800/50" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-4/6" />
       </div>
     </div>
   );
@@ -116,14 +119,11 @@ export function CardSkeleton() {
  * Used for loading states in tables and lists
  */
 export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
+  const widths = ["72%", "88%", "64%", "92%", "70%", "85%"];
   return (
-    <div className="flex items-center gap-4 p-4 border-b border-zinc-800">
+    <div className="flex items-center gap-4 border-b border-[var(--oklch-border-alpha)] p-4">
       {Array.from({ length: columns }).map((_, i) => (
-        <Skeleton 
-          key={i} 
-          className="h-4 flex-1 bg-zinc-800/50" 
-          style={{ width: `${Math.random() * 40 + 60}%` }}
-        />
+        <Skeleton key={i} className="h-4 flex-1" style={{ maxWidth: widths[i % widths.length] }} />
       ))}
     </div>
   );
@@ -133,19 +133,18 @@ export function TableRowSkeleton({ columns = 4 }: { columns?: number }) {
  * Grid Skeleton
  * Used for loading grid layouts (portfolio, gigs, etc.)
  */
-export function GridSkeleton({ 
-  count = 6, 
-  component: Component = PortfolioPreviewSkeleton 
-}: { 
+export function GridSkeleton({
+  count = 6,
+  component: Component = PortfolioPreviewSkeleton,
+}: {
   count?: number;
-  component?: React.ComponentType;
+  component?: ComponentType;
 }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:gap-8 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
         <Component key={i} />
       ))}
     </div>
   );
 }
-

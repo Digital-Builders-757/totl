@@ -1,6 +1,8 @@
 ﻿import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { PATHS } from "@/lib/constants/routes";
 import { Database } from "@/types/supabase";
 
 // Use generated database types instead of custom interfaces
@@ -19,6 +21,23 @@ type Application = Pick<ApplicationRow, "id" | "status" | "created_at"> & {
   };
 };
 
+function applicationStatusVariant(status: string) {
+  switch (status) {
+    case "accepted":
+      return "accepted" as const;
+    case "rejected":
+      return "rejected" as const;
+    case "new":
+      return "new" as const;
+    case "under_review":
+      return "under_review" as const;
+    case "shortlisted":
+      return "shortlisted" as const;
+    default:
+      return "under_review" as const;
+  }
+}
+
 export function TalentData({
   talentProfile,
   applications,
@@ -28,48 +47,57 @@ export function TalentData({
 }) {
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="grain-texture">
         <CardHeader>
-          <CardTitle>Talent Profile</CardTitle>
-          <CardDescription>Your professional information</CardDescription>
+          <CardTitle className="font-display text-xl text-[var(--oklch-text-primary)] sm:text-2xl">
+            Talent profile
+          </CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
+            Your professional information
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!talentProfile ? (
             <div className="space-y-4">
-              <p className="text-gray-500">You haven&apos;t created a talent profile yet.</p>
-              <Link
-                href="/talent/create-profile"
-                className="inline-block px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
-              >
-                Create Talent Profile
-              </Link>
+              <p className="text-sm text-[var(--oklch-text-secondary)] sm:text-base">
+                You haven&apos;t added your talent details yet.
+              </p>
+              <Button variant="default" className="rounded-full font-semibold" asChild>
+                <Link href={PATHS.TALENT_PROFILE}>Complete talent profile</Link>
+              </Button>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <h3 className="font-medium mb-1">Experience</h3>
-                <p className="text-gray-600">{talentProfile.experience || "No experience provided"}</p>
+                <h3 className="mb-1 text-sm font-medium text-[var(--oklch-text-muted)]">Experience</h3>
+                <p className="text-[var(--oklch-text-secondary)]">
+                  {talentProfile.experience || "No experience provided"}
+                </p>
               </div>
 
               <div>
-                <h3 className="font-medium mb-1">Specialties</h3>
+                <h3 className="mb-1 text-sm font-medium text-[var(--oklch-text-muted)]">Specialties</h3>
                 {talentProfile.specialties && talentProfile.specialties.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {talentProfile.specialties.map((specialty, index) => (
-                      <Badge key={index} variant="outline">
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="border-[var(--oklch-border-alpha)] bg-white/[0.06] font-normal text-[var(--oklch-text-secondary)]"
+                      >
                         {specialty}
                       </Badge>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No specialties listed</p>
+                  <p className="text-sm text-[var(--oklch-text-muted)]">No specialties listed</p>
                 )}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:gap-8">
                 <div>
-                  <h3 className="font-medium mb-1">Experience</h3>
-                  <p className="text-gray-600">
+                  <h3 className="mb-1 text-sm font-medium text-[var(--oklch-text-muted)]">Years of experience</h3>
+                  <p className="text-[var(--oklch-text-secondary)]">
                     {talentProfile.experience_years
                       ? `${talentProfile.experience_years} years`
                       : "Not specified"}
@@ -77,18 +105,18 @@ export function TalentData({
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-1">Portfolio</h3>
+                  <h3 className="mb-1 text-sm font-medium text-[var(--oklch-text-muted)]">Portfolio</h3>
                   {talentProfile.portfolio_url ? (
                     <a
                       href={talentProfile.portfolio_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="focus-hint text-sm font-medium text-[var(--oklch-accent)] underline-offset-4 hover:underline"
                     >
-                      View Portfolio
+                      View portfolio
                     </a>
                   ) : (
-                    <p className="text-gray-500">No portfolio link</p>
+                    <p className="text-sm text-[var(--oklch-text-muted)]">No portfolio link</p>
                   )}
                 </div>
               </div>
@@ -97,39 +125,47 @@ export function TalentData({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="grain-texture">
         <CardHeader>
-          <CardTitle>Your Applications</CardTitle>
-          <CardDescription>Gigs you&apos;ve applied to</CardDescription>
+          <CardTitle className="font-display text-xl text-[var(--oklch-text-primary)] sm:text-2xl">
+            Your applications
+          </CardTitle>
+          <CardDescription className="text-[var(--oklch-text-secondary)]">
+            Opportunities you&apos;ve applied to
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {!applications || applications.length === 0 ? (
-            <p className="text-gray-500">You haven&apos;t applied to any gigs yet.</p>
+            <div className="space-y-4 text-center sm:text-left">
+              <p className="text-sm text-[var(--oklch-text-secondary)] sm:text-base">
+                You haven&apos;t applied to any opportunities yet.
+              </p>
+              <Button variant="default" className="rounded-full font-semibold" asChild>
+                <Link href={PATHS.GIGS}>Browse opportunities</Link>
+              </Button>
+            </div>
           ) : (
             <ul className="space-y-4">
               {applications.map((application) => (
-                <li key={application.id} className="border-b pb-4 last:border-b-0 last:pb-0">
+                <li
+                  key={application.id}
+                  className="border-b border-[var(--oklch-border-alpha)] pb-4 last:border-b-0 last:pb-0"
+                >
                   <Link
                     href={`/gigs/${application.gigs.id}`}
-                    className="font-medium hover:underline"
+                    className="focus-hint font-medium text-[var(--oklch-text-primary)] hover:underline"
                   >
                     {application.gigs.title}
                   </Link>
-                  <p className="text-sm text-gray-600 mt-1">{application.gigs.company_name}</p>
-                  <div className="flex justify-between mt-2">
-                    <Badge
-                      variant={
-                        application.status === "accepted"
-                          ? "default"
-                          : application.status === "rejected"
-                            ? "destructive"
-                            : "default"
-                      }
-                    >
+                  <p className="mt-1 text-sm text-[var(--oklch-text-secondary)]">
+                    {application.gigs.company_name}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <Badge variant={applicationStatusVariant(application.status)}>
                       {application.status}
                     </Badge>
-                    <span className="text-xs text-gray-500">
-                      Applied on {new Date(application.created_at).toLocaleDateString()}
+                    <span className="text-xs text-[var(--oklch-text-muted)]">
+                      Applied {new Date(application.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </li>

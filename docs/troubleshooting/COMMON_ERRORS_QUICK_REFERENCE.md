@@ -20,6 +20,8 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **Public gig pages leaked full title/description to guests:** `getGigDisplayTitle` / `getGigDisplayDescription` used to return real copy for any non-talent viewer, so **guests** on **`/gigs/[id]`** saw the full DB strings. **Fix:** Gate on **`canViewFullGigMarketingCopy`** (subscribed talent, client, admin only); use **`GigReferenceLinksGate`** for external reference URLs. **Prevention:** Do not render raw **`gig.title`** / **`gig.description`** on marketing surfaces; keep apply-page headers on the same helpers as detail.
+- **Portfolio finalize falsely fails after upload (`storage.list` + 1000 limit):** Verifying an upload by listing the user folder can miss the new object when many files exist (prefix sort / pagination). **Fix:** Use **`storage.from(bucket).exists(fullPath)`** (or `info(path)`) for an O(1) check on the exact key. **Prevention:** Do not rely on `list(..., { limit: N })` to prove a specific object exists.
 - **Supabase head count query looks like “zero rows” on failure:** `.select("id", { count: "exact", head: true })` can return **`error`** with **`count: null`**. Using **`result.count ?? 0`** hides outages and wrong-sides UX (e.g. missing “existing applicants” warning).
   - **Fix:** Check **`result.error`**, log it, and choose a **fail-safe** (e.g. assume count > 0 for warnings) or return an error state—not **`?? 0`** alone.
   - **Prevention:** Any **`head: true`** count used for gating or warnings must branch on **`error`** first.
@@ -69,6 +71,12 @@ npm run build
   - **Root Cause:** Legacy admin policies that subquery `profiles` under RLS can deny the **updated** row’s `WITH CHECK` in some cases.
   - **Fix:** Apply migration `20260411220101_fix_admin_gigs_rls_and_helpers.sql` (adds `public.totl_user_is_admin()` and explicit admin gig policies). Run `supabase db push` on the target project.
   - **Prevention:** Prefer `SECURITY DEFINER` admin helpers + explicit `USING`/`WITH CHECK` on admin `UPDATE` policies for tables clients also update.
+- **Admin delete gig fails (RLS) even though `DELETE` on `gigs` is allowed — often cascaded `bookings`:** Deleting a row in `public.gigs` cascades to `public.bookings` (`ON DELETE CASCADE`). Under RLS, **each** cascaded `DELETE` must pass that table’s policies; `bookings` historically had **no** `DELETE` policy, so the whole statement could fail.
+  - **Fix:** Apply migration `20260412180000_admin_delete_bookings_for_gig_cascade.sql` (`Admins can delete bookings` using `public.totl_user_is_admin()`).
+  - **Prevention:** When adding `ON DELETE CASCADE` children of RLS-protected parents, ensure admins have a `DELETE` policy (or a single `SECURITY DEFINER` RPC) for child tables that will be cascade-deleted.
+- **Admin UI used to block “Delete permanently” when `applications_count > 0`:** Product + server action intentionally prevented hard delete so listings with applicants were only closed.
+  - **Current behavior:** Admin confirm can delete the gig and cascade-remove applications (destructive). Use **Close** when history must be kept.
+  - **Prevention:** Train ops: confirm dialog text includes application counts; prefer **`docs/runbooks/production-gig-cleanup.md`** for bulk SQL in production.
 - **Sentry: `[cron/booking-reminders] CRON_SECRET is not configured` (TOTLMODELAGENCY-3K):** Preview or branch deploys hit the cron URL without `CRON_SECRET`.
   - **Fix:** Set `CRON_SECRET` on environments that should run reminders; ignore noise from previews or disable cron there. Code path uses `console.warn` (not `logger.warn`) so this no longer opens Sentry issues for expected misconfig.
   - **Prevention:** Document required cron env vars in Vercel project settings.

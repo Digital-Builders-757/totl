@@ -8,6 +8,73 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig marketing copy paywall — guests + unpaid talent (April 12, 2026)**
+
+**GIGS / SUBSCRIPTION** — April 12, 2026
+- ✅ **`lib/gig-access.ts`:** Added **`canViewFullGigMarketingCopy`** — real title/description only for **subscribed talent**, **clients**, and **admins**; **guests** and **unpaid talent** see category templates (same as prior obfuscation for non-sub talent).
+- ✅ **`app/gigs/[id]/page.tsx`**, **`app/gigs/[id]/apply/page.tsx`:** Apply summary uses display helpers; **`GigReferenceLinksGate`** shows reference links only when marketing copy is allowed; otherwise locked card (sign-in or subscribe).
+- ✅ **`components/gigs/gig-card.tsx`:** Browse cards use obfuscated title for image **`alt`** when the visible title is gated.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P1):** Optional transport-layer redaction of **`description`** in RSC payloads for strict anti-scraping (see plan § optional hardening).
+
+---
+
+## 🚀 **Latest: Admin gig delete — applications + bookings RLS cascade (April 12, 2026)**
+
+**ADMIN / GIGS / SUPABASE** — April 12, 2026
+- ✅ **`deleteGigAsAdminAction`:** Removed the server-side refusal when a gig has applications; dependent rows are removed via FK **`ON DELETE CASCADE`** after admin confirmation (destructive).
+- ✅ **Admin UI (`admin-gigs-client`, `admin-gig-detail-client`):** **Delete permanently** is no longer disabled only because **`applications_count > 0`**; confirmations state how many applications will be removed; detail **Remove listing** copy updated.
+- ✅ **RLS:** Migration **`20260412180000_admin_delete_bookings_for_gig_cascade.sql`** adds **`Admins can delete bookings`** on **`public.bookings`** so cascaded deletes from **`gigs`** are not blocked (the table previously had no **`DELETE`** policy under RLS).
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** (admin gig delete / cascade); **`docs/runbooks/production-gig-cleanup.md`** (admin UI vs raw SQL).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Apply **`20260411220101`** (if not already on prod) and **`20260412180000`** via **`supabase db push`** (or pipeline); smoke **admin → Delete permanently** on staging for a gig with test applications (and with a booking if available).
+
+**Next (P1):** Optional Playwright coverage for the two-step confirmation when **`applications_count > 0`**.
+
+---
+
+## 🚀 **Latest: Portfolio storage — UUID paths + `exists()` finalize (April 12, 2026)**
+
+**STORAGE / PORTFOLIO** — April 12, 2026
+- ✅ **`requestPortfolioImageUpload`:** Random path segment uses **`crypto.randomUUID()`** (aligned with **`gig-actions`**), not `Math.random().toString(36)…`.
+- ✅ **`finalizePortfolioImage`:** Verifies the object with **`storage.from("portfolio").exists(path)`** instead of **`list(user.id, { limit: 1000 })`**, avoiding false “file not found” when a user has many portfolio objects.
+- ✅ **Docs:** `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md` — note on list-vs-exists verification.
+
+**Verification:** `npm run typecheck` — green, April 12, 2026.
+
+---
+
+## 🚀 **Latest: Talent dashboard core cards + profile strength (April 12, 2026)**
+
+**UI / TALENT DASHBOARD** — April 12, 2026
+- ✅ **`app/dashboard/talent-data.tsx` & `profile-data.tsx`:** Frosted `grain-texture` cards, OKLCH typography, primary CTAs (**Complete talent profile** → `PATHS.TALENT_PROFILE`, **Browse opportunities**); application status badges use semantic variants; fixed dead link to non-existent `/talent/create-profile`.
+- ✅ **`app/talent/dashboard/client.tsx`:** Stat and tab cards use **`grain-texture`**; profile-completion strip uses **`panel-frosted`** + outline **Finish profile** button; primary CTAs use **`Button variant="default"`** + **`rounded-full`** (replaced flat white / ad-hoc green-purple); category chips use token surface (no light-gray badge on dark); non-functional **Filter** / **Export** controls **disabled** to avoid misleading affordances; **EmptyState** bookings + discover empty states get a single clear action (**Browse opportunities** / **Refresh**).
+- ✅ **`components/talent/profile-strength-card.tsx`:** Removed `bg-gray-900` override; OKLCH row badges + **Complete profile** as primary, **Settings** outline; stacked CTAs on mobile.
+- ✅ **`components/ui/empty-state.tsx`:** OKLCH text/icon, **`grain-texture`**, primary **rounded-full** action button (fixes gray-900 copy on dark shells).
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green, April 12, 2026.
+
+**Next (P1):** **`/talent/profile`** page shell parity; talent **applications** desktop rows that still use mixed `border-border/40` without `grain-texture` if product wants full consistency.
+
+---
+
+## 🚀 **Latest: Public entry funnel, frosted loaders, talent discovery client (April 12, 2026)**
+
+**UI / PUBLIC** — April 12, 2026
+- ✅ **Navbar, choose-role, login:** OKLCH text tokens, `ambientTone="lifted"` on auth surfaces, aligned **Back to home** / **Create account** copy; shorter mobile navbar + mobile Subscribe dedupe; `PageShell` top padding matches bar height.
+- ✅ **Loading + skeletons:** `panel-frosted` / token shells for gigs list/detail, talent profile/subscribe loaders; `image-skeletons.tsx` no longer zinc-heavy; gigs filter skeleton matches real **`panel-frosted grain-texture`** (removed invalid `glass-card`).
+- ✅ **`app/talent/talent-client.tsx`:** Public listing polish — frosted search shell, `totl-input-shell` field, OKLCH chips, count line, cohesive empty states (**Clear search** vs **Back to home**), primary **View profile** CTA; removed IntersectionObserver scroll hooks and `apple-input` / `apple-button` patterns.
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green, April 12, 2026.
+
+**Next (P0):** Merge **develop → main** via **PR #250**; smoke public auth entry + any route that still imports **`TalentClient`** when **`/talent`** is re-enabled.
+
+---
+
 ## 🚀 **Latest: Admin control-plane — talent UI, honest dashboard, legacy route retirement (April 12, 2026)**
 
 **ADMIN** — April 12, 2026

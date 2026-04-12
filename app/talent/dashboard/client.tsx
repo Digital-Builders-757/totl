@@ -736,13 +736,8 @@ function TalentDashboardContent({
     setSelectedBooking(null);
   };
 
-  // Note: Category color logic can be enhanced with getCategoryBadgeVariant if needed
-  // For now, keeping a simple fallback since badge styling may vary
-  const getCategoryColor = (category: string) => {
-    void category;
-    // Default fallback - can be enhanced with getCategoryBadgeVariant
-    return "bg-gray-50 text-gray-700 border-gray-200";
-  };
+  const categoryBadgeClassName =
+    "border-[var(--oklch-border-alpha)] bg-white/[0.06] text-[var(--oklch-text-secondary)]";
 
   useEffect(() => {
     return () => {
@@ -894,7 +889,7 @@ function TalentDashboardContent({
                 size="icon"
                 className="h-9 w-9 text-white hover:bg-white/10"
               />
-              <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+              <Button size="sm" variant="default" className="rounded-full font-semibold" asChild>
                 <Link href="/gigs">Browse opportunities</Link>
               </Button>
             </div>
@@ -927,7 +922,7 @@ function TalentDashboardContent({
                 className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
                 showLabel
               />
-              <Button size="sm" className="bg-white text-black hover:bg-gray-200" asChild>
+              <Button size="sm" variant="default" className="rounded-full font-semibold" asChild>
                 <Link href="/gigs" className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
                   Browse opportunities
@@ -969,14 +964,11 @@ function TalentDashboardContent({
           <SubscriptionPrompt profile={subscriptionProfile} variant="banner" context="general" />
         )}
         {needsProfileCompletion && (
-          <div className="mb-4 flex items-center justify-between rounded-lg border border-amber-700/50 bg-amber-900/10 px-3 py-2 text-sm">
-            <span className="text-amber-200">Finish profile to get more opportunities</span>
-            <Link
-              href="/settings"
-              className="shrink-0 font-medium text-amber-400 hover:text-amber-300 hover:underline"
-            >
-              Finish profile →
-            </Link>
+          <div className="panel-frosted mb-4 flex flex-col gap-2 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-[var(--oklch-text-primary)]">Finish your profile to get better-matched opportunities.</span>
+            <Button variant="outline" size="sm" className="shrink-0 rounded-full border-amber-500/40 font-semibold" asChild>
+              <Link href="/settings">Finish profile →</Link>
+            </Button>
           </div>
         )}
 
@@ -992,7 +984,7 @@ function TalentDashboardContent({
         </div>
 
         <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
-          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
+          <Card className="grain-texture flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -1010,7 +1002,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
+          <Card className="grain-texture flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -1028,7 +1020,7 @@ function TalentDashboardContent({
             </CardContent>
           </Card>
 
-          <Card className="flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
+          <Card className="grain-texture flex h-full min-w-0 flex-col transition-shadow hover:shadow-md">
             <CardContent className="flex flex-1 flex-col p-4">
               <div className="flex-1 space-y-3">
                 <div className="card-header-row">
@@ -1114,7 +1106,7 @@ function TalentDashboardContent({
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Primary CTA: Browse Opportunities first */}
-              <Card className="lg:col-span-1">
+              <Card className="grain-texture lg:col-span-1">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -1134,16 +1126,16 @@ function TalentDashboardContent({
                     <div className="text-3xl font-bold text-green-400 mb-2">{gigs.length}</div>
                     <p className="text-sm text-white">Active opportunities available</p>
                   </div>
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white" asChild>
+                  <Button variant="default" className="w-full rounded-full font-semibold" asChild>
                     <Link href="/gigs" className="flex items-center gap-2">
                       <Eye className="h-4 w-4" />
-                      Browse All Opportunities
+                      Browse all opportunities
                     </Link>
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="lg:col-span-1">
+              <Card className="grain-texture lg:col-span-1">
                 <CardHeader>
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
@@ -1175,7 +1167,7 @@ function TalentDashboardContent({
               </Card>
             </div>
 
-            <Card className="lg:col-span-2">
+            <Card className="grain-texture lg:col-span-2">
               <CardHeader>
                 <div className="card-header-row">
                   <CardTitle className="flex items-center gap-2 text-white">
@@ -1310,11 +1302,11 @@ function TalentDashboardContent({
                     </div>
                   </>
                 ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 text-[var(--oklch-text-tertiary)] mx-auto mb-4" />
-                    <p className="text-[var(--oklch-text-secondary)] mb-4">You don&apos;t have any upcoming opportunities.</p>
-                    <Button asChild className="bg-purple-600 hover:bg-purple-700 text-white">
-                      <Link href="/gigs">Browse Available Opportunities</Link>
+                  <div className="py-8 text-center">
+                    <Calendar className="mx-auto mb-4 h-12 w-12 text-[var(--oklch-text-tertiary)]" />
+                    <p className="mb-4 text-[var(--oklch-text-secondary)]">You don&apos;t have any upcoming opportunities.</p>
+                    <Button variant="default" className="rounded-full font-semibold" asChild>
+                      <Link href="/gigs">Browse opportunities</Link>
                     </Button>
                   </div>
                 )}
@@ -1323,12 +1315,12 @@ function TalentDashboardContent({
           </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">
-            <Card>
+            <Card className="grain-texture">
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="space-y-2">
                     <div className="card-header-row">
-                      <CardTitle>My Applications</CardTitle>
+                      <CardTitle className="text-[var(--oklch-text-primary)]">My Applications</CardTitle>
                       <Badge variant="outline" className="status-chip">
                         Active
                       </Badge>
@@ -1337,20 +1329,12 @@ function TalentDashboardContent({
                       Track all your opportunity applications and their status
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
-                    >
-                      <Filter className="h-4 w-4 mr-2" />
+                  <div className="hidden gap-2 sm:flex">
+                    <Button type="button" variant="outline" size="sm" disabled className="border-white/15 opacity-60">
+                      <Filter className="mr-2 h-4 w-4" />
                       Filter
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-white/15 text-[var(--oklch-text-primary)] hover:bg-white/10"
-                    >
+                    <Button type="button" variant="outline" size="sm" disabled className="border-white/15 opacity-60">
                       Export
                     </Button>
                   </div>
@@ -1474,10 +1458,7 @@ function TalentDashboardContent({
                               {app.gigs?.client_profiles?.company_name || "Private Client"}
                             </p>
                             <div className="flex flex-wrap gap-4 text-sm text-[var(--oklch-text-tertiary)]">
-                              <Badge
-                                variant="outline"
-                                className={getCategoryColor(app.gigs?.category || "General")}
-                              >
+                              <Badge variant="outline" className={categoryBadgeClassName}>
                                 {getCategoryLabel(app.gigs?.category || "")}
                               </Badge>
                               <span className="flex items-center gap-1">
@@ -1516,15 +1497,17 @@ function TalentDashboardContent({
           </TabsContent>
 
           <TabsContent value="bookings" className="space-y-6">
-            <Card>
+            <Card className="grain-texture">
               <CardHeader>
                 <div className="card-header-row">
-                  <CardTitle>My Bookings</CardTitle>
+                  <CardTitle className="text-[var(--oklch-text-primary)]">My Bookings</CardTitle>
                   <Badge variant="outline" className="status-chip">
                     Upcoming
                   </Badge>
                 </div>
-                <CardDescription>Your confirmed and upcoming opportunities</CardDescription>
+                <CardDescription className="text-[var(--oklch-text-secondary)]">
+                  Your confirmed and upcoming opportunities
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {bookingsLoading ? (
@@ -1535,7 +1518,13 @@ function TalentDashboardContent({
                   <EmptyState
                     icon={Calendar}
                     title="No bookings yet"
-                    description="When you get accepted for an opportunity, it will appear here with the date, time, and details."
+                    description="When a client accepts your application, the booking will show here with date and details."
+                    action={{
+                      label: "Browse opportunities",
+                      onClick: () => {
+                        router.push("/gigs");
+                      },
+                    }}
                   />
                 ) : (
                   <>
@@ -1673,33 +1662,33 @@ function TalentDashboardContent({
           </TabsContent>
 
           <TabsContent value="discover" className="space-y-6">
-            <Card>
+            <Card className="grain-texture">
               <CardHeader>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <div className="space-y-2">
                     <div className="card-header-row">
-                      <CardTitle>Available Opportunities</CardTitle>
+                      <CardTitle className="text-[var(--oklch-text-primary)]">Available Opportunities</CardTitle>
                       <Badge variant="outline" className="status-chip">
                         Live
                       </Badge>
                     </div>
-                    <CardDescription>
+                    <CardDescription className="text-[var(--oklch-text-secondary)]">
                       Discover new opportunities that match your profile
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Filter className="h-4 w-4 mr-2" />
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" disabled className="opacity-60">
+                      <Filter className="mr-2 h-4 w-4" />
                       Filter
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <Search className="h-4 w-4 mr-2" />
+                    <Button type="button" variant="outline" size="sm" disabled className="opacity-60">
+                      <Search className="mr-2 h-4 w-4" />
                       Search
                     </Button>
-                    <Button asChild size="sm">
+                    <Button variant="default" size="sm" className="rounded-full font-semibold" asChild>
                       <Link href="/gigs">
-                        <Eye className="h-4 w-4 mr-2" />
-                        View All Opportunities
+                        <Eye className="mr-2 h-4 w-4" />
+                        View all opportunities
                       </Link>
                     </Button>
                   </div>
@@ -1726,8 +1715,14 @@ function TalentDashboardContent({
                 ) : gigs.length === 0 ? (
                   <EmptyState
                     icon={Briefcase}
-                    title="No Opportunities Available"
-                    description="There are currently no active opportunities available. Check back soon for new opportunities!"
+                    title="No opportunities right now"
+                    description="There aren&apos;t any active listings at the moment. Check back soon or refresh."
+                    action={{
+                      label: "Refresh",
+                      onClick: () => {
+                        refetch();
+                      },
+                    }}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1752,7 +1747,7 @@ function TalentDashboardContent({
       {/* Mobile sticky primary CTA */}
       <div className="panel-frosted md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40">
         <div className="container mx-auto px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
-          <Button asChild className="w-full bg-white text-black hover:bg-gray-200">
+          <Button variant="default" className="w-full rounded-full font-semibold" asChild>
             <Link href="/gigs">Browse opportunities</Link>
           </Button>
         </div>

@@ -2,7 +2,7 @@ import { MapPin, Calendar, DollarSign, Clock, History, Building, ArrowLeft, Send
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
+import { GigReferenceLinksGate } from "@/components/gigs/gig-reference-links-gate";
 import { PageShell } from "@/components/layout/page-shell";
 import { FlagGigDialog } from "@/components/moderation/flag-gig-dialog";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
@@ -127,7 +127,7 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
                 <div className="h-64 md:h-96 relative">
                     <SafeImage
                       src={gig.image_url}
-                      alt={gig.title}
+                      alt={displayTitle}
                       fill
                       className="object-cover rounded-t-lg"
                       placeholderQuery={gig.category?.toLowerCase() || "general"}
@@ -198,7 +198,12 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
             </CardContent>
           </Card>
 
-          <GigReferenceLinksSection referenceLinks={gig.reference_links} />
+          <GigReferenceLinksGate
+            referenceLinks={gig.reference_links}
+            profile={profile}
+            gigId={id}
+            hasUser={!!user}
+          />
 
           {/* Client Information - Only visible to authenticated users */}
           {user ? (

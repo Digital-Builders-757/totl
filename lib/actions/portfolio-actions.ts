@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
@@ -52,7 +53,8 @@ export async function requestPortfolioImageUpload(input: {
     }
 
     const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substring(7);
+    // Match gig image hardening: crypto.randomUUID() (replaces Math.random()) for path uniqueness
+    const randomId = randomUUID().replace(/-/g, "").substring(0, 8);
     const path = `${user.id}/portfolio-${timestamp}-${randomId}.${ext}`;
 
     const { data, error } = await supabase.storage.from("portfolio").createSignedUploadUrl(path);
@@ -108,25 +110,17 @@ export async function finalizePortfolioImage(input: {
       return { error: "Title is required" };
     }
 
-    const fileName = path.split("/").pop();
-    if (!fileName) {
-      return { error: "Invalid upload path" };
-    }
+    // O(1) existence check on the exact object path (avoids list() pagination / sort limits).
+    const { data: fileExists, error: existsError } = await supabase.storage.from("portfolio").exists(path);
 
-    const { data: listed, error: listError } = await supabase.storage
-      .from("portfolio")
-      .list(user.id, { limit: 1000 });
-
-    if (listError) {
-      logger.error("Portfolio finalize list error", listError, { path });
+    if (existsError) {
+      logger.error("Portfolio finalize exists check error", existsError, { path });
       return {
         error: "We could not verify your upload. Please try again.",
       };
     }
 
-    const exists = listed?.some((f) => f.name === fileName) ?? false;
-
-    if (!exists) {
+    if (!fileExists) {
       return {
         error: "We could not confirm your file in storage. Please try uploading again.",
       };

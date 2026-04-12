@@ -2,7 +2,7 @@ import { ArrowLeft, Send, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ApplyToGigForm } from "./apply-to-gig-form";
-import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
+import { GigReferenceLinksGate } from "@/components/gigs/gig-reference-links-gate";
 import { PageShell } from "@/components/layout/page-shell";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { getCategoryBadgeVariant, getCategoryLabel } from "@/lib/constants/gig-categories";
 import { GIG_PUBLIC_SELECT } from "@/lib/db/selects";
+import { getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
 interface ApplyToGigPageProps {
@@ -59,6 +60,9 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     notFound();
   }
 
+  const displayTitle = getGigDisplayTitle(gig, promptProfile);
+  const displayDescription = getGigDisplayDescription(gig, promptProfile);
+
   // Check if user already applied
   const { data: existingApplication } = await supabase
     .from("applications")
@@ -86,8 +90,8 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
             <CardHeader>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                  <CardTitle className="text-2xl font-bold">{gig.title}</CardTitle>
-                  <CardDescription className="text-base mt-2">{gig.description}</CardDescription>
+                  <CardTitle className="text-2xl font-bold">{displayTitle}</CardTitle>
+                  <CardDescription className="text-base mt-2">{displayDescription}</CardDescription>
                 </div>
                 <Badge variant={getCategoryBadgeVariant(gig.category || "")}>
                   {getCategoryLabel(gig.category || "")}
@@ -127,7 +131,12 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
             </CardContent>
           </Card>
 
-          <GigReferenceLinksSection referenceLinks={gig.reference_links} />
+          <GigReferenceLinksGate
+            referenceLinks={gig.reference_links}
+            profile={promptProfile}
+            gigId={gig.id}
+            hasUser
+          />
 
           <Card>
             <CardHeader>
