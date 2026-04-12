@@ -27,10 +27,24 @@ export function GigImageUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  /** Keeps the hidden file input in sync so native form submission includes the file after drag-and-drop. */
+  const syncNativeFileInput = (file: File | null) => {
+    const el = fileInputRef.current;
+    if (!el) return;
+    if (!file) {
+      el.value = "";
+      return;
+    }
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    el.files = dt.files;
+  };
+
   const handleFileSelect = (file: File | null) => {
     if (!file) {
       setSelectedFile(null);
       setPreviewUrl(null);
+      syncNativeFileInput(null);
       onFileSelect?.(null);
       return;
     }
@@ -58,6 +72,7 @@ export function GigImageUploader({
     }
 
     setSelectedFile(file);
+    syncNativeFileInput(file);
 
     // Create preview
     const reader = new FileReader();
@@ -95,9 +110,7 @@ export function GigImageUploader({
   const handleClearFile = () => {
     setSelectedFile(null);
     setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    syncNativeFileInput(null);
     onFileSelect?.(null);
   };
 

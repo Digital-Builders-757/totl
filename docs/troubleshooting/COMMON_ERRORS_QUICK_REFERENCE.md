@@ -72,6 +72,9 @@ npm run build
 - **Next.js `UnrecognizedActionError` / failed to find server action on `/admin/gigs/create` (TOTLMODELAGENCY-3G):** Client bundle references a stale server-action id after deploy or uses a client-wrapped action.
   - **Fix:** Bind forms to an exported server action from a `"use server"` module (e.g. `useActionState(createGigFormAction, null)`); include file fields via named `<input type="file" name="...">` where possible. Users with old tabs may need a hard refresh after deploy.
   - **Prevention:** Avoid inline client `useActionState` wrappers that indirectly invoke server actions for critical submits.
+- **Admin create gig: cover preview shows but `gig_image` missing on submit (drag-and-drop):** Dropping a file updates React preview state but not the native `<input type="file">`, so multipart **`FormData`** has no file for **`formFieldName`**.
+  - **Fix:** After accepting a dropped file, assign it to the input with `DataTransfer` (`items.add(file)` then `input.files = dataTransfer.files`). Implemented in `components/gigs/gig-image-uploader.tsx` as `syncNativeFileInput`.
+  - **Prevention:** Any custom drop handler that participates in native form submission must keep the hidden file input in sync, not only `FileReader` preview state.
 - **StorageApiError: Bucket not found (TOTLMODELAGENCY-3B):** Portfolio upload on POST /settings fails with "Bucket not found".
   - **Root Cause:** The `portfolio` storage bucket does not exist in the production Supabase project (migration not applied or project set up before portfolio migration).
   - **Fix:** Run `supabase db push` to apply migration `20260314031246_ensure_portfolio_bucket_exists.sql` which creates the portfolio bucket and policies idempotently.

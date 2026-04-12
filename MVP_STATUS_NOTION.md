@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig cover — drag-and-drop syncs native file input (April 12, 2026)**
+
+**ADMIN / GIGS** — April 12, 2026
+- ✅ **`GigImageUploader` (`components/gigs/gig-image-uploader.tsx`):** After validating a dropped file, sync it to the hidden `<input type="file">` via `DataTransfer` so native multipart submit includes **`gig_image`** for **`createGigFormAction`** (preview/`FileReader` alone does not populate the input).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **`/admin/gigs/create`** with a **drag-and-dropped** cover image and confirm **`gigs.image_url`** on the created gig.
+
+**Next (P1):** Portfolio and settings polish per earlier status blocks (no change to this hotfix).
+
+---
+
 ## 🚀 **Latest: Portfolio — glass UI, honest copy, signed Storage uploads (April 12, 2026)**
 
 **SETTINGS / PORTFOLIO / STORAGE** — April 12, 2026
