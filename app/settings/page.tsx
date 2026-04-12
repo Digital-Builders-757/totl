@@ -75,7 +75,7 @@ export default async function SettingsPage() {
       .from("portfolio_items")
       .select("id, talent_id, title, description, caption, image_url, created_at, updated_at")
       .eq("talent_id", user.id)
-      .order("created_at", { ascending: true }),
+      .order("created_at", { ascending: false }),
   ]);
 
   // Generate signed URL with image transformations for avatar if path exists

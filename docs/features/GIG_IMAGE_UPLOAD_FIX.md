@@ -18,6 +18,7 @@
 ### 1. Created Reusable `GigImageUploader` Component
 **File**: `components/gigs/gig-image-uploader.tsx`
 
+- **Native `formFieldName` + drag-and-drop (April 2026):** Dropped files are copied onto the hidden file input via `DataTransfer` so multipart server actions receive the file (click-to-upload already populated the input; drop-only did not).
 - Drag & drop support
 - File validation (JPEG, PNG, GIF, WebP, max 10MB)
 - Image preview
@@ -38,7 +39,7 @@
 
 - `uploadGigImage()` function handles file upload to Supabase Storage
 - Returns public URL or error
-- Follows same pattern as `uploadPortfolioImage()`
+- Follows the same storage-then-metadata idea as portfolio uploads (see `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`)
 
 ### 4. Updated Client-Facing Create Gig Form
 **File**: `app/post-gig/page.tsx`

@@ -16,7 +16,7 @@ Implemented premium hover effects on portfolio tiles to create a tactile, high-e
 ## ✨ Features Implemented
 
 ### 1. **Shadow Glow on Hover**
-- White shadow glow on hover: `shadow-[0_8px_30px_rgb(255,255,255,0.12)]`
+- Soft shadow on hover: `hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]` (glass cards; zinc-era values were retired April 2026)
 - Creates premium "back-lit" effect
 - Consistent with OKLCH brand color system
 - **Performance:** CSS-only, zero JavaScript overhead
@@ -60,12 +60,7 @@ Implemented premium hover effects on portfolio tiles to create a tactile, high-e
 - Added caption overlay with slide-up animation
 - Added content lift animation
 
-**Key Classes:**
-```tsx
-className="portfolio-tile relative overflow-hidden bg-zinc-900 border-zinc-800 
-  transition-all duration-300 ease-out 
-  hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]"
-```
+**Key Classes (April 2026):** `panel-frosted`, `border-white/10`, `bg-[var(--totl-surface-glass-strong)]`, soft hover shadow as above; optional `motion-reduce` to limit transforms.
 
 #### 2. `components/portfolio/portfolio-preview.tsx`
 **Changes:**
@@ -74,12 +69,7 @@ className="portfolio-tile relative overflow-hidden bg-zinc-900 border-zinc-800
 - Updated overlay to slide-up pattern
 - Enhanced image zoom on hover
 
-**Key Classes:**
-```tsx
-className="portfolio-preview-tile relative overflow-hidden bg-zinc-900 border-zinc-800 
-  group transition-all duration-300 ease-out 
-  hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]"
-```
+**Key Classes:** Same glass stack as gallery; `portfolio-preview-tile` retained for targeting.
 
 ---
 

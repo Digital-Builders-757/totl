@@ -8,6 +8,35 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig cover — drag-and-drop syncs native file input (April 12, 2026)**
+
+**ADMIN / GIGS** — April 12, 2026
+- ✅ **`GigImageUploader` (`components/gigs/gig-image-uploader.tsx`):** After validating a dropped file, sync it to the hidden `<input type="file">` via `DataTransfer` so native multipart submit includes **`gig_image`** for **`createGigFormAction`** (preview/`FileReader` alone does not populate the input).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **`/admin/gigs/create`** with a **drag-and-dropped** cover image and confirm **`gigs.image_url`** on the created gig.
+
+**Next (P1):** Portfolio and settings polish per earlier status blocks (no change to this hotfix).
+
+---
+
+## 🚀 **Latest: Portfolio — glass UI, honest copy, signed Storage uploads (April 12, 2026)**
+
+**SETTINGS / PORTFOLIO / STORAGE** — April 12, 2026
+- ✅ **UI:** `portfolio-upload`, `portfolio-gallery`, `portfolio-preview`, and `portfolio-section` use `panel-frosted`, OKLCH text tokens, and mobile-safe actions; empty states have a single clear CTA.
+- ✅ **Product honesty:** Removed drag-reorder and “featured/star” messaging (not persisted in schema). Gallery order matches **`created_at` descending** (newest first), aligned in `app/settings/page.tsx` with `getPortfolioItems`.
+- ✅ **Upload pipeline:** `requestPortfolioImageUpload` + browser `uploadToSignedUrl` + `finalizePortfolioImage` — metadata insert only after Storage succeeds; rollback deletes the object on DB failure. `deletePortfolioItem` removes the storage object when the path is under the talent prefix.
+- ✅ **Docs:** `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`, `docs/features/PORTFOLIO_GALLERY_IMPLEMENTATION.md`, `docs/features/PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md`, `docs/features/GIG_IMAGE_UPLOAD_FIX.md` (cross-reference).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **Settings → Portfolio** (upload, edit, delete) on desktop and narrow viewport; confirm network shows image bytes to Supabase Storage, not through the Server Action body.
+
+**Next (P1):** Wire `PortfolioPreview` where product wants a dashboard/profile preview; optional trim `next.config.mjs` `serverActions.bodySizeLimit` only after confirming other actions do not need the headroom.
+
+---
+
 ## 🚀 **Latest: Premium authenticated surfaces — settings, application modal, billing (April 11, 2026)**
 
 **UI / SETTINGS / TALENT** — April 11, 2026

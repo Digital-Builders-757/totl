@@ -7,9 +7,13 @@ import { PortfolioGallery } from "@/components/portfolio/portfolio-gallery";
 import { PortfolioUpload } from "@/components/portfolio/portfolio-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils/utils";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & { imageUrl?: string };
+
+const glassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] text-white shadow-none";
 
 interface PortfolioSectionProps {
   portfolioItems: PortfolioItem[];
@@ -21,133 +25,138 @@ export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
 
   const handleUploadSuccess = () => {
     setShowUpload(false);
-    // Refresh server components to reload portfolio items (no full-page reload).
     router.refresh();
   };
 
   const handleGalleryUpdate = () => {
-    // Refresh server components to reload portfolio items (no full-page reload).
     router.refresh();
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-white">Portfolio Gallery</h3>
-          <p className="text-sm text-zinc-400 mt-1">
-            Showcase your best work with a professional portfolio
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold text-[var(--oklch-text-primary)]">Portfolio gallery</h3>
+          <p className="mt-1 text-sm text-[var(--oklch-text-secondary)]">
+            Show your work with clear titles and captions. Newest uploads appear first.
           </p>
         </div>
-        {!showUpload && (
-          <Button
-            onClick={() => setShowUpload(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Image
-          </Button>
-        )}
-        {showUpload && (
-          <Button
-            onClick={() => setShowUpload(false)}
-            variant="outline"
-            className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
-          >
-            <X className="w-4 h-4 mr-2" />
-            Cancel
-          </Button>
-        )}
+        <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
+          {!showUpload && (
+            <Button
+              onClick={() => setShowUpload(true)}
+              className="min-h-11 w-full bg-[var(--oklch-accent)] text-white hover:bg-[var(--oklch-accent)]/90 sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add image
+            </Button>
+          )}
+          {showUpload && (
+            <Button
+              onClick={() => setShowUpload(false)}
+              variant="outline"
+              className="min-h-11 w-full border-white/15 bg-white/[0.04] text-[var(--oklch-text-primary)] hover:bg-white/[0.08] sm:w-auto"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Upload Form */}
       {showUpload && (
         <div className="animate-in slide-in-from-top-2">
           <PortfolioUpload onUploadSuccess={handleUploadSuccess} />
         </div>
       )}
 
-      {/* Portfolio Gallery */}
       <PortfolioGallery initialItems={portfolioItems} onUpdate={handleGalleryUpdate} />
 
-      {/* Help Text */}
       {portfolioItems.length === 0 && !showUpload && (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className={cn(glassCard)}>
           <CardHeader>
-            <CardTitle className="text-white">Get Started with Your Portfolio</CardTitle>
-            <CardDescription className="text-zinc-400">
-              Add your professional photos to attract more clients
+            <CardTitle className="text-[var(--oklch-text-primary)]">Get started</CardTitle>
+            <CardDescription className="text-[var(--oklch-text-secondary)]">
+              Build a focused set of images clients can browse from your profile.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4">
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white font-semibold text-sm">1</span>
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oklch-accent)]/25 text-sm font-semibold text-[var(--oklch-accent)]">
+                  1
                 </div>
                 <div>
-                  <h4 className="text-white font-medium">Upload Your Best Work</h4>
-                  <p className="text-sm text-zinc-400">
-                    Add high-quality images from your professional shoots
+                  <h4 className="font-medium text-[var(--oklch-text-primary)]">Upload</h4>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">
+                    Add JPEG, PNG, or WebP — we optimize on your device before sending to storage.
                   </p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white font-semibold text-sm">2</span>
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oklch-accent)]/25 text-sm font-semibold text-[var(--oklch-accent)]">
+                  2
                 </div>
                 <div>
-                  <h4 className="text-white font-medium">Organize & Label</h4>
-                  <p className="text-sm text-zinc-400">
-                    Add titles and descriptions to provide context for each image
+                  <h4 className="font-medium text-[var(--oklch-text-primary)]">Label</h4>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">
+                    Titles and captions help clients understand each piece at a glance.
                   </p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white font-semibold text-sm">3</span>
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--oklch-accent)]/25 text-sm font-semibold text-[var(--oklch-accent)]">
+                  3
                 </div>
                 <div>
-                  <h4 className="text-white font-medium">Set Your Featured Image</h4>
-                  <p className="text-sm text-zinc-400">
-                    Star your best photo to showcase it prominently on your profile
+                  <h4 className="font-medium text-[var(--oklch-text-primary)]">Edit anytime</h4>
+                  <p className="text-sm text-[var(--oklch-text-secondary)]">
+                    Update titles and captions from the gallery cards whenever you like.
                   </p>
                 </div>
               </div>
             </div>
+            <Button
+              onClick={() => setShowUpload(true)}
+              className="min-h-11 w-full bg-[var(--oklch-accent)] text-white hover:bg-[var(--oklch-accent)]/90 sm:w-auto"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add your first image
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Tips Card */}
       {portfolioItems.length > 0 && (
-        <Card className="bg-zinc-900 border-zinc-800">
+        <Card className={cn(glassCard)}>
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Portfolio Tips
+            <CardTitle className="flex items-center gap-2 text-[var(--oklch-text-primary)]">
+              <span className="text-[var(--oklch-accent)]" aria-hidden>
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </span>
+              Tips
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-sm text-zinc-400">
+            <ul className="space-y-2 text-sm text-[var(--oklch-text-secondary)]">
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>Drag and drop to reorder your images</span>
+                <span className="mt-0.5 text-[var(--oklch-accent)]">•</span>
+                <span>Newest uploads appear at the top of your gallery.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>Star an image to set it as your primary/featured photo</span>
+                <span className="mt-0.5 text-[var(--oklch-accent)]">•</span>
+                <span>Use sharp, well-lit images — we compress for delivery while keeping quality high.</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>Use high-resolution images for the best presentation</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-blue-500 mt-0.5">•</span>
-                <span>Add descriptive titles and captions to help clients understand your work</span>
+                <span className="mt-0.5 text-[var(--oklch-accent)]">•</span>
+                <span>Strong titles and short captions help clients scan your work quickly.</span>
               </li>
             </ul>
           </CardContent>
@@ -156,4 +165,3 @@ export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
     </div>
   );
 }
-
