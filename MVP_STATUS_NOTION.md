@@ -42,7 +42,7 @@
 
 **Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green, April 12, 2026.
 
-**Next (P0):** Merge **develop → main**; smoke public auth entry + any route that still imports **`TalentClient`** when **`/talent`** is re-enabled.
+**Next (P0):** Merge **develop → main** via **PR #250**; smoke public auth entry + any route that still imports **`TalentClient`** when **`/talent`** is re-enabled.
 
 ---
 
