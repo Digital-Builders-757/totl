@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Gig marketing copy paywall — guests + unpaid talent (April 12, 2026)**
+
+**GIGS / SUBSCRIPTION** — April 12, 2026
+- ✅ **`lib/gig-access.ts`:** Added **`canViewFullGigMarketingCopy`** — real title/description only for **subscribed talent**, **clients**, and **admins**; **guests** and **unpaid talent** see category templates (same as prior obfuscation for non-sub talent).
+- ✅ **`app/gigs/[id]/page.tsx`**, **`app/gigs/[id]/apply/page.tsx`:** Apply summary uses display helpers; **`GigReferenceLinksGate`** shows reference links only when marketing copy is allowed; otherwise locked card (sign-in or subscribe).
+- ✅ **`components/gigs/gig-card.tsx`:** Browse cards use obfuscated title for image **`alt`** when the visible title is gated.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P1):** Optional transport-layer redaction of **`description`** in RSC payloads for strict anti-scraping (see plan § optional hardening).
+
+---
+
 ## 🚀 **Latest: Admin gig delete — applications + bookings RLS cascade (April 12, 2026)**
 
 **ADMIN / GIGS / SUPABASE** — April 12, 2026

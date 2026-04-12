@@ -120,7 +120,7 @@ export function GigCard(props: GigCardProps) {
     <div className="relative aspect-[4/3] w-full overflow-hidden">
       <SafeImage
         src={imageSrc}
-        alt={gig.title}
+        alt={variant === "browse" ? displayTitle : gig.title}
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-110"
         context={imageContext}

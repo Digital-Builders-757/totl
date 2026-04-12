@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 12, 2026 (admin gig delete + bookings RLS cascade ship — see `MVP_STATUS_NOTION.md`, `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`, `docs/runbooks/production-gig-cleanup.md`)
+**Last Updated:** April 12, 2026 (gig marketing copy paywall + admin gig delete / bookings RLS — see `MVP_STATUS_NOTION.md`, `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`, `docs/runbooks/production-gig-cleanup.md`)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 

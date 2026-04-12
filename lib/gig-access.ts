@@ -8,7 +8,18 @@ type Gig = Database["public"]["Tables"]["gigs"]["Row"];
 type GigDisplaySource = Pick<Gig, "title" | "description" | "category">;
 
 /**
- * Obfuscated titles for non-subscriber talent users
+ * Whether the viewer may see real gig title/description (not category templates).
+ * Guests never see full marketing copy; subscribed talent, clients, and admins do.
+ */
+export function canViewFullGigMarketingCopy(profile: Profile | MinimalProfile | null): boolean {
+  if (!profile) return false;
+  if (profile.role === "client" || profile.role === "admin") return true;
+  if (profile.role === "talent") return isActiveSubscriber(profile);
+  return false;
+}
+
+/**
+ * Obfuscated titles when full marketing copy is withheld
  * Keyed by normalized category to handle both new and legacy categories
  */
 const OBFUSCATED_TITLES: Record<GigCategory, string> = {
@@ -25,7 +36,7 @@ const OBFUSCATED_TITLES: Record<GigCategory, string> = {
 };
 
 /**
- * Obfuscated descriptions for non-subscriber talent users
+ * Obfuscated descriptions when full marketing copy is withheld
  * Keyed by normalized category to handle both new and legacy categories
  */
 const OBFUSCATED_DESCRIPTIONS: Record<GigCategory, string> = {
@@ -42,33 +53,26 @@ const OBFUSCATED_DESCRIPTIONS: Record<GigCategory, string> = {
 };
 
 /**
- * Get display title for a gig based on user's subscription status
- * Talent non-subscribers see obfuscated titles to protect client privacy
+ * Get display title for a gig — real title only when canViewFullGigMarketingCopy; else category template
  */
 export function getGigDisplayTitle(
   gig: GigDisplaySource,
   profile: Profile | MinimalProfile | null
 ): string {
-  const isTalent = profile?.role === "talent";
-  if (!isTalent) return gig.title;
-
-  if (isActiveSubscriber(profile)) return gig.title;
+  if (canViewFullGigMarketingCopy(profile)) return gig.title;
 
   const c = normalizeGigCategory(gig.category);
   return OBFUSCATED_TITLES[c];
 }
 
 /**
- * Get display description for a gig based on user's subscription status
+ * Get display description for a gig — real body only when canViewFullGigMarketingCopy; else category template
  */
 export function getGigDisplayDescription(
   gig: GigDisplaySource,
   profile: Profile | MinimalProfile | null
 ): string {
-  const isTalent = profile?.role === "talent";
-  if (!isTalent) return gig.description;
-
-  if (isActiveSubscriber(profile)) return gig.description;
+  if (canViewFullGigMarketingCopy(profile)) return gig.description;
 
   const c = normalizeGigCategory(gig.category);
   return OBFUSCATED_DESCRIPTIONS[c];
