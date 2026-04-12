@@ -1,14 +1,19 @@
 "use client";
 
+import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils/utils";
 import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"] & {
   imageUrl?: string;
 };
+
+const glassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] text-white shadow-none";
 
 interface PortfolioPreviewProps {
   items: PortfolioItem[];
@@ -18,87 +23,66 @@ interface PortfolioPreviewProps {
 export function PortfolioPreview({ items, showManageLink = true }: PortfolioPreviewProps) {
   if (items.length === 0) {
     return (
-      <Card className="p-8 bg-zinc-900 border-zinc-800 text-center">
-        <div className="max-w-md mx-auto space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-zinc-800 flex items-center justify-center">
-            <svg
-              className="w-8 h-8 text-zinc-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+      <Card className={cn(glassCard, "p-8 text-center sm:p-10")}>
+        <div className="mx-auto max-w-md space-y-5">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
+            <ImageIcon className="h-8 w-8 text-[var(--oklch-text-tertiary)]" aria-hidden />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">No portfolio images yet</h3>
-            <p className="text-zinc-400 mt-2">Add portfolio images to showcase your work</p>
+            <h3 className="text-lg font-semibold text-[var(--oklch-text-primary)]">
+              No portfolio images yet
+            </h3>
+            <p className="mt-2 text-sm text-[var(--oklch-text-secondary)]">
+              Add photos in Settings to show your work here.
+            </p>
           </div>
           {showManageLink && (
-            <Link href="/settings">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                Add Portfolio Images
-              </Button>
-            </Link>
+            <Button
+              asChild
+              className="min-h-11 w-full bg-[var(--oklch-accent)] text-white hover:bg-[var(--oklch-accent)]/90 sm:w-auto"
+            >
+              <Link href="/settings">Add photos in Settings</Link>
+            </Button>
           )}
         </div>
       </Card>
     );
   }
 
-  // Show up to 6 items in the preview
   const previewItems = items.slice(0, 6);
   const hasMore = items.length > 6;
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
         {previewItems.map((item) => (
           <Card
             key={item.id}
-            className="portfolio-preview-tile relative overflow-hidden bg-zinc-900 border-zinc-800 group transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-[0_8px_30px_rgb(255,255,255,0.12)]"
+            className={cn(
+              glassCard,
+              "portfolio-preview-tile group relative overflow-hidden transition-all duration-300 ease-out",
+              "hover:shadow-[0_8px_30px_rgba(255,255,255,0.08)]"
+            )}
           >
-
-            {/* Image */}
-            <div className="relative w-full aspect-[4/3] md:aspect-square bg-zinc-800 overflow-hidden">
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-black/20 md:aspect-square">
               {item.imageUrl ? (
                 <Image
                   src={item.imageUrl}
                   alt={item.title}
                   fill
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transform-none"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <svg
-                    className="w-12 h-12 text-zinc-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
+                <div className="flex h-full w-full items-center justify-center">
+                  <ImageIcon className="h-12 w-12 text-[var(--oklch-text-tertiary)]" aria-hidden />
                 </div>
               )}
 
-              {/* Overlay on Hover - Slides up from bottom */}
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out">
-                <h4 className="text-white font-semibold text-sm mb-1 line-clamp-2">
-                  {item.title}
-                </h4>
+              <div className="absolute inset-x-0 bottom-0 translate-y-full bg-gradient-to-t from-black/90 via-black/70 to-transparent p-3 transition-transform duration-300 ease-out group-hover:translate-y-0 motion-reduce:transform-none sm:p-4">
+                <h4 className="mb-1 line-clamp-2 text-sm font-semibold text-white">{item.title}</h4>
                 {item.caption && (
-                  <p className="text-zinc-300 text-xs line-clamp-2">{item.caption}</p>
+                  <p className="line-clamp-2 text-xs text-zinc-300">{item.caption}</p>
                 )}
               </div>
             </div>
@@ -106,20 +90,21 @@ export function PortfolioPreview({ items, showManageLink = true }: PortfolioPrev
         ))}
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-400">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-[var(--oklch-text-secondary)]">
           {items.length} portfolio {items.length === 1 ? "image" : "images"}
         </p>
         {showManageLink && (
-          <Link href="/settings">
-            <Button variant="outline" size="sm" className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700">
-              {hasMore ? "View All & Manage" : "Manage Portfolio"}
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="min-h-11 w-full border-white/15 bg-white/[0.04] text-[var(--oklch-text-primary)] hover:bg-white/[0.08] sm:w-auto"
+          >
+            <Link href="/settings">{hasMore ? "View all in Settings" : "Manage in Settings"}</Link>
+          </Button>
         )}
       </div>
     </div>
   );
 }
-

@@ -10,8 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { uploadPortfolioImage } from "@/lib/actions/portfolio-actions";
+import {
+  finalizePortfolioImage,
+  requestPortfolioImageUpload,
+} from "@/lib/actions/portfolio-actions";
+import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
 import { logger } from "@/lib/utils/logger";
+import { cn } from "@/lib/utils/utils";
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -20,8 +25,13 @@ const COMPRESSION_OPTIONS = {
   maxWidthOrHeight: 1920,
   initialQuality: 0.8,
   useWebWorker: true,
-  // No fileType = preserve original format (PNG keeps transparency)
 };
+
+const glassCard =
+  "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] p-5 text-white shadow-none sm:p-6";
+
+const inputGlass =
+  "min-h-11 border-white/10 bg-white/[0.06] text-[var(--oklch-text-primary)] placeholder:text-[var(--oklch-text-tertiary)] focus-visible:ring-[var(--oklch-accent)]";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -48,7 +58,6 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
   const handleFileSelect = (file: File | null) => {
     if (!file) return;
 
-    // Validate file type (jpeg/png/webp; gif dropped for v1)
     if (!ALLOWED_TYPES.includes(file.type)) {
       toast({
         title: "Invalid file type",
@@ -58,7 +67,6 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
       return;
     }
 
-    // Validate file size (10MB; client compresses before upload)
     if (file.size > MAX_FILE_SIZE_BYTES) {
       toast({
         title: "File too large",
@@ -70,7 +78,6 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
 
     setSelectedFile(file);
 
-    // Create preview
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewUrl(e.target?.result as string);
@@ -132,24 +139,68 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
     setIsUploading(true);
 
     try {
-      // Compress before upload: resize longest edge 1920px, quality 0.8, target ~1-5MB
-      // Preserves PNG transparency (no fileType = keep original format)
       setIsCompressing(true);
       const compressedFile = await imageCompression(selectedFile, COMPRESSION_OPTIONS);
       setIsCompressing(false);
 
-      const formData = new FormData();
-      formData.append("portfolio_image", compressedFile);
-      formData.append("title", title.trim());
-      if (description.trim()) formData.append("description", description.trim());
-      if (caption.trim()) formData.append("caption", caption.trim());
+      const intent = await requestPortfolioImageUpload({
+        contentType: compressedFile.type,
+        byteSize: compressedFile.size,
+      });
 
-      const result = await uploadPortfolioImage(formData);
-
-      if (result.error) {
+      if (intent.error || !intent.path || !intent.token) {
         toast({
           title: "Upload failed",
-          description: result.error,
+          description: intent.error ?? "Could not start upload",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const supabase = createSupabaseBrowser();
+      const { error: uploadError } = await supabase.storage
+        .from("portfolio")
+        .uploadToSignedUrl(intent.path, intent.token, compressedFile, {
+          contentType: compressedFile.type,
+        });
+
+      if (uploadError) {
+        logger.error("Portfolio signed upload failed", uploadError);
+        const msg = (uploadError.message || "").toLowerCase();
+        if (msg.includes("bucket not found") || msg.includes("bucket_not_found")) {
+          toast({
+            title: "Upload failed",
+            description:
+              "Portfolio storage is not configured yet. Please contact support or try again later.",
+            variant: "destructive",
+          });
+        } else if (msg.includes("permission") || msg.includes("policy")) {
+          toast({
+            title: "Upload failed",
+            description: "Permission denied. Check storage policies for the portfolio bucket.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Upload failed",
+            description: "Failed to upload image. Please try again.",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
+      const finalize = await finalizePortfolioImage({
+        path: intent.path,
+        title: title.trim(),
+        description: description.trim() || null,
+        caption: caption.trim() || null,
+      });
+
+      if (finalize.error) {
+        toast({
+          title: "Upload failed",
+          description: finalize.error,
           variant: "destructive",
         });
         return;
@@ -161,10 +212,9 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
           : "";
       toast({
         title: "Success!",
-        description: `${result.message || "Portfolio image uploaded successfully"}${sizeInfo}`,
+        description: `${finalize.message || "Portfolio image uploaded successfully"}${sizeInfo}`,
       });
 
-      // Reset form
       setSelectedFile(null);
       setPreviewUrl(null);
       setTitle("");
@@ -174,7 +224,6 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
         fileInputRef.current.value = "";
       }
 
-      // Notify parent component
       onUploadSuccess?.();
     } catch (error) {
       logger.error("Portfolio upload failed", error);
@@ -189,18 +238,25 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
     }
   };
 
+  const dropZoneClass = cn(
+    "relative cursor-pointer rounded-xl border-2 border-dashed p-6 text-center transition-colors duration-200 sm:p-8",
+    isDragging
+      ? "border-[var(--oklch-accent)] bg-[var(--oklch-accent)]/10"
+      : "border-white/20 hover:border-white/35",
+    selectedFile && "border-emerald-500/60 bg-emerald-500/5"
+  );
+
   return (
-    <Card className="p-6 bg-zinc-900 border-zinc-800">
+    <Card className={glassCard}>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* File Upload Area */}
         <div>
-          <Label className="text-white mb-2 block">Image</Label>
+          <Label className="mb-2 block text-[var(--oklch-text-primary)]">Image</Label>
           <div
             role="button"
             tabIndex={0}
             onClick={() => fileInputRef.current?.click()}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 fileInputRef.current?.click();
               }
@@ -208,12 +264,7 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`
-              relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-              transition-colors duration-200
-              ${isDragging ? "border-blue-500 bg-blue-500/10" : "border-zinc-700 hover:border-zinc-600"}
-              ${selectedFile ? "border-green-500" : ""}
-            `}
+            className={dropZoneClass}
           >
             <input
               ref={fileInputRef}
@@ -226,43 +277,38 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
 
             {previewUrl ? (
               <div className="space-y-4">
-                <div className="relative w-full h-64 rounded-lg overflow-hidden">
-                  <Image
-                    src={previewUrl}
-                    alt="Preview"
-                    fill
-                    className="object-cover"
-                  />
+                <div className="relative h-56 w-full overflow-hidden rounded-lg sm:h-64">
+                  <Image src={previewUrl} alt="Preview" fill className="object-cover" />
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(ev) => {
+                    ev.stopPropagation();
                     handleClearFile();
                   }}
-                  className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
+                  className="min-h-11 border-white/15 bg-white/[0.06] text-[var(--oklch-text-primary)] hover:bg-white/10"
                 >
-                  <X className="w-4 h-4 mr-2" />
-                  Remove Image
+                  <X className="mr-2 h-4 w-4" />
+                  Remove image
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="w-16 h-16 mx-auto rounded-full bg-zinc-800 flex items-center justify-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/[0.06]">
                   {isDragging ? (
-                    <Upload className="w-8 h-8 text-blue-500 animate-bounce" />
+                    <Upload className="h-8 w-8 animate-bounce text-[var(--oklch-accent)]" />
                   ) : (
-                    <ImageIcon className="w-8 h-8 text-zinc-500" />
+                    <ImageIcon className="h-8 w-8 text-[var(--oklch-text-tertiary)]" />
                   )}
                 </div>
                 <div>
-                  <p className="text-white font-medium">
+                  <p className="font-medium text-[var(--oklch-text-primary)]">
                     {isDragging ? "Drop image here" : "Click to upload or drag and drop"}
                   </p>
-                  <p className="text-sm text-zinc-400 mt-1">
-                    JPEG, PNG, or WebP (max 10MB, compressed before upload)
+                  <p className="mt-1 text-sm text-[var(--oklch-text-secondary)]">
+                    JPEG, PNG, or WebP · max 10MB · optimized on your device before upload
                   </p>
                 </div>
               </div>
@@ -270,79 +316,75 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
           </div>
         </div>
 
-        {/* Title */}
         <div>
-          <Label htmlFor="title" className="text-white mb-2 block">
-            Title <span className="text-red-500">*</span>
+          <Label htmlFor="title" className="mb-2 block text-[var(--oklch-text-primary)]">
+            Title <span className="text-red-400">*</span>
           </Label>
           <Input
             id="title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Editorial Shoot - Vogue"
+            placeholder="e.g., Editorial shoot — spring lookbook"
             required
             disabled={isUploading || isCompressing}
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+            className={inputGlass}
           />
         </div>
 
-        {/* Caption */}
         <div>
-          <Label htmlFor="caption" className="text-white mb-2 block">
+          <Label htmlFor="caption" className="mb-2 block text-[var(--oklch-text-primary)]">
             Caption
           </Label>
           <Input
             id="caption"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
-            placeholder="Short caption for the image"
+            placeholder="Short line shown with the image"
             disabled={isUploading || isCompressing}
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+            className={inputGlass}
           />
-          <p className="text-sm text-zinc-400 mt-1">
-            Optional short description shown with the image
+          <p className="mt-1 text-sm text-[var(--oklch-text-tertiary)]">
+            Optional — appears on hover with the photo
           </p>
         </div>
 
-        {/* Description */}
         <div>
-          <Label htmlFor="description" className="text-white mb-2 block">
+          <Label htmlFor="description" className="mb-2 block text-[var(--oklch-text-primary)]">
             Description
           </Label>
           <Textarea
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Additional details about this portfolio item..."
+            placeholder="Extra context for this piece (optional)"
             rows={3}
             disabled={isUploading || isCompressing}
-            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+            className={inputGlass}
           />
-          <p className="text-sm text-zinc-400 mt-1">
-            Optional detailed information about the shoot, project, or context
+          <p className="mt-1 text-sm text-[var(--oklch-text-tertiary)]">
+            Optional — more detail in your gallery card
           </p>
         </div>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           disabled={!selectedFile || !title.trim() || isUploading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+          className="min-h-11 w-full bg-[var(--oklch-accent)] text-white hover:bg-[var(--oklch-accent)]/90"
         >
           {isCompressing ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Optimizing image…
             </>
           ) : isUploading ? (
             <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
               Uploading…
             </>
           ) : (
             <>
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Portfolio Image
+              <Upload className="mr-2 h-4 w-4" />
+              Upload portfolio image
             </>
           )}
         </Button>
@@ -350,4 +392,3 @@ export function PortfolioUpload({ onUploadSuccess }: PortfolioUploadProps) {
     </Card>
   );
 }
-

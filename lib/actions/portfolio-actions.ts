@@ -9,12 +9,24 @@ import type { Database } from "@/types/supabase";
 
 type PortfolioItem = Database["public"]["Tables"]["portfolio_items"]["Row"];
 
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+function extFromContentType(contentType: string): string | null {
+  if (contentType === "image/jpeg") return "jpg";
+  if (contentType === "image/png") return "png";
+  if (contentType === "image/webp") return "webp";
+  return null;
+}
+
 /**
- * Upload a portfolio image to Supabase Storage and create a portfolio item.
- * TODO: Migrate to direct-to-Supabase signed uploads (client uploads to storage,
- * server only inserts metadata) to eliminate large body payloads through Server Actions.
+ * Step 1 of 2: reserve a storage path and return a signed upload token.
+ * Client uploads bytes with {@link uploadToSignedUrl} (browser Supabase client), then calls {@link finalizePortfolioImage}.
  */
-export async function uploadPortfolioImage(formData: FormData) {
+export async function requestPortfolioImageUpload(input: {
+  contentType: string;
+  byteSize: number;
+}): Promise<{ path?: string; token?: string; error?: string }> {
   try {
     const supabase = await createSupabaseServer();
     const {
@@ -26,57 +38,28 @@ export async function uploadPortfolioImage(formData: FormData) {
       return { error: "Authentication failed" };
     }
 
-    const file = formData.get("portfolio_image") as File | null;
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string | null;
-    const caption = formData.get("caption") as string | null;
-
-    if (!file || file.size === 0) {
-      return { error: "No file provided" };
-    }
-
-    if (!title || title.trim().length === 0) {
-      return { error: "Title is required" };
-    }
-
-    // Enhanced file validation (jpeg/png/webp; gif dropped for v1)
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
+    if (!ALLOWED_TYPES.includes(input.contentType as (typeof ALLOWED_TYPES)[number])) {
       return { error: "Invalid file type. Please use JPEG, PNG, or WebP" };
     }
 
-    const maxSize = 10 * 1024 * 1024; // 10MB; client compresses before upload
-    if (file.size > maxSize) {
+    if (input.byteSize <= 0 || input.byteSize > MAX_FILE_BYTES) {
       return { error: "File too large. Maximum size is 10MB." };
     }
 
-    // Generate optimized path following user-specific folder pattern
-    const ext =
-      file.type === "image/jpeg"
-        ? "jpg"
-        : file.type === "image/png"
-          ? "png"
-          : file.type === "image/webp"
-            ? "webp"
-            : "gif";
+    const ext = extFromContentType(input.contentType);
+    if (!ext) {
+      return { error: "Invalid file type. Please use JPEG, PNG, or WebP" };
+    }
+
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(7);
     const path = `${user.id}/portfolio-${timestamp}-${randomId}.${ext}`;
 
-    // Upload file to storage
-    const { error: uploadError } = await supabase.storage.from("portfolio").upload(path, file, {
-      contentType: file.type,
-      upsert: false, // Don't overwrite existing files
-    });
+    const { data, error } = await supabase.storage.from("portfolio").createSignedUploadUrl(path);
 
-    if (uploadError) {
-      logger.error("Portfolio upload error", uploadError, {
-        path,
-        bucket: "portfolio",
-        message: uploadError.message,
-        name: (uploadError as { name?: string }).name,
-      });
-      const msg = (uploadError.message || "Unknown error").toLowerCase();
+    if (error || !data?.token) {
+      logger.error("Portfolio signed URL error", error, { path });
+      const msg = (error?.message || "").toLowerCase();
       if (msg.includes("bucket not found") || msg.includes("bucket_not_found")) {
         return {
           error:
@@ -86,25 +69,78 @@ export async function uploadPortfolioImage(formData: FormData) {
       if (msg.includes("permission") || msg.includes("policy")) {
         return { error: "Permission denied. Check storage policies for the portfolio bucket." };
       }
-      return { error: "Failed to upload image. Please try again." };
+      return { error: "Could not start upload. Please try again." };
     }
 
-    // Get current max display_order for this talent
-    // Create portfolio item record (display_order and is_primary fields removed from schema)
-    const { data: portfolioItem, error: insertError } = await supabase
-      .from("portfolio_items")
-      .insert({
-        talent_id: user.id,
-        title: title.trim(),
-        description: description?.trim() || null,
-        caption: caption?.trim() || null,
-        image_url: path,
-      })
-      .select("id,talent_id,title,description,caption,image_url,created_at,updated_at")
-      .single();
+    return { path: data.path, token: data.token };
+  } catch (error) {
+    logger.error("Unexpected requestPortfolioImageUpload error", error);
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+/**
+ * Step 2 of 2: after direct storage upload succeeds, insert the portfolio row. Rolls back storage on DB failure.
+ */
+export async function finalizePortfolioImage(input: {
+  path: string;
+  title: string;
+  description: string | null;
+  caption: string | null;
+}): Promise<{ success?: boolean; message?: string; error?: string }> {
+  try {
+    const supabase = await createSupabaseServer();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: "Authentication failed" };
+    }
+
+    const path = input.path.trim();
+    if (!path || !path.startsWith(`${user.id}/`)) {
+      return { error: "Invalid upload path" };
+    }
+
+    if (!input.title?.trim()) {
+      return { error: "Title is required" };
+    }
+
+    const fileName = path.split("/").pop();
+    if (!fileName) {
+      return { error: "Invalid upload path" };
+    }
+
+    const { data: listed, error: listError } = await supabase.storage
+      .from("portfolio")
+      .list(user.id, { limit: 1000 });
+
+    if (listError) {
+      logger.error("Portfolio finalize list error", listError, { path });
+      return {
+        error: "We could not verify your upload. Please try again.",
+      };
+    }
+
+    const exists = listed?.some((f) => f.name === fileName) ?? false;
+
+    if (!exists) {
+      return {
+        error: "We could not confirm your file in storage. Please try uploading again.",
+      };
+    }
+
+    const { error: insertError } = await supabase.from("portfolio_items").insert({
+      talent_id: user.id,
+      title: input.title.trim(),
+      description: input.description?.trim() || null,
+      caption: input.caption?.trim() || null,
+      image_url: path,
+    });
 
     if (insertError) {
-      // Rollback: remove the uploaded file
       await supabase.storage.from("portfolio").remove([path]);
       logger.error("Database insert error", insertError);
       return { error: "Failed to create portfolio item. Please try again." };
@@ -114,11 +150,10 @@ export async function uploadPortfolioImage(formData: FormData) {
     revalidatePath(PATHS.TALENT_DASHBOARD);
     return {
       success: true,
-      portfolioItem,
       message: "Portfolio image uploaded successfully",
     };
   } catch (error) {
-    logger.error("Unexpected portfolio upload error", error);
+    logger.error("Unexpected finalizePortfolioImage error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -138,7 +173,6 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       return { error: "Authentication failed" };
     }
 
-    // Get the portfolio item first
     const { data: item, error: fetchError } = await supabase
       .from("portfolio_items")
       .select("image_url, talent_id")
@@ -149,12 +183,10 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       return { error: "Portfolio item not found" };
     }
 
-    // Verify ownership
     if (item.talent_id !== user.id) {
       return { error: "Access denied" };
     }
 
-    // Delete from database (RLS will enforce ownership)
     const { error: deleteError } = await supabase
       .from("portfolio_items")
       .delete()
@@ -165,9 +197,12 @@ export async function deletePortfolioItem(portfolioItemId: string) {
       return { error: "Failed to delete portfolio item. Please try again." };
     }
 
-    // Storage deletion removed - using image_url instead of image_path
-    // If using external URLs, no storage cleanup needed
-    // Primary image logic removed - is_primary field no longer exists
+    if (item.image_url?.startsWith(`${user.id}/`)) {
+      const { error: removeError } = await supabase.storage.from("portfolio").remove([item.image_url]);
+      if (removeError) {
+        logger.error("Portfolio storage delete error", removeError, { path: item.image_url });
+      }
+    }
 
     revalidatePath("/settings");
     revalidatePath(PATHS.TALENT_DASHBOARD);
@@ -177,68 +212,6 @@ export async function deletePortfolioItem(portfolioItemId: string) {
     };
   } catch (error) {
     logger.error("Unexpected delete error", error);
-    return { error: "An unexpected error occurred. Please try again." };
-  }
-}
-
-/**
- * Reorder portfolio items via drag-and-drop
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function reorderPortfolioItems(_itemIds: string[]) {
-  try {
-    const supabase = await createSupabaseServer();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { error: "Authentication failed" };
-    }
-
-    // display_order field removed from schema - reordering not supported
-    // Items are displayed in created_at order
-    // TODO: Re-implement reordering if needed with a different approach
-
-    revalidatePath("/settings");
-    revalidatePath(PATHS.TALENT_DASHBOARD);
-    return {
-      success: true,
-      message: "Portfolio order updated successfully",
-    };
-  } catch (error) {
-    logger.error("Unexpected reorder error", error);
-    return { error: "An unexpected error occurred. Please try again." };
-  }
-}
-
-/**
- * Set a portfolio item as primary/featured
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function setPrimaryPortfolioItem(_portfolioItemId: string) {
-  try {
-    const supabase = await createSupabaseServer();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return { error: "Authentication failed" };
-    }
-
-    // Feature removed - is_primary field no longer exists in schema
-    // Return success to prevent breaking existing code
-    revalidatePath("/settings");
-    revalidatePath(PATHS.TALENT_DASHBOARD);
-    return {
-      success: true,
-      message: "Primary image feature has been removed",
-    };
-  } catch (error) {
-    logger.error("Unexpected set primary error", error);
     return { error: "An unexpected error occurred. Please try again." };
   }
 }
@@ -271,11 +244,11 @@ export async function updatePortfolioItem(
 
     const patch: Database["public"]["Tables"]["portfolio_items"]["Update"] = {
       ...(updates.title !== undefined && { title: updates.title.trim() }),
-      ...(updates.description !== undefined && { 
-        description: updates.description?.trim() || null 
+      ...(updates.description !== undefined && {
+        description: updates.description?.trim() || null,
       }),
-      ...(updates.caption !== undefined && { 
-        caption: updates.caption?.trim() || null 
+      ...(updates.caption !== undefined && {
+        caption: updates.caption?.trim() || null,
       }),
     };
 
@@ -283,7 +256,7 @@ export async function updatePortfolioItem(
       .from("portfolio_items")
       .update(patch)
       .eq("id", portfolioItemId)
-      .eq("talent_id", user.id); // RLS enforcement
+      .eq("talent_id", user.id);
 
     if (updateError) {
       logger.error("Database update error", updateError);
@@ -323,7 +296,6 @@ export async function getPortfolioItems(talentId: string): Promise<{
       return { items: [], error: "Failed to load portfolio items" };
     }
 
-    // image_url stores storage path; convert to full public URL
     const itemsWithUrls = (items || []).map((item: PortfolioItem) => ({
       ...item,
       imageUrl: publicBucketUrl("portfolio", item.image_url) ?? item.image_url ?? undefined,
@@ -335,4 +307,3 @@ export async function getPortfolioItems(talentId: string): Promise<{
     return { items: [], error: "An unexpected error occurred" };
   }
 }
-

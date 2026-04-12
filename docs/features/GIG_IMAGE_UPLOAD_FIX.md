@@ -38,7 +38,7 @@
 
 - `uploadGigImage()` function handles file upload to Supabase Storage
 - Returns public URL or error
-- Follows same pattern as `uploadPortfolioImage()`
+- Follows the same storage-then-metadata idea as portfolio uploads (see `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`)
 
 ### 4. Updated Client-Facing Create Gig Form
 **File**: `app/post-gig/page.tsx`

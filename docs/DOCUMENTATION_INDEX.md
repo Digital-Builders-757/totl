@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 11, 2026
+**Last Updated:** April 12, 2026
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -74,6 +74,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 ### **Layer 2 — Domain Contracts (canonical)**
 - `contracts/INDEX.md`
+- `contracts/PORTFOLIO_UPLOADS_CONTRACT.md` - Portfolio image signed upload + `portfolio_items` metadata (Apr 2026)
 
 ### **Layer 3 — Journeys (canonical acceptance tests)**
 - `journeys/INDEX.md`
@@ -161,7 +162,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
 - `UI_VISUAL_LANGUAGE.md` - 🎨 **NEW** - Visual design system and component guidelines (Jan 2025)
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
-- `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery feature (complete guide)
+- `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery (current behavior; see also `contracts/PORTFOLIO_UPLOADS_CONTRACT.md`)
 - `guides/OPPORTUNITY_IMAGE_SPECS.md` - Opportunity cover image dimensions (1200×900 px, 4:3) for flyers
 - `PORTFOLIO_HOVER_EFFECTS_IMPLEMENTATION.md` - Premium hover effects on portfolio tiles (Oct 2025)
 - `COMMAND_PALETTE_IMPLEMENTATION.md` - Global command palette (⌘K) implementation (Oct 2025)

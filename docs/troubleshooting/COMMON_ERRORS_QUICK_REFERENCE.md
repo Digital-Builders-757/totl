@@ -60,6 +60,8 @@ npm run build
 - **Portfolio images not loading (404 or broken):** `portfolio_items.image_url` stores the **storage path** (e.g. `user-id/portfolio-123.jpg`), not the full URL.
   - **Fix:** Use `publicBucketUrl("portfolio", item.image_url)` when building image URLs for display. Applied in Settings page, portfolio-actions, admin talent dashboard.
   - **Prevention:** All portfolio display paths must convert storage path to full URL via `publicBucketUrl`.
+- **Portfolio upload: finalize step says file not found in storage:** After `uploadToSignedUrl`, the server lists `portfolio/{userId}/` to confirm the object before inserting `portfolio_items`. RLS/list limits or a slow write can make this fail even when the upload succeeded.
+  - **Fix:** Retry once; verify Storage policies allow the authenticated user to **list** objects under their prefix (see `supabase/migrations/20260314031246_ensure_portfolio_bucket_exists.sql`). See `docs/contracts/PORTFOLIO_UPLOADS_CONTRACT.md`.
 - **Admin cannot close gig — `42501` RLS on `gigs` (TOTLMODELAGENCY-3N):** `closeGigAsAdminAction` or similar returns “new row violates row-level security policy for table \"gigs\"”.
   - **Root Cause:** Legacy admin policies that subquery `profiles` under RLS can deny the **updated** row’s `WITH CHECK` in some cases.
   - **Fix:** Apply migration `20260411220101_fix_admin_gigs_rls_and_helpers.sql` (adds `public.totl_user_is_admin()` and explicit admin gig policies). Run `supabase db push` on the target project.
