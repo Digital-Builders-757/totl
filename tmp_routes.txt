@@ -9,8 +9,8 @@
 /admin/gigs/success
 /admin/moderation
 /admin/talent
-/admin/talentdashboard
-/admin/talentdashboard/profile
+/admin/talentdashboard → /talent/dashboard (redirect)
+/admin/talentdashboard/profile → /talent/profile (redirect)
 /admin/users
 /admin/users/create
 /auth/callback

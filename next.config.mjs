@@ -49,7 +49,33 @@ const nextConfig = {
       bodySizeLimit: '15mb',
     },
   },
-  
+
+  /** Legacy talent UI lived under /admin/talentdashboard; canonical routes are /talent/dashboard and /talent/profile. */
+  async redirects() {
+    return [
+      {
+        source: '/admin/talentdashboard/profile',
+        destination: '/talent/profile',
+        permanent: true,
+      },
+      {
+        source: '/admin/talentdashboard/portfolio',
+        destination: '/talent/profile',
+        permanent: true,
+      },
+      {
+        source: '/admin/talentdashboard/applications',
+        destination: '/talent/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/admin/talentdashboard',
+        destination: '/talent/dashboard',
+        permanent: true,
+      },
+    ];
+  },
+
   // Suppress Edge Runtime warnings for Supabase
   webpack: (config, { isServer }) => {
     if (!isServer) {

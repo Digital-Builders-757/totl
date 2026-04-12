@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin control-plane — talent UI, honest dashboard, legacy route retirement (April 12, 2026)**
+
+**ADMIN** — April 12, 2026
+- ✅ **`/admin/talent`:** `admin-talent-client.tsx` uses default admin atmosphere (no gray gradient shell override); frosted summary chips; OKLCH text tokens; table, specialty chips, search, and verification filters match polished admin terminals; `loading.tsx` skeleton border aligned with frosted loaders.
+- ✅ **`/admin/dashboard`:** “Analytics” tab is an honest **Operational data** panel with links to real admin routes (no “coming soon” tease); Overview **Snapshot** counts match loaded data; **Platform Health** labeled illustrative (not live probes).
+- ✅ **Legacy `/admin/talentdashboard`:** App Router tree removed; **permanent redirects** in `next.config.mjs` to `/talent/dashboard` and `/talent/profile` so bookmarks and old links land on canonical talent surfaces.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 12, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **`/admin/talent`**, **`/admin/dashboard`** (Overview + Analytics tab), and confirm **`/admin/talentdashboard`** redirects (308) to **`/talent/dashboard`**.
+
+**Next (P1):** Optional parity pass on **`/admin/gigs`** shell (still uses older gradient wrapper) if product wants every admin list identical; ship real aggregated analytics only when backend metrics exist.
+
+---
+
 ## 🚀 **Latest: Gig cover — drag-and-drop syncs native file input (April 12, 2026)**
 
 **ADMIN / GIGS** — April 12, 2026
@@ -1034,7 +1049,7 @@
   - tighter shared `PageShell` / `PageHeader` density so first meaningful content appears sooner on mobile
 - ✅ Follow-up mobile contract cleanup:
   - fixed `FiltersSheet` title/close-button overlap by switching the header to a structural flex layout (`justify-between`, `min-w-0`, `truncate`, `shrink-0`) and truncating the subtitle line too
-  - extended `MobileTabRail` adoption to remaining shared admin surfaces (`/admin/gigs`, legacy `/admin/talentdashboard`)
+  - extended `MobileTabRail` adoption to remaining shared admin surfaces (`/admin/gigs`); legacy `/admin/talentdashboard` now **redirects** to `/talent/dashboard` (see `next.config.mjs`)
 - ✅ Improved documentation information architecture with new directory entry points:
   - `docs/archive/README.md`
   - `docs/development/README.md`
@@ -1781,7 +1796,7 @@ Use this as the active operating board. Historical sections below remain the aud
 - ✅ Upgraded `/admin/dashboard` mobile density:
   - collapsed mobile stats summary
   - horizontal tab rail with fade edges
-- ✅ Upgraded legacy `/admin/talentdashboard` tab density behavior for mobile consistency.
+- ✅ Retired duplicate `/admin/talentdashboard` UI in favor of canonical `/talent/dashboard` + `/talent/profile` (permanent redirects in `next.config.mjs`).
 
 **Problems discovered and resolved this session:**
 - ✅ `/client/bookings` still used pre-constitution top-heavy mobile layout and dense 5-tab row.

@@ -44,8 +44,8 @@ Primary admin routes:
 - `/admin/diagnostic`
 
 Secondary / legacy admin-ish routes:
-- `/admin/talentdashboard`
-- `/admin/talentdashboard/profile`
+- `/admin/talentdashboard` → redirects to `/talent/dashboard`
+- `/admin/talentdashboard/profile` → redirects to `/talent/profile`
 
 ---
 
