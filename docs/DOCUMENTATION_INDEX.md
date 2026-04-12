@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 12, 2026
+**Last Updated:** April 12, 2026 (admin cohesion ship; no new standalone docs — see `MVP_STATUS_NOTION.md` + `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md` for route-delete / `.next` hygiene)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 

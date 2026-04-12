@@ -94,7 +94,11 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
   const renderTalentActions = (talent: TalentProfile) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white"
+        >
           <MoreVertical size={16} />
         </Button>
       </DropdownMenuTrigger>
@@ -102,7 +106,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
         <DropdownMenuItem asChild>
           <Link
             href={`/talent/${talent.user_id}`}
-            className="text-gray-300 hover:bg-gray-700 flex items-center"
+            className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10"
           >
             <Eye className="mr-2 h-4 w-4" />
             View Profile
@@ -116,11 +120,11 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
     if (filteredTalent.length === 0) {
       return (
         <div className="text-center py-12">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5">
             <UserIcon className="h-7 w-7 text-blue-400" />
           </div>
-          <h3 className="text-lg font-semibold text-white">No Talent Found</h3>
-          <p className="mt-2 text-sm text-gray-400">
+          <h3 className="text-lg font-semibold text-white">No talent found</h3>
+          <p className="mt-2 text-sm text-[var(--oklch-text-secondary)]">
             {searchQuery || verificationFilter !== "all"
               ? "Try adjusting your search or filters."
               : "No talent profiles have been created yet."}
@@ -161,25 +165,25 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
           <table className="w-full">
             <thead>
               <tr className="bg-gradient-to-r from-card/45 to-card/28">
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Talent
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Location
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Experience
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Specialties
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Joined
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Status
                 </th>
-                <th className="text-left text-xs font-medium text-gray-300 uppercase tracking-wider py-4 px-6">
+                <th className="text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)] py-4 px-6">
                   Actions
                 </th>
               </tr>
@@ -189,7 +193,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                 <tr key={talent.id} className="hover:bg-card/22 transition-colors duration-200">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white font-semibold">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/10 font-semibold text-white">
                         {talent.first_name.charAt(0)}
                         {talent.last_name.charAt(0)}
                       </div>
@@ -198,22 +202,24 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                           {talent.first_name} {talent.last_name}
                         </div>
                         {talent.profiles?.display_name && (
-                          <div className="text-gray-400 text-xs">{talent.profiles.display_name}</div>
+                          <div className="text-xs text-[var(--oklch-text-secondary)]">
+                            {talent.profiles.display_name}
+                          </div>
                         )}
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-6">
                     {talent.location ? (
-                      <div className="flex items-center gap-2 text-gray-400 text-sm">
-                        <MapPin className="h-3 w-3" />
+                      <div className="flex items-center gap-2 text-sm text-[var(--oklch-text-secondary)]">
+                        <MapPin className="h-3 w-3 shrink-0" />
                         {talent.location}
                       </div>
                     ) : (
-                      <span className="text-gray-500 text-sm">—</span>
+                      <span className="text-sm text-[var(--oklch-text-tertiary)]">—</span>
                     )}
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="py-4 px-6 text-sm text-[var(--oklch-text-secondary)]">
                     {talent.experience_years ? `${talent.experience_years} years` : "—"}
                   </td>
                   <td className="py-4 px-6">
@@ -222,22 +228,22 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                         {talent.specialties.slice(0, 2).map((specialty, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded"
+                            className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-[var(--oklch-text-secondary)]"
                           >
                             {specialty}
                           </span>
                         ))}
                         {talent.specialties.length > 2 && (
-                          <span className="px-2 py-1 bg-gray-700 text-gray-400 text-xs rounded">
+                          <span className="rounded border border-white/10 bg-white/5 px-2 py-1 text-xs text-[var(--oklch-text-tertiary)]">
                             +{talent.specialties.length - 2}
                           </span>
                         )}
                       </div>
                     ) : (
-                      <span className="text-gray-500 text-sm">—</span>
+                      <span className="text-sm text-[var(--oklch-text-tertiary)]">—</span>
                     )}
                   </td>
-                  <td className="py-4 px-6 text-gray-400 text-sm">
+                  <td className="py-4 px-6 text-sm text-[var(--oklch-text-secondary)]">
                     {new Date(talent.created_at).toLocaleDateString()}
                   </td>
                   <td className="py-4 px-6">
@@ -262,11 +268,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
   };
 
   return (
-    <PageShell
-      topPadding={false}
-      fullBleed
-      className="bg-gradient-to-br from-gray-900 via-black to-gray-800"
-    >
+    <PageShell topPadding={false} fullBleed>
       <AdminHeader user={user} />
 
       <div className="container mx-auto space-y-5 px-4 py-4 sm:px-6 sm:py-6">
@@ -285,11 +287,17 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
           />
         </div>
         <div className="hidden flex-wrap items-center gap-2 md:flex">
-          <div className="rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-3 py-2 text-sm font-medium text-white">
-            {totalTalent} Total
+          <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white shadow-sm">
+            <span className="text-[var(--oklch-text-tertiary)]">Total </span>
+            {totalTalent}
           </div>
-          <div className="rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-medium text-white">
-            {verifiedTalent} Verified
+          <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white shadow-sm">
+            <span className="text-[var(--oklch-text-tertiary)]">Verified </span>
+            {verifiedTalent}
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white shadow-sm">
+            <span className="text-[var(--oklch-text-tertiary)]">Unverified </span>
+            {unverifiedTalent}
           </div>
         </div>
 
@@ -297,34 +305,38 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
           <div className="border-b border-border/40 bg-gradient-to-r from-card/40 to-card/25 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between">
               <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Talent Profiles</h2>
-              <div className="flex items-center space-x-3">
-                <div className="relative">
+              <div className="flex w-full min-w-0 flex-col gap-3 md:w-auto md:flex-row md:items-center md:justify-end md:gap-3">
+                <div className="relative min-w-0 w-full sm:max-w-[min(100%,20rem)]">
                   <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
                     size={16}
                   />
                   <Input
                     placeholder="Search by name, location, or specialty..."
-                    className="pl-9 w-full md:w-60 bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
+                    className="w-full pl-9"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div className="md:hidden">
+                <div className="flex shrink-0 items-center gap-2 md:hidden">
                   <FiltersSheet
                     open={isFiltersOpen}
                     onOpenChange={setIsFiltersOpen}
                     activeCount={activeFilterCount}
                     title="Talent Filters"
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                   >
                     <div className="space-y-2">
-                      <p className="text-xs text-gray-400">Verification</p>
+                      <p className="text-xs text-[var(--oklch-text-tertiary)]">Verification</p>
                       <div className="grid grid-cols-1 gap-2">
                         <Button
                           type="button"
                           variant={verificationFilter === "all" ? "default" : "outline"}
-                          className={verificationFilter === "all" ? "" : "border-gray-600 text-gray-300"}
+                          className={
+                            verificationFilter === "all"
+                              ? ""
+                              : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"
+                          }
                           onClick={() => setVerificationFilter("all")}
                         >
                           All ({totalTalent})
@@ -332,7 +344,11 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                         <Button
                           type="button"
                           variant={verificationFilter === "verified" ? "default" : "outline"}
-                          className={verificationFilter === "verified" ? "" : "border-gray-600 text-gray-300"}
+                          className={
+                            verificationFilter === "verified"
+                              ? ""
+                              : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"
+                          }
                           onClick={() => setVerificationFilter("verified")}
                         >
                           Verified ({verifiedTalent})
@@ -340,7 +356,11 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                         <Button
                           type="button"
                           variant={verificationFilter === "unverified" ? "default" : "outline"}
-                          className={verificationFilter === "unverified" ? "" : "border-gray-600 text-gray-300"}
+                          className={
+                            verificationFilter === "unverified"
+                              ? ""
+                              : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)]"
+                          }
                           onClick={() => setVerificationFilter("unverified")}
                         >
                           Unverified ({unverifiedTalent})
@@ -353,7 +373,7 @@ export function AdminTalentClient({ talent: initialTalent, user }: AdminTalentCl
                   <Button
                     variant="outline"
                     onClick={() => setVerificationFilter("all")}
-                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                    className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                   >
                     <SlidersHorizontal className="mr-2 h-4 w-4" />
                     {activeFilterCount > 0 ? "Filters (1)" : "Filters"}

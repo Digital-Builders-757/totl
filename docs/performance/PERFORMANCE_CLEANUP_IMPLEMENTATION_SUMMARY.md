@@ -56,8 +56,7 @@
 - ✅ `app/admin/applications/[id]/admin-application-detail-client.tsx` - 2 console statements → logger
 - ✅ `app/admin/talent/page.tsx` - 1 console statement → logger
 - ✅ `app/admin/moderation/page.tsx` - 1 console statement → logger
-- ✅ `app/admin/talentdashboard/page.tsx` - 6 console statements → logger
-- ✅ `app/admin/talentdashboard/profile/page.tsx` - 2 console statements → logger
+- ✅ (Historical) `app/admin/talentdashboard/*` — route family removed; redirects to `/talent/dashboard` and `/talent/profile`.
 
 **Total Replaced:** ~100+ console statements across 15+ files
 

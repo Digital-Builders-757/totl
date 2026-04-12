@@ -13,7 +13,7 @@ export default function AdminTalentLoading() {
           <div className="h-10 w-48 bg-white/10 rounded animate-pulse" />
         </div>
         <div className="panel-frosted rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-gray-700 space-y-3">
+          <div className="border-b border-border/40 p-4 space-y-3">
             {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-white/10 animate-pulse" />

@@ -17,6 +17,7 @@ import {
   DollarSign,
   MapPin,
   Shield,
+  UserCircle,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -347,11 +348,11 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                       Platform Health
                     </CardTitle>
                     <Badge variant="outline" className="status-chip">
-                      Stable
+                      Illustrative
                     </Badge>
                   </div>
                   <CardDescription className="text-[var(--oklch-text-secondary)]">
-                    System status and performance
+                    Placeholder labels only — not live infrastructure monitoring.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -393,24 +394,24 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                   <div className="card-header-row">
                     <CardTitle className="flex items-center gap-2 text-white">
                       <Activity className="h-5 w-5 text-purple-400" />
-                      Recent Activity
+                      Snapshot
                     </CardTitle>
                     <Badge variant="outline" className="status-chip">
-                      Today
+                      Loaded data
                     </Badge>
                   </div>
                   <CardDescription className="text-[var(--oklch-text-secondary)]">
-                    Latest platform updates
+                    Counts from the records fetched for this page (not a separate analytics feed).
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-purple-400 mb-2">{applications.length}</div>
-                    <p className="text-sm text-white">New applications today</p>
+                    <p className="text-sm text-white">Total applications</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-400 mb-2">{gigs.length}</div>
-                    <p className="text-sm text-white">Total active gigs</p>
+                    <div className="text-3xl font-bold text-blue-400 mb-2">{dashboardStats.activeGigs}</div>
+                    <p className="text-sm text-white">Active opportunities</p>
                   </div>
                 </CardContent>
               </Card>
@@ -589,19 +590,39 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="border-white/10">
+            <Card className="border-white/10 panel-frosted">
               <CardHeader>
-                <CardTitle className="text-white">Platform Analytics</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Insights and performance metrics
+                <CardTitle className="text-white">Operational data</CardTitle>
+                <CardDescription className="text-[var(--oklch-text-secondary)]">
+                  Aggregated analytics are not shipped yet. Use these admin views for live listings, applications, and
+                  roster data.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <BarChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-300 mb-4">Analytics dashboard coming soon.</p>
-                  <p className="text-sm text-gray-300">Track platform performance, user engagement, and business metrics.</p>
-                </div>
+              <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                <Button className="border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
+                  <Link href="/admin/gigs">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Opportunities
+                  </Link>
+                </Button>
+                <Button className="border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
+                  <Link href="/admin/applications">
+                    <Users className="mr-2 h-4 w-4" />
+                    Applications
+                  </Link>
+                </Button>
+                <Button className="border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
+                  <Link href="/admin/users">
+                    <Users className="mr-2 h-4 w-4" />
+                    Users
+                  </Link>
+                </Button>
+                <Button className="border-white/10 bg-white/5 text-white hover:bg-white/10" variant="outline" asChild>
+                  <Link href="/admin/talent">
+                    <UserCircle className="mr-2 h-4 w-4" />
+                    Talent roster
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
