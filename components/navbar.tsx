@@ -76,28 +76,32 @@ export default function Navbar() {
       : "bg-black";
   const navbarBorder = isScrolled ? "border-b border-border/35" : "border-b border-transparent";
 
-  // Determine text color based on scroll position and current page
-  const textColor = isScrolled || !isHomepage ? "text-white" : "text-white";
+  // Primary nav links stay high-contrast; secondary surfaces use OKLCH tokens (see gigs breadcrumbs).
+  const textColor = "text-white";
+  const navMutedHover =
+    "text-[var(--oklch-text-tertiary)] hover:text-white transition-colors";
+  const dropdownItemClass =
+    "block px-4 py-2 text-sm text-[var(--oklch-text-tertiary)] hover:bg-white/10 hover:text-white";
 
   return (
     <header
       className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${navbarBg} ${navbarBorder}`}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex h-16 items-center justify-between sm:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
+          <Link href="/" className="flex shrink-0 items-center group">
             <Image
               src="/images/solo_logo.png"
               alt="TOTL Agency"
               width={180}
               height={70}
-              className="h-16 w-auto group-hover:scale-110 transition-transform duration-300"
+              className="h-12 w-auto transition-transform duration-300 group-hover:scale-105 sm:h-16"
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-16">
+          <nav className="hidden items-center gap-8 md:flex lg:gap-10">
             {/* Opportunities link: only show for signed-in users (G1: list requires sign-in) */}
             {user && (
               <Link
@@ -143,50 +147,34 @@ export default function Navbar() {
               <div className="relative group">
                 <Button
                   variant="ghost"
-                  className={`${textColor} hover:text-gray-300 font-medium transition-colors flex items-center`}
+                  className={`${textColor} ${navMutedHover} font-medium flex items-center`}
                 >
                   My Account
                   <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
                 <div className="absolute right-0 mt-2 z-20 w-48 overflow-hidden rounded-md panel-frosted shadow-lg opacity-0 shadow-black/30 transition-all duration-200 invisible group-hover:visible group-hover:opacity-100">
                   {userRole === "talent" && (
-                    <Link
-                      href={PATHS.TALENT_DASHBOARD}
-                      prefetch={shouldPrefetch}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                    >
+                    <Link href={PATHS.TALENT_DASHBOARD} prefetch={shouldPrefetch} className={dropdownItemClass}>
                       Talent Dashboard
                     </Link>
                   )}
                   {userRole === "client" && (
-                    <Link
-                      href={PATHS.CLIENT_DASHBOARD}
-                      prefetch={shouldPrefetch}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                    >
+                    <Link href={PATHS.CLIENT_DASHBOARD} prefetch={shouldPrefetch} className={dropdownItemClass}>
                       Career Builder Dashboard
                     </Link>
                   )}
                   {userRole === "admin" && (
-                    <Link
-                      href={PATHS.ADMIN_DASHBOARD}
-                      prefetch={shouldPrefetch}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                    >
+                    <Link href={PATHS.ADMIN_DASHBOARD} prefetch={shouldPrefetch} className={dropdownItemClass}>
                       Admin Dashboard
                     </Link>
                   )}
-                  <Link
-                    href="/settings"
-                    prefetch={shouldPrefetch}
-                    className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white"
-                  >
+                  <Link href="/settings" prefetch={shouldPrefetch} className={dropdownItemClass}>
                     Profile Settings
                   </Link>
                   <button
                     onClick={handleSignOut}
                     disabled={isSigningOut}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`${dropdownItemClass} w-full text-left disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     {isSigningOut ? "Signing Out..." : "Sign Out"}
                   </button>
@@ -195,19 +183,13 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href={PATHS.LOGIN}>
-                  <Button
-                    variant="ghost"
-                    className={`${textColor} hover:text-gray-300 font-medium transition-colors`}
-                  >
+                  <Button variant="ghost" className={`${textColor} ${navMutedHover} font-medium`}>
                     Sign In
                   </Button>
                 </Link>
                 <Link href={PATHS.CHOOSE_ROLE} prefetch={false}>
-                  <Button
-                    variant="default"
-                    className="bg-white text-black hover:bg-gray-200 font-semibold"
-                  >
-                    Create Account
+                  <Button variant="default" className="rounded-full px-5 font-semibold">
+                    Create account
                   </Button>
                 </Link>
               </>
@@ -224,33 +206,34 @@ export default function Navbar() {
               </Link>
             )}
             <button
-              className="md:hidden text-gray-300 hover:text-white"
+              type="button"
+              id="navbar-mobile-menu-button"
+              aria-expanded={isMenuOpen}
+              aria-controls="navbar-mobile-menu"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--oklch-text-tertiary)] transition-colors hover:text-white md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMenuOpen ? <X className="h-6 w-6" aria-hidden /> : <Menu className="h-6 w-6" aria-hidden />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-          {isMenuOpen && (
-        <div className="panel-frosted border-t border-border/40 shadow-lg shadow-black/25 md:hidden">
+      {/* Mobile Menu — Subscribe stays compact in header; no duplicate full-width CTA here */}
+      {isMenuOpen && (
+        <div
+          id="navbar-mobile-menu"
+          className="panel-frosted border-t border-border/40 shadow-lg shadow-black/25 md:hidden"
+          role="navigation"
+          aria-label="Mobile"
+        >
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col space-y-4">
-                  {showPersistentSubscribeCta && (
-                    <Link
-                      href="/talent/subscribe"
-                      className="w-full inline-flex justify-center rounded-full bg-amber-400 text-black font-semibold py-3"
-                    >
-                      Subscribe & Apply
-                    </Link>
-                  )}
               {/* Opportunities link: only show for signed-in users (G1: list requires sign-in) */}
               {user && (
                 <Link
                   href="/gigs"
-                  className="text-white hover:text-gray-300 font-medium transition-colors py-2"
+                  className="py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                 >
                   Opportunities
                 </Link>
@@ -262,7 +245,7 @@ export default function Navbar() {
                     {userRole === "talent" && (
                       <Link
                         href={PATHS.TALENT_DASHBOARD}
-                        className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                        className="block py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                       >
                         Talent Dashboard
                       </Link>
@@ -270,7 +253,7 @@ export default function Navbar() {
                     {userRole === "client" && (
                       <Link
                         href={PATHS.CLIENT_DASHBOARD}
-                        className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                        className="block py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                       >
                         Career Builder Dashboard
                       </Link>
@@ -278,21 +261,21 @@ export default function Navbar() {
                     {userRole === "admin" && (
                       <Link
                         href={PATHS.ADMIN_DASHBOARD}
-                        className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                        className="block py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                       >
                         Admin Dashboard
                       </Link>
                     )}
                     <Link
                       href="/settings"
-                      className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                      className="block py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                     >
                       Profile Settings
                     </Link>
                     <button
                       onClick={handleSignOut}
                       disabled={isSigningOut}
-                      className="block py-2 text-white hover:text-gray-300 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="block py-2 text-left font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {isSigningOut ? "Signing Out..." : "Sign Out"}
                     </button>
@@ -301,14 +284,14 @@ export default function Navbar() {
                   <>
                     <Link
                       href={PATHS.LOGIN}
-                      className="block py-2 text-white hover:text-gray-300 font-medium transition-colors"
+                      className="block py-2 font-medium text-white transition-colors hover:text-[var(--oklch-text-secondary)]"
                     >
                       Sign In
                     </Link>
                     <div className="mt-4">
                       <Link href={PATHS.CHOOSE_ROLE} prefetch={false}>
-                        <Button className="w-full bg-white text-black hover:bg-gray-200">
-                          Create Account
+                        <Button variant="default" className="w-full rounded-full font-semibold">
+                          Create account
                         </Button>
                       </Link>
                     </div>

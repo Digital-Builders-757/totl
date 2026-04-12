@@ -39,7 +39,7 @@ export function PageShell({
       ambientTone={ambientTone}
       routeRole={routeRole}
       className={cn("text-[var(--oklch-text-primary)]", className)}
-      contentClassName={cn(topPadding && "pt-20 sm:pt-24")}
+      contentClassName={cn(topPadding && "pt-16 sm:pt-20 lg:pt-24")}
     >
       {fullBleed ? (
         children

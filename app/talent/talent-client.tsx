@@ -1,11 +1,13 @@
 "use client";
 
 import { Search, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SafeImage } from "@/components/ui/safe-image";
+import { cn } from "@/lib/utils/utils";
 
 // Custom type matching the actual selected fields from server query
 type TalentProfile = {
@@ -35,73 +37,107 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Initialize scroll animations
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: "0px 0px -50px 0px",
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
-      });
-    }, observerOptions);
-
-    // Observe all elements with scroll animation classes
-    const animatedElements = document.querySelectorAll(
-      ".scroll-fade-in, .scroll-slide-left, .scroll-slide-right, .scroll-scale-in"
-    );
-    animatedElements.forEach((el) => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-
-  const filteredTalent = initialTalent.filter(
-    (person) =>
-      `${person.first_name} ${person.last_name}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      person.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.experience?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredTalent = useMemo(
+    () =>
+      initialTalent.filter(
+        (person) =>
+          `${person.first_name} ${person.last_name}`
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          person.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          person.experience?.toLowerCase().includes(searchTerm.toLowerCase())
+      ),
+    [initialTalent, searchTerm]
   );
 
+  const hasCatalog = initialTalent.length > 0;
+  const showSearchEmpty = hasCatalog && filteredTalent.length === 0 && searchTerm.length > 0;
+  const showCatalogEmpty = !hasCatalog;
+
   return (
-    <div className="space-y-16">
-      {/* Search */}
-      <div className="max-w-3xl mx-auto animate-apple-slide-up">
-        <div className="relative">
-          <Input
-            type="text"
-            placeholder="Search by name, location, or experience..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="apple-input py-6 text-xl placeholder-gray-400 focus:ring-4 focus:ring-white/20 transition-all duration-300"
-          />
+    <div className="space-y-8 sm:space-y-10">
+      {/* Search — primary hierarchy */}
+      <div className="mx-auto max-w-3xl space-y-2">
+        <label
+          htmlFor="talent-search"
+          className="block text-sm font-medium text-[var(--oklch-text-secondary)]"
+        >
+          Search talent
+        </label>
+        <div className="panel-frosted grain-texture relative rounded-2xl p-3 sm:p-4">
+          <div className="relative">
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 z-[1] h-5 w-5 -translate-y-1/2 text-[var(--oklch-text-muted)]"
+              aria-hidden
+            />
+            <Input
+              id="talent-search"
+              type="search"
+              autoComplete="off"
+              placeholder="Name, location, or experience"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={cn(
+                "h-12 border-0 bg-transparent pl-10 pr-3 text-base shadow-none sm:h-12 sm:text-lg",
+                "placeholder:text-[var(--oklch-text-muted)]"
+              )}
+            />
+          </div>
         </div>
+        {hasCatalog && filteredTalent.length > 0 ? (
+          <p className="text-center text-sm text-[var(--oklch-text-muted)]">
+            {filteredTalent.length} profile{filteredTalent.length === 1 ? "" : "s"}
+            {searchTerm ? ` matching “${searchTerm}”` : ""}
+          </p>
+        ) : null}
       </div>
 
       {/* Results */}
       {filteredTalent.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="w-24 h-24 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Search className="h-12 w-12 text-gray-400" />
+        <div className="panel-frosted mx-auto max-w-lg rounded-2xl px-6 py-10 text-center sm:px-8">
+          <div
+            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[var(--oklch-border-alpha)] bg-[var(--oklch-panel-alpha)]"
+            aria-hidden
+          >
+            <Search className="h-8 w-8 text-[var(--oklch-text-muted)]" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-3">No Talent Found</h2>
-          <p className="text-gray-300 text-lg">
-            {searchTerm
-              ? `No talent profiles match "${searchTerm}". Try adjusting your search.`
-              : "No talent profiles available at the moment."}
-          </p>
+          {showSearchEmpty ? (
+            <>
+              <h2 className="mb-2 font-display text-xl font-semibold text-[var(--oklch-text-primary)] sm:text-2xl">
+                No matching profiles
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-[var(--oklch-text-secondary)] sm:text-base">
+                Try a shorter search or different keywords.
+              </p>
+              <Button
+                type="button"
+                variant="default"
+                className="rounded-full font-semibold"
+                onClick={() => setSearchTerm("")}
+              >
+                Clear search
+              </Button>
+            </>
+          ) : showCatalogEmpty ? (
+            <>
+              <h2 className="mb-2 font-display text-xl font-semibold text-[var(--oklch-text-primary)] sm:text-2xl">
+                No talent profiles yet
+              </h2>
+              <p className="mb-6 text-sm leading-relaxed text-[var(--oklch-text-secondary)] sm:text-base">
+                Check back soon for new talent on TOTL.
+              </p>
+              <Button variant="outline" className="rounded-full border-border/50 font-semibold" asChild>
+                <Link href="/">Back to home</Link>
+              </Button>
+            </>
+          ) : null}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8 xl:grid-cols-4">
           {filteredTalent.map((person) => (
             <div
               key={person.id}
-              className="group panel-frosted card-backlit grain-texture cursor-pointer overflow-hidden rounded-2xl scroll-fade-in scroll-stagger-1 hover-lift"
+              className="group panel-frosted card-backlit grain-texture hover-lift min-w-0 cursor-pointer overflow-hidden rounded-2xl"
               onClick={() => router.push(`/talent/${person.user_id}`)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -112,7 +148,7 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
               role="button"
               tabIndex={0}
             >
-              <div className="relative aspect-4-5 sm:aspect-3-4 md:aspect-4-5 image-sophisticated">
+              <div className="image-sophisticated relative aspect-4-5 sm:aspect-3-4 md:aspect-4-5">
                 <SafeImage
                   src={
                     person.profiles?.avatar_url ||
@@ -129,52 +165,62 @@ export default function TalentClient({ initialTalent }: TalentClientProps) {
                   context="talent-profile"
                   fallbackSrc="/images/solo_logo.png"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                  <h3 className="text-white text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 line-clamp-2">
+                  <h3 className="mb-1 line-clamp-2 text-lg font-bold text-white sm:mb-2 sm:text-xl md:text-2xl">
                     {person.first_name} {person.last_name}
                   </h3>
-                  <p className="text-gray-300 text-xs sm:text-sm font-medium line-clamp-1">{person.location}</p>
+                  <p className="line-clamp-1 text-xs font-medium text-[var(--oklch-text-tertiary)] sm:text-sm">
+                    {person.location}
+                  </p>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6">
+              <div className="space-y-4 p-4 sm:space-y-5 sm:p-6 md:p-8">
                 <div className="space-y-3 sm:space-y-4">
                   {/* Only show public-safe information */}
                   {person.specialties && person.specialties.length > 0 && (
                     <div className="space-y-2">
-                      <span className="text-xs sm:text-sm font-medium text-gray-400">Specialties</span>
+                      <span className="text-xs font-medium text-[var(--oklch-text-muted)] sm:text-sm">
+                        Specialties
+                      </span>
                       <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {person.specialties.slice(0, 3).map((specialty, index) => (
                           <span
                             key={index}
-                            className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full line-clamp-1"
+                            className="line-clamp-1 rounded-full border border-[var(--oklch-border-alpha)] bg-white/[0.06] px-2.5 py-1 text-xs font-medium text-[var(--oklch-text-secondary)]"
                           >
                             {specialty}
                           </span>
                         ))}
                         {person.specialties.length > 3 && (
-                          <span className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded-full">
+                          <span className="rounded-full border border-[var(--oklch-border-alpha)] bg-white/[0.06] px-2.5 py-1 text-xs font-medium text-[var(--oklch-text-muted)]">
                             +{person.specialties.length - 3} more
                           </span>
                         )}
                       </div>
                     </div>
                   )}
-                  {person.experience_years && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs sm:text-sm font-medium text-gray-400">Experience</span>
-                      <span className="text-xs sm:text-sm font-semibold text-white">{person.experience_years} years</span>
+                  {person.experience_years != null && person.experience_years > 0 && (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-[var(--oklch-text-muted)] sm:text-sm">
+                        Experience
+                      </span>
+                      <span className="text-xs font-semibold text-[var(--oklch-text-primary)] sm:text-sm">
+                        {person.experience_years} years
+                      </span>
                     </div>
                   )}
                 </div>
                 <Button
-                  className="w-full apple-button hover-lift focus-ring text-sm sm:text-base py-2 sm:py-3"
+                  variant="default"
+                  className="w-full rounded-full py-2 text-sm sm:py-2.5 sm:text-base"
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push(`/talent/${person.user_id}`);
                   }}
                 >
-                  View Profile <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  View profile
+                  <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" aria-hidden />
                 </Button>
               </div>
             </div>

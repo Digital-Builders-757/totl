@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Public entry funnel, frosted loaders, talent discovery client (April 12, 2026)**
+
+**UI / PUBLIC** — April 12, 2026
+- ✅ **Navbar, choose-role, login:** OKLCH text tokens, `ambientTone="lifted"` on auth surfaces, aligned **Back to home** / **Create account** copy; shorter mobile navbar + mobile Subscribe dedupe; `PageShell` top padding matches bar height.
+- ✅ **Loading + skeletons:** `panel-frosted` / token shells for gigs list/detail, talent profile/subscribe loaders; `image-skeletons.tsx` no longer zinc-heavy; gigs filter skeleton matches real **`panel-frosted grain-texture`** (removed invalid `glass-card`).
+- ✅ **`app/talent/talent-client.tsx`:** Public listing polish — frosted search shell, `totl-input-shell` field, OKLCH chips, count line, cohesive empty states (**Clear search** vs **Back to home**), primary **View profile** CTA; removed IntersectionObserver scroll hooks and `apple-input` / `apple-button` patterns.
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — green, April 12, 2026.
+
+**Next (P0):** Merge **develop → main**; smoke public auth entry + any route that still imports **`TalentClient`** when **`/talent`** is re-enabled.
+
+---
+
 ## 🚀 **Latest: Admin control-plane — talent UI, honest dashboard, legacy route retirement (April 12, 2026)**
 
 **ADMIN** — April 12, 2026
