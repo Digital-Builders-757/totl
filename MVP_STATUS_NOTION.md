@@ -8,6 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Portfolio storage — UUID paths + `exists()` finalize (April 12, 2026)**
+
+**STORAGE / PORTFOLIO** — April 12, 2026
+- ✅ **`requestPortfolioImageUpload`:** Random path segment uses **`crypto.randomUUID()`** (aligned with **`gig-actions`**), not `Math.random().toString(36)…`.
+- ✅ **`finalizePortfolioImage`:** Verifies the object with **`storage.from("portfolio").exists(path)`** instead of **`list(user.id, { limit: 1000 })`**, avoiding false “file not found” when a user has many portfolio objects.
+- ✅ **Docs:** `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md` — note on list-vs-exists verification.
+
+**Verification:** `npm run typecheck` — green, April 12, 2026.
+
+---
+
 ## 🚀 **Latest: Talent dashboard core cards + profile strength (April 12, 2026)**
 
 **UI / TALENT DASHBOARD** — April 12, 2026

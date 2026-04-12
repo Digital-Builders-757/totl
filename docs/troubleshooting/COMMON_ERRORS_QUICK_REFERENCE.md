@@ -20,6 +20,7 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **Portfolio finalize falsely fails after upload (`storage.list` + 1000 limit):** Verifying an upload by listing the user folder can miss the new object when many files exist (prefix sort / pagination). **Fix:** Use **`storage.from(bucket).exists(fullPath)`** (or `info(path)`) for an O(1) check on the exact key. **Prevention:** Do not rely on `list(..., { limit: N })` to prove a specific object exists.
 - **Supabase head count query looks like “zero rows” on failure:** `.select("id", { count: "exact", head: true })` can return **`error`** with **`count: null`**. Using **`result.count ?? 0`** hides outages and wrong-sides UX (e.g. missing “existing applicants” warning).
   - **Fix:** Check **`result.error`**, log it, and choose a **fail-safe** (e.g. assume count > 0 for warnings) or return an error state—not **`?? 0`** alone.
   - **Prevention:** Any **`head: true`** count used for gating or warnings must branch on **`error`** first.
