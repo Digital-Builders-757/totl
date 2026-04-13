@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -22,31 +22,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
+import { waitForServerSessionReady } from "@/lib/auth/wait-for-server-session-ready";
 import { logger } from "@/lib/utils/logger";
 
-async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    try {
-      const response = await fetch("/api/auth/session-ready", {
-        method: "GET",
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        return true;
-      }
-    } catch {
-      // Ignore probe errors and retry with short backoff.
-    }
-
-    if (attempt < maxAttempts - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
-    }
-  }
-
-  return false;
-}
+const APPLY_SUBMIT_SESSION_WAIT_MS = 45_000;
+/** One bounded wait after navigation before hitting status API (avoids multi-minute nested loops). */
+const APPLY_STATUS_INITIAL_WAIT_MS = 28_000;
 
 export default function ClientApplicationPage() {
   const [formData, setFormData] = useState({
@@ -61,6 +42,7 @@ export default function ClientApplicationPage() {
     website: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitBusyLabel, setSubmitBusyLabel] = useState("Submitting...");
   const [hasStartedEditing, setHasStartedEditing] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const router = useRouter();
@@ -112,18 +94,25 @@ export default function ClientApplicationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitBusyLabel("Finishing sign-in…");
 
     try {
-      const serverSessionReady = await waitForServerSessionReady();
+      const serverSessionReady = await waitForServerSessionReady({
+        maxWaitMs: APPLY_SUBMIT_SESSION_WAIT_MS,
+      });
       if (!serverSessionReady) {
         toast({
-          title: "Still signing you in",
-          description: "Your session is still finishing. Please wait a moment and try again.",
+          title: "Could not confirm your session yet",
+          description:
+            "Your browser signed you in, but our servers did not see the session in time. Refresh this page, then tap Submit again. If it keeps happening, wait one minute and retry.",
           variant: "destructive",
         });
         setIsSubmitting(false);
+        setSubmitBusyLabel("Submitting...");
         return;
       }
+
+      setSubmitBusyLabel("Submitting...");
 
       const result = await submitClientApplication({
         firstName: formData.firstName,
@@ -144,6 +133,7 @@ export default function ClientApplicationPage() {
           variant: "destructive",
         });
         setIsSubmitting(false);
+        setSubmitBusyLabel("Submitting...");
         return;
       }
 
@@ -165,6 +155,7 @@ export default function ClientApplicationPage() {
         variant: "destructive",
       });
       setIsSubmitting(false);
+      setSubmitBusyLabel("Submitting...");
     }
   };
 
@@ -181,27 +172,28 @@ export default function ClientApplicationPage() {
     const checkStatus = async () => {
       setIsCheckingStatus(true);
       try {
+        setStatusMessage("Finishing sign-in… Checking whether you already have an application on file.");
+        const serverSessionReady = await waitForServerSessionReady({
+          maxWaitMs: APPLY_STATUS_INITIAL_WAIT_MS,
+        });
+        if (!serverSessionReady) {
+          setStatusMessage(
+            "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
+          );
+        }
+
         let response: Response | null = null;
-
-        for (let attempt = 0; attempt < 6; attempt += 1) {
-          const serverSessionReady = await waitForServerSessionReady();
-          if (!serverSessionReady) {
-            setStatusMessage("Finalizing your sign-in. Checking application status...");
-            continue;
-          }
-
+        for (let attempt = 0; attempt < 8; attempt += 1) {
           response = await fetch(`/api/client-applications/status`, { signal: controller.signal });
 
-          // Invite/callback flows can briefly race server cookie visibility even after
-          // the browser session exists. Retry auth failures before surfacing an error.
           if (response.ok) {
             break;
           }
 
           if (response.status === 401 || response.status === 403) {
-            setStatusMessage("Finalizing your sign-in. Checking application status...");
-            if (attempt < 5) {
-              await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+            setStatusMessage("Finishing sign-in… Checking application status.");
+            if (attempt < 7) {
+              await new Promise((resolve) => setTimeout(resolve, 450 * (attempt + 1)));
               continue;
             }
           }
@@ -496,7 +488,7 @@ export default function ClientApplicationPage() {
                         applicationStatus?.status === "pending"
                       }
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Application"}
+                      {isSubmitting ? submitBusyLabel : "Submit Application"}
                     </Button>
                     <p className="text-sm text-[var(--oklch-text-muted)] mt-4 text-left">
                       By submitting this form, you agree to our{" "}

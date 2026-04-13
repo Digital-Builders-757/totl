@@ -309,7 +309,8 @@ npm run build
   - **Root Cause:** Callback can establish browser session before server-side cookie visibility fully converges; server action `submitClientApplication()` calls `auth.getUser()` and may read `null` during this race.
   - **Fix:** In callback gate, wait for server session readiness before redirecting:
     - add `GET /api/auth/session-ready` that validates server `auth.getUser()`
-    - retry probe with short backoff before leaving `/auth/callback`
+    - retry the probe with **bounded** exponential backoff + jitter (~tens of seconds cap) before leaving `/auth/callback` (mobile Safari often needs more than a few seconds)
+    - on `/client/apply`, use the same probe with a similar cap **before** `submitClientApplication()`; show “Finishing sign-in…” instead of failing on the first 401 from the probe
   - **Fix:** Add structured diagnostics in `submitClientApplication()` with `traceId` across auth lookup, duplicate check, insert, and email side-effects to isolate branch failures quickly.
   - **Prevention:** For invite-linked auth flows, verify both browser and server session convergence before navigating users into server-action submit pages.
 - **Career Builder hard delete fails with FK error (`SQLSTATE 23503`, `client_applications_user_id_fkey`):**

@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 12, 2026 (Bugbot triage: portfolio `exists()` UX, talent empty-state string, `PageShell` padding — see `MVP_STATUS_NOTION.md`, `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`; prior: gig marketing paywall, admin gig delete / bookings RLS, `docs/runbooks/production-gig-cleanup.md`)
+**Last Updated:** April 13, 2026 (Career Builder invite session-ready hardening: `lib/auth/wait-for-server-session-ready.ts`, callback + `/client/apply` — see `MVP_STATUS_NOTION.md`, `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`; prior: Bugbot triage April 12, gig marketing paywall, admin gig delete / bookings RLS)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 

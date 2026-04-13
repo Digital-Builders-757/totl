@@ -8,6 +8,23 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder invite — server session convergence (April 13, 2026)**
+
+**AUTH / CAREER BUILDER** — April 13, 2026
+- ✅ **`lib/auth/wait-for-server-session-ready.ts`:** Shared client probe for **`GET /api/auth/session-ready`** with bounded exponential backoff + jitter (mobile / Safari cookie visibility).
+- ✅ **`app/auth/callback/page.tsx`:** Longer session-ready wait + extended **`getBootStateRedirect`** polling before leaving callback.
+- ✅ **`app/client/apply/page.tsx`:** Submit path waits for server-visible session (~45s cap) with **Finishing sign-in…** button copy; status check uses one bounded wait then fetch retries (avoids long nested loops); hard-fail toast gives refresh + retry guidance (replaces misleading **Still signing you in** on first submit).
+- ✅ **`tests/auth/invite-client-apply-flow.spec.ts`:** Success URL assertion timeout increased for slow cookie sync / CI.
+- ✅ **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`:** Invite → apply submit race documented with current mitigation.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **invite → `/auth/callback` → `/client/apply` → submit → `/client/apply/success`** on staging (mobile Safari if available).
+
+**Next (P1):** Optional **`fetch` timeout** (AbortController) on the session-ready probe to bound rare hung requests.
+
+---
+
 ## 🚀 **Latest: Bugbot triage — portfolio `exists()`, talent empty state, `PageShell` padding (April 12, 2026)**
 
 **QUALITY / UX** — April 12, 2026

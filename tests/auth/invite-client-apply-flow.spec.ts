@@ -62,7 +62,8 @@ test.describe("Invite to client apply flow", () => {
     );
 
     await page.getByRole("button", { name: "Submit Application" }).click();
-    await expect(page).toHaveURL(/\/client\/apply\/success/, { timeout: 30_000 });
+    // Submit waits for server-visible session (cookie sync); allow slow mobile / CI.
+    await expect(page).toHaveURL(/\/client\/apply\/success/, { timeout: 90_000 });
     await expect(page.getByRole("heading", { name: /application submitted successfully/i })).toBeVisible({
       timeout: 20_000,
     });
