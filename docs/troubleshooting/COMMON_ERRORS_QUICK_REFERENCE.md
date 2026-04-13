@@ -311,6 +311,9 @@ npm run build
     - add `GET /api/auth/session-ready` that validates server `auth.getUser()`
     - retry the probe with **bounded** exponential backoff + jitter (~tens of seconds cap) before leaving `/auth/callback` (mobile Safari often needs more than a few seconds)
     - on `/client/apply`, use the same probe with a similar cap **before** `submitClientApplication()`; show “Finishing sign-in…” instead of failing on the first 401 from the probe
+    - each probe `fetch` uses an **AbortController** per attempt (~12s default) so a stalled connection cannot hang until the overall budget elapses
+    - `GET /api/auth/session-ready` returns JSON **`reason`**: `no_session` (401), `auth_error` / `server_exception` (500) for client-side distinction; **`logger.warn`** on server for auth/exception paths (no user PII)
+    - `waitForServerSessionReady` returns a **structured result** (`terminal`: `not_ready` | `server_error` | `fetch_timeout` | `network`) for apply/callback copy + **`logger.warn`** fields on exhaustion
   - **Fix:** Add structured diagnostics in `submitClientApplication()` with `traceId` across auth lookup, duplicate check, insert, and email side-effects to isolate branch failures quickly.
   - **Prevention:** For invite-linked auth flows, verify both browser and server session convergence before navigating users into server-action submit pages.
 - **Career Builder hard delete fails with FK error (`SQLSTATE 23503`, `client_applications_user_id_fkey`):**

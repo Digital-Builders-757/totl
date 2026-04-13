@@ -11,17 +11,18 @@
 ## 🚀 **Latest: Career Builder invite — server session convergence (April 13, 2026)**
 
 **AUTH / CAREER BUILDER** — April 13, 2026
-- ✅ **`lib/auth/wait-for-server-session-ready.ts`:** Shared client probe for **`GET /api/auth/session-ready`** with bounded exponential backoff + jitter (mobile / Safari cookie visibility).
-- ✅ **`app/auth/callback/page.tsx`:** Longer session-ready wait + extended **`getBootStateRedirect`** polling before leaving callback.
-- ✅ **`app/client/apply/page.tsx`:** Submit path waits for server-visible session (~45s cap) with **Finishing sign-in…** button copy; status check uses one bounded wait then fetch retries (avoids long nested loops); hard-fail toast gives refresh + retry guidance (replaces misleading **Still signing you in** on first submit).
+- ✅ **`lib/auth/wait-for-server-session-ready.ts`:** Shared client probe for **`GET /api/auth/session-ready`** with bounded exponential backoff + jitter (mobile / Safari cookie visibility); **per-fetch AbortController** (~12s) so a stalled request cannot hang a single attempt; returns **structured `terminal`** (`not_ready` | `server_error` | `fetch_timeout` | `network`) for UX + logs.
+- ✅ **`app/api/auth/session-ready/route.ts`:** JSON **`reason`** codes (`no_session`, `auth_error`, `server_exception`) with **`logger.warn`** on failure paths (no user PII).
+- ✅ **`app/auth/callback/page.tsx`:** Longer session-ready wait + extended **`getBootStateRedirect`** polling before leaving callback; callback hard-fail copy varies by **`terminal`**.
+- ✅ **`app/client/apply/page.tsx`:** Submit path waits for server-visible session (~45s cap) with **Finishing sign-in…** button copy; status check uses one bounded wait then fetch retries (avoids long nested loops); submit/status toasts and banners vary by **`terminal`** when the probe exhausts.
 - ✅ **`tests/auth/invite-client-apply-flow.spec.ts`:** Success URL assertion timeout increased for slow cookie sync / CI.
-- ✅ **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`:** Invite → apply submit race documented with current mitigation.
+- ✅ **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`:** Invite → apply submit race + session-ready diagnostics documented.
 
-**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026.
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026 (session-ready hardening pass).
 
 **Next (P0):** Merge **develop → main** via PR; smoke **invite → `/auth/callback` → `/client/apply` → submit → `/client/apply/success`** on staging (mobile Safari if available).
 
-**Next (P1):** Optional **`fetch` timeout** (AbortController) on the session-ready probe to bound rare hung requests.
+**Next (P1):** Optional **metrics or Sentry breadcrumbs** on `session-ready` terminal counts in production (if noise is acceptable).
 
 ---
 

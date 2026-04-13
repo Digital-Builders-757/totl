@@ -131,14 +131,18 @@ function AuthCallbackGate() {
         window.history.replaceState({}, "", `${PATHS.AUTH_CALLBACK}?returnUrl=${encodeURIComponent(safeReturn)}`);
 
         // Ensure server-side auth sees the cookie-backed session before leaving callback.
-        const serverSessionReady = await waitForServerSessionReady({
+        const sessionProbe = await waitForServerSessionReady({
           maxWaitMs: CALLBACK_SESSION_WAIT_MS,
         });
-        if (!serverSessionReady) {
+        if (!sessionProbe.ok) {
           logger.warn("[auth/callback] server session not ready after callback exchange", {
             hasCode: Boolean(code),
             hasTokenHash: Boolean(tokenHash),
             hasOtpType: Boolean(otpType),
+            terminal: sessionProbe.terminal,
+            attempts: sessionProbe.attempts,
+            lastHttpStatus: sessionProbe.lastHttpStatus,
+            lastBodyReason: sessionProbe.lastBodyReason,
           });
         }
 
@@ -157,10 +161,14 @@ function AuthCallbackGate() {
         }
 
         if (cancelled) return;
-        if (!resolvedTarget && !serverSessionReady) {
-          throw new Error(
-            "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again."
-          );
+        if (!resolvedTarget && !sessionProbe.ok) {
+          const message =
+            sessionProbe.terminal === "server_error"
+              ? "Our servers could not verify your account yet. Wait a minute, then reopen your invite link or try signing in from the login page."
+              : sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network"
+                ? "The connection timed out while finishing sign-in. Check your network, then reopen the invite link."
+                : "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again.";
+          throw new Error(message);
         }
         const target = resolvedTarget ?? safeReturn;
         router.replace(target);

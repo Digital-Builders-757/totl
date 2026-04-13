@@ -22,12 +22,46 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
-import { waitForServerSessionReady } from "@/lib/auth/wait-for-server-session-ready";
+import {
+  type WaitForServerSessionReadyResult,
+  waitForServerSessionReady,
+} from "@/lib/auth/wait-for-server-session-ready";
 import { logger } from "@/lib/utils/logger";
 
 const APPLY_SUBMIT_SESSION_WAIT_MS = 45_000;
 /** One bounded wait after navigation before hitting status API (avoids multi-minute nested loops). */
 const APPLY_STATUS_INITIAL_WAIT_MS = 28_000;
+
+function sessionProbeFailureToast(
+  probe: Extract<WaitForServerSessionReadyResult, { ok: false }>
+): { title: string; description: string } {
+  switch (probe.terminal) {
+    case "server_error":
+      return {
+        title: "Could not verify your session on our servers",
+        description:
+          "The sign-in check failed with a server error. Wait a minute, refresh this page, then tap Submit again. If it keeps failing, contact support with the approximate time you tried.",
+      };
+    case "fetch_timeout":
+      return {
+        title: "Sign-in check timed out",
+        description:
+          "Confirming your session took too long to respond. Check your connection, refresh this page, then tap Submit again.",
+      };
+    case "network":
+      return {
+        title: "Connection problem during sign-in check",
+        description:
+          "We could not reach the server to confirm your session. Check your network, refresh this page, then try again.",
+      };
+    case "not_ready":
+      return {
+        title: "Could not confirm your session yet",
+        description:
+          "Your browser signed you in, but our servers did not see the session in time. Refresh this page, then tap Submit again. If it keeps happening, wait one minute and retry.",
+      };
+  }
+}
 
 export default function ClientApplicationPage() {
   const [formData, setFormData] = useState({
@@ -97,14 +131,20 @@ export default function ClientApplicationPage() {
     setSubmitBusyLabel("Finishing sign-in…");
 
     try {
-      const serverSessionReady = await waitForServerSessionReady({
+      const sessionProbe = await waitForServerSessionReady({
         maxWaitMs: APPLY_SUBMIT_SESSION_WAIT_MS,
       });
-      if (!serverSessionReady) {
+      if (!sessionProbe.ok) {
+        logger.warn("[client/apply] session-ready probe exhausted (submit)", {
+          terminal: sessionProbe.terminal,
+          attempts: sessionProbe.attempts,
+          lastHttpStatus: sessionProbe.lastHttpStatus,
+          lastBodyReason: sessionProbe.lastBodyReason,
+        });
+        const { title, description } = sessionProbeFailureToast(sessionProbe);
         toast({
-          title: "Could not confirm your session yet",
-          description:
-            "Your browser signed you in, but our servers did not see the session in time. Refresh this page, then tap Submit again. If it keeps happening, wait one minute and retry.",
+          title,
+          description,
           variant: "destructive",
         });
         setIsSubmitting(false);
@@ -173,13 +213,29 @@ export default function ClientApplicationPage() {
       setIsCheckingStatus(true);
       try {
         setStatusMessage("Finishing sign-in… Checking whether you already have an application on file.");
-        const serverSessionReady = await waitForServerSessionReady({
+        const sessionProbe = await waitForServerSessionReady({
           maxWaitMs: APPLY_STATUS_INITIAL_WAIT_MS,
         });
-        if (!serverSessionReady) {
-          setStatusMessage(
-            "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
-          );
+        if (!sessionProbe.ok) {
+          logger.warn("[client/apply] session-ready probe exhausted (status prefetch)", {
+            terminal: sessionProbe.terminal,
+            attempts: sessionProbe.attempts,
+            lastHttpStatus: sessionProbe.lastHttpStatus,
+            lastBodyReason: sessionProbe.lastBodyReason,
+          });
+          if (sessionProbe.terminal === "server_error") {
+            setStatusMessage(
+              "Our servers could not verify your session yet. You can still fill out the form; refresh the page if this message persists."
+            );
+          } else if (sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network") {
+            setStatusMessage(
+              "The sign-in check timed out or hit a connection issue. You can keep filling out the form; refresh if your application status does not load."
+            );
+          } else {
+            setStatusMessage(
+              "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
+            );
+          }
         }
 
         let response: Response | null = null;
