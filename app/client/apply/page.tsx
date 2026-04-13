@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
@@ -22,30 +22,45 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
+import {
+  type WaitForServerSessionReadyResult,
+  waitForServerSessionReady,
+} from "@/lib/auth/wait-for-server-session-ready";
 import { logger } from "@/lib/utils/logger";
 
-async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    try {
-      const response = await fetch("/api/auth/session-ready", {
-        method: "GET",
-        cache: "no-store",
-        credentials: "include",
-      });
+const APPLY_SUBMIT_SESSION_WAIT_MS = 45_000;
+/** One bounded wait after navigation before hitting status API (avoids multi-minute nested loops). */
+const APPLY_STATUS_INITIAL_WAIT_MS = 28_000;
 
-      if (response.ok) {
-        return true;
-      }
-    } catch {
-      // Ignore probe errors and retry with short backoff.
-    }
-
-    if (attempt < maxAttempts - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
-    }
+function sessionProbeFailureToast(
+  probe: Extract<WaitForServerSessionReadyResult, { ok: false }>
+): { title: string; description: string } {
+  switch (probe.terminal) {
+    case "server_error":
+      return {
+        title: "Could not verify your session on our servers",
+        description:
+          "The sign-in check failed with a server error. Wait a minute, refresh this page, then tap Submit again. If it keeps failing, contact support with the approximate time you tried.",
+      };
+    case "fetch_timeout":
+      return {
+        title: "Sign-in check timed out",
+        description:
+          "Confirming your session took too long to respond. Check your connection, refresh this page, then tap Submit again.",
+      };
+    case "network":
+      return {
+        title: "Connection problem during sign-in check",
+        description:
+          "We could not reach the server to confirm your session. Check your network, refresh this page, then try again.",
+      };
+    case "not_ready":
+      return {
+        title: "Could not confirm your session yet",
+        description:
+          "Your browser signed you in, but our servers did not see the session in time. Refresh this page, then tap Submit again. If it keeps happening, wait one minute and retry.",
+      };
   }
-
-  return false;
 }
 
 export default function ClientApplicationPage() {
@@ -61,6 +76,7 @@ export default function ClientApplicationPage() {
     website: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitBusyLabel, setSubmitBusyLabel] = useState("Submitting...");
   const [hasStartedEditing, setHasStartedEditing] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const router = useRouter();
@@ -112,18 +128,31 @@ export default function ClientApplicationPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitBusyLabel("Finishing sign-in…");
 
     try {
-      const serverSessionReady = await waitForServerSessionReady();
-      if (!serverSessionReady) {
+      const sessionProbe = await waitForServerSessionReady({
+        maxWaitMs: APPLY_SUBMIT_SESSION_WAIT_MS,
+      });
+      if (!sessionProbe.ok) {
+        logger.warn("[client/apply] session-ready probe exhausted (submit)", {
+          terminal: sessionProbe.terminal,
+          attempts: sessionProbe.attempts,
+          lastHttpStatus: sessionProbe.lastHttpStatus,
+          lastBodyReason: sessionProbe.lastBodyReason,
+        });
+        const { title, description } = sessionProbeFailureToast(sessionProbe);
         toast({
-          title: "Still signing you in",
-          description: "Your session is still finishing. Please wait a moment and try again.",
+          title,
+          description,
           variant: "destructive",
         });
         setIsSubmitting(false);
+        setSubmitBusyLabel("Submitting...");
         return;
       }
+
+      setSubmitBusyLabel("Submitting...");
 
       const result = await submitClientApplication({
         firstName: formData.firstName,
@@ -144,6 +173,7 @@ export default function ClientApplicationPage() {
           variant: "destructive",
         });
         setIsSubmitting(false);
+        setSubmitBusyLabel("Submitting...");
         return;
       }
 
@@ -165,6 +195,7 @@ export default function ClientApplicationPage() {
         variant: "destructive",
       });
       setIsSubmitting(false);
+      setSubmitBusyLabel("Submitting...");
     }
   };
 
@@ -181,27 +212,44 @@ export default function ClientApplicationPage() {
     const checkStatus = async () => {
       setIsCheckingStatus(true);
       try {
-        let response: Response | null = null;
-
-        for (let attempt = 0; attempt < 6; attempt += 1) {
-          const serverSessionReady = await waitForServerSessionReady();
-          if (!serverSessionReady) {
-            setStatusMessage("Finalizing your sign-in. Checking application status...");
-            continue;
+        setStatusMessage("Finishing sign-in… Checking whether you already have an application on file.");
+        const sessionProbe = await waitForServerSessionReady({
+          maxWaitMs: APPLY_STATUS_INITIAL_WAIT_MS,
+        });
+        if (!sessionProbe.ok) {
+          logger.warn("[client/apply] session-ready probe exhausted (status prefetch)", {
+            terminal: sessionProbe.terminal,
+            attempts: sessionProbe.attempts,
+            lastHttpStatus: sessionProbe.lastHttpStatus,
+            lastBodyReason: sessionProbe.lastBodyReason,
+          });
+          if (sessionProbe.terminal === "server_error") {
+            setStatusMessage(
+              "Our servers could not verify your session yet. You can still fill out the form; refresh the page if this message persists."
+            );
+          } else if (sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network") {
+            setStatusMessage(
+              "The sign-in check timed out or hit a connection issue. You can keep filling out the form; refresh if your application status does not load."
+            );
+          } else {
+            setStatusMessage(
+              "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
+            );
           }
+        }
 
+        let response: Response | null = null;
+        for (let attempt = 0; attempt < 8; attempt += 1) {
           response = await fetch(`/api/client-applications/status`, { signal: controller.signal });
 
-          // Invite/callback flows can briefly race server cookie visibility even after
-          // the browser session exists. Retry auth failures before surfacing an error.
           if (response.ok) {
             break;
           }
 
           if (response.status === 401 || response.status === 403) {
-            setStatusMessage("Finalizing your sign-in. Checking application status...");
-            if (attempt < 5) {
-              await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
+            setStatusMessage("Finishing sign-in… Checking application status.");
+            if (attempt < 7) {
+              await new Promise((resolve) => setTimeout(resolve, 450 * (attempt + 1)));
               continue;
             }
           }
@@ -496,7 +544,7 @@ export default function ClientApplicationPage() {
                         applicationStatus?.status === "pending"
                       }
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Application"}
+                      {isSubmitting ? submitBusyLabel : "Submit Application"}
                     </Button>
                     <p className="text-sm text-[var(--oklch-text-muted)] mt-4 text-left">
                       By submitting this form, you agree to our{" "}

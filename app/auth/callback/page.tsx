@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getBootStateRedirect } from "@/lib/actions/boot-actions";
+import { sleepBootRetryDelayMs, waitForServerSessionReady } from "@/lib/auth/wait-for-server-session-ready";
 import { PATHS } from "@/lib/constants/routes";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logger } from "@/lib/utils/logger";
@@ -22,29 +23,8 @@ type GateState =
   | { kind: "checking"; message: string }
   | { kind: "failed"; message: string };
 
-async function waitForServerSessionReady(maxAttempts = 6): Promise<boolean> {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    try {
-      const response = await fetch("/api/auth/session-ready", {
-        method: "GET",
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        return true;
-      }
-    } catch {
-      // Ignore probe failures and retry with backoff.
-    }
-
-    if (attempt < maxAttempts - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
-    }
-  }
-
-  return false;
-}
+const CALLBACK_SESSION_WAIT_MS = 38_000;
+const CALLBACK_BOOT_POLL_BUDGET_MS = 32_000;
 
 const isSupportedOtpType = (
   value: string | null | undefined
@@ -151,33 +131,44 @@ function AuthCallbackGate() {
         window.history.replaceState({}, "", `${PATHS.AUTH_CALLBACK}?returnUrl=${encodeURIComponent(safeReturn)}`);
 
         // Ensure server-side auth sees the cookie-backed session before leaving callback.
-        const serverSessionReady = await waitForServerSessionReady();
-        if (!serverSessionReady) {
+        const sessionProbe = await waitForServerSessionReady({
+          maxWaitMs: CALLBACK_SESSION_WAIT_MS,
+        });
+        if (!sessionProbe.ok) {
           logger.warn("[auth/callback] server session not ready after callback exchange", {
             hasCode: Boolean(code),
             hasTokenHash: Boolean(tokenHash),
             hasOtpType: Boolean(otpType),
+            terminal: sessionProbe.terminal,
+            attempts: sessionProbe.attempts,
+            lastHttpStatus: sessionProbe.lastHttpStatus,
+            lastBodyReason: sessionProbe.lastBodyReason,
           });
         }
 
-        // Cookie sync to server can be briefly delayed after setSession/verifyOtp.
+        // Cookie sync + profile bootstrap can lag behind the browser session (mobile/Safari).
         let resolvedTarget: string | null = null;
-        for (let attempt = 0; attempt < 5; attempt += 1) {
+        const bootStarted = Date.now();
+        let bootAttempt = 0;
+        while (Date.now() - bootStarted < CALLBACK_BOOT_POLL_BUDGET_MS) {
           const result = await getBootStateRedirect({ postAuth: true, returnUrlRaw });
           if (result.redirectTo) {
             resolvedTarget = result.redirectTo;
             break;
           }
-          if (attempt < 4) {
-            await new Promise((resolve) => setTimeout(resolve, 200 * (attempt + 1)));
-          }
+          await sleepBootRetryDelayMs(bootAttempt);
+          bootAttempt += 1;
         }
 
         if (cancelled) return;
-        if (!resolvedTarget && !serverSessionReady) {
-          throw new Error(
-            "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again."
-          );
+        if (!resolvedTarget && !sessionProbe.ok) {
+          const message =
+            sessionProbe.terminal === "server_error"
+              ? "Our servers could not verify your account yet. Wait a minute, then reopen your invite link or try signing in from the login page."
+              : sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network"
+                ? "The connection timed out while finishing sign-in. Check your network, then reopen the invite link."
+                : "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again.";
+          throw new Error(message);
         }
         const target = resolvedTarget ?? safeReturn;
         router.replace(target);
