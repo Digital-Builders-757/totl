@@ -108,12 +108,12 @@
   - These routes must verify:
     - session via `createSupabaseServer()` and `auth.getUser()`
     - admin role via `profiles.role = 'admin'`
-  - Career Builder lifecycle guardrails:
-    - target eligibility for disable/delete is `profiles.role = 'client'`
-    - admin cannot disable/delete self
-    - admin cannot hard-delete admin targets
-    - disable is the primary path (`profiles.is_suspended = true`)
-    - hard delete for Career Builder accounts is blocked; disable is the official policy because dependent rows can violate FK constraints
+  - Admin user lifecycle guardrails:
+    - **Disable (suspend):** target must be `profiles.role = 'client'` (Career Builder); writes `profiles.is_suspended = true`
+    - **Hard delete (admin workflow):** target must be `profiles.role = 'talent'`; uses `POST /api/admin/delete-user` (auth user delete + DB cascades)
+    - admin cannot disable or hard-delete self
+    - admin cannot hard-delete another admin
+    - hard delete for Career Builder accounts is blocked (409); disable is the official policy because dependent rows can violate FK constraints
 
 ---
 
@@ -166,16 +166,18 @@
   - approve client applications (promotion)
   - suspend/reinstate accounts
   - disable Career Builder accounts from `/admin/users`
+  - hard-delete eligible Talent accounts from `/admin/users` (confirmed destructive action)
   - close gigs via moderation
 
 ### Manual test steps
 - Login as admin → visit `/admin/dashboard`.
 - Login as admin → visit `/admin/users` and verify:
-  - client rows expose `Disable Career Builder`
-  - non-client rows do not expose those actions
+  - Career Builder (`client`) rows expose `Disable Career Builder` and do **not** expose `Delete User`
+  - Talent rows expose `Delete User` (confirmation + checkbox required) and do **not** expose disable
+  - Admin rows do **not** expose `Delete User`
   - disabling a client sets `profiles.is_suspended = true`
   - a disabled client is routed to `/suspended` on next protected navigation
-  - hard delete for Career Builder targets fails with explicit guidance to disable instead
+  - hard delete for Career Builder targets fails with explicit guidance to disable instead (API or UI should surface the same policy)
 - Approve a `client_applications` row → verify:
   - `client_applications.status='approved'`
   - `profiles.role='client' AND profiles.account_type='client'`

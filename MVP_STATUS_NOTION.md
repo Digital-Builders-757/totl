@@ -8,6 +8,38 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Users — Talent hard delete from dashboard (April 14, 2026)**
+
+**ADMIN / QA** — April 14, 2026
+- ✅ **`/admin/users`:** **Delete User** for eligible **Talent** only (confirmation + checkbox); uses **`POST /api/admin/delete-user`**; Career Builder rows remain **disable-only**; no delete for admin targets or self (server guardrails unchanged).
+- ✅ **Tests:** **`tests/helpers/seed-admin-user.ts`**, Playwright updates in **`tests/admin/admin-users-route.spec.ts`** and **`tests/admin/admin-user-lifecycle-guardrail.spec.ts`** (self-delete API guard with paginated auth user lookup).
+- ✅ **`docs/contracts/ADMIN_CONTRACT.md`:** Disable (**client**) vs hard-delete (**talent**) eligibility and manual checklist aligned with the UI.
+- ✅ **Build / types:** Production webpack **`config.cache = false`** when **`!dev`** in **`next.config.mjs`** (mitigates Windows `.next` pack rename flakiness); minimal **`pages/_app.tsx`** + **`pages/404.tsx`** so **`pages-manifest.json`** is emitted reliably; **`"terminal" in sessionProbe`** narrowing in **`app/auth/callback/page.tsx`** and **`app/client/apply/page.tsx`**; **`delayWithOptionalAbort`** **`AbortSignal`** handling in **`lib/auth/wait-for-server-session-ready.ts`**.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 14, 2026.
+
+**Next (P0):** None.
+
+**Next (P1):** Optional **archive / FK-safe teardown** flow for Career Builder accounts if product needs removal beyond disable.
+
+---
+
+## 🚀 **Latest: Public gig routes — Supabase errors vs true 404s (April 13, 2026)**
+
+**GIGS / OBSERVABILITY** — April 13, 2026
+- ✅ **`app/gigs/[id]/page.tsx`**, **`app/gigs/[id]/apply/page.tsx`:** PostgREST **`PGRST116`** (no row for `.single()`) → **`notFound()`** only; other errors (e.g. **`TypeError: fetch failed`**) → **`logger.error`** with **`gigId`** + rethrow so the route surfaces an error boundary instead of a misleading **404**.
+- ✅ **`lib/validation/is-uuid.ts`:** Shared UUID string check; **`app/gigs/[id]/page.tsx`**, **`app/gigs/[id]/apply/page.tsx`**, **`app/gigs/[id]/apply/actions.ts`** reject invalid ids early (404 / user-facing error).
+- ✅ **`tests/talent/talent-gig-detail-route.spec.ts`:** Non-UUID **`/gigs/...`** and **`/gigs/.../apply`** expect **404**.
+- ✅ **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`:** Gig detail Sentry noise / **`fetch failed`** vs **`PGRST116`** documented.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026.
+
+**Next (P0):** None for this patch.
+
+**Next (P1):** If **`fetch failed`** volume in Sentry stays high after deploy, tune **`beforeSend`** or sampling for transport errors after confirming outage patterns.
+
+---
+
 ## 🚀 **Latest: Career Builder invite — server session convergence (April 13, 2026)**
 
 **AUTH / CAREER BUILDER** — April 13, 2026
@@ -17,8 +49,9 @@
 - ✅ **`app/client/apply/page.tsx`:** Submit path waits for server-visible session (~45s cap) with **Finishing sign-in…** button copy; status check uses one bounded wait then fetch retries (avoids long nested loops); submit/status toasts and banners vary by **`terminal`** when the probe exhausts.
 - ✅ **`tests/auth/invite-client-apply-flow.spec.ts`:** Success URL assertion timeout increased for slow cookie sync / CI.
 - ✅ **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`:** Invite → apply submit race + session-ready diagnostics documented.
+- ✅ **React effect cleanup / `AbortSignal`:** `waitForServerSessionReady` accepts optional **`signal`** and returns **`{ ok: false, aborted: true }`** when cancelled; **`/client/apply`** status prefetch passes the same **`AbortController`** as status **`fetch`** so the probe stops if the user edits the form or the effect re-runs; status **`catch`** ignores **`AbortError`**. **`sleepBootRetryDelayMs`** accepts **`signal`**; **`/auth/callback`** uses an **`AbortController`** so session probe + boot backoff do not keep running after unmount (no “zombie” **`getBootStateRedirect`** loop).
 
-**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026 (session-ready hardening pass).
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 13, 2026 (session-ready hardening + abort/cleanup pass).
 
 **Next (P0):** Merge **develop → main** via PR; smoke **invite → `/auth/callback` → `/client/apply` → submit → `/client/apply/success`** on staging (mobile Safari if available).
 
@@ -1325,7 +1358,7 @@
 - [x] Document disable as the official policy when dependent rows exist.
 
 **Next (P1 - follow-up polish)**
-- [ ] Decide whether hard delete should remain available only for non-client test-user cleanup flows in a separate scoped PR.
+- [x] Talent hard delete exposed from `/admin/users` for eligible accounts (April 14, 2026); Career Builder remains disable-only.
 
 ## 🚀 **Latest: VIP invite callback hardening for Career Builder apply flow (March 8, 2026)**
 

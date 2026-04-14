@@ -48,7 +48,8 @@ function AuthCallbackGate() {
   });
 
   useEffect(() => {
-    let cancelled = false;
+    const ac = new AbortController();
+    const signal = ac.signal;
 
     async function run() {
       if (!supabase) return;
@@ -133,17 +134,23 @@ function AuthCallbackGate() {
         // Ensure server-side auth sees the cookie-backed session before leaving callback.
         const sessionProbe = await waitForServerSessionReady({
           maxWaitMs: CALLBACK_SESSION_WAIT_MS,
+          signal,
         });
+        if (signal.aborted) return;
         if (!sessionProbe.ok) {
-          logger.warn("[auth/callback] server session not ready after callback exchange", {
-            hasCode: Boolean(code),
-            hasTokenHash: Boolean(tokenHash),
-            hasOtpType: Boolean(otpType),
-            terminal: sessionProbe.terminal,
-            attempts: sessionProbe.attempts,
-            lastHttpStatus: sessionProbe.lastHttpStatus,
-            lastBodyReason: sessionProbe.lastBodyReason,
-          });
+          if ("terminal" in sessionProbe) {
+            logger.warn("[auth/callback] server session not ready after callback exchange", {
+              hasCode: Boolean(code),
+              hasTokenHash: Boolean(tokenHash),
+              hasOtpType: Boolean(otpType),
+              terminal: sessionProbe.terminal,
+              attempts: sessionProbe.attempts,
+              lastHttpStatus: sessionProbe.lastHttpStatus,
+              lastBodyReason: sessionProbe.lastBodyReason,
+            });
+          } else {
+            return;
+          }
         }
 
         // Cookie sync + profile bootstrap can lag behind the browser session (mobile/Safari).
@@ -151,21 +158,23 @@ function AuthCallbackGate() {
         const bootStarted = Date.now();
         let bootAttempt = 0;
         while (Date.now() - bootStarted < CALLBACK_BOOT_POLL_BUDGET_MS) {
+          if (signal.aborted) return;
           const result = await getBootStateRedirect({ postAuth: true, returnUrlRaw });
           if (result.redirectTo) {
             resolvedTarget = result.redirectTo;
             break;
           }
-          await sleepBootRetryDelayMs(bootAttempt);
+          await sleepBootRetryDelayMs(bootAttempt, undefined, undefined, signal);
           bootAttempt += 1;
         }
 
-        if (cancelled) return;
-        if (!resolvedTarget && !sessionProbe.ok) {
+        if (signal.aborted) return;
+        if (!resolvedTarget && !sessionProbe.ok && "terminal" in sessionProbe) {
+          const terminal = sessionProbe.terminal;
           const message =
-            sessionProbe.terminal === "server_error"
+            terminal === "server_error"
               ? "Our servers could not verify your account yet. Wait a minute, then reopen your invite link or try signing in from the login page."
-              : sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network"
+              : terminal === "fetch_timeout" || terminal === "network"
                 ? "The connection timed out while finishing sign-in. Check your network, then reopen the invite link."
                 : "We couldn't finalize your sign-in session yet. Please reopen the invite link and try again.";
           throw new Error(message);
@@ -174,7 +183,7 @@ function AuthCallbackGate() {
         router.replace(target);
       } catch (callbackError) {
         logger.error("[auth/callback] Failed to establish session from callback", callbackError);
-        if (!cancelled) {
+        if (!signal.aborted) {
           setState({
             kind: "failed",
             message:
@@ -188,7 +197,7 @@ function AuthCallbackGate() {
 
     run();
     return () => {
-      cancelled = true;
+      ac.abort();
     };
   }, [router, supabase]);
 

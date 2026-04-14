@@ -16,6 +16,7 @@ import { GIG_PUBLIC_WITH_CLIENT_PROFILE_SELECT, PROFILE_GIG_VIEWER_SELECT } from
 import { canSeeClientDetails, getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
+import { isValidUuid } from "@/lib/validation/is-uuid";
 import type { Database } from "@/types/supabase";
 
 // Public gig detail page - dynamic rendering required due to createSupabaseServer() / cookies()
@@ -28,6 +29,9 @@ interface GigDetailsPageProps {
 
 export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
   const { id } = await params;
+  if (!isValidUuid(id)) {
+    notFound();
+  }
   const supabase = await createSupabaseServer();
 
   // Get current user session
@@ -45,8 +49,17 @@ export default async function GigDetailsPage({ params }: GigDetailsPageProps) {
     .eq("status", "active")
     .single();
 
-  if (error || !gig) {
-    logger.error("Gig not found", error);
+  if (error?.code === "PGRST116") {
+    notFound();
+  }
+  if (error) {
+    logger.error("Failed to load gig", error, { gigId: id });
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Failed to load gig", { cause: error });
+  }
+  if (!gig) {
     notFound();
   }
 

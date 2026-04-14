@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { loginAsAdmin } from "../helpers/admin-auth";
 import { safeGoto } from "../helpers/navigation";
+import { seedUserWithRole } from "../helpers/seed-admin-user";
 import { createSupabaseAdminClientForTests } from "../helpers/supabase-admin";
 
 async function seedClientForUsersTable(runId: number, opts?: { isSuspended?: boolean }) {
@@ -100,7 +101,7 @@ test.describe("Admin users route contracts", () => {
     await expect(row).toBeVisible();
     await row.getByRole("button").click();
     await expect(page.getByRole("menuitem", { name: "Disable Career Builder" })).toBeVisible();
-    await expect(page.getByRole("menuitem", { name: "Hard Delete (Danger)" })).toHaveCount(0);
+    await expect(page.getByRole("menuitem", { name: "Delete User" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "View Career Builder Profile" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/client/profile\\?userId=${seededClient.userId}`));
@@ -113,6 +114,46 @@ test.describe("Admin users route contracts", () => {
 
     await expect(page).toHaveURL(/\/admin\/users\/create(\/|$)/);
     await expect(page.getByRole("heading", { name: "Create New User" }).first()).toBeVisible();
+  });
+
+  test("admin can hard-delete an eligible Talent user from actions menu", async ({ page }) => {
+    const runId = Date.now();
+    const seededTalent = await seedUserWithRole("talent", runId);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    const searchInput = page.getByPlaceholder("Search by name, ID, or role...");
+    await searchInput.fill(seededTalent.displayName);
+    const row = page.locator("tr", { hasText: seededTalent.displayName }).first();
+    await expect(row).toBeVisible();
+    await row.getByRole("button").click();
+
+    await page.getByRole("menuitem", { name: "Delete User" }).click();
+    const deleteDialog = page.getByRole("dialog", { name: "Delete user permanently?" });
+    await expect(deleteDialog).toBeVisible();
+
+    await deleteDialog.getByRole("checkbox", { name: /Confirm permanent deletion/i }).check();
+    await deleteDialog.getByRole("button", { name: "Delete User" }).click();
+
+    await expect(page.locator("tr", { hasText: seededTalent.displayName })).toHaveCount(0, {
+      timeout: 20_000,
+    });
+  });
+
+  test("admin rows do not expose Delete User in actions menu", async ({ page }) => {
+    const runId = Date.now();
+    const seededAdmin = await seedUserWithRole("admin", runId);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededAdmin.displayName);
+    const row = page.locator("tr", { hasText: seededAdmin.displayName }).first();
+    await expect(row).toBeVisible();
+    await row.getByRole("button").click();
+
+    await expect(page.getByRole("menuitem", { name: "Delete User" })).toHaveCount(0);
   });
 });
 
