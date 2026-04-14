@@ -13,6 +13,8 @@ import { getCategoryBadgeVariant, getCategoryLabel } from "@/lib/constants/gig-c
 import { GIG_PUBLIC_SELECT } from "@/lib/db/selects";
 import { getGigDisplayDescription, getGigDisplayTitle } from "@/lib/gig-access";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
+import { isValidUuid } from "@/lib/validation/is-uuid";
 
 interface ApplyToGigPageProps {
   params: Promise<{ id: string }>;
@@ -20,6 +22,9 @@ interface ApplyToGigPageProps {
 
 export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
   const { id } = await params;
+  if (!isValidUuid(id)) {
+    notFound();
+  }
   const supabase = await createSupabaseServer();
 
   // Get current user session
@@ -56,7 +61,17 @@ export default async function ApplyToGigPage({ params }: ApplyToGigPageProps) {
     .eq("status", "active")
     .single();
 
-  if (gigError || !gig) {
+  if (gigError?.code === "PGRST116") {
+    notFound();
+  }
+  if (gigError) {
+    logger.error("Failed to load gig (apply)", gigError, { gigId: id });
+    if (gigError instanceof Error) {
+      throw gigError;
+    }
+    throw new Error("Failed to load gig", { cause: gigError });
+  }
+  if (!gig) {
     notFound();
   }
 

@@ -49,7 +49,7 @@ const DEFAULT_AVATAR = "/images/totl-logo-transparent.png";
 export function AdminHeader({ user, notificationCount: notificationCountProp }: AdminHeaderProps) {
   const { moderationCount } = useAdminModerationCount();
   const notificationCount = notificationCountProp ?? moderationCount;
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const { signOut, profile } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

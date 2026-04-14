@@ -124,7 +124,7 @@ export function ClientDashboard({ initialData }: ClientDashboardProps) {
   }, [applications, applicationsLength, user]);
 
   useEffect(() => {
-    const verifiedParam = searchParams.get("verified");
+    const verifiedParam = searchParams?.get("verified");
     if (verifiedParam !== "true" || hasHandledVerificationRef.current) {
       return;
     }

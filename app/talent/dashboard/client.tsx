@@ -613,7 +613,7 @@ function TalentDashboardContent({
   const urlCleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const verifiedParam = searchParams.get("verified");
+    const verifiedParam = searchParams?.get("verified");
 
     if (verifiedParam !== "true" || hasHandledVerificationRef.current) {
       return;
@@ -693,7 +693,7 @@ function TalentDashboardContent({
   // Data fetching handled by useTalentDashboardData hook above
 
   useEffect(() => {
-    const applied = searchParams.get("applied");
+    const applied = searchParams?.get("applied");
     if (applied === "success") {
       toast({
         title: "TalentApplication Submitted Successfully! 🎉",

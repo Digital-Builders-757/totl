@@ -7,6 +7,7 @@ import { absoluteUrl } from "@/lib/server/get-site-url";
 import { generateApplicationReceivedEmail, generateNewApplicationClientEmail } from "@/lib/services/email-templates";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
+import { isValidUuid } from "@/lib/validation/is-uuid";
 
 interface ApplyToGigParams {
   gigId: string;
@@ -14,6 +15,10 @@ interface ApplyToGigParams {
 }
 
 export async function applyToGig({ gigId, message }: ApplyToGigParams) {
+  if (!isValidUuid(gigId)) {
+    return { error: "This opportunity could not be found." };
+  }
+
   const supabase = await createSupabaseServer();
 
   // Get current user

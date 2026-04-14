@@ -77,7 +77,12 @@ const nextConfig = {
   },
 
   // Suppress Edge Runtime warnings for Supabase
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
+    // Windows + long/space paths: persistent pack cache can fail mid-build (ENOENT on rename),
+    // which then surfaces as missing `.next/server/pages-manifest.json` during "Collecting page data".
+    if (!dev) {
+      config.cache = false;
+    }
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,

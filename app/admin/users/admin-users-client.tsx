@@ -15,6 +15,7 @@ import {
   Plus,
   ArrowUp,
   Loader2,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -84,6 +85,10 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const [disableConfirmChecked, setDisableConfirmChecked] = useState(false);
   const [disableReason, setDisableReason] = useState("");
   const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
 
   const getUserDisplayName = (u: UserProfile) => {
     const talentName = u.talent_profiles
@@ -142,6 +147,73 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const adminUsers = users.filter((u) => u.role === "admin" && u.is_suspended !== true);
   const suspendedUsers = users.filter((u) => u.is_suspended === true);
   const activeAllCount = users.filter((u) => u.is_suspended !== true).length;
+
+  const canShowHardDelete = (target: UserProfile) =>
+    target.role === "talent" && target.id !== user.id;
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete || !deleteConfirmChecked) return;
+
+    const userIdToDelete = userToDelete.id;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/admin/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userIdToDelete }),
+      });
+
+      const data = (await response.json()) as { error?: string; message?: string; success?: boolean };
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to delete user");
+      }
+
+      toast({
+        title: "Success",
+        description: data.message || "User deleted successfully.",
+        variant: "success",
+      });
+
+      setUsers((prevUsers) => prevUsers.filter((profile) => profile.id !== userIdToDelete));
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      setDeleteConfirmChecked(false);
+      router.refresh();
+    } catch (error) {
+      logger.error("Error deleting user", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const openDeleteDialog = (userProfile: UserProfile) => {
+    if (!canShowHardDelete(userProfile)) {
+      let description = "Hard delete is only available for Talent accounts from this screen.";
+      if (userProfile.id === user.id) {
+        description = "Cannot delete your own account.";
+      } else if (userProfile.role === "client") {
+        description =
+          "Hard delete is not available for Career Builder accounts. Use Disable Career Builder instead.";
+      } else if (userProfile.role === "admin") {
+        description = "Cannot hard-delete admin accounts.";
+      }
+      toast({
+        title: "Error",
+        description,
+        variant: "destructive",
+      });
+      return;
+    }
+    setUserToDelete(userProfile);
+    setDeleteConfirmChecked(false);
+    setDeleteDialogOpen(true);
+  };
 
   const handleDisableUser = async () => {
     if (!userToDisable || !disableConfirmChecked) return;
@@ -346,6 +418,18 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             )}
             Promote to Talent
           </DropdownMenuItem>
+        )}
+        {canShowHardDelete(userProfile) && (
+          <>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem
+              onClick={() => openDeleteDialog(userProfile)}
+              className="flex items-center text-rose-300 hover:bg-white/10 focus:text-rose-300"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete User
+            </DropdownMenuItem>
+          </>
         )}
         {userProfile.id !== user.id && userProfile.role === "client" && (
           <>
@@ -682,6 +766,86 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
                 <>
                   <Shield className="mr-2 h-4 w-4" />
                   Disable Career Builder
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && isDeleting) return;
+          setDeleteDialogOpen(open);
+          if (!open) {
+            setUserToDelete(null);
+            setDeleteConfirmChecked(false);
+          }
+        }}
+      >
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-rose-300">Delete user permanently?</DialogTitle>
+            <DialogDescription asChild>
+              <div className="space-y-3 text-[var(--oklch-text-secondary)]">
+                <p>
+                  This permanently deletes the account and signs the user out everywhere. Related
+                  application data may be removed automatically by the database (cascades). This
+                  cannot be undone.
+                </p>
+                {userToDelete ? (
+                  <p className="text-sm font-medium text-white">
+                    {getUserDisplayName(userToDelete)}
+                    <span className="ml-2 font-mono text-xs font-normal text-[var(--oklch-text-tertiary)]">
+                      ({userToDelete.id.slice(0, 8)}…)
+                    </span>
+                  </p>
+                ) : null}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-start gap-3 text-sm text-[var(--oklch-text-secondary)]">
+              <Checkbox
+                aria-label="Confirm permanent deletion of this user account"
+                checked={deleteConfirmChecked}
+                onCheckedChange={(checked) => setDeleteConfirmChecked(checked === true)}
+                disabled={isDeleting}
+              />
+              <span>
+                I understand this is a hard delete, it cannot be undone, and I am deleting the
+                correct user.
+              </span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false);
+                setUserToDelete(null);
+                setDeleteConfirmChecked(false);
+              }}
+              disabled={isDeleting}
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeleteUser}
+              disabled={isDeleting || !deleteConfirmChecked}
+              className="bg-rose-600 hover:bg-rose-700 text-white"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting…
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete User
                 </>
               )}
             </Button>

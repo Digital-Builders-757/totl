@@ -24,6 +24,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { submitClientApplication } from "@/lib/actions/client-actions";
 import {
   type WaitForServerSessionReadyResult,
+  type WaitForServerSessionTerminal,
   waitForServerSessionReady,
 } from "@/lib/auth/wait-for-server-session-ready";
 import { logger } from "@/lib/utils/logger";
@@ -33,7 +34,7 @@ const APPLY_SUBMIT_SESSION_WAIT_MS = 45_000;
 const APPLY_STATUS_INITIAL_WAIT_MS = 28_000;
 
 function sessionProbeFailureToast(
-  probe: Extract<WaitForServerSessionReadyResult, { ok: false }>
+  probe: Extract<WaitForServerSessionReadyResult, { ok: false; terminal: WaitForServerSessionTerminal }>
 ): { title: string; description: string } {
   switch (probe.terminal) {
     case "server_error":
@@ -135,18 +136,25 @@ export default function ClientApplicationPage() {
         maxWaitMs: APPLY_SUBMIT_SESSION_WAIT_MS,
       });
       if (!sessionProbe.ok) {
-        logger.warn("[client/apply] session-ready probe exhausted (submit)", {
-          terminal: sessionProbe.terminal,
-          attempts: sessionProbe.attempts,
-          lastHttpStatus: sessionProbe.lastHttpStatus,
-          lastBodyReason: sessionProbe.lastBodyReason,
-        });
-        const { title, description } = sessionProbeFailureToast(sessionProbe);
-        toast({
-          title,
-          description,
-          variant: "destructive",
-        });
+        if ("aborted" in sessionProbe && sessionProbe.aborted) {
+          setIsSubmitting(false);
+          setSubmitBusyLabel("Submitting...");
+          return;
+        }
+        if ("terminal" in sessionProbe) {
+          logger.warn("[client/apply] session-ready probe exhausted (submit)", {
+            terminal: sessionProbe.terminal,
+            attempts: sessionProbe.attempts,
+            lastHttpStatus: sessionProbe.lastHttpStatus,
+            lastBodyReason: sessionProbe.lastBodyReason,
+          });
+          const { title, description } = sessionProbeFailureToast(sessionProbe);
+          toast({
+            title,
+            description,
+            variant: "destructive",
+          });
+        }
         setIsSubmitting(false);
         setSubmitBusyLabel("Submitting...");
         return;
@@ -215,26 +223,32 @@ export default function ClientApplicationPage() {
         setStatusMessage("Finishing sign-in… Checking whether you already have an application on file.");
         const sessionProbe = await waitForServerSessionReady({
           maxWaitMs: APPLY_STATUS_INITIAL_WAIT_MS,
+          signal: controller.signal,
         });
         if (!sessionProbe.ok) {
-          logger.warn("[client/apply] session-ready probe exhausted (status prefetch)", {
-            terminal: sessionProbe.terminal,
-            attempts: sessionProbe.attempts,
-            lastHttpStatus: sessionProbe.lastHttpStatus,
-            lastBodyReason: sessionProbe.lastBodyReason,
-          });
-          if (sessionProbe.terminal === "server_error") {
-            setStatusMessage(
-              "Our servers could not verify your session yet. You can still fill out the form; refresh the page if this message persists."
-            );
-          } else if (sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network") {
-            setStatusMessage(
-              "The sign-in check timed out or hit a connection issue. You can keep filling out the form; refresh if your application status does not load."
-            );
-          } else {
-            setStatusMessage(
-              "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
-            );
+          if ("aborted" in sessionProbe && sessionProbe.aborted) {
+            return;
+          }
+          if ("terminal" in sessionProbe) {
+            logger.warn("[client/apply] session-ready probe exhausted (status prefetch)", {
+              terminal: sessionProbe.terminal,
+              attempts: sessionProbe.attempts,
+              lastHttpStatus: sessionProbe.lastHttpStatus,
+              lastBodyReason: sessionProbe.lastBodyReason,
+            });
+            if (sessionProbe.terminal === "server_error") {
+              setStatusMessage(
+                "Our servers could not verify your session yet. You can still fill out the form; refresh the page if this message persists."
+              );
+            } else if (sessionProbe.terminal === "fetch_timeout" || sessionProbe.terminal === "network") {
+              setStatusMessage(
+                "The sign-in check timed out or hit a connection issue. You can keep filling out the form; refresh if your application status does not load."
+              );
+            } else {
+              setStatusMessage(
+                "Still finishing sign-in. You can continue filling out the form — we will retry status in the background."
+              );
+            }
           }
         }
 
@@ -286,6 +300,9 @@ export default function ClientApplicationPage() {
           setStatusMessage(null);
         }
       } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
         logger.error("Failed to load application status", error);
         setStatusMessage("Unable to load your application status right now.");
       } finally {

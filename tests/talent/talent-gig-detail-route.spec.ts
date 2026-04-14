@@ -2,6 +2,18 @@ import { expect, test } from "@playwright/test";
 import { ensureTalentReady, loginAsTalent } from "../helpers/auth";
 import { safeGoto } from "../helpers/navigation";
 
+test.describe("Gig id route validation", () => {
+  test("non-UUID gig id returns 404 without hitting DB error", async ({ page }) => {
+    const res = await page.goto("/gigs/2");
+    expect(res?.status()).toBe(404);
+  });
+
+  test("non-UUID apply path returns 404", async ({ page }) => {
+    const res = await page.goto("/gigs/not-a-uuid/apply");
+    expect(res?.status()).toBe(404);
+  });
+});
+
 test.describe("Talent gig detail route contracts", () => {
   test("gig detail shell renders stable sections", async ({ page }) => {
     await loginAsTalent(page);
