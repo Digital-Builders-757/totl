@@ -62,6 +62,7 @@ function mergeAbortSignals(timeoutSignal: AbortSignal, external?: AbortSignal): 
 function delayWithOptionalAbort(ms: number, signal?: AbortSignal): Promise<void> {
   if (ms <= 0) return Promise.resolve();
   if (signal == null) return new Promise((resolve) => setTimeout(resolve, ms));
+  if (signal.aborted) return Promise.resolve();
   const sig = signal;
   return new Promise((resolve) => {
     const onAbort = () => {
