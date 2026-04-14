@@ -27,7 +27,7 @@
 
 ### 3) Manage users
 - **Routes:** `/admin/users` (+ API routes)
-- **Writes:** Supabase Auth admin operations (create/delete) + profile suspension (`disable-user`)
+- **Writes:** Supabase Auth admin operations (create/delete) + profile suspension / reinstate (`set-user-suspension`; legacy `disable-user` wrapper)
 - **Contracts:** `docs/contracts/ADMIN_CONTRACT.md`
 
 ### 4) Moderate content

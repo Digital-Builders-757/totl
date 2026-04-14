@@ -100,7 +100,7 @@ test.describe("Admin users route contracts", () => {
     const row = page.locator("tr", { hasText: seededClient.displayName }).first();
     await expect(row).toBeVisible();
     await row.getByRole("button").click();
-    await expect(page.getByRole("menuitem", { name: "Disable Career Builder" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Suspend User" })).toBeVisible();
     await expect(page.getByRole("menuitem", { name: "Delete User" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "View Career Builder Profile" }).click();
 
@@ -154,6 +154,64 @@ test.describe("Admin users route contracts", () => {
     await row.getByRole("button").click();
 
     await expect(page.getByRole("menuitem", { name: "Delete User" })).toHaveCount(0);
+  });
+
+  test("admin rows do not expose Suspend User or Reinstate User", async ({ page }) => {
+    const runId = Date.now();
+    const seededAdmin = await seedUserWithRole("admin", runId);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededAdmin.displayName);
+    const row = page.locator("tr", { hasText: seededAdmin.displayName }).first();
+    await expect(row).toBeVisible();
+    await row.getByRole("button").click();
+
+    await expect(page.getByRole("menuitem", { name: "Suspend User" })).toHaveCount(0);
+    await expect(page.getByRole("menuitem", { name: "Reinstate User" })).toHaveCount(0);
+  });
+
+  test("admin can suspend a Talent user and reinstate from Suspended tab", async ({ page }) => {
+    const runId = Date.now();
+    const seededTalent = await seedUserWithRole("talent", runId);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    const searchInput = page.getByPlaceholder("Search by name, ID, or role...");
+    await searchInput.fill(seededTalent.displayName);
+    const row = page.locator("tr", { hasText: seededTalent.displayName }).first();
+    await expect(row).toBeVisible();
+    await row.getByRole("button").click();
+
+    await page.getByRole("menuitem", { name: "Suspend User" }).click();
+    const suspendDialog = page.getByRole("dialog", { name: "Suspend User" });
+    await expect(suspendDialog).toBeVisible();
+    await suspendDialog.getByRole("checkbox", { name: /Confirm suspend/i }).check();
+    await suspendDialog.getByRole("button", { name: "Suspend User" }).click();
+
+    await expect(row).toHaveCount(0, { timeout: 20_000 });
+
+    await page.getByRole("tab", { name: /Suspended \(/i }).first().click();
+    await searchInput.fill(seededTalent.displayName);
+    const suspendedRow = page.locator("tr", { hasText: seededTalent.displayName }).first();
+    await expect(suspendedRow).toBeVisible({ timeout: 20_000 });
+    await suspendedRow.getByRole("button").click();
+    await page.getByRole("menuitem", { name: "Reinstate User" }).click();
+
+    const reinstateDialog = page.getByRole("dialog", { name: "Reinstate User" });
+    await expect(reinstateDialog).toBeVisible();
+    await reinstateDialog.getByRole("checkbox", { name: /Confirm reinstate/i }).check();
+    await reinstateDialog.getByRole("button", { name: "Reinstate User" }).click();
+
+    await expect(suspendedRow).toHaveCount(0, { timeout: 20_000 });
+
+    await page.getByRole("tab", { name: /All \(/i }).first().click();
+    await searchInput.fill(seededTalent.displayName);
+    await expect(page.locator("tr", { hasText: seededTalent.displayName }).first()).toBeVisible({
+      timeout: 20_000,
+    });
   });
 });
 

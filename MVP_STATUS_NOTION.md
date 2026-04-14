@@ -8,12 +8,29 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Users — reversible suspend / reinstate (April 14, 2026)**
+
+**ADMIN / API / QA** — April 14, 2026
+- ✅ **`POST /api/admin/set-user-suspension`:** canonical body `{ userId, suspended: boolean, reason? }`; **Talent** and **Career Builder** targets only; blocks **self** and **admin** targets; suspend sets `profiles.is_suspended` (+ optional `suspension_reason`); reinstate sets `is_suspended = false` and clears `suspension_reason`.
+- ✅ **`POST /api/admin/disable-user`:** thin backward-compatible wrapper (treats omitted `suspended` as `true`).
+- ✅ **`/admin/users`:** **Suspend User** / **Reinstate User** in the actions menu with confirmation dialogs; **hard delete** remains **Talent-only** and separate; Career Builder hard delete still **409** with guidance to use **Suspend User**.
+- ✅ **Tests:** `tests/admin/admin-user-lifecycle-guardrail.spec.ts`, `tests/admin/admin-users-route.spec.ts` (suspend/reinstate flows, admin row guardrails).
+- ✅ **Docs:** `docs/contracts/ADMIN_CONTRACT.md`, `docs/journeys/ADMIN_JOURNEY.md`, `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 14, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke **Suspend User** / **Reinstate User** on staging for Talent + Career Builder.
+
+**Next (P1):** Optional **admin-account** suspension only if product/compliance explicitly requires it (currently blocked end-to-end).
+
+---
+
 ## 🚀 **Latest: Admin users list load, mobile drawer, and dialog stacking (April 14, 2026)**
 
 **ADMIN / UI** — April 14, 2026
 - ✅ **`/admin/users`:** Explicit **`talent_profiles!talent_profiles_user_id_fkey`** embed; session **`profiles`** read with **service-role fallback** after admin gate; **`loadError`** banner when both reads fail; **controlled `Tabs`**; post-sync refetch retries admin read and can show a non-blocking stale-verification note.
 - ✅ **Admin + Career Builder mobile drawers:** **`DialogContent`** uses **`!fixed z-[51]`** so **`.panel-frosted`** does not override **`position: fixed`** (panel above the dim overlay).
-- ✅ **Disable / Delete confirmations on `/admin/users`:** same **`!fixed z-[51]`** on confirmation **`DialogContent`**.
+- ✅ **Suspend / Reinstate / Delete confirmations on `/admin/users`:** same **`!fixed z-[51]`** on confirmation **`DialogContent`**.
 - ✅ **Tests:** **`tests/admin/admin-dashboard-overflow-sentinel.spec.ts`** asserts a **Users** link inside **`admin-drawer-panel`** (opt-in **`RUN_AUTH_OVERFLOW=1`** overflow suite).
 - ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — **`panel-frosted` + Radix Dialog** stacking.
 
@@ -42,7 +59,7 @@
 ## 🚀 **Latest: Admin Users — Talent hard delete from dashboard (April 14, 2026)**
 
 **ADMIN / QA** — April 14, 2026
-- ✅ **`/admin/users`:** **Delete User** for eligible **Talent** only (confirmation + checkbox); uses **`POST /api/admin/delete-user`**; Career Builder rows remain **disable-only**; no delete for admin targets or self (server guardrails unchanged).
+- ✅ **`/admin/users`:** **Delete User** for eligible **Talent** only (confirmation + checkbox); uses **`POST /api/admin/delete-user`**; Career Builder rows use **suspend** (reversible), not hard delete; no delete for admin targets or self (server guardrails unchanged).
 - ✅ **Tests:** **`tests/helpers/seed-admin-user.ts`**, Playwright updates in **`tests/admin/admin-users-route.spec.ts`** and **`tests/admin/admin-user-lifecycle-guardrail.spec.ts`** (self-delete API guard with paginated auth user lookup).
 - ✅ **`docs/contracts/ADMIN_CONTRACT.md`:** Disable (**client**) vs hard-delete (**talent**) eligibility and manual checklist aligned with the UI.
 - ✅ **Build / types:** Production webpack **`config.cache = false`** when **`!dev`** on **Windows** (`win32`) or **`DISABLE_NEXT_WEBPACK_CACHE=1`** in **`next.config.mjs`** (mitigates Windows `.next` pack rename flakiness; Linux/Vercel keep cache); minimal **`pages/_app.tsx`** + **`pages/404.tsx`** so **`pages-manifest.json`** is emitted reliably; **`"terminal" in sessionProbe`** narrowing in **`app/auth/callback/page.tsx`** and **`app/client/apply/page.tsx`**; **`delayWithOptionalAbort`** respects **already-aborted** **`AbortSignal`** in **`lib/auth/wait-for-server-session-ready.ts`**.

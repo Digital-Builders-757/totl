@@ -30,7 +30,8 @@
 ### API routes (admin)
 - `/api/admin/create-user`
 - `/api/admin/delete-user`
-- `/api/admin/disable-user`
+- `/api/admin/disable-user` (legacy; defaults to suspend when `suspended` omitted)
+- `/api/admin/set-user-suspension` (canonical suspend / reinstate)
 - `/api/admin/invite-career-builder`
 - `/api/admin/update-user-role`
 - `/api/admin/check-auth-schema`
@@ -109,11 +110,11 @@
     - session via `createSupabaseServer()` and `auth.getUser()`
     - admin role via `profiles.role = 'admin'`
   - Admin user lifecycle guardrails:
-    - **Disable (suspend):** target must be `profiles.role = 'client'` (Career Builder); writes `profiles.is_suspended = true`
+    - **Suspend / reinstate:** targets must be `profiles.role` in `('talent','client')`; writes `profiles.is_suspended` and optional `suspension_reason` on suspend; reinstate clears `suspension_reason`. Use **`POST /api/admin/set-user-suspension`** with `{ userId, suspended: boolean, reason? }`. **`POST /api/admin/disable-user`** remains a backward-compatible alias (omit `suspended` → suspend). **Admin** profile targets are rejected (400). **Self** actions rejected (400).
     - **Hard delete (admin workflow):** target must be `profiles.role = 'talent'`; uses `POST /api/admin/delete-user` (auth user delete + DB cascades)
-    - admin cannot disable or hard-delete self
+    - admin cannot suspend, reinstate, or hard-delete self
     - admin cannot hard-delete another admin
-    - hard delete for Career Builder accounts is blocked (409); disable is the official policy because dependent rows can violate FK constraints
+    - hard delete for Career Builder accounts is blocked (409); **suspend** is the official reversible policy because dependent rows can violate FK constraints on auth user delete
 
 ---
 
@@ -164,20 +165,20 @@
 - Non-admin cannot access `/admin/*`.
 - Admin can:
   - approve client applications (promotion)
-  - suspend/reinstate accounts
-  - disable Career Builder accounts from `/admin/users`
+  - suspend/reinstate Talent and Career Builder accounts from `/admin/users` (reversible; `profiles.is_suspended`)
   - hard-delete eligible Talent accounts from `/admin/users` (confirmed destructive action)
   - close gigs via moderation
 
 ### Manual test steps
 - Login as admin → visit `/admin/dashboard`.
 - Login as admin → visit `/admin/users` and verify:
-  - Career Builder (`client`) rows expose `Disable Career Builder` and do **not** expose `Delete User`
-  - Talent rows expose `Delete User` (confirmation + checkbox required) and do **not** expose disable
-  - Admin rows do **not** expose `Delete User`
-  - disabling a client sets `profiles.is_suspended = true`
-  - a disabled client is routed to `/suspended` on next protected navigation
-  - hard delete for Career Builder targets fails with explicit guidance to disable instead (API or UI should surface the same policy)
+  - Career Builder (`client`) rows expose **Suspend User** (when active) and do **not** expose `Delete User`
+  - Talent rows expose **Suspend User** (when active) and `Delete User` (confirmation + checkbox required)
+  - Admin rows do **not** expose `Delete User`, **Suspend User**, or **Reinstate User**
+  - Suspending sets `profiles.is_suspended = true` (optional reason → `suspension_reason`)
+  - **Reinstate User** (Suspended tab) sets `is_suspended = false` and clears `suspension_reason`
+  - a suspended user is routed to `/suspended` on next protected navigation (existing middleware)
+  - hard delete for Career Builder targets fails with explicit guidance to **suspend** instead (API or UI should surface the same policy)
 - Approve a `client_applications` row → verify:
   - `client_applications.status='approved'`
   - `profiles.role='client' AND profiles.account_type='client'`

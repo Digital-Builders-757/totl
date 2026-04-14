@@ -333,7 +333,7 @@ npm run build
 - **Career Builder hard delete fails with FK error (`SQLSTATE 23503`, `client_applications_user_id_fkey`):**
   - **Symptom:** Admin attempts to delete a Career Builder and the database rejects deleting `auth.users` because `client_applications.user_id` still references that user.
   - **Root Cause:** Career Builder accounts can own dependent rows that are not safe to remove via auth-user deletion from the Admin Users workflow.
-  - **Fix:** Treat `Disable Career Builder` (`profiles.is_suspended = true`) as the official admin action and block Career Builder hard delete with a clear “Use Disable Career Builder instead” message.
+  - **Fix:** Use **Suspend User** from `/admin/users` (`profiles.is_suspended = true`; reversible). Career Builder hard delete stays blocked (409) with guidance to **suspend** instead of delete.
   - **Prevention:** Do not use hard delete for Career Builder accounts in admin UX unless a future scoped cleanup flow first proves FK-safe dependency handling.
 - **Mobile route contract suite fails with `Login failed: Invalid credentials` across many Client/Talent specs:**
   - **Symptom:** `test:qa:mobile-guardrails`, `client-routes`, or `talent-routes` fail before route assertions run, often across many specs at once.
