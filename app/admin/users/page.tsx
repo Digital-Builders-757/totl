@@ -21,6 +21,26 @@ type UserProfile = {
   } | null;
 };
 
+/** Explicit FK avoids ambiguous embed errors when querying profiles → talent_profiles. */
+const PROFILE_LIST_SELECT = `
+  id,
+  role,
+  display_name,
+  is_suspended,
+  avatar_url,
+  avatar_path,
+  email_verified,
+  created_at,
+  updated_at,
+  talent_profiles!talent_profiles_user_id_fkey(first_name, last_name)
+`;
+
+function describeQueryError(err: { message?: string; code?: string }): string {
+  const msg = err.message?.trim() || "Failed to load users.";
+  const code = err.code ? ` (${err.code})` : "";
+  return `${msg}${code}`;
+}
+
 // Force dynamic rendering to prevent static pre-rendering
 export const dynamic = "force-dynamic";
 
@@ -49,32 +69,38 @@ export default async function AdminUsersPage() {
     redirect("/login?returnUrl=/admin/users");
   }
 
-  // Fetch all users with their profiles and talent profiles (if applicable)
-  const { data: profiles, error: profilesError } = await supabase
+  let loadError: string | null = null;
+  let profiles: UserProfile[] | null = null;
+
+  const sessionFetch = await supabase
     .from("profiles")
-    .select(`
-      id,
-      role,
-      display_name,
-      is_suspended,
-      avatar_url,
-      avatar_path,
-      email_verified,
-      created_at,
-      updated_at,
-      talent_profiles!left(first_name, last_name)
-    `)
+    .select(PROFILE_LIST_SELECT)
     .order("created_at", { ascending: false });
 
-  if (profilesError) {
-    logger.error("Error fetching profiles", profilesError);
-    return <AdminUsersClient users={[]} user={user} />;
+  if (sessionFetch.error) {
+    logger.error("[AdminUsersPage] Session profiles fetch failed", sessionFetch.error);
+    const adminFetch = await supabaseAdmin
+      .from("profiles")
+      .select(PROFILE_LIST_SELECT)
+      .order("created_at", { ascending: false });
+
+    if (adminFetch.error) {
+      logger.error("[AdminUsersPage] Admin profiles fetch failed", adminFetch.error);
+      loadError = describeQueryError(sessionFetch.error);
+      profiles = [];
+    } else {
+      profiles = (adminFetch.data ?? []) as UserProfile[];
+    }
+  } else {
+    profiles = (sessionFetch.data ?? []) as UserProfile[];
+  }
+
+  if (!profiles) {
+    profiles = [];
   }
 
   // Sync email verification status from auth.users.email_confirmed_at to profiles.email_verified
-  // This ensures the admin dashboard shows accurate verification status
-  if (profiles && profiles.length > 0) {
-    // Pull a large page so we don't miss users due to pagination limits
+  if (profiles.length > 0) {
     const {
       data,
       error: listError,
@@ -115,35 +141,44 @@ export default async function AdminUsersPage() {
           }
         }
 
-        // Re-fetch profiles after sync
-        const { data: syncedProfiles, error: refetchError } = await supabase
+        const refetchSession = await supabase
           .from("profiles")
-          .select(`
-            id,
-            role,
-            display_name,
-            is_suspended,
-            avatar_url,
-            avatar_path,
-            email_verified,
-            created_at,
-            updated_at,
-            talent_profiles!left(first_name, last_name)
-          `)
+          .select(PROFILE_LIST_SELECT)
           .order("created_at", { ascending: false });
 
-        if (refetchError) {
+        if (refetchSession.error) {
           logger.error(
-            "[AdminUsersPage] Error refetching profiles after sync",
-            refetchError
+            "[AdminUsersPage] Error refetching profiles after sync (session)",
+            refetchSession.error
           );
-        } else if (syncedProfiles) {
-          return <AdminUsersClient users={syncedProfiles as UserProfile[]} user={user} />;
+          const refetchAdmin = await supabaseAdmin
+            .from("profiles")
+            .select(PROFILE_LIST_SELECT)
+            .order("created_at", { ascending: false });
+
+          if (refetchAdmin.error) {
+            logger.error(
+              "[AdminUsersPage] Error refetching profiles after sync (admin)",
+              refetchAdmin.error
+            );
+            loadError =
+              loadError ??
+              "Could not refresh the user list after syncing email verification. You may still see slightly stale verification badges.";
+          } else {
+            profiles = (refetchAdmin.data ?? []) as UserProfile[];
+          }
+        } else {
+          profiles = (refetchSession.data ?? []) as UserProfile[];
         }
       }
     }
   }
 
-  return <AdminUsersClient users={(profiles || []) as UserProfile[]} user={user} />;
+  return (
+    <AdminUsersClient
+      users={profiles}
+      user={user}
+      loadError={loadError}
+    />
+  );
 }
-

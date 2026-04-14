@@ -47,6 +47,9 @@ npm run build
 - **Next.js production build: webpack pack cache ENOENT / missing `.next/server/pages-manifest.json` (often Windows + long paths):** Persistent webpack filesystem cache can fail mid-build on some setups.
   - **Fix:** Repo **`next.config.mjs`** disables webpack persistent cache for **`!dev`** on **`win32`** only (and when **`DISABLE_NEXT_WEBPACK_CACHE=1`**). On a non-Windows machine hitting the same failure, set **`DISABLE_NEXT_WEBPACK_CACHE=1`** for that build.
   - **Prevention:** Do not force **`config.cache = false`** for all platforms unless necessary; it slows CI and Vercel.
+- **Radix Dialog / drawer: full-screen dim overlay but no visible panel (“black screen”):** `DialogContent` is **`fixed`** + **`z-50`** in **`components/ui/dialog.tsx`**, but **`.panel-frosted`** in **`app/globals.css`** sets **`position: relative`** in **`@layer utilities`** after **`@tailwind utilities`**, so **`relative` can win** over **`fixed`** on the same node. The overlay stays **`fixed inset-0`**, while the panel is not stacked as intended.
+  - **Fix:** On affected **`DialogContent`** instances, add **`!fixed z-[51]`** (or any **`z` strictly above the overlay**) so the panel stays fixed and paints above the backdrop. Used for admin/client mobile nav drawers and admin users disable/delete confirmations.
+  - **Prevention:** Prefer a composable surface class that does not set **`position`** when used on portaled overlays, or document that **`panel-frosted` + Dialog** must pair with **`!fixed`**.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`
