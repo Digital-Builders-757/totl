@@ -44,6 +44,9 @@ npm run build
 - **`tsc` / `npm run typecheck` fails with missing `app/.../page.js` under `.next/types` after deleting or moving App Router routes:** Stale Next.js generated types still reference removed files.
   - **Fix:** Delete the `.next` folder and run `npm run typecheck` (or `npm run build`) again so types regenerate from the current `app/` tree.
   - **Prevention:** After removing routes locally, run a fresh build or remove `.next` before relying on `tsc` in an old workspace.
+- **Next.js production build: webpack pack cache ENOENT / missing `.next/server/pages-manifest.json` (often Windows + long paths):** Persistent webpack filesystem cache can fail mid-build on some setups.
+  - **Fix:** Repo **`next.config.mjs`** disables webpack persistent cache for **`!dev`** on **`win32`** only (and when **`DISABLE_NEXT_WEBPACK_CACHE=1`**). On a non-Windows machine hitting the same failure, set **`DISABLE_NEXT_WEBPACK_CACHE=1`** for that build.
+  - **Prevention:** Do not force **`config.cache = false`** for all platforms unless necessary; it slows CI and Vercel.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`

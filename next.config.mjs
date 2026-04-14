@@ -80,7 +80,8 @@ const nextConfig = {
   webpack: (config, { isServer, dev }) => {
     // Windows + long/space paths: persistent pack cache can fail mid-build (ENOENT on rename),
     // which then surfaces as missing `.next/server/pages-manifest.json` during "Collecting page data".
-    if (!dev) {
+    // Limit to win32 (and optional DISABLE_NEXT_WEBPACK_CACHE=1) so Linux CI / Vercel keep webpack cache.
+    if (!dev && (process.platform === 'win32' || process.env.DISABLE_NEXT_WEBPACK_CACHE === '1')) {
       config.cache = false;
     }
     if (!isServer) {

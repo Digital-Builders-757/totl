@@ -8,13 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Bugbot follow-up — abortable delay + scoped webpack cache (April 14, 2026)**
+
+**BUILD / AUTH** — April 14, 2026
+- ✅ **`lib/auth/wait-for-server-session-ready.ts`:** `delayWithOptionalAbort` resolves immediately when the **`AbortSignal` is already aborted** (late `abort` listeners do not run on an already-aborted signal; avoids sleeping a full backoff after effect cleanup).
+- ✅ **`next.config.mjs`:** Webpack **`config.cache = false`** only for **non-dev** builds on **`win32`** or when **`DISABLE_NEXT_WEBPACK_CACHE=1`** — keeps persistent cache on **Linux CI / Vercel**; Windows long-path pack-cache workaround preserved.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 14, 2026.
+
+**Next (P0):** None.
+
+**Next (P1):** None for this patch.
+
+---
+
 ## 🚀 **Latest: Admin Users — Talent hard delete from dashboard (April 14, 2026)**
 
 **ADMIN / QA** — April 14, 2026
 - ✅ **`/admin/users`:** **Delete User** for eligible **Talent** only (confirmation + checkbox); uses **`POST /api/admin/delete-user`**; Career Builder rows remain **disable-only**; no delete for admin targets or self (server guardrails unchanged).
 - ✅ **Tests:** **`tests/helpers/seed-admin-user.ts`**, Playwright updates in **`tests/admin/admin-users-route.spec.ts`** and **`tests/admin/admin-user-lifecycle-guardrail.spec.ts`** (self-delete API guard with paginated auth user lookup).
 - ✅ **`docs/contracts/ADMIN_CONTRACT.md`:** Disable (**client**) vs hard-delete (**talent**) eligibility and manual checklist aligned with the UI.
-- ✅ **Build / types:** Production webpack **`config.cache = false`** when **`!dev`** in **`next.config.mjs`** (mitigates Windows `.next` pack rename flakiness); minimal **`pages/_app.tsx`** + **`pages/404.tsx`** so **`pages-manifest.json`** is emitted reliably; **`"terminal" in sessionProbe`** narrowing in **`app/auth/callback/page.tsx`** and **`app/client/apply/page.tsx`**; **`delayWithOptionalAbort`** **`AbortSignal`** handling in **`lib/auth/wait-for-server-session-ready.ts`**.
+- ✅ **Build / types:** Production webpack **`config.cache = false`** when **`!dev`** on **Windows** (`win32`) or **`DISABLE_NEXT_WEBPACK_CACHE=1`** in **`next.config.mjs`** (mitigates Windows `.next` pack rename flakiness; Linux/Vercel keep cache); minimal **`pages/_app.tsx`** + **`pages/404.tsx`** so **`pages-manifest.json`** is emitted reliably; **`"terminal" in sessionProbe`** narrowing in **`app/auth/callback/page.tsx`** and **`app/client/apply/page.tsx`**; **`delayWithOptionalAbort`** respects **already-aborted** **`AbortSignal`** in **`lib/auth/wait-for-server-session-ready.ts`**.
 
 **Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 14, 2026.
 
