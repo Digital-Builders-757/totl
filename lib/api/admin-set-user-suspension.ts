@@ -136,13 +136,18 @@ export async function handleAdminSetUserSuspension(
     });
   }
 
-  const { error: reinstateError } = await supabaseAdmin
+  let { error: reinstateError } = await supabaseAdmin
     .from("profiles")
     .update({
       is_suspended: false,
       suspension_reason: null,
     })
     .eq("id", userId);
+
+  if (reinstateError && isMissingSuspensionReasonColumnError(reinstateError as SupabaseLikeError)) {
+    const retry = await supabaseAdmin.from("profiles").update({ is_suspended: false }).eq("id", userId);
+    reinstateError = retry.error;
+  }
 
   if (reinstateError) {
     return NextResponse.json({ error: reinstateError.message }, { status: 500 });
