@@ -105,7 +105,7 @@ export function ClientTerminalHeader({
       <Dialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DialogContent
           data-testid="client-drawer-panel"
-          className="panel-frosted left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-white"
+          className="panel-frosted !fixed z-[51] left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-white"
         >
           <div className="flex h-full flex-col">
             <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/10 bg-[rgba(10,10,18,0.72)] px-4 pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] backdrop-blur-sm">

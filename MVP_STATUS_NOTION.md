@@ -8,6 +8,23 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin users list load, mobile drawer, and dialog stacking (April 14, 2026)**
+
+**ADMIN / UI** — April 14, 2026
+- ✅ **`/admin/users`:** Explicit **`talent_profiles!talent_profiles_user_id_fkey`** embed; session **`profiles`** read with **service-role fallback** after admin gate; **`loadError`** banner when both reads fail; **controlled `Tabs`**; post-sync refetch retries admin read and can show a non-blocking stale-verification note.
+- ✅ **Admin + Career Builder mobile drawers:** **`DialogContent`** uses **`!fixed z-[51]`** so **`.panel-frosted`** does not override **`position: fixed`** (panel above the dim overlay).
+- ✅ **Disable / Delete confirmations on `/admin/users`:** same **`!fixed z-[51]`** on confirmation **`DialogContent`**.
+- ✅ **Tests:** **`tests/admin/admin-dashboard-overflow-sentinel.spec.ts`** asserts a **Users** link inside **`admin-drawer-panel`** (opt-in **`RUN_AUTH_OVERFLOW=1`** overflow suite).
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — **`panel-frosted` + Radix Dialog** stacking.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 14, 2026.
+
+**Next (P0):** None.
+
+**Next (P1):** Optional shared dialog/drawer surface that avoids **`position: relative`** on portaled content.
+
+---
+
 ## 🚀 **Latest: Bugbot follow-up — abortable delay + scoped webpack cache (April 14, 2026)**
 
 **BUILD / AUTH** — April 14, 2026

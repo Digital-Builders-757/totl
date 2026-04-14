@@ -16,10 +16,11 @@ import {
   ArrowUp,
   Loader2,
   Trash2,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { MobileListRowCard } from "@/components/dashboard/mobile-list-row-card";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
@@ -28,6 +29,7 @@ import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
 import { PageShell } from "@/components/layout/page-shell";
 import { SafeDate } from "@/components/safe-date";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -71,9 +73,14 @@ type UserProfile = {
 interface AdminUsersClientProps {
   users: UserProfile[];
   user: User;
+  loadError?: string | null;
 }
 
-export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClientProps) {
+export function AdminUsersClient({
+  users: initialUsers,
+  user,
+  loadError = null,
+}: AdminUsersClientProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,6 +96,10 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
+
+  useEffect(() => {
+    setUsers(initialUsers);
+  }, [initialUsers]);
 
   const getUserDisplayName = (u: UserProfile) => {
     const talentName = u.talent_profiles
@@ -449,7 +460,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
   );
 
   const renderUsersContent = () => {
-    if (filteredUsers.length === 0) {
+    if (!loadError && filteredUsers.length === 0) {
       return (
         <div className="text-center py-10">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20">
@@ -461,6 +472,10 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           </p>
         </div>
       );
+    }
+
+    if (loadError && filteredUsers.length === 0) {
+      return null;
     }
 
     return (
@@ -578,6 +593,17 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           }
         />
 
+        {loadError ? (
+          <Alert
+            variant="destructive"
+            className="border-rose-500/40 bg-rose-500/10 text-rose-100 [&>svg]:text-rose-200"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Could not load users</AlertTitle>
+            <AlertDescription>{loadError}</AlertDescription>
+          </Alert>
+        ) : null}
+
         <div className="md:hidden">
           <MobileSummaryRow
             items={[
@@ -629,7 +655,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
             </div>
           </div>
 
-          <Tabs defaultValue="all" className="w-full space-y-4" onValueChange={setActiveTab}>
+          <Tabs value={activeTab} className="w-full space-y-4" onValueChange={setActiveTab}>
             <div className="border-b border-white/10 px-4 sm:px-6">
               <MobileTabRail edgeColorClassName="from-[rgba(6,8,18,0.98)]">
                 <TabsList className="panel-frosted inline-flex h-auto min-w-max gap-1 rounded-xl border border-white/10 bg-white/5 p-1">
@@ -709,7 +735,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
 
       {/* Disable Confirmation Dialog */}
       <Dialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
-        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-amber-300">Disable Career Builder</DialogTitle>
             <DialogDescription className="text-[var(--oklch-text-secondary)]">
@@ -784,7 +810,7 @@ export function AdminUsersClient({ users: initialUsers, user }: AdminUsersClient
           }
         }}
       >
-        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-rose-300">Delete user permanently?</DialogTitle>
             <DialogDescription asChild>

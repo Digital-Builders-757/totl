@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 14, 2026 (admin `/admin/users` Talent hard delete UI + `ADMIN_CONTRACT.md`; public gig routes: `PGRST116` vs transport errors; session-ready **`AbortSignal`** / **`terminal`** narrowing; `COMMON_ERRORS_QUICK_REFERENCE.md`; prior: session-ready hardening, Bugbot triage April 12, gig marketing paywall, admin gig delete / bookings RLS)
+**Last Updated:** April 14, 2026 (admin `/admin/users` list hardening + load errors, mobile drawer / confirmation dialog **`panel-frosted`** stacking fix, `COMMON_ERRORS_QUICK_REFERENCE.md`; prior: Talent hard delete UI, public gig `PGRST116` vs transport errors, session-ready probe, Bugbot triage, gig paywall, admin gig delete RLS)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
