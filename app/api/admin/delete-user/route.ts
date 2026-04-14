@@ -90,7 +90,7 @@ export const POST = async (request: Request) => {
       return NextResponse.json(
         {
           error:
-            "Hard delete is blocked for Career Builder accounts because dependent records can violate foreign key constraints. Use Disable Career Builder instead.",
+            "Hard delete is blocked for Career Builder accounts because dependent records can violate foreign key constraints. Use Suspend User instead.",
         },
         { status: 409 }
       );

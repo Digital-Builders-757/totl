@@ -17,6 +17,7 @@ import {
   Loader2,
   Trash2,
   AlertCircle,
+  Undo2,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -86,11 +87,15 @@ export function AdminUsersClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [users, setUsers] = useState(initialUsers);
-  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
-  const [userToDisable, setUserToDisable] = useState<UserProfile | null>(null);
-  const [isDisabling, setIsDisabling] = useState(false);
-  const [disableConfirmChecked, setDisableConfirmChecked] = useState(false);
-  const [disableReason, setDisableReason] = useState("");
+  const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [userToSuspend, setUserToSuspend] = useState<UserProfile | null>(null);
+  const [isSuspending, setIsSuspending] = useState(false);
+  const [suspendConfirmChecked, setSuspendConfirmChecked] = useState(false);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [reinstateDialogOpen, setReinstateDialogOpen] = useState(false);
+  const [userToReinstate, setUserToReinstate] = useState<UserProfile | null>(null);
+  const [isReinstating, setIsReinstating] = useState(false);
+  const [reinstateConfirmChecked, setReinstateConfirmChecked] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserProfile | null>(null);
@@ -162,6 +167,16 @@ export function AdminUsersClient({
   const canShowHardDelete = (target: UserProfile) =>
     target.role === "talent" && target.id !== user.id;
 
+  const canSuspendUser = (target: UserProfile) =>
+    target.id !== user.id &&
+    (target.role === "talent" || target.role === "client") &&
+    target.is_suspended !== true;
+
+  const canReinstateUser = (target: UserProfile) =>
+    target.id !== user.id &&
+    (target.role === "talent" || target.role === "client") &&
+    target.is_suspended === true;
+
   const handleDeleteUser = async () => {
     if (!userToDelete || !deleteConfirmChecked) return;
 
@@ -210,7 +225,7 @@ export function AdminUsersClient({
         description = "Cannot delete your own account.";
       } else if (userProfile.role === "client") {
         description =
-          "Hard delete is not available for Career Builder accounts. Use Disable Career Builder instead.";
+          "Hard delete is not available for Career Builder accounts. Use Suspend User instead.";
       } else if (userProfile.role === "admin") {
         description = "Cannot hard-delete admin accounts.";
       }
@@ -226,50 +241,99 @@ export function AdminUsersClient({
     setDeleteDialogOpen(true);
   };
 
-  const handleDisableUser = async () => {
-    if (!userToDisable || !disableConfirmChecked) return;
+  const handleSuspendUser = async () => {
+    if (!userToSuspend || !suspendConfirmChecked) return;
 
-    const userIdToDisable = userToDisable.id;
-    const reasonToSend = disableReason.trim();
+    const userIdToSuspend = userToSuspend.id;
+    const reasonToSend = suspendReason.trim();
 
-    setIsDisabling(true);
+    setIsSuspending(true);
     try {
-      const response = await fetch("/api/admin/disable-user", {
+      const response = await fetch("/api/admin/set-user-suspension", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: userIdToDisable, reason: reasonToSend || undefined }),
+        body: JSON.stringify({
+          userId: userIdToSuspend,
+          suspended: true,
+          reason: reasonToSend || undefined,
+        }),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as { error?: string; message?: string };
       if (!response.ok) {
-        throw new Error(data.error || "Failed to disable Career Builder");
+        throw new Error(data.error || "Failed to suspend user");
       }
 
       toast({
         title: "Success",
-        description: data.message || "Career Builder account disabled successfully.",
+        description: data.message || "User suspended successfully.",
         variant: "success",
       });
 
       setUsers((prevUsers) =>
         prevUsers.map((profile) =>
-          profile.id === userIdToDisable ? { ...profile, is_suspended: true } : profile
+          profile.id === userIdToSuspend ? { ...profile, is_suspended: true } : profile
         )
       );
-      setDisableDialogOpen(false);
-      setUserToDisable(null);
-      setDisableConfirmChecked(false);
-      setDisableReason("");
+      setSuspendDialogOpen(false);
+      setUserToSuspend(null);
+      setSuspendConfirmChecked(false);
+      setSuspendReason("");
       router.refresh();
     } catch (error) {
-      logger.error("Error disabling Career Builder account", error);
+      logger.error("Error suspending user", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to disable Career Builder",
+        description: error instanceof Error ? error.message : "Failed to suspend user",
         variant: "destructive",
       });
     } finally {
-      setIsDisabling(false);
+      setIsSuspending(false);
+    }
+  };
+
+  const handleReinstateUser = async () => {
+    if (!userToReinstate || !reinstateConfirmChecked) return;
+
+    const userIdToReinstate = userToReinstate.id;
+
+    setIsReinstating(true);
+    try {
+      const response = await fetch("/api/admin/set-user-suspension", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: userIdToReinstate, suspended: false }),
+      });
+
+      const data = (await response.json()) as { error?: string; message?: string };
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to reinstate user");
+      }
+
+      toast({
+        title: "Success",
+        description: data.message || "User reinstated successfully.",
+        variant: "success",
+      });
+
+      setUsers((prevUsers) =>
+        prevUsers.map((profile) =>
+          profile.id === userIdToReinstate ? { ...profile, is_suspended: false } : profile
+        )
+      );
+      setReinstateDialogOpen(false);
+      setUserToReinstate(null);
+      setReinstateConfirmChecked(false);
+      router.refresh();
+    } catch (error) {
+      logger.error("Error reinstating user", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to reinstate user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsReinstating(false);
     }
   };
 
@@ -312,27 +376,39 @@ export function AdminUsersClient({
     }
   };
 
-  const openDisableDialog = (userProfile: UserProfile) => {
-    if (userProfile.id === user.id) {
+  const openSuspendDialog = (userProfile: UserProfile) => {
+    if (!canSuspendUser(userProfile)) {
       toast({
         title: "Error",
-        description: "Cannot disable your own account",
+        description:
+          userProfile.id === user.id
+            ? "Cannot suspend your own account."
+            : "Suspend is only available for Talent and Career Builder accounts.",
         variant: "destructive",
       });
       return;
     }
-    if (userProfile.role !== "client") {
+    setUserToSuspend(userProfile);
+    setSuspendReason("");
+    setSuspendConfirmChecked(false);
+    setSuspendDialogOpen(true);
+  };
+
+  const openReinstateDialog = (userProfile: UserProfile) => {
+    if (!canReinstateUser(userProfile)) {
       toast({
         title: "Error",
-        description: "Disable is only available for Career Builder accounts.",
+        description:
+          userProfile.id === user.id
+            ? "Cannot reinstate your own account."
+            : "Reinstate is only available for suspended Talent and Career Builder accounts.",
         variant: "destructive",
       });
       return;
     }
-    setUserToDisable(userProfile);
-    setDisableReason("");
-    setDisableConfirmChecked(false);
-    setDisableDialogOpen(true);
+    setUserToReinstate(userProfile);
+    setReinstateConfirmChecked(false);
+    setReinstateDialogOpen(true);
   };
 
   const getRoleIcon = (role: string) => {
@@ -430,6 +506,30 @@ export function AdminUsersClient({
             Promote to Talent
           </DropdownMenuItem>
         )}
+        {canSuspendUser(userProfile) && (
+          <>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem
+              onClick={() => openSuspendDialog(userProfile)}
+              className="flex items-center text-amber-300 hover:bg-white/10"
+            >
+              <Shield className="mr-2 h-4 w-4" />
+              Suspend User
+            </DropdownMenuItem>
+          </>
+        )}
+        {canReinstateUser(userProfile) && (
+          <>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem
+              onClick={() => openReinstateDialog(userProfile)}
+              className="flex items-center text-emerald-300 hover:bg-white/10"
+            >
+              <Undo2 className="mr-2 h-4 w-4" />
+              Reinstate User
+            </DropdownMenuItem>
+          </>
+        )}
         {canShowHardDelete(userProfile) && (
           <>
             <DropdownMenuSeparator className="bg-white/10" />
@@ -439,19 +539,6 @@ export function AdminUsersClient({
             >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete User
-            </DropdownMenuItem>
-          </>
-        )}
-        {userProfile.id !== user.id && userProfile.role === "client" && (
-          <>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem
-              onClick={() => openDisableDialog(userProfile)}
-              disabled={Boolean(userProfile.is_suspended)}
-              className="flex items-center text-amber-300 hover:bg-white/10"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              {userProfile.is_suspended ? "Already Suspended" : "Disable Career Builder"}
             </DropdownMenuItem>
           </>
         )}
@@ -733,65 +820,142 @@ export function AdminUsersClient({
         </div>
       </div>
 
-      {/* Disable Confirmation Dialog */}
-      <Dialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
+      {/* Suspend User */}
+      <Dialog
+        open={suspendDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && isSuspending) return;
+          setSuspendDialogOpen(open);
+          if (!open) {
+            setUserToSuspend(null);
+            setSuspendConfirmChecked(false);
+            setSuspendReason("");
+          }
+        }}
+      >
         <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
-            <DialogTitle className="text-amber-300">Disable Career Builder</DialogTitle>
+            <DialogTitle className="text-amber-300">Suspend User</DialogTitle>
             <DialogDescription className="text-[var(--oklch-text-secondary)]">
-              This will suspend the selected Career Builder account and prevent access to protected
-              routes until reinstated.
+              This suspends the account: the user will be signed out from protected areas and blocked
+              from signing in or accessing the app until you reinstate them. They will see the
+              standard suspended experience.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <p className="text-sm text-[var(--oklch-text-secondary)]">Optional reason shown on the suspended page:</p>
+              <p className="text-sm text-[var(--oklch-text-secondary)]">
+                Optional reason (shown on the suspended page):
+              </p>
               <Input
-                value={disableReason}
-                onChange={(event) => setDisableReason(event.target.value)}
+                value={suspendReason}
+                onChange={(event) => setSuspendReason(event.target.value)}
                 placeholder="Policy violation, fraud risk, or internal note..."
-                className=""
-                disabled={isDisabling}
+                disabled={isSuspending}
               />
             </div>
             <div className="flex items-start gap-3 text-sm text-[var(--oklch-text-secondary)]">
               <Checkbox
-                aria-label="Confirm disable Career Builder account"
-                checked={disableConfirmChecked}
-                onCheckedChange={(checked) => setDisableConfirmChecked(checked === true)}
-                disabled={isDisabling}
+                aria-label="Confirm suspend user account"
+                checked={suspendConfirmChecked}
+                onCheckedChange={(checked) => setSuspendConfirmChecked(checked === true)}
+                disabled={isSuspending}
               />
-              <span>I understand this will immediately block this account from dashboard access.</span>
+              <span>I understand this will immediately block this account until reinstated.</span>
             </div>
           </div>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
-                setDisableDialogOpen(false);
-                setUserToDisable(null);
-                setDisableConfirmChecked(false);
-                setDisableReason("");
+                setSuspendDialogOpen(false);
+                setUserToSuspend(null);
+                setSuspendConfirmChecked(false);
+                setSuspendReason("");
               }}
-              disabled={isDisabling}
+              disabled={isSuspending}
               className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
               Cancel
             </Button>
             <Button
-              onClick={handleDisableUser}
-              disabled={isDisabling || !disableConfirmChecked}
+              onClick={handleSuspendUser}
+              disabled={isSuspending || !suspendConfirmChecked}
               className="bg-amber-600 hover:bg-amber-700 text-white"
             >
-              {isDisabling ? (
+              {isSuspending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Disabling...
+                  Suspending...
                 </>
               ) : (
                 <>
                   <Shield className="mr-2 h-4 w-4" />
-                  Disable Career Builder
+                  Suspend User
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reinstate User */}
+      <Dialog
+        open={reinstateDialogOpen}
+        onOpenChange={(open) => {
+          if (!open && isReinstating) return;
+          setReinstateDialogOpen(open);
+          if (!open) {
+            setUserToReinstate(null);
+            setReinstateConfirmChecked(false);
+          }
+        }}
+      >
+        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+          <DialogHeader>
+            <DialogTitle className="text-emerald-300">Reinstate User</DialogTitle>
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
+              This removes the suspension so the user can sign in and use the app again.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-start gap-3 text-sm text-[var(--oklch-text-secondary)]">
+              <Checkbox
+                aria-label="Confirm reinstate user account"
+                checked={reinstateConfirmChecked}
+                onCheckedChange={(checked) => setReinstateConfirmChecked(checked === true)}
+                disabled={isReinstating}
+              />
+              <span>I understand this will restore access for this account.</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setReinstateDialogOpen(false);
+                setUserToReinstate(null);
+                setReinstateConfirmChecked(false);
+              }}
+              disabled={isReinstating}
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleReinstateUser}
+              disabled={isReinstating || !reinstateConfirmChecked}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              {isReinstating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Reinstating...
+                </>
+              ) : (
+                <>
+                  <Undo2 className="mr-2 h-4 w-4" />
+                  Reinstate User
                 </>
               )}
             </Button>
