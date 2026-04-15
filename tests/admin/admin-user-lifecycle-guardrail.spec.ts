@@ -276,4 +276,42 @@ test.describe("Admin user lifecycle guardrails", () => {
     const payload = (await response.json()) as { error?: string };
     expect(payload.error).toMatch(/own account/i);
   });
+
+  test("hard delete succeeds when content_flags assigns the target talent as assigned_admin", async ({
+    page,
+  }) => {
+    const runId = Date.now();
+    await loginAsAdmin(page);
+    const reporterUser = await seedUserWithRole("talent", runId);
+    const targetUser = await seedUserWithRole("talent", runId + 1);
+
+    const supabaseAdmin = createSupabaseAdminClientForTests();
+    const { error: flagError } = await supabaseAdmin.from("content_flags").insert({
+      resource_type: "talent_profile",
+      resource_id: targetUser.userId,
+      reporter_id: reporterUser.userId,
+      assigned_admin_id: targetUser.userId,
+      reason: "Guardrail: assigned_admin equals deleted talent profile",
+      status: "open",
+    });
+
+    if (flagError) {
+      throw new Error(flagError.message);
+    }
+
+    const response = await page.request.post("/api/admin/delete-user", {
+      data: { userId: targetUser.userId },
+    });
+
+    expect(response.status()).toBe(200);
+    const payload = (await response.json()) as { success?: boolean };
+    expect(payload.success).toBeTruthy();
+
+    const { data: staleAssigned } = await supabaseAdmin
+      .from("content_flags")
+      .select("id")
+      .eq("assigned_admin_id", targetUser.userId);
+
+    expect(staleAssigned?.length ?? 0).toBe(0);
+  });
 });

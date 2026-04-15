@@ -1,9 +1,32 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import { logger } from "@/lib/utils/logger";
 
 type SupabaseLikeError = { message?: string; status?: number };
+
+function serializeSupabaseAuthError(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    const e = error as Error & { status?: number; code?: string };
+    return {
+      name: e.name,
+      message: e.message,
+      status: e.status,
+      code: e.code,
+    };
+  }
+  if (error && typeof error === "object") {
+    const o = error as Record<string, unknown>;
+    return {
+      message: o.message,
+      status: o.status,
+      code: o.code,
+      name: o.name,
+    };
+  }
+  return { message: String(error) };
+}
 
 function isAuthUserNotFoundError(error: SupabaseLikeError): boolean {
   // Supabase Auth admin can return a 404-style error when the user doesn't exist.
@@ -15,7 +38,20 @@ function isAuthUserNotFoundError(error: SupabaseLikeError): boolean {
 
 function isForeignKeyConstraintError(error: SupabaseLikeError): boolean {
   const msg = String(error?.message ?? "");
-  return error?.status === 409 || /foreign key/i.test(msg) || /constraint/i.test(msg);
+  return (
+    error?.status === 409 ||
+    /foreign key/i.test(msg) ||
+    /constraint/i.test(msg) ||
+    /23503/i.test(msg) ||
+    /violates foreign key/i.test(msg) ||
+    /referenced from table/i.test(msg) ||
+    /still referenced/i.test(msg)
+  );
+}
+
+/** GoTrue often wraps Postgres failures as this generic string; treat like a constraint block for UX. */
+function isGenericDatabaseDeletingUserMessage(error: SupabaseLikeError): boolean {
+  return /database error deleting user/i.test(String(error?.message ?? ""));
 }
 
 export const POST = async (request: Request) => {
@@ -191,13 +227,44 @@ export const POST = async (request: Request) => {
           message: "User already deleted.",
         });
       }
-      if (isForeignKeyConstraintError(error as SupabaseLikeError)) {
+
+      const serialized = serializeSupabaseAuthError(error);
+      const constraintLike =
+        isForeignKeyConstraintError(error as SupabaseLikeError) ||
+        isGenericDatabaseDeletingUserMessage(error as SupabaseLikeError);
+
+      logger.error("[AdminDeleteUser] auth.admin.deleteUser failed", {
+        deleted_user_id: userId,
+        deleted_by: user.id,
+        ...serialized,
+      });
+
+      Sentry.withScope((scope) => {
+        scope.setTag("admin_operation", "delete_user");
+        scope.setContext("supabase_auth_admin", {
+          target_user_id: userId,
+          requester_user_id: user.id,
+          error: serialized,
+        });
+        if (constraintLike) {
+          Sentry.captureMessage("Admin delete user blocked (constraint or wrapped DB error)", "warning");
+        } else {
+          Sentry.captureException(
+            error instanceof Error ? error : new Error(String(serialized.message ?? "deleteUser failed"))
+          );
+        }
+      });
+
+      if (constraintLike) {
         return NextResponse.json(
-          { error: "Hard delete failed due to related data constraints. Use Disable instead." },
+          {
+            error:
+              "Hard delete failed due to related data constraints. Use Suspend User instead. If this persists after a schema deploy, check Postgres logs and supabase/diagnostics/auth-user-delete-fk-audit.sql.",
+          },
           { status: 409 }
         );
       }
-      logger.error("Error deleting user:", error);
+
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 

@@ -111,7 +111,7 @@
     - admin role via `profiles.role = 'admin'`
   - Admin user lifecycle guardrails:
     - **Suspend / reinstate:** targets must be `profiles.role` in `('talent','client')`; writes `profiles.is_suspended` and optional `suspension_reason` on suspend; reinstate clears `suspension_reason`. Use **`POST /api/admin/set-user-suspension`** with `{ userId, suspended: boolean, reason? }`. **`POST /api/admin/disable-user`** remains a backward-compatible alias (omit `suspended` → suspend). **Admin** profile targets are rejected (400). **Self** actions rejected (400).
-    - **Hard delete (admin workflow):** target must be `profiles.role = 'talent'`; uses `POST /api/admin/delete-user` (auth user delete + DB cascades)
+    - **Hard delete (admin workflow):** target must be `profiles.role = 'talent'`; uses `POST /api/admin/delete-user` (auth user delete + DB cascades). If production still hits GoTrue **“Database error deleting user”**, verify FKs (especially `content_flags.assigned_admin_id` → **`ON DELETE SET NULL`**) via migration `20260414120000_repair_fks_for_auth_user_delete.sql` and `supabase/diagnostics/auth-user-delete-fk-audit.sql`.
     - admin cannot suspend, reinstate, or hard-delete self
     - admin cannot hard-delete another admin
     - hard delete for Career Builder accounts is blocked (409); **suspend** is the official reversible policy because dependent rows can violate FK constraints on auth user delete
@@ -156,6 +156,11 @@
 3) **Moderation update fails**
 - Symptom: cannot update flags; error indicates permission.
 - Cause: admin not recognized or RLS mismatch.
+
+4) **Talent hard delete fails with generic database error**
+- Symptom: `POST /api/admin/delete-user` returns 500/409 or Sentry shows `AuthApiError: Database error deleting user`.
+- Likely cause: FK still **`NO ACTION`** on a child of `profiles` / `auth.users` (historically `content_flags.assigned_admin_id` when it equals the deleted profile).
+- **Fix:** Apply `20260414120000_repair_fks_for_auth_user_delete.sql`; run `supabase/diagnostics/auth-user-delete-fk-audit.sql` and Postgres logs for `23503`.
 
 ---
 
