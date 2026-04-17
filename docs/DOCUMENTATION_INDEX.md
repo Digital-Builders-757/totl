@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 14, 2026 (admin **Suspend User** / **Reinstate User** + `set-user-suspension` API; prior: `/admin/users` list hardening, mobile drawer / confirmation dialog **`panel-frosted`** stacking, Talent hard delete UI, public gig `PGRST116` vs transport errors, session-ready probe)
+**Last Updated:** April 17, 2026 (`/admin/users` subscription column + filters + billing dialog; admin dashboard paid-talent headcount parity with unknown-plan bucket; prior: admin Talent **hard delete** FK repair, **Suspend User** / **Reinstate User**, `/admin/users` list hardening, mobile drawer / dialog stacking)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -46,6 +46,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 | `docs/tests/` | Test documentation and matrices (`tests/README.md`) |
 | `docs/plans/` | Design plans and implementation summaries (`plans/README.md`) |
 | `docs/runbooks/` | Operational runbooks (one-off production procedures, data hygiene) |
+| `supabase/diagnostics/` | **SQL-only** read-only audits for ops (e.g. `auth-user-delete-fk-audit.sql` when `auth.admin.deleteUser` fails) |
 | `docs/archive/` | Historical / superseded documentation (`archive/README.md`) |
 
 **Archive policy:** Historical / one-off reports and superseded plans live in `docs/archive/`. Prefer the non-archived docs unless you are investigating history/regressions.

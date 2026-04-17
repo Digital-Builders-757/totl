@@ -116,6 +116,39 @@ test.describe("Admin users route contracts", () => {
     await expect(page.getByRole("heading", { name: "Create New User" }).first()).toBeVisible();
   });
 
+  test("users table shows subscription column and paid talent badge from profile data", async ({ page }) => {
+    const runId = Date.now();
+    const seededTalent = await seedUserWithRole("talent", runId);
+    const supabaseAdmin = createSupabaseAdminClientForTests();
+    const { error: subError } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        subscription_status: "active",
+        subscription_plan: "monthly",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", seededTalent.userId);
+    if (subError) throw new Error(subError.message);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    await expect(page.getByTestId("columnheader-subscription")).toBeVisible();
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededTalent.displayName);
+    await expect(page.getByTestId(`user-subscription-${seededTalent.userId}`)).toHaveText("Paid · Monthly");
+  });
+
+  test("non-talent rows show N/A in subscription column", async ({ page }) => {
+    const runId = Date.now();
+    const seededAdmin = await seedUserWithRole("admin", runId);
+
+    await loginAsAdmin(page);
+    await safeGoto(page, "/admin/users");
+
+    await page.getByPlaceholder("Search by name, ID, or role...").fill(seededAdmin.displayName);
+    await expect(page.getByTestId(`user-subscription-${seededAdmin.userId}`)).toHaveText("N/A");
+  });
+
   test("admin can hard-delete an eligible Talent user from actions menu", async ({ page }) => {
     const runId = Date.now();
     const seededTalent = await seedUserWithRole("talent", runId);

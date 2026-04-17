@@ -17,6 +17,8 @@ type PaidTalentStats = {
   monthlyCount: number;
   annualCount: number;
   unknownPlanCount: number;
+  /** Active talent subscribers (monthly + annual + unknown plan); matches admin Users “Paid” filter. */
+  paidActiveTalentTotal: number;
   estimatedMrrCents: number;
   estimatedArrCents: number;
 };
@@ -63,12 +65,17 @@ export default async function AdminDashboard() {
   const ANNUAL_CENTS = 20000; // $200.00
   const annualMrrCents = Math.round(ANNUAL_CENTS / 12); // $16.67/mo equivalent
 
+  const m = monthlyCount ?? 0;
+  const a = annualCount ?? 0;
+  const u = unknownPlanCount ?? 0;
+
   const paidTalentStats: PaidTalentStats = {
-    monthlyCount: monthlyCount ?? 0,
-    annualCount: annualCount ?? 0,
-    unknownPlanCount: unknownPlanCount ?? 0,
-    estimatedMrrCents: (monthlyCount ?? 0) * MONTHLY_CENTS + (annualCount ?? 0) * annualMrrCents,
-    estimatedArrCents: (monthlyCount ?? 0) * (MONTHLY_CENTS * 12) + (annualCount ?? 0) * ANNUAL_CENTS,
+    monthlyCount: m,
+    annualCount: a,
+    unknownPlanCount: u,
+    paidActiveTalentTotal: m + a + u,
+    estimatedMrrCents: m * MONTHLY_CENTS + a * annualMrrCents,
+    estimatedArrCents: m * (MONTHLY_CENTS * 12) + a * ANNUAL_CENTS,
   };
 
   // Fetch dashboard data

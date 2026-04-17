@@ -15,6 +15,11 @@ type UserProfile = {
   email_verified: boolean | null;
   created_at: string;
   updated_at: string;
+  subscription_status: "none" | "active" | "past_due" | "canceled";
+  subscription_plan: string | null;
+  subscription_current_period_end: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   talent_profiles?: {
     first_name: string;
     last_name: string;
@@ -32,6 +37,11 @@ const PROFILE_LIST_SELECT = `
   email_verified,
   created_at,
   updated_at,
+  subscription_status,
+  subscription_plan,
+  subscription_current_period_end,
+  stripe_customer_id,
+  stripe_subscription_id,
   talent_profiles!talent_profiles_user_id_fkey(first_name, last_name)
 `;
 

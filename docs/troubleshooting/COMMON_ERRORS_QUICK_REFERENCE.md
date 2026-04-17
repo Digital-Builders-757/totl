@@ -29,6 +29,10 @@ npm run build
 - **Supabase head count query looks like “zero rows” on failure:** `.select("id", { count: "exact", head: true })` can return **`error`** with **`count: null`**. Using **`result.count ?? 0`** hides outages and wrong-sides UX (e.g. missing “existing applicants” warning).
   - **Fix:** Check **`result.error`**, log it, and choose a **fail-safe** (e.g. assume count > 0 for warnings) or return an error state—not **`?? 0`** alone.
   - **Prevention:** Any **`head: true`** count used for gating or warnings must branch on **`error`** first.
+- **Sentry / Admin: `AuthApiError: Database error deleting user` on `POST /api/admin/delete-user` (TOTLMODELAGENCY-2Z / 3T-style):** GoTrue wraps the underlying Postgres failure; common cause is a **foreign key** blocking cascade when deleting `auth.users` (e.g. `public.content_flags.assigned_admin_id` still **`NO ACTION`** and points at the talent profile being removed).
+  - **Fix:** Apply migration `20260414120000_repair_fks_for_auth_user_delete.sql` (`ON DELETE SET NULL` on `assigned_admin_id`, cascade repairs). Use **`supabase/diagnostics/auth-user-delete-fk-audit.sql`** in the Supabase SQL editor to list FK `delete_rule` to `auth.users` / `profiles(id)`; check Postgres logs for **`23503`** and constraint name.
+  - **API behavior:** Route logs structured details + Sentry context; generic wrapped message maps to **409** with guidance to **Suspend User** if delete still cannot complete.
+  - **Prevention:** Do not rely on `CREATE TABLE IF NOT EXISTS` alone to upgrade FKs; use explicit `ALTER TABLE ... DROP/ADD CONSTRAINT` migrations when delete semantics change.
 - **Admin API routes return 401/403:** `POST /api/admin/create-user`, `GET /api/admin/test-connection`, `GET /api/admin/check-auth-schema` require authenticated admin.
   - **Fix:** Ensure caller is signed in with `profiles.role = 'admin'`. Use `requireAdmin()` from `@/lib/api/require-admin` for new admin routes.
   - **Prevention:** All admin API routes must call `requireAdmin()` (or equivalent) before performing admin operations.

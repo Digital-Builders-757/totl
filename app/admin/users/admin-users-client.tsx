@@ -4,7 +4,6 @@ import type { User } from "@supabase/supabase-js";
 import {
   Search,
   MoreVertical,
-  Filter,
   User as UserIcon,
   Shield,
   Briefcase,
@@ -18,6 +17,7 @@ import {
   Trash2,
   AlertCircle,
   Undo2,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -53,7 +53,11 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
+import { getPlanDisplayName, getSubscriptionStatusColor, getSubscriptionStatusText } from "@/lib/subscription";
+import { cn } from "@/lib/utils";
 import { logger } from "@/lib/utils/logger";
+
+type SubscriptionFilter = "all" | "paid" | "free" | "past_due" | "canceled";
 
 type UserProfile = {
   id: string;
@@ -65,11 +69,48 @@ type UserProfile = {
   email_verified: boolean | null;
   created_at: string;
   updated_at: string;
+  subscription_status: "none" | "active" | "past_due" | "canceled";
+  subscription_plan: string | null;
+  subscription_current_period_end: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
   talent_profiles?: {
     first_name: string;
     last_name: string;
   } | null;
 };
+
+function talentSubscriptionListLabel(u: UserProfile): string {
+  if (u.subscription_status === "active") {
+    const plan =
+      u.subscription_plan === "monthly"
+        ? "Monthly"
+        : u.subscription_plan === "annual"
+          ? "Annual"
+          : "Plan unset";
+    return `Paid · ${plan}`;
+  }
+  if (u.subscription_status === "none") return "Free";
+  if (u.subscription_status === "past_due") return "Past due";
+  return "Canceled";
+}
+
+function matchesSubscriptionFilter(u: UserProfile, filter: SubscriptionFilter): boolean {
+  if (filter === "all") return true;
+  if (u.role !== "talent") return false;
+  switch (filter) {
+    case "paid":
+      return u.subscription_status === "active";
+    case "free":
+      return u.subscription_status === "none";
+    case "past_due":
+      return u.subscription_status === "past_due";
+    case "canceled":
+      return u.subscription_status === "canceled";
+    default:
+      return true;
+  }
+}
 
 interface AdminUsersClientProps {
   users: UserProfile[];
@@ -86,6 +127,8 @@ export function AdminUsersClient({
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionFilter>("all");
+  const [subscriptionDetailUser, setSubscriptionDetailUser] = useState<UserProfile | null>(null);
   const [users, setUsers] = useState(initialUsers);
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
   const [userToSuspend, setUserToSuspend] = useState<UserProfile | null>(null);
@@ -139,6 +182,10 @@ export function AdminUsersClient({
       }
     }
 
+    if (subscriptionFilter !== "all") {
+      filtered = filtered.filter((u) => matchesSubscriptionFilter(u, subscriptionFilter));
+    }
+
     // Filter by search query (within tab's dataset)
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -155,7 +202,7 @@ export function AdminUsersClient({
     }
 
     return filtered;
-  }, [users, searchQuery, activeTab]);
+  }, [users, searchQuery, activeTab, subscriptionFilter]);
 
   // Group by role for stats (exclude suspended from active tab counts)
   const talentUsers = users.filter((u) => u.role === "talent" && u.is_suspended !== true);
@@ -462,6 +509,33 @@ export function AdminUsersClient({
     </div>
   );
 
+  const renderTalentSubscriptionBadge = (userProfile: UserProfile) => {
+    if (userProfile.role !== "talent") {
+      return (
+        <span
+          className="text-xs text-[var(--oklch-text-tertiary)]"
+          data-testid={`user-subscription-${userProfile.id}`}
+        >
+          N/A
+        </span>
+      );
+    }
+    const label = talentSubscriptionListLabel(userProfile);
+    return (
+      <Badge
+        variant="outline"
+        className={cn(
+          "status-chip max-w-[12rem] truncate border font-medium",
+          getSubscriptionStatusColor(userProfile.subscription_status)
+        )}
+        data-testid={`user-subscription-${userProfile.id}`}
+        title={label}
+      >
+        {label}
+      </Badge>
+    );
+  };
+
   const renderUserActions = (userProfile: UserProfile) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -479,6 +553,15 @@ export function AdminUsersClient({
               <Eye className="mr-2 h-4 w-4" />
               View Talent Profile
             </Link>
+          </DropdownMenuItem>
+        )}
+        {userProfile.role === "talent" && (
+          <DropdownMenuItem
+            onClick={() => setSubscriptionDetailUser(userProfile)}
+            className="flex items-center text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
+          >
+            <CreditCard className="mr-2 h-4 w-4" />
+            Subscription details
           </DropdownMenuItem>
         )}
         {userProfile.role === "client" && (
@@ -579,6 +662,13 @@ export function AdminUsersClient({
                   label: "Email",
                   value: userProfile.email_verified ? "Verified" : "Unverified",
                 },
+                {
+                  label: "Subscription",
+                  value:
+                    userProfile.role === "talent"
+                      ? talentSubscriptionListLabel(userProfile)
+                      : "N/A",
+                },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
               badge={getCombinedBadges(userProfile.id, userProfile.role, userProfile.is_suspended)}
@@ -595,6 +685,12 @@ export function AdminUsersClient({
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Role
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]"
+                  data-testid="columnheader-subscription"
+                >
+                  Subscription
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Email Verified
@@ -633,6 +729,7 @@ export function AdminUsersClient({
                       {getSuspensionBadge(userProfile.is_suspended)}
                     </div>
                   </td>
+                  <td className="py-4 px-6">{renderTalentSubscriptionBadge(userProfile)}</td>
                   <td className="py-4 px-6">
                     {userProfile.email_verified ? (
                       <div className="flex items-center gap-2">
@@ -720,24 +817,55 @@ export function AdminUsersClient({
         {/* Users Section */}
         <div className="mb-8 overflow-hidden rounded-2xl panel-frosted card-backlit shadow-lg">
           <div className="border-b border-border/40 bg-gradient-to-r from-card/40 to-card/25 p-4 sm:p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between">
-              <h2 className="text-2xl font-bold text-white mb-4 md:mb-0">Users</h2>
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
-                    size={16}
-                  />
-                  <Input
-                    placeholder="Search by name, ID, or role..."
-                    className="w-full pl-9 md:w-64"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <h2 className="text-2xl font-bold text-white">Users</h2>
+              <div className="flex w-full flex-col gap-3 md:w-auto md:items-end">
+                <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                  <div className="relative w-full sm:w-auto">
+                    <Search
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--oklch-text-tertiary)]"
+                      size={16}
+                    />
+                    <Input
+                      placeholder="Search by name, ID, or role..."
+                      className="w-full pl-9 sm:w-64"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                 </div>
-                <Button variant="outline" size="icon" className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white">
-                  <Filter size={16} />
-                </Button>
+                <div
+                  className="flex flex-wrap gap-1.5 sm:justify-end"
+                  role="group"
+                  aria-label="Filter by subscription"
+                >
+                  {(
+                    [
+                      { id: "all" as const, label: "All" },
+                      { id: "paid" as const, label: "Paid" },
+                      { id: "free" as const, label: "Free" },
+                      { id: "past_due" as const, label: "Past due" },
+                      { id: "canceled" as const, label: "Canceled" },
+                    ] as const
+                  ).map((opt) => (
+                    <Button
+                      key={opt.id}
+                      type="button"
+                      size="sm"
+                      variant={subscriptionFilter === opt.id ? "default" : "outline"}
+                      className={cn(
+                        "h-8 rounded-lg border px-2.5 text-xs",
+                        subscriptionFilter === opt.id
+                          ? "border-orange-500/50 bg-orange-500/20 text-orange-100 hover:bg-orange-500/30 hover:text-white"
+                          : "border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
+                      )}
+                      aria-pressed={subscriptionFilter === opt.id}
+                      onClick={() => setSubscriptionFilter(opt.id)}
+                    >
+                      {opt.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -1038,6 +1166,91 @@ export function AdminUsersClient({
                   Delete User
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={subscriptionDetailUser !== null}
+        onOpenChange={(open) => {
+          if (!open) setSubscriptionDetailUser(null);
+        }}
+      >
+        <DialogContent className="panel-frosted !fixed z-[51] max-h-[85vh] overflow-y-auto border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <CreditCard className="h-5 w-5 text-orange-400" />
+              Subscription details
+            </DialogTitle>
+            <DialogDescription className="text-[var(--oklch-text-secondary)]">
+              {subscriptionDetailUser ? (
+                <>
+                  Talent account:{" "}
+                  <span className="font-medium text-white">{getUserDisplayName(subscriptionDetailUser)}</span>
+                </>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          {subscriptionDetailUser ? (
+            <dl className="space-y-3 text-sm">
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-[var(--oklch-text-tertiary)]">Plan</dt>
+                <dd className="font-medium text-white">{getPlanDisplayName(subscriptionDetailUser.subscription_plan)}</dd>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-[var(--oklch-text-tertiary)]">Status</dt>
+                <dd className="font-medium text-white">
+                  {getSubscriptionStatusText(subscriptionDetailUser.subscription_status)}
+                </dd>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-[var(--oklch-text-tertiary)]">Billing interval</dt>
+                <dd className="font-medium text-white">
+                  {subscriptionDetailUser.subscription_plan === "monthly"
+                    ? "Monthly"
+                    : subscriptionDetailUser.subscription_plan === "annual"
+                      ? "Annual"
+                      : subscriptionDetailUser.subscription_plan
+                        ? subscriptionDetailUser.subscription_plan
+                        : "—"}
+                </dd>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <dt className="text-[var(--oklch-text-tertiary)]">Current period ends</dt>
+                <dd className="font-medium text-white">
+                  {subscriptionDetailUser.subscription_current_period_end ? (
+                    <SafeDate date={subscriptionDetailUser.subscription_current_period_end} />
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+              </div>
+              {subscriptionDetailUser.stripe_customer_id ? (
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-[var(--oklch-text-tertiary)]">Stripe customer ID</dt>
+                  <dd className="break-all font-mono text-xs text-[var(--oklch-text-secondary)]">
+                    {subscriptionDetailUser.stripe_customer_id}
+                  </dd>
+                </div>
+              ) : null}
+              {subscriptionDetailUser.stripe_subscription_id ? (
+                <div className="flex flex-col gap-0.5">
+                  <dt className="text-[var(--oklch-text-tertiary)]">Stripe subscription ID</dt>
+                  <dd className="break-all font-mono text-xs text-[var(--oklch-text-secondary)]">
+                    {subscriptionDetailUser.stripe_subscription_id}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : null}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setSubscriptionDetailUser(null)}
+              className="border-white/10 bg-white/5 text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

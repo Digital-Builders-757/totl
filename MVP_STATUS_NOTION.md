@@ -8,6 +8,39 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Users — subscription visibility + paid talent count parity (April 17, 2026)**
+
+**ADMIN / UI** — April 17, 2026
+- ✅ **`/admin/users`:** Loads `profiles` subscription + Stripe id fields; **Subscription** column with badges (Paid · plan, Free, Past due, Canceled); non-talent **N/A**; subscription filter chips (All / Paid / Free / Past due / Canceled); talent **Subscription details** dialog (plan, status, billing interval, period end, Stripe IDs when present).
+- ✅ **`/admin/dashboard`:** `paidActiveTalentTotal` = monthly + annual + **unknown-plan** active talent so overview **paid** headcount matches the Users **Paid** filter; desktop card shows active subscriber count + plan breakdown test ids (`paid-talent-count`, `paid-talent-breakdown`); MRR/ARR formulas unchanged (monthly + annual only).
+- ✅ **Tests:** `tests/admin/admin-users-route.spec.ts`, `tests/admin/paid-talent-stats.spec.ts`.
+- ✅ **Docs:** `docs/contracts/ADMIN_CONTRACT.md` (Overview + `/admin/users` parity).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 17, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke `/admin/users` subscription filters vs dashboard counts on staging.
+
+**Next (P1):** None for this patch.
+
+---
+
+## 🚀 **Latest: Admin Talent hard delete — FK repair + observability (April 14, 2026)**
+
+**ADMIN / DB / SENTRY** — April 14, 2026
+- ✅ **Root cause (repeatable):** `public.content_flags.assigned_admin_id → profiles(id)` could remain **`NO ACTION`** if the table predated cascade migrations or was only created with `CREATE TABLE IF NOT EXISTS`, blocking `auth.admin.deleteUser` when a flag assigned the **same** talent as `assigned_admin_id`.
+- ✅ **Migration:** `supabase/migrations/20260414120000_repair_fks_for_auth_user_delete.sql` reapplies **`ON DELETE SET NULL`** for `assigned_admin_id`, **`ON DELETE CASCADE`** for `reporter_id`, and defensively reapplies `gig_notifications.user_id → auth.users` **`ON DELETE CASCADE`**.
+- ✅ **API:** `POST /api/admin/delete-user` — structured logs + Sentry context; broader FK-style message matching; generic GoTrue **“Database error deleting user”** returns **409** with suspend guidance (reduces noisy 500s).
+- ✅ **Ops SQL:** `supabase/diagnostics/auth-user-delete-fk-audit.sql` for production FK audits when deletes fail.
+- ✅ **Test:** `tests/admin/admin-user-lifecycle-guardrail.spec.ts` — hard delete with `content_flags` assigning target as `assigned_admin_id`.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx playwright test tests/admin/admin-user-lifecycle-guardrail.spec.ts --grep content_flags` — ship run, April 14, 2026.
+
+**Next (P0):** Apply the new migration to **production** (`supabase db push` or pipeline); retry failing deletes; run diagnostic SQL if any remain.
+
+**Next (P1):** None for this patch.
+
+---
+
 ## 🚀 **Latest: Admin Users — reversible suspend / reinstate (April 14, 2026)**
 
 **ADMIN / API / QA** — April 14, 2026

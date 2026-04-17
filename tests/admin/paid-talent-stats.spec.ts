@@ -51,6 +51,8 @@ test.describe("Admin Dashboard: Paid Talent stats", () => {
     // Smoke: card renders and contains earning metrics.
     await expect(page.getByTestId("paid-talent-card")).toBeVisible();
     await expect(page.getByTestId("paid-talent-card-title")).toHaveText("Paid Talent");
+    await expect(page.getByTestId("paid-talent-count")).toBeVisible();
+    await expect(page.getByTestId("paid-talent-breakdown")).toBeVisible();
     await expect(page.getByTestId("paid-talent-mrr")).toBeVisible();
     await expect(page.getByTestId("paid-talent-arr")).toBeVisible();
   });
