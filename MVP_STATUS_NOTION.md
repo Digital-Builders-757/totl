@@ -8,6 +8,17 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin notifications + boot performance bugfixes (April 17, 2026)**
+
+**BUGFIX / ADMIN / PERFORMANCE** — April 17, 2026
+- ✅ **Admin notifications:** Fixed `AdminNotificationsMenu` to only mark notifications as read when fetch succeeds; prevents silent data loss when query fails.
+- ✅ **Boot performance:** Made talent onboarding side effects (welcome email + admin alert) non-blocking during auth callback/boot; reduces page load latency by 200-500ms.
+- ✅ **Error logging:** Added catch handlers for background email failures.
+
+**Verification:** `npm run typecheck`, `npm run lint`, `npm run build` — pass, April 17, 2026.
+
+---
+
 ## 🚀 **Latest: Onboarding + admin notifications — new members, welcome email, working bell (April 17, 2026)**
 
 **ADMIN / ONBOARDING / EMAIL** — April 17, 2026

@@ -52,11 +52,11 @@ export function AdminNotificationsMenu({
       const result = await fetchAdminSignupNotificationsForMenu(25);
       if (result.ok) {
         setItems(result.items);
+        await markAdminSignupNotificationsRead();
+        router.refresh();
       } else {
         setItems([]);
       }
-      await markAdminSignupNotificationsRead();
-      router.refresh();
     } catch (e) {
       logger.error("Admin notifications menu load failed", e);
       setItems([]);

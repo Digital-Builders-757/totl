@@ -194,12 +194,14 @@ export async function getBootState(params?: {
     }
 
     if (profile && role === "talent") {
-      await processTalentOnboardingSideEffects(user, {
+      void processTalentOnboardingSideEffects(user, {
         role: profile.role,
         display_name: profile.display_name,
         email_verified: profile.email_verified,
         welcome_email_sent_at: profile.welcome_email_sent_at,
         admin_new_member_email_sent_at: profile.admin_new_member_email_sent_at,
+      }).catch((e) => {
+        logger.error("[boot] background onboarding side effects failed", e);
       });
     }
 
@@ -352,12 +354,14 @@ export async function getBootStateRedirect(params?: {
     }
 
     if (role === "talent") {
-      await processTalentOnboardingSideEffects(user, {
+      void processTalentOnboardingSideEffects(user, {
         role: profile.role,
         display_name: profile.display_name,
         email_verified: profile.email_verified,
         welcome_email_sent_at: profile.welcome_email_sent_at,
         admin_new_member_email_sent_at: profile.admin_new_member_email_sent_at,
+      }).catch((e) => {
+        logger.error("[boot] background onboarding side effects failed", e);
       });
     }
 
