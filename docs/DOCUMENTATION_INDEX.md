@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 17, 2026 (`/admin/users` subscription column + filters + billing dialog; admin dashboard paid-talent headcount parity with unknown-plan bucket; prior: admin Talent **hard delete** FK repair, **Suspend User** / **Reinstate User**, `/admin/users` list hardening, mobile drawer / dialog stacking)
+**Last Updated:** April 17, 2026 (onboarding: admin new-member notifications + welcome/admin alert emails + working admin Notifications menu; prior: `/admin/users` subscription column + filters; admin dashboard paid-talent parity; Talent **hard delete** FK repair; **Suspend** / **Reinstate**; drawer/dialog stacking)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -234,6 +234,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `qa/SOFT_LAUNCH_RUNBOOK_2026-03-05.md` - Go/no-go gates, launch window validation, monitoring, and rollback procedure for soft launch (Mar 2026)
 
 ### **📧 Services & Integrations**
+- `TOTL_ONBOARDING_NOTIFICATIONS_WORK_ORDER.md` - **NEW** — Admin new-member visibility, welcome automation, Notifications UI scope + definition of done (Apr 2026)
 - `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 - `SENTRY_PRODUCTION_SETUP.md` - Sentry production configuration

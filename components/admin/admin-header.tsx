@@ -3,7 +3,6 @@
 import type { User } from "@supabase/supabase-js";
 import {
   BarChart3,
-  Bell,
   Briefcase,
   Building2,
   FileText,
@@ -20,6 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAdminModerationCount } from "@/components/admin/admin-moderation-count-provider";
+import { AdminNotificationsMenu } from "@/components/admin/admin-notifications-menu";
 import { useAuth } from "@/components/auth/auth-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -47,8 +47,9 @@ interface AdminHeaderProps {
 const DEFAULT_AVATAR = "/images/totl-logo-transparent.png";
 
 export function AdminHeader({ user, notificationCount: notificationCountProp }: AdminHeaderProps) {
-  const { moderationCount } = useAdminModerationCount();
-  const notificationCount = notificationCountProp ?? moderationCount;
+  const { moderationCount, signupNotificationUnreadCount } = useAdminModerationCount();
+  const notificationCount =
+    notificationCountProp ?? moderationCount + signupNotificationUnreadCount;
   const pathname = usePathname() ?? "";
   const { signOut, profile } = useAuth();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -187,20 +188,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
             {mobileTitle}
           </p>
           <div className="flex min-w-[5rem] shrink-0 items-center justify-end gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Notifications"
-              className="relative text-foreground hover:bg-white/10"
-            >
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 ? (
-                <span className="absolute right-1.5 top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium leading-none text-white">
-                  {notificationCount > 9 ? "9+" : notificationCount}
-                </span>
-              ) : null}
-            </Button>
+            <AdminNotificationsMenu variant="mobile-icon" badgeCount={notificationCount} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -258,15 +246,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline" size="sm" className="border-white/10 bg-white/5 text-foreground hover:bg-white/10">
-                <Bell className="mr-2 h-4 w-4" />
-                Notifications
-                {notificationCount > 0 ? (
-                  <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-xs text-white">
-                    {notificationCount}
-                  </span>
-                ) : null}
-              </Button>
+              <AdminNotificationsMenu variant="desktop-button" badgeCount={notificationCount} />
               <Button
                 type="button"
                 variant="outline"

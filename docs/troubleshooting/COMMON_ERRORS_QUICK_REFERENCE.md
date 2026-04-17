@@ -76,6 +76,10 @@ npm run build
   - **Root Cause:** Migration `20260313120000_add_user_notifications.sql` not applied yet
   - **Fix:** Run `supabase db push` (or `supabase db reset` for local) to apply the migration
   - **Prevention:** Apply migration before deploying notification feature code
+- **Admin “new member” notifications / boot email columns missing:** Postgres errors on **`new_member_signup`**, **`welcome_email_sent_at`**, or **`admin_new_member_email_sent_at`**
+  - **Root Cause:** Migration `20260417180000_new_member_admin_notifications.sql` not applied to the target database
+  - **Fix:** `supabase db push --linked` (or your pipeline), then `npm run types:regen` and commit `types/database.ts`
+  - **Prevention:** Ship schema before or with app code that selects those columns or uses the new enum label
 - **Portfolio images not loading (404 or broken):** `portfolio_items.image_url` stores the **storage path** (e.g. `user-id/portfolio-123.jpg`), not the full URL.
   - **Fix:** Use `publicBucketUrl("portfolio", item.image_url)` when building image URLs for display. Applied in Settings page, portfolio-actions, admin talent dashboard.
   - **Prevention:** All portfolio display paths must convert storage path to full URL via `publicBucketUrl`.
