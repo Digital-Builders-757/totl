@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 17, 2026 (onboarding: admin new-member notifications + welcome/admin alert emails + working admin Notifications menu; prior: `/admin/users` subscription column + filters; admin dashboard paid-talent parity; Talent **hard delete** FK repair; **Suspend** / **Reinstate**; drawer/dialog stacking)
+**Last Updated:** April 17, 2026 (onboarding: claim-then-send for boot emails to prevent duplicate welcome/admin alerts under concurrent boot; admin new-member notifications + welcome/admin alert emails + working admin Notifications menu; prior: `/admin/users` subscription column + filters; admin dashboard paid-talent parity; Talent **hard delete** FK repair; **Suspend** / **Reinstate**; drawer/dialog stacking)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
