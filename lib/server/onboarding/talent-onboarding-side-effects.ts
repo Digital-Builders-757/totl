@@ -21,6 +21,9 @@ export type TalentProfileEmailState = {
 /**
  * Idempotent welcome + admin alert emails for new talent accounts.
  * Called from boot paths when the session user is talent.
+ *
+ * Uses conditional updates (claim-then-send) so concurrent boot requests cannot
+ * duplicate emails.
  */
 export async function processTalentOnboardingSideEffects(
   user: User,
@@ -44,18 +47,22 @@ export async function processTalentOnboardingSideEffects(
 
   if (emailVerified && !profile.welcome_email_sent_at) {
     try {
-      const { subject, html } = generateWelcomeEmail({
-        name: displayName,
-        loginUrl: absoluteUrl("/login"),
-      });
-      await sendEmail({ to: email, subject, html });
-      await logEmailSent(email, "welcome", true);
-      const { error } = await adminClient
+      const welcomeSentAt = new Date().toISOString();
+      const { data: welcomeClaimRows, error: welcomeClaimError } = await adminClient
         .from("profiles")
-        .update({ welcome_email_sent_at: new Date().toISOString() })
-        .eq("id", user.id);
-      if (error) {
-        logger.error("[onboarding] failed to set welcome_email_sent_at", error);
+        .update({ welcome_email_sent_at: welcomeSentAt })
+        .eq("id", user.id)
+        .is("welcome_email_sent_at", null)
+        .select("id");
+      if (welcomeClaimError) {
+        logger.error("[onboarding] failed to claim welcome_email_sent_at", welcomeClaimError);
+      } else if (welcomeClaimRows?.length === 1) {
+        const { subject, html } = generateWelcomeEmail({
+          name: displayName,
+          loginUrl: absoluteUrl("/login"),
+        });
+        await sendEmail({ to: email, subject, html });
+        await logEmailSent(email, "welcome", true);
       }
     } catch (e) {
       logger.error("[onboarding] welcome email failed", e);
@@ -64,20 +71,27 @@ export async function processTalentOnboardingSideEffects(
 
   if (!profile.admin_new_member_email_sent_at) {
     try {
-      const adminEmail = process.env.ADMIN_EMAIL || "admin@thetotlagency.com";
-      const { subject, html } = generateAdminNewMemberAlertEmail({
-        memberDisplayName: displayName,
-        memberEmail: email,
-        usersUrl: absoluteUrl("/admin/users"),
-      });
-      await sendEmail({ to: adminEmail, subject, html });
-      await logEmailSent(adminEmail, "admin-new-member-alert", true);
-      const { error } = await adminClient
+      const adminSentAt = new Date().toISOString();
+      const { data: adminClaimRows, error: adminClaimError } = await adminClient
         .from("profiles")
-        .update({ admin_new_member_email_sent_at: new Date().toISOString() })
-        .eq("id", user.id);
-      if (error) {
-        logger.error("[onboarding] failed to set admin_new_member_email_sent_at", error);
+        .update({ admin_new_member_email_sent_at: adminSentAt })
+        .eq("id", user.id)
+        .is("admin_new_member_email_sent_at", null)
+        .select("id");
+      if (adminClaimError) {
+        logger.error(
+          "[onboarding] failed to claim admin_new_member_email_sent_at",
+          adminClaimError
+        );
+      } else if (adminClaimRows?.length === 1) {
+        const adminEmail = process.env.ADMIN_EMAIL || "admin@thetotlagency.com";
+        const { subject, html } = generateAdminNewMemberAlertEmail({
+          memberDisplayName: displayName,
+          memberEmail: email,
+          usersUrl: absoluteUrl("/admin/users"),
+        });
+        await sendEmail({ to: adminEmail, subject, html });
+        await logEmailSent(adminEmail, "admin-new-member-alert", true);
       }
     } catch (e) {
       logger.error("[onboarding] admin new-member email failed", e);

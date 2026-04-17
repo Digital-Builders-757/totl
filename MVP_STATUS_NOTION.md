@@ -12,7 +12,7 @@
 
 **ADMIN / ONBOARDING / EMAIL** — April 17, 2026
 - ✅ **DB:** Migration `20260417180000_new_member_admin_notifications.sql` — `notification_type.new_member_signup`; `profiles.welcome_email_sent_at` + `admin_new_member_email_sent_at`; trigger **`profiles_notify_admins_on_talent_insert`** inserts **`user_notifications`** for each admin when a **talent** **`profiles`** row is inserted (idempotent).
-- ✅ **Emails:** `processTalentOnboardingSideEffects` from boot (`getBootState` / `getBootStateRedirect`) — post-verification **welcome** (Resend + existing template); one-shot **admin alert** to **`ADMIN_EMAIL`** (`generateAdminNewMemberAlertEmail`; copy TBD for client).
+- ✅ **Emails:** `processTalentOnboardingSideEffects` from boot (`getBootState` / `getBootStateRedirect`) — post-verification **welcome** (Resend + existing template); one-shot **admin alert** to **`ADMIN_EMAIL`** (`generateAdminNewMemberAlertEmail`; copy TBD for client). **Race fix:** conditional DB **claim-then-send** on `welcome_email_sent_at` / `admin_new_member_email_sent_at` (`IS NULL` + `select`) so concurrent boot requests cannot duplicate sends; tests in `lib/server/onboarding/talent-onboarding-side-effects.test.ts`.
 - ✅ **Admin UI:** **`AdminNotificationsMenu`** — bell / “Notifications” opens a **dropdown** with recent signup alerts; marks read on open; badge = open moderation flags + unread signup notifications.
 - ✅ **Types:** `npm run types:regen` after migration applied to linked project.
 - ✅ **Docs:** `docs/TOTL_ONBOARDING_NOTIFICATIONS_WORK_ORDER.md` (scope + DoD), index + troubleshooting note.

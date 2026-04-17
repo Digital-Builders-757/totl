@@ -76,6 +76,9 @@ npm run build
   - **Root Cause:** Migration `20260313120000_add_user_notifications.sql` not applied yet
   - **Fix:** Run `supabase db push` (or `supabase db reset` for local) to apply the migration
   - **Prevention:** Apply migration before deploying notification feature code
+- **Duplicate welcome / admin alert emails for one talent signup:** Two overlapping **`getBootState`** / **`getBootStateRedirect`** invocations could both see **`welcome_email_sent_at`** (or admin timestamp) still **null** and send twice before updating **`profiles`**.
+  - **Fix:** `processTalentOnboardingSideEffects` uses **claim-then-send**: **`UPDATE ... WHERE id = ? AND welcome_email_sent_at IS NULL`** (same for admin column), **`select("id")`**, send only when **exactly one row** is returned.
+  - **Prevention:** Do not send onboarding emails based only on an in-memory profile snapshot; always serialize “first send” via the conditional update (or an equivalent DB RPC).
 - **Admin “new member” notifications / boot email columns missing:** Postgres errors on **`new_member_signup`**, **`welcome_email_sent_at`**, or **`admin_new_member_email_sent_at`**
   - **Root Cause:** Migration `20260417180000_new_member_admin_notifications.sql` not applied to the target database
   - **Fix:** `supabase db push --linked` (or your pipeline), then `npm run types:regen` and commit `types/database.ts`
