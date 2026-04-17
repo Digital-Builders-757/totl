@@ -47,6 +47,7 @@ interface AdminDashboardClientProps {
     monthlyCount: number;
     annualCount: number;
     unknownPlanCount: number;
+    paidActiveTalentTotal: number;
     estimatedMrrCents: number;
     estimatedArrCents: number;
   };
@@ -94,7 +95,7 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
               { label: "Accepted", value: dashboardStats.acceptedApplications, icon: CheckCircle },
               {
                 label: "Paid talent",
-                value: paidTalentStats.monthlyCount + paidTalentStats.annualCount,
+                value: paidTalentStats.paidActiveTalentTotal,
                 icon: DollarSign,
               },
             ]}
@@ -230,6 +231,14 @@ export function AdminDashboardClient({ user, gigs, applications, paidTalentStats
                 <span data-testid="paid-talent-arr">{money(paidTalentStats.estimatedArrCents)}</span>
                 <span className="text-xs ml-1">/yr</span>
               </div>
+              <p className="text-sm font-medium text-white">
+                <span data-testid="paid-talent-count">{paidTalentStats.paidActiveTalentTotal}</span>
+                <span className="ml-1 font-normal text-[var(--oklch-text-tertiary)]">active subscribers</span>
+              </p>
+              <p className="text-xs text-[var(--oklch-text-tertiary)]" data-testid="paid-talent-breakdown">
+                {paidTalentStats.monthlyCount} monthly · {paidTalentStats.annualCount} annual ·{" "}
+                {paidTalentStats.unknownPlanCount} plan unknown
+              </p>
             </CardContent>
           </Card>
         </div>

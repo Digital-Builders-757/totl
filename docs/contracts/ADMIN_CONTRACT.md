@@ -56,7 +56,8 @@
 - Show **Estimated** MRR/ARR derived from counts (no Stripe API calls):
   - MRR est. = `monthly * $20 + annual * ($200 / 12)` (display $16.67/mo per annual sub)
   - ARR est. = `monthly * $240 + annual * $200`
-- Full breakdown (monthly/annual/unknown counts) may be surfaced on admin talent page or settings; Overview card keeps focus on earnings.
+- **Active subscriber headcount** on the Overview card must equal **`monthly + annual + unknown`** (all active talent), so it matches **`/admin/users`** when filtered to **Paid** (talent + `subscription_status = 'active'`). MRR/ARR intentionally exclude the unknown-plan bucket from dollar estimates.
+- **`/admin/users`:** Subscription status for each row comes from the same `public.profiles` fields (badges + optional **Subscription details** dialog for talent).
 
 **Source of truth:** subscription fields are written by the Stripe webhook into `public.profiles`.
 

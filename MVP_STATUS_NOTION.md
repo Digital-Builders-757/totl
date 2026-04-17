@@ -8,6 +8,22 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin Users — subscription visibility + paid talent count parity (April 17, 2026)**
+
+**ADMIN / UI** — April 17, 2026
+- ✅ **`/admin/users`:** Loads `profiles` subscription + Stripe id fields; **Subscription** column with badges (Paid · plan, Free, Past due, Canceled); non-talent **N/A**; subscription filter chips (All / Paid / Free / Past due / Canceled); talent **Subscription details** dialog (plan, status, billing interval, period end, Stripe IDs when present).
+- ✅ **`/admin/dashboard`:** `paidActiveTalentTotal` = monthly + annual + **unknown-plan** active talent so overview **paid** headcount matches the Users **Paid** filter; desktop card shows active subscriber count + plan breakdown test ids (`paid-talent-count`, `paid-talent-breakdown`); MRR/ARR formulas unchanged (monthly + annual only).
+- ✅ **Tests:** `tests/admin/admin-users-route.spec.ts`, `tests/admin/paid-talent-stats.spec.ts`.
+- ✅ **Docs:** `docs/contracts/ADMIN_CONTRACT.md` (Overview + `/admin/users` parity).
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 17, 2026.
+
+**Next (P0):** Merge **develop → main** via PR; smoke `/admin/users` subscription filters vs dashboard counts on staging.
+
+**Next (P1):** None for this patch.
+
+---
+
 ## 🚀 **Latest: Admin Talent hard delete — FK repair + observability (April 14, 2026)**
 
 **ADMIN / DB / SENTRY** — April 14, 2026

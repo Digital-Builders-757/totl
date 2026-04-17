@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 14, 2026 (admin Talent **hard delete** FK repair migration + delete-user observability + `supabase/diagnostics/auth-user-delete-fk-audit.sql`; prior: **Suspend User** / **Reinstate User**, `/admin/users` list hardening, mobile drawer / dialog stacking, public gig errors, session-ready probe)
+**Last Updated:** April 17, 2026 (`/admin/users` subscription column + filters + billing dialog; admin dashboard paid-talent headcount parity with unknown-plan bucket; prior: admin Talent **hard delete** FK repair, **Suspend User** / **Reinstate User**, `/admin/users` list hardening, mobile drawer / dialog stacking)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
