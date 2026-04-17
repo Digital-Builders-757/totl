@@ -573,6 +573,7 @@ export type Database = {
       profiles: {
         Row: {
           account_type: Database["public"]["Enums"]["account_type_enum"]
+          admin_new_member_email_sent_at: string | null
           avatar_path: string | null
           avatar_url: string | null
           bio: string | null
@@ -591,9 +592,11 @@ export type Database = {
           suspension_reason: string | null
           updated_at: string
           website: string | null
+          welcome_email_sent_at: string | null
         }
         Insert: {
           account_type?: Database["public"]["Enums"]["account_type_enum"]
+          admin_new_member_email_sent_at?: string | null
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -612,9 +615,11 @@ export type Database = {
           suspension_reason?: string | null
           updated_at?: string
           website?: string | null
+          welcome_email_sent_at?: string | null
         }
         Update: {
           account_type?: Database["public"]["Enums"]["account_type_enum"]
+          admin_new_member_email_sent_at?: string | null
           avatar_path?: string | null
           avatar_url?: string | null
           bio?: string | null
@@ -633,6 +638,7 @@ export type Database = {
           suspension_reason?: string | null
           updated_at?: string
           website?: string | null
+          welcome_email_sent_at?: string | null
         }
         Relationships: []
       }
@@ -1035,6 +1041,7 @@ export type Database = {
       }
       test_enum_casting: { Args: { test_role: string }; Returns: string }
       test_trigger_function_exists: { Args: never; Returns: boolean }
+      totl_user_is_admin: { Args: never; Returns: boolean }
       validate_gig_reference_links: { Args: { links: Json }; Returns: boolean }
     }
     Enums: {
@@ -1058,6 +1065,7 @@ export type Database = {
         | "new_application"
         | "application_accepted"
         | "application_rejected"
+        | "new_member_signup"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
     }
@@ -1209,6 +1217,7 @@ export const Constants = {
         "new_application",
         "application_accepted",
         "application_rejected",
+        "new_member_signup",
       ],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],

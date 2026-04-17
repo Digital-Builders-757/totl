@@ -28,7 +28,8 @@ export type EmailTemplate =
   | "client-application-rejected"
   | "client-application-followup-applicant"
   | "client-application-followup-admin"
-  | "client-application-existing-user-login";
+  | "client-application-existing-user-login"
+  | "admin-new-member-alert";
 
 /**
  * Send an email using Resend

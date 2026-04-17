@@ -197,6 +197,31 @@ export function generateWelcomeEmail(data: EmailTemplateData): EmailTemplate {
   };
 }
 
+/** Admin inbox alert when a new talent registers. Copy is placeholder until client approval. */
+export function generateAdminNewMemberAlertEmail(data: {
+  memberDisplayName: string;
+  memberEmail: string;
+  usersUrl: string;
+}): EmailTemplate {
+  const content = `
+    <h1>New talent signup</h1>
+    <p><strong>${escapeHtml(data.memberDisplayName)}</strong> (${escapeHtml(data.memberEmail)}) registered.</p>
+    <p><em>Client-approved subject/body/branding TBD — this template is structured for easy swap-in.</em></p>
+    <div style="text-align: center; margin: 24px 0;">
+      <a href="${escapeHtml(data.usersUrl)}" class="button">Open Admin Users</a>
+    </div>
+    <p style="font-size: 14px; color: #666;">You can review and manage accounts under Admin → Users.</p>
+    <p>
+      Best regards,<br>
+      <strong>TOTL Agency (automated)</strong>
+    </p>
+  `;
+  return {
+    subject: "TOTL: New member registered",
+    html: createBaseTemplate("New member alert", content, "Admin notification"),
+  };
+}
+
 export function generateVerificationEmail(data: EmailTemplateData): EmailTemplate {
   const content = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

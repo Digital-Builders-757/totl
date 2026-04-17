@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { ensureProfileExists } from "@/lib/actions/auth-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { decidePostAuthRedirect } from "@/lib/routing/decide-redirect";
+import { processTalentOnboardingSideEffects } from "@/lib/server/onboarding/talent-onboarding-side-effects";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { determineDestination } from "@/lib/utils/determine-destination";
 import { logger } from "@/lib/utils/logger";
@@ -104,12 +105,17 @@ export async function getBootState(params?: {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, account_type, display_name")
+      .select(
+        "role, account_type, display_name, email_verified, welcome_email_sent_at, admin_new_member_email_sent_at"
+      )
       .eq("id", user.id)
       .maybeSingle<{
         role: Database["public"]["Enums"]["user_role"] | null;
         account_type: Database["public"]["Enums"]["account_type_enum"] | null;
         display_name: string | null;
+        email_verified: boolean | null;
+        welcome_email_sent_at: string | null;
+        admin_new_member_email_sent_at: string | null;
       }>();
 
     const role = (profile?.role ?? null) as UserRole;
@@ -187,6 +193,16 @@ export async function getBootState(params?: {
       });
     }
 
+    if (profile && role === "talent") {
+      await processTalentOnboardingSideEffects(user, {
+        role: profile.role,
+        display_name: profile.display_name,
+        email_verified: profile.email_verified,
+        welcome_email_sent_at: profile.welcome_email_sent_at,
+        admin_new_member_email_sent_at: profile.admin_new_member_email_sent_at,
+      });
+    }
+
     return {
       userId: user.id,
       email: user.email ?? null,
@@ -242,12 +258,17 @@ export async function getBootStateRedirect(params?: {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role, account_type, display_name")
+      .select(
+        "role, account_type, display_name, email_verified, welcome_email_sent_at, admin_new_member_email_sent_at"
+      )
       .eq("id", user.id)
       .maybeSingle<{
         role: Database["public"]["Enums"]["user_role"] | null;
         account_type: Database["public"]["Enums"]["account_type_enum"] | null;
         display_name: string | null;
+        email_verified: boolean | null;
+        welcome_email_sent_at: string | null;
+        admin_new_member_email_sent_at: string | null;
       }>();
 
     // If profile query fails or profile missing, return with reason
@@ -327,6 +348,16 @@ export async function getBootStateRedirect(params?: {
         account_type: (accountType === "unassigned" ? null : accountType) as
           | Database["public"]["Enums"]["account_type_enum"]
           | null,
+      });
+    }
+
+    if (role === "talent") {
+      await processTalentOnboardingSideEffects(user, {
+        role: profile.role,
+        display_name: profile.display_name,
+        email_verified: profile.email_verified,
+        welcome_email_sent_at: profile.welcome_email_sent_at,
+        admin_new_member_email_sent_at: profile.admin_new_member_email_sent_at,
       });
     }
 
