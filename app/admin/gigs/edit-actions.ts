@@ -1,9 +1,11 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 
 import type { GigReferenceLinkFormRow } from "@/lib/gig-reference-links";
 import { parseReferenceLinksForDatabase } from "@/lib/gig-reference-links";
+import { validateClientOpportunityRequired } from "@/lib/opportunity-form-helpers";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -46,6 +48,30 @@ export async function updateGigAsAdminAction(input: {
     return { ok: false, error: "Not allowed" };
   }
 
+  const validated = validateClientOpportunityRequired({
+    title: input.title,
+    description: input.description,
+    category: input.category,
+    location: input.location,
+    duration: input.duration,
+    compensation: input.compensation,
+    date: input.date,
+  });
+
+  if (!validated.ok) {
+    logger.warn("[updateGigAsAdminAction] Required field validation failed", {
+      surface: "admin-edit",
+      mode: "edit",
+      gigId: input.gigId,
+      validation: "required_fields",
+      missingFields: validated.missingFields,
+      referenceLinkRowCount: input.referenceLinks?.length ?? 0,
+    });
+    return { ok: false, error: validated.message };
+  }
+
+  const v = validated.data;
+
   const { data: gigRow, error: gigFetchError } = await supabase
     .from("gigs")
     .select("id")
@@ -58,6 +84,13 @@ export async function updateGigAsAdminAction(input: {
 
   const linksResult = parseReferenceLinksForDatabase(input.referenceLinks ?? []);
   if (!linksResult.ok) {
+    logger.warn("[updateGigAsAdminAction] Reference links validation failed", {
+      surface: "admin-edit",
+      mode: "edit",
+      gigId: input.gigId,
+      validation: "reference_links",
+      referenceLinkRowCount: input.referenceLinks?.length ?? 0,
+    });
     return { ok: false, error: linksResult.error };
   }
 
@@ -73,13 +106,13 @@ export async function updateGigAsAdminAction(input: {
     | "application_deadline"
     | "reference_links"
   > = {
-    title: input.title,
-    description: input.description,
-    category: input.category,
-    location: input.location,
-    compensation: input.compensation,
-    duration: input.duration,
-    date: input.date,
+    title: v.title,
+    description: v.description,
+    category: v.category,
+    location: v.location,
+    compensation: v.compensation,
+    duration: v.duration,
+    date: v.date,
     application_deadline: input.application_deadline?.trim()
       ? input.application_deadline.trim()
       : null,
@@ -89,8 +122,16 @@ export async function updateGigAsAdminAction(input: {
   const { error: gigUpdateError } = await supabase.from("gigs").update(updatePayload).eq("id", input.gigId);
 
   if (gigUpdateError) {
-    logger.error("[updateGigAsAdminAction] update failed", gigUpdateError);
-    return { ok: false, error: gigUpdateError.message ?? "Failed to update opportunity" };
+    const debugId = randomUUID().replace(/-/g, "").slice(0, 12);
+    logger.error("[updateGigAsAdminAction] update failed", gigUpdateError, {
+      surface: "admin-edit",
+      mode: "edit",
+      gigId: input.gigId,
+      validation: "database_update",
+      debugId,
+      referenceLinkRowCount: input.referenceLinks?.length ?? 0,
+    });
+    return { ok: false, error: `Could not save changes. (Ref: ${debugId})` };
   }
 
   revalidatePath("/");

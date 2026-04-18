@@ -31,7 +31,14 @@ import {
   type GigReferenceLinkFormRow,
   referenceLinkKindLabel,
 } from "@/lib/gig-reference-links";
+import {
+  categoryForOpportunitySelect,
+  fieldErrorsFromMissing,
+  selectValueFromCategory,
+  validateClientOpportunityRequired,
+} from "@/lib/opportunity-form-helpers";
 import { logger } from "@/lib/utils/logger";
+import { cn } from "@/lib/utils/utils";
 
 const emptyForm = {
   title: "",
@@ -73,11 +80,15 @@ export function PostGigClient({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState(() => ({
     ...emptyForm,
     ...initialValues,
     referenceLinks: initialValues?.referenceLinks ?? emptyForm.referenceLinks,
+    category: initialValues
+      ? categoryForOpportunitySelect(initialValues.category)
+      : emptyForm.category,
   }));
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -87,10 +98,22 @@ export function PostGigClient({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
+    setFieldErrors((prev) => {
+      if (!prev[id]) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleSelectChange = (value: string) => {
+    setFieldErrors((prev) => {
+      if (!prev.category) return prev;
+      const next = { ...prev };
+      delete next.category;
+      return next;
+    });
     setFormData((prev) => ({ ...prev, category: value }));
   };
 
@@ -126,6 +149,7 @@ export function PostGigClient({
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setFieldErrors({});
 
     if (!user) {
       setError(
@@ -137,23 +161,87 @@ export function PostGigClient({
       return;
     }
 
+    const surfaceTag = isAdminSurface
+      ? mode === "edit"
+        ? "admin-edit"
+        : "admin-create"
+      : mode === "edit"
+        ? "client-edit"
+        : "client-create";
+
+    const validation = validateClientOpportunityRequired({
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      location: formData.location,
+      duration: formData.duration,
+      compensation: formData.compensation,
+      date: formData.date,
+    });
+
+    if (!validation.ok) {
+      setFieldErrors(fieldErrorsFromMissing(validation.missingFields));
+      setError(validation.message);
+      setIsSubmitting(false);
+      logger.warn("[PostGigClient] Client validation failed", {
+        surface: surfaceTag,
+        mode,
+        validation: "required_fields",
+        missingFields: validation.missingFields,
+        referenceLinkRowCount: formData.referenceLinks.length,
+        hasImageAttempt: Boolean(imageFile && imageFile.size > 0),
+      });
+      return;
+    }
+
+    const trimmed = validation.data;
+
     try {
       if (mode === "edit") {
-        if (!gigId) throw new Error("Missing opportunity identifier");
+        if (!gigId) {
+          logger.error(
+            "[PostGigClient] Missing gigId in edit mode",
+            new Error("missing gigId"),
+            { surface: surfaceTag, mode }
+          );
+          setError("Something went wrong. Refresh the page and try again.");
+          setIsSubmitting(false);
+          return;
+        }
         const payload = {
           gigId,
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          location: formData.location,
-          compensation: formData.compensation,
-          duration: formData.duration,
-          date: formData.date,
-          application_deadline: formData.application_deadline || null,
+          title: trimmed.title,
+          description: trimmed.description,
+          category: trimmed.category,
+          location: trimmed.location,
+          compensation: trimmed.compensation,
+          duration: trimmed.duration,
+          date: trimmed.date,
+          application_deadline: formData.application_deadline?.trim()
+            ? formData.application_deadline.trim()
+            : null,
           referenceLinks: formData.referenceLinks,
         };
         const result = isAdminSurface ? await updateGigAsAdminAction(payload) : await updateGigAction(payload);
-        if (!result.ok) throw new Error(result.error);
+        if (!result.ok) {
+          const message =
+            typeof result.error === "string" && result.error.trim()
+              ? result.error
+              : "We couldn’t save your changes. Please try again.";
+          logger.warn("[PostGigClient] Update action returned error", {
+            surface: surfaceTag,
+            mode,
+            gigId,
+            validation: "server_rejected",
+            hasServerMessage: Boolean(
+              typeof result.error === "string" && result.error.trim()
+            ),
+            referenceLinkRowCount: formData.referenceLinks.length,
+          });
+          setError(message);
+          setIsSubmitting(false);
+          return;
+        }
         toast({
           title: "Opportunity updated",
           description: isAdminSurface
@@ -162,19 +250,39 @@ export function PostGigClient({
         });
       } else {
         const result = await createGigAction({
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          location: formData.location,
-          compensation: formData.compensation,
-          duration: formData.duration,
-          date: formData.date,
-          application_deadline: formData.application_deadline || null,
+          title: trimmed.title,
+          description: trimmed.description,
+          category: trimmed.category,
+          location: trimmed.location,
+          compensation: trimmed.compensation,
+          duration: trimmed.duration,
+          date: trimmed.date,
+          application_deadline: formData.application_deadline?.trim()
+            ? formData.application_deadline.trim()
+            : null,
           imageFile: imageFile,
           referenceLinks: formData.referenceLinks,
         });
 
-        if (!result.ok) throw new Error(result.error);
+        if (!result.ok) {
+          const message =
+            typeof result.error === "string" && result.error.trim()
+              ? result.error
+              : "We couldn’t create this opportunity. Please try again.";
+          logger.warn("[PostGigClient] Create action returned error", {
+            surface: surfaceTag,
+            mode,
+            validation: "server_rejected",
+            hasServerMessage: Boolean(
+              typeof result.error === "string" && result.error.trim()
+            ),
+            referenceLinkRowCount: formData.referenceLinks.length,
+            hasImageAttempt: Boolean(imageFile && imageFile.size > 0),
+          });
+          setError(message);
+          setIsSubmitting(false);
+          return;
+        }
 
         toast({
           title: "Opportunity Posted Successfully!",
@@ -189,13 +297,23 @@ export function PostGigClient({
         router.push("/client/dashboard");
       }
     } catch (err) {
-      logger.error(mode === "edit" ? "Error updating gig" : "Error creating gig", err);
+      logger.error(
+        mode === "edit" ? "[PostGigClient] Error updating gig" : "[PostGigClient] Error creating gig",
+        err,
+        {
+          surface: surfaceTag,
+          mode,
+          gigId: gigId ?? null,
+          hasImageAttempt: Boolean(imageFile && imageFile.size > 0),
+          referenceLinkRowCount: formData.referenceLinks.length,
+        }
+      );
       setError(
-        err instanceof Error
+        err instanceof Error && err.message.trim()
           ? err.message
           : mode === "edit"
-            ? "Failed to update opportunity"
-            : "Failed to create opportunity"
+            ? "Failed to update opportunity."
+            : "Failed to create opportunity."
       );
     } finally {
       setIsSubmitting(false);
@@ -324,8 +442,15 @@ export function PostGigClient({
                   value={formData.title}
                   onChange={handleChange}
                   required
-                  className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                  aria-invalid={Boolean(fieldErrors.title)}
+                  className={cn(
+                    "bg-background text-foreground placeholder:text-muted-foreground/70",
+                    fieldErrors.title && "border-destructive"
+                  )}
                 />
+                {fieldErrors.title ? (
+                  <p className="text-sm text-destructive">{fieldErrors.title}</p>
+                ) : null}
               </div>
 
               <div className="space-y-2">
@@ -337,17 +462,31 @@ export function PostGigClient({
                   onChange={handleChange}
                   rows={4}
                   required
-                  className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                  aria-invalid={Boolean(fieldErrors.description)}
+                  className={cn(
+                    "bg-background text-foreground placeholder:text-muted-foreground/70",
+                    fieldErrors.description && "border-destructive"
+                  )}
                 />
+                {fieldErrors.description ? (
+                  <p className="text-sm text-destructive">{fieldErrors.description}</p>
+                ) : null}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="category">Opportunity Type *</Label>
-                  <Select value={formData.category} onValueChange={handleSelectChange}>
+                  <Select
+                    value={selectValueFromCategory(formData.category)}
+                    onValueChange={handleSelectChange}
+                  >
                     <SelectTrigger
                       id="category"
-                      className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                      aria-invalid={Boolean(fieldErrors.category)}
+                      className={cn(
+                        "bg-background text-foreground placeholder:text-muted-foreground/70",
+                        fieldErrors.category && "border-destructive"
+                      )}
                     >
                       <SelectValue placeholder="Select opportunity type" />
                     </SelectTrigger>
@@ -359,6 +498,9 @@ export function PostGigClient({
                       ))}
                     </SelectContent>
                   </Select>
+                  {fieldErrors.category ? (
+                    <p className="text-sm text-destructive">{fieldErrors.category}</p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="location">Location *</Label>
@@ -368,8 +510,15 @@ export function PostGigClient({
                     value={formData.location}
                     onChange={handleChange}
                     required
-                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                    aria-invalid={Boolean(fieldErrors.location)}
+                    className={cn(
+                      "bg-background text-foreground placeholder:text-muted-foreground/70",
+                      fieldErrors.location && "border-destructive"
+                    )}
                   />
+                  {fieldErrors.location ? (
+                    <p className="text-sm text-destructive">{fieldErrors.location}</p>
+                  ) : null}
                 </div>
               </div>
 
@@ -382,8 +531,15 @@ export function PostGigClient({
                     value={formData.duration}
                     onChange={handleChange}
                     required
-                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                    aria-invalid={Boolean(fieldErrors.duration)}
+                    className={cn(
+                      "bg-background text-foreground placeholder:text-muted-foreground/70",
+                      fieldErrors.duration && "border-destructive"
+                    )}
                   />
+                  {fieldErrors.duration ? (
+                    <p className="text-sm text-destructive">{fieldErrors.duration}</p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="compensation">Compensation *</Label>
@@ -393,8 +549,15 @@ export function PostGigClient({
                     value={formData.compensation}
                     onChange={handleChange}
                     required
-                    className="bg-background text-foreground placeholder:text-muted-foreground/70"
+                    aria-invalid={Boolean(fieldErrors.compensation)}
+                    className={cn(
+                      "bg-background text-foreground placeholder:text-muted-foreground/70",
+                      fieldErrors.compensation && "border-destructive"
+                    )}
                   />
+                  {fieldErrors.compensation ? (
+                    <p className="text-sm text-destructive">{fieldErrors.compensation}</p>
+                  ) : null}
                 </div>
               </div>
 
@@ -501,8 +664,15 @@ export function PostGigClient({
                     value={formData.date}
                     onChange={handleChange}
                     required
-                    className="bg-background text-foreground"
+                    aria-invalid={Boolean(fieldErrors.date)}
+                    className={cn(
+                      "bg-background text-foreground",
+                      fieldErrors.date && "border-destructive"
+                    )}
                   />
+                  {fieldErrors.date ? (
+                    <p className="text-sm text-destructive">{fieldErrors.date}</p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="application_deadline">Submission Deadline</Label>

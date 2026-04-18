@@ -8,6 +8,24 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Opportunity create/edit — validation + Radix Select hardening (April 18, 2026)**
+
+**CLIENT / ADMIN / GIGS** — April 18, 2026
+- ✅ **Root cause:** `PostGigClient` bound Radix **`Select`** to **`""`** or DB categories (e.g. **`other`**) with no matching **`SelectItem`**, causing client-side runtime errors; Career Builder create lacked server-side required-field checks; empty **`File`** could be passed to upload.
+- ✅ **`lib/opportunity-form-helpers.ts`:** `categoryForOpportunitySelect`, `selectValueFromCategory`, `validateClientOpportunityRequired`, `validateAdminCreateGigFields`, field error helpers; Vitest in **`lib/opportunity-form-helpers.test.ts`**.
+- ✅ **`PostGigClient`:** Safe Select value, pre-submit validation, inline + banner errors, structured **`logger.warn` / `logger.error`**; normalized category in state when **`initialValues`** present.
+- ✅ **Edit pages:** Client + admin gig edit pass **`categoryForOpportunitySelect(gig.category)`** into initial values.
+- ✅ **Server actions:** **`createGigAction`**, **`updateGigAction`**, **`updateGigAsAdminAction`**, admin **`createGig`** — trim/validate, image only when **`size > 0`**, **`logger.warn`** on user-fixable validation, **`debugId`** + safe user copy on DB failures; reference-links failures logged.
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — Radix Select + opportunity category mismatch.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx vitest run lib/opportunity-form-helpers.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Quick manual smoke: **Career Builder post opportunity** + **admin create opportunity** with missing required fields (expect inline/banner errors, no crash); edit gig with legacy **`other`** category.
+
+**Next (P1):** Optional Playwright regression for empty-category submit path.
+
+---
+
 ## 🚀 **Latest: Repo hygiene + documentation audit (April 18, 2026)**
 
 **DOCS / TOOLING / ROOT** — April 18, 2026
