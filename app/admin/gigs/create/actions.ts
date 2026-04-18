@@ -1,10 +1,12 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { uploadGigImage, deleteGigImage } from "@/lib/actions/gig-actions";
 import type { GigReferenceLinkFormRow } from "@/lib/gig-reference-links";
 import { parseReferenceLinksForDatabase } from "@/lib/gig-reference-links";
+import { validateAdminCreateGigFields } from "@/lib/opportunity-form-helpers";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -66,17 +68,20 @@ export async function createGig(formData: FormData) {
   }
 
   // Extract form data
-  const title = formData.get("title") as string;
-  const category = formData.get("category") as string;
-  const location = formData.get("location") as string;
-  const description = formData.get("description") as string;
+  const titleRaw = formData.get("title");
+  const categoryRaw = formData.get("category");
+  const locationRaw = formData.get("location");
+  const descriptionRaw = formData.get("description");
+  const title = typeof titleRaw === "string" ? titleRaw : "";
+  const category = typeof categoryRaw === "string" ? categoryRaw : "";
+  const location = typeof locationRaw === "string" ? locationRaw : "";
+  const description = typeof descriptionRaw === "string" ? descriptionRaw : "";
   const startDate = formData.get("start_date") as string;
   const applicationDeadlineRaw = formData.get("application_deadline") as string | null;
   const applicationDeadline =
     applicationDeadlineRaw?.trim() ? applicationDeadlineRaw.trim() : null;
   const compensationMin = formData.get("compensation_min") as string;
   const compensationMax = formData.get("compensation_max") as string;
-  const imageFile = formData.get("gig_image") as File | null;
 
   // Get requirements (they come as multiple form fields)
   const requirements: string[] = [];
@@ -86,10 +91,29 @@ export async function createGig(formData: FormData) {
     }
   });
 
-  // Validate required fields
-  if (!title || !description || !category || !location) {
-    return { error: "Please fill in all required fields" };
+  const imageFile = formData.get("gig_image");
+  const imageFileTyped = imageFile instanceof File ? imageFile : null;
+
+  const adminValidated = validateAdminCreateGigFields({
+    title,
+    description,
+    category,
+    location,
+  });
+
+  if (!adminValidated.ok) {
+    logger.warn("[createGig] Admin create validation failed", {
+      surface: "admin-create",
+      mode: "create",
+      validation: "required_fields",
+      missingFields: adminValidated.missingFields,
+      referenceLinkRowCount: referenceLinkRows.length,
+      hasImageAttempt: Boolean(imageFileTyped && imageFileTyped.size > 0),
+    });
+    return { error: adminValidated.message };
   }
+
+  const { title: t, description: desc, category: cat, location: loc } = adminValidated.data;
 
   // Format compensation
   const minComp = parseInt(compensationMin) || 0;
@@ -98,13 +122,20 @@ export async function createGig(formData: FormData) {
 
   const linksResult = parseReferenceLinksForDatabase(referenceLinkRows);
   if (!linksResult.ok) {
+    logger.warn("[createGig] Reference links validation failed", {
+      surface: "admin-create",
+      mode: "create",
+      validation: "reference_links",
+      referenceLinkRowCount: referenceLinkRows.length,
+      hasImageAttempt: Boolean(imageFileTyped && imageFileTyped.size > 0),
+    });
     return { error: linksResult.error };
   }
 
   // Upload image if provided (before DB insert to enable cleanup on failure)
   let imageUrl: string | null = null;
-  if (imageFile && imageFile.size > 0) {
-    const uploadResult = await uploadGigImage(imageFile);
+  if (imageFileTyped && imageFileTyped.size > 0) {
+    const uploadResult = await uploadGigImage(imageFileTyped);
     if (!uploadResult.ok) {
       // Include debug_id in error message for tracing
       const errorMsg = uploadResult.debug_id
@@ -120,10 +151,10 @@ export async function createGig(formData: FormData) {
     .from("gigs")
     .insert({
       client_id: user.id,
-      title,
-      description,
-      category,
-      location,
+      title: t,
+      description: desc,
+      category: cat,
+      location: loc,
       compensation,
       duration: "TBD", // Default duration
       date: startDate || new Date().toISOString().split("T")[0],
@@ -137,14 +168,30 @@ export async function createGig(formData: FormData) {
 
   // If DB insert fails but image was uploaded, clean up orphaned image
   if (insertError && imageUrl) {
-    logger.error("Error creating gig", insertError);
+    const debugId = randomUUID().replace(/-/g, "").slice(0, 12);
+    logger.error("[createGig] Error creating gig", insertError, {
+      surface: "admin-create",
+      mode: "create",
+      validation: "database_insert",
+      debugId,
+      hadUploadedImage: true,
+      referenceLinkRowCount: referenceLinkRows.length,
+    });
     await deleteGigImage(imageUrl);
-    return { error: `Failed to create gig: ${insertError.message}` };
+    return { error: `Failed to create opportunity. (Ref: ${debugId})` };
   }
 
   if (insertError) {
-    logger.error("Error creating gig", insertError);
-    return { error: `Failed to create gig: ${insertError.message}` };
+    const debugId = randomUUID().replace(/-/g, "").slice(0, 12);
+    logger.error("[createGig] Error creating gig", insertError, {
+      surface: "admin-create",
+      mode: "create",
+      validation: "database_insert",
+      debugId,
+      hadUploadedImage: false,
+      referenceLinkRowCount: referenceLinkRows.length,
+    });
+    return { error: `Failed to create opportunity. (Ref: ${debugId})` };
   }
 
   // Revalidate relevant pages

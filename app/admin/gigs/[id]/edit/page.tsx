@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { PostGigClient } from "@/app/post-gig/post-gig-client";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { referenceLinksToFormRows } from "@/lib/gig-reference-links";
+import { categoryForOpportunitySelect } from "@/lib/opportunity-form-helpers";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
 import { logger } from "@/lib/utils/logger";
@@ -73,7 +74,7 @@ export default async function AdminEditGigPage({ params }: AdminEditGigPageProps
   const initialValues = {
     title: gig.title,
     description: gig.description,
-    category: gig.category,
+    category: categoryForOpportunitySelect(gig.category),
     location: gig.location,
     compensation: gig.compensation,
     duration: gig.duration,

@@ -13,7 +13,7 @@ export async function updateProfile(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "You need to be signed in to update your profile." };
   }
 
   const displayName = formData.get("display_name") as string;
@@ -26,7 +26,7 @@ export async function updateProfile(formData: FormData) {
 
   if (error) {
     logger.error("Error updating profile:", error);
-    return { error: error.message };
+    return { error: "We couldn’t save your display name. Please try again." };
   }
 
   // Revalidate the dashboard path to refresh the data
@@ -44,7 +44,7 @@ export async function createTalentProfile(formData: FormData) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { error: "Not authenticated" };
+    return { error: "You need to be signed in to update your profile." };
   }
 
   // Extract form data
@@ -92,7 +92,7 @@ export async function createTalentProfile(formData: FormData) {
 
   if (error) {
     logger.error("Error with talent profile:", error);
-    return { error: error.message };
+    return { error: "We couldn’t save your profile details. Please try again." };
   }
 
   // Revalidate the dashboard path to refresh the data

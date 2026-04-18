@@ -20,6 +20,7 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **User-facing toasts or alerts show raw Postgres / RLS / `fetch` errors:** Hurts trust and reads “broken app.” **Fix:** Map failures with **`userSafeMessage`** from `@/lib/errors/user-safe-message` (or fixed copy from server actions); log full detail with **`logger`** / **`logActionFailure`** from `@/lib/errors/log-action-failure`. **Prevention:** Do not pass **`error.message`** from Supabase or API JSON straight into UI; use route **`error.tsx`** + calm copy for thrown segment errors (see `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md`).
 - **Sentry: `TypeError: fetch failed` on `/gigs/[id]` logged as “Gig not found” (TOTLMODELAGENCY-3R-style):** The Supabase client can fail at the transport layer (`fetch failed`) while the gig may still exist. Treating **any** query error like a missing row returns **404** and mislabels Sentry.
   - **Fix:** On `.single()` gig loads, **`PGRST116`** only → **`notFound()`** without **`logger.error`**; all other errors → **`logger.error("Failed to load gig", …, { gigId })`** and **rethrow** so the route can surface an error boundary / **5xx**.
   - **Prevention:** Do not treat every failed `.single()` like a missing row (for example `if (error || !gig) { logger.error("not found"); notFound(); }`); branch on **`error.code`** (and keep invalid id guards, e.g. **`isValidUuid`**, separate from DB outages).
@@ -54,6 +55,9 @@ npm run build
 - **Radix Dialog / drawer: full-screen dim overlay but no visible panel (“black screen”):** `DialogContent` is **`fixed`** + **`z-50`** in **`components/ui/dialog.tsx`**, but **`.panel-frosted`** in **`app/globals.css`** sets **`position: relative`** in **`@layer utilities`** after **`@tailwind utilities`**, so **`relative` can win** over **`fixed`** on the same node. The overlay stays **`fixed inset-0`**, while the panel is not stacked as intended.
   - **Fix:** On affected **`DialogContent`** instances, add **`!fixed z-[51]`** (or any **`z` strictly above the overlay**) so the panel stays fixed and paints above the backdrop. Used for admin/client mobile nav drawers and admin users disable/delete confirmations.
   - **Prevention:** Prefer a composable surface class that does not set **`position`** when used on portaled overlays, or document that **`panel-frosted` + Dialog** must pair with **`!fixed`**.
+- **Radix Select / opportunity form: generic client-side exception on create or edit:** A controlled **`Select`** from **`components/ui/select.tsx`** must use **`value={undefined}`** when nothing is selected (never **`""`**), and the **`value` must match a `SelectItem`**. DB categories such as **`other`** are not in **`VISIBLE_GIG_CATEGORIES`**, so loading them into **`value`** without mapping can crash the page.
+  - **Fix:** Use **`selectValueFromCategory`** and **`categoryForOpportunitySelect`** from **`lib/opportunity-form-helpers.ts`** (see **`PostGigClient`** and admin/client edit **`initialValues`**).
+  - **Prevention:** Normalize legacy / non-visible categories before binding the Select; keep server-side validation in **`createGigAction`** / **`updateGigAction`** aligned with the same rules.
 - **Import Path Errors:** `Module not found: Can't resolve '@/lib/supabase/supabase-admin-client'`
   - **Fix:** Use correct path `@/lib/supabase-admin-client`
 - **Missing Import Errors:** `ReferenceError: createNameSlug is not defined`

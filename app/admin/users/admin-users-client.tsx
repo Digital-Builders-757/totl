@@ -53,9 +53,10 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { getRoleDisplayName } from "@/lib/constants/user-roles";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { getPlanDisplayName, getSubscriptionStatusColor, getSubscriptionStatusText } from "@/lib/subscription";
 import { cn } from "@/lib/utils";
-import { logger } from "@/lib/utils/logger";
 
 type SubscriptionFilter = "all" | "paid" | "free" | "past_due" | "canceled";
 
@@ -254,10 +255,13 @@ export function AdminUsersClient({
       setDeleteConfirmChecked(false);
       router.refresh();
     } catch (error) {
-      logger.error("Error deleting user", error);
+      logActionFailure("admin.users.delete", error, { userId: userIdToDelete });
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete user",
+        title: "Couldn’t delete user",
+        description: userSafeMessage(
+          error,
+          "We couldn’t complete delete. Try again, or suspend the user if the problem continues."
+        ),
         variant: "destructive",
       });
     } finally {
@@ -328,10 +332,10 @@ export function AdminUsersClient({
       setSuspendReason("");
       router.refresh();
     } catch (error) {
-      logger.error("Error suspending user", error);
+      logActionFailure("admin.users.suspend", error, { userId: userIdToSuspend });
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to suspend user",
+        title: "Couldn’t suspend user",
+        description: userSafeMessage(error, "We couldn’t suspend this account. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -373,10 +377,10 @@ export function AdminUsersClient({
       setReinstateConfirmChecked(false);
       router.refresh();
     } catch (error) {
-      logger.error("Error reinstating user", error);
+      logActionFailure("admin.users.reinstate", error, { userId: userIdToReinstate });
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to reinstate user",
+        title: "Couldn’t reinstate user",
+        description: userSafeMessage(error, "We couldn’t reinstate this account. Please try again."),
         variant: "destructive",
       });
     } finally {
@@ -412,10 +416,10 @@ export function AdminUsersClient({
       
       router.refresh();
     } catch (error) {
-      logger.error("Error updating user role", error);
+      logActionFailure("admin.users.updateRole", error, { userId, newRole });
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update user role",
+        title: "Couldn’t update role",
+        description: userSafeMessage(error, "We couldn’t update this user’s role. Please try again."),
         variant: "destructive",
       });
     } finally {

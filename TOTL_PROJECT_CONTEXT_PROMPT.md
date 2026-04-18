@@ -44,7 +44,7 @@
 - **Query Style:** Explicit column selections (`.select('id, role')`). `select('*')` is allowed only in vetted admin scripts.  
 - **Security:** RLS is always on. Use `auth.uid()` (via Supabase helpers) for filters. No service-role keys in browser bundles.  
 - **Component Boundaries:** Presentational components have zero side effects, zero fetches, and receive typed props.  
-- **Server Actions & Mutations:** Wrap in `try/catch`, log to `lib/error-logger`, return typed results.
+- **Server Actions & Mutations:** Wrap in `try/catch`, log with `logger` from `@/lib/utils/logger` (or `logActionFailure` from `@/lib/errors/log-action-failure`); use `@/lib/utils/error-logger` only for optional UX/analytics helpers; return typed results with user-safe messages (`userSafeMessage` from `@/lib/errors/user-safe-message` when surfacing to clients).
 
 ---
 

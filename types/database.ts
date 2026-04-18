@@ -1066,6 +1066,10 @@ export type Database = {
         | "application_accepted"
         | "application_rejected"
         | "new_member_signup"
+        | "subscription_activated"
+        | "subscription_past_due"
+        | "subscription_cancel_at_period_end"
+        | "subscription_ended"
       subscription_status: "none" | "active" | "past_due" | "canceled"
       user_role: "talent" | "client" | "admin"
     }
@@ -1218,6 +1222,10 @@ export const Constants = {
         "application_accepted",
         "application_rejected",
         "new_member_signup",
+        "subscription_activated",
+        "subscription_past_due",
+        "subscription_cancel_at_period_end",
+        "subscription_ended",
       ],
       subscription_status: ["none", "active", "past_due", "canceled"],
       user_role: ["talent", "client", "admin"],

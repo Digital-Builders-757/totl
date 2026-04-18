@@ -2,7 +2,7 @@
 
 import { RouteErrorFallback } from "@/components/errors/route-error-fallback";
 
-export default function DashboardError({
+export default function AdminSegmentError({
   error,
   reset,
 }: {
@@ -13,9 +13,9 @@ export default function DashboardError({
     <RouteErrorFallback
       error={error}
       reset={reset}
-      title="Dashboard temporarily unavailable"
-      description="We encountered an issue loading your dashboard. Please try again in a moment."
-      logLabel="[talent/dashboard]"
+      title="Admin area hit a snag"
+      description="We couldn’t finish loading this admin screen. Try again, or return to the dashboard from the menu."
+      logLabel="[admin]"
     />
   );
 }

@@ -15,8 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
+import { useToast } from "@/components/ui/use-toast";
 import { cancelBooking, getClientBookings, updateBookingStatus } from "@/lib/actions/booking-actions";
-import { logger } from "@/lib/utils/logger";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import type { Database } from "@/types/supabase";
 
 const BookingsStatsOverview = dynamic(() => import("./components/bookings-stats-overview"), {
@@ -33,6 +35,7 @@ interface ClientBookingsClientProps {
 
 export default function ClientBookingsClient({ userId, initialBookings }: ClientBookingsClientProps) {
   const [activeTab, setActiveTab] = useState("all");
+  const { toast } = useToast();
 
   const {
     data: bookings = [],
@@ -74,10 +77,11 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
     const result = await cancelBooking({ bookingId });
     if (result.error) {
       mutate(previous, { revalidate: false });
-      alert(result.error);
-      logger.warn("[client/bookings] cancelBooking failed, rolled back optimistic state", {
-        bookingId,
-        error: result.error,
+      logActionFailure("client.bookings.cancel", new Error(result.error), { bookingId });
+      toast({
+        title: "Couldn’t cancel booking",
+        description: userSafeMessage(result.error, "We couldn’t cancel this booking. Try again."),
+        variant: "destructive",
       });
       return;
     }
@@ -95,11 +99,11 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
     const result = await updateBookingStatus({ bookingId, status });
     if (result.error) {
       mutate(previous, { revalidate: false });
-      alert(result.error);
-      logger.warn("[client/bookings] updateBookingStatus failed, rolled back optimistic state", {
-        bookingId,
-        status,
-        error: result.error,
+      logActionFailure("client.bookings.updateStatus", new Error(result.error), { bookingId, status });
+      toast({
+        title: "Couldn’t update booking",
+        description: userSafeMessage(result.error, "We couldn’t update this booking. Try again."),
+        variant: "destructive",
       });
       return;
     }
@@ -162,9 +166,9 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
         <div className="flex min-h-[100dvh] items-center justify-center px-4">
           <div className="panel-frosted card-backlit max-w-md rounded-2xl p-8 text-center">
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
-            <h2 className="mb-2 text-xl font-semibold">Error</h2>
+            <h2 className="mb-2 text-xl font-semibold">Bookings unavailable</h2>
             <p className="mb-4 text-[var(--oklch-text-muted)]">
-              {error instanceof Error ? error.message : "Failed to load bookings"}
+              {userSafeMessage(error, "We couldn’t load your bookings. Try again in a moment.")}
             </p>
             <Button onClick={() => mutate()}>Try Again</Button>
           </div>

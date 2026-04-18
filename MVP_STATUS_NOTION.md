@@ -8,6 +8,44 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Error experience + logging hardening (April 18, 2026)**
+
+**UX / OBSERVABILITY / DOCS** — April 18, 2026
+- ✅ **User-safe copy:** `lib/errors/user-safe-message.ts` maps auth/network/RLS/Stripe-style failures to calm, non-technical messages; Vitest in `lib/errors/user-safe-message.test.ts`.
+- ✅ **Structured failures:** `lib/errors/log-action-failure.ts` + `logActionFailure("flow.name", err, context)` on admin users, saved searches, bookings mutations, billing/subscribe client paths, onboarding account-type update.
+- ✅ **API:** `handleApiError` returns generic 500 JSON + `debugId` in details; full detail only in logs (`lib/api/api-utils.ts`).
+- ✅ **Boundaries:** Branded `app/global-error.tsx`; shared `RouteErrorFallback` + route `error.tsx` for talent dashboard, client dashboard, admin segment, client bookings.
+- ✅ **Server actions:** Safer return strings for notifications + legacy `app/dashboard/actions.ts`; billing/subscribe server throws use plain-language messages + logging.
+- ✅ **error-logger:** `lib/error-logger.ts` re-exports `@/lib/utils/error-logger`; `logError` now emits `logger.warn` in production (Sentry message, not dev-only).
+- ✅ **Docs:** `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md`; index link; `TOTL_PROJECT_CONTEXT_PROMPT.md` + `.cursorrules` logging guidance.
+- ✅ **Types:** `types/database.ts` regen (`npm run types:regen:dev`) so `types:check` matches remote schema.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Smoke: admin user actions, saved search save/delete, client bookings load + cancel/status, billing portal + subscribe checkout (expect safe toasts, no raw DB strings); merge **develop → main** if PR is open.
+
+**Next (P1):** Extend `userSafeMessage` from new Sentry fingerprints; replace remaining `console.*` in non-test `components/**` where appropriate.
+
+---
+
+## 🚀 **Latest: Opportunity create/edit — validation + Radix Select hardening (April 18, 2026)**
+
+**CLIENT / ADMIN / GIGS** — April 18, 2026
+- ✅ **Root cause:** `PostGigClient` bound Radix **`Select`** to **`""`** or DB categories (e.g. **`other`**) with no matching **`SelectItem`**, causing client-side runtime errors; Career Builder create lacked server-side required-field checks; empty **`File`** could be passed to upload.
+- ✅ **`lib/opportunity-form-helpers.ts`:** `categoryForOpportunitySelect`, `selectValueFromCategory`, `validateClientOpportunityRequired`, `validateAdminCreateGigFields`, field error helpers; Vitest in **`lib/opportunity-form-helpers.test.ts`**.
+- ✅ **`PostGigClient`:** Safe Select value, pre-submit validation, inline + banner errors, structured **`logger.warn` / `logger.error`**; normalized category in state when **`initialValues`** present.
+- ✅ **Edit pages:** Client + admin gig edit pass **`categoryForOpportunitySelect(gig.category)`** into initial values.
+- ✅ **Server actions:** **`createGigAction`**, **`updateGigAction`**, **`updateGigAsAdminAction`**, admin **`createGig`** — trim/validate, image only when **`size > 0`**, **`logger.warn`** on user-fixable validation, **`debugId`** + safe user copy on DB failures; reference-links failures logged.
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — Radix Select + opportunity category mismatch.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx vitest run lib/opportunity-form-helpers.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Quick manual smoke: **Career Builder post opportunity** + **admin create opportunity** with missing required fields (expect inline/banner errors, no crash); edit gig with legacy **`other`** category.
+
+**Next (P1):** Optional Playwright regression for empty-category submit path.
+
+---
+
 ## 🚀 **Latest: Repo hygiene + documentation audit (April 18, 2026)**
 
 **DOCS / TOOLING / ROOT** — April 18, 2026
@@ -5331,7 +5369,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 11, 2026*
-*Current Status: MVP Complete; Sentry-driven fixes for admin gigs RLS migration, cron logging, and admin create server action; ViZB/casting work on develop*
+*Last Updated: April 18, 2026*
+*Current Status: MVP Complete; error UX + structured logging hardening on develop; existing develop→main PR can carry this batch*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Push migration 20260411220101 to prod; PR develop→main; smoke admin gigs + cron; resolve Sentry 3G/3K/3N after verify*
+*Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*

@@ -665,7 +665,7 @@ Refer to `docs/USESEARCHPARAMS_SSR_GUIDE.md` for patterns.
 ### Code Quality & Error Handling
 
 * Wrap async operations in `try/catch`.
-* Use project error logging utilities (e.g., `lib/error-logger.ts`).
+* Use project error logging utilities: `logger` / `logActionFailure` (`@/lib/utils/logger`, `@/lib/errors/log-action-failure`); optional UX analytics via `@/lib/utils/error-logger` (re-exported from `@/lib/error-logger`).
 * Handle Supabase errors gracefully with meaningful messages.
 
 ---

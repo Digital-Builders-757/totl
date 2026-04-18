@@ -2,7 +2,7 @@
 
 import { RouteErrorFallback } from "@/components/errors/route-error-fallback";
 
-export default function DashboardError({
+export default function ClientBookingsRouteError({
   error,
   reset,
 }: {
@@ -13,9 +13,9 @@ export default function DashboardError({
     <RouteErrorFallback
       error={error}
       reset={reset}
-      title="Dashboard temporarily unavailable"
-      description="We encountered an issue loading your dashboard. Please try again in a moment."
-      logLabel="[talent/dashboard]"
+      title="Bookings couldn’t load"
+      description="We couldn’t load your bookings right now. Please try again in a moment."
+      logLabel="[client/bookings]"
     />
   );
 }

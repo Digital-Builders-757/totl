@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 
+import { logActionFailure } from "@/lib/errors/log-action-failure";
 import { getAppUrl, stripe } from "@/lib/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 
@@ -22,16 +23,16 @@ export async function createBillingPortalSession() {
     .maybeSingle();
 
   if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    throw new Error('Failed to fetch user profile');
+    logActionFailure("billing.createPortalSession.profile", profileError, { userId: user.id });
+    throw new Error("We couldn’t load your billing profile. Please try again.");
   }
 
   if (!profile || profile.role !== 'talent') {
-    throw new Error('Only talent users can access billing');
+    throw new Error("Billing is only available for talent accounts.");
   }
 
   if (!profile.stripe_customer_id) {
-    throw new Error('No Stripe customer found. Please subscribe first.');
+    throw new Error("Subscribe first to manage billing and payment methods.");
   }
 
   // 3. Create billing portal session
@@ -43,7 +44,10 @@ export async function createBillingPortalSession() {
   });
 
   if (!session.url) {
-    throw new Error('Failed to create billing portal session');
+    logActionFailure("billing.createPortalSession.stripe", new Error("missing session.url"), {
+      userId: user.id,
+    });
+    throw new Error("We couldn’t open the billing portal. Please try again.");
   }
 
   redirect(session.url);

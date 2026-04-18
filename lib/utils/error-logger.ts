@@ -46,12 +46,8 @@ class ErrorLogger {
 
     this.logs.push(logData);
 
-    // In production, you'd send this to your logging service
-    if (process.env.NODE_ENV === "development") {
-      logger.error("Error logged", undefined, { logData });
-    }
-
-    // You could also send to Supabase, Sentry, or other services here
+    // Sentry: warning-level message (not an exception) — keeps UX/analytics noise separate from real stack traces
+    logger.warn(`[errorLogger] ${context}`, { ...logData });
   }
 
   logAnalytics(

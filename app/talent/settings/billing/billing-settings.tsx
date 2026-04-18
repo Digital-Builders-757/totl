@@ -17,7 +17,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { isRedirectError } from "@/lib/is-redirect-error";
 import {
   getSubscriptionStatusText,
@@ -49,6 +52,7 @@ const glassCard =
   "panel-frosted min-w-0 border-white/10 bg-[var(--totl-surface-glass-strong)] text-white shadow-none";
 
 export function BillingSettings({ profile }: BillingSettingsProps) {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showPlanDetails, setShowPlanDetails] = useState(isActiveSubscriber(profile));
 
@@ -60,7 +64,15 @@ export function BillingSettings({ profile }: BillingSettingsProps) {
       if (isRedirectError(error)) {
         throw error;
       }
-      console.error("Billing portal error:", error);
+      logActionFailure("billing.portal.client", error);
+      toast({
+        title: "Billing portal unavailable",
+        description: userSafeMessage(
+          error,
+          "We couldn’t open the billing portal. Please try again in a moment."
+        ),
+        variant: "destructive",
+      });
       setIsLoading(false);
     }
   };

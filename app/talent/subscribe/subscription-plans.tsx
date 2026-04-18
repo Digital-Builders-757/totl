@@ -7,9 +7,13 @@ import { createTalentCheckoutSession } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { isRedirectError } from "@/lib/is-redirect-error";
 
 export function SubscriptionPlans() {
+  const { toast } = useToast();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   const handleSubscribe = async (plan: 'monthly' | 'annual') => {
@@ -20,9 +24,16 @@ export function SubscriptionPlans() {
       if (isRedirectError(error)) {
         throw error;
       }
-      console.error('Subscription error:', error);
+      logActionFailure("subscribe.checkout.client", error, { plan });
+      toast({
+        title: "Checkout couldn’t start",
+        description: userSafeMessage(
+          error,
+          "We couldn’t start subscription checkout. Please try again."
+        ),
+        variant: "destructive",
+      });
       setLoadingPlan(null);
-      // You could add toast notification here
     }
   };
 

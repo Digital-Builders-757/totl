@@ -30,6 +30,8 @@ import {
   type SavedSearch,
   type SavedSearchParams,
 } from "@/lib/actions/saved-search-actions";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { buildGigsUrl } from "@/lib/utils/saved-search-url";
 
 export interface SavedSearchesBarProps {
@@ -80,7 +82,12 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
       await fetchSearches();
       toast({ title: "Search saved", description: `"${name}" saved successfully.` });
     } else {
-      toast({ title: "Failed to save", description: result.error, variant: "destructive" });
+      logActionFailure("gigs.savedSearches.save", new Error(result.error));
+      toast({
+        title: "Couldn’t save search",
+        description: userSafeMessage(result.error, "We couldn’t save this search. Try again."),
+        variant: "destructive",
+      });
     }
   };
 
@@ -93,7 +100,12 @@ export function SavedSearchesBar({ currentParams }: SavedSearchesBarProps) {
       await fetchSearches();
       toast({ title: "Search deleted" });
     } else {
-      toast({ title: "Failed to delete", description: result.error, variant: "destructive" });
+      logActionFailure("gigs.savedSearches.delete", new Error(result.error), { searchId: search.id });
+      toast({
+        title: "Couldn’t delete search",
+        description: userSafeMessage(result.error, "We couldn’t remove this saved search. Try again."),
+        variant: "destructive",
+      });
     }
   };
 
