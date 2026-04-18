@@ -8,6 +8,19 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Error message handling bug fixes (April 18, 2026)**
+
+**BUG FIXES / UX** — April 18, 2026
+- ✅ **userSafeMessage logic:** Fixed to return original message instead of fallback when message doesn't look like stack/SQL dump; preserves carefully crafted server action error messages.
+- ✅ **Dead code removal:** Removed unused `userSafeActionError` export from `lib/errors/user-safe-message.ts`.
+- ✅ **Category normalization:** Removed redundant double-normalization in gig edit flows; normalization now happens once in `PostGigClient` state initializer.
+
+**Verification:** `npm run test:unit`, `npm run lint`, `npm run build` (with placeholder env vars) — ship run, April 18, 2026.
+
+**Next (P0):** Verify server action error messages now pass through to UI correctly in saved searches, bookings, and other flows using `userSafeMessage`.
+
+---
+
 ## 🚀 **Latest: Error experience + logging hardening (April 18, 2026)**
 
 **UX / OBSERVABILITY / DOCS** — April 18, 2026

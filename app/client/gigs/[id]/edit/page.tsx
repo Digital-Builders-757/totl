@@ -5,7 +5,6 @@ import { getBootState } from "@/lib/actions/boot-actions";
 import { ONBOARDING_PATH, PATHS } from "@/lib/constants/routes";
 import { referenceLinksToFormRows } from "@/lib/gig-reference-links";
 import { isRedirectError } from "@/lib/is-redirect-error";
-import { categoryForOpportunitySelect } from "@/lib/opportunity-form-helpers";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { formatDateForDateInput, formatDeadlineForDatetimeLocal } from "@/lib/utils/date-form";
 import { logger } from "@/lib/utils/logger";
@@ -81,7 +80,7 @@ export default async function ClientEditGigPage({ params }: { params: Promise<{ 
     const initialValues = {
       title: gig.title,
       description: gig.description,
-      category: categoryForOpportunitySelect(gig.category),
+      category: gig.category,
       location: gig.location,
       compensation: gig.compensation,
       duration: gig.duration,

@@ -97,12 +97,5 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
     return fallback;
   }
 
-  return fallback;
-}
-
-/**
- * For server actions that return `{ error: string }` where the string might be internal.
- */
-export function userSafeActionError(err: unknown): string {
-  return userSafeMessage(err);
+  return msg;
 }
