@@ -32,7 +32,7 @@
 - **Admins** manage users, moderate content, and oversee the platform
 
 ### **Tech Stack**
-- **Frontend:** Next.js 15.5.4 + App Router + TypeScript 5 (strict)
+- **Frontend:** Next.js 15.5.x + App Router + TypeScript 5 (strict); see `package.json` for resolved version
 - **Backend:** Supabase (PostgreSQL + Auth + Storage + Real-time)
 - **UI:** TailwindCSS + shadcn/ui components
 - **Email:** Resend API
@@ -282,7 +282,7 @@ npm run lint
 
 ### **Where to Put Documentation**
 
-- **Root directory:** Only `README.md`, `database_schema_audit.md`, `MVP_STATUS_NOTION.md`, `notion_update.md`
+- **Root directory:** Keep the root minimal. Canonical root docs include `README.md`, `AGENT_ONBOARDING.md`, `TOTL_PROJECT_CONTEXT_PROMPT.md`, `database_schema_audit.md`, `MVP_STATUS_NOTION.md`, `PROJECT_STATUS_REPORT.md`, `PAST_PROGRESS_HISTORY.md`, and `notion_update.md` (see `docs/DOCUMENTATION_INDEX.md`).
 - **`docs/` folder:** Everything else (feature guides, troubleshooting, setup, etc.)
 
 ### **When to Update Documentation**

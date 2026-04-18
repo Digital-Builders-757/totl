@@ -9,7 +9,7 @@
 *Connecting exceptional talent with premium opportunities worldwide*
 
 [![TOTL Agency](https://img.shields.io/badge/TOTL-Agency-purple?style=for-the-badge&logo=theater-masks)](https://www.thetotlagency.com)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge)](https://www.thetotlagency.com)
@@ -77,7 +77,7 @@ TOTL Agency is a comprehensive talent booking platform that revolutionizes how m
 
 | Category | Technology | Version | Purpose |
 |----------|------------|---------|---------|
-| **Frontend** | Next.js | 15.5.4 | React framework with App Router |
+| **Frontend** | Next.js | 15.5.x | React framework with App Router (`package.json` for exact) |
 | **Language** | TypeScript | 5.0 | Type-safe development |
 | **Styling** | TailwindCSS | 3.4.17 | Utility-first CSS |
 | **UI Components** | shadcn/ui | Latest | Accessible component library |

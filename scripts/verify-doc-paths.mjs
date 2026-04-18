@@ -10,6 +10,7 @@
  * - database_schema_audit.md
  * - docs/diagrams/airport-model.md
  * - docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md
+ * - docs/PRE_PUSH_CHECKLIST.md
  * - MVP_STATUS_NOTION.md
  */
 
@@ -26,6 +27,7 @@ const REQUIRED_PATHS = [
   "database_schema_audit.md",
   "docs/diagrams/airport-model.md",
   "docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md",
+  "docs/PRE_PUSH_CHECKLIST.md",
   "MVP_STATUS_NOTION.md",
 ];
 

@@ -75,6 +75,6 @@ npm run build
 3. ✅ `npm run lint`
 4. ✅ Check import paths are correct
 5. ✅ Verify branch-specific types are generated
-6. ✅ Read `docs/PRE_PUSH_CHECKLIST.md` for detailed guidance
+6. ✅ Follow this document (canonical pre-push checklist)
 
 **If ANY step fails, DO NOT PUSH until it's fixed!**

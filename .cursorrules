@@ -1,4 +1,3 @@
-````markdown
 # TOTL Agency – Cursor AI Assistant Rules
 
 ## 🎯 MANDATORY CONTEXT REFERENCE
@@ -108,7 +107,7 @@ If a large refactor is truly needed, it must be broken into **small, reversible 
 
 **Tech Stack:**
 
-- Next.js 15.2.4 + App Router + TypeScript 5
+- Next.js 15.5.x + App Router + TypeScript 5 (see `package.json` for resolved version)
 - Supabase (PostgreSQL + Auth + Storage + Real-time)
 - TailwindCSS + shadcn/ui components
 - Resend API for custom emails
@@ -248,13 +247,9 @@ If updating `SIGNED_OUT` handling in `onAuthStateChange`:
 ## 🚫 FORBIDDEN PATTERNS
 
 - **Console statements in production code:**
-  - ❌ `console.log()` / `console.debug()` - Use `logger.info()` / `logger.debug()` instead
-  - ✅ `console.warn()` / `console.error()` - Allowed only for critical errors before logger init
-  - ✅ Use `logger` utility (`lib/utils/logger.ts`) for all production logging
-  - ESLint will error on `console.log/debug` - this is intentional
-
-## 🚫 FORBIDDEN PATTERNS
-
+  - ❌ `console.log()` / `console.debug()` — use `logger.info()` / `logger.debug()` instead
+  - ✅ `console.warn()` / `console.error()` — allowed only for critical errors before logger init
+  - ✅ Use `logger` (`lib/utils/logger.ts`) for production logging; ESLint errors on `console.log` / `console.debug` by design
 - Using `any` types for database results or DTOs.
 - Making database changes without updating `database_schema_audit.md`.
 - Updating `types/database.ts` by hand (must be generated).
@@ -310,10 +305,10 @@ These rules apply to:
   npx supabase gen types typescript \
     --project-id "$SUPABASE_PROJECT_ID" \
     --schema public > types/database.ts
-````
+  ```
 
-* Prepend or keep an **AUTO-GENERATED** banner comment in `types/database.ts` to discourage manual edits.
-* If there is a `types/supabase.ts` wrapper, it should only re-export from `types/database.ts`.
+- Prepend or keep an **AUTO-GENERATED** banner comment in `types/database.ts` to discourage manual edits.
+- If there is a `types/supabase.ts` wrapper, it should only re-export from `types/database.ts`.
 
 ---
 
@@ -693,6 +688,3 @@ and justify why.
 **Final Principle:**
 Prioritize **security**, **type safety**, and **auth stability** over stylistic preferences.
 Red Zone files must be changed with precision, not rewritten on a whim.
-
-```
-```
