@@ -32,7 +32,6 @@ import {
   referenceLinkKindLabel,
 } from "@/lib/gig-reference-links";
 import {
-  categoryForOpportunitySelect,
   fieldErrorsFromMissing,
   selectValueFromCategory,
   validateClientOpportunityRequired,
@@ -86,9 +85,6 @@ export function PostGigClient({
     ...emptyForm,
     ...initialValues,
     referenceLinks: initialValues?.referenceLinks ?? emptyForm.referenceLinks,
-    category: initialValues
-      ? categoryForOpportunitySelect(initialValues.category)
-      : emptyForm.category,
   }));
   const [imageFile, setImageFile] = useState<File | null>(null);
 

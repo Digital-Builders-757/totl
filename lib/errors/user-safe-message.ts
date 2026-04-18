@@ -92,17 +92,14 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
     return "This feature is temporarily unavailable. Please try again later.";
   }
 
-  // If it still looks like a stack or SQL dump, use fallback
-  if (msg.length > 200 || lower.includes("at ") || lower.includes("select ") || lower.includes("insert ")) {
+  // If it still looks like a stack or SQL dump, use fallback; otherwise pass through short curated copy.
+  // Note: avoid `includes("at ")` — it false-positives on words like "that".
+  const looksLikeStackFrame =
+    /(?:^|\n)\s+at\s+/m.test(msg) ||
+    /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
+  if (msg.length > 200 || looksLikeStackFrame || lower.includes("select ") || lower.includes("insert ")) {
     return fallback;
   }
 
-  return fallback;
-}
-
-/**
- * For server actions that return `{ error: string }` where the string might be internal.
- */
-export function userSafeActionError(err: unknown): string {
-  return userSafeMessage(err);
+  return msg;
 }

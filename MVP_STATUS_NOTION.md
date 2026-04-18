@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: PR #261 review — userSafeMessage, global-error CSS, gig category (April 18, 2026)**
+
+**UX / QA (Bugbot + Sentry)** — April 18, 2026
+- ✅ **`userSafeMessage`:** After known-danger heuristics, **pass through** short curated strings (e.g. server action copy) instead of always replacing with generic fallback; removed unused **`userSafeActionError`** export; stack detection avoids **`at `** false positives on **“that”** (uses line-start **`at`** / **`at name (path:line`** patterns).
+- ✅ **`app/global-error.tsx`:** Import **`./globals.css`** so Tailwind + CSS variables apply when the global boundary replaces the root layout (Sentry review).
+- ✅ **`PostGigClient`:** Drop duplicate **`categoryForOpportunitySelect`** in initial state; client + admin edit pages already normalize **`initialValues.category`** (Bugbot redundancy).
+
+**Verification:** `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Merge **develop → main** when PR #261 checks pass; smoke global error page styling if you can force a root-level error in preview.
+
+**Next (P1):** Watch **`userSafeMessage`** stack heuristics (line-start `at` + `at name (path:line`) for false positives on unusual user copy.
+
+---
+
 ## 🚀 **Latest: Error experience + logging hardening (April 18, 2026)**
 
 **UX / OBSERVABILITY / DOCS** — April 18, 2026
@@ -5370,6 +5385,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: April 18, 2026*
-*Current Status: MVP Complete; error UX + structured logging hardening on develop; existing develop→main PR can carry this batch*
+*Current Status: MVP Complete; PR #261 follow-ups (userSafeMessage pass-through, global-error CSS, PostGig category dedupe) on develop*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*
