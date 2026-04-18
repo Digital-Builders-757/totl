@@ -95,8 +95,8 @@ If a change breaks a journey, it’s not “done” even if it compiles.
   If you need a new route category/prefix, add it there and reuse it.
 - **No duplicate routing helpers** (“3 brains” problem).  
   Use the canonical routing helper modules above; do not re-implement logic in middleware/actions/components.
-- **Canonical imports enforced by ESLint** (`.eslintrc.json`).  
-  - Example: `@/lib/supabase/supabase-admin-client*` is forbidden; use `@/lib/supabase-admin-client`.
+- **Canonical imports (declared in `.eslintrc.json`)** — ESLint’s **active** entrypoint is `.eslintrc.js`; when both files exist, extend/merge so the JSON rules actually run (see `docs/TOTL_REPO_HYGIENE_AND_DOCUMENTATION_AUDIT_MASTER_PLAN_2026.md`).  
+  - Example intent: `@/lib/supabase/supabase-admin-client*` is forbidden; use `@/lib/supabase-admin-client`.
 - **Type imports**: always `import type { Database } from "@/types/supabase"` (never import from `types/database.ts` directly in app code).
 - **RLS assumed always**: queries must be compatible with least-privilege RLS patterns.
 - **Explicit selects** in app code (avoid `select('*')` except vetted admin scripts).

@@ -1329,7 +1329,7 @@ git push origin main
 
 ## 🆘 **EMERGENCY CONTACTS**
 
-- **Full Checklist:** `docs/PRE_PUSH_CHECKLIST.md`
+- **Full Checklist:** `docs/PRE_PUSH_CHECKLIST.md` (stable link; full steps in `docs/development/PRE_PUSH_CHECKLIST.md`; `npm run docs:verify-paths` guards the entry path)
 - **Troubleshooting:** `docs/TROUBLESHOOTING_GUIDE.md`
 - **Schema Guide:** `docs/SCHEMA_SYNC_FIX_GUIDE.md`
 - **Project Rules:** `.cursorrules`

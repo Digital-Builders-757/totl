@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 17, 2026 (onboarding: claim-then-send for boot emails to prevent duplicate welcome/admin alerts under concurrent boot; admin new-member notifications + welcome/admin alert emails + working admin Notifications menu; prior: `/admin/users` subscription column + filters; admin dashboard paid-talent parity; Talent **hard delete** FK repair; **Suspend** / **Reinstate**; drawer/dialog stacking)
+**Last Updated:** April 18, 2026 (hygiene: `docs/PRE_PUSH_CHECKLIST.md` stub, `scripts/README.md`, ESLint dual-config note, root cleanup; prior: April 17 onboarding/notifications work)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -260,7 +260,8 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `AUDIT_MASTER_BOARD.md` - Rolling one-screen audit queue (IDs + proof hooks + next actions)
 - `AUDIT_LOG.md` - Append-only audit proof ledger (timestamped command receipts)
 - `audits/UI_UX_SCREENSHOT_REMEDIATION_REPORT_2026-03-03.md` - Screenshot-driven MVP UI/UX remediation system (matrix, P0 definition, stop-the-line blockers, mobile gate)
-- `ENGINEERING_COMMANDS.md` - **NEW** ✅ - Canonical Cursor command system (Dec 2025)
+- `development/ENGINEERING_COMMANDS.md` - **NEW** ✅ - Canonical Cursor command system (Dec 2025)
+- `TOTL_REPO_HYGIENE_AND_DOCUMENTATION_AUDIT_MASTER_PLAN_2026.md` - Rolling hygiene audit ledger (Apr 2026)
 - `ARCHITECTURE_SOURCE_OF_TRUTH.md` - **NEW** - Canonical truth sources + non-negotiable “do not duplicate” laws (Dec 2025)
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
 - `OFF_SYNC_INVENTORY.md` - Winners declared + drift remediation tracker (Dec 2025)

@@ -1,3 +1,10 @@
+/**
+ * Active ESLint config for `next lint` / ESLint CLI.
+ *
+ * Note: If `.eslintrc.json` is added alongside this file without being extended,
+ * ESLint loads only this file — stricter rules in JSON would be ignored. See
+ * `docs/TOTL_REPO_HYGIENE_AND_DOCUMENTATION_AUDIT_MASTER_PLAN_2026.md` (deferred follow-ups).
+ */
 module.exports = {
   extends: [
     "next/core-web-vitals",

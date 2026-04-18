@@ -8,6 +8,28 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Repo hygiene + documentation audit (April 18, 2026)**
+
+**DOCS / TOOLING / ROOT** — April 18, 2026
+- ✅ **`docs/PRE_PUSH_CHECKLIST.md`:** Stable entry point (stub) linking to canonical **`docs/development/PRE_PUSH_CHECKLIST.md`**; fixes broken links from onboarding, `.cursorrules`, and troubleshooting.
+- ✅ **`docs/TOTL_REPO_HYGIENE_AND_DOCUMENTATION_AUDIT_MASTER_PLAN_2026.md`:** Rolling audit ledger (risks, constraints, validation, deferred ESLint JSON/JS merge).
+- ✅ **`scripts/README.md`** + **`docs/development/ENGINEERING_COMMANDS.md`:** Map `verify-fast`, `pre-push:check`, `verify-all`, `docs:verify-paths`, `pre-commit:legacy`.
+- ✅ **`scripts/verify-doc-paths.mjs`:** Requires `docs/PRE_PUSH_CHECKLIST.md` so CI catches accidental deletes.
+- ✅ **`docs/DOCUMENTATION_INDEX.md`:** `development/ENGINEERING_COMMANDS.md` path corrected; index links hygiene audit.
+- ✅ **`docs/ARCHITECTURE_SOURCE_OF_TRUTH.md`:** Documents ESLint active entrypoint (`.eslintrc.js`) vs stricter `.eslintrc.json` (merge deferred).
+- ✅ **`.eslintrc.js`:** Comment explains dual-config behavior; behavior unchanged for CI.
+- ✅ **`.cursorrules`:** Removed erroneous outer fence, merged duplicate forbidden-patterns, fixed codegen markdown fence, Next version note.
+- ✅ **Root:** Removed stale `.git-commit-msg.txt`; deleted local `.pr-body-*.md` scratch files; **`.gitignore`** ignores `.pr-body-*.md`.
+- ✅ **`AGENT_ONBOARDING.md` / `README.md`:** Root-doc list and Next.js version wording aligned with `package.json` / index.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 18, 2026.
+
+**Next (P0):** Prior roadmap unchanged — e.g. **develop → main** merge / prod smoke for prior features as needed.
+
+**Next (P1):** Dedicated PR to **merge `.eslintrc.json` into the active ESLint config** and fix violations; optional `package.json` `name` cleanup; broader doc link sweep.
+
+---
+
 ## 🚀 **Latest: Onboarding + admin notifications — new members, welcome email, working bell (April 17, 2026)**
 
 **ADMIN / ONBOARDING / EMAIL** — April 17, 2026

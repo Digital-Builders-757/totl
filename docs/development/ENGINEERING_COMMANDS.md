@@ -13,6 +13,18 @@
 
 These command files are designed to be **copy/paste-safe operating doctrine** for both humans and agents.
 
+### NPM scripts (verification ladder)
+
+See **[`scripts/README.md`](../../scripts/README.md)** for which `package.json` commands are for daily dev, pre-push, full gate, and automation. Short map:
+
+| Intent | Typical command |
+|--------|-----------------|
+| Fast local gate | `npm run verify-fast` |
+| Pre-push (repo script) | `npm run pre-push:check` |
+| Full gate (includes build) | `npm run verify-all` |
+| Doc path immutables | `npm run docs:verify-paths` |
+| Legacy pre-commit shape | `npm run pre-commit:legacy` |
+
 ---
 
 ## Core pipeline (the spine)
