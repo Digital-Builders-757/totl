@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 18, 2026 (hygiene: `docs/PRE_PUSH_CHECKLIST.md` stub, `scripts/README.md`, ESLint dual-config note, root cleanup; prior: April 17 onboarding/notifications work)
+**Last Updated:** April 18, 2026 (error UX/logging work order: `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md`; hygiene: `docs/PRE_PUSH_CHECKLIST.md` stub, `scripts/README.md`, ESLint dual-config note, root cleanup; prior: April 17 onboarding/notifications work)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -125,7 +125,8 @@ All other documentation has been organized into the `docs/` folder with the foll
 ### **🚨 Critical Error Prevention**
 - `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling; Apr 2026 - Sentry admin gigs RLS, cron CRON_SECRET, Next server actions; Apr 2026 - admin gig cover drag-drop vs native `multipart` file field; Apr 2026 - admin gig **delete** cascade + `bookings` RLS)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling; Apr 2026 - Sentry admin gigs RLS, cron CRON_SECRET, Next server actions; Apr 2026 - admin gig cover drag-drop vs native `multipart` file field; Apr 2026 - admin gig **delete** cascade + `bookings` RLS; Apr 2026 - user-safe error copy vs raw `error.message` in UI)
+- `TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md` - **✅ NEW** - Audit + standards for user-safe errors vs structured logging (Apr 2026)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)
 - `features/TALENT_DASHBOARD_V1_SIMPLIFICATION_PLAN.md` - **✅ NEW** - v1 simplification: 3 KPI cards (Applications, Accepted, Earnings), footer alignment (March 2026)

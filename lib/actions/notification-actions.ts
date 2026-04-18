@@ -66,7 +66,7 @@ export async function insertNotification(params: {
         return { success: true };
       }
       logger.error("insertNotification error", error);
-      return { error: error.message };
+      return { error: "Could not create that notification." };
     }
     return { success: true };
   } catch (err) {
@@ -83,7 +83,7 @@ export async function markNotificationRead(notificationId: string) {
     const supabase = await createSupabaseServer();
     const { data: auth } = await supabase.auth.getUser();
     const userId = auth.user?.id;
-    if (!userId) return { error: "Unauthorized" };
+    if (!userId) return { error: "You need to be signed in to do that." };
 
     const { error } = await supabase
       .from("user_notifications")
@@ -93,7 +93,7 @@ export async function markNotificationRead(notificationId: string) {
 
     if (error) {
       logger.error("markNotificationRead error", error);
-      return { error: error.message };
+      return { error: "Could not mark that notification as read. Try refreshing." };
     }
     return { success: true };
   } catch (err) {
@@ -110,7 +110,7 @@ export async function markAllNotificationsRead() {
     const supabase = await createSupabaseServer();
     const { data: auth } = await supabase.auth.getUser();
     const userId = auth.user?.id;
-    if (!userId) return { error: "Unauthorized" };
+    if (!userId) return { error: "You need to be signed in to do that." };
 
     const { error } = await supabase
       .from("user_notifications")
@@ -120,7 +120,7 @@ export async function markAllNotificationsRead() {
 
     if (error) {
       logger.error("markAllNotificationsRead error", error);
-      return { error: error.message };
+      return { error: "Could not clear notifications. Try refreshing." };
     }
     return { success: true };
   } catch (err) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodSchema } from "zod";
-import { logger } from "@/lib/utils/logger";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
 
 /**
  * Standard API error response
@@ -59,15 +59,22 @@ export async function validateRequestBody<T>(
   }
 }
 
+const GENERIC_500 = "An unexpected error occurred. Please try again.";
+
 /**
- * Handle API route errors consistently
+ * Handle API route errors consistently.
+ * Logs full detail; returns a safe client message (optional debugId for support correlation).
  */
-export function handleApiError(error: unknown, context: string) {
-  logger.error(`Error in ${context}`, error);
-
-  if (error instanceof Error) {
-    return createErrorResponse(error.message, 500);
+function newDebugId(): string {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
   }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
 
-  return createErrorResponse("Unknown error", 500);
+export function handleApiError(error: unknown, context: string) {
+  const debugId = newDebugId();
+  logActionFailure(`api.${context}`, error, { debugId });
+
+  return createErrorResponse(GENERIC_500, 500, { debugId });
 }

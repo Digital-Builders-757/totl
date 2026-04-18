@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import { PATHS } from "@/lib/constants/routes";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
 import { getAppUrl, stripe, STRIPE_PRICES } from "@/lib/stripe";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
@@ -24,12 +25,12 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
     .maybeSingle();
 
   if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    throw new Error('Failed to fetch user profile');
+    logActionFailure("subscribe.checkout.profile", profileError, { userId: user.id });
+    throw new Error("We couldn’t load your profile. Please try again.");
   }
 
   if (!profile || profile.role !== 'talent') {
-    throw new Error('Only talent users can subscribe');
+    throw new Error("Subscriptions are only available for talent accounts.");
   }
 
   // 3. Check if already has active subscription
@@ -58,8 +59,8 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
       .eq("id", user.id);
 
     if (updateError) {
-      console.error('Error updating customer ID:', updateError);
-      throw new Error('Failed to create customer');
+      logActionFailure("subscribe.checkout.saveCustomer", updateError, { userId: user.id });
+      throw new Error("We couldn’t set up billing. Please try again.");
     }
   }
 
@@ -89,7 +90,8 @@ export async function createTalentCheckoutSession(plan: 'monthly' | 'annual') {
   });
 
   if (!session.url) {
-    throw new Error('Failed to create checkout session');
+    logActionFailure("subscribe.checkout.stripe", new Error("missing session.url"), { userId: user.id });
+    throw new Error("We couldn’t start checkout. Please try again.");
   }
 
   redirect(session.url);

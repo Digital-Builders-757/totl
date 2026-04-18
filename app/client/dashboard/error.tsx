@@ -2,7 +2,7 @@
 
 import { RouteErrorFallback } from "@/components/errors/route-error-fallback";
 
-export default function DashboardError({
+export default function ClientDashboardError({
   error,
   reset,
 }: {
@@ -14,8 +14,8 @@ export default function DashboardError({
       error={error}
       reset={reset}
       title="Dashboard temporarily unavailable"
-      description="We encountered an issue loading your dashboard. Please try again in a moment."
-      logLabel="[talent/dashboard]"
+      description="We couldn’t load your Career Builder dashboard. Please try again — this is usually brief."
+      logLabel="[client/dashboard]"
     />
   );
 }

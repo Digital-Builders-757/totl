@@ -20,6 +20,7 @@ npm run build
 - `@/types/supabase` (CORRECT)
 
 ## **3. COMMON ERRORS TO AVOID**
+- **User-facing toasts or alerts show raw Postgres / RLS / `fetch` errors:** Hurts trust and reads “broken app.” **Fix:** Map failures with **`userSafeMessage`** from `@/lib/errors/user-safe-message` (or fixed copy from server actions); log full detail with **`logger`** / **`logActionFailure`** from `@/lib/errors/log-action-failure`. **Prevention:** Do not pass **`error.message`** from Supabase or API JSON straight into UI; use route **`error.tsx`** + calm copy for thrown segment errors (see `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md`).
 - **Sentry: `TypeError: fetch failed` on `/gigs/[id]` logged as “Gig not found” (TOTLMODELAGENCY-3R-style):** The Supabase client can fail at the transport layer (`fetch failed`) while the gig may still exist. Treating **any** query error like a missing row returns **404** and mislabels Sentry.
   - **Fix:** On `.single()` gig loads, **`PGRST116`** only → **`notFound()`** without **`logger.error`**; all other errors → **`logger.error("Failed to load gig", …, { gigId })`** and **rethrow** so the route can surface an error boundary / **5xx**.
   - **Prevention:** Do not treat every failed `.single()` like a missing row (for example `if (error || !gig) { logger.error("not found"); notFound(); }`); branch on **`error.code`** (and keep invalid id guards, e.g. **`isValidUuid`**, separate from DB outages).

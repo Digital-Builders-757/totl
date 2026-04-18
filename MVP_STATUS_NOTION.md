@@ -8,6 +8,26 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Error experience + logging hardening (April 18, 2026)**
+
+**UX / OBSERVABILITY / DOCS** — April 18, 2026
+- ✅ **User-safe copy:** `lib/errors/user-safe-message.ts` maps auth/network/RLS/Stripe-style failures to calm, non-technical messages; Vitest in `lib/errors/user-safe-message.test.ts`.
+- ✅ **Structured failures:** `lib/errors/log-action-failure.ts` + `logActionFailure("flow.name", err, context)` on admin users, saved searches, bookings mutations, billing/subscribe client paths, onboarding account-type update.
+- ✅ **API:** `handleApiError` returns generic 500 JSON + `debugId` in details; full detail only in logs (`lib/api/api-utils.ts`).
+- ✅ **Boundaries:** Branded `app/global-error.tsx`; shared `RouteErrorFallback` + route `error.tsx` for talent dashboard, client dashboard, admin segment, client bookings.
+- ✅ **Server actions:** Safer return strings for notifications + legacy `app/dashboard/actions.ts`; billing/subscribe server throws use plain-language messages + logging.
+- ✅ **error-logger:** `lib/error-logger.ts` re-exports `@/lib/utils/error-logger`; `logError` now emits `logger.warn` in production (Sentry message, not dev-only).
+- ✅ **Docs:** `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md`; index link; `TOTL_PROJECT_CONTEXT_PROMPT.md` + `.cursorrules` logging guidance.
+- ✅ **Types:** `types/database.ts` regen (`npm run types:regen:dev`) so `types:check` matches remote schema.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Smoke: admin user actions, saved search save/delete, client bookings load + cancel/status, billing portal + subscribe checkout (expect safe toasts, no raw DB strings); merge **develop → main** if PR is open.
+
+**Next (P1):** Extend `userSafeMessage` from new Sentry fingerprints; replace remaining `console.*` in non-test `components/**` where appropriate.
+
+---
+
 ## 🚀 **Latest: Opportunity create/edit — validation + Radix Select hardening (April 18, 2026)**
 
 **CLIENT / ADMIN / GIGS** — April 18, 2026
@@ -5349,7 +5369,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 11, 2026*
-*Current Status: MVP Complete; Sentry-driven fixes for admin gigs RLS migration, cron logging, and admin create server action; ViZB/casting work on develop*
+*Last Updated: April 18, 2026*
+*Current Status: MVP Complete; error UX + structured logging hardening on develop; existing develop→main PR can carry this batch*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Push migration 20260411220101 to prod; PR develop→main; smoke admin gigs + cron; resolve Sentry 3G/3K/3N after verify*
+*Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*

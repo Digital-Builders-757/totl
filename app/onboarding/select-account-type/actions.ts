@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PATHS } from "@/lib/constants/routes";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import type { Database } from "@/types/supabase";
 
@@ -59,8 +60,8 @@ export async function selectAccountType(formData: FormData) {
     .eq("id", user.id);
 
   if (error) {
-    console.error("Unable to update account type:", error);
-    throw new Error("Failed to update account type");
+    logActionFailure("onboarding.selectAccountType", error, { userId: user.id });
+    throw new Error("We couldn’t finish setting up your account. Please try again.");
   }
 
   revalidatePath("/");
