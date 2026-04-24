@@ -137,7 +137,7 @@ export function AdminHeader({ user, notificationCount: notificationCountProp }: 
             </DialogTrigger>
             <DialogContent
               data-testid="admin-drawer-panel"
-              className="panel-frosted !fixed z-[51] left-0 top-0 h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-foreground"
+              className="panel-frosted !fixed !max-h-none left-0 top-0 z-[101] h-[100dvh] w-[min(85vw,320px)] max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-none border-r border-white/10 bg-[var(--totl-surface-glass-strong)] p-0 pb-[env(safe-area-inset-bottom)] text-foreground"
             >
               <DialogTitle className="sr-only">Admin Navigation</DialogTitle>
               <div className="flex h-full flex-col">

@@ -43,7 +43,7 @@ export function FiltersSheet({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           data-testid="filters-sheet-panel"
-          className="panel-frosted card-backlit left-0 top-auto bottom-0 h-[min(82dvh,720px)] w-full max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-t-2xl rounded-b-none border-x-0 border-b-0 border-t border-border/40 p-0 text-white"
+          className="panel-frosted card-backlit !max-h-none left-0 top-auto bottom-0 z-[101] h-[min(82dvh,720px)] w-full max-w-none translate-x-0 translate-y-0 overflow-hidden rounded-t-2xl rounded-b-none border-x-0 border-b-0 border-t border-border/40 p-0 text-white"
         >
           <div className="flex h-full flex-col">
             <div className="sticky top-0 z-10 border-b border-border/40 bg-card/25 px-4 pb-3 pt-3 backdrop-blur-sm">

@@ -125,7 +125,11 @@ function AuthCallbackGate() {
         }
 
         if (!didEstablishSession) {
-          throw new Error("The invite link did not include a valid authentication token.");
+          setState({
+            kind: "failed",
+            message: "The invite link did not include a valid authentication token.",
+          });
+          return;
         }
 
         // Remove invite tokens from the URL so refreshes do not re-run token exchange.
