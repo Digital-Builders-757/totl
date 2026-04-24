@@ -1,7 +1,7 @@
 # TOTL — Error experience and logging hardening (work order)
 
-**Date:** April 18, 2026  
-**Status:** Phase 1 audit + Phase 2 first-pass implementation (see repo for applied changes)
+**Date:** April 18, 2026 (updated April 23, 2026)  
+**Status:** Waves 1–5 shipped — shared **`userSafeMessage`** / **`userSafeMessageFromActionError`**, hardened server actions, client toasts/forms, production API 5xx bodies, and **`console.*` → `logger`** in **`components/**`** and key **`app/**`** surfaces. Dev-only **`/api/dev/profile-bootstrap`** may still echo internal messages by design.
 
 This document records current patterns, gaps, prioritized surfaces, and shared standards for user-facing errors vs internal logging.
 
@@ -12,7 +12,7 @@ This document records current patterns, gaps, prioritized surfaces, and shared s
 | Pattern | Where | Notes |
 |--------|--------|--------|
 | **`logger` (`@/lib/utils/logger`)** | Server actions, many API routes, some client boundaries | Structured `context`, Sentry `captureException` / `captureMessage`, dev console, redaction |
-| **`console.error` / `console.warn`** | Billing/subscribe, onboarding action, auth recovery, some admin components | Bypasses structured context; inconsistent with repo standard |
+| **`console.error` / `console.warn`** | Tests, `logger` internals, rare third-party shims | Prefer **`logger`** in app/components/API for Sentry correlation; remaining **`console.*`** in product code should be treated as debt |
 | **`handleApiError` (`@/lib/api/api-utils`)** | Defined but **unused** in routes at audit time | Previously returned `error.message` in JSON 500 bodies (leak risk) — hardened to generic client message + `debugId` in logs |
 | **Toasts with `error.message` / `result.error`** | Admin users, saved searches, login edge cases | Exposes Supabase/transport wording to users |
 | **Sentry `beforeSend`** | `instrumentation-client.ts` | Heavy filtering (noise vs signal); separate from per-flow logging |
@@ -90,9 +90,11 @@ This document records current patterns, gaps, prioritized surfaces, and shared s
 
 ## 7. Follow-up backlog (not exhaustive)
 
+**Completed in repo pass (Apr 2026):** Extended **`userSafeMessage`** (JWT/rate-limit/auth-api heuristics) + **`userSafeMessageFromActionError`** for legacy **`{ error: string }`**; **`logActionFailure` / `userSafeMessage`** on settings, profile, client, dashboard actions; client forms/login/onboarding/admin surfaces map through safe helpers; admin API routes use generic 5xx JSON + structured logs; **`SafeImage`**, auth timeout recovery, Supabase connection test, email-ledger-debug, and booking-reminders cron use **`logger`** instead of raw **`console.*`**.
+
 - Extend `userSafeMessage` with more Stripe/PostgREST codes as they appear in Sentry.
 - Add `error.tsx` under more admin children if specific routes throw often.
-- Gradually migrate remaining `console.*` in `components/**` to `logger` where bundle allows (client: `logger` is fine — it uses Sentry).
+- Sweep **`lib/**`** scripts and any remaining non-test **`console.*`** outside the paths above if grep finds new stragglers after future features.
 
 ---
 

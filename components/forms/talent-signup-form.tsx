@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ensureProfilesAfterSignup } from "@/lib/actions/auth-actions";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 
 // Define the form schema with validation rules
@@ -150,7 +151,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
 
       if (error) {
         logger.error("Talent signup failed", error);
-        setServerError(error.message);
+        setServerError(userSafeMessage(error, "We couldn’t create your account. Please try again."));
         setIsSubmitting(false);
         return;
       }
@@ -190,9 +191,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
       router.push(`/verification-pending?email=${encodeURIComponent(data.email)}`);
     } catch (error) {
       logger.error("Unexpected error during talent signup", error);
-      setServerError(
-        error instanceof Error ? error.message : "An unexpected error occurred. Please try again."
-      );
+      setServerError(userSafeMessage(error, "An unexpected error occurred. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

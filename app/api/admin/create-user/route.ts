@@ -60,7 +60,10 @@ export async function POST(request: Request) {
       }
       
       logger.error("Auth user creation failed", authError);
-      return NextResponse.json({ error: authError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: "We couldn’t create the user. Please try again." },
+        { status: 500 }
+      );
     }
 
     // Step 2: Create/update profile record

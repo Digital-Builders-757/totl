@@ -78,7 +78,10 @@ export async function POST(request: Request) {
 
     if (updateError) {
       logger.error("Error updating profile role", updateError, { userId });
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: "We couldn’t update the role. Please try again." },
+        { status: 500 }
+      );
     }
 
     // Handle role-specific profile creation/deletion

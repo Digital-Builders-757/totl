@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PASSWORD_RECOVERY_INTENT_KEY } from "@/lib/constants/password-recovery";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logger } from "@/lib/utils/logger";
 
@@ -65,7 +66,7 @@ export function UpdatePasswordForm() {
       if (error) {
         toast({
           title: "Error",
-          description: error.message,
+          description: userSafeMessage(error, "We couldn’t update your password. Please try again."),
           variant: "destructive",
         });
       } else {

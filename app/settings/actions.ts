@@ -2,6 +2,8 @@
 
 import "server-only";
 import { revalidatePath } from "next/cache";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
@@ -37,7 +39,8 @@ export async function updateBasicProfile(formData: FormData) {
     .single();
 
   if (error) {
-    return { error: error.message };
+    logActionFailure("settings.updateBasicProfile", error, { userId: user.id });
+    return { error: userSafeMessage(error, "We couldn’t update your display name. Please try again.") };
   }
 
   revalidatePath("/settings");
@@ -57,7 +60,8 @@ export async function updateEmail(newEmail: string) {
 
   const { error } = await supabase.auth.updateUser({ email: newEmail });
   if (error) {
-    return { error: error.message };
+    logActionFailure("settings.updateEmail", error, { userId: user.id });
+    return { error: userSafeMessage(error, "We couldn’t start the email change. Please try again.") };
   }
 
   return { success: true }; // Supabase will send a confirmation email
@@ -75,7 +79,11 @@ export async function changePassword(password: string) {
   }
 
   const { error } = await supabase.auth.updateUser({ password });
-  return error ? { error: error.message } : { success: true };
+  if (error) {
+    logActionFailure("settings.changePassword", error, { userId: user.id });
+    return { error: userSafeMessage(error, "We couldn’t update your password. Please try again.") };
+  }
+  return { success: true };
 }
 
 export async function upsertTalentProfile(payload: {
@@ -129,7 +137,8 @@ export async function upsertTalentProfile(payload: {
     .single();
 
   if (error) {
-    return { error: error.message };
+    logActionFailure("settings.upsertTalentProfile", error, { userId: user.id });
+    return { error: userSafeMessage(error, "We couldn’t save your talent profile. Please try again.") };
   }
 
   revalidatePath("/settings");
@@ -173,7 +182,8 @@ export async function upsertClientProfile(payload: {
     .single();
 
   if (error) {
-    return { error: error.message };
+    logActionFailure("settings.upsertClientProfile", error, { userId: user.id });
+    return { error: userSafeMessage(error, "We couldn’t save your company profile. Please try again.") };
   }
 
   revalidatePath("/settings");

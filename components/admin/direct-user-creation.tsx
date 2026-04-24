@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type UserRole = Database["public"]["Enums"]["user_role"];
@@ -98,7 +99,7 @@ export default function DirectUserCreation() {
         details: data.user as CreatedUser,
       });
     } catch (error) {
-      console.error("User creation error:", error);
+      logger.error("User creation error", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setResult({
         success: false,

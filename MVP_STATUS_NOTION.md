@@ -8,6 +8,24 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Error logging + client-facing copy pass (April 23, 2026)**
+
+**UX / OBSERVABILITY** — April 23, 2026
+- ✅ **`userSafeMessage`:** Extra auth/JWT/rate-limit heuristics; **`userSafeMessageFromActionError`** for legacy **`{ error: string }`** action results (see `lib/errors/user-safe-message.ts` + Vitest).
+- ✅ **Server actions:** Settings, profile, client, and dashboard paths log with **`logActionFailure` / `logger`** and return user-safe strings instead of raw Supabase messages where hardened.
+- ✅ **Client UI:** Forms, login, onboarding, apply-to-gig, email verification, admin user/application flows map errors through **`userSafeMessage`** / **`userSafeMessageFromActionError`**.
+- ✅ **API:** Production admin/client routes avoid echoing **`error.message`** on 5xx; **`logger`** on catch paths. Dev **`/api/dev/profile-bootstrap`** unchanged (verbose by design).
+- ✅ **Logging hygiene:** **`SafeImage`**, auth timeout recovery, Supabase connection test, email-ledger-debug, booking-reminders cron → **`logger`** instead of **`console.*`**.
+- ✅ **Docs:** `docs/TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md` §7 updated; troubleshooting quick reference adds action-error + API patterns.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 23, 2026.
+
+**Next (P0):** Merge **develop → main** after PR review; smoke settings save, login, apply-to-gig, admin approve/reject (non-technical toasts).
+
+**Next (P1):** Extend **`userSafeMessage`** from new Sentry fingerprints; grep for new **`console.*`** after future PRs.
+
+---
+
 ## 🚀 **Latest: Admin dialog viewport + gigs/auth telemetry (April 24, 2026)**
 
 **ADMIN / UI / OBSERVABILITY** — April 24, 2026

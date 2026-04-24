@@ -6,6 +6,7 @@ import { useAuth } from "@/components/auth/auth-provider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 
 export function EmailVerificationReminder() {
@@ -27,7 +28,7 @@ export function EmailVerificationReminder() {
       if (error) {
         toast({
           title: "Error",
-          description: error.message,
+          description: userSafeMessage(error, "We couldn’t send the verification email. Please try again."),
           variant: "destructive",
         });
       } else {

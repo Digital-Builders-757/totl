@@ -1,6 +1,7 @@
 "use server";
 
 import { sendEmail, logEmailSent } from "@/lib/email-service";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import {
   generateClientApplicationAdminNotificationEmail,
@@ -129,7 +130,9 @@ export async function submitClientApplication(data: ClientApplicationData) {
             userId: user.id,
             existingApplicationId: existing.id,
           });
-          return { error: updateError.message };
+          return {
+            error: userSafeMessage(updateError, "We couldn’t update your application. Please try again."),
+          };
         }
 
         // Keep response shape consistent with insert path.
@@ -174,7 +177,9 @@ export async function submitClientApplication(data: ClientApplicationData) {
         userId: user.id,
         canonicalEmail,
       });
-      return { error: error.message };
+      return {
+        error: userSafeMessage(error, "We couldn’t submit your application. Please try again."),
+      };
     }
 
     logger.info("[client-apply] insert succeeded", {
@@ -297,7 +302,9 @@ export async function approveClientApplication(applicationId: string, adminNotes
       if (msg.toLowerCase().includes("unauthorized")) return { error: "Not authenticated" };
       if (msg.toLowerCase().includes("not found")) return { error: "Application not found" };
       if (msg.toLowerCase().includes("cannot approve")) return { error: "Cannot approve a rejected application" };
-      return { error: msg };
+      return {
+        error: userSafeMessage(new Error(msg), "We couldn’t approve this application. Please try again."),
+      };
     }
 
     const row = rpcData[0];
@@ -387,12 +394,18 @@ export async function rejectClientApplication(applicationId: string, adminNotes?
     );
 
     if (rpcError || !rpcData || rpcData.length === 0) {
+      logger.error("rejectClientApplication RPC failed", rpcError ?? new Error("No RPC data"), {
+        applicationId,
+        rpcDataPresent: Boolean(rpcData),
+      });
       const msg = rpcError?.message || "Rejection failed";
       if (msg.toLowerCase().includes("forbidden")) return { error: "Not authorized" };
       if (msg.toLowerCase().includes("unauthorized")) return { error: "Not authenticated" };
       if (msg.toLowerCase().includes("not found")) return { error: "Application not found" };
       if (msg.toLowerCase().includes("cannot reject")) return { error: "Cannot reject an approved application" };
-      return { error: msg };
+      return {
+        error: userSafeMessage(new Error(msg), "We couldn’t reject this application. Please try again."),
+      };
     }
 
     const row = rpcData[0];

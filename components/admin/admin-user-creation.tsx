@@ -24,7 +24,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { userSafeMessage, userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
 import { createSupabaseBrowser } from "@/lib/supabase/supabase-browser";
+import { logger } from "@/lib/utils/logger";
 
 export default function AdminUserCreation() {
   const [email, setEmail] = useState("");
@@ -59,13 +61,18 @@ export default function AdminUserCreation() {
       });
 
       if (error) {
-        console.error("Error creating user:", error);
-        setError(error.message || "Failed to create user");
+        logger.error("[admin-user-creation] invoke failed", error);
+        setError(userSafeMessage(error, "We couldn’t create that user. Please try again."));
         return;
       }
 
       if (data?.error) {
-        setError(data.error);
+        setError(
+          userSafeMessageFromActionError(
+            typeof data.error === "string" ? data.error : String(data.error),
+            "We couldn’t create that user. Please try again."
+          )
+        );
         return;
       }
 
@@ -81,8 +88,8 @@ export default function AdminUserCreation() {
       setFirstName("");
       setLastName("");
     } catch (err) {
-      console.error("Unexpected error:", err);
-      setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      logger.error("[admin-user-creation] unexpected", err);
+      setError(userSafeMessage(err, "Something went wrong. Please try again."));
     } finally {
       setIsLoading(false);
     }

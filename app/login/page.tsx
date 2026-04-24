@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 import { cn } from "@/lib/utils/utils";
 
@@ -95,7 +96,7 @@ export default function Login() {
         } else {
           toast({
             title: "Error signing in",
-            description: error.message,
+            description: userSafeMessage(error, "We couldn’t sign you in. Please try again."),
             variant: "destructive",
           });
         }

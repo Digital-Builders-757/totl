@@ -7,6 +7,7 @@ import { applyToGig } from "./actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { userSafeMessage, userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
 import { useSupabase } from "@/lib/hooks/use-supabase";
 import { logger } from "@/lib/utils/logger";
 import type { Json } from "@/types/database";
@@ -126,7 +127,9 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
       });
 
       if (result.error) {
-        setError(result.error);
+        setError(
+          userSafeMessageFromActionError(result.error, "We couldn’t submit your application. Please try again.")
+        );
         setSubmitting(false);
         return;
       }
@@ -151,10 +154,10 @@ export function ApplyToGigForm({ gig }: ApplyToGigFormProps) {
         // Swallow logging failures - never block UI recovery
       }
 
-      // CRITICAL: Always execute these regardless of Sentry/logger success/failure
-      const userMessage = err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
-        ? "Configuration error: Please refresh the page. If the problem persists, contact support."
-        : "An unexpected error occurred. Please try again.";
+      const userMessage =
+        err instanceof Error && err.message.includes("NEXT_PUBLIC_SUPABASE")
+          ? "Configuration error: Please refresh the page. If the problem persists, contact support."
+          : userSafeMessage(err, "An unexpected error occurred. Please try again.");
 
       setError(userMessage);
       setSubmitting(false);
