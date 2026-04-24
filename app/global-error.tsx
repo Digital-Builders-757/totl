@@ -1,5 +1,7 @@
 "use client";
 
+import "./globals.css";
+
 import * as Sentry from "@sentry/nextjs";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect } from "react";

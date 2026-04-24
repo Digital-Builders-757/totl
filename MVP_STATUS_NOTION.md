@@ -8,6 +8,40 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Admin dialog viewport + gigs/auth telemetry (April 24, 2026)**
+
+**ADMIN / UI / OBSERVABILITY** — April 24, 2026
+- ✅ **Shared `DialogContent` (`components/ui/dialog.tsx`):** `!fixed`, overlay **`z-[100]`** / panel **`z-[101]`**, **`max-h`** + **`overflow-y-auto`**, **`w-[calc(100vw-2rem)]`** so centered modals stay on-screen on mobile (fixes Career Builder application approve/reject “black screen” / actions off-screen).
+- ✅ **Full-height dialogs:** **`!max-h-none`** on admin mobile nav drawer, Career Builder terminal drawer, and filters bottom sheet so they are not capped by the modal max-height.
+- ✅ **Admin row menus:** **`queueMicrotask`** before opening approve/reject/details dialogs from **`DropdownMenu`** on **`/admin/client-applications`** and **`/admin/applications`**.
+- ✅ **`/gigs`:** Redirect when **`page`** is beyond **`totalPages`** (removes out-of-range PostgREST noise / Sentry warning).
+- ✅ **`/auth/callback`:** Missing invite token sets failed UI state without **`throw`** → **`logger.error`** Sentry capture for expected user error.
+- ✅ **Talent signup:** Profile ensure failure after retry uses **`logger.debug`** (non-fatal race).
+- ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** (dialog black-screen causes + fixes); drawer notes in this file.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint` — ship run, April 24, 2026.
+
+**Next (P0):** Merge **develop → main**; smoke **Career Builder Applications** → Approve on a phone (Safari + Chrome).
+
+**Next (P1):** Continue Sentry triage for unrelated issues (network **`Load failed`** on **`/gigs`**, cron secrets, Stripe “no profile”, etc.).
+
+---
+
+## 🚀 **Latest: PR #261 review — userSafeMessage, global-error CSS, gig category (April 18, 2026)**
+
+**UX / QA (Bugbot + Sentry)** — April 18, 2026
+- ✅ **`userSafeMessage`:** After known-danger heuristics, **pass through** short curated strings (e.g. server action copy) instead of always replacing with generic fallback; removed unused **`userSafeActionError`** export; stack detection avoids **`at `** false positives on **“that”** (uses line-start **`at`** / **`at name (path:line`** patterns).
+- ✅ **`app/global-error.tsx`:** Import **`./globals.css`** so Tailwind + CSS variables apply when the global boundary replaces the root layout (Sentry review).
+- ✅ **`PostGigClient`:** Drop duplicate **`categoryForOpportunitySelect`** in initial state; client + admin edit pages already normalize **`initialValues.category`** (Bugbot redundancy).
+
+**Verification:** `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 18, 2026.
+
+**Next (P0):** Merge **develop → main** when PR #261 checks pass; smoke global error page styling if you can force a root-level error in preview.
+
+**Next (P1):** Watch **`userSafeMessage`** stack heuristics (line-start `at` + `at name (path:line`) for false positives on unusual user copy.
+
+---
+
 ## 🚀 **Latest: Error experience + logging hardening (April 18, 2026)**
 
 **UX / OBSERVABILITY / DOCS** — April 18, 2026
@@ -139,8 +173,9 @@
 
 **ADMIN / UI** — April 14, 2026
 - ✅ **`/admin/users`:** Explicit **`talent_profiles!talent_profiles_user_id_fkey`** embed; session **`profiles`** read with **service-role fallback** after admin gate; **`loadError`** banner when both reads fail; **controlled `Tabs`**; post-sync refetch retries admin read and can show a non-blocking stale-verification note.
-- ✅ **Admin + Career Builder mobile drawers:** **`DialogContent`** uses **`!fixed z-[51]`** so **`.panel-frosted`** does not override **`position: fixed`** (panel above the dim overlay).
-- ✅ **Suspend / Reinstate / Delete confirmations on `/admin/users`:** same **`!fixed z-[51]`** on confirmation **`DialogContent`**.
+- ✅ **Admin + Career Builder mobile drawers:** Shared **`DialogContent`** uses **`!fixed`** + **`z-[101]`** (overlay **`z-[100]`**) so **`.panel-frosted`** does not override **`position: fixed`**; drawers add **`!max-h-none`** for full-height panels.
+- ✅ **Suspend / Reinstate / Delete confirmations on `/admin/users`:** Rely on shared modal stacking; centered modals use viewport **`max-h` + scroll** so approve/reject actions stay reachable on mobile.
+- ✅ **Career Builder application approve/reject (admin):** Defer opening confirm dialogs from row menus with **`queueMicrotask`** to avoid “black screen” / off-screen actions when **`DropdownMenu`** closes.
 - ✅ **Tests:** **`tests/admin/admin-dashboard-overflow-sentinel.spec.ts`** asserts a **Users** link inside **`admin-drawer-panel`** (opt-in **`RUN_AUTH_OVERFLOW=1`** overflow suite).
 - ✅ **Docs:** **`docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`** — **`panel-frosted` + Radix Dialog** stacking.
 
@@ -5370,6 +5405,6 @@ Use this as the active operating board. Historical sections below remain the aud
 ---
 
 *Last Updated: April 18, 2026*
-*Current Status: MVP Complete; error UX + structured logging hardening on develop; existing develop→main PR can carry this batch*
+*Current Status: MVP Complete; PR #261 follow-ups (userSafeMessage pass-through, global-error CSS, PostGig category dedupe) on develop*
 *Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
 *Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*

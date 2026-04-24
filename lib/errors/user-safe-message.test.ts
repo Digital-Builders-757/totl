@@ -21,4 +21,15 @@ describe("userSafeMessage", () => {
     const fb = "Custom.";
     expect(userSafeMessage(new Error(""), fb)).toBe(fb);
   });
+
+  it("passes through short curated server-style messages", () => {
+    const msg = "Could not mark that notification as read. Try refreshing.";
+    expect(userSafeMessage(new Error(msg))).toBe(msg);
+  });
+
+  it("maps multiline stack traces to fallback", () => {
+    const fb = "Custom fallback.";
+    const stack = "Error: boom\n    at foo (main.js:1:1)";
+    expect(userSafeMessage(new Error(stack), fb)).toBe(fb);
+  });
 });

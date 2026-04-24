@@ -427,7 +427,7 @@ export function AdminApplicationsClient({
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setSelectedApplication(application);
-                                      setShowApproveDialog(true);
+                                      queueMicrotask(() => setShowApproveDialog(true));
                                     }}
                                     className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                                   >
@@ -437,7 +437,7 @@ export function AdminApplicationsClient({
                                   <DropdownMenuItem
                                     onClick={() => {
                                       setSelectedApplication(application);
-                                      setShowRejectDialog(true);
+                                      queueMicrotask(() => setShowRejectDialog(true));
                                     }}
                                     className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
                                   >

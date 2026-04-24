@@ -965,7 +965,7 @@ export function AdminUsersClient({
           }
         }}
       >
-        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-amber-300">Suspend User</DialogTitle>
             <DialogDescription className="text-[var(--oklch-text-secondary)]">
@@ -1043,7 +1043,7 @@ export function AdminUsersClient({
           }
         }}
       >
-        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-emerald-300">Reinstate User</DialogTitle>
             <DialogDescription className="text-[var(--oklch-text-secondary)]">
@@ -1106,7 +1106,7 @@ export function AdminUsersClient({
           }
         }}
       >
-        <DialogContent className="panel-frosted !fixed z-[51] border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="text-rose-300">Delete user permanently?</DialogTitle>
             <DialogDescription asChild>
@@ -1181,7 +1181,7 @@ export function AdminUsersClient({
           if (!open) setSubscriptionDetailUser(null);
         }}
       >
-        <DialogContent className="panel-frosted !fixed z-[51] max-h-[85vh] overflow-y-auto border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
+        <DialogContent className="panel-frosted max-h-[85vh] overflow-y-auto border-white/10 bg-[var(--totl-surface-glass-strong)] text-white">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-white">
               <CreditCard className="h-5 w-5 text-orange-400" />

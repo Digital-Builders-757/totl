@@ -169,7 +169,7 @@ export default function TalentSignupForm({ onComplete }: TalentSignupFormProps) 
           await new Promise(resolve => setTimeout(resolve, 1000));
           profileResult = await ensureProfilesAfterSignup();
           if (profileResult.error) {
-            logger.error("Profile ensure after signup failed after retry", profileResult.error);
+            logger.debug("Profile ensure after signup failed after retry (non-fatal)", profileResult.error);
             // Don't fail signup - user was created, profiles might be created by trigger
           }
         }

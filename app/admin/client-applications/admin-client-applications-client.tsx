@@ -171,7 +171,7 @@ export function AdminClientApplicationsClient({
         <DropdownMenuItem
           onClick={() => {
             setSelectedApplication(application);
-            setIsDetailsDialogOpen(true);
+            queueMicrotask(() => setIsDetailsDialogOpen(true));
           }}
           className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
         >
@@ -184,7 +184,7 @@ export function AdminClientApplicationsClient({
               onClick={() => {
                 setSelectedApplication(application);
                 setAdminNotes("");
-                setIsApproveDialogOpen(true);
+                queueMicrotask(() => setIsApproveDialogOpen(true));
               }}
               className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
@@ -195,7 +195,7 @@ export function AdminClientApplicationsClient({
               onClick={() => {
                 setSelectedApplication(application);
                 setAdminNotes("");
-                setIsRejectDialogOpen(true);
+                queueMicrotask(() => setIsRejectDialogOpen(true));
               }}
               className="text-[var(--oklch-text-secondary)] hover:bg-white/10 hover:text-white"
             >
@@ -1117,7 +1117,7 @@ export function AdminClientApplicationsClient({
                   <Button
                     onClick={() => {
                       setIsDetailsDialogOpen(false);
-                      setIsApproveDialogOpen(true);
+                      queueMicrotask(() => setIsApproveDialogOpen(true));
                     }}
                     className="flex-1 gap-2 bg-green-600 hover:bg-green-700"
                   >
@@ -1127,7 +1127,7 @@ export function AdminClientApplicationsClient({
                   <Button
                     onClick={() => {
                       setIsDetailsDialogOpen(false);
-                      setIsRejectDialogOpen(true);
+                      queueMicrotask(() => setIsRejectDialogOpen(true));
                     }}
                     variant="destructive"
                     className="flex-1 gap-2"

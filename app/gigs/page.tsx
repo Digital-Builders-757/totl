@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { Search, ArrowRight, ChevronLeft, Home, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { SignInGate } from "@/components/auth/sign-in-gate";
 import { GigCard } from "@/components/gigs/gig-card";
@@ -78,6 +79,22 @@ export default async function GigsPage({
   const pageParam = typeof sp.page === "string" ? parseInt(sp.page, 10) : 1;
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
   const pageSize = 9;
+
+  const buildPageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (rawKeyword) params.set("q", rawKeyword);
+    if (category) params.set("category", category);
+    if (location) params.set("location", location);
+    if (radiusMiles) params.set("radius_miles", radiusMiles);
+    if (compensation) params.set("compensation", compensation);
+    if (payRange) params.set("pay_range", payRange);
+    if (sort !== "newest") params.set("sort", sort);
+    if (upcoming) params.set("upcoming", "1");
+    if (localDateRaw && /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw))
+      params.set("local_date", localDateRaw);
+    params.set("page", String(targetPage));
+    return `/gigs?${params.toString()}`;
+  };
 
   const payBounds = getPayRangeBounds(payRange);
   const dateMin =
@@ -249,13 +266,11 @@ export default async function GigsPage({
   }
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  if (page > totalPages) {
+    redirect(buildPageHref(totalPages));
+  }
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  
-  // Handle errors - PGRST103 is expected for out-of-range pages, just show empty results
-  if (error?.code === "PGRST103") {
-    logger.warn("Pagination out of range", { page, total });
-  }
   if (error && error.code !== "PGRST103") {
     logger.error("Error fetching gigs", error);
     return (
@@ -292,23 +307,6 @@ export default async function GigsPage({
       </PageShell>
     );
   }
-
-  // Helper to preserve query params while changing page
-  const buildPageHref = (targetPage: number) => {
-    const params = new URLSearchParams();
-    if (rawKeyword) params.set("q", rawKeyword);
-    if (category) params.set("category", category);
-    if (location) params.set("location", location);
-    if (radiusMiles) params.set("radius_miles", radiusMiles);
-    if (compensation) params.set("compensation", compensation);
-    if (payRange) params.set("pay_range", payRange);
-    if (sort !== "newest") params.set("sort", sort);
-    if (upcoming) params.set("upcoming", "1");
-    if (localDateRaw && /^\d{4}-\d{2}-\d{2}$/.test(localDateRaw))
-      params.set("local_date", localDateRaw);
-    params.set("page", String(targetPage));
-    return `/gigs?${params.toString()}`;
-  };
 
   // Extract user role and profile from parallel fetch result
   let userRole: string | null = null;
