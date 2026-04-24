@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertClientProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 
 // Import the generated type instead of defining our own
@@ -103,20 +104,8 @@ export default function ClientProfileForm({ initialData }: ClientProfileFormProp
       router.push(PATHS.CLIENT_DASHBOARD);
     } catch (err) {
       logger.error("Error updating profile", err);
-      
-      // Extract error message from various error types
-      let errorMessage = "An unexpected error occurred";
-      
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (err && typeof err === 'object') {
-        // Handle Supabase error objects
-        const supabaseError = err as { message?: string; details?: string; hint?: string };
-        errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
-      }
-      
+      const errorMessage = userSafeMessage(err, "We couldn’t update your profile. Please try again.");
       setError(errorMessage);
-      
       toast({
         title: "Error updating profile",
         description: errorMessage,

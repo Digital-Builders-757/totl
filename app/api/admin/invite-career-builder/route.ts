@@ -4,6 +4,7 @@ import { PATHS } from "@/lib/constants/routes";
 import { absoluteUrl } from "@/lib/server/get-site-url";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 
@@ -72,7 +73,11 @@ export async function POST(request: Request) {
         );
       }
 
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      logger.error("[invite-career-builder] inviteUserByEmail failed", error, { email });
+      return NextResponse.json(
+        { error: "We couldn’t send the invite. Please try again or contact support." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -82,10 +87,8 @@ export async function POST(request: Request) {
       redirectTo,
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unexpected error" },
-      { status: 500 }
-    );
+    logger.error("[invite-career-builder] unexpected", error);
+    return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });
   }
 }
 

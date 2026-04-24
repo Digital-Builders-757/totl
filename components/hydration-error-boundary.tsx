@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/utils/logger";
 
 interface HydrationErrorBoundaryProps {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ export function HydrationErrorBoundary({
     // Listen for hydration errors
     const handleError = (event: ErrorEvent) => {
       if (event.message.includes("hydrat") || event.message.includes("hydration")) {
-        console.warn("Hydration error detected, but continuing:", event.message);
+        logger.warn("Hydration error detected, but continuing", { message: event.message });
         setHasError(true);
         // Don't prevent default - let React handle it
       }

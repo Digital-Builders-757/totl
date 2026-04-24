@@ -4,6 +4,7 @@ import { z } from "zod";
 import { computeEmailSendWindowForNow, EmailSendPurpose } from "@/lib/server/email/claim-email-send";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
+import { logger } from "@/lib/utils/logger";
 
 export const runtime = "nodejs";
 
@@ -90,7 +91,7 @@ export async function GET(request: Request) {
         : null,
     });
   } catch (e) {
-    console.error("[totl][admin][email-ledger-debug] error", e);
+    logger.error("[totl][admin][email-ledger-debug] error", e);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }

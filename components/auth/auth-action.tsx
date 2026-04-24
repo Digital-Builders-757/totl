@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import type { ButtonProps } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { logger } from "@/lib/utils/logger";
 
 interface AuthActionProps extends ButtonProps {
   actionText?: string;
@@ -38,7 +39,7 @@ export function AuthAction({
       setIsLoading(true);
       await onAction();
     } catch (error) {
-      console.error("Action error:", error);
+      logger.error("AuthAction error", error);
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",

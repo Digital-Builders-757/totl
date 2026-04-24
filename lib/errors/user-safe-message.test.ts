@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { userSafeMessage } from "./user-safe-message";
+import { userSafeMessage, userSafeMessageFromActionError } from "./user-safe-message";
 
 describe("userSafeMessage", () => {
   it("maps failed to fetch to network copy", () => {
@@ -31,5 +31,19 @@ describe("userSafeMessage", () => {
     const fb = "Custom fallback.";
     const stack = "Error: boom\n    at foo (main.js:1:1)";
     expect(userSafeMessage(new Error(stack), fb)).toBe(fb);
+  });
+
+  it("maps invalid JWT to session copy", () => {
+    expect(userSafeMessage(new Error("Invalid JWT"))).toMatch(/session expired|sign in again/i);
+  });
+
+  it("maps rate limit copy", () => {
+    expect(userSafeMessage(new Error("429: rate limit exceeded"))).toMatch(/too many attempts/i);
+  });
+
+  it("userSafeMessageFromActionError maps stored strings", () => {
+    expect(userSafeMessageFromActionError("violates row-level security policy")).toMatch(/don’t have permission/i);
+    expect(userSafeMessageFromActionError(undefined, "Saved.")).toBe("Saved.");
+    expect(userSafeMessageFromActionError("")).toMatch(/something went wrong/i);
   });
 });

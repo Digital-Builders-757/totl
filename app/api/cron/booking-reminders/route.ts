@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
   if (!cronSecret) {
     // Preview deploys and misconfigured envs hit this; logger.warn posts to Sentry (TOTLMODELAGENCY-3K).
-    console.warn("[cron/booking-reminders] CRON_SECRET is not configured");
+    logger.warn("[cron/booking-reminders] CRON_SECRET is not configured");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

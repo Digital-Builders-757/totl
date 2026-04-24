@@ -2,7 +2,10 @@
 
 import "server-only";
 import { z } from "zod";
+import { logActionFailure } from "@/lib/errors/log-action-failure";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -74,7 +77,10 @@ export async function upsertTalentProfileAction(
   };
 
   const { error } = await supabase.from("talent_profiles").upsert(values, { onConflict: "user_id" });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    logActionFailure("profile.upsertTalent", error, { userId: user.id });
+    return { ok: false, error: userSafeMessage(error, "We couldn’t save your profile. Please try again.") };
+  }
 
   const displayName = `${parsed.data.first_name} ${parsed.data.last_name}`.trim();
   const { error: nameError } = await supabase
@@ -84,7 +90,7 @@ export async function upsertTalentProfileAction(
 
   if (nameError) {
     // Non-fatal: profile data was saved; display_name is cosmetic.
-    console.warn("[totl] upsertTalentProfileAction: display_name update failed", {
+    logger.warn("[totl] upsertTalentProfileAction: display_name update failed", {
       userId: user.id,
       message: nameError.message,
     });
@@ -118,7 +124,10 @@ export async function upsertClientProfileAction(
   };
 
   const { error } = await supabase.from("client_profiles").upsert(values, { onConflict: "user_id" });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    logActionFailure("profile.upsertClient", error, { userId: user.id });
+    return { ok: false, error: userSafeMessage(error, "We couldn’t save your company profile. Please try again.") };
+  }
 
   const { error: nameError } = await supabase
     .from("profiles")
@@ -126,7 +135,7 @@ export async function upsertClientProfileAction(
     .eq("id", user.id);
 
   if (nameError) {
-    console.warn("[totl] upsertClientProfileAction: display_name update failed", {
+    logger.warn("[totl] upsertClientProfileAction: display_name update failed", {
       userId: user.id,
       message: nameError.message,
     });
@@ -185,7 +194,10 @@ export async function updateTalentPersonalInfoAction(
     .update(talentPatch)
     .eq("user_id", user.id);
 
-  if (talentError) return { ok: false, error: talentError.message };
+  if (talentError) {
+    logActionFailure("profile.updateTalentPersonal", talentError, { userId: user.id });
+    return { ok: false, error: userSafeMessage(talentError, "We couldn’t save your details. Please try again.") };
+  }
 
   const profilePatch: ProfilesUpdate = {
     instagram_handle: parsed.data.instagram_handle,
@@ -197,7 +209,10 @@ export async function updateTalentPersonalInfoAction(
     .update(profilePatch)
     .eq("id", user.id);
 
-  if (profileError) return { ok: false, error: profileError.message };
+  if (profileError) {
+    logActionFailure("profile.updateTalentPersonalProfiles", profileError, { userId: user.id });
+    return { ok: false, error: userSafeMessage(profileError, "We couldn’t save your details. Please try again.") };
+  }
 
   return { ok: true };
 }
@@ -230,7 +245,10 @@ export async function updateTalentProfessionalInfoAction(
   };
 
   const { error } = await supabase.from("talent_profiles").update(patch).eq("user_id", user.id);
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    logActionFailure("profile.updateTalentProfessional", error, { userId: user.id });
+    return { ok: false, error: userSafeMessage(error, "We couldn’t save your professional info. Please try again.") };
+  }
 
   return { ok: true };
 }

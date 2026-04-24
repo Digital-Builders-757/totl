@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
+import { userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
@@ -108,7 +109,10 @@ export function AdminApplicationDetailClient({
       if (!result.ok) {
         toast({
           title: "Error",
-          description: result.error,
+          description: userSafeMessageFromActionError(
+            result.error,
+            "We couldn’t approve this application. Please try again."
+          ),
           variant: "destructive",
         });
       } else {
@@ -152,7 +156,10 @@ export function AdminApplicationDetailClient({
       if (!result.ok) {
         toast({
           title: "Error",
-          description: result.error,
+          description: userSafeMessageFromActionError(
+            result.error,
+            "We couldn’t reject this application. Please try again."
+          ),
           variant: "destructive",
         });
       } else {

@@ -265,7 +265,10 @@ export const POST = async (request: Request) => {
         );
       }
 
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: "We couldn’t complete that action. Please try again." },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -274,9 +277,6 @@ export const POST = async (request: Request) => {
     });
   } catch (error) {
     logger.error("Error deleting user:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "We couldn’t complete that action. Please try again." }, { status: 500 });
   }
 };

@@ -96,21 +96,22 @@ export async function getTalentDashboardData(
 
   // Talent profile: allow "not found" (setup not finished), but hard-fail other errors
   if (talentProfileResult.error && talentProfileResult.error.code !== "PGRST116") {
-    throw new Error(
-      `[getTalentDashboardData] Failed to fetch talent profile: ${talentProfileResult.error.message}`
-    );
+    logger.error("[getTalentDashboardData] Failed to fetch talent profile", talentProfileResult.error, {
+      userId,
+    });
+    throw new Error("Could not load your dashboard. Please try again.");
   }
 
   // Hard-fail real query errors (no silent empty dashboards)
   if (applicationsResult.error) {
-    throw new Error(
-      `[getTalentDashboardData] Failed to fetch applications: ${applicationsResult.error.message}`
-    );
+    logger.error("[getTalentDashboardData] Failed to fetch applications", applicationsResult.error, {
+      userId,
+    });
+    throw new Error("Could not load your dashboard. Please try again.");
   }
   if (gigsResult.error) {
-    throw new Error(
-      `[getTalentDashboardData] Failed to fetch gigs: ${gigsResult.error.message}`
-    );
+    logger.error("[getTalentDashboardData] Failed to fetch gigs", gigsResult.error, { userId });
+    throw new Error("Could not load your dashboard. Please try again.");
   }
 
   const applicationsRaw = applicationsResult.data ?? [];
@@ -135,9 +136,10 @@ export async function getTalentDashboardData(
       .returns<ClientProfileLite[]>();
 
     if (clientProfilesResult.error) {
-      throw new Error(
-        `[getTalentDashboardData] Failed to fetch client profiles: ${clientProfilesResult.error.message}`
-      );
+      logger.error("[getTalentDashboardData] Failed to fetch client profiles", clientProfilesResult.error, {
+        userId,
+      });
+      throw new Error("Could not load your dashboard. Please try again.");
     }
 
     companyByClientId = new Map(
@@ -255,8 +257,8 @@ export async function getClientDashboardData(
   }
 
   if (gigsResult.error) {
-    logger.error("[getClientDashboardData] Error fetching gigs", gigsResult.error);
-    throw new Error(`[getClientDashboardData] Failed to fetch gigs: ${gigsResult.error.message}`);
+    logger.error("[getClientDashboardData] Error fetching gigs", gigsResult.error, { userId });
+    throw new Error("Could not load your dashboard. Please try again.");
   }
 
   const gigs = gigsResult.data ?? [];
@@ -275,8 +277,10 @@ export async function getClientDashboardData(
       .returns<ClientApplicationRaw[]>();
 
     if (applicationsResult.error) {
-      logger.error("[getClientDashboardData] Error fetching applications", applicationsResult.error);
-      throw new Error(`[getClientDashboardData] Failed to fetch applications: ${applicationsResult.error.message}`);
+      logger.error("[getClientDashboardData] Error fetching applications", applicationsResult.error, {
+        userId,
+      });
+      throw new Error("Could not load your dashboard. Please try again.");
     }
 
     applicationsRaw = applicationsResult.data ?? [];

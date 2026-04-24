@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/utils/logger";
 
 export default function SupabaseConnectionTest() {
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +43,7 @@ export default function SupabaseConnectionTest() {
         serviceVars: data.serviceVars,
       });
     } catch (e) {
-      console.error("Error testing connection:", e);
+      logger.error("Error testing connection", e);
       setConnectionStatus({
         connected: false,
         error: e instanceof Error ? e.message : "Unknown error",

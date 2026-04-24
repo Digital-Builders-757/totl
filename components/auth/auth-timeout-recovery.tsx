@@ -30,7 +30,7 @@ export function AuthTimeoutRecovery() {
         }
       } catch (err) {
         // SignOut may fail if client is stuck - that's okay, we'll wipe storage
-        console.warn("[AuthTimeoutRecovery] SignOut failed (expected if stuck):", err);
+        logger.warn("[AuthTimeoutRecovery] SignOut failed (expected if stuck)", { err });
       }
 
       // Step 3: Wipe Supabase storage keys from localStorage
@@ -50,7 +50,7 @@ export function AuthTimeoutRecovery() {
           try {
             localStorage.removeItem(key);
           } catch (err) {
-            console.warn(`[AuthTimeoutRecovery] Failed to remove ${key}:`, err);
+            logger.warn(`[AuthTimeoutRecovery] Failed to remove ${key}`, { err });
           }
         });
 
@@ -58,7 +58,7 @@ export function AuthTimeoutRecovery() {
         try {
           sessionStorage.clear();
         } catch (err) {
-          console.warn("[AuthTimeoutRecovery] Failed to clear sessionStorage:", err);
+          logger.warn("[AuthTimeoutRecovery] Failed to clear sessionStorage", { err });
         }
 
         logger.debug(`[AuthTimeoutRecovery] Cleared ${keysToRemove.length} storage keys`);
@@ -69,7 +69,7 @@ export function AuthTimeoutRecovery() {
         window.location.replace("/login?cleared=1");
       }
     } catch (err) {
-      console.error("[AuthTimeoutRecovery] Error clearing session:", err);
+      logger.error("[AuthTimeoutRecovery] Error clearing session", err);
       // Fallback: just reload
       if (typeof window !== "undefined") {
         window.location.replace("/login?cleared=1");

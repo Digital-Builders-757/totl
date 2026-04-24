@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { userSafeMessage, userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 
 const profileFormSchema = z.object({
@@ -76,14 +77,14 @@ export function OnboardingForm() {
       });
 
       if (!result.ok) {
-        setError(result.error);
+        setError(userSafeMessageFromActionError(result.error, "We couldn’t save your profile. Please try again."));
         return;
       }
 
       router.replace(result.nextPath);
     } catch (err) {
       logger.error("Error creating profile", err);
-      setError(err instanceof Error ? err.message : "Failed to create profile. Please try again.");
+      setError(userSafeMessage(err, "We couldn’t create your profile. Please try again."));
     } finally {
       setIsSubmitting(false);
     }

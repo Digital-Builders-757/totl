@@ -76,7 +76,10 @@ export async function GET() {
 
   if (profileError) {
     logger.error("Error fetching profile for client application status", profileError);
-    return NextResponse.json({ error: profileError.message }, { status: 500 });
+    return NextResponse.json(
+      { error: "We couldn’t load your application status. Please try again." },
+      { status: 500 }
+    );
   }
 
   try {

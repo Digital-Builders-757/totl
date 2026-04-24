@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { logImageFallback } from "@/lib/utils/error-logger";
+import { logger } from "@/lib/utils/logger";
 import { cn } from "@/lib/utils/utils";
 
 interface SafeImageProps {
@@ -78,8 +79,7 @@ export function SafeImage({
     (fallbackFirstOnBlockedHosts && src.startsWith("http") && isProbablyBlockedUpstream(src));
 
   if (src && shouldUseFallback && src !== fallbackSrc) {
-    // eslint-disable-next-line no-console
-    console.warn(`SafeImage: fallback-first in ${context}`, {
+    logger.warn(`SafeImage: fallback-first in ${context}`, {
       src,
       reason: !src
         ? "null/undefined"

@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from "@/lib/utils/logger";
 
 export default function AuthSchemaCheck() {
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +44,7 @@ export default function AuthSchemaCheck() {
         error: data.error,
       });
     } catch (e) {
-      console.error("Error checking auth schema:", e);
+      logger.error("Error checking auth schema", e);
       setAuthSchemaStatus({
         exists: false,
         tables: [],

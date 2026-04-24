@@ -58,8 +58,31 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
   if (lower.includes("user already registered") || lower.includes("already been registered")) {
     return "An account with this email already exists. Try signing in instead.";
   }
-  if (lower.includes("jwt") && lower.includes("expired")) {
+  if (
+    (lower.includes("jwt") && (lower.includes("expired") || lower.includes("invalid") || lower.includes("malformed"))) ||
+    lower.includes("invalid jwt") ||
+    lower.includes("invalid claim") ||
+    lower.includes("session missing") ||
+    lower.includes("session not found")
+  ) {
     return "Your session expired. Please sign in again.";
+  }
+  if (
+    lower.includes("refresh token") &&
+    (lower.includes("not found") || lower.includes("invalid") || lower.includes("expired"))
+  ) {
+    return "Your session expired. Please sign in again.";
+  }
+  if (
+    lower.includes("rate limit") ||
+    lower.includes("too many requests") ||
+    lower.includes("too_many") ||
+    lower.includes("email rate limit")
+  ) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  if (lower.includes("authapierror") || lower.includes("auth api error")) {
+    return "We couldn’t verify your account. Try signing in again.";
   }
 
   // PostgREST / RLS (never show raw codes to end users)
@@ -102,4 +125,16 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
   }
 
   return msg;
+}
+
+/**
+ * Maps legacy server-action shapes `{ error: string }` to user-safe copy.
+ * Use when the string might be a forwarded DB/network error.
+ */
+export function userSafeMessageFromActionError(
+  error: string | null | undefined,
+  fallback: string = GENERIC
+): string {
+  if (error == null || error.trim() === "") return fallback;
+  return userSafeMessage(new Error(error), fallback);
 }
