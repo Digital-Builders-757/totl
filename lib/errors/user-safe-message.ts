@@ -6,8 +6,7 @@
 const GENERIC =
   "Something went wrong on our end. Please try again in a moment. If it keeps happening, contact support.";
 
-const NETWORK =
-  "We couldn’t reach our servers. Check your connection and try again.";
+const NETWORK = "We couldn’t reach our servers. Check your connection and try again.";
 
 /** Strip noisy prefixes some layers add */
 function normalizeMessage(raw: string): string {
@@ -16,7 +15,12 @@ function normalizeMessage(raw: string): string {
 
 function messageFromUnknown(err: unknown): string {
   if (err instanceof Error) return normalizeMessage(err.message);
-  if (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string") {
+  if (
+    err &&
+    typeof err === "object" &&
+    "message" in err &&
+    typeof (err as { message: unknown }).message === "string"
+  ) {
     return normalizeMessage((err as { message: string }).message);
   }
   return normalizeMessage(String(err));
@@ -94,10 +98,15 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
 
   // If it still looks like a stack or SQL dump, use fallback; otherwise pass through short curated copy.
   // Note: avoid `includes("at ")` — it false-positives on words like "that".
-  const looksLikeStackFrame =
-    /(?:^|\n)\s+at\s+/m.test(msg) ||
-    /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
-  if (msg.length > 200 || looksLikeStackFrame || lower.includes("select ") || lower.includes("insert ")) {
+  const looksLikeStackFrame = /(?:^|\n)\s+at\s+/m.test(msg) || /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
+  if (
+    msg.length > 200 ||
+    looksLikeStackFrame ||
+    lower.includes("select ") ||
+    lower.includes("insert ") ||
+    lower.includes("update ") ||
+    lower.includes("delete ")
+  ) {
     return fallback;
   }
 
