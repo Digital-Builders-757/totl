@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: `userSafeMessage` SQL / engine leak guard (April 24, 2026)**
+
+**UX / ROBUSTNESS** — April 24, 2026
+- ✅ **`messageLooksInternalOrSqlLike`** in `lib/errors/user-safe-message.ts`: blocks pass-through of short errors that look like **UPDATE/DELETE/MERGE/TRUNCATE** SQL, Postgres **`detail:`** / **`hint:`** / syntax / **`relation "`** fragments, plus existing stack/length/**SELECT**/**INSERT** checks (addresses Bugbot PR #262 follow-up).
+- ✅ **Tests:** `lib/errors/user-safe-message.test.ts` — 12 cases including merge/action-error paths.
+- ✅ **Docs:** `COMMON_ERRORS_QUICK_REFERENCE.md`, work order §6, `docs/DOCUMENTATION_INDEX.md` last-updated.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npm run test:unit -- lib/errors/user-safe-message.test.ts` — ship run, April 24, 2026.
+
+**Next (P0):** Merge **develop → main** when current PR is green; quick smoke: toast copy still calm on a forced error path.
+
+**Next (P1):** If product needs verbatim short strings with words like `update `, use a dedicated mapped branch or rephrase server copy; avoid broadening `messageLooksInternalOrSqlLike` without tests.
+
+---
+
 ## 🚀 **Latest: Error logging + client-facing copy pass (April 23, 2026)**
 
 **UX / OBSERVABILITY** — April 23, 2026

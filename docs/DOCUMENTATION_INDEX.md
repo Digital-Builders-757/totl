@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 23, 2026 (repo-wide user-safe errors + logging hygiene pass; error UX work order §7; `COMMON_ERRORS` action-error + API 5xx notes; prior: April 18 error UX/logging work order + hygiene)
+**Last Updated:** April 24, 2026 (`userSafeMessage` SQL/engine fragment guard + tests; `COMMON_ERRORS` pass-through note; prior: April 23 repo-wide user-safe errors + logging hygiene)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -125,7 +125,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 ### **🚨 Critical Error Prevention**
 - `troubleshooting/README.md` - Entry point for troubleshooting docs and common error triage
 - `PRE_PUSH_CHECKLIST.md` - **🚨 CRITICAL** - Mandatory checklist to prevent common errors before pushing (Jan 2025)
-- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (Nov 2025 - Stripe, Jan 2026 - Bugbot, Apr 2026 - Supabase `head` count + `error` handling; Apr 2026 - Sentry admin gigs RLS, cron CRON_SECRET, Next server actions; Apr 2026 - admin gig cover drag-drop vs native `multipart` file field; Apr 2026 - admin gig **delete** cascade + `bookings` RLS; Apr 2026 - user-safe error copy vs raw `error.message` in UI; Apr 2026 - `global-error.tsx` must import `globals.css`; Apr 2026 - `userSafeMessageFromActionError` + avoid echoing `error.message` in production API 5xx JSON)
+- `COMMON_ERRORS_QUICK_REFERENCE.md` - **⚡ UPDATED** - Quick copy/paste fixes for common errors (…; Apr 2026 - `userSafeMessage` avoid SQL-shaped pass-through + Vitest; Apr 2026 - `userSafeMessageFromActionError` + API 5xx JSON; see file for full history)
 - `TOTL_ERROR_EXPERIENCE_AND_LOGGING_HARDENING_WORK_ORDER_2026.md` - Audit + standards for user-safe errors vs structured logging (Apr 2026; Apr 2026 update: waves 1–5 shipped in repo)
 - `BUGBOT_FIXES_PLAN.md` - **✅ NEW** - Comprehensive plan and implementation for Cursor Bugbot error handling fixes (Jan 2026)
 - `TALENT_DASHBOARD_UPGRADES_IMPLEMENTATION.md` - **✅ NEW** - Talent dashboard resilience upgrades (infinite loading fix, API key diagnostics, Dec 2025)

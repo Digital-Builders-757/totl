@@ -23,6 +23,44 @@ function messageFromUnknown(err: unknown): string {
 }
 
 /**
+ * True when a short string still looks like a stack, SQL, or Postgres engine line — do not pass through to users.
+ * Broader than statement keywords only (Bugbot: pass-through must not leak UPDATE/DELETE-shaped errors).
+ */
+function messageLooksInternalOrSqlLike(msg: string): boolean {
+  if (msg.length > 200) return true;
+
+  const lower = msg.toLowerCase();
+  // Note: avoid `includes("at ")` — it false-positives on words like "that".
+  const looksLikeStackFrame =
+    /(?:^|\n)\s+at\s+/m.test(msg) || /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
+  if (looksLikeStackFrame) return true;
+
+  if (
+    lower.includes("select ") ||
+    lower.includes("insert ") ||
+    lower.includes("update ") ||
+    lower.includes("delete ") ||
+    lower.includes("merge ") ||
+    lower.includes("truncate ")
+  ) {
+    return true;
+  }
+
+  if (
+    lower.includes("detail:") ||
+    lower.includes("hint:") ||
+    lower.includes("syntax error") ||
+    lower.includes("at or near") ||
+    lower.includes("at character") ||
+    lower.includes('relation "')
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Returns user-safe description text (for toasts, alerts, inline).
  * Optional `fallback` overrides the generic unknown case (e.g. shorter copy for admin toasts).
  */
@@ -115,12 +153,8 @@ export function userSafeMessage(err: unknown, fallback: string = GENERIC): strin
     return "This feature is temporarily unavailable. Please try again later.";
   }
 
-  // If it still looks like a stack or SQL dump, use fallback; otherwise pass through short curated copy.
-  // Note: avoid `includes("at ")` — it false-positives on words like "that".
-  const looksLikeStackFrame =
-    /(?:^|\n)\s+at\s+/m.test(msg) ||
-    /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
-  if (msg.length > 200 || looksLikeStackFrame || lower.includes("select ") || lower.includes("insert ")) {
+  // If it still looks like a stack or SQL / engine line, use fallback; otherwise pass through short curated copy.
+  if (messageLooksInternalOrSqlLike(msg)) {
     return fallback;
   }
 
