@@ -27,6 +27,32 @@ describe("userSafeMessage", () => {
     expect(userSafeMessage(new Error(msg))).toBe(msg);
   });
 
+  it("passes through short action copy with to update / to delete (not SQL-shaped)", () => {
+    const fb = "We couldn’t do that. Try again.";
+    expect(userSafeMessage(new Error("Failed to update booking"), fb)).toBe("Failed to update booking");
+    expect(userSafeMessage(new Error("Failed to update status"), fb)).toBe("Failed to update status");
+    expect(userSafeMessage(new Error("Failed to delete saved search"), fb)).toBe("Failed to delete saved search");
+  });
+
+  it("does not pass through short messages with SQL statement keywords (UPDATE/DELETE)", () => {
+    const fb = "Use fallback.";
+    // Avoid "rls" / permission heuristics so the final SQL-ish guard is what we exercise.
+    expect(userSafeMessage(new Error("Error: update not allowed for this column"), fb)).toBe(fb);
+    expect(userSafeMessage(new Error("Delete failed: row is referenced"), fb)).toBe(fb);
+  });
+
+  it("does not pass through Postgres-style detail / syntax fragments", () => {
+    const fb = "Custom.";
+    expect(userSafeMessage(new Error('ERROR: 42P01: relation "foo" does not exist\nLINE 1: ...'), fb)).toBe(
+      fb
+    );
+    expect(userSafeMessage(new Error("Detail: Key (id)=(1) is not present in table bar."), fb)).toBe(fb);
+  });
+
+  it("userSafeMessageFromActionError maps SQL-shaped short action errors to safe copy", () => {
+    expect(userSafeMessageFromActionError("merge into gigs failed")).toMatch(/something went wrong|try again/i);
+  });
+
   it("maps multiline stack traces to fallback", () => {
     const fb = "Custom fallback.";
     const stack = "Error: boom\n    at foo (main.js:1:1)";

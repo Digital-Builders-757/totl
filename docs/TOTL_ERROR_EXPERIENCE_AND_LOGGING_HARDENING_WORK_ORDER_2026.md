@@ -76,6 +76,7 @@ This document records current patterns, gaps, prioritized surfaces, and shared s
 - **Tier A — Inline / field:** Specific, actionable (validation).
 - **Tier B — Toast:** Short headline + one sentence; no vendor internals.
 - **Tier C — Full page / boundary:** Calm explanation + Try again; optional “Reference: {digest}” when Next provides digest.
+- **`userSafeMessage` final pass-through:** After known vendor maps, `messageLooksInternalOrSqlLike` blocks stack traces, over-long text, and SQL/Postgres-shaped fragments (including `UPDATE`/`DELETE`-style short errors) so they fall back to generic copy instead of leaking to the UI.
 
 ### Server action / mutation returns
 
