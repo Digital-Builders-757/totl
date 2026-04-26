@@ -8,6 +8,21 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: `userSafeMessage` DML heuristics — curated "Failed to update/delete…" pass-through (April 25, 2026)**
+
+**UX / ROBUSTNESS (PR #264 follow-up)** — April 25, 2026
+- ✅ **`messageLooksInternalOrSqlLike`:** Replaced naive `update ` / `delete ` substrings with SQL-shaped `UPDATE` / `DELETE` (word boundary + space) and **negative lookbehind** so English **to update** / **to delete** in curated copy (e.g. booking + saved-search actions) is not misclassified. **`MERGE`** tightened to **`MERGE INTO`** only (still catches `merge into …` test cases).
+- ✅ **Tests:** `lib/errors/user-safe-message.test.ts` — 13 cases including pass-through for `Failed to update booking`, `Failed to delete saved search`, etc.
+- ✅ **Docs:** this file, `COMMON_ERRORS_QUICK_REFERENCE.md` guard wording, `docs/DOCUMENTATION_INDEX.md` last-updated.
+
+**Verification:** `npm run schema:verify:comprehensive`, `npm run types:check`, `npm run build`, `npm run lint`, `npx vitest run lib/errors/user-safe-message.test.ts` — ship run, April 25, 2026.
+
+**Next (P0):** Merge **develop → main** when PR is green; smoke a booking status update + saved search remove (toast should show action copy or call-site fallback, not generic-only swap from mis-flagged DML).
+
+**Next (P1):** If Bugbot or UX finds false positives on **`select `** / **`insert `** (still substring-based), tighten to statement patterns with tests.
+
+---
+
 ## 🚀 **Latest: `userSafeMessage` SQL / engine leak guard (April 24, 2026)**
 
 **UX / ROBUSTNESS** — April 24, 2026

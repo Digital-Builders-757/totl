@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 24, 2026 (`userSafeMessage` SQL/engine fragment guard + tests; `COMMON_ERRORS` pass-through note; prior: April 23 repo-wide user-safe errors + logging hygiene)
+**Last Updated:** April 25, 2026 (`userSafeMessage` DML heuristics: no false positive on "Failed to update/delete…"; `COMMON_ERRORS` + MVP status; prior: April 24 SQL/engine fragment guard)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 

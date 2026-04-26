@@ -35,13 +35,15 @@ function messageLooksInternalOrSqlLike(msg: string): boolean {
     /(?:^|\n)\s+at\s+/m.test(msg) || /\s+at\s+\S+\s*\([^)]*:\d/.test(msg);
   if (looksLikeStackFrame) return true;
 
+  // DML / MERGE: avoid false positives on English "to update" / "to delete" in curated
+  // copy (e.g. "Failed to update booking") while still flagging SQL-looking UPDATE/DELETE.
   if (
+    /(?<!\bto\s)\bupdate\s+/i.test(msg) ||
+    /(?<!\bto\s)\bdelete\s+/i.test(msg) ||
     lower.includes("select ") ||
     lower.includes("insert ") ||
-    lower.includes("update ") ||
-    lower.includes("delete ") ||
-    lower.includes("merge ") ||
-    lower.includes("truncate ")
+    lower.includes("truncate ") ||
+    /\bmerge\s+into\b/i.test(msg)
   ) {
     return true;
   }

@@ -27,6 +27,13 @@ describe("userSafeMessage", () => {
     expect(userSafeMessage(new Error(msg))).toBe(msg);
   });
 
+  it("passes through short action copy with to update / to delete (not SQL-shaped)", () => {
+    const fb = "We couldn’t do that. Try again.";
+    expect(userSafeMessage(new Error("Failed to update booking"), fb)).toBe("Failed to update booking");
+    expect(userSafeMessage(new Error("Failed to update status"), fb)).toBe("Failed to update status");
+    expect(userSafeMessage(new Error("Failed to delete saved search"), fb)).toBe("Failed to delete saved search");
+  });
+
   it("does not pass through short messages with SQL statement keywords (UPDATE/DELETE)", () => {
     const fb = "Use fallback.";
     // Avoid "rls" / permission heuristics so the final SQL-ish guard is what we exercise.
