@@ -1,5 +1,8 @@
-import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import "server-only";
+
+import { createClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/utils/logger";
+import type { Database } from "@/types/supabase";
 
 export type HomeFeaturedGig = {
   id: string;
@@ -28,7 +31,14 @@ export async function getFeaturedOpportunitiesForHome(
   }
 
   try {
-    const supabase = await createSupabaseServer();
+    // Use a cookie-free server client so homepage data can be ISR-cached.
+    const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      },
+    });
     const nowMs = Date.now();
 
     const { data, error } = await supabase

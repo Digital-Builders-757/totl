@@ -44,6 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
+import { userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
@@ -140,7 +141,10 @@ export function AdminApplicationsClient({
       if (!result.ok) {
         toast({
           title: "Error",
-          description: result.error,
+          description: userSafeMessageFromActionError(
+            result.error,
+            "We couldn't update this application right now. Please try again."
+          ),
           variant: "destructive",
         });
       } else {
@@ -184,7 +188,10 @@ export function AdminApplicationsClient({
       if (!result.ok) {
         toast({
           title: "Error",
-          description: result.error,
+          description: userSafeMessageFromActionError(
+            result.error,
+            "We couldn't update this application right now. Please try again."
+          ),
           variant: "destructive",
         });
       } else {

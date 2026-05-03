@@ -2,6 +2,7 @@
 
 **Date Created:** January 20, 2026  
 **Purpose:** Track Web Vitals baselines and optimization improvements
+**Current Reality (May 3, 2026):** Instrumentation is enabled and maintained; route-level numeric baseline capture is still pending collection from staging/production traces.
 
 ---
 

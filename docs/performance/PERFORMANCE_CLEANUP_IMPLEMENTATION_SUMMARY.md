@@ -202,7 +202,7 @@ export async function getClientDashboardData(userId: string) {
 - `app/client/dashboard/page.tsx` - Server Component wrapper
 - `app/client/dashboard/client.tsx` - Client Component (UI only)
 - `app/client/dashboard/loading.tsx` - Loading skeleton
-- `docs/PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - This file
+- `docs/performance/PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - This file
 
 ### **Modified**
 - `.eslintrc.js` - Added no-console rule

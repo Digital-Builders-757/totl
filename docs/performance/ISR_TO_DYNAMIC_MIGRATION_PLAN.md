@@ -11,7 +11,7 @@
 ### Core Documents Reviewed
 - ✅ `docs/ARCHITECTURE_CONSTITUTION.md` - Non-negotiable architectural boundaries
 - ✅ `docs/DOCUMENTATION_INDEX.md` - Documentation spine
-- ✅ `docs/ROUTE_CACHING_STRATEGY.md` - Current caching documentation (needs update)
+- ✅ `docs/performance/ROUTE_CACHING_STRATEGY.md` - Current caching documentation (needs update)
 - ✅ `docs/diagrams/airport-model.md` - Airport architecture zones
 - ✅ `app/gigs/[id]/page.tsx` - Currently uses ISR (`revalidate = 300`) but calls `createSupabaseServer()`
 - ✅ `app/talent/[slug]/page.tsx` - Currently uses ISR (`revalidate = 600`) and calls `createSupabaseServer()`
@@ -145,7 +145,7 @@ Remove ISR from routes that use `createSupabaseServer()`, add explicit `force-dy
    - **Delete:** Comment about "use ISR for CDN caching" (lines 68-69)
    - **Add:** `export const dynamic = "force-dynamic";` (optional but recommended for clarity)
 
-3. **`docs/ROUTE_CACHING_STRATEGY.md`**
+3. **`docs/performance/ROUTE_CACHING_STRATEGY.md`**
    - **Update:** Public Routes section to remove `/gigs/[id]` and `/talent/[slug]` from ISR table
    - **Add:** New section: "Routes Using `createSupabaseServer()` (Always Dynamic)"
    - **Add:** Explicit rule: "Any route using `createSupabaseServer()` (cookies/session) is treated as dynamic; ISR is not applied."

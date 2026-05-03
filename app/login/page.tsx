@@ -10,7 +10,6 @@ import { PageShell } from "@/components/layout/page-shell";
 import { SectionCard } from "@/components/layout/section-card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
@@ -129,7 +128,6 @@ export default function Login() {
       ambientTone="lifted"
       className="grain-texture glow-backplate relative overflow-x-hidden text-white"
     >
-      <FloatingPathsBackground opacity={0.08} color="white" />
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-r from-white/3 via-white/8 to-white/3" />
       <div className="pointer-events-none absolute left-1/4 top-0 z-[1] h-72 w-72 animate-apple-float rounded-full bg-white/3 blur-3xl" />
       <div

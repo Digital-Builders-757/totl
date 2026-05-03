@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { getClientGigs, type ClientGig } from "@/lib/actions/client-gigs-actions";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 
 const GigsStatsOverview = dynamic(() => import("./components/gigs-stats-overview"), { ssr: false });
 const GigsResultsContent = dynamic(() => import("./components/gigs-results-content"), { ssr: false });
@@ -118,7 +119,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
             <h2 className="mb-2 text-xl font-semibold">Unable to load gigs</h2>
             <p className="mb-4 text-[var(--oklch-text-muted)]">
-              {error instanceof Error ? error.message : "Failed to load opportunities"}
+              {userSafeMessage(error, "Failed to load opportunities")}
             </p>
             <Button onClick={() => mutate()}>Try Again</Button>
           </div>

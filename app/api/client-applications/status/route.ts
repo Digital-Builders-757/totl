@@ -103,8 +103,11 @@ export async function GET() {
       adminNotes: application.admin_notes,
     });
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    logger.error("Error loading client application status", e);
+    return NextResponse.json(
+      { error: "We couldn't load your application status right now. Please try again." },
+      { status: 500 }
+    );
   }
 }
 

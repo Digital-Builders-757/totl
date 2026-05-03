@@ -8,6 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Full audit pass — loading + error states + docs de-dup (May 3, 2026)**
+
+**PERFORMANCE / RELIABILITY / DOCS** — May 3, 2026
+- ✅ **Loading-speed pass:** Home route now uses ISR-style `revalidate` with cookie-free featured-gig fetch; root `app/loading.tsx` added; talent dashboard active-gig query is bounded (`limit 24`); login route removed animated path background dependency from the critical auth surface.
+- ✅ **Error/logging hardening:** Added `app/error.tsx` plus route `error.tsx` coverage for `/gigs` and `/client/gigs`; replaced high-risk UI/API raw error leaks with `userSafeMessage`/safe copy patterns; admin mutation/API routes now return generic 5xx copy with structured logs.
+- ✅ **Runtime logging consistency:** Replaced remaining non-test `console.error`/`console.warn` usage in touched helper/middleware paths with `logger`-based logging.
+- ✅ **Docs de-dup + drift cleanup:** Updated `docs/DOCUMENTATION_INDEX.md` path correctness (performance/security/guides/ViZB/email-notification canonicals), refreshed performance doc references to `docs/performance/*`, clarified error-hardening helper adoption notes, and synced this status stream + `PROJECT_STATUS_REPORT.md`.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass (after updating verification scripts to current Supabase CLI)
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+- ✅ `npm run docs:verify-paths` — pass
+
+**Next (P0):** Complete `/ship` with scoped commit + push on `develop`, then update/create `develop -> main` PR with evidence and rollback note.
+
+**Next (P1):** Continue route-by-route performance follow-ups (public caching strategy + dashboard payload shaping) and incremental API error-envelope standardization.
+
+---
+
 ## 🚀 **Latest: `userSafeMessage` DML heuristics — curated "Failed to update/delete…" pass-through (April 25, 2026)**
 
 **UX / ROBUSTNESS (PR #264 follow-up)** — April 25, 2026
@@ -5452,7 +5473,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 18, 2026*
-*Current Status: MVP Complete; PR #261 follow-ups (userSafeMessage pass-through, global-error CSS, PostGig category dedupe) on develop*
-*Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*
+*Last Updated: May 3, 2026*
+*Current Status: MVP Complete; full loading/error/docs audit implemented on develop with mandatory verification gates passing*
+*Codebase Rating: 9.2/10 - Production ready with stronger loading/error resilience, cleaner docs spine, and working schema/type verification gates*
+*Next Review: Complete ship + develop→main PR, then run post-merge smoke on key dashboard/error-boundary flows*

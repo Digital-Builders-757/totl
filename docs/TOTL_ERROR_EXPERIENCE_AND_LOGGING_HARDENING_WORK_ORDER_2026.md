@@ -13,7 +13,7 @@ This document records current patterns, gaps, prioritized surfaces, and shared s
 |--------|--------|--------|
 | **`logger` (`@/lib/utils/logger`)** | Server actions, many API routes, some client boundaries | Structured `context`, Sentry `captureException` / `captureMessage`, dev console, redaction |
 | **`console.error` / `console.warn`** | Tests, `logger` internals, rare third-party shims | Prefer **`logger`** in app/components/API for Sentry correlation; remaining **`console.*`** in product code should be treated as debt |
-| **`handleApiError` (`@/lib/api/api-utils`)** | Defined but **unused** in routes at audit time | Previously returned `error.message` in JSON 500 bodies (leak risk) — hardened to generic client message + `debugId` in logs |
+| **`handleApiError` (`@/lib/api/api-utils`)** | Defined; **not yet broadly adopted** in routes | Previously returned `error.message` in JSON 500 bodies (leak risk) — now hardened to generic client message + `debugId` in logs for future callers |
 | **Toasts with `error.message` / `result.error`** | Admin users, saved searches, login edge cases | Exposes Supabase/transport wording to users |
 | **Sentry `beforeSend`** | `instrumentation-client.ts` | Heavy filtering (noise vs signal); separate from per-flow logging |
 | **Route `error.tsx`** | Talent dashboard only (custom); rest fall through to **global** | Global used generic `NextError` — replaced with calm branded fallback |
@@ -27,7 +27,7 @@ This document records current patterns, gaps, prioritized surfaces, and shared s
 1. **`app/global-error.tsx`** — Default Next error page (`statusCode={0}`), not on-brand.
 2. **Missing segment `error.tsx`** — Client dashboard, admin, bookings had no dedicated recovery UI.
 3. **Admin / bookings / saved searches** — Raw error strings in toasts or inline UI.
-4. **API helper** — `handleApiError` exposed internal messages (latent risk for future routes).
+4. **API helper** — `handleApiError` previously exposed internal messages (now hardened; adoption in routes can continue incrementally).
 
 ---
 

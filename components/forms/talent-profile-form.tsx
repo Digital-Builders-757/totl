@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertTalentProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 import { isModelingTalent } from "@/lib/utils/talent-type";
 import type { Database } from "@/types/supabase";
@@ -195,20 +196,14 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       router.push(PATHS.TALENT_DASHBOARD);
     } catch (error) {
       logger.error("Error updating profile", error instanceof Error ? error : new Error(String(error)));
-      
-      // Extract error message from various error types
-      let errorMessage = "An unexpected error occurred. Please try again.";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (error && typeof error === 'object') {
-        // Handle Supabase error objects
-        const supabaseError = error as { message?: string; details?: string; hint?: string };
-        errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
-      }
-      
+
+      const errorMessage = userSafeMessage(
+        error,
+        "We couldn't update your profile right now. Please try again."
+      );
+
       setServerError(errorMessage);
-      
+
       toast({
         title: "Error updating profile",
         description: errorMessage,

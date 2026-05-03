@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight, Briefcase, CheckCircle2, Clock3, Search, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 

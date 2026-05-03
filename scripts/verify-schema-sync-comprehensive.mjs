@@ -16,7 +16,7 @@ import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const PINNED_CLI_VERSION = '2.34.3';
+const PINNED_CLI_VERSION = '2.95.4';
 const DEV_PROJECT_ID = 'utvircuwknqzpnmvxidp';
 const PROD_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || '<PROD_ID>';
 const TARGET_PROJECT_ID = process.env.SUPABASE_PROJECT_ID || DEV_PROJECT_ID;
@@ -36,7 +36,7 @@ console.log('==========================================');
 // Step 1: Verify CLI version
 console.log('\n1. Checking Supabase CLI version...');
 try {
-  const cliVersion = execSync('npx -y supabase@2.34.3 --version', { encoding: 'utf8' }).trim();
+  const cliVersion = execSync(`npx -y supabase@${PINNED_CLI_VERSION} --version`, { encoding: 'utf8' }).trim();
   console.log(`✅ CLI version: ${cliVersion}`);
 } catch (error) {
   console.error('❌ Failed to verify CLI version:', error.message);
@@ -62,7 +62,7 @@ for (const candidate of localLinkCandidates) {
 }
 
 try {
-  const linkInfo = execSync('npx -y supabase@2.34.3 projects list', { encoding: 'utf8' });
+  const linkInfo = execSync(`npx -y supabase@${PINNED_CLI_VERSION} projects list`, { encoding: 'utf8' });
   if (!linkedProjectRef) {
     // Best-effort parse for a selected project (format can vary by CLI / auth state).
     const linkedProject = linkInfo.match(/●.*?│\s*([a-z0-9]{12,})\s*│/i);

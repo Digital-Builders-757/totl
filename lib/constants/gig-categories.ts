@@ -1,3 +1,5 @@
+import { logger } from "@/lib/utils/logger";
+
 /**
  * Canonical Gig Categories Module
  * 
@@ -148,7 +150,9 @@ export function normalizeGigCategory(category: CategoryInput): GigCategory {
   // Only warn on non-empty unknown values (keeps logs clean and meaningful)
   // In production, you might want to log this to Sentry for data quality monitoring
   if (process.env.NODE_ENV === "development") {
-    console.warn(`[gig-categories] Unknown category normalized to "other":`, category);
+    logger.warn("[gig-categories] unknown category normalized to 'other'", {
+      category,
+    });
   }
   
   return "other";
