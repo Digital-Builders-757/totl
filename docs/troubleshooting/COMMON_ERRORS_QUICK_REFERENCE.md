@@ -53,6 +53,10 @@ npm run build
 - **Types stay stale after adding a migration:** Code references a new column but `npm run types:check` still fails.
   - **Fix:** Apply migrations to the target Supabase project first (`supabase db push --linked` or your deploy pipeline), then run `npm run types:regen:dev` and commit the regenerated `types/database.ts`.
   - **Prevention:** Do not patch `types/database.ts` by hand for schema you have not pushed yet; the generator is the source of truth once the column exists remotely.
+- **`supabase migration new ...` hangs and leaves empty migration files in `supabase/migrations/`:**
+  - **Symptom:** CLI appears stuck; multiple timestamped migration files are created with `0` bytes.
+  - **Fix:** Keep only the intended migration file, delete empty duplicates, then re-run checks (`schema:verify:comprehensive`, `types:check`, `build`, `lint`) before commit.
+  - **Prevention:** If CLI hangs repeatedly on Windows shells, stop the process promptly and verify migration file sizes before continuing.
 - **`tsc` / `npm run typecheck` fails with missing `app/.../page.js` under `.next/types` after deleting or moving App Router routes:** Stale Next.js generated types still reference removed files.
   - **Fix:** Delete the `.next` folder and run `npm run typecheck` (or `npm run build`) again so types regenerate from the current `app/` tree.
   - **Prevention:** After removing routes locally, run a fresh build or remove `.next` before relying on `tsc` in an old workspace.

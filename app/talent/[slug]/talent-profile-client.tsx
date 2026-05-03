@@ -2,9 +2,12 @@
 
 import { Flag, Mail, Phone } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { useAuth } from "@/components/auth/auth-provider";
 import { FlagProfileDialog } from "@/components/moderation/flag-profile-dialog";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { sendCollaborationRequestAction } from "@/lib/actions/collaboration-actions";
 import type { Database } from "@/types/supabase";
 
 type TalentProfileRow = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -31,6 +34,9 @@ interface TalentProfileClientProps {
 
 export function TalentProfileClient({ talent }: TalentProfileClientProps) {
   const { user: authUser, profile: authProfile } = useAuth();
+  const { toast } = useToast();
+  const [isSendingCollab, setIsSendingCollab] = useState(false);
+  const [collabRequested, setCollabRequested] = useState(false);
 
   const user =
     authUser && authProfile
@@ -41,6 +47,7 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
       : null;
 
   const canReportProfile = !!user && user.id !== talent.user_id;
+  const canSendCollab = !!user && user.id !== talent.user_id;
 
   // PR3: Do NOT infer access client-side (Option B requirement)
   // Server already determined relationship and included/excluded phone accordingly
@@ -136,6 +143,55 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Collaboration */}
+      <div className="space-y-3 rounded-xl border border-border/50 bg-card/35 p-6">
+        <h3 className="text-lg font-semibold text-foreground">Collaboration</h3>
+        <p className="text-sm text-muted-foreground">
+          Want to work together on a future project? Send a one-click collaboration request and keep the conversation on-platform.
+        </p>
+        {!user ? (
+          <Button asChild className="w-full">
+            <Link href="/login">Sign in to request collaboration</Link>
+          </Button>
+        ) : canSendCollab ? (
+          <Button
+            className="w-full"
+            variant={collabRequested ? "outline" : "default"}
+            disabled={isSendingCollab || collabRequested}
+            onClick={async () => {
+              setIsSendingCollab(true);
+              const result = await sendCollaborationRequestAction(talent.user_id);
+              if (!result.ok) {
+                toast({
+                  title: "Could not send request",
+                  description: result.error,
+                  variant: "destructive",
+                });
+                setIsSendingCollab(false);
+                return;
+              }
+
+              setCollabRequested(true);
+              toast({
+                title: result.alreadyRequested
+                  ? "Request already sent"
+                  : "Collaboration request sent",
+                description: result.alreadyRequested
+                  ? "This member already has your collaboration request."
+                  : "They’ll receive an in-app notification.",
+              });
+              setIsSendingCollab(false);
+            }}
+          >
+            {isSendingCollab ? "Sending..." : collabRequested ? "Request Sent" : "Request Collaboration"}
+          </Button>
+        ) : (
+          <Button variant="outline" disabled className="w-full justify-center">
+            You cannot send a request to your own profile
+          </Button>
+        )}
       </div>
 
       {/* Experience */}

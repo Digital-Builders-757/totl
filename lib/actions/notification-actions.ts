@@ -3,8 +3,13 @@
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { createSupabaseAdminClient } from "@/lib/supabase-admin-client";
 import { logger } from "@/lib/utils/logger";
+import type { Database } from "@/types/supabase";
 
-export type NotificationType = "new_application" | "application_accepted" | "application_rejected";
+export type NotificationType =
+  | "new_application"
+  | "application_accepted"
+  | "application_rejected"
+  | "collaboration_request";
 
 /**
  * Get unread notification count for the current user.
@@ -47,16 +52,18 @@ export async function insertNotification(params: {
   body?: string | null;
 }) {
   try {
+    type NotificationInsert = Database["public"]["Tables"]["user_notifications"]["Insert"];
     const admin = createSupabaseAdminClient();
+    const payload: NotificationInsert = {
+      recipient_id: params.recipientId,
+      type: params.type as unknown as NotificationInsert["type"],
+      reference_id: params.referenceId,
+      title: params.title,
+      body: params.body ?? null,
+    };
     const { error } = await admin
       .from("user_notifications")
-      .insert({
-        recipient_id: params.recipientId,
-        type: params.type,
-        reference_id: params.referenceId,
-        title: params.title,
-        body: params.body ?? null,
-      })
+      .insert(payload)
       .select("id")
       .maybeSingle();
 

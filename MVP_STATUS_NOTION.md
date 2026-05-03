@@ -8,6 +8,27 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder opportunities expansion + on-platform collab requests (May 3, 2026)**
+
+**OPPORTUNITIES / COLLAB / PROFILE MODEL** — May 3, 2026
+- ✅ **Opportunity taxonomy expanded:** Added requested categories (`Designers`, `MUA`, `Hairstylists`, `Wedding`, `Internship`, `Crew`, `Athlete`, `Craft Services`) while preserving existing options via canonical `gig-categories` constants.
+- ✅ **On-platform collaboration request flow:** Added one-click collaboration request on talent profile pages, backed by a server action (`sendCollaborationRequestAction`) and in-app notifications (`user_notifications`) for recipient + admin visibility.
+- ✅ **Paid compensation option (admin create flow):** Added `Paid Opportunity` toggle; compensation formatter now supports `Paid` and `Paid · $min-$max` while preserving existing min/max behavior.
+- ✅ **Comp-card + provenance migration scaffolded:** New migration `20260503171000_expand_opportunities_collab_compcard.sql` adds `collaboration_request` notification enum, comp-card fields on `talent_profiles` (`bust`, `hips`, `waist`, `suit`, `resume_link`), and invite/referral provenance columns on `client_applications`.
+- ✅ **Docs updated:** Added `docs/features/CAREER_BUILDER_OPPORTUNITY_EXPANSION_2026-05-03.md`, indexed it in `docs/DOCUMENTATION_INDEX.md`, and documented migration-cli empty-file cleanup in `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+
+**Next (P0):** Apply `20260503171000_expand_opportunities_collab_compcard.sql` to the target Supabase project and regenerate `types/database.ts` so UI/server code can safely read/write new comp-card and provenance fields.
+
+**Next (P1):** Extend Settings/talent profile forms and admin Career Builder review UI to surface and persist the newly added comp-card + invite/referral provenance fields end-to-end.
+
+---
+
 ## 🚀 **Latest: Full audit pass — loading + error states + docs de-dup (May 3, 2026)**
 
 **PERFORMANCE / RELIABILITY / DOCS** — May 3, 2026

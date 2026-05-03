@@ -40,6 +40,7 @@ const MAX_REFERENCE_LINKS = 15;
 export function CreateGigForm() {
   const [requirements, setRequirements] = useState<string[]>([""]);
   const [category, setCategory] = useState<string>("modeling");
+  const [isPaidCompensation, setIsPaidCompensation] = useState(false);
   const [referenceLinks, setReferenceLinks] = useState<GigReferenceLinkFormRow[]>([]);
   const [state, formAction] = useActionState(createGigFormAction, null);
 
@@ -253,6 +254,29 @@ export function CreateGigForm() {
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-card/20 px-4 py-3">
+                <div>
+                  <Label htmlFor="compensation_paid" className="text-[var(--oklch-text-primary)]">
+                    Paid Opportunity
+                  </Label>
+                  <p className="text-xs text-[var(--oklch-text-tertiary)]">
+                    Keep min/max when known. Turn this on if the opportunity is paid.
+                  </p>
+                </div>
+                <Switch
+                  id="compensation_paid"
+                  checked={isPaidCompensation}
+                  onCheckedChange={setIsPaidCompensation}
+                  className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-white/20"
+                />
+                <input
+                  type="hidden"
+                  name="compensation_paid"
+                  value={isPaidCompensation ? "true" : "false"}
+                  readOnly
+                />
               </div>
 
               <div className="space-y-4 rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">

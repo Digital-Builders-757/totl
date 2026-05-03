@@ -82,6 +82,8 @@ export async function createGig(formData: FormData) {
     applicationDeadlineRaw?.trim() ? applicationDeadlineRaw.trim() : null;
   const compensationMin = formData.get("compensation_min") as string;
   const compensationMax = formData.get("compensation_max") as string;
+  const compensationPaidRaw = formData.get("compensation_paid");
+  const isPaidCompensation = compensationPaidRaw === "true";
 
   // Get requirements (they come as multiple form fields)
   const requirements: string[] = [];
@@ -118,7 +120,13 @@ export async function createGig(formData: FormData) {
   // Format compensation
   const minComp = parseInt(compensationMin) || 0;
   const maxComp = parseInt(compensationMax) || 0;
-  const compensation = maxComp > minComp ? `$${minComp} - $${maxComp}` : `$${minComp}`;
+  const compensationRange = maxComp > minComp ? `$${minComp} - $${maxComp}` : `$${minComp}`;
+  const compensation =
+    isPaidCompensation && minComp <= 0 && maxComp <= 0
+      ? "Paid"
+      : isPaidCompensation
+        ? `Paid · ${compensationRange}`
+        : compensationRange;
 
   const linksResult = parseReferenceLinksForDatabase(referenceLinkRows);
   if (!linksResult.ok) {

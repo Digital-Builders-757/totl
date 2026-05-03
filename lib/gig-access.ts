@@ -31,6 +31,14 @@ const OBFUSCATED_TITLES: Record<GigCategory, string> = {
   dancer: "Paid Dance Performance Opportunity",
   musician: "Live Performance / Session Opportunity",
   events: "Event Opportunity for Premium Client",
+  designers: "Design Collaboration Opportunity",
+  mua: "Makeup Artist Opportunity for Premium Client",
+  hairstylists: "Hairstylist Opportunity for Premium Client",
+  wedding: "Wedding Opportunity for Premium Client",
+  internship: "Creative Internship Opportunity",
+  crew: "Production Crew Opportunity",
+  athlete: "Athlete Campaign Opportunity",
+  "craft-services": "Craft Services Opportunity",
   others: "Creative Opportunity for Premium Client",
   other: "Creative Opportunity for Premium Client",
 };
@@ -48,6 +56,16 @@ const OBFUSCATED_DESCRIPTIONS: Record<GigCategory, string> = {
   dancer: "Performance opportunity for experienced dancers. Subscribe to see schedule, style, and compensation details.",
   musician: "Music opportunity for performers or session players. Subscribe to see set details and compensation.",
   events: "Event opportunity with a premium client. Subscribe to see full details, dates, and requirements.",
+  designers: "Design-focused opportunity with a premium client. Subscribe to see full scope and deliverables.",
+  mua: "Makeup artist opportunity with a premium client. Subscribe to see schedule, style direction, and compensation.",
+  hairstylists:
+    "Hairstylist opportunity with a premium client. Subscribe to see look direction, schedule, and compensation.",
+  wedding: "Wedding opportunity with a premium client. Subscribe to see timeline, requirements, and compensation.",
+  internship: "Creative internship opportunity. Subscribe to see role scope, schedule, and mentorship details.",
+  crew: "Production crew opportunity with a premium client. Subscribe to see duties, schedule, and compensation.",
+  athlete: "Athlete-focused campaign opportunity. Subscribe to see deliverables, schedule, and compensation.",
+  "craft-services":
+    "Craft services opportunity for production support. Subscribe to see schedule, scope, and compensation.",
   others: "Professional creative opportunity with a premium client. Subscribe to see full details.",
   other: "Professional creative opportunity with a premium client. Subscribe to see full details.",
 };

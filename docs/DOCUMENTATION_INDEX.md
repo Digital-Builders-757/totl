@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** May 3, 2026 (full loading/error-state/docs audit pass; path drift cleanup + error-boundary/logging updates)
+**Last Updated:** May 3, 2026 (Career Builder opportunity expansion + collab request flow + paid compensation toggle ship)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -159,6 +159,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `SQL_RLS_POLICY_CREATION_GUIDE.md` - **🚨 CRITICAL** - PostgreSQL RLS policy creation guide (Nov 2025)
 
 ### **🎨 Features & Implementation**
+- `features/CAREER_BUILDER_OPPORTUNITY_EXPANSION_2026-05-03.md` - **✅ NEW** - Opportunity-type expansion, collaboration requests, paid compensation toggle, and comp-card/provenance migration ship notes (May 2026)
 - `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
 - `UI_LAYOUT_CONTRACT.md` - 🎨 **NEW** - Canonical Terminal Kit (PageShell/PageHeader/SectionCard/DataTableShell) + mobile safety rules (Dec 2025)
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
