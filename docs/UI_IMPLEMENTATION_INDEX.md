@@ -1,6 +1,6 @@
 # TOTL Agency - UI Implementation Index (Doc <-> Code Lock)
 
-**Date:** March 3, 2026  
+**Date:** May 3, 2026  
 **Status:** Canonical implementation index for UI governance  
 **Primary law:** `docs/UI_CONSTITUTION.md`  
 **Purpose:** Prevent contract drift by mapping each UI law to the exact owning primitive(s) in code.
@@ -45,6 +45,7 @@ If a route violates the constitution and does not use the owning primitive, it i
 | Talent terminal header/nav chrome | Route-local + shared shell (no single dedicated talent header primitive yet) | Marked in-progress; avoid introducing parallel talent header components |
 | Secondary filters in a sheet | `components/dashboard/filters-sheet.tsx` (`FiltersSheet`) | Canonical mobile secondary filter container |
 | Mobile KPI density control | `components/dashboard/mobile-summary-row.tsx` (`MobileSummaryRow`) | Use for compact summary instead of fat KPI stacks |
+| Editorial / marketing hero canopy (section spotlight) | `components/ui/totl-editorial-section.tsx` (`TotlEditorialSection`) + `.totl-editorial-canopy` in **`app/globals.css`** | Lightweight wash for `/`, `/gigs` hero bands; avoids extra JS |
 | Canonical page shell and heading | `components/layout/page-shell.tsx` (`PageShell`), `components/layout/page-header.tsx` (`PageHeader`) | Required baseline for new/touched full pages |
 | Data table overflow handling | `components/layout/data-table-shell.tsx` (`DataTableShell`) | Required for table-like layouts on mobile |
 

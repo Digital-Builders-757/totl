@@ -8,6 +8,20 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Premium branded loading + editorial canopy + docs spine (May 2026)**
+
+**UI / PERFORMANCE / DOCUMENTATION**
+- ✅ **Branded loading system:** `TotlBrandLoadingRibbon` / `TotlBrandLoadingRail` / `TotlMarketingLoadingBackdrop` (`components/ui/totl-brand-loading.tsx`), warm veil + rail keyframes in `app/globals.css` (respects reduced motion). **`AuthLoadingShell`** DRYs login/signup/recovery/callback loaders; spinner-only recovery loaders replaced with skeleton + rail where applicable.
+- ✅ **Dashboard + admin loaders:** **`ClientDashboardSkeleton`** / **`TalentDashboardSkeleton`** (with `routeRole`), **`AdminLoadingShell`** ribbon + warm veil strip; **`app/talent/dashboard/client.tsx`** Suspense fallback uses **`TalentDashboardSkeleton`** (no plain “Loading…”).
+- ✅ **Editorial canopy:** **`TotlEditorialSection`** + **`.totl-editorial-canopy`** — CSS-only section hero wash; wired on **`/`** hero, **`/gigs`** headline band, root **`loading.tsx`** parity.
+- ✅ **Docs synced:** `docs/DOCUMENTATION_INDEX.md`, `docs/features/UI_VISUAL_LANGUAGE.md`, `docs/features/README.md`, `docs/UI_IMPLEMENTATION_INDEX.md`, plus this **`MVP_STATUS_NOTION.md`** entry.
+
+**Next (P0):** Staging smoke — cold load `/`, `/login`, `/gigs`, `/client/dashboard`, `/talent/dashboard`, `/admin`; confirm loaders appear instantly; reduced-motion spot check; **`develop` → `main`** PR after CI green.
+
+**Next (P1):** Pending migrations (`20260503171000_*`, `20260504003000_*`) per env; prune temporary schema fallbacks once uniform.
+
+---
+
 ## 🚀 **Latest: Career Builder ship + UX polish pushed to develop (May 4, 2026)**
 
 **SHIPPED THIS RUN** — May 4, 2026

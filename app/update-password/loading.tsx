@@ -1,18 +1,27 @@
-import { PageShell } from "@/components/layout/page-shell";
-import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { AuthLoadingShell } from "@/components/layout/auth-loading-shell";
+import { SectionCard } from "@/components/layout/section-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TotlBrandLoadingRail } from "@/components/ui/totl-brand-loading";
 
 export default function UpdatePasswordLoading() {
   return (
-    <PageShell
-      fullBleed
-      className="grain-texture glow-backplate relative overflow-x-hidden text-white"
-    >
-      <FloatingPathsBackground opacity={0.08} color="white" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
-      <div className="relative z-10 flex min-h-[60vh] items-center justify-center px-4">
-        <LoadingSpinner size="lg" className="text-white" />
+    <AuthLoadingShell ribbonFootline="Securing password update…">
+      <div className="flex min-h-[52vh] items-center justify-center px-4 pb-16 pt-2">
+        <SectionCard className="w-full max-w-md overflow-hidden" paddingClassName="p-6 sm:p-8">
+          <div className="space-y-5">
+            <div className="space-y-1 text-center">
+              <Skeleton className="mx-auto h-7 w-52 rounded-lg bg-white/10" />
+              <Skeleton className="mx-auto h-4 w-[90%] max-w-[17rem] rounded-lg bg-white/10" />
+            </div>
+            <TotlBrandLoadingRail className="opacity-95" />
+            <div className="space-y-3 pt-2">
+              <Skeleton className="h-10 w-full rounded-lg bg-white/10" />
+              <Skeleton className="h-10 w-full rounded-lg bg-white/10" />
+              <Skeleton className="h-11 w-full rounded-lg bg-white/10" />
+            </div>
+          </div>
+        </SectionCard>
       </div>
-    </PageShell>
+    </AuthLoadingShell>
   );
 }
