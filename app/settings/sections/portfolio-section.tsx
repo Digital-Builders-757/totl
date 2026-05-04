@@ -158,6 +158,30 @@ export function PortfolioSection({ portfolioItems }: PortfolioSectionProps) {
                 <span className="mt-0.5 text-[var(--oklch-accent)]">•</span>
                 <span>Strong titles and short captions help clients scan your work quickly.</span>
               </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-0.5 text-[var(--oklch-accent)]">•</span>
+                <span>
+                  Need a quick resize? Use{" "}
+                  <a
+                    href="https://squoosh.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[var(--oklch-accent)] underline-offset-2 hover:underline"
+                  >
+                    Squoosh
+                  </a>{" "}
+                  or watch a short{" "}
+                  <a
+                    href="https://www.youtube.com/results?search_query=how+to+resize+images+for+portfolio"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[var(--oklch-accent)] underline-offset-2 hover:underline"
+                  >
+                    image-resize tutorial
+                  </a>
+                  .
+                </span>
+              </li>
             </ul>
           </CardContent>
         </Card>

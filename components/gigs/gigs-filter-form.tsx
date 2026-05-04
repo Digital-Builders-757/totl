@@ -1,7 +1,8 @@
 "use client";
 
 import { Search, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ export function GigsFilterForm({
   sort,
   upcoming,
 }: GigsFilterFormProps) {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(
     Boolean(
       radiusMiles ||
@@ -66,12 +68,98 @@ export function GigsFilterForm({
     }
   };
 
+  const activeFilterCount =
+    Number(Boolean(rawKeyword)) +
+    Number(Boolean(category)) +
+    Number(Boolean(location)) +
+    Number(Boolean(radiusMiles)) +
+    Number(Boolean(compensation)) +
+    Number(Boolean(payRange)) +
+    Number(sort !== "newest") +
+    Number(upcoming);
+
+  const submitWithCategory = (categoryValue: string) => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const categoryInput = form.elements.namedItem("category") as HTMLSelectElement | null;
+    const pageInput = form.elements.namedItem("page") as HTMLInputElement | null;
+    if (categoryInput) categoryInput.value = categoryValue;
+    if (pageInput) pageInput.value = "1";
+    form.requestSubmit();
+  };
+
+  const submitWithUpcomingToggle = () => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const upcomingInput = form.elements.namedItem("upcoming") as HTMLInputElement | null;
+    const pageInput = form.elements.namedItem("page") as HTMLInputElement | null;
+    if (upcomingInput) upcomingInput.checked = !upcomingInput.checked;
+    if (pageInput) pageInput.value = "1";
+    form.requestSubmit();
+  };
+
   return (
     <form
+      ref={formRef}
       className="flex flex-col gap-4 sm:gap-5 md:gap-6 relative z-10"
       method="get"
       onSubmit={handleSubmit}
     >
+      <div className="panel-frosted rounded-2xl border border-white/10 px-3 py-3 sm:px-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => submitWithCategory("modeling")}
+              className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/12"
+            >
+              Modeling
+            </button>
+            <button
+              type="button"
+              onClick={() => submitWithCategory("acting")}
+              className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/12"
+            >
+              Acting
+            </button>
+            <button
+              type="button"
+              onClick={() => submitWithCategory("designers")}
+              className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/12"
+            >
+              Designers
+            </button>
+            <button
+              type="button"
+              onClick={() => submitWithCategory("crew")}
+              className="rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/12"
+            >
+              Crew
+            </button>
+            <button
+              type="button"
+              onClick={submitWithUpcomingToggle}
+              className="rounded-full border border-violet-300/30 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-100 transition hover:bg-violet-400/20"
+            >
+              Upcoming
+            </button>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-[var(--oklch-text-tertiary)]">
+            <span>
+              {activeFilterCount > 0
+                ? `${activeFilterCount} filter${activeFilterCount > 1 ? "s" : ""} active`
+                : "No filters active"}
+            </span>
+            {activeFilterCount > 0 ? (
+              <Link href="/gigs" className="text-white underline-offset-4 transition hover:text-violet-100 hover:underline">
+                Clear all
+              </Link>
+            ) : null}
+          </div>
+        </div>
+      </div>
       <div className="relative flex-grow">
         <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
         <Input

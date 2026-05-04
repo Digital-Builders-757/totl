@@ -12,6 +12,16 @@ type ProfilesUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 type TalentProfilesInsert = Database["public"]["Tables"]["talent_profiles"]["Insert"];
 type ClientProfilesInsert = Database["public"]["Tables"]["client_profiles"]["Insert"];
 
+type SupabaseLikeError = { message?: string } | null;
+
+function isMissingCompCardColumnError(error: SupabaseLikeError): boolean {
+  const message = String(error?.message ?? "");
+  return (
+    /column/i.test(message) &&
+    /(bust|hips|waist|suit|resume_link)/i.test(message)
+  );
+}
+
 function assertUserId(user: { id?: string }): asserts user is { id: string } {
   if (!user.id) throw new Error("Missing user id");
 }
@@ -99,6 +109,11 @@ export async function upsertTalentProfile(payload: {
   hair_color?: string;
   eye_color?: string;
   shoe_size?: string;
+  bust?: string;
+  hips?: string;
+  waist?: string;
+  suit?: string;
+  resume_link?: string;
   languages?: string[];
   specialties?: string[];
 }) {
@@ -139,6 +154,33 @@ export async function upsertTalentProfile(payload: {
   if (error) {
     logActionFailure("settings.upsertTalentProfile", error, { userId: user.id });
     return { error: userSafeMessage(error, "We couldn’t save your talent profile. Please try again.") };
+  }
+
+  type UntypedTalentProfilesClient = {
+    update: (values: Record<string, unknown>) => {
+      eq: (
+        column: string,
+        value: string
+      ) => Promise<{ error: SupabaseLikeError }>;
+    };
+  };
+
+  const compCardPatch: Record<string, unknown> = {
+    bust: payload.bust ?? null,
+    hips: payload.hips ?? null,
+    waist: payload.waist ?? null,
+    suit: payload.suit ?? null,
+    resume_link: payload.resume_link ?? null,
+  };
+
+  const compCardClient = supabase.from("talent_profiles") as unknown as UntypedTalentProfilesClient;
+  const { error: compCardError } = await compCardClient.update(compCardPatch).eq("user_id", user.id);
+
+  if (compCardError && !isMissingCompCardColumnError(compCardError)) {
+    logActionFailure("settings.upsertTalentProfileCompCard", compCardError, { userId: user.id });
+    return {
+      error: userSafeMessage(compCardError, "We couldn’t save your comp card details. Please try again."),
+    };
   }
 
   revalidatePath("/settings");

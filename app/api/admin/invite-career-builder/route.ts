@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, display_name")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -54,11 +54,18 @@ export async function POST(request: Request) {
     const redirectTo = absoluteUrl(
       `/auth/callback?returnUrl=${encodeURIComponent(PATHS.CLIENT_APPLY)}`
     );
+    const invitedAt = new Date().toISOString();
 
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       redirectTo,
       data: {
         invited_for: "career_builder_application",
+        invited_by_admin_id: user.id,
+        invited_by_admin_name:
+          typeof profile.display_name === "string" && profile.display_name.trim().length > 0
+            ? profile.display_name.trim()
+            : null,
+        invited_at: invitedAt,
       },
     });
 
@@ -85,6 +92,7 @@ export async function POST(request: Request) {
       email,
       invitedUserId: data.user?.id ?? null,
       redirectTo,
+      invitedAt,
     });
   } catch (error) {
     logger.error("[invite-career-builder] unexpected", error);

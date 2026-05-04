@@ -8,6 +8,40 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder ship + UX polish pushed to develop (May 4, 2026)**
+
+**SHIPPED THIS RUN** — May 4, 2026
+- ✅ **Bundle on `develop`:** Admin invite/referral provenance vetting surfaces, Career Builder lifecycle copy (suspend vs delete), comp-card/resume wiring with schema fallbacks, gig reference-link visibility fix for authenticated members, scaffold migration `external_casting_calls`, and a focused UI polish pass (home trust framing, gigs quick-filter chips + clear-all, richer gig cards, ambient motion polish, refined `PageHeader`).
+- ✅ **Mandatory checks:** `npm run schema:verify:comprehensive`, `types:check`, `build`, `lint`, `docs:verify-paths` — pass on this ship run.
+
+**Next (P0):** Smoke on staging — invite Career Builder → apply with referral → admin lists; talent comp-card + resume edits; gigs listing quick filters and reference links signed in as talent (with/without subscription); review PR into `main` after green CI.
+
+**Next (P1):** Apply pending migrations (`20260503171000_*`, `20260504003000_*`) in each environment; prune provenance/comp-card fallback branches once schemas are uniformly deployed.
+
+## 🚀 **Latest: Career Builder admin vetting hardening (May 3, 2026)**
+
+**ADMIN OPS / LIFECYCLE / PROVENANCE** — May 3, 2026
+- ✅ **Invite provenance capture:** Admin Career Builder invite route now stamps `invited_by_admin_id` + `invited_at` into auth user metadata at invite time.
+- ✅ **Referral capture on apply:** `/client/apply` now includes optional `Referred By`; `submitClientApplication()` persists invite/referral provenance when schema columns are available, with safe fallback for environments pending migration.
+- ✅ **Admin vetting visibility:** `/admin/client-applications` and `/admin/users` now surface invited-by, referred-by, invite timestamp, and lifecycle context for quick review.
+- ✅ **Delete vs suspend clarity:** `/admin/users` explicitly shows Career Builder accounts as suspend/reinstate-only; delete remains Talent-only, with UI copy aligned to API behavior.
+- ✅ **Auditability strengthened:** suspension logs now include reason context, and suspended users show reason context in admin UI.
+- ✅ **Comp-card field UI shipped:** Talent settings/profile surfaces now support explicit comp-card fields (`bust`, `hips`, `waist`, `suit`, `shoe`, `eyes`, `hair`) plus `resume_link`, with fallback handling for environments missing new columns.
+- ✅ **Image resize guidance added:** Settings upload surfaces now include practical resize help (Squoosh/Canva/tutorial links) to reduce failed uploads and support comp-card prep.
+- ✅ **External casting schema scaffolded:** Added migration `20260504003000_create_external_casting_calls.sql` with a pending-review queue table for future automated casting ingestion.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+
+**Next (P0):** Smoke invite → callback → `/client/apply` → admin review and talent comp-card editing flow on staging with fresh test accounts; capture screenshots for ops handoff.
+
+**Next (P1):** Apply `20260503171000_expand_opportunities_collab_compcard.sql` to all target environments, regenerate types, and remove temporary fallback code paths for pre-provenance schemas.
+
+---
+
 ## 🚀 **Latest: Career Builder opportunities expansion + on-platform collab requests (May 3, 2026)**
 
 **OPPORTUNITIES / COLLAB / PROFILE MODEL** — May 3, 2026

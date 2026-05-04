@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** May 3, 2026 (Career Builder opportunity expansion + collab request flow + paid compensation toggle ship)
+**Last Updated:** May 3, 2026 (Career Builder admin vetting + comp-card profile field pass + image resize guidance)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 

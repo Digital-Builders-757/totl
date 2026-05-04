@@ -26,7 +26,14 @@ type TalentPublicClientModel = Pick<
   | "measurements"
   | "experience_years"
   | "portfolio_url"
-> & { phone: string | null };
+> & {
+  phone: string | null;
+  bust?: string | null;
+  hips?: string | null;
+  waist?: string | null;
+  suit?: string | null;
+  resume_link?: string | null;
+};
 
 interface TalentProfileClientProps {
   talent: TalentPublicClientModel;
@@ -136,6 +143,30 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
               <span className="font-medium text-foreground">{talent.shoe_size}</span>
             </div>
           )}
+          {talent.suit && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Suit</span>
+              <span className="font-medium text-foreground">{talent.suit}</span>
+            </div>
+          )}
+          {talent.bust && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Bust</span>
+              <span className="font-medium text-foreground">{talent.bust}</span>
+            </div>
+          )}
+          {talent.waist && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Waist</span>
+              <span className="font-medium text-foreground">{talent.waist}</span>
+            </div>
+          )}
+          {talent.hips && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Hips</span>
+              <span className="font-medium text-foreground">{talent.hips}</span>
+            </div>
+          )}
           {talent.measurements && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Measurements</span>
@@ -213,6 +244,20 @@ export function TalentProfileClient({ talent }: TalentProfileClientProps) {
             className="text-primary hover:underline"
           >
             View Portfolio
+          </a>
+        </div>
+      )}
+
+      {talent.resume_link && (
+        <div className="rounded-xl border border-border/50 bg-card/35 p-6">
+          <h3 className="mb-4 text-lg font-semibold text-foreground">Resume</h3>
+          <a
+            href={talent.resume_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            View Resume
           </a>
         </div>
       )}

@@ -55,6 +55,10 @@ import { Database } from "@/types/supabase";
 
 type ClientApplication = Database["public"]["Tables"]["client_applications"]["Row"] & {
   follow_up_sent_at?: string | null;
+  invited_by_admin_id?: string | null;
+  invited_by_name?: string | null;
+  referral_source?: string | null;
+  invite_timestamp?: string | null;
 };
 
 interface AdminClientApplicationsClientProps {
@@ -132,6 +136,21 @@ export function AdminClientApplicationsClient({
       return null;
     }
     return new Date(value).toLocaleDateString();
+  };
+
+  const formatInviteTimestamp = (value: string | null | undefined) => {
+    if (!value) return "Not recorded";
+    const parsed = Date.parse(value);
+    if (Number.isNaN(parsed)) return "Not recorded";
+    return new Date(parsed).toLocaleString();
+  };
+
+  const getInviteSummary = (application: ClientApplication) => {
+    const inviterLabel = application.invited_by_name?.trim() || "Self-started or unknown";
+    const inviteMs = application.invite_timestamp ? Date.parse(application.invite_timestamp) : Number.NaN;
+    const inviteAtLabel =
+      Number.isNaN(inviteMs) || inviteMs <= 0 ? "Not recorded" : new Date(inviteMs).toLocaleDateString();
+    return { inviterLabel, inviteAtLabel };
   };
 
   // Status badge styling
@@ -241,6 +260,18 @@ export function AdminClientApplicationsClient({
                     ? `Sent ${formatFollowUpDate(application.follow_up_sent_at)}`
                     : "Not sent",
                 },
+                {
+                  label: "Invited by",
+                  value: getInviteSummary(application).inviterLabel,
+                },
+                {
+                  label: "Invited",
+                  value: getInviteSummary(application).inviteAtLabel,
+                },
+                {
+                  label: "Referred by",
+                  value: application.referral_source || "Not provided",
+                },
               ]}
               badge={getStatusBadge(application.status)}
               trailing={renderApplicationActions(application)}
@@ -265,6 +296,12 @@ export function AdminClientApplicationsClient({
                 </th>
                 <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Applied Date
+                </th>
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
+                  Invite Context
+                </th>
+                <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
+                  Referred By
                 </th>
                 <th className="text-left text-xs font-medium text-[var(--oklch-text-secondary)] uppercase tracking-wider py-4 px-6">
                   Status
@@ -302,6 +339,15 @@ export function AdminClientApplicationsClient({
                   </td>
                   <td className="py-4 px-6 text-[var(--oklch-text-tertiary)] text-sm">
                     {new Date(application.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-6 text-sm">
+                    <div className="text-white">{getInviteSummary(application).inviterLabel}</div>
+                    <div className="text-[var(--oklch-text-tertiary)] text-xs">
+                      Invited: {getInviteSummary(application).inviteAtLabel}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-[var(--oklch-text-tertiary)] text-sm">
+                    {application.referral_source || "—"}
                   </td>
                   <td className="py-4 px-6">{getStatusBadge(application.status)}</td>
                   <td className="py-4 px-6">
@@ -572,6 +618,9 @@ export function AdminClientApplicationsClient({
       "Industry",
       "Status",
       "Submitted Date",
+      "Invited By",
+      "Invite Timestamp",
+      "Referred By",
       "Business Description",
       "Needs",
       "Website",
@@ -588,6 +637,9 @@ export function AdminClientApplicationsClient({
       app.industry || "",
       app.status,
       new Date(app.created_at).toLocaleDateString(),
+      getInviteSummary(app).inviterLabel,
+      app.invite_timestamp ? new Date(app.invite_timestamp).toISOString() : "",
+      app.referral_source || "",
       `"${app.business_description.replace(/"/g, '""')}"`,
       `"${app.needs_description.replace(/"/g, '""')}"`,
       app.website || "",
@@ -1091,6 +1143,24 @@ export function AdminClientApplicationsClient({
                   <div className="flex justify-between">
                     <span className="text-[var(--oklch-text-tertiary)]">Submitted</span>
                     <span className="text-[var(--oklch-text-secondary)]">{new Date(selectedApplication.created_at).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--oklch-text-tertiary)]">Invited by</span>
+                    <span className="text-[var(--oklch-text-secondary)]">
+                      {selectedApplication.invited_by_name || "Self-started or unknown"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--oklch-text-tertiary)]">Invite timestamp</span>
+                    <span className="text-[var(--oklch-text-secondary)]">
+                      {formatInviteTimestamp(selectedApplication.invite_timestamp)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--oklch-text-tertiary)]">Referred by</span>
+                    <span className="text-[var(--oklch-text-secondary)]">
+                      {selectedApplication.referral_source || "Not provided"}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-[var(--oklch-text-tertiary)]">Last Updated</span>

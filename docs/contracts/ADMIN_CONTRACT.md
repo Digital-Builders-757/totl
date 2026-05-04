@@ -116,6 +116,10 @@
     - admin cannot suspend, reinstate, or hard-delete self
     - admin cannot hard-delete another admin
     - hard delete for Career Builder accounts is blocked (409); **suspend** is the official reversible policy because dependent rows can violate FK constraints on auth user delete
+  - Career Builder invite/referral provenance:
+    - `POST /api/admin/invite-career-builder` stores invite metadata on the auth user (`invited_by_admin_id`, `invited_at`) so provenance survives callback/apply.
+    - `submitClientApplication(...)` writes `invited_by_admin_id` / `referral_source` when available (with backward-compatible retry when columns are not yet present).
+    - Admin review surfaces (`/admin/client-applications`, `/admin/users`) show **invited by**, **referred by**, and **invite timestamp** for faster vetting context.
 
 ---
 
@@ -125,7 +129,7 @@
 - `public.profiles`
   - `role`, `account_type`, `is_suspended`, `suspension_reason`, `email_verified`, subscription fields
 - `public.client_applications`
-  - `status`, `admin_notes`, follow-up timestamps
+  - `status`, `admin_notes`, follow-up timestamps, invite/referral provenance (`invited_by_admin_id`, `referral_source`)
 - `public.client_profiles`
   - created during approval (idempotent)
 - `public.content_flags`
@@ -179,6 +183,7 @@
 - Login as admin → visit `/admin/dashboard`.
 - Login as admin → visit `/admin/users` and verify:
   - Career Builder (`client`) rows expose **Suspend User** (when active) and do **not** expose `Delete User`
+  - Career Builder rows show invite/referral context (`Invited by`, `Referred by`, `Invited`) plus clear lifecycle copy indicating suspend/reinstate policy
   - Talent rows expose **Suspend User** (when active) and `Delete User` (confirmation + checkbox required)
   - Admin rows do **not** expose `Delete User`, **Suspend User**, or **Reinstate User**
   - Suspending sets `profiles.is_suspended = true` (optional reason → `suspension_reason`)
@@ -187,6 +192,7 @@
   - hard delete for Career Builder targets fails with explicit guidance to **suspend** instead (API or UI should surface the same policy)
 - Approve a `client_applications` row → verify:
   - `client_applications.status='approved'`
+  - provenance remains visible on admin review surfaces (`invited_by_admin_id` / `referral_source` if available)
   - `profiles.role='client' AND profiles.account_type='client'`
   - `client_profiles` exists
 - Retry approve → verify:

@@ -117,7 +117,7 @@ export function GigCard(props: GigCardProps) {
       : "/images/solo_logo.png";
 
   const imageBlock = (
-    <div className="relative aspect-[4/3] w-full overflow-hidden">
+    <div className="relative z-[2] aspect-[4/3] w-full overflow-hidden">
       <SafeImage
         src={imageSrc}
         alt={variant === "browse" ? displayTitle : gig.title}
@@ -144,25 +144,25 @@ export function GigCard(props: GigCardProps) {
   );
 
   const contentBlock = (
-    <div className="space-y-3 p-4 sm:space-y-4 sm:p-6">
+    <div className="relative z-[2] space-y-3 p-4 sm:space-y-4 sm:p-6">
       {displayDescription && (
         <p className="line-clamp-2 text-sm leading-relaxed text-[var(--oklch-text-secondary)]">
           {displayDescription}
         </p>
       )}
-      <div className="space-y-2">
-        <div className="flex items-center text-xs text-[var(--oklch-text-tertiary)] sm:text-sm">
-          <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
+      <div className="flex flex-wrap gap-2">
+        <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-[var(--oklch-text-tertiary)]">
+          <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
           <span className="truncate">{gig.location}</span>
         </div>
-        <div className="flex items-center text-xs text-[var(--oklch-text-tertiary)] sm:text-sm">
-          <DollarSign className="mr-2 h-4 w-4 flex-shrink-0 text-white" />
-          <span className="font-semibold text-white">{gig.compensation}</span>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/20 bg-violet-400/10 px-3 py-1.5 text-xs text-violet-100">
+          <DollarSign className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="font-semibold">{gig.compensation}</span>
         </div>
-          <div className="flex items-center text-xs text-[var(--oklch-text-tertiary)] sm:text-sm">
-            <Calendar className="mr-2 h-4 w-4 flex-shrink-0" />
-            <span className="truncate">{gig.date ?? "—"}</span>
-          </div>
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-[var(--oklch-text-tertiary)]">
+          <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="truncate">{gig.date ?? "—"}</span>
+        </div>
       </div>
       {variant === "dashboard" ? (
         <div className="flex gap-2 pt-2 mt-auto">
@@ -191,7 +191,9 @@ export function GigCard(props: GigCardProps) {
   );
 
   const cardBacklit = (
-    <div className="card-backlit overflow-hidden rounded-2xl group cursor-pointer active:scale-95 transition-all duration-200 sm:hover:scale-[1.02]">
+    <div className="card-backlit relative overflow-hidden rounded-2xl group cursor-pointer active:scale-95 transition-all duration-200 sm:hover:scale-[1.02]">
+      <div className="pointer-events-none absolute inset-0 z-[1] rounded-2xl border border-white/10" />
+      <div className="pointer-events-none absolute inset-0 z-[1] opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(120%_50%_at_50%_0%,rgba(167,139,250,0.22),transparent_58%)]" />
       {variant === "dashboard" ? (
         <>
           <Link href={href} className="block">

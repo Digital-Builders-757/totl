@@ -120,6 +120,7 @@ export async function handleAdminSetUserSuspension(
     logger.info("[AdminSetUserSuspension] Suspended user", {
       actor_id: user.id,
       target_user_id: userId,
+      reason: reason || null,
     });
 
     return NextResponse.json({
@@ -151,6 +152,7 @@ export async function handleAdminSetUserSuspension(
   logger.info("[AdminSetUserSuspension] Reinstated user", {
     actor_id: user.id,
     target_user_id: userId,
+    previous_reason: targetProfile.is_suspended ? "cleared" : null,
   });
 
   return NextResponse.json({

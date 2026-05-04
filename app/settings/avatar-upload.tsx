@@ -28,10 +28,10 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
 
   const handleFileSelect = (file: File) => {
     // Validate file type
-    if (!["image/jpeg", "image/png", "image/gif"].includes(file.type)) {
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: "Please select a JPG, PNG, or GIF file.",
+        description: "Please select a JPG, PNG, GIF, or WebP file.",
         variant: "destructive",
       });
       return;
@@ -165,9 +165,30 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
               <p className="text-sm text-[var(--oklch-text-secondary)]">
                 {previewUrl ? "Click to change file" : "Drag and drop or click to upload"}
               </p>
-              <p className="mt-1 text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG or GIF. Max 1MB.</p>
+              <p className="mt-1 text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG, GIF, or WebP. Max 1MB.</p>
             </div>
           </button>
+          <p className="text-xs text-[var(--oklch-text-tertiary)]">
+            Need to resize quickly? Try{" "}
+            <a
+              href="https://squoosh.app/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--oklch-accent)] underline-offset-2 hover:underline"
+            >
+              Squoosh
+            </a>{" "}
+            or{" "}
+            <a
+              href="https://www.canva.com/resize-image/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--oklch-accent)] underline-offset-2 hover:underline"
+            >
+              Canva Resize
+            </a>
+            .
+          </p>
         </div>
 
         <div className="flex flex-col items-start gap-2 md:hidden">
@@ -181,14 +202,14 @@ export function AvatarUpload({ currentAvatarUrl, userEmail, displayName }: Avata
             <Upload className="mr-2 h-4 w-4" />
             {previewUrl || currentAvatarUrl ? "Change photo" : "Upload photo"}
           </Button>
-          <p className="text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG or GIF. Max 1MB.</p>
+          <p className="text-xs text-[var(--oklch-text-tertiary)]">JPG, PNG, GIF, or WebP. Max 1MB.</p>
         </div>
       </div>
 
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/gif"
+        accept="image/jpeg,image/png,image/gif,image/webp"
         onChange={handleFileChange}
         className="hidden"
       />
