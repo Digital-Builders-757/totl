@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import { GigReferenceLinksSection } from "@/components/gigs/gig-reference-links-section";
-import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { canViewFullGigMarketingCopy } from "@/lib/gig-access";
@@ -35,37 +34,35 @@ export function GigReferenceLinksGate({
   const hasLinks = parseStoredReferenceLinksForDisplay(referenceLinks).length > 0;
   if (!hasLinks) return null;
 
-  if (canViewFullGigMarketingCopy(profile)) {
+  const isAuthenticatedTalent = hasUser && profile?.role === "talent";
+  if (isAuthenticatedTalent || canViewFullGigMarketingCopy(profile)) {
     return <GigReferenceLinksSection referenceLinks={referenceLinks} />;
   }
 
   const returnPath = `/gigs/${gigId}`;
-  const promptProfile =
-    profile && profile.role === "talent"
-      ? { role: profile.role, subscription_status: profile.subscription_status }
-      : null;
-
   return (
     <Card data-testid="reference-links-locked">
       <CardHeader>
         <CardTitle>Reference & inspiration</CardTitle>
         <CardDescription>
-          Links from the career builder (reels, campaigns, portfolios) are visible to subscribed talent
-          members.
+          Links from the career builder (reels, campaigns, portfolios) are visible after signing in.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {hasUser && profile?.role === "talent" ? (
-          <>
-            <SubscriptionPrompt profile={promptProfile} variant="card" context="gig-details" />
+        {hasUser ? (
+          <div className="space-y-3 text-center py-2">
+            <p className="text-sm text-[var(--oklch-text-muted)]">
+              This account cannot access reference links yet. Sign in with your talent, career builder,
+              or admin account.
+            </p>
             <Button asChild className="w-full button-glow border-0">
-              <Link href="/talent/subscribe">View Plans</Link>
+              <Link href={`/login?returnUrl=${encodeURIComponent(returnPath)}`}>Sign in</Link>
             </Button>
-          </>
+          </div>
         ) : (
           <div className="space-y-3 text-center py-2">
             <p className="text-sm text-[var(--oklch-text-muted)]">
-              Sign in as a talent member with an active subscription to view reference links.
+              Sign in to view reference links.
             </p>
             <Button asChild className="w-full button-glow border-0">
               <Link href={`/login?returnUrl=${encodeURIComponent(returnPath)}`}>Sign in</Link>

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 
 export default function ResetPassword() {
@@ -31,7 +32,10 @@ export default function ResetPassword() {
       if (error) {
         toast({
           title: "Error",
-          description: error.message,
+          description: userSafeMessage(
+            error,
+            "We couldn't send a reset link right now. Please try again."
+          ),
           variant: "destructive",
         });
       } else {

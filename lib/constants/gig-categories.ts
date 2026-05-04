@@ -1,3 +1,5 @@
+import { logger } from "@/lib/utils/logger";
+
 /**
  * Canonical Gig Categories Module
  * 
@@ -14,6 +16,14 @@ export const GIG_CATEGORIES = [
   "dancer",
   "musician",
   "events",
+  "designers",
+  "mua",
+  "hairstylists",
+  "wedding",
+  "internship",
+  "crew",
+  "athlete",
+  "craft-services",
   "others",
   "other",
 ] as const;
@@ -31,6 +41,14 @@ export const VISIBLE_GIG_CATEGORIES = [
   "dancer",
   "musician",
   "events",
+  "designers",
+  "mua",
+  "hairstylists",
+  "wedding",
+  "internship",
+  "crew",
+  "athlete",
+  "craft-services",
   "others",
 ] as const;
 
@@ -54,6 +72,14 @@ export const LEGACY_CATEGORY_MAP: Record<string, GigCategory> = {
   "e-commerce": "influencer",
   // Events / Others
   event: "events",
+  design: "designers",
+  designer: "designers",
+  hairstylist: "hairstylists",
+  hair: "hairstylists",
+  makeup: "mua",
+  "make-up": "mua",
+  craftservices: "craft-services",
+  "craft services": "craft-services",
   // Generic fallback
   other: "other",
   others: "others",
@@ -72,6 +98,14 @@ export const CATEGORY_FILTER_SETS = {
   dancer: ["dancer"],
   musician: ["musician"],
   events: ["events", "event"],
+  designers: ["designers", "designer", "design"],
+  mua: ["mua", "makeup", "make-up"],
+  hairstylists: ["hairstylists", "hairstylist", "hair"],
+  wedding: ["wedding"],
+  internship: ["internship"],
+  crew: ["crew"],
+  athlete: ["athlete"],
+  "craft-services": ["craft-services", "craft services", "craftservices"],
   others: ["other", "others"],
   other: ["other"],
 } satisfies Record<GigCategory, string[]>;
@@ -88,6 +122,14 @@ const LABELS = {
   dancer: "Dancer",
   musician: "Musician",
   events: "Events",
+  designers: "Designers",
+  mua: "MUA",
+  hairstylists: "Hairstylists",
+  wedding: "Wedding",
+  internship: "Internship",
+  crew: "Crew",
+  athlete: "Athlete",
+  "craft-services": "Craft Services",
   others: "Others",
   other: "Other",
 } satisfies Record<GigCategory, string>;
@@ -104,6 +146,14 @@ const BADGE_VARIANTS = {
   dancer: "outline" as const,
   musician: "secondary" as const,
   events: "outline" as const,
+  designers: "secondary" as const,
+  mua: "outline" as const,
+  hairstylists: "outline" as const,
+  wedding: "default" as const,
+  internship: "outline" as const,
+  crew: "secondary" as const,
+  athlete: "default" as const,
+  "craft-services": "outline" as const,
   others: "outline" as const,
   other: "outline" as const,
 } satisfies Record<GigCategory, "default" | "secondary" | "outline">;
@@ -148,7 +198,9 @@ export function normalizeGigCategory(category: CategoryInput): GigCategory {
   // Only warn on non-empty unknown values (keeps logs clean and meaningful)
   // In production, you might want to log this to Sentry for data quality monitoring
   if (process.env.NODE_ENV === "development") {
-    console.warn(`[gig-categories] Unknown category normalized to "other":`, category);
+    logger.warn("[gig-categories] unknown category normalized to 'other'", {
+      category,
+    });
   }
   
   return "other";

@@ -75,6 +75,7 @@ export default function ClientApplicationPage() {
     businessDescription: "",
     needsDescription: "",
     website: "",
+    referralSource: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitBusyLabel, setSubmitBusyLabel] = useState("Submitting...");
@@ -172,6 +173,7 @@ export default function ClientApplicationPage() {
         businessDescription: formData.businessDescription,
         needsDescription: formData.needsDescription,
         website: formData.website || null,
+        referralSource: formData.referralSource || null,
       });
 
       if (result.error) {
@@ -548,6 +550,19 @@ export default function ClientApplicationPage() {
                       className={inputClass}
                       placeholder="Enter your company website"
                       value={formData.website}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className={labelClass} htmlFor="referralSource">
+                      Referred By (Optional)
+                    </Label>
+                    <Input
+                      id="referralSource"
+                      className={inputClass}
+                      placeholder="Name, agency, or source that referred you"
+                      value={formData.referralSource}
                       onChange={handleChange}
                     />
                   </div>

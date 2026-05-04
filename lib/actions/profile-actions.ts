@@ -25,6 +25,11 @@ const talentProfileSchema = z.object({
   hair_color: z.string().max(30).nullish().optional(),
   eye_color: z.string().max(30).nullish().optional(),
   shoe_size: z.string().max(10).nullish().optional(),
+  bust: z.string().max(20).nullish().optional(),
+  hips: z.string().max(20).nullish().optional(),
+  waist: z.string().max(20).nullish().optional(),
+  suit: z.string().max(20).nullish().optional(),
+  resume_link: z.string().url().nullish().optional(),
   languages: z.array(z.string().min(1).max(50)).nullish(),
 });
 
@@ -74,6 +79,11 @@ export async function upsertTalentProfileAction(
     ...(parsed.data.hair_color !== undefined && { hair_color: parsed.data.hair_color ?? null }),
     ...(parsed.data.eye_color !== undefined && { eye_color: parsed.data.eye_color ?? null }),
     ...(parsed.data.shoe_size !== undefined && { shoe_size: parsed.data.shoe_size ?? null }),
+    ...(parsed.data.bust !== undefined && { bust: parsed.data.bust ?? null }),
+    ...(parsed.data.hips !== undefined && { hips: parsed.data.hips ?? null }),
+    ...(parsed.data.waist !== undefined && { waist: parsed.data.waist ?? null }),
+    ...(parsed.data.suit !== undefined && { suit: parsed.data.suit ?? null }),
+    ...(parsed.data.resume_link !== undefined && { resume_link: parsed.data.resume_link ?? null }),
   };
 
   const { error } = await supabase.from("talent_profiles").upsert(values, { onConflict: "user_id" });
@@ -155,6 +165,11 @@ const talentPersonalInfoSchema = z.object({
   hair_color: z.string().max(30).nullable().optional(),
   eye_color: z.string().max(30).nullable().optional(),
   shoe_size: z.string().max(10).nullable().optional(),
+  bust: z.string().max(20).nullable().optional(),
+  hips: z.string().max(20).nullable().optional(),
+  waist: z.string().max(20).nullable().optional(),
+  suit: z.string().max(20).nullable().optional(),
+  resume_link: z.string().url().nullable().optional(),
   languages: z.array(z.string().min(1).max(50)).nullable(),
   instagram_handle: z.string().max(50).nullable(),
 });
@@ -187,6 +202,11 @@ export async function updateTalentPersonalInfoAction(
     ...(parsed.data.hair_color !== undefined && { hair_color: parsed.data.hair_color }),
     ...(parsed.data.eye_color !== undefined && { eye_color: parsed.data.eye_color }),
     ...(parsed.data.shoe_size !== undefined && { shoe_size: parsed.data.shoe_size }),
+    ...(parsed.data.bust !== undefined && { bust: parsed.data.bust }),
+    ...(parsed.data.hips !== undefined && { hips: parsed.data.hips }),
+    ...(parsed.data.waist !== undefined && { waist: parsed.data.waist }),
+    ...(parsed.data.suit !== undefined && { suit: parsed.data.suit }),
+    ...(parsed.data.resume_link !== undefined && { resume_link: parsed.data.resume_link }),
   };
 
   const { error: talentError } = await supabase

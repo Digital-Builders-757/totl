@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { upsertTalentProfileAction } from "@/lib/actions/profile-actions";
 import { PATHS } from "@/lib/constants/routes";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { logger } from "@/lib/utils/logger";
 import { isModelingTalent } from "@/lib/utils/talent-type";
 import type { Database } from "@/types/supabase";
@@ -36,7 +37,13 @@ type TalentProfileFormData = Pick<
   | "shoe_size"
   | "languages"
   | "specialties"
->;
+> & {
+  bust?: string | null;
+  hips?: string | null;
+  waist?: string | null;
+  suit?: string | null;
+  resume_link?: string | null;
+};
 
 // Define the form schema
 const profileSchema = z.object({
@@ -78,6 +85,15 @@ const profileSchema = z.object({
   hair_color: z.string().max(30, { message: "Hair color cannot exceed 30 characters" }).optional(),
   eye_color: z.string().max(30, { message: "Eye color cannot exceed 30 characters" }).optional(),
   shoe_size: z.string().max(10, { message: "Shoe size cannot exceed 10 characters" }).optional(),
+  bust: z.string().max(20, { message: "Bust cannot exceed 20 characters" }).optional(),
+  hips: z.string().max(20, { message: "Hips cannot exceed 20 characters" }).optional(),
+  waist: z.string().max(20, { message: "Waist cannot exceed 20 characters" }).optional(),
+  suit: z.string().max(20, { message: "Suit size cannot exceed 20 characters" }).optional(),
+  resume_link: z
+    .string()
+    .url({ message: "Please enter a valid resume URL" })
+    .optional()
+    .or(z.literal("")),
   languages: z.string().max(200, { message: "Languages cannot exceed 200 characters" }).optional(),
 });
 
@@ -100,7 +116,12 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       initialData?.measurements ||
       initialData?.hair_color ||
       initialData?.eye_color ||
-      initialData?.shoe_size
+      initialData?.shoe_size ||
+      initialData?.bust ||
+      initialData?.hips ||
+      initialData?.waist ||
+      initialData?.suit ||
+      initialData?.resume_link
   );
   const [showAdvanced, setShowAdvanced] = useState(hasAdvancedValues);
 
@@ -130,6 +151,11 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       hair_color: initialData?.hair_color || "",
       eye_color: initialData?.eye_color || "",
       shoe_size: initialData?.shoe_size || "",
+      bust: initialData?.bust || "",
+      hips: initialData?.hips || "",
+      waist: initialData?.waist || "",
+      suit: initialData?.suit || "",
+      resume_link: initialData?.resume_link || "",
       languages: initialData?.languages?.join(", ") || "",
     },
     shouldUnregister: true, // Unregister hidden fields so they don't submit
@@ -144,6 +170,11 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       unregister("hair_color");
       unregister("eye_color");
       unregister("shoe_size");
+      unregister("bust");
+      unregister("hips");
+      unregister("waist");
+      unregister("suit");
+      unregister("resume_link");
     }
   }, [showModelingFields, unregister]);
 
@@ -176,6 +207,12 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
           ...(showModelingFields && data.hair_color !== undefined && { hair_color: data.hair_color || null }),
           ...(showModelingFields && data.eye_color !== undefined && { eye_color: data.eye_color || null }),
           ...(showModelingFields && data.shoe_size !== undefined && { shoe_size: data.shoe_size || null }),
+          ...(showModelingFields && data.bust !== undefined && { bust: data.bust || null }),
+          ...(showModelingFields && data.hips !== undefined && { hips: data.hips || null }),
+          ...(showModelingFields && data.waist !== undefined && { waist: data.waist || null }),
+          ...(showModelingFields && data.suit !== undefined && { suit: data.suit || null }),
+          ...(showModelingFields &&
+            data.resume_link !== undefined && { resume_link: data.resume_link || null }),
           languages,
         });
 
@@ -195,20 +232,14 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
       router.push(PATHS.TALENT_DASHBOARD);
     } catch (error) {
       logger.error("Error updating profile", error instanceof Error ? error : new Error(String(error)));
-      
-      // Extract error message from various error types
-      let errorMessage = "An unexpected error occurred. Please try again.";
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (error && typeof error === 'object') {
-        // Handle Supabase error objects
-        const supabaseError = error as { message?: string; details?: string; hint?: string };
-        errorMessage = supabaseError.message || supabaseError.details || supabaseError.hint || errorMessage;
-      }
-      
+
+      const errorMessage = userSafeMessage(
+        error,
+        "We couldn't update your profile right now. Please try again."
+      );
+
       setServerError(errorMessage);
-      
+
       toast({
         title: "Error updating profile",
         description: errorMessage,
@@ -520,6 +551,89 @@ export default function TalentProfileForm({ initialData }: TalentProfileFormProp
               />
               {errors.measurements && (
                 <p className="text-sm text-red-400">{errors.measurements.message}</p>
+              )}
+            </div>
+          )}
+
+          {showModelingFields && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bust" className={errors.bust ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
+                  Bust
+                </Label>
+                <Input
+                  id="bust"
+                  placeholder="34"
+                  {...register("bust")}
+                  className={errors.bust ? "border-red-500/80" : ""}
+                  disabled={isSubmitting}
+                />
+                {errors.bust ? <p className="text-sm text-red-400">{errors.bust.message}</p> : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="waist" className={errors.waist ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
+                  Waist
+                </Label>
+                <Input
+                  id="waist"
+                  placeholder="26"
+                  {...register("waist")}
+                  className={errors.waist ? "border-red-500/80" : ""}
+                  disabled={isSubmitting}
+                />
+                {errors.waist ? <p className="text-sm text-red-400">{errors.waist.message}</p> : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="hips" className={errors.hips ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
+                  Hips
+                </Label>
+                <Input
+                  id="hips"
+                  placeholder="36"
+                  {...register("hips")}
+                  className={errors.hips ? "border-red-500/80" : ""}
+                  disabled={isSubmitting}
+                />
+                {errors.hips ? <p className="text-sm text-red-400">{errors.hips.message}</p> : null}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="suit" className={errors.suit ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}>
+                  Suit
+                </Label>
+                <Input
+                  id="suit"
+                  placeholder="38R"
+                  {...register("suit")}
+                  className={errors.suit ? "border-red-500/80" : ""}
+                  disabled={isSubmitting}
+                />
+                {errors.suit ? <p className="text-sm text-red-400">{errors.suit.message}</p> : null}
+              </div>
+            </div>
+          )}
+
+          {showModelingFields && (
+            <div className="space-y-2">
+              <Label
+                htmlFor="resume_link"
+                className={errors.resume_link ? "text-red-400" : "text-[var(--oklch-text-secondary)]"}
+              >
+                Resume Link
+              </Label>
+              <Input
+                id="resume_link"
+                type="url"
+                placeholder="https://..."
+                {...register("resume_link")}
+                className={errors.resume_link ? "border-red-500/80" : ""}
+                disabled={isSubmitting}
+              />
+              {errors.resume_link ? (
+                <p className="text-sm text-red-400">{errors.resume_link.message}</p>
+              ) : (
+                <p className="text-xs text-[var(--oklch-text-tertiary)]">
+                  Add a shareable resume URL for casting submissions.
+                </p>
               )}
             </div>
           )}

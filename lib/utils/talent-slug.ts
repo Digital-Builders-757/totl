@@ -4,6 +4,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createNameSlug } from "./slug";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type TalentProfile = Database["public"]["Tables"]["talent_profiles"]["Row"];
@@ -36,7 +37,7 @@ export async function getTalentSlugFromId(
 
     return createNameSlug(data.first_name, data.last_name);
   } catch (error) {
-    console.error("Error fetching talent profile for slug:", error);
+    logger.error("[talent.slug] failed to fetch talent profile", error, { talentId });
     return null;
   }
 }

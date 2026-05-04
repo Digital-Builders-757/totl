@@ -18,6 +18,21 @@ import type { Database } from "@/types/supabase";
 // Force dynamic rendering to prevent build-time issues
 export const dynamic = "force-dynamic";
 
+type SupabaseLikeError = { message?: string } | null;
+
+type TalentWithCompCard = Database["public"]["Tables"]["talent_profiles"]["Row"] & {
+  bust?: string | null;
+  hips?: string | null;
+  waist?: string | null;
+  suit?: string | null;
+  resume_link?: string | null;
+};
+
+function isMissingCompCardColumnError(error: SupabaseLikeError): boolean {
+  const message = String(error?.message ?? "");
+  return /column/i.test(message) && /(bust|hips|waist|suit|resume_link)/i.test(message);
+}
+
 export default async function SettingsPage() {
   // Check if Supabase is configured
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -48,8 +63,31 @@ export default async function SettingsPage() {
     redirect(PATHS.LOGIN);
   }
 
+  const fetchTalentProfile = async (): Promise<{ data: TalentWithCompCard | null }> => {
+    const baseSelect =
+      "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, experience_years, specialties, weight, created_at, updated_at";
+    const compCardSelect = `${baseSelect}, bust, hips, waist, suit, resume_link`;
+
+    const primary = await supabase
+      .from("talent_profiles")
+      .select(compCardSelect)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (primary.error && isMissingCompCardColumnError(primary.error)) {
+      const fallback = await supabase
+        .from("talent_profiles")
+        .select(baseSelect)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      return { data: fallback.data as unknown as TalentWithCompCard | null };
+    }
+
+    return { data: primary.data as unknown as TalentWithCompCard | null };
+  };
+
   // Fetch profile data with explicit column selection
-  const [{ data: profile }, { data: talent }, { data: client }, { data: portfolioItems }] = await Promise.all([
+  const [{ data: profile }, { data: talentResult }, { data: client }, { data: portfolioItems }] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -57,13 +95,7 @@ export default async function SettingsPage() {
       )
       .eq("id", user.id)
       .single(),
-    supabase
-      .from("talent_profiles")
-      .select(
-        "id, user_id, first_name, last_name, phone, age, location, experience, portfolio_url, height, measurements, hair_color, eye_color, shoe_size, languages, experience_years, specialties, weight, created_at, updated_at"
-      )
-      .eq("user_id", user.id)
-      .maybeSingle(),
+    fetchTalentProfile(),
     supabase
       .from("client_profiles")
       .select(
@@ -77,6 +109,7 @@ export default async function SettingsPage() {
       .eq("talent_id", user.id)
       .order("created_at", { ascending: false }),
   ]);
+  const talent = talentResult ?? null;
 
   // Generate signed URL with image transformations for avatar if path exists
   let avatarSrc: string | null = null;

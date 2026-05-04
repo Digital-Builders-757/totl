@@ -36,7 +36,20 @@ type PublicTalentProfile = Pick<
   | "weight"
   | "created_at"
   | "updated_at"
->;
+> & {
+  bust?: string | null;
+  hips?: string | null;
+  waist?: string | null;
+  suit?: string | null;
+  resume_link?: string | null;
+};
+
+type SupabaseLikeError = { message?: string } | null;
+
+function isMissingCompCardColumnError(error: SupabaseLikeError): boolean {
+  const message = String(error?.message ?? "");
+  return /column/i.test(message) && /(bust|hips|waist|suit|resume_link)/i.test(message);
+}
 
 interface TalentProfilePageProps {
   params: Promise<{
@@ -86,7 +99,7 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const nameParts = parseSlug(slug);
     
-    const PUBLIC_FIELDS = `
+    const PUBLIC_FIELDS_BASE = `
       id,
       user_id,
       first_name,
@@ -107,46 +120,55 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
       created_at,
       updated_at
     `;
+    const PUBLIC_FIELDS_WITH_COMP_CARD = `${PUBLIC_FIELDS_BASE}, bust, hips, waist, suit, resume_link`;
+
+    const fetchCandidates = async (
+      selectColumns: string
+    ): Promise<{ data: PublicTalentProfile[]; error: SupabaseLikeError }> => {
+      if (uuidRegex.test(slug)) {
+        const { data, error: uuidError } = await supabase
+          .from("talent_profiles")
+          .select(selectColumns)
+          .eq("user_id", slug)
+          .limit(1);
+        return {
+          data: (data ?? []) as unknown as PublicTalentProfile[],
+          error: uuidError,
+        };
+      }
+
+      if (nameParts) {
+        const { data, error: nameError } = await supabase
+          .from("talent_profiles")
+          .select(selectColumns)
+          .ilike("first_name", nameParts.firstName)
+          .ilike("last_name", `%${nameParts.lastName}%`)
+          .limit(25); // Hard cap to prevent enumeration
+        return {
+          data: (data ?? []) as unknown as PublicTalentProfile[],
+          error: nameError,
+        };
+      }
+
+      return { data: [], error: null };
+    };
 
     let candidates: PublicTalentProfile[] = [];
+    let candidateQueryError: SupabaseLikeError = null;
 
-    // Strategy A: UUID path (exact match, fast)
-    // Query user_id only - internal links always pass profiles.id (user_id). Reduces edge collisions.
-    if (uuidRegex.test(slug)) {
-      const { data, error: uuidError } = await supabase
-        .from("talent_profiles")
-        .select(PUBLIC_FIELDS)
-        .eq("user_id", slug)
-        .limit(1);
+    const withCompCard = await fetchCandidates(PUBLIC_FIELDS_WITH_COMP_CARD);
+    candidates = withCompCard.data;
+    candidateQueryError = withCompCard.error;
 
-      if (uuidError) {
-        logger.error("Supabase error fetching talent by UUID", uuidError);
-        error = `Database error: ${uuidError.message}`;
-      } else {
-        candidates = (data ?? []) as PublicTalentProfile[];
-      }
+    if (candidateQueryError && isMissingCompCardColumnError(candidateQueryError)) {
+      const fallback = await fetchCandidates(PUBLIC_FIELDS_BASE);
+      candidates = fallback.data;
+      candidateQueryError = fallback.error;
     }
-    // Strategy B: Name-based path (bounded candidates)
-    else if (nameParts) {
-      const { data, error: nameError } = await supabase
-        .from("talent_profiles")
-        .select(PUBLIC_FIELDS)
-        .ilike("first_name", nameParts.firstName)
-        .ilike("last_name", `%${nameParts.lastName}%`)
-        .limit(25); // Hard cap to prevent enumeration
 
-      if (nameError) {
-        logger.error("Supabase error fetching talent by name", nameError);
-        error = `Database error: ${nameError.message}`;
-      } else {
-        candidates = (data ?? []) as PublicTalentProfile[];
-      }
-    }
-    // Strategy C: Invalid slug format
-    else {
-      // Slug doesn't match UUID and can't be parsed as name
-      // Will result in notFound() below
-      candidates = [];
+    if (candidateQueryError) {
+      logger.error("Supabase error fetching talent profile candidates", candidateQueryError, { slug });
+      error = `Database error: ${candidateQueryError.message ?? "Unknown query error"}`;
     }
 
     // PR4: Final exact slug match on bounded candidate set (safe, small)

@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** April 25, 2026 (`userSafeMessage` DML heuristics: no false positive on "Failed to update/delete…"; `COMMON_ERRORS` + MVP status; prior: April 24 SQL/engine fragment guard)
+**Last Updated:** May 3, 2026 (Career Builder admin vetting + comp-card profile field pass + image resize guidance)
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -60,7 +60,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `docs/archive/DEBUG_MISSING_API_KEY_PLAN_JAN_2025.md`
 - `docs/archive/SDA_DELIVERABLES_REPORT.md`
 - `docs/archive/SDA_EXECUTIVE_SUMMARY.md`
-- `docs/archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` (completed ViZB visual catch-up punch list, April 11, 2026)
+- `archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` (completed ViZB visual catch-up punch list, April 11, 2026)
 
 ---
 
@@ -98,11 +98,11 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `THREE_TRUTHS_TESTING_GUIDE.md` - **✅ NEW** - Testing guide for three truths logging (Jan 2026)
 - `THREE_TRUTHS_TEST_SUMMARY.md` - **✅ NEW** - Quick reference summary for three truths testing (Jan 2026)
 - `AUTH_*.md` stubs - Stable links that forward to archived auth history in `docs/archive/`
-- `SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
+- `security/SECURITY_CONFIGURATION.md` - Complete security configuration and fixes guide
 - `SECURITY_STANDARDS_ENFORCEMENT.md` - **🔐 NEW** - Automated security checks and enforcement (Jan 2025)
 - `security/SECRETS_ROTATION_AND_WEBHOOK_SECRET_VALIDATION_RUNBOOK_2026-03-04.md` - Ops runbook for rotating leaked Supabase keys and verifying Stripe webhook secret pairing (Mar 2026)
 - `security/SECRETS_ROTATION_EXECUTION_LOG_TEMPLATE_2026-03-04.md` - Fill-in execution log template for key-rotation + webhook pairing proof capture (Mar 2026)
-- `SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
+- `guides/SUPABASE_MCP_SETUP_GUIDE.md` - **✅ NEW** - Supabase MCP server setup and configuration (Nov 2025)
 - `SUPABASE_MCP_QUICK_START.md` - **✅ NEW** - Quick start guide for Supabase MCP (Nov 2025)
 - `SUPABASE_API_KEY_FIX.md` - **✅ NEW** - Supabase API key fix overview and problem statement (Jan 2025)
 - `SUPABASE_API_KEY_FIX_IMPLEMENTATION.md` - **✅ NEW** - Supabase API key diagnostics and environment variable detection implementation (Jan 2025)
@@ -119,7 +119,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `plans/NOTIFICATIONS_IMPLEMENTATION_PLAN.md` - **✅ NEW** - In-app notification design (Approach A/B/C); Approach B implemented (Mar 2026)
 - `plans/GIG_CARD_GLOW_BORDER_PLAN.md` - **✅ NEW** - Gig card spotlight glow effect design (Approach C implemented, Mar 2026)
 - `plans/PROFILE_STRENGTH_TO_SETTINGS_PLAN.md` - **✅ NEW** - Profile Strength relocation from dashboard to Settings (Approach A implemented, Mar 2026)
-- `plans/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` - **✅ NEW** - Ranked next-session visual catch-up handoff for making TOTL feel closer to ViZB (Apr 2026)
+- `archive/TOTL_VIZB_CATCHUP_NEXT_SESSION_PLAN_2026-04-11.md` - Completed ViZB catch-up handoff (historical reference, Apr 2026)
 - `HANDOFF.md` - **🤖 NEW** - Agent handoff prompt for notifications & booking UX context (Mar 2026)
 
 ### **🚨 Critical Error Prevention**
@@ -147,18 +147,19 @@ All other documentation has been organized into the `docs/` folder with the foll
 ### **🗄️ Database & Backend**
 - `DATABASE_REPORT.md` - Database structure and analysis
 - `DATABASE_TABLE_COUNT_RECONCILIATION.md` - **✅ NEW** - Canonical source of truth for table counts (13 tables: 8 core + 5 supporting) with CI enforcement
-- `SUPABASE_PERFORMANCE_FIX_GUIDE.md` - **✅ UPDATED** - Performance optimization guide (database + application-level fixes, Jan 2025)
-- `PERFORMANCE_OPTIMIZATION_PLAN.md` - **✅ NEW** - Complete performance optimization plan (Approach A+ - Measurement-First + Incremental Wins, Jan 2026)
-- `PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
-- `PERFORMANCE_BASELINE.md` - **✅ NEW** - Performance baseline metrics tracking and optimization phases (Jan 2026)
-- `PERFORMANCE_CLEANUP_PLAN.md` - **✅ NEW** - Performance cleanup plan: eliminate reloads, remove console logs, validate RSC architecture (Jan 2026)
+- `performance/SUPABASE_PERFORMANCE_FIX_GUIDE.md` - **✅ UPDATED** - Performance optimization guide (database + application-level fixes, Jan 2025)
+- `performance/PERFORMANCE_OPTIMIZATION_PLAN.md` - **✅ NEW** - Complete performance optimization plan (Approach A+ - Measurement-First + Incremental Wins, Jan 2026)
+- `performance/PERFORMANCE_OPTIMIZATION_IMPLEMENTATION.md` - **✅ NEW** - Performance optimization implementation summary (Phase 1 complete, Jan 2026)
+- `performance/PERFORMANCE_BASELINE.md` - **✅ NEW** - Performance baseline metrics tracking and optimization phases (Jan 2026)
+- `performance/PERFORMANCE_CLEANUP_PLAN.md` - **✅ NEW** - Performance cleanup plan: eliminate reloads, remove console logs, validate RSC architecture (Jan 2026)
 - `performance/PERFORMANCE_CLEANUP_IMPLEMENTATION_SUMMARY.md` - **✅ UPDATED** - Performance cleanup implementation summary + March 6 addendum (SWR dedupe, optimistic UX, chunk-splitting for client dashboard/gigs/bookings/applications)
-- `ROUTE_CACHING_STRATEGY.md` - **✅ UPDATED** - Route-by-route caching strategy documentation (ISR for public, dynamic for routes using createSupabaseServer(), Jan 2026)
-- `ISR_TO_DYNAMIC_MIGRATION_PLAN.md` - **✅ NEW** - ISR to dynamic migration plan (MVP honesty mode - routes using cookies must be dynamic, Jan 2026)
-- `SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
+- `performance/ROUTE_CACHING_STRATEGY.md` - **✅ UPDATED** - Route-by-route caching strategy documentation (ISR for public, dynamic for routes using createSupabaseServer(), Jan 2026)
+- `performance/ISR_TO_DYNAMIC_MIGRATION_PLAN.md` - **✅ NEW** - ISR to dynamic migration plan (MVP honesty mode - routes using cookies must be dynamic, Jan 2026)
+- `development/SCHEMA_SYNC_FIX_GUIDE.md` - Fix schema drift and CI verification (Oct 2025)
 - `SQL_RLS_POLICY_CREATION_GUIDE.md` - **🚨 CRITICAL** - PostgreSQL RLS policy creation guide (Nov 2025)
 
 ### **🎨 Features & Implementation**
+- `features/CAREER_BUILDER_OPPORTUNITY_EXPANSION_2026-05-03.md` - **✅ NEW** - Opportunity-type expansion, collaboration requests, paid compensation toggle, and comp-card/provenance migration ship notes (May 2026)
 - `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
 - `UI_LAYOUT_CONTRACT.md` - 🎨 **NEW** - Canonical Terminal Kit (PageShell/PageHeader/SectionCard/DataTableShell) + mobile safety rules (Dec 2025)
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
@@ -205,7 +206,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `development/UI_CONTRACT_DRIFT_LEDGER.md` - **✅ NEW** - Live docs-vs-code mismatch backlog with owner/PR/evidence closure fields (Mar 2026)
 - `CODING_STANDARDS.md` - Coding standards and best practices
 - `TROUBLESHOOTING_GUIDE.md` - Common issues and solutions
-- `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system
+- `features/EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Legacy stub; canonical behavior lives in `contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` (history in `archive/EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md`)
 - `SIGN_OUT_IMPROVEMENTS.md` - Sign-out functionality improvements
 - `LOGIN_PAGE_STYLING_IMPROVEMENTS.md` - Login page styling improvements (Oct 2025)
 
@@ -236,7 +237,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 
 ### **📧 Services & Integrations**
 - `TOTL_ONBOARDING_NOTIFICATIONS_WORK_ORDER.md` - **NEW** — Admin new-member visibility, welcome automation, Notifications UI scope + definition of done (Apr 2026)
-- `EMAIL_NOTIFICATION_SYSTEM_IMPLEMENTATION.md` - Complete email notification system (consolidated)
+- `contracts/EMAIL_NOTIFICATIONS_CONTRACT.md` - Canonical email notification contract
 - `SENTRY_SETUP_GUIDE.md` - Sentry error tracking setup
 - `SENTRY_PRODUCTION_SETUP.md` - Sentry production configuration
 - `SENTRY_ERROR_TRACKING_ENHANCEMENT.md` - **NEW** ✅ - Sentry error tracking enhancements and 406 error fixes (Jan 2025)
@@ -267,7 +268,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `ARCHITECTURE_CONSTITUTION.md` - **NEW** - Non-negotiable system boundaries (middleware/auth/server actions/RLS/Stripe idempotency) (Dec 2025)
 - `OFF_SYNC_INVENTORY.md` - Winners declared + drift remediation tracker (Dec 2025)
 - `DOCS_OVERHAUL_PLAN_2026.md` - Design plan for docs overhaul (Approach A implemented Mar 2026)
-- `NEW_DEV_ONBOARDING.md` - **NEW** - New developer onboarding (“operate the airport”) (Dec 2025)
+- `guides/NEW_DEV_ONBOARDING.md` - **NEW** - New developer onboarding (“operate the airport”) (Dec 2025)
 
 ---
 

@@ -387,7 +387,7 @@ return Sentry.startSpan(
 
 #### **4.4 Document Baseline Metrics**
 
-**File:** `docs/PERFORMANCE_BASELINE.md` (update)
+**File:** `docs/performance/PERFORMANCE_BASELINE.md` (update)
 
 **Metrics to Track:**
 - LCP per route
@@ -440,7 +440,7 @@ return Sentry.startSpan(
 
 ### **Phase 5: Documentation & Cleanup**
 - [ ] Update `MVP_STATUS_NOTION.md` with completion status
-- [ ] Update `docs/PERFORMANCE_BASELINE.md` with metrics
+- [ ] Update `docs/performance/PERFORMANCE_BASELINE.md` with metrics
 - [ ] Update `docs/COMMON_ERRORS_QUICK_REFERENCE.md` with logger usage
 - [ ] Remove outdated documentation references to `window.location.reload()`
 - [ ] Create architecture decision record for RSC pattern
@@ -499,8 +499,8 @@ return Sentry.startSpan(
 ## 📚 References
 
 - **Architecture Standards:** `docs/ARCHITECTURE_CONSTITUTION.md`
-- **Performance Plan:** `docs/PERFORMANCE_OPTIMIZATION_PLAN.md`
-- **Performance Baseline:** `docs/PERFORMANCE_BASELINE.md`
+- **Performance Plan:** `docs/performance/PERFORMANCE_OPTIMIZATION_PLAN.md`
+- **Performance Baseline:** `docs/performance/PERFORMANCE_BASELINE.md`
 - **Common Errors:** `docs/COMMON_ERRORS_QUICK_REFERENCE.md`
 - **Talent Dashboard Pattern:** `app/talent/dashboard/page.tsx`
 - **Sentry Config:** `instrumentation-client.ts`

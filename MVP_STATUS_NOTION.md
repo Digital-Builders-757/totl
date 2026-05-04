@@ -8,6 +8,82 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Career Builder ship + UX polish pushed to develop (May 4, 2026)**
+
+**SHIPPED THIS RUN** — May 4, 2026
+- ✅ **Bundle on `develop`:** Admin invite/referral provenance vetting surfaces, Career Builder lifecycle copy (suspend vs delete), comp-card/resume wiring with schema fallbacks, gig reference-link visibility fix for authenticated members, scaffold migration `external_casting_calls`, and a focused UI polish pass (home trust framing, gigs quick-filter chips + clear-all, richer gig cards, ambient motion polish, refined `PageHeader`).
+- ✅ **Mandatory checks:** `npm run schema:verify:comprehensive`, `types:check`, `build`, `lint`, `docs:verify-paths` — pass on this ship run.
+
+**Next (P0):** Smoke on staging — invite Career Builder → apply with referral → admin lists; talent comp-card + resume edits; gigs listing quick filters and reference links signed in as talent (with/without subscription); review PR into `main` after green CI.
+
+**Next (P1):** Apply pending migrations (`20260503171000_*`, `20260504003000_*`) in each environment; prune provenance/comp-card fallback branches once schemas are uniformly deployed.
+
+## 🚀 **Latest: Career Builder admin vetting hardening (May 3, 2026)**
+
+**ADMIN OPS / LIFECYCLE / PROVENANCE** — May 3, 2026
+- ✅ **Invite provenance capture:** Admin Career Builder invite route now stamps `invited_by_admin_id` + `invited_at` into auth user metadata at invite time.
+- ✅ **Referral capture on apply:** `/client/apply` now includes optional `Referred By`; `submitClientApplication()` persists invite/referral provenance when schema columns are available, with safe fallback for environments pending migration.
+- ✅ **Admin vetting visibility:** `/admin/client-applications` and `/admin/users` now surface invited-by, referred-by, invite timestamp, and lifecycle context for quick review.
+- ✅ **Delete vs suspend clarity:** `/admin/users` explicitly shows Career Builder accounts as suspend/reinstate-only; delete remains Talent-only, with UI copy aligned to API behavior.
+- ✅ **Auditability strengthened:** suspension logs now include reason context, and suspended users show reason context in admin UI.
+- ✅ **Comp-card field UI shipped:** Talent settings/profile surfaces now support explicit comp-card fields (`bust`, `hips`, `waist`, `suit`, `shoe`, `eyes`, `hair`) plus `resume_link`, with fallback handling for environments missing new columns.
+- ✅ **Image resize guidance added:** Settings upload surfaces now include practical resize help (Squoosh/Canva/tutorial links) to reduce failed uploads and support comp-card prep.
+- ✅ **External casting schema scaffolded:** Added migration `20260504003000_create_external_casting_calls.sql` with a pending-review queue table for future automated casting ingestion.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+
+**Next (P0):** Smoke invite → callback → `/client/apply` → admin review and talent comp-card editing flow on staging with fresh test accounts; capture screenshots for ops handoff.
+
+**Next (P1):** Apply `20260503171000_expand_opportunities_collab_compcard.sql` to all target environments, regenerate types, and remove temporary fallback code paths for pre-provenance schemas.
+
+---
+
+## 🚀 **Latest: Career Builder opportunities expansion + on-platform collab requests (May 3, 2026)**
+
+**OPPORTUNITIES / COLLAB / PROFILE MODEL** — May 3, 2026
+- ✅ **Opportunity taxonomy expanded:** Added requested categories (`Designers`, `MUA`, `Hairstylists`, `Wedding`, `Internship`, `Crew`, `Athlete`, `Craft Services`) while preserving existing options via canonical `gig-categories` constants.
+- ✅ **On-platform collaboration request flow:** Added one-click collaboration request on talent profile pages, backed by a server action (`sendCollaborationRequestAction`) and in-app notifications (`user_notifications`) for recipient + admin visibility.
+- ✅ **Paid compensation option (admin create flow):** Added `Paid Opportunity` toggle; compensation formatter now supports `Paid` and `Paid · $min-$max` while preserving existing min/max behavior.
+- ✅ **Comp-card + provenance migration scaffolded:** New migration `20260503171000_expand_opportunities_collab_compcard.sql` adds `collaboration_request` notification enum, comp-card fields on `talent_profiles` (`bust`, `hips`, `waist`, `suit`, `resume_link`), and invite/referral provenance columns on `client_applications`.
+- ✅ **Docs updated:** Added `docs/features/CAREER_BUILDER_OPPORTUNITY_EXPANSION_2026-05-03.md`, indexed it in `docs/DOCUMENTATION_INDEX.md`, and documented migration-cli empty-file cleanup in `docs/troubleshooting/COMMON_ERRORS_QUICK_REFERENCE.md`.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+
+**Next (P0):** Apply `20260503171000_expand_opportunities_collab_compcard.sql` to the target Supabase project and regenerate `types/database.ts` so UI/server code can safely read/write new comp-card and provenance fields.
+
+**Next (P1):** Extend Settings/talent profile forms and admin Career Builder review UI to surface and persist the newly added comp-card + invite/referral provenance fields end-to-end.
+
+---
+
+## 🚀 **Latest: Full audit pass — loading + error states + docs de-dup (May 3, 2026)**
+
+**PERFORMANCE / RELIABILITY / DOCS** — May 3, 2026
+- ✅ **Loading-speed pass:** Home route now uses ISR-style `revalidate` with cookie-free featured-gig fetch; root `app/loading.tsx` added; talent dashboard active-gig query is bounded (`limit 24`); login route removed animated path background dependency from the critical auth surface.
+- ✅ **Error/logging hardening:** Added `app/error.tsx` plus route `error.tsx` coverage for `/gigs` and `/client/gigs`; replaced high-risk UI/API raw error leaks with `userSafeMessage`/safe copy patterns; admin mutation/API routes now return generic 5xx copy with structured logs.
+- ✅ **Runtime logging consistency:** Replaced remaining non-test `console.error`/`console.warn` usage in touched helper/middleware paths with `logger`-based logging.
+- ✅ **Docs de-dup + drift cleanup:** Updated `docs/DOCUMENTATION_INDEX.md` path correctness (performance/security/guides/ViZB/email-notification canonicals), refreshed performance doc references to `docs/performance/*`, clarified error-hardening helper adoption notes, and synced this status stream + `PROJECT_STATUS_REPORT.md`.
+
+**Verification (May 3 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass (after updating verification scripts to current Supabase CLI)
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+- ✅ `npm run docs:verify-paths` — pass
+
+**Next (P0):** Complete `/ship` with scoped commit + push on `develop`, then update/create `develop -> main` PR with evidence and rollback note.
+
+**Next (P1):** Continue route-by-route performance follow-ups (public caching strategy + dashboard payload shaping) and incremental API error-envelope standardization.
+
+---
+
 ## 🚀 **Latest: `userSafeMessage` DML heuristics — curated "Failed to update/delete…" pass-through (April 25, 2026)**
 
 **UX / ROBUSTNESS (PR #264 follow-up)** — April 25, 2026
@@ -5452,7 +5528,7 @@ Use this as the active operating board. Historical sections below remain the aud
 
 ---
 
-*Last Updated: April 18, 2026*
-*Current Status: MVP Complete; PR #261 follow-ups (userSafeMessage pass-through, global-error CSS, PostGig category dedupe) on develop*
-*Codebase Rating: 9.2/10 - Production ready with stronger deployment/CI safety posture, cleaner logging discipline, and stable verification gates*
-*Next Review: Merge develop→main when green; smoke error boundaries + billing paths after deploy*
+*Last Updated: May 3, 2026*
+*Current Status: MVP Complete; full loading/error/docs audit implemented on develop with mandatory verification gates passing*
+*Codebase Rating: 9.2/10 - Production ready with stronger loading/error resilience, cleaner docs spine, and working schema/type verification gates*
+*Next Review: Complete ship + develop→main PR, then run post-merge smoke on key dashboard/error-boundary flows*

@@ -30,7 +30,7 @@
 ### Current State Analysis
 **Sentry Configuration:**
 - ✅ Traces enabled (`tracesSampleRate: 0.1` production, `1.0` dev)
-- ❌ **Web Vitals NOT explicitly enabled** (missing `browserTracingIntegration` with web vitals)
+- ✅ Web Vitals enabled (`browserTracingIntegration` in `instrumentation-client.ts`)
 - ✅ Session Replay enabled (`replaysOnErrorSampleRate: 0.1`, `replaysSessionSampleRate: 0.1`)
 - ✅ Source maps uploaded (`widenClientFileUpload: true`)
 
@@ -208,7 +208,7 @@ Start with Sentry Web Vitals instrumentation to establish baselines, then apply 
    - `app/client/dashboard/page.tsx` → Add Server Component data fetching with Suspense
    - Create `app/talent/dashboard/loading.tsx`, `app/client/dashboard/loading.tsx` for streaming UI
 
-5. **Performance ledger doc** (`docs/PERFORMANCE_BASELINE.md`):
+5. **Performance ledger doc** (`docs/performance/PERFORMANCE_BASELINE.md`):
    - Document baseline metrics (LCP, INP, CLS)
    - Track improvements per optimization
 
@@ -286,7 +286,7 @@ Add indexes and Next.js caching configs only. Keep current client-side data fetc
 
 ### Measurement & Baseline
 - ✅ **Sentry Web Vitals enabled** and reporting LCP, INP, CLS metrics
-- ✅ **Performance ledger created** (`docs/PERFORMANCE_BASELINE.md`) with baseline metrics for:
+- ✅ **Performance ledger created** (`docs/performance/PERFORMANCE_BASELINE.md`) with baseline metrics for:
   - Login page (first paint)
   - Talent Dashboard (LCP, INP, data load time)
   - Client Dashboard (LCP, INP, data load time)
@@ -300,7 +300,7 @@ Add indexes and Next.js caching configs only. Keep current client-side data fetc
 - ✅ **Supabase Performance Advisor run** and warnings addressed
 
 ### Rendering & Caching Strategy
-- ✅ **Route-by-route caching documented** (`docs/ROUTE_CACHING_STRATEGY.md`):
+- ✅ **Route-by-route caching documented** (`docs/performance/ROUTE_CACHING_STRATEGY.md`):
   - Public pages: ISR with `revalidate` (if applicable)
   - Auth pages: `dynamic: 'force-dynamic'`
   - Dashboards: `dynamic: 'force-dynamic'` (explicit, even if default)

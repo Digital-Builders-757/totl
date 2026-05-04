@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { handleAdminSetUserSuspension } from "@/lib/api/admin-set-user-suspension";
+import { logger } from "@/lib/utils/logger";
 
 export async function POST(request: Request) {
   try {
@@ -29,8 +30,9 @@ export async function POST(request: Request) {
       reason,
     });
   } catch (error) {
+    logger.error("[api/admin/set-user-suspension] request parse failed", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "We couldn't update suspension right now. Please try again." },
       { status: 500 }
     );
   }

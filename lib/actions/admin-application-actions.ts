@@ -1,7 +1,9 @@
 "use server";
 
 import "server-only";
+import { userSafeMessage } from "@/lib/errors/user-safe-message";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 type ApplicationStatus = Database["public"]["Enums"]["application_status"];
@@ -33,7 +35,19 @@ export async function adminSetApplicationStatusAction(input: {
     .update({ status: input.status })
     .eq("id", input.applicationId);
 
-  if (updateErr) return { ok: false, error: updateErr.message };
+  if (updateErr) {
+    logger.error("[admin.applications.status] failed to update application", updateErr, {
+      applicationId: input.applicationId,
+      status: input.status,
+    });
+    return {
+      ok: false,
+      error: userSafeMessage(
+        updateErr,
+        "We couldn't update this application right now. Please try again."
+      ),
+    };
+  }
 
   return { ok: true };
 }

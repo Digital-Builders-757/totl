@@ -32,6 +32,8 @@ type GigRaw = Pick<
 
 type ClientProfileLite = Pick<ClientProfileRow, "user_id" | "company_name">;
 
+const TALENT_DASHBOARD_GIGS_LIMIT = 24;
+
 // Final dashboard shapes (keeps `client_profiles` nested under gig)
 type GigWithCompany = GigRaw & {
   client_profiles: { company_name: string } | null;
@@ -91,6 +93,7 @@ export async function getTalentDashboardData(
       )
       .eq("status", "active")
       .order("created_at", { ascending: false })
+      .limit(TALENT_DASHBOARD_GIGS_LIMIT)
       .returns<GigRaw[]>(),
   ]);
 

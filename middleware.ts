@@ -18,6 +18,7 @@ import {
   needsClientAccess,
   needsTalentAccess,
 } from "@/lib/utils/route-access";
+import { logger } from "@/lib/utils/logger";
 import type { Database } from "@/types/supabase";
 
 // CookieToSet type removed: use @supabase/ssr CookieOptions instead.
@@ -154,7 +155,10 @@ export async function middleware(req: NextRequest) {
     .maybeSingle<ProfileRow>();
 
   if (profileError && profileError.code !== "PGRST116") {
-    console.error("Middleware profile query error:", profileError);
+    logger.error("[middleware] profile query error", profileError, {
+      path,
+      userId: user.id,
+    });
   }
 
   if (debugRouting) {

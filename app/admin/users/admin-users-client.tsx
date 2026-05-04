@@ -65,6 +65,7 @@ type UserProfile = {
   role: "talent" | "client" | "admin";
   display_name: string | null;
   is_suspended: boolean | null;
+  suspension_reason?: string | null;
   avatar_url: string | null;
   avatar_path: string | null;
   email_verified: boolean | null;
@@ -79,6 +80,10 @@ type UserProfile = {
     first_name: string;
     last_name: string;
   } | null;
+  career_builder_application_status?: string | null;
+  career_builder_referral_source?: string | null;
+  career_builder_invite_timestamp?: string | null;
+  career_builder_invited_by_name?: string | null;
 };
 
 function talentSubscriptionListLabel(u: UserProfile): string {
@@ -161,6 +166,37 @@ export function AdminUsersClient({
   const getUserInitial = (u: UserProfile) => {
     const name = getUserDisplayName(u);
     return name && name !== "No name" ? name.charAt(0).toUpperCase() : u.id.charAt(0).toUpperCase();
+  };
+
+  const formatOptionalDate = (value: string | null | undefined): string => {
+    if (!value) return "Not recorded";
+    const parsed = Date.parse(value);
+    if (Number.isNaN(parsed)) return "Not recorded";
+    return new Date(parsed).toLocaleDateString();
+  };
+
+  const getCareerBuilderContext = (u: UserProfile) => {
+    if (u.role !== "client") {
+      return {
+        invitedByLabel: "N/A",
+        referredByLabel: "N/A",
+        inviteDateLabel: "N/A",
+        lifecycleLabel: "N/A",
+      };
+    }
+
+    const lifecycleLabel = u.is_suspended
+      ? "Suspended (suspension is the lifecycle control for Career Builders)"
+      : u.career_builder_application_status
+        ? `Application: ${u.career_builder_application_status}`
+        : "Application status unavailable";
+
+    return {
+      invitedByLabel: u.career_builder_invited_by_name || "Self-started or unknown",
+      referredByLabel: u.career_builder_referral_source || "Not provided",
+      inviteDateLabel: formatOptionalDate(u.career_builder_invite_timestamp),
+      lifecycleLabel,
+    };
   };
 
   // Filter users based on search query and active tab
@@ -323,7 +359,9 @@ export function AdminUsersClient({
 
       setUsers((prevUsers) =>
         prevUsers.map((profile) =>
-          profile.id === userIdToSuspend ? { ...profile, is_suspended: true } : profile
+          profile.id === userIdToSuspend
+            ? { ...profile, is_suspended: true, suspension_reason: reasonToSend || null }
+            : profile
         )
       );
       setSuspendDialogOpen(false);
@@ -369,7 +407,9 @@ export function AdminUsersClient({
 
       setUsers((prevUsers) =>
         prevUsers.map((profile) =>
-          profile.id === userIdToReinstate ? { ...profile, is_suspended: false } : profile
+          profile.id === userIdToReinstate
+            ? { ...profile, is_suspended: false, suspension_reason: null }
+            : profile
         )
       );
       setReinstateDialogOpen(false);
@@ -629,6 +669,18 @@ export function AdminUsersClient({
             </DropdownMenuItem>
           </>
         )}
+        {userProfile.role === "client" && (
+          <>
+            <DropdownMenuSeparator className="bg-white/10" />
+            <DropdownMenuItem
+              disabled
+              className="flex items-center text-[var(--oklch-text-tertiary)] opacity-80"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete unavailable (suspend only)
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -673,6 +725,26 @@ export function AdminUsersClient({
                       ? talentSubscriptionListLabel(userProfile)
                       : "N/A",
                 },
+                {
+                  label: "Invited by",
+                  value: getCareerBuilderContext(userProfile).invitedByLabel,
+                },
+                {
+                  label: "Referred by",
+                  value: getCareerBuilderContext(userProfile).referredByLabel,
+                },
+                {
+                  label: "Invited",
+                  value: getCareerBuilderContext(userProfile).inviteDateLabel,
+                },
+                {
+                  label: "Lifecycle",
+                  value: getCareerBuilderContext(userProfile).lifecycleLabel,
+                },
+                {
+                  label: "Suspension reason",
+                  value: userProfile.suspension_reason || "Not provided",
+                },
                 { label: "Joined", value: new Date(userProfile.created_at).toLocaleDateString() },
               ]}
               badge={getCombinedBadges(userProfile.id, userProfile.role, userProfile.is_suspended)}
@@ -701,6 +773,9 @@ export function AdminUsersClient({
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   Joined
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
+                  Vetting Context
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-[var(--oklch-text-secondary)]">
                   User ID
@@ -732,6 +807,11 @@ export function AdminUsersClient({
                       {getRoleBadge(userProfile.role)}
                       {getSuspensionBadge(userProfile.is_suspended)}
                     </div>
+                    {userProfile.is_suspended && userProfile.suspension_reason ? (
+                      <p className="mt-1 text-xs text-amber-300" title={userProfile.suspension_reason}>
+                        Reason: {userProfile.suspension_reason}
+                      </p>
+                    ) : null}
                   </td>
                   <td className="py-4 px-6">{renderTalentSubscriptionBadge(userProfile)}</td>
                   <td className="py-4 px-6">
@@ -749,6 +829,27 @@ export function AdminUsersClient({
                   </td>
                   <td className="px-6 py-4 text-sm text-[var(--oklch-text-tertiary)]">
                     <SafeDate date={userProfile.created_at} />
+                  </td>
+                  <td className="py-4 px-6 text-xs text-[var(--oklch-text-secondary)]">
+                    {userProfile.role === "client" ? (
+                      <div className="space-y-1">
+                        <p>
+                          Invited by:{" "}
+                          <span className="text-white">{getCareerBuilderContext(userProfile).invitedByLabel}</span>
+                        </p>
+                        <p>
+                          Referred by:{" "}
+                          <span className="text-white">{getCareerBuilderContext(userProfile).referredByLabel}</span>
+                        </p>
+                        <p>
+                          Invited:{" "}
+                          <span className="text-white">{getCareerBuilderContext(userProfile).inviteDateLabel}</span>
+                        </p>
+                        <p>{getCareerBuilderContext(userProfile).lifecycleLabel}</p>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="py-4 px-6">
                     <div className="font-mono text-xs text-[var(--oklch-text-tertiary)]">{userProfile.id.slice(0, 8)}...</div>
@@ -791,6 +892,14 @@ export function AdminUsersClient({
             <AlertDescription>{loadError}</AlertDescription>
           </Alert>
         ) : null}
+
+        <Alert className="border-amber-500/30 bg-amber-500/10 text-amber-100 [&>svg]:text-amber-200">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Career Builder lifecycle policy</AlertTitle>
+          <AlertDescription>
+            Career Builder accounts are managed with suspension/reinstatement. Hard delete is intentionally unavailable for Career Builders in this workflow.
+          </AlertDescription>
+        </Alert>
 
         <div className="md:hidden">
           <MobileSummaryRow

@@ -541,7 +541,7 @@ export function PostGigClient({
                   <Label htmlFor="compensation">Compensation *</Label>
                   <Input
                     id="compensation"
-                    placeholder="e.g., $1,200, $500-$800, etc."
+                    placeholder="e.g., Paid, $1,200, Paid · $500-$800"
                     value={formData.compensation}
                     onChange={handleChange}
                     required

@@ -122,7 +122,7 @@ export async function POST(request: Request) {
   } catch (error) {
     logger.error("Error updating user role", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: "We couldn't update the role right now. Please try again." },
       { status: 500 }
     );
   }

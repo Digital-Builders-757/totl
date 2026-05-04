@@ -26,7 +26,40 @@ type ClientApplicationData = {
   businessDescription: string;
   needsDescription: string;
   website: string | null;
+  referralSource?: string | null;
 };
+
+function isMissingProvenanceColumnError(error: { message?: string } | null): boolean {
+  const message = String(error?.message ?? "");
+  return (
+    /column/i.test(message) &&
+    /(invited_by_admin_id|referral_source)/i.test(message)
+  );
+}
+
+function normalizeInviteMetadata(rawUserMetadata: unknown): {
+  invitedByAdminId: string | null;
+  inviteTimestamp: string | null;
+} {
+  const metadata =
+    rawUserMetadata && typeof rawUserMetadata === "object"
+      ? (rawUserMetadata as Record<string, unknown>)
+      : null;
+  if (!metadata) {
+    return { invitedByAdminId: null, inviteTimestamp: null };
+  }
+
+  const invitedByAdminIdRaw =
+    typeof metadata.invited_by_admin_id === "string" ? metadata.invited_by_admin_id.trim() : "";
+  const invitedByAdminId = invitedByAdminIdRaw.length > 0 ? invitedByAdminIdRaw : null;
+
+  const invitedAtRaw = typeof metadata.invited_at === "string" ? metadata.invited_at.trim() : "";
+  const invitedAtMs = invitedAtRaw ? Date.parse(invitedAtRaw) : Number.NaN;
+  const inviteTimestamp =
+    Number.isNaN(invitedAtMs) || invitedAtMs <= 0 ? null : new Date(invitedAtMs).toISOString();
+
+  return { invitedByAdminId, inviteTimestamp };
+}
 
 export async function submitClientApplication(data: ClientApplicationData) {
   const supabase = await createSupabaseServer();
@@ -76,6 +109,14 @@ export async function submitClientApplication(data: ClientApplicationData) {
       };
     }
 
+    const { invitedByAdminId, inviteTimestamp } = normalizeInviteMetadata(user.user_metadata);
+    const metadataReferral =
+      typeof user.user_metadata?.referral_source === "string"
+        ? user.user_metadata.referral_source.trim()
+        : "";
+    const requestedReferral = typeof data.referralSource === "string" ? data.referralSource.trim() : "";
+    const referralSource = requestedReferral || metadataReferral || (invitedByAdminId ? "Admin invite" : null);
+
     // Option 1 (finish-line truth): client_applications is UNIQUE(email).
     // `user_id` is optional linkage; never treat it as the uniqueness key.
     const canonicalEmail = user.email.trim().toLowerCase();
@@ -104,9 +145,35 @@ export async function submitClientApplication(data: ClientApplicationData) {
       });
       if (existing.status === "rejected") {
         // Allow re-apply by updating the same row (keeps UNIQUE(email) truth intact).
-        const { error: updateError } = await supabase
+        const updatePayload: Database["public"]["Tables"]["client_applications"]["Update"] & {
+          invited_by_admin_id?: string | null;
+          referral_source?: string | null;
+        } = {
+          user_id: user.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          company_name: data.companyName,
+          email: canonicalEmail,
+          phone: data.phone,
+          industry: data.industry,
+          business_description: data.businessDescription,
+          needs_description: data.needsDescription,
+          website: data.website,
+          status: "pending",
+          admin_notes: null,
+          follow_up_sent_at: null,
+          updated_at: new Date().toISOString(),
+          invited_by_admin_id: invitedByAdminId,
+          referral_source: referralSource,
+        };
+
+        let { error: updateError } = await supabase
           .from("client_applications")
-          .update({
+          .update(updatePayload)
+          .eq("id", existing.id);
+
+        if (updateError && isMissingProvenanceColumnError(updateError)) {
+          const retryPayload: Database["public"]["Tables"]["client_applications"]["Update"] = {
             user_id: user.id,
             first_name: data.firstName,
             last_name: data.lastName,
@@ -121,8 +188,13 @@ export async function submitClientApplication(data: ClientApplicationData) {
             admin_notes: null,
             follow_up_sent_at: null,
             updated_at: new Date().toISOString(),
-          })
-          .eq("id", existing.id);
+          };
+          const retry = await supabase
+            .from("client_applications")
+            .update(retryPayload)
+            .eq("id", existing.id);
+          updateError = retry.error;
+        }
 
         if (updateError) {
           logger.error("[client-apply] rejected application update failed", updateError, {
@@ -151,25 +223,53 @@ export async function submitClientApplication(data: ClientApplicationData) {
     }
 
     // Insert the application into the client_applications table
-    const { data: application, error } = await supabase
+    const insertPayload: Database["public"]["Tables"]["client_applications"]["Insert"] & {
+      invited_by_admin_id?: string | null;
+      referral_source?: string | null;
+    } = {
+      user_id: user.id,
+      first_name: data.firstName,
+      last_name: data.lastName,
+      company_name: data.companyName,
+      email: canonicalEmail,
+      phone: data.phone,
+      industry: data.industry,
+      business_description: data.businessDescription,
+      needs_description: data.needsDescription,
+      website: data.website,
+      status: "pending",
+      invited_by_admin_id: invitedByAdminId,
+      referral_source: referralSource,
+    };
+
+    let { data: application, error } = await supabase
       .from("client_applications")
-      .insert([
-        {
-          user_id: user.id,
-          first_name: data.firstName,
-          last_name: data.lastName,
-          company_name: data.companyName,
-          email: canonicalEmail,
-          phone: data.phone,
-          industry: data.industry,
-          business_description: data.businessDescription,
-          needs_description: data.needsDescription,
-          website: data.website,
-          status: "pending",
-        },
-      ])
+      .insert([insertPayload])
       .select("id, created_at")
       .single();
+
+    if (error && isMissingProvenanceColumnError(error)) {
+      const retryPayload: Database["public"]["Tables"]["client_applications"]["Insert"] = {
+        user_id: user.id,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        company_name: data.companyName,
+        email: canonicalEmail,
+        phone: data.phone,
+        industry: data.industry,
+        business_description: data.businessDescription,
+        needs_description: data.needsDescription,
+        website: data.website,
+        status: "pending",
+      };
+      const retry = await supabase
+        .from("client_applications")
+        .insert([retryPayload])
+        .select("id, created_at")
+        .single();
+      application = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       logger.error("[client-apply] insert failed", error, {
@@ -182,10 +282,22 @@ export async function submitClientApplication(data: ClientApplicationData) {
       };
     }
 
+    if (!application) {
+      logger.error("[client-apply] insert returned no application row", null, {
+        traceId,
+        userId: user.id,
+        canonicalEmail,
+      });
+      return { error: "We couldn’t submit your application. Please try again." };
+    }
+
     logger.info("[client-apply] insert succeeded", {
       traceId,
       userId: user.id,
       applicationId: application.id,
+      invitedByAdminId,
+      inviteTimestamp,
+      referralSource,
     });
 
     // Send email notifications

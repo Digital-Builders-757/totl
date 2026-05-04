@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRight, Briefcase, CheckCircle2, Clock3, Search, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 
@@ -37,6 +35,14 @@ const statHighlights = [
   { value: "1K+", label: "Projects completed" },
   { value: "50+", label: "Cities covered" },
   { value: "4.9", label: "Average satisfaction" },
+];
+
+const trustPillars = [
+  "Invite-led marketplace",
+  "On-platform collaboration",
+  "Role-based access controls",
+  "Agency-grade review workflow",
+  "Clean booking pipeline",
 ];
 
 export function HomePageClient({ featuredGigs }: { featuredGigs: HomeFeaturedGig[] }) {
@@ -83,6 +89,22 @@ export function HomePageClient({ featuredGigs }: { featuredGigs: HomeFeaturedGig
                       Explore the system
                     </Button>
                   </Link>
+                </div>
+
+                <div className="panel-frosted card-backlit rounded-2xl border border-white/10 p-4 sm:p-5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--totl-text-soft)]">
+                    Why teams switch to TOTL
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {trustPillars.map((pillar) => (
+                      <span
+                        key={pillar}
+                        className="hero-trust-chip rounded-full border border-white/12 bg-white/[0.06] px-3 py-1.5 text-xs text-white/90"
+                      >
+                        {pillar}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3">
@@ -137,6 +159,13 @@ export function HomePageClient({ featuredGigs }: { featuredGigs: HomeFeaturedGig
                   <p className="mt-2 text-sm leading-6 text-[var(--totl-text-soft)]">
                     Discovery, review, and booking all stay inside one premium operating layer.
                   </p>
+                </div>
+
+                <div className="panel-frosted card-backlit absolute -top-5 right-6 hidden rounded-2xl border border-white/12 px-4 py-3 lg:block">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--totl-text-soft)]">
+                    Average satisfaction
+                  </p>
+                  <p className="mt-1 text-2xl font-semibold text-white">4.9/5</p>
                 </div>
               </div>
             </div>
