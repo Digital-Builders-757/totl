@@ -26,6 +26,7 @@ import { useState, useEffect, useCallback, Suspense, useRef } from "react";
 import { ApplicationDetailsModal } from "@/components/application-details-modal";
 import { useAuth } from "@/components/auth/auth-provider";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
+import { TalentDashboardSkeleton } from "@/components/dashboard/talent-dashboard-skeleton";
 import { GigCard } from "@/components/gigs/gig-card";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
 import { PageHeader } from "@/components/layout/page-header";
@@ -1779,13 +1780,7 @@ export function DashboardClient({
   disableClientFetch?: boolean;
 }) {
   return (
-    <Suspense
-      fallback={
-        <PageShell className="grain-texture glow-backplate text-white" containerClassName="flex min-h-[70vh] items-center justify-center py-8">
-          <p className="text-xl text-[var(--oklch-text-primary)]">Loading...</p>
-        </PageShell>
-      }
-    >
+    <Suspense fallback={<TalentDashboardSkeleton />}>
       <TalentDashboardContent initialData={initialData} disableClientFetch={disableClientFetch} />
     </Suspense>
   );

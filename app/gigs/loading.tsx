@@ -1,11 +1,21 @@
 import { GigCardSkeleton } from "@/components/ui/image-skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TotlBrandLoadingRibbon } from "@/components/ui/totl-brand-loading";
 
 export default function Loading() {
   return (
     <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient pt-40">
       <div className="container mx-auto px-4 py-10 sm:py-12">
         <div className="mx-auto max-w-6xl">
+          <div className="mb-8 px-2 sm:px-0">
+            <TotlBrandLoadingRibbon
+              compact
+              eyebrow="Opportunities"
+              footline="Indexing opportunities…"
+              className="max-w-xl"
+            />
+          </div>
+
           {/* Breadcrumb skeleton */}
           <div className="mb-6 flex items-center gap-3 px-2 sm:mb-8 sm:px-0">
             <Skeleton className="h-4 w-16" />

@@ -1,10 +1,18 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { TotlBrandLoadingRibbon } from "@/components/ui/totl-brand-loading";
 
 export default function GigDetailLoading() {
   return (
     <div className="min-h-screen bg-[var(--oklch-bg)] page-ambient pt-40">
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-4xl space-y-6">
+          <TotlBrandLoadingRibbon
+            compact
+            eyebrow="Opportunity"
+            footline="Loading brief…"
+            className="max-w-lg"
+          />
+
           {/* Back link skeleton */}
           <Skeleton className="h-5 w-24" />
 

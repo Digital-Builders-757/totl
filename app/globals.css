@@ -948,6 +948,87 @@
   }
 }
 
+/* Brand loading: indeterminate rail + warm veil (see components/ui/totl-brand-loading.tsx) */
+@keyframes totl-loading-rail-shift {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateX(320%);
+    opacity: 0.45;
+  }
+}
+
+.totl-brand-loading-rail__bar {
+  width: 42%;
+  background: linear-gradient(
+    90deg,
+    rgba(251, 191, 129, 0.28),
+    rgba(196, 181, 253, 0.95),
+    rgba(253, 230, 138, 0.32)
+  );
+  animation: totl-loading-rail-shift 2.1s ease-in-out infinite;
+}
+
+.totl-brand-loading-warm-veil {
+  opacity: 0.82;
+  background:
+    radial-gradient(ellipse 80% 52% at 50% -8%, rgba(251, 191, 129, 0.09), transparent 58%),
+    radial-gradient(ellipse 55% 40% at 86% 18%, rgba(167, 139, 250, 0.08), transparent 55%),
+    radial-gradient(ellipse 60% 45% at 10% 22%, rgba(148, 197, 255, 0.055), transparent 52%);
+}
+
+/**
+ * Editorial hero canopy — section-sized wash (pairs with TotlEditorialSection).
+ * Stays inside overflow-hidden ancestors; opacity-only drift when motion OK.
+ */
+.totl-editorial-canopy {
+  position: relative;
+  isolation: isolate;
+}
+
+.totl-editorial-canopy > * {
+  position: relative;
+  z-index: 1;
+}
+
+.totl-editorial-canopy::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0 auto auto 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: min(28rem, 58%);
+  max-height: min(480px, 70vh);
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    radial-gradient(ellipse 88% 100% at 50% -2%, rgba(255, 255, 255, 0.07), transparent 56%),
+    radial-gradient(ellipse 52% 70% at 10% 0%, rgba(186, 167, 255, 0.08), transparent 54%),
+    radial-gradient(ellipse 48% 65% at 92% -4%, rgba(253, 230, 138, 0.042), transparent 52%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .totl-editorial-canopy::before {
+    animation: totl-editorial-canopy-breathe 15s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes totl-editorial-canopy-breathe {
+  0% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0.64;
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease-out;
 }
@@ -2010,7 +2091,18 @@ label {
   .animate-checkmark {
     animation: none !important;
   }
-  
+
+  .totl-brand-loading-rail__bar {
+    animation: none !important;
+    transform: translateX(70%);
+    opacity: 0.88;
+  }
+
+  .totl-editorial-canopy::before {
+    animation: none !important;
+    opacity: 0.52;
+  }
+
   /* Keep functional transitions only */
   .hover-transition,
   .hover-scale,

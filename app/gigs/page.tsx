@@ -12,6 +12,7 @@ import { SavedSearchesBar } from "@/components/gigs/saved-searches-bar";
 import { PageShell } from "@/components/layout/page-shell";
 import { SubscriptionPrompt } from "@/components/subscription-prompt";
 import { Button } from "@/components/ui/button";
+import { TotlEditorialSection } from "@/components/ui/totl-editorial-section";
 import { getCategoryFilterSet } from "@/lib/constants/gig-categories";
 import { GIGS_SORT_OPTIONS, type GigsSortValue } from "@/lib/constants/gigs-sort";
 import { getPayRangeBounds, type PayRangeValue } from "@/lib/constants/pay-range-filter";
@@ -394,7 +395,7 @@ export default async function GigsPage({
             </div>
           </div>
 
-          <div className="mb-6 sm:mb-10 text-left md:text-center px-4 sm:px-0">
+          <TotlEditorialSection className="relative mb-8 sm:mb-11 px-4 pb-8 text-left sm:px-0 sm:pb-10 md:text-center">
             <div className="panel-frosted w-fit mx-0 md:mx-auto mb-4 sm:mb-6 px-4 sm:px-6 py-2 sm:py-3">
               <span className="text-white font-medium text-xs sm:text-sm">Active Opportunities</span>
             </div>
@@ -405,7 +406,7 @@ export default async function GigsPage({
               Browse available opportunities and filter by opportunity type, location, and compensation
               to find the right fit for your next booking.
             </p>
-          </div>
+          </TotlEditorialSection>
 
           {/* Subscription Prompt for talent users */}
           {shouldShowSubscriptionPrompt(profile) && (

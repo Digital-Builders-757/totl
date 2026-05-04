@@ -6,6 +6,7 @@ import { PostGigFooterLink } from "@/components/post-gig-footer-link";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
 import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
+import { TotlEditorialSection } from "@/components/ui/totl-editorial-section";
 import { TotlSectionDivider } from "@/components/ui/totl-section-divider";
 import type { HomeFeaturedGig } from "@/lib/home-featured-gigs";
 
@@ -49,7 +50,7 @@ export function HomePageClient({ featuredGigs }: { featuredGigs: HomeFeaturedGig
   return (
     <TotlAtmosphereShell className="text-white">
       <main className="relative">
-        <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
+        <TotlEditorialSection className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
           <div className="container mx-auto px-4 pb-16 sm:px-6 sm:pb-20 lg:px-8 lg:pb-24">
             <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(420px,0.9fr)] lg:gap-16">
               <div className="max-w-2xl space-y-8">
@@ -170,7 +171,7 @@ export function HomePageClient({ featuredGigs }: { featuredGigs: HomeFeaturedGig
               </div>
             </div>
           </div>
-        </section>
+        </TotlEditorialSection>
 
         <TotlSectionDivider variant="hero" />
 

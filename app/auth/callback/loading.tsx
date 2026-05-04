@@ -1,16 +1,12 @@
-import { PageShell } from "@/components/layout/page-shell";
+import { AuthLoadingShell } from "@/components/layout/auth-loading-shell";
 import { SectionCard } from "@/components/layout/section-card";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FloatingPathsBackground } from "@/components/ui/floating-paths-background";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AuthCallbackLoading() {
   return (
-    <PageShell fullBleed className="grain-texture glow-backplate relative overflow-x-hidden text-white">
-      <FloatingPathsBackground opacity={0.08} color="white" />
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-white/5 via-transparent to-white/5 opacity-40" />
-
-      <div className="relative z-10 flex min-h-[60vh] items-center justify-center p-4">
+    <AuthLoadingShell ribbonFootline="Verifying credentials…">
+      <div className="flex min-h-[52vh] items-center justify-center p-4 pt-2">
         <SectionCard className="w-full max-w-md" paddingClassName="p-6 sm:p-8">
           <CardHeader className="p-0 pb-4">
             <CardTitle className="text-center text-white">Email Verification</CardTitle>
@@ -24,6 +20,6 @@ export default function AuthCallbackLoading() {
           </div>
         </SectionCard>
       </div>
-    </PageShell>
+    </AuthLoadingShell>
   );
 }

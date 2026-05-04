@@ -1,11 +1,19 @@
 import { PageShell } from "@/components/layout/page-shell";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TotlBrandLoadingRibbon } from "@/components/ui/totl-brand-loading";
 
 export function ClientDashboardSkeleton() {
   return (
-    <PageShell ambientTone="lifted" topPadding={false} fullBleed>
+    <PageShell ambientTone="lifted" topPadding={false} fullBleed routeRole="client">
       <div className="container mx-auto px-4 py-3 sm:px-6 sm:py-6 lg:px-8">
         <div className="mx-auto w-full max-w-6xl space-y-8">
+          <TotlBrandLoadingRibbon
+            compact
+            eyebrow="Career Builder"
+            footline="Composing your pipeline…"
+            className="max-w-xl pb-2"
+          />
+
           {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-2">

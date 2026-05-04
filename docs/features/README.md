@@ -1,12 +1,12 @@
 # Features Docs Index
 
-**Date:** March 9, 2026  
+**Date:** May 3, 2026  
 **Status:** ✅ ACTIVE  
 **Purpose:** Provide a navigable entry point for feature implementation docs, PR summaries, UI contracts, and product-specific execution notes.
 
 ## Start Here
 
-- `UI_VISUAL_LANGUAGE.md` - design language and visual system guidance
+- `UI_VISUAL_LANGUAGE.md` — design language, layout shells (**`TotlEditorialSection`**, **`TotlBrandLoading*`**, **`AuthLoadingShell`**), loaders
 - `UI_LAYOUT_CONTRACT.md` - layout and shell contract
 - `STATUS_BADGE_SYSTEM.md` - badge language and variants
 - `CLIENT_ACCOUNT_FLOW_PRD.md` - client account flow product definition
