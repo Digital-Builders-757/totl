@@ -45,6 +45,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 | `docs/diagrams/` | Architecture diagrams and visual documentation (`diagrams/README.md`) |
 | `docs/tests/` | Test documentation and matrices (`tests/README.md`) |
 | `docs/plans/` | Design plans and implementation summaries (`plans/README.md`) |
+| `docs/work-orders/` | TOTL backlog queue (`work-orders/README.md`) |
 | `docs/runbooks/` | Operational runbooks (one-off production procedures, data hygiene) |
 | `supabase/diagnostics/` | **SQL-only** read-only audits for ops (e.g. `auth-user-delete-fk-audit.sql` when `auth.admin.deleteUser` fails) |
 | `docs/archive/` | Historical / superseded documentation (`archive/README.md`) |

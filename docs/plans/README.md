@@ -16,6 +16,7 @@ Plans document **design decisions and implementation approaches** for targeted w
 
 ## Start here
 
+- `TOTL_CATCHUP_ROADMAP.md` — Current execution order for the next TOTL improvement batches
 - `STRIPE_WEBHOOK_ORPHANED_CUSTOMER_PLAN.md` — Design plan for orphaned Stripe webhook events
 - `STRIPE_WEBHOOK_ORPHANED_CUSTOMER_IMPLEMENTATION.md` — Implementation summary for orphaned customer handling
 
