@@ -1,10 +1,13 @@
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { TalentProfileClient } from "./talent-profile-client";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { SafeImage } from "@/components/ui/safe-image";
+import { PATHS } from "@/lib/constants/routes";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import { createNameSlug, parseSlug } from "@/lib/utils/slug";
@@ -77,6 +80,24 @@ function normalizeToStringArray(value: string[] | string | null | undefined): st
     }
   }
   return [];
+}
+
+function compCardQuickStats(talent: PublicTalentProfile): { label: string; value: string }[] {
+  const out: { label: string; value: string }[] = [];
+  if (talent.height) out.push({ label: "Height", value: talent.height });
+  if (talent.weight) out.push({ label: "Weight", value: `${talent.weight} lbs` });
+  if (talent.bust && talent.waist && talent.hips) {
+    out.push({
+      label: "Bust · waist · hips",
+      value: `${talent.bust} · ${talent.waist} · ${talent.hips}`,
+    });
+  }
+  if (talent.suit) out.push({ label: "Suit", value: talent.suit });
+  if (talent.shoe_size) out.push({ label: "Shoe", value: talent.shoe_size });
+  if (talent.measurements && !(talent.bust && talent.waist && talent.hips)) {
+    out.push({ label: "Measurements", value: talent.measurements });
+  }
+  return out.slice(0, 6);
 }
 
 // Public talent profile page - dynamic rendering required due to createSupabaseServer() / cookies()
@@ -260,117 +281,140 @@ export default async function TalentProfilePage({ params }: TalentProfilePagePro
     notFound();
   }
 
+  const quickStats = compCardQuickStats(talent);
+  const displayLocation = talent.location?.trim() || null;
+
   return (
-    <div className="min-h-screen bg-seamless-primary">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Link href="/">
-            <Button
-              variant="outline"
-              className="flex items-center border-border/50 bg-card/20 text-foreground hover:bg-card/30"
+    <PageShell ambientTone="lifted" containerClassName="max-w-4xl py-5 sm:py-8">
+      <PageHeader
+        title={`${talent.first_name} ${talent.last_name}`}
+        subtitle={
+          displayLocation
+            ? displayLocation
+            : "TOTL talent profile — book through the platform."
+        }
+        breadcrumbs={
+          <>
+            <Link
+              href={PATHS.HOME}
+              className="transition-colors hover:text-[var(--oklch-text-primary)]"
             >
+              Home
+            </Link>
+            <span className="text-[var(--oklch-text-tertiary)]">→</span>
+            <span className="text-[var(--oklch-text-secondary)]">Talent</span>
+          </>
+        }
+        actions={
+          <Button variant="outline" size="sm" asChild>
+            <Link href={PATHS.HOME} className="inline-flex items-center">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
+              Back to home
+            </Link>
+          </Button>
+        }
+        className="mb-6 sm:mb-8"
+      />
+
+      <div className="overflow-hidden rounded-xl border border-white/10 shadow-lg panel-frosted card-backlit">
+        <div className="relative aspect-16-9 sm:aspect-3-4 md:aspect-16-9 lg:h-96">
+          <SafeImage
+            src={
+              talent.portfolio_url &&
+              !talent.portfolio_url.includes("youtube.com") &&
+              !talent.portfolio_url.includes("youtu.be")
+                ? talent.portfolio_url
+                : "https://picsum.photos/800/400"
+            }
+            alt={`${talent.first_name} ${talent.last_name}`}
+            fill
+            className="object-cover"
+            context="talent-profile-header"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" aria-hidden />
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="overflow-hidden rounded-xl border border-border/40 shadow-lg panel-frosted card-backlit">
-            {/* Header Section */}
-            <div className="relative aspect-16-9 sm:aspect-3-4 md:aspect-16-9 lg:h-96">
-              <SafeImage
-                src={
-                  talent.portfolio_url &&
-                  !talent.portfolio_url.includes("youtube.com") &&
-                  !talent.portfolio_url.includes("youtu.be")
-                    ? talent.portfolio_url
-                    : "https://picsum.photos/800/400"
-                }
-                alt={`${talent.first_name} ${talent.last_name}`}
-                fill
-                className="object-cover"
-                context="talent-profile-header"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
-              <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6">
-                <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-bold mb-2 line-clamp-2">
-                  {talent.first_name} {talent.last_name}
-                </h1>
-                {talent.location && (
-                  <div className="flex items-center text-gray-300 text-sm sm:text-base">
-                    <MapPin className="mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <span className="line-clamp-1">{talent.location}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Content Section */}
-            <div className="bg-[var(--oklch-bg)]/92 p-4 sm:p-6 md:p-8">
-              <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
-                {/* Main Content */}
-                <div className="lg:col-span-2">
-                  {/* About Section */}
-                  <div className="mb-8">
-                    <h2 className="mb-4 text-2xl font-bold text-foreground">About</h2>
-                    <p className="leading-relaxed text-muted-foreground">
-                      {talent.experience || "No experience details provided."}
-                    </p>
-                  </div>
-
-                  {/* Specialties */}
-                  {(() => {
-                    const specialtiesArray = normalizeToStringArray(talent.specialties);
-                    if (specialtiesArray.length === 0) return null;
-                    return (
-                      <div className="mb-8">
-                        <h2 className="mb-4 text-2xl font-bold text-foreground">Specialties</h2>
-                        <div className="flex flex-wrap gap-2">
-                          {specialtiesArray.map((specialty, index) => (
-                            <span
-                              key={index}
-                              className="rounded-full border border-border/50 bg-card/40 px-3 py-1 text-sm font-medium text-foreground"
-                            >
-                              {specialty}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Languages */}
-                  {(() => {
-                    const languagesArray = normalizeToStringArray(talent.languages);
-                    if (languagesArray.length === 0) return null;
-                    return (
-                      <div className="mb-8">
-                        <h2 className="mb-4 text-2xl font-bold text-foreground">Languages</h2>
-                        <div className="flex flex-wrap gap-2">
-                          {languagesArray.map((language, index) => (
-                            <span
-                              key={index}
-                              className="rounded-full border border-border/50 bg-card/40 px-3 py-1 text-sm font-medium text-foreground"
-                            >
-                              {language}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
+        {quickStats.length > 0 ? (
+          <div className="border-b border-white/10 bg-gradient-to-r from-black/55 via-black/40 to-black/30 px-4 py-4 sm:px-6">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60">
+              At a glance
+            </p>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3 lg:grid-cols-6">
+              {quickStats.map((row) => (
+                <div key={row.label} className="min-w-0">
+                  <dt className="text-[11px] text-white/55">{row.label}</dt>
+                  <dd className="truncate text-sm font-medium text-white">{row.value}</dd>
                 </div>
+              ))}
+            </dl>
+          </div>
+        ) : null}
 
-                {/* Sidebar - Client component handles authentication logic */}
-                <TalentProfileClient talent={talent} />
+        <div className="bg-[var(--oklch-bg)]/92 p-4 sm:p-6 md:p-8">
+          <div className="grid grid-cols-1 gap-6 md:gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <div className="mb-8">
+                <h2 className="mb-2 text-xl font-bold tracking-tight text-[var(--oklch-text-primary)] sm:text-2xl">
+                  Bio
+                </h2>
+                <p className="text-sm text-[var(--oklch-text-secondary)]">
+                  Narrative from this talent&apos;s TOTL profile.
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[var(--oklch-text-secondary)] sm:text-base">
+                  {talent.experience || "No experience details provided."}
+                </p>
               </div>
+
+              {(() => {
+                const specialtiesArray = normalizeToStringArray(talent.specialties);
+                if (specialtiesArray.length === 0) return null;
+                return (
+                  <div className="mb-8">
+                    <h2 className="mb-4 text-xl font-bold tracking-tight text-[var(--oklch-text-primary)] sm:text-2xl">
+                      Specialties
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {specialtiesArray.map((specialty, index) => (
+                        <span
+                          key={index}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-[var(--oklch-text-primary)]"
+                        >
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {(() => {
+                const languagesArray = normalizeToStringArray(talent.languages);
+                if (languagesArray.length === 0) return null;
+                return (
+                  <div className="mb-8">
+                    <h2 className="mb-4 text-xl font-bold tracking-tight text-[var(--oklch-text-primary)] sm:text-2xl">
+                      Languages
+                    </h2>
+                    <div className="flex flex-wrap gap-2">
+                      {languagesArray.map((language, index) => (
+                        <span
+                          key={index}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm font-medium text-[var(--oklch-text-primary)]"
+                        >
+                          {language}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
+
+            <TalentProfileClient talent={talent} />
           </div>
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
 

@@ -206,6 +206,8 @@ Based on `docs/TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md`, you are currently in:
 
 ## 🎯 Immediate Next Steps (Priority Order)
 
+The current catch-up queue lives in `docs/plans/TOTL_CATCHUP_ROADMAP.md` and `docs/work-orders/README.md`.
+
 ### **Priority 0: Critical Fixes (P0)**
 1. **Onboarding spine polish** - Verify BootState routing in preview/prod
 2. **Playwright admin test helper env** - Fix SUPABASE_SERVICE_ROLE_KEY alignment

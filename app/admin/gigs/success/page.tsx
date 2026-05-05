@@ -4,9 +4,9 @@ import { CheckCircle, Clock, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { PageShell } from "@/components/layout/page-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function GigSuccessPage() {
@@ -24,31 +24,32 @@ export default function GigSuccessPage() {
 
   if (!gigId) {
     return (
-      <TotlAtmosphereShell ambientTone="lifted" className="min-h-screen text-[var(--oklch-text-primary)]">
-        <div className="container mx-auto px-4 py-12">
-          <div className="mx-auto max-w-lg text-center">
-            <div className="panel-frosted card-backlit rounded-2xl border border-white/10 bg-[var(--totl-surface-glass-strong)] p-8">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15">
-                <Clock className="h-8 w-8 text-red-400" />
-              </div>
-              <h2 className="text-2xl font-semibold text-white">Invalid Gig ID</h2>
-              <p className="mt-2 text-[var(--oklch-text-secondary)]">
-                No gig ID provided. Please submit an opportunity first.
-              </p>
-              <Button asChild className="mt-6">
-                <Link href="/post-gig">Create New Gig</Link>
-              </Button>
+      <PageShell
+        ambientTone="lifted"
+        routeRole="admin"
+        containerClassName="py-10 sm:py-12 lg:py-16"
+      >
+        <div className="mx-auto max-w-lg text-center">
+          <div className="panel-frosted card-backlit rounded-2xl border border-white/10 bg-[var(--totl-surface-glass-strong)] p-6 sm:p-8">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15">
+              <Clock className="h-8 w-8 text-red-400" />
             </div>
+            <h2 className="text-xl font-semibold text-white sm:text-2xl">Invalid Gig ID</h2>
+            <p className="mt-2 text-sm text-[var(--oklch-text-secondary)] sm:text-base">
+              No gig ID provided. Please submit an opportunity first.
+            </p>
+            <Button asChild className="mt-6">
+              <Link href="/post-gig">Create New Gig</Link>
+            </Button>
           </div>
         </div>
-      </TotlAtmosphereShell>
+      </PageShell>
     );
   }
 
   return (
-    <TotlAtmosphereShell ambientTone="lifted" className="min-h-screen text-[var(--oklch-text-primary)]">
-      <div className="container mx-auto px-4 py-10 sm:py-12">
-        <div className="mx-auto max-w-2xl space-y-8">
+    <PageShell ambientTone="lifted" routeRole="admin" containerClassName="py-10 sm:py-12 lg:py-16">
+      <div className="mx-auto max-w-2xl space-y-8">
           <div className="panel-frosted card-backlit rounded-2xl border border-white/10 bg-[var(--totl-surface-glass-strong)] p-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-500/15">
               <CheckCircle className="h-8 w-8 text-green-400" />
@@ -86,16 +87,15 @@ export default function GigSuccessPage() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <Button asChild variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
-              <Link href="/admin/dashboard">Go to Dashboard</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/post-gig">Create Another Gig</Link>
-            </Button>
-          </div>
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <Button asChild variant="outline" className="border-white/10 bg-white/5 text-white hover:bg-white/10">
+            <Link href="/admin/dashboard">Go to Dashboard</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/post-gig">Create Another Gig</Link>
+          </Button>
         </div>
       </div>
-    </TotlAtmosphereShell>
+    </PageShell>
   );
 }

@@ -11,10 +11,10 @@ import { FiltersSheet } from "@/components/dashboard/filters-sheet";
 import { MobileSummaryRow } from "@/components/dashboard/mobile-summary-row";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { getClientApplications } from "@/lib/actions/client-applications-actions";
 
 const AcceptApplicationDialog = dynamic(
@@ -204,7 +204,7 @@ export default function ClientApplicationsClient({
     `/talent/${application.talent_id}`;
 
   return (
-    <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+    <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
       <ClientTerminalHeader
         title="Applications"
         subtitle="Review and manage talent applications for your opportunities"
@@ -216,19 +216,9 @@ export default function ClientApplicationsClient({
         mobileSecondaryAction={<SecondaryActionLink href="/client/gigs">My opportunities →</SecondaryActionLink>}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
-        <div className="mb-4 md:mb-8 md:hidden">
-          <details>
-            <summary className="cursor-pointer list-none text-sm font-medium text-[var(--oklch-text-secondary)]">
-              <span className="inline-flex items-center gap-2">
-                Show stats
-                <span className="text-xs text-[var(--oklch-text-tertiary)]">({applications.length} total)</span>
-              </span>
-            </summary>
-            <div className="mt-2">
-              <MobileSummaryRow items={summaryItems} />
-            </div>
-          </details>
+      <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
+        <div className="mb-4 md:hidden">
+          <MobileSummaryRow items={summaryItems} />
         </div>
 
         <div className="mb-8 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-4">
@@ -486,6 +476,6 @@ export default function ClientApplicationsClient({
           />
         </>
       )}
-    </TotlAtmosphereShell>
+    </PageShell>
   );
 }
