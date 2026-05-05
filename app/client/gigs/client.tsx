@@ -12,11 +12,11 @@ import useSWR from "swr";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { getClientGigs, type ClientGig } from "@/lib/actions/client-gigs-actions";
 import { userSafeMessage } from "@/lib/errors/user-safe-message";
 
@@ -113,7 +113,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
   // Show error state if Supabase is not configured
   if (error) {
     return (
-      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+      <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
         <div className="flex min-h-[100dvh] items-center justify-center px-4">
           <div className="panel-frosted card-backlit max-w-md rounded-2xl p-8 text-center">
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
@@ -124,13 +124,13 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
             <Button onClick={() => mutate()}>Try Again</Button>
           </div>
         </div>
-      </TotlAtmosphereShell>
+      </PageShell>
     );
   }
 
   if (isLoading) {
     return (
-      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+      <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
         <div className="px-4 py-8">
           <div className="mx-auto w-full max-w-6xl space-y-6">
             <div className="space-y-3">
@@ -146,12 +146,12 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
             <Skeleton className="h-[460px] w-full rounded-xl bg-muted/35" />
           </div>
         </div>
-      </TotlAtmosphereShell>
+      </PageShell>
     );
   }
 
   return (
-    <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+    <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
       <ClientTerminalHeader
         title="My Opportunities"
         subtitle="Manage your posted opportunities and track applications"
@@ -166,7 +166,7 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
         mobileSecondaryAction={<SecondaryActionLink href="/client/post-gig">Post new opportunity →</SecondaryActionLink>}
       />
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
+      <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <GigsStatsOverview
           totalGigs={gigs.length}
           activeCount={statusCounts.active}
@@ -227,6 +227,6 @@ export default function ClientGigsClient({ userId, initialGigs }: ClientGigsClie
           </TabsContent>
         </Tabs>
       </div>
-    </TotlAtmosphereShell>
+    </PageShell>
   );
 }

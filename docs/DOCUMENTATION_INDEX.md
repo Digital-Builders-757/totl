@@ -1,6 +1,6 @@
 # TOTL Agency — Documentation Spine (3-Layer Source of Truth)
 
-**Last Updated:** May 3, 2026 — Doc spine refreshed (editorial canopy + branded loading primitives; staleness cues on indices). Source of truth: `features/UI_VISUAL_LANGUAGE.md`, `UI_IMPLEMENTATION_INDEX.md`, `components/layout/*`, `components/ui/*`.
+**Last Updated:** May 5, 2026 — PageShell interior pattern noted for client/admin (`features/UI_VISUAL_LANGUAGE.md`). Source of truth: `features/UI_VISUAL_LANGUAGE.md`, `UI_IMPLEMENTATION_INDEX.md`, `components/layout/*`, `components/ui/*`.
 
 This document defines the **single, strict documentation spine** for TOTL Agency. Everything else is **reference** or **archive**.
 
@@ -164,7 +164,7 @@ All other documentation has been organized into the `docs/` folder with the foll
 - `STATUS_BADGE_SYSTEM.md` - 🎨 **NEW** - Comprehensive status badge system with 25+ variants (Nov 2025)
 - `UI_LAYOUT_CONTRACT.md` - 🎨 **NEW** - Canonical Terminal Kit (PageShell/PageHeader/SectionCard/DataTableShell) + mobile safety rules (Dec 2025)
 - `TOTL_ENHANCEMENT_IMPLEMENTATION_PLAN.md` - 🚀 **NEW** - Comprehensive enhancement roadmap for "sellable for millions" marketplace (Jan 2025)
-- `UI_VISUAL_LANGUAGE.md` - 🎨 **CANONICAL** — Design system + layout shells (**`TotlEditorialSection`**, **`TotlBrandLoading*`**, **`AuthLoadingShell`**) — refreshed May 2026
+- `UI_VISUAL_LANGUAGE.md` - 🎨 **CANONICAL** — Design system + layout shells (**`PageShell`** interior convention, **`TotlEditorialSection`**, **`TotlBrandLoading*`**, **`AuthLoadingShell`**) — refreshed May 2026
 - `BOOKING_FLOW_IMPLEMENTATION.md` - Booking workflow implementation
 - `PORTFOLIO_GALLERY_IMPLEMENTATION.md` - Portfolio gallery (current behavior; see also `contracts/PORTFOLIO_UPLOADS_CONTRACT.md`)
 - `guides/OPPORTUNITY_IMAGE_SPECS.md` - Opportunity cover image dimensions (1200×900 px, 4:3) for flyers

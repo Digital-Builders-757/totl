@@ -1,6 +1,5 @@
 import { redirect, notFound } from "next/navigation";
 import { AdminApplicationDetailClient } from "./admin-application-detail-client";
-import { AdminHeader } from "@/components/admin/admin-header";
 import { createSupabaseServer } from "@/lib/supabase/supabase-server";
 import { logger } from "@/lib/utils/logger";
 import { type ProfileRow } from "@/types/database-helpers";
@@ -148,11 +147,6 @@ export default async function AdminApplicationDetailPage({
     notFound();
   }
 
-  return (
-    <>
-      <AdminHeader user={user} />
-      <AdminApplicationDetailClient application={applicationWithDetails} user={user} />
-    </>
-  );
+  return <AdminApplicationDetailClient application={applicationWithDetails} user={user} />;
 }
 

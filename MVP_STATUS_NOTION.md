@@ -8,6 +8,26 @@
 
 # 🎉 CURRENT STATUS: MVP COMPLETE WITH SUBSCRIPTION SYSTEM!
 
+## 🚀 **Latest: Shared PageShell + PageHeader alignment (May 5, 2026)**
+
+**UI / PRIMITIVES** — May 5, 2026
+- ✅ **Client terminal:** `/client/applications`, `/client/gigs`, `/client/bookings` use **`PageShell`** (`ambientTone="lifted"`, `routeRole="client"`, `topPadding={false}`, `fullBleed`) instead of ad-hoc **`TotlAtmosphereShell`**; applications shows **`MobileSummaryRow`** on mobile without a collapsed stats disclosure.
+- ✅ **Admin:** `/admin/applications/[id]` matches dashboard shell (**`PageShell`** + **`AdminHeader`** + **`PageHeader`**); **`/admin/gigs/success`** uses **`PageShell`** with `routeRole="admin"`.
+- ✅ **Public talent:** `/talent/[slug]` uses **`PageShell`** + **`PageHeader`** (breadcrumbs, back action); hero no longer duplicates the title; body sections use shared OKLCH text tokens and slightly tighter mobile headings.
+- ✅ **Docs:** `docs/features/UI_VISUAL_LANGUAGE.md` (PageShell interior pattern); `docs/DOCUMENTATION_INDEX.md` staleness line.
+
+**Verification (May 5 ship run):**
+- ✅ `npm run schema:verify:comprehensive` — pass
+- ✅ `npm run types:check` — pass
+- ✅ `npm run build` — pass
+- ✅ `npm run lint` — pass
+
+**Next (P0):** Staging smoke — client applications / gigs / bookings, admin application detail + gig success, public talent profile on narrow viewports.
+
+**Next (P1):** Sweep remaining interiors per **`docs/work-orders/TOTL_VISUAL_STYLE_ALIGNMENT_WORK_ORDER.md`**; migrate stragglers off raw **`TotlAtmosphereShell`** where **`PageShell`** is appropriate.
+
+---
+
 ## 🚀 **Latest: Premium branded loading + editorial canopy + docs spine (May 2026)**
 
 **UI / PERFORMANCE / DOCUMENTATION**

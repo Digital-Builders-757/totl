@@ -15,6 +15,9 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AdminHeader } from "@/components/admin/admin-header";
+import { PageHeader } from "@/components/layout/page-header";
+import { PageShell } from "@/components/layout/page-shell";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +32,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { ApplicationStatusBadge } from "@/components/ui/status-badge";
 import { Textarea } from "@/components/ui/textarea";
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { useToast } from "@/components/ui/use-toast";
 import { adminSetApplicationStatusAction } from "@/lib/actions/admin-application-actions";
 import { userSafeMessageFromActionError } from "@/lib/errors/user-safe-message";
@@ -81,11 +83,12 @@ type ApplicationWithDetails = Database["public"]["Tables"]["applications"]["Row"
 
 interface AdminApplicationDetailClientProps {
   application: ApplicationWithDetails;
-  user?: User; // Optional since it's not used in component
+  user: User;
 }
 
 export function AdminApplicationDetailClient({
   application,
+  user,
 }: AdminApplicationDetailClientProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -186,50 +189,47 @@ export function AdminApplicationDetailClient({
   const talentProfileHref = application.talent_id ? `/talent/${application.talent_id}` : null;
 
   return (
-    <TotlAtmosphereShell ambientTone="lifted" className="min-h-screen text-[var(--oklch-text-primary)]">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/admin/applications"
-            className="mb-4 inline-flex items-center text-[var(--oklch-text-secondary)] transition-colors hover:text-white"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Applications
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Application Details</h1>
-              <p className="text-[var(--oklch-text-secondary)]">
-                Application ID: {application.id.slice(0, 8)}...
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {application.status === "new" || application.status === "under_review" ? (
-                <>
-                  <Button
-                    variant="outline"
-                    className="border-green-700 text-green-400 hover:bg-green-900/20 hover:text-green-300"
-                    onClick={() => setShowApproveDialog(true)}
-                  >
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    Approve
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-red-700 text-red-400 hover:bg-red-900/20 hover:text-red-300"
-                    onClick={() => setShowRejectDialog(true)}
-                  >
-                    <XCircle className="mr-2 h-4 w-4" />
-                    Reject
-                  </Button>
-                </>
-              ) : null}
-            </div>
-          </div>
-        </div>
+    <PageShell topPadding={false} fullBleed ambientTone="lifted">
+      <AdminHeader user={user} />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
+        <PageHeader
+          title="Application details"
+          subtitle={`Application ID: ${application.id.slice(0, 8)}...`}
+          breadcrumbs={
+            <Link
+              href="/admin/applications"
+              className="inline-flex items-center gap-2 text-[var(--oklch-text-secondary)] transition-colors hover:text-[var(--oklch-text-primary)]"
+            >
+              <ArrowLeft className="h-4 w-4 shrink-0" />
+              Back to applications
+            </Link>
+          }
+          actions={
+            application.status === "new" || application.status === "under_review" ? (
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  variant="outline"
+                  className="border-green-700 text-green-400 hover:bg-green-900/20 hover:text-green-300"
+                  onClick={() => setShowApproveDialog(true)}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Approve
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-red-700 text-red-400 hover:bg-red-900/20 hover:text-red-300"
+                  onClick={() => setShowRejectDialog(true)}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Reject
+                </Button>
+              </div>
+            ) : undefined
+          }
+          className="mb-6 sm:mb-8"
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Application Info */}
@@ -596,7 +596,7 @@ export function AdminApplicationDetailClient({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </TotlAtmosphereShell>
+    </PageShell>
   );
 }
 

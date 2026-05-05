@@ -11,10 +11,10 @@ import type { Booking } from "@/app/client/bookings/types";
 import { ClientTerminalHeader } from "@/components/client/client-terminal-header";
 import { SecondaryActionLink } from "@/components/dashboard/secondary-action-link";
 import { MobileTabRail } from "@/components/layout/mobile-tab-rail";
+import { PageShell } from "@/components/layout/page-shell";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TotlAtmosphereShell } from "@/components/ui/totl-atmosphere-shell";
 import { useToast } from "@/components/ui/use-toast";
 import { cancelBooking, getClientBookings, updateBookingStatus } from "@/lib/actions/booking-actions";
 import { logActionFailure } from "@/lib/errors/log-action-failure";
@@ -141,7 +141,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
 
   if (isLoading) {
     return (
-      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+      <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
         <div className="px-4 py-8">
           <div className="mx-auto w-full max-w-6xl space-y-6">
             <div className="space-y-3">
@@ -156,13 +156,13 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
             <Skeleton className="h-[420px] w-full rounded-2xl border border-white/10 bg-white/5" />
           </div>
         </div>
-      </TotlAtmosphereShell>
+      </PageShell>
     );
   }
 
   if (error) {
     return (
-      <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+      <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
         <div className="flex min-h-[100dvh] items-center justify-center px-4">
           <div className="panel-frosted card-backlit max-w-md rounded-2xl p-8 text-center">
             <AlertCircle className="mx-auto mb-4 h-12 w-12 text-red-400" />
@@ -173,12 +173,12 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
             <Button onClick={() => mutate()}>Try Again</Button>
           </div>
         </div>
-      </TotlAtmosphereShell>
+      </PageShell>
     );
   }
 
   return (
-    <TotlAtmosphereShell ambientTone="lifted" className="text-[var(--oklch-text-primary)]">
+    <PageShell ambientTone="lifted" routeRole="client" topPadding={false} fullBleed>
       <ClientTerminalHeader
         title="Bookings"
         subtitle="Manage your confirmed talent bookings"
@@ -197,7 +197,7 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
         }
       />
 
-      <div className="container mx-auto px-4 py-4 sm:py-6">
+      <div className="container mx-auto px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
         <BookingsStatsOverview stats={bookingStats} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -238,6 +238,6 @@ export default function ClientBookingsClient({ userId, initialBookings }: Client
           </TabsContent>
         </Tabs>
       </div>
-    </TotlAtmosphereShell>
+    </PageShell>
   );
 }

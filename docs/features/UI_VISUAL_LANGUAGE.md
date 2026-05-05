@@ -75,12 +75,22 @@ Use these when composing full-page or section-level structure so surfaces stay c
 - **`TotlAtmosphereShell`** — `components/ui/totl-atmosphere-shell.tsx` — optional full-page atmosphere wrapper (gradients, paths, glow) for marketing-style routes.
 - **`TotlSectionDivider`** — `components/ui/totl-section-divider.tsx` — consistent section transitions between bands.
 - **`PageShell`** — `components/layout/page-shell.tsx` — default route wrapper (`page-ambient`, container width, nav top offset); use `fullBleed` when the page controls its own horizontal layout.
+  - **Authenticated interiors (client / admin):** Prefer **`PageShell`** + role header (**`ClientTerminalHeader`** / **`AdminHeader`**) + inner `container` spacing (`px-4 py-5 sm:px-6 sm:py-8 lg:px-8`) instead of wrapping the page in **`TotlAtmosphereShell`** directly. Set `topPadding={false}` and `fullBleed` when the header handles the fold (matches **`/client/dashboard`**).
 - **`SectionCard`** — `components/layout/section-card.tsx` — canonical frosted panel stack (`panel-frosted` + `card-backlit` + `grain-texture`) for grouped content.
 - **`AuthEntryShell`** — `components/layout/auth-entry-shell.tsx` — full-bleed auth/recovery entry (atmosphere + optional back link + `SectionCard`). Props: `omitBackLink`, `panelClassName` / `panelPaddingClassName` for wider holds (e.g. suspended). Container spacing aligns with `/login` (`py-4 sm:py-6 md:py-8`).
 - **`TotlMarketingLoadingBackdrop`**, **`TotlBrandLoadingRibbon`**, **`TotlBrandLoadingRail`** — `components/ui/totl-brand-loading.tsx` — marketing/root **`loading.tsx`** backdrop (**`TotlAtmosphereShell`** + grain + warm veil lane), branded wordmark block, and slim indeterminate rail (`role="progressbar"`, `aria-busy`; CSS `.totl-brand-loading-rail__bar` in **`app/globals.css`**, toned down under `prefers-reduced-motion`).
 - **`TotlEditorialSection`** — `components/ui/totl-editorial-section.tsx` — section-sized editorial canopy (CSS **`.totl-editorial-canopy`** in **`app/globals.css`**: soft radial washes; opacity-only drift when motion is allowed). Use on marketing and high-traffic list heroes (`/`, `/gigs`).
-- **`AuthLoadingShell`** — `components/layout/auth-loading-shell.tsx` — Paths + vignette wrapper for **`/login`**, signup, and recovery loaders; optionally shows **`TotlBrandLoadingRibbon`** for a consistent auth brand moment.
+- **`AuthLoadingShell`** — `components/layout/auth-loading-shell.tsx` — Paths + vignette wrapper for **`/login`**, **`/choose-role`**, onboarding redirect stub (**`/onboarding/select-account-type`**), signup, and recovery loaders; optional **`ambientTone`** to match the destination `PageShell`; shows **`TotlBrandLoadingRibbon`** for a consistent auth brand moment. **`/onboarding`** loading uses **`TotlBrandLoadingRibbon`** inside **`PageShell`** for continuity into profile setup.
 - **Dashboard loaders:** Pass **`routeRole`** on **`PageShell`** in **`ClientDashboardSkeleton`** / **`TalentDashboardSkeleton`** so `[data-role]` ambient matches terminal routes.
+
+### Auth intent + post-sign-in routing (code contract)
+
+- **`pickSafeReturnUrl`** — `lib/utils/return-url.ts` — after sign-in/callback, the first *safe* internal path among `returnUrl` and `next` wins (avoids dropping intent when providers use `next`).
+- **`decidePostAuthRedirect`** — honors that path once the profile is **routable** (role or resolved `account_type`), including talent/client **role** while `account_type` is briefly `unassigned`.
+### Dashboard + account surfaces (density contract)
+
+- **`/settings`** is the canonical **account & profile** destination: tabs for basics, details, portfolio (talent), and **Account** (password, subscription, sign out). Terminal headers link here with **Account & settings** rather than exposing sign out as a primary dashboard action.
+- Prefer **`PageHeader`** for in-page hierarchy below sticky terminal bars, **`MobileSummaryRow`** for scan-friendly mobile stats, and consistent **`container` + `py-5 sm:py-8`** rhythm on dense dashboards.
 
 ## Mobile UX Guidelines
 
